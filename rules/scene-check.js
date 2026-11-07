@@ -45,7 +45,10 @@ function prepare(s,p={}){
  if(all.some(x=>x.origin==='engine-local-scene'&&x.location===s.world.location&&
     !x.used&&x.source===source))
   throw Error('Resolve the existing pending local scene check before recording another');
- const checkId=E.id(s,'scene');
+ const sequence=C.int(s.sequence,'original engine event sequence',0,1000000000)+1;
+ const checkId='scene_'+String(sequence).padStart(5,'0');
+ if(s.table?.sceneChecks?.[checkId])throw Error('That scene-check identifier already exists');
+ s.sequence=sequence;
  C.event(s,'world',observed,{
   origin:'engine-local-scene',checkId,location:s.world.location,
   biome:loc.biome,method:p.method,intent
