@@ -66,6 +66,12 @@ function board(s,p={}){
     typeof ledger.usedReports!=='object'||Array.isArray(ledger.usedReports)))
   throw Error('An invalid existing bulletin record cannot be overwritten');
  const unrecorded=notices.filter(n=>!ledger?.notices?.[n.id]);
+ // A second look at the SAME known public notices is not another timed
+ // appointment. The original record stays authoritative, and no extra
+ // clock, world tick or save revision is consumed until new notices appear.
+ if(unrecorded.length===0)return {read:true,minutes:0,newNotices:0,
+  alreadyKnown:true,knownNotices:publicStatus(s).knownNotices,
+  note:'The same known public postings remain on the board; rereading them does not establish a new agreement or information.'};
  const old=s.world.minutes;
  E.advance(s,READ);Time.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
  s.table||={};s.table.publicFieldNotices||={notices:{},usedReports:{}};
