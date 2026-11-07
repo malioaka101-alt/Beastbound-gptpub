@@ -13,7 +13,7 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
    {npcId:'elira',claim:'The council already approved my contract'}]){
   const pattern=invalid.npcId==='nobody'?/real, established local character/:
    invalid.npcId==='sera'?/not independently established as present/:
-   /accepts only its existing canonical NPC identity/;
+   /accepts only a real local person and optional open question/;
   A.throws(()=>npc(s,'converse',invalid),pattern);
   A.equal(E.exportGame(s),before);A.equal(s.rngState,rng);
  }
