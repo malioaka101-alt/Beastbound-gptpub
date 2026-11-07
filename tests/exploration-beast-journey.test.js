@@ -9,24 +9,30 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
 const fresh=seed=>E.newGame({seed,name:'Independent Wild Journey Fixture',
  background:'fieldworker',path:'undecided'});
 function chosenSeed(kind){
- // Source-driven deterministic fixture discovery: inspect the engine's
- // *ordinary first explore*. Do not fabricate a beast, its disposition,
- // consent, species, threat, location or result in the saved campaign.
- for(let seed=881201;seed<883201;seed++){
+ // Source-driven deterministic fixture discovery. A person may take
+ // *several* real searches to encounter; each unsuitable animal is simply
+ // left alone. Do not force the species, attitude, roll or appearance.
+ const seeds=kind==='sapient'?[963202]:
+  Array.from({length:150},(_,i)=>881201+i);
+ for(const seed of seeds){
   const s=fresh(seed);
-  if(!E.dispatch(s,'travel forest').ok||
-     !E.dispatch(s,'explore').ok)continue;
-  const enc=s.encounter,b=s.beasts[enc?.beastId],
-   sp=b&&E.SPECIES[b.species];
-  if(!b||enc.threat||
-     /terrified|panicked|hostile|fleeing|agitated/i.test(b.mood))continue;
-  if((sp.intelligence==='sapient')===(kind==='sapient'))
-   return seed;
+  if(!E.dispatch(s,'travel forest').ok)continue;
+  const limit=kind==='sapient'?150:1;
+  for(let n=1;n<=limit;n++){
+   if(!E.dispatch(s,'explore').ok)break;
+   const enc=s.encounter,b=s.beasts[enc?.beastId],
+    sp=b&&E.SPECIES[b.species];
+   if(b&&!enc.threat&&
+      !/terrified|panicked|hostile|fleeing|agitated/i.test(b.mood)&&
+      (sp.intelligence==='sapient')===(kind==='sapient'))
+    return {seed,explores:n};
+   if(!E.dispatch(s,'leave').ok)break;
+  }
  }
- throw Error('No independently generated '+kind+' first-encounter fixture');
+ throw Error('No genuinely encountered, nonthreatening '+kind+' fixture');
 }
 function runJourney(kind){
- const seed=chosenSeed(kind),dir=FS.mkdtempSync(
+ const {seed,explores}=chosenSeed(kind),dir=FS.mkdtempSync(
    Path.join(OS.tmpdir(),'bb-exploration-journey-')),
   file=Path.join(dir,'save.json');
  const read=()=>FS.readFileSync(file,'utf8'),
@@ -64,9 +70,18 @@ function runJourney(kind){
   A.equal(load().player.stamina,52-4);
   unchanged(()=>rule('world','watchWildBeast'),
    /truly witnessed, present, unowned|Sapient beast persons/);
-  const encounter=action('explore');
-  A.equal(encounter.result.ok,true);
-  A.equal(encounter.result.applied,true);
+  // Reproduce every actual exploration and safe departure from the seed
+  // witness. No fixture creates an encounter or rewrites a saved outcome.
+  for(let n=1;n<=explores;n++){
+   const encounter=action('explore');
+   A.equal(encounter.result.ok,true);
+   A.equal(encounter.result.applied,true);
+   if(n<explores){
+    const release=action('leave');
+    A.equal(release.result.ok,true);
+    A.equal(load().encounter,null);
+   }
+  }
   const first=load(),id=first.encounter?.beastId,animal=first.beasts[id],
    species=animal&&E.SPECIES[animal.species],
    record=first.log.find(x=>x.type==='encounter'&&
