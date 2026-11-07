@@ -67,7 +67,12 @@ function personallyWitnessedNearbyPerson(s,range){
  if(minute<8*60||minute>=18*60)return null;
  const w=Realm.peek(s),conversations=[
   ...(s.table?.npcConversations?.records||[]).map(x=>({
-   ...x,origin:'engine-local-npc-conversation',canonical:true})),
+   ...x,
+   // Actual followup speech is still a recently witnessed local person;
+   // an unanswered question reveals no private identity or soul attribute.
+   origin:x.origin==='witnessed-npc-source-grounded-question'?
+    'source-verified-npc-followup':'engine-local-npc-conversation',
+   canonical:true})),
   ...(s.table?.emergentConversations?.records||[]).map(x=>({
    ...x,origin:'emergent-person-local-conversation',canonical:false}))
  ];

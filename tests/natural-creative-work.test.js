@@ -21,10 +21,14 @@ try{
  // a manufactured item created by saying a recipe name.
  const blank=E.newGame({seed:991200,name:'No Design To Invent',background:'fieldworker'});
  write(blank);const empty=read(),rng=load().rngState;
- A.throws(()=>act('fabricate_design_by_name_01','make legendary dragon wings'),
-  /No single genuinely recorded design/);
- A.throws(()=>act('fabricate_craft_by_name_01','craft legendary potion'),
-  /Unsupported crafting recipe or blueprint/);
+ const wings=act('fabricate_design_by_name_01','make legendary dragon wings');
+ const potion=act('fabricate_craft_by_name_01','craft legendary potion');
+ for(const proposed of [wings,potion]){
+  A.equal(proposed.applied,false);
+  A.equal(proposed.output.gmAdjudication.status,'unresolved');
+  A.equal(proposed.output.gmAdjudication.noOutcomeClaimed,true,
+   'Open-ended descriptions cannot invent any power, item or formula');
+ }
  A.throws(()=>act('fabricate_named_id_00001','build design_99999'),
   /No single genuinely recorded design/);
  A.equal(read(),empty);A.equal(load().rngState,rng);

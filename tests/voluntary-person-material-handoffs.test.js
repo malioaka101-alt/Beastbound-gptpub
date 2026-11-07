@@ -41,7 +41,7 @@ try{
  impossible.world.minutes=22*60;
  const afterHours=E.exportGame(impossible);
  A.throws(()=>R.act(impossible,{system:'social',operation:'materialHandoff',
-  params:{npcId:'otto',item:'clean_rations'}}),/working-day in-person/);
+  params:{npcId:'otto',item:'clean_rations'}}),/not independently established as present/);
  A.equal(E.exportGame(impossible),afterHours);
  impossible.world.minutes=8*60;
  impossible.player.inventory.clean_rations=0;

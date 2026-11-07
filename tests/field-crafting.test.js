@@ -82,8 +82,15 @@ function workbench(seed=66810){
   const file=Path.join(dir,'save.json');
   FS.writeFileSync(file,E.exportGame(workbench(66812))+'\n');
   const prior=FS.readFileSync(file,'utf8');
-  A.throws(()=>Turn.execute(file,{id:'invalid_recipe_0001',mode:'act',
-   action:'craft crystal dragon serum'}),/Unsupported crafting recipe/);
+  // A freeform proposal is allowed, but cannot materialise an invented
+  // recipe, ingredient, roll or result. No actual crafting happens here.
+  const unverified=Turn.execute(file,{id:'invalid_recipe_0001',mode:'act',
+   action:'craft crystal dragon serum'});
+  A.equal(unverified.ok,true);
+  A.equal(unverified.applied,false);
+  A.equal(unverified.output.gmAdjudication.status,'unresolved');
+  A.equal(unverified.output.gmAdjudication.noRollOccurred,true);
+  A.equal(unverified.output.gmAdjudication.noOutcomeClaimed,true);
   A.equal(FS.readFileSync(file,'utf8'),prior);
   A.throws(()=>Turn.execute(file,{id:'craft_fake_0001',mode:'rule',system:'craft',
    operation:'fieldPoultice',params:{quantity:100,free:true}}),/accepts no chosen/);

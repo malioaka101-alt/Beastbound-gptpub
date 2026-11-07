@@ -84,7 +84,12 @@ function witnessedTheory(s,system,guideId){
  // Once genuinely heard, theoretical understanding can travel with the
  // learner. A teacher does not need to remain physically nearby forever.
  const ledger=s.table?.npcConversations;
- const row=ledger?.records?.slice().reverse().find(x=>x.npcId===guideId);
+ // A genuine earlier professional explanation survives later unrelated
+ // small talk. The *most recent conversation of any topic* is not proof of
+ // teaching, nor may it erase the saved original sourced lesson.
+ const row=ledger?.records?.slice().reverse().find(x=>
+  x.npcId===guideId&&x.origin==='witnessed-npc-professional-topic'&&
+  x.heard===npc.topic);
  const source='Direct in-person professional conversation with '+npc.name+
   ' at '+loc.name;
  if(!row||row.heard!==npc.topic||row.name!==npc.name||

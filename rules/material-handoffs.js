@@ -83,9 +83,10 @@ function offer(s,p={}){
   throw Error('An incapacitated character cannot make a deliberate material handoff');
  if(!Object.hasOwn(E.RESOURCES,p.item))
   throw Error('Only an existing authenticated physical resource can be offered');
- const minute=s.world.minutes%DAY;
- if(minute<8*60||minute+WORK>18*60)
-  throw Error('A genuine working-day in-person encounter is required to offer these goods');
+ // Physical presence is the real availability rule. The authored
+ // public professionals already have their verified 08:00–18:00 shift in
+ // person-presence; an independently present worker is not sent home by
+ // an extra universal clock restriction on gifts.
  const w=Realm.peek(s),day=Math.floor(s.world.minutes/DAY),
   available=Presence.localStatus(s,w).people,
   found=available.find(x=>x.npcId===p.npcId);

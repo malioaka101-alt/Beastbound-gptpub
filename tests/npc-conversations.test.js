@@ -13,7 +13,7 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
    {npcId:'elira',claim:'The council already approved my contract'}]){
   const pattern=invalid.npcId==='nobody'?/real, established local character/:
    invalid.npcId==='sera'?/not independently established as present/:
-   /accepts only its existing canonical NPC identity/;
+   /accepts only a real local person and optional open question/;
   A.throws(()=>npc(s,'converse',invalid),pattern);
   A.equal(E.exportGame(s),before);A.equal(s.rngState,rng);
  }
@@ -42,7 +42,8 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
  A.match(P.full(s,'people'),/CONVERSATIONS/);
  A.match(P.full(s,'people'),/Elira Moss/);
  const snap=E.exportGame(s);
- A.throws(()=>npc(s,'converse',{npcId:'elira'}),/already been witnessed today/);
+ const again=npc(s,'converse',{npcId:'elira'});
+ A.equal(again.alreadyMetToday,true);A.equal(again.elapsedMinutes,0);
  A.equal(E.exportGame(s),snap);A.equal(s.rngState,raw);
  const second=npc(s,'converse',{npcId:'otto'});
  A.equal(second.name,'Orrin Vale');
@@ -66,7 +67,7 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
  const s=fresh(),rng=s.rngState;
  s.world.minutes=20*60;
  const original=E.exportGame(s);
- A.throws(()=>npc(s,'converse',{npcId:'elira'}),/not available outside the local daytime/);
+ A.throws(()=>npc(s,'converse',{npcId:'elira'}),/not independently available at this scene and time/);
  A.equal(E.exportGame(s),original);A.equal(s.rngState,rng);
 }
 {
@@ -97,8 +98,8 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
   A.equal(known.applied,false);
   A.equal(known.output.rules.knownConversations.length,1);
   A.equal(FS.readFileSync(file,'utf8'),played);
-  A.throws(()=>Turn.execute(file,{id:'npc_repeat_00001',mode:'act',action:'talk Elira'}),
-   /already been witnessed today/);
+  const repeat=Turn.execute(file,{id:'npc_repeat_00001',mode:'act',action:'talk Elira'});
+  A.equal(repeat.applied,false);A.equal(repeat.output.npc.alreadyMetToday,true);
   A.equal(FS.readFileSync(file,'utf8'),played);
   const second=Turn.execute(file,{id:'npc_real_00002',mode:'act',action:'talk to Orrin Vale'});
   A.equal(second.applied,true);A.equal(second.output.npc.name,'Orrin Vale');
@@ -118,12 +119,14 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
   const out=Turn.execute(file,req);
   A.equal(out.applied,true);
   A.equal(out.output.npc.npcId,'elira');
-  A.match(out.output.message,/not automatically answered/);
+  A.match(out.output.message,/do not establish an answer/);
+  A.equal(out.output.npc.answerKind,'unverified');
   A.match(out.output.message,/about the reeds/);
-  A.equal(out.output.npc.spoken,E.NPCS.elira.topic);
+  A.equal(out.output.npc.spoken,null);
   const saved=FS.readFileSync(file,'utf8'),t=E.importGame(saved);
   A.equal(t.table.npcConversations.records.length,1);
-  A.equal(t.table.npcConversations.records[0].heard,E.NPCS.elira.topic);
+  A.equal(t.table.npcConversations.records[0].heard,null);
+  A.equal(t.table.npcConversations.records[0].question,'the reeds');
   A.equal(t.rngState,s.rngState);
   A.equal(t.world.minutes,s.world.minutes+12);
   A.equal(Turn.execute(file,req).duplicate,true);

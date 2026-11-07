@@ -62,7 +62,7 @@ try{
    assert.throws(()=>R.execute(save,{id:'craft_guard_0001',mode:'act',action}),/real clean infirmary or academy clinic|Unsupported crafting recipe/);
    assert.equal(fs.readFileSync(save,'utf8'),craftBefore,'rejected crafting must not change save or RNG');
  }
- const err=R.execute(save,{id:'turn_0006',mode:'act',action:'invent free legendary dragon'});assert.equal(err.ok,false);assert.equal(err.applied,false);
+ const err=R.execute(save,{id:'turn_0006',mode:'act',action:'invent free legendary dragon'});assert.equal(err.ok,true);assert.equal(err.applied,false);assert.equal(err.output.gmAdjudication.status,'unresolved');assert.equal(err.output.gmAdjudication.noOutcomeClaimed,true);
  assert.equal(E.importGame(fs.readFileSync(save,'utf8')).chatRuntime.revision,3);
  assert.throws(()=>R.execute(save,{id:'illegal/path',mode:'act',action:'rest'}));
  console.log('Chat-turn runtime tests passed (34-wide panels, checks, idempotent state, revision and stale-write protection)');
