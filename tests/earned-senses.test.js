@@ -226,6 +226,25 @@ function train(s,system){
  A.equal(E.exportGame(s),frozen);
 }
 {
+ // A newly asked real question is still a genuinely close conversation;
+ // an unknown *answer* cannot falsely erase observed physical proximity
+ // nor reveal a person's soul identity, memories or intent.
+ const s=fresh(801012);train(s,'soul');
+ const talk=rule(s,'npc','converse',{npcId:'elira',
+  question:'What private secret was sealed in the council archive?'});
+ A.equal(talk.answerKind,'unverified');
+ A.equal(talk.spoken,null);
+ const record=s.table.npcConversations.records.at(-1);
+ A.equal(record.origin,'witnessed-npc-source-grounded-question');
+ const outcome=rule(s,'soul','perceive');
+ A.equal(outcome.recentConversantSignature,true);
+ A.equal(outcome.nearbyLifeSign,true);
+ A.equal(outcome.noNamesRead,true);
+ A.equal(outcome.noBeastMindRead,true);
+ A.equal(s.table.perceptionPractice.soulAttempts.at(-1).nearbyPersonWitnessHash,
+  record.eventHash);
+}
+{
  const s=fresh(801008);train(s,'soul');
  rule(s,'npc','converse',{npcId:'elira'});
  const original=s.world.minutes;

@@ -110,6 +110,39 @@ function stageTwo(seed){
  A.equal(guided.theoreticalGuidance.aDemonstration,false);
 }
 {
+ // Dialogue freedom cannot make optional theory disappear or create a fake
+ // lesson from an unrelated private question. The original authored speech
+ // must be genuinely witnessed and remain traceable after later small talk.
+ const learner=stageTwo(771239);
+ const unrelated=R.act(learner,{system:'npc',operation:'converse',
+  params:{npcId:'sera',question:'What is the secret genealogy of the council?'}});
+ A.equal(unrelated.spoken,null);
+ A.equal(learner.table.npcConversations.visits?.sera,undefined);
+ const afterUnknown=E.exportGame(learner),rng=learner.rngState;
+ A.throws(()=>gate(learner,{guidanceId:'sera',minutes:15}),
+  /actual witnessed relevant professional explanation/);
+ A.equal(E.exportGame(learner),afterUnknown);
+ A.equal(learner.rngState,rng);
+ const lesson=R.act(learner,{system:'npc',operation:'converse',
+  params:{npcId:'sera',question:'What Meridian anatomy must I protect among the primary gates and network?'}});
+ A.equal(lesson.answerKind,'authored-professional-topic');
+ A.equal(lesson.spoken,E.NPCS.sera.topic);
+ const verified=learner.table.npcConversations.records.at(-1);
+ A.equal(verified.origin,'witnessed-npc-professional-topic');
+ A.equal(learner.table.npcConversations.visits.sera['1'],verified.eventHash);
+ A.equal(learner.npcMemory['Professor Sera'],1);
+ const followup=R.act(learner,{system:'npc',operation:'converse',
+  params:{npcId:'sera',question:'What local routes leave this settlement?'}});
+ A.equal(followup.answerKind,'public-local-routes');
+ A.equal(learner.table.npcConversations.records.at(-1).origin,
+  'witnessed-npc-source-grounded-question');
+ const work=gate(learner,{guidanceId:'sera',minutes:15});
+ A.equal(work.theoreticalGuidance.sourceId,'sera');
+ A.equal(work.theoreticalGuidance.bonus,1);
+ A.equal(work.theoreticalGuidance.automaticLearning,false);
+ A.equal(learner.npcMemory['Professor Sera'],1);
+}
+{
  // Tampering with a claimed teacher or hearsay is not a shortcut.
  const s=stageTwo(771236);
  npc(s,'sera');

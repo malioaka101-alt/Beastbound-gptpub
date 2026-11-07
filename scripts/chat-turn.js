@@ -190,7 +190,18 @@ function physicalDesignIntent(s,action){
  if(!m)return null;
  if(m[1]==='craft'&&['field_poultice','field poultice'].includes(m[2].replace(/\s+/g,' ').trim()))
   return null;
- const id=recordedDesignId(s,m[2],m[1]);
+ let id;
+ try{id=recordedDesignId(s,m[2],m[1]);}
+ catch(error){
+  const requested=m[2].trim();
+  // An *ordinary new idea* is a legitimate freeform intention, not a
+  // fabricated recorded design. Explicit invalid design IDs and genuinely
+  // ambiguous owned titles still require truthful reconciliation.
+  if(!/^(?:design_[0-9]+|water_indicator_design_[0-9]+)$/.test(requested)&&
+    /^(?:No single genuinely recorded design|Unsupported crafting recipe or blueprint)/.test(String(error.message)))
+   return null;
+  throw error;
+ }
  const operation=['build','assemble','make','prototype','craft'].includes(m[1])?
   'prototype':m[1]==='test'?'calibrate':m[1];
  return {id,operation};
@@ -267,6 +278,29 @@ function nonConsequentialAction(s,action){
   return {message:'Known '+action+' information, without changing time or progression.',
    view:P.full(s,PANELS[action])};
  return null;
+}
+
+// Use exactly the existing engine's place-name resolution for known exits.
+// A non-adjacent or unknown destination is still a valid travel intention;
+// it must not spend time or create a route without verified adjudication.
+function linkedTravelIntent(s,action){
+ const wanted=action.replace(/^(?:travel|go to|move to)\s+/,'').trim();
+ const places=E.LOCATIONS,ids=Object.keys(places);
+ let target=Object.hasOwn(places,wanted)?wanted:
+  ids.find(id=>places[id].name.toLowerCase()===wanted);
+ if(!target){
+  const candidates=ids.filter(id=>places[id].name.toLowerCase().includes(wanted));
+  if(candidates.length===1)target=candidates[0];
+ }
+ return !!target && places[s.world.location]?.exits.includes(target);
+}
+function unresolvedSceneIntent(s,intent){
+ const scene=localScene(s);
+ return {gmAdjudication:{intent,status:'unresolved',
+  location:scene.location,scene:scene.name,visibleContext:scene,
+  noRollOccurred:true,noTimeElapsed:true,noItemsChanged:true,
+  noOutcomeClaimed:true,requiresSourceBoundResolution:true},
+  message:'The intention is open for GM adjudication against the actual local scene. No success, failure, die, item, time, relationship or power has been assigned; use an existing verified rule or narrate only an uncontested source-grounded observation.'};
 }
 
 function execute(savePath, req) {
@@ -542,9 +576,12 @@ function execute(savePath, req) {
        n.name.toLowerCase()===person ||
        (person.length>=4 && n.name.toLowerCase().startsWith(person)));
      if(matches.length===1){
-       response.npc=Rules.act(s,{system:'npc',operation:'converse',params:{npcId:matches[0][0]}});
-       response.message=response.npc.message+
-        (question?' This is the person\'s established public statement; your specific question about '+question+' is not automatically answered by it.':'');
+       // A question now reaches the original canonical person's own
+       // source-verified follow-up path. If no source supports an answer,
+       // the engine leaves it unresolved for natural GM dialogue.
+       response.npc=Rules.act(s,{system:'npc',operation:'converse',
+        params:{npcId:matches[0][0],...(question?{question}:{})}});
+       response.message=response.npc.message;
      }else{
        // A newly generated person is addressable by their *actually present*
        // individual name; a remote roster entry does not establish an encounter.
@@ -611,9 +648,26 @@ function execute(savePath, req) {
    }else if(['heal','use balm','use healing balm','apply healing balm',
      'treat my light wound with healing balm'].includes(action)){
      response.health=Health.balm(s);response.message='Healing balm applied to a genuine Light wound.';
-   }else{
+   }else if(/^(?:travel|go to|move to)\s+\S/.test(action)&&
+      !linkedTravelIntent(s,action)){
+     // The engine must not reject a real journey merely because its route
+     // has not yet been established. No unverified teleportation occurs.
+     Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
+   }else if(/^(?:travel|go to|move to)\s+\S/.test(action)||
+      ['explore','search area','look for beasts','scout',
+       'leave','leave beast'].includes(action)){
+     // Retain only the explicitly established ordinary legacy movement /
+     // exploration bridge. Never let an unfamiliar intention fall through to
+     // retired quest, instant prize, automatic power or other old shortcuts.
      const r=E.dispatch(s,req.action);ok=r.ok;response.message=r.message;
      if(ok)Health.sync(s,{source:'legacy'});
+   }else{
+     // Open-ended play is a GM decision, not a parser error and not an excuse
+     // to select a DC, loot, NPC consent or skill outcome. An unrecognized
+     // intention goes back to the narrator with the real current scene.
+     // Trivial warranted actions may be narrated without a roll; genuine
+     // uncertain tasks need an already source-committed check/operation.
+     Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
    }
 
  } else if(req.mode==='rule'){

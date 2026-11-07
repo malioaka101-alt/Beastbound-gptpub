@@ -34,6 +34,8 @@ jobs:
             tests/sapient-beast-personhood.test.js
             tests/beast-ecological-learning.test.js
             tests/chat-runtime.test.js
+            tests/open-ended-intent-and-contextual-dialogue.test.js
+            tests/actual-presence-not-universal-hours.test.js
             tests/npc-conversations.test.js
             tests/voluntary-person-material-handoffs.test.js
             tests/social-houses.test.js
@@ -44,6 +46,7 @@ jobs:
             tests/earned-family-service.test.js
             tests/chat-runner-contract.test.js
             tests/private-turn-receipt.test.js
+            tests/private-process-pending-integration.test.js
             tests/legacy-social-competition-guard.test.js
             tests/quest-shortcut-guard.test.js
             tests/field-competition.test.js
