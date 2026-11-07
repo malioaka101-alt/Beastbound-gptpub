@@ -133,4 +133,61 @@ const fresh=()=>E.newGame({name:'Witnessed Conversation Fixture',seed:734421,pat
   A.equal(FS.readFileSync(file,'utf8'),saved);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
+{
+ // The GM can recall what a real person actually said or independently
+ // accepted, without discovering private world data or rerolling a decision.
+ const s=fresh();
+ const context=(npcId,extras={})=>R.act(s,{system:'social',
+  operation:'personContext',params:{npcId,...extras}});
+ const original=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>context('elira',{agree:true}),/names only a real person ID/);
+ A.equal(E.exportGame(s),original);
+ const unknown=context('sera');
+ A.equal(unknown.known,false);A.equal(unknown.presentHere,false);
+ A.ok(!JSON.stringify(unknown).includes('Professor Sera'));
+ const visible=context('elira');
+ A.equal(visible.known,true);A.equal(visible.name,'Elira Moss');
+ A.equal(visible.presentHere,true);A.deepEqual(visible.conversations,[]);
+ A.equal(E.exportGame(s),original);A.equal(s.rngState,rng);
+ const first=npc(s,'converse',{npcId:'elira',
+  question:'What professional observations does the guild verify?'});
+ const witnessed=context('elira');
+ A.equal(witnessed.conversations.length,1);
+ A.equal(witnessed.conversations[0].heard,first.spoken);
+ A.equal(witnessed.conversations[0].answerKind,'authored-professional-topic');
+ A.equal(witnessed.handoffs.length,0);
+ // A handoff is a recipient's independent material decision, not a
+ // friendship or payment. It becomes visible in the same person's context.
+ s.player.inventory.clean_rations=Math.max(1,s.player.inventory.clean_rations||0);
+ const gift=R.act(s,{system:'social',operation:'materialHandoff',
+  params:{npcId:'otto',item:'clean_rations'}});
+ const orrin=context('otto');
+ A.equal(orrin.known,true);A.equal(orrin.handoffs.length,1);
+ A.equal(orrin.handoffs[0].accepted,gift.accepted);
+ A.equal(orrin.handoffs[0].quantityMoved,gift.quantityMoved);
+ A.equal(orrin.conversations.length,0);
+ A.equal(orrin.workOffers.length,0);
+ A.ok(!JSON.stringify(orrin).includes('rngState'));
+ A.ok(!JSON.stringify(orrin).includes('held'));
+ A.ok(!JSON.stringify(orrin).includes('temperament'));
+ A.ok(!JSON.stringify(orrin).includes('goal'));
+ const file=Path.join(FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-gm-person-view-')),
+  'save.json');
+ try{
+  FS.writeFileSync(file,E.exportGame(s)+'\n');
+  const before=FS.readFileSync(file,'utf8');
+  const read=Turn.execute(file,{id:'gm_person_view_0001',mode:'rule',
+   system:'social',operation:'personContext',params:{npcId:'otto'}});
+  A.equal(read.ok,true);A.equal(read.applied,false);
+  A.equal(read.output.rules.handoffs[0].accepted,gift.accepted);
+  A.equal(FS.readFileSync(file,'utf8'),before);
+ }finally{FS.rmSync(Path.dirname(file),{recursive:true,force:true});}
+ // Moving away never erases witnessed history or discloses the remote person's
+ // unseen whereabouts. Availability is always checked from the current scene.
+ A.equal(E.dispatch(s,'travel academy').ok,true);
+ A.equal(context('elira').presentHere,false);
+ A.equal(context('elira').conversations[0].heard,first.spoken);
+ A.equal(context('otto').presentHere,false);
+ A.equal(context('otto').handoffs[0].accepted,gift.accepted);
+}
 console.log('Local witnessed NPC talks preserve named speaker, profession, dialogue, time and private player knowledge');
