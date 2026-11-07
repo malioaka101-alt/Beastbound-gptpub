@@ -1,6 +1,9 @@
 name: Private Beastbound Chat Turns
-# Migration guard: original push trigger restored after data import.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'requests/**'
   workflow_dispatch:
 permissions:
   contents: write
