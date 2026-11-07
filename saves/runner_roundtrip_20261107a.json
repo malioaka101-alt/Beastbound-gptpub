@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 20261107,
-  "rngState": 162739441,
+  "rngState": 2324254599,
   "sequence": 0,
   "log": [
     {
@@ -44,10 +44,41 @@
         "biome": "fen",
         "observation": "terrain-traces"
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:35",
+      "type": "roll",
+      "text": "🎲 Interpret wetland margin signs: d20 11 +5 = 16 vs DC 12 → success (+4)",
+      "details": {
+        "dice": [
+          11
+        ],
+        "roll": 11,
+        "modifier": 5,
+        "dc": 12,
+        "total": 16,
+        "margin": 4,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:35",
+      "type": "world",
+      "text": "The visible habitat traces are interpreted; the individual creature, if any, remains unidentified.",
+      "details": {
+        "checkId": "habitat_fen_00000",
+        "interpreted": true,
+        "degree": "success"
+      }
     }
   ],
   "world": {
-    "minutes": 575,
+    "minutes": 590,
     "location": "fen",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -93,7 +124,9 @@
     "skills": {
       "survival": {
         "rank": 2,
-        "xp": 0
+        "xp": 2,
+        "ppPeriod": 0,
+        "ppThisSixday": 2
       },
       "beastcraft": {
         "rank": 1,
@@ -253,7 +286,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 2,
+    "revision": 3,
     "applied": {
       "rt_02_travel_20261107a": {
         "revision": 1,
@@ -311,6 +344,71 @@
             }
           ]
         }
+      },
+      "rt_04_check_20261107a": {
+        "revision": 3,
+        "mode": "check",
+        "hash": "4db51181ada1fadb5c6ed1aa4d2b090432258fb481854c61df84d63e04b1f374",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 09:50",
+          "output": {
+            "check": {
+              "dice": [
+                11
+              ],
+              "roll": 11,
+              "modifier": 5,
+              "dc": 12,
+              "total": 16,
+              "margin": 4,
+              "degree": "success",
+              "success": true,
+              "progress": 1,
+              "naturalBonus": 0,
+              "practiceSkill": "survival",
+              "ppAwarded": 2,
+              "skillRankBefore": 2,
+              "skillRankAfter": 2,
+              "noExtraRoll": true,
+              "verifiedSceneCheck": "habitat_fen_00000",
+              "elapsedMinutes": 15
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 09:35",
+              "type": "roll",
+              "text": "🎲 Interpret wetland margin signs: d20 11 +5 = 16 vs DC 12 → success (+4)",
+              "details": {
+                "dice": [
+                  11
+                ],
+                "roll": 11,
+                "modifier": 5,
+                "dc": 12,
+                "total": 16,
+                "margin": 4,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 1,
+              "time": "Day 1, 09:35",
+              "type": "world",
+              "text": "The visible habitat traces are interpreted; the individual creature, if any, remains unidentified.",
+              "details": {
+                "checkId": "habitat_fen_00000",
+                "interpreted": true,
+                "degree": "success"
+              }
+            }
+          ]
+        }
       }
     },
     "focus": []
@@ -345,11 +443,50 @@
           }
         },
         "biome": "fen",
-        "subject": "wetland margin signs"
+        "subject": "wetland margin signs",
+        "used": true,
+        "checkedAtMinute": 575
       }
     },
     "habitatSurveyDaily": {
       "fen": 0
+    },
+    "sceneCheckEventsUsed": {
+      "339ff106110e2c1dbaa21bed91130d75def628ed54c693eb2f68896a4c3b6ba4": "habitat_fen_00000"
+    },
+    "habitatSurveyFindings": {
+      "habitat_fen_00000": {
+        "checkId": "habitat_fen_00000",
+        "location": "fen",
+        "biome": "fen",
+        "observedSceneHash": "339ff106110e2c1dbaa21bed91130d75def628ed54c693eb2f68896a4c3b6ba4",
+        "degree": "success",
+        "success": true,
+        "interpretedAtMinute": 575,
+        "rollEventIndex": 5,
+        "rollEventHash": "4672ae913e7773a4b275f437617f424d967c0c22e5cdb0cf1d0940f532ef242c",
+        "rollEvent": {
+          "day": 1,
+          "time": "Day 1, 09:35",
+          "type": "roll",
+          "text": "🎲 Interpret wetland margin signs: d20 11 +5 = 16 vs DC 12 → success (+4)",
+          "details": {
+            "dice": [
+              11
+            ],
+            "roll": 11,
+            "modifier": 5,
+            "dc": 12,
+            "total": 16,
+            "margin": 4,
+            "degree": "success",
+            "success": true,
+            "progress": 1,
+            "naturalBonus": 0
+          }
+        },
+        "finding": "Habitat traces interpreted; no species identity independently confirmed"
+      }
     }
   }
 }
