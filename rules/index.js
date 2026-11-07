@@ -101,6 +101,64 @@ function dissolveBond(s,beastId,b){
  const beast=s.beasts?.[beastId];
  if(beast){beast.relationship='former partner';beast.consent=false;}
 }
+// A compact GM-facing *view* over existing witnessed interactions.
+// No new personality, trust, consent, reputation, relationship or memory
+// system. Every entry is already player-known through its original rule.
+function knownPersonContext(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).length!==1||typeof p.npcId!=='string'||
+    !/^[a-z0-9][a-z0-9:_-]{1,100}$/.test(p.npcId))
+  throw Error('A person context request names only a real person ID, not a chosen disposition, promise or hidden fact');
+ const id=p.npcId,w=Realm.peek(s),person=PersonPresence.identity(w,id),
+  current=PersonPresence.localStatus(s,w).people
+   .some(x=>x.npcId===id);
+ const conversations=[
+  ...NPCConversations.status(s,{}).knownConversations.filter(x=>x.npcId===id)
+   .map(x=>({day:x.day,location:x.location,
+    ...(x.asked?{question:x.asked}:{}),
+    heard:x.heard,answerKind:x.answerKind||'authored-public-topic',
+    source:x.source})),
+  ...EmergentPeople.heardStatus(s,w).knownPeople.filter(x=>x.npcId===id)
+   .map(x=>({day:x.day,location:x.lastMetAt,
+    ...(x.asked?{question:x.asked}:{}),
+    heard:x.heard,answerKind:x.answerKind||'witnessed-person-response',
+    source:'personally-witnessed-local-conversation'}))
+ ];
+ const handoffs=MaterialHandoffs.status(s,{}).knownHandoffs
+   .filter(x=>x.npcId===id).map(x=>({
+    day:x.day,location:x.location,item:x.item,
+    accepted:x.accepted,quantityMoved:x.quantityMoved,
+    witnessHash:x.witnessHash
+   }));
+ const workOffers=EmergentPeople.localWorkOffersStatus(s,{npcId:id})
+   .knownWorkOffers.map(x=>({
+    offerId:x.offerId,day:x.day,location:x.location,purpose:x.purpose,
+    accepted:x.accepted,state:x.state,completedWork:x.completedWork
+   }));
+ const assistedWork=EmergentPeople.assistanceStatus(s,{npcId:id})
+   .personallyAssistedWork.map(x=>({
+    day:x.day,location:x.site,agreed:x.agreed,
+    skill:x.skill,ownResult:x.ownResult,
+    ...(x.observed?{observed:x.observed}:{})
+   }));
+ const witnessedWork=EmergentPeople.witnessedWorkStatus(s,{npcId:id})
+   .personallyWitnessedWork.map(x=>({
+    day:x.day,location:x.site,observed:x.observed
+   }));
+ const personallyKnown=conversations.length+handoffs.length+
+  workOffers.length+assistedWork.length+witnessedWork.length>0;
+ if(!person||(!current&&!personallyKnown))
+  return {known:false,presentHere:false,
+   note:'No known or locally witnessed person with this identity. Do not reveal a remote private life or assume contact.'};
+ return {known:true,npcId:id,name:person.name,
+  profession:person.profession,presentHere:current,
+  conversations:conversations.slice(-25),
+  handoffs:handoffs.slice(-25),
+  workOffers:workOffers.slice(-25),
+  assistedWork:assistedWork.slice(-25),
+  witnessedWork:witnessedWork.slice(-25),
+  note:'Only prior player-witnessed exchanges and currently visible identity. Culture and occupation do not determine beliefs, hidden motives, trust or consent. An accepted item is not an agreement; an old work offer is not a new promise.'};
+}
 function act(s,{system,operation,params={}}={}){
  if(!params||typeof params!=='object'||Array.isArray(params))throw Error('Invalid rule parameters');
  switch(`${system}.${operation}`){
@@ -226,6 +284,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.status':return SocialFabric.status(s,params);
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupMembersStatus':return GroupInvitations.status(s,params);
+  case 'social.personContext':return knownPersonContext(s,params);
   case 'social.localPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
       Object.keys(params).length)throw Error('Real local people status is read-only and accepts no invented individual or presence');
