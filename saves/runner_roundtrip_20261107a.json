@@ -286,7 +286,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 3,
+    "revision": 4,
     "applied": {
       "rt_02_travel_20261107a": {
         "revision": 1,
@@ -409,9 +409,32 @@
             }
           ]
         }
+      },
+      "rt_05_checkpoint_20261107a": {
+        "revision": 4,
+        "mode": "checkpoint",
+        "hash": "6d5934e14b089dec26e0c4599b8b8fc9c28fc3ba6047eff9f2ebc7ee4eb390d3",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 09:50",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
-    "focus": []
+    "focus": [
+      "Review the witnessed wetland signs"
+    ],
+    "scene": "At the Whisperfen wetlands after an independently checked survey of reed-waterline and mud impressions. No beast identity or material prize was established.",
+    "journal": [
+      {
+        "day": 1,
+        "text": "Test fixture reached the fen by an established route, witnessed a habitat survey, and resolved check habitat_fen_00000: d20 11 +5 = 16 vs DC 12, success. The one-use check is spent."
+      }
+    ]
   },
   "table": {
     "sceneChecks": {
