@@ -53,4 +53,38 @@ function passage(s,p={}){
  return {...result,precommitted:true,rationsConsumed:days,
   unchangedLocation:s.world.location,source:'prior witnessed local downtime'};
 }
-module.exports={passage};
+// Short, ordinary waiting is not a multi-day government-approved downtime.
+// A person may simply stay in a safe settlement for a while. This earns
+// nothing and cannot silently cover sleeping, long-term care, dangerous
+// wilderness or an unresolved encounter. The GM determines whether "wait"
+// actually reflects the player's intention; minutes are elapsed time only.
+function wait(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).length!==1||
+    !Number.isInteger(p.minutes)||p.minutes<1||p.minutes>360)
+  throw Error('Ordinary waiting accepts only 1–360 actual elapsed minutes, no chosen outcomes, rewards, skills or world changes');
+ if(s.battle||s.encounter)
+  throw Error('An unresolved beast encounter or battle cannot be dismissed as quiet waiting');
+ const loc=E.LOCATIONS[s.world?.location];
+ if(!loc||loc.biome!=='settlement')
+  throw Error('Uneventful waiting requires a genuinely safe, established settlement; wilderness time needs actual safety and circumstances');
+ const c=s.table?.combatants?.player;
+ if(c&&c.status!=='ok')
+  throw Error('An incapacitated character needs actual care rather than unattended waiting');
+ if(s.world.minutes%1440+p.minutes>=1440)
+  throw Error('Overnight passage needs actual sleep, shelter or provisioned downtime rather than a silent clock skip');
+ const old=s.world.minutes;
+ E.advance(s,p.minutes);
+ W.finalizeTime(s,old);
+ Health.sync(s,{source:'legacy'});
+ C.event(s,'story','Time passes without undertaking additional work at '+loc.name+'.',{
+  origin:'ordinary-safe-local-wait',location:s.world.location,
+  elapsedMinutes:p.minutes,clock:E.clock(s),
+  noTraining:true,noFreeResources:true,noAutomaticConsent:true
+ });
+ return {waited:true,elapsedMinutes:p.minutes,
+  location:s.world.location,clock:E.clock(s),noSkillsEarned:true,
+  noWagesEarned:true,noAutomaticRestOrHealing:true,
+  note:'The world clock advances; NPC schedules and ordinary circumstances can change, but no undertaking or agreement is assumed.'};
+}
+module.exports={passage,wait};
