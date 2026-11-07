@@ -114,4 +114,20 @@ const fresh=seed=>E.newGame({name:'Natural Time Verification',seed,path:'undecid
   A.equal(read(),saved);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
+{
+// The base engine advances minutes/daily conditions exactly once; the world
+// finalizer observes the elapsed period and must not process the same
+// independent sixday/month event a second time when the turn runner checks.
+ const s=fresh(981505),old=s.world.minutes;
+ E.advance(s,6*1440);
+ const World=require('../rules/world');
+ const once=World.finalizeTime(s,old);
+ A.ok(once.sixdayTicks.length>=1);
+ const after=E.exportGame(s),rng=s.rngState;
+ const repeat=World.finalizeTime(s,old);
+ A.deepEqual(repeat.sixdayTicks,[]);
+ A.deepEqual(repeat.monthTicks,[]);
+ A.equal(E.exportGame(s),after);
+ A.equal(s.rngState,rng);
+}
 console.log('Natural time-flow checks passed: free rereads, bounded real safe waiting, protected overnight and world passage, one original saved turn, replay and stale safety');
