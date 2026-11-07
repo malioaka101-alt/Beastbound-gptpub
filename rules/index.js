@@ -326,6 +326,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.agendaReveal':return Agendas.reveal(s,params);
   case 'world.agendaStatus':return {agendas:Agendas.publicStatus(s)};
   case 'world.advance':return TimePassage.passage(s,params);
+  case 'world.wait':return TimePassage.wait(s,params);
   case 'research.start':return ResearchGuard.start(s,params);
   case 'research.survey':return ResearchGuard.survey(s,params);
   case 'research.week':return ResearchGuard.week(s,params);
