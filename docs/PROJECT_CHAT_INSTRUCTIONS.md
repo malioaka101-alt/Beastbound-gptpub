@@ -1,5 +1,11 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Live-play turn speed and trial reset — newest player direction
+
+**Speed is a top priority.** See `docs/FAST_TURNS.md` (live-play speed priority). For each required resume/action state read, fetch the instruction, Table Rules and live save in **one parallel connector batch**. Do not reread unrelated technical files, summon unnecessary workflows or repeat searches. Dialogue-only scenes and rereading **already player-known facts** require GM narration and no new mechanical turn; the current known source facts are enough. First-time witnessed information, resource costs, world time, checks, NPC choices and other consequences use one verified engine resolution and one confirmed persisted result. Keep daily narrative concise; show a compact beautiful status plate, never reproduce a long CSS app, a full game ledger or an overly expansive board display every turn.
+
+**Current trial campaign:** Aerin Marsh. The user has requested a **complete fresh campaign reset after the trial**, **not immediately**. Preserve the trial checkpoint until the user explicitly ends testing, then create a fresh start/character-creation process without carrying forward this trial's relationships, clocks or achievements. Do not reset on routine exploration, comments about HUD quality or performance requests.
+
 ## Pinned current foundation decision — 7 November 2026, after public PR #7
 
 **Read [`docs/FINISH_LINE_A_READINESS_2026-11-07.md`](FINISH_LINE_A_READINESS_2026-11-07.md) first.** It supersedes the older PR #140, blocked private Actions and 108/111-test snapshots within this long historical file. Active code/checkpoints: **public** `malioaka101-alt/Beastbound-gptpub`; the RPG runs in **private Project chat**, not as a website. Public repository files and checkpoint data are **not** private secret storage. Public PRs #1–#7 are merged and [113/113 complete Node tests passed](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42422519596). Source-bound terrain check [live run](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42419882130) and the real eight-run `requests/ → results/ → saves/ → checkpoint → resumed original-roll recovery` disposable workflow are confirmed. Do not extrapolate complete Master Prompt parity from those verified slices.
