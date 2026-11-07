@@ -32,10 +32,22 @@
       "type": "travel",
       "text": "You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects.",
       "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:35",
+      "type": "world",
+      "text": "A changing reed-waterline and soft mud impressions are visible at Whisperfen Wetlands.",
+      "details": {
+        "checkId": "habitat_fen_00000",
+        "location": "fen",
+        "biome": "fen",
+        "observation": "terrain-traces"
+      }
     }
   ],
   "world": {
-    "minutes": 555,
+    "minutes": 575,
     "location": "fen",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -63,7 +75,7 @@
     "path": "meridian",
     "health": 64,
     "maxHealth": 64,
-    "stamina": 48,
+    "stamina": 46,
     "maxStamina": 52,
     "mana": 24,
     "maxMana": 24,
@@ -241,7 +253,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 1,
+    "revision": 2,
     "applied": {
       "rt_02_travel_20261107a": {
         "revision": 1,
@@ -264,8 +276,80 @@
           ],
           "message": ""
         }
+      },
+      "rt_03_survey_20261107a": {
+        "revision": 2,
+        "mode": "rule",
+        "hash": "b415d00b706b976fb00884ab2419f7038650d87b172774a3577cfdefde881b5b",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 09:35",
+          "output": {
+            "rules": {
+              "prepared": true,
+              "checkId": "habitat_fen_00000",
+              "challenge": "Interpret wetland margin signs",
+              "elapsedMinutes": 20,
+              "staminaSpent": 2,
+              "observed": "A changing reed-waterline and soft mud impressions",
+              "nextAction": "Use the witnessed checkId in a genuine skill check",
+              "note": "No beast, loot, rarity, research conclusion or guaranteed success is created"
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 09:35",
+              "type": "world",
+              "text": "A changing reed-waterline and soft mud impressions are visible at Whisperfen Wetlands.",
+              "details": {
+                "checkId": "habitat_fen_00000",
+                "location": "fen",
+                "biome": "fen",
+                "observation": "terrain-traces"
+              }
+            }
+          ]
+        }
       }
     },
     "focus": []
+  },
+  "table": {
+    "sceneChecks": {
+      "habitat_fen_00000": {
+        "checkId": "habitat_fen_00000",
+        "origin": "engine-habitat-survey",
+        "attribute": "wis",
+        "skill": "survival",
+        "dc": 12,
+        "extra": 0,
+        "minutes": 15,
+        "label": "Interpret wetland margin signs",
+        "risky": true,
+        "location": "fen",
+        "worldMinute": 575,
+        "source": "Engine-observed a changing reed-waterline and soft mud impressions at known Whisperfen Wetlands",
+        "eventIndex": 4,
+        "eventHash": "339ff106110e2c1dbaa21bed91130d75def628ed54c693eb2f68896a4c3b6ba4",
+        "observationEvent": {
+          "day": 1,
+          "time": "Day 1, 09:35",
+          "type": "world",
+          "text": "A changing reed-waterline and soft mud impressions are visible at Whisperfen Wetlands.",
+          "details": {
+            "checkId": "habitat_fen_00000",
+            "location": "fen",
+            "biome": "fen",
+            "observation": "terrain-traces"
+          }
+        },
+        "biome": "fen",
+        "subject": "wetland margin signs"
+      }
+    },
+    "habitatSurveyDaily": {
+      "fen": 0
+    }
   }
 }

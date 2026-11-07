@@ -1,0 +1,36 @@
+{
+  "id": "rt_03_survey_20261107a",
+  "ok": true,
+  "applied": true,
+  "revision": 2,
+  "stateHash": "18193ce3c5bad3750cd17880f632e0bcadf83dc2ed6bbe40be282994cd9fa15c",
+  "clock": "Day 1, 09:35",
+  "output": {
+    "rules": {
+      "prepared": true,
+      "checkId": "habitat_fen_00000",
+      "challenge": "Interpret wetland margin signs",
+      "elapsedMinutes": 20,
+      "staminaSpent": 2,
+      "observed": "A changing reed-waterline and soft mud impressions",
+      "nextAction": "Use the witnessed checkId in a genuine skill check",
+      "note": "No beast, loot, rarity, research conclusion or guaranteed success is created"
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 09:35",
+      "type": "world",
+      "text": "A changing reed-waterline and soft mud impressions are visible at Whisperfen Wetlands.",
+      "details": {
+        "checkId": "habitat_fen_00000",
+        "location": "fen",
+        "biome": "fen",
+        "observation": "terrain-traces"
+      }
+    }
+  ],
+  "panel": "╔═ ROUNDTRIP · DAY 1 ════════════╗\n║ 09:35 · Morning · cool         ║\n║ Whisperfen Wetlands       85 T ║\n║ STA  █████████░          46/52 ║\n║ QI   ██████████          14/14 ║\n╚════════════════════════════════╝",
+  "recap": "CAMPAIGN: Roundtrip Save Resume Fixture (seed 20261107)\nSCENE: Whisperfen Wetlands, Day 1, 09:35\nPC: fieldworker, meridian; 85 T\nJOURNAL: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet. | You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects. | A changing reed-waterline and soft mud impressions are visible at Whisperfen Wetlands.\nCURRENT: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet."
+}
