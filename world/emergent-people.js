@@ -232,8 +232,53 @@ function heardStatus(s,w){
  if(!Array.isArray(records))throw Error('Invalid personally witnessed conversation history');
  return {knownPeople:records.slice(-25).map(r=>({
   npcId:r.npcId,name:r.name,profession:r.profession,
-  lastMetAt:r.location,day:r.day,heard:r.heard
+  lastMetAt:r.location,day:r.day,heard:r.heard,
+  ...(r.question?{asked:r.question,answerKind:r.answerKind}:{} )
  })),note:'Only what was witnessed personally is known. An absent person’s location, finances, personal choices and heritage remain private.'};
+}
+// Compose a *person's* bounded public answer from actual existing biography,
+// working circumstances, region and culture. Their polity is background,
+// NOT a template for belief, ethics, temperament or automatic agreement.
+function localReply(s,p,question){
+ const q=question.toLowerCase(),home=Atlas.R[p.birthSource.regionId],
+  culture=Atlas.C[Atlas.P[p.birthSource.polity]?.culture],
+  loc=Engine.LOCATIONS[s.world.location];
+ const voice={
+  reserved:'I can tell you this much. ',
+  curious:'What brought you to ask? ',
+  steady:'Here is what I know. ',
+  independent:'I can speak for myself, at least. '
+ }[p.personality]||'';
+ const lowerFirst=x=>x[0].toLowerCase()+x.slice(1);
+ if(/\b(?:road|roads|route|routes|path|paths|directions|where can i go)\b/.test(q))
+  return {kind:'public-routes',spoken:voice+'The known paths from '+
+   loc.name+' lead to '+loc.exits.map(id=>Engine.LOCATIONS[id].name).join(', ')+
+   '. A road is not a promise of safe passage.',
+   source:'Public routes of the currently witnessed local scene'};
+ if(/\b(?:language|tongue|speech|dialect)\b/.test(q))
+  return {kind:'individual-language',spoken:voice+
+   'The language recorded in the place where my work began is '+p.language+
+   '. That tells you nothing certain about another person.',
+   source:'Individual established spoken language and origin'};
+ if(/\b(?:custom|customs|tradition|traditions|culture|festival|home|homeland|from originally)\b/.test(q)&&
+    home&&culture)
+  return {kind:'home-culture',spoken:voice+
+   'Around '+home.name+', '+lowerFirst(culture.customs)+' '+
+   'That is a regional custom, not a rule for how every person there thinks.',
+   source:'Published regional customs of '+culture.name+' and this person’s established place of origin'};
+ if(/\b(?:work|working|job|profession|livelihood|task|need|needs|concern|concerns|craft|trade|help)\b/.test(q))
+  return {kind:'individual-work',spoken:voice+
+   'My work here is '+p.profession+'. I am trying to '+
+   lowerFirst(p.purpose).replace(/[.!?]+$/,'')+
+   '. That is the work I can speak for, not an offer or a promise.',
+   source:'This individual’s causally established occupation and present purpose'};
+ if(/\b(?:weather|rain|mist|wind)\b/.test(q))
+  return {kind:'observed-weather',spoken:voice+
+   'From here, the weather is '+s.world.weather+'.',
+   source:'Actually observable local weather at the active scene'};
+ return {kind:'unverified',spoken:voice+
+  'I would rather not give you an answer I cannot substantiate. You can ask what I have actually seen here.',
+  source:'No individual witnessed evidence supports a specific answer'};
 }
 function meet(s,params={}){
  if(!params||typeof params!=='object'||Array.isArray(params)||
@@ -244,35 +289,67 @@ function meet(s,params={}){
  if(s.battle||s.encounter)throw Error('Resolve actual immediate encounters before a considered local conversation');
  if(s.table?.combatants?.player?.status&&s.table.combatants.player.status!=='ok')
   throw Error('An incapacitated character cannot hold this conversation');
- const minute=s.world.minutes%DAY;
- if(minute<8*60||minute+MINUTES>18*60)
-  throw Error('Local working-day presence is required for a real conversation');
  const w=require('./simulation').peek(s),now=Math.floor(s.world.minutes/DAY),
   sh=presence(w,params.npcId,s.world.location,now),
   p=w.emergentPeople?.people?.[params.npcId.slice(9)];
- if(!sh||!p)throw Error('That person is not independently witnessed as available at the current scene');
- const prior=s.table?.emergentConversations?.lastByDay?.[p.id];
- if(prior===now)throw Error('This individual has already given one short work conversation today; further freeform dialogue need not repeat a roll');
- const old=s.world.minutes,choice=draw(p),strained=p.fatigue>66||
-  w.countries[p.polity].stability<27;
- const cooperative=choice<(strained?.38:.74),
-  heard=cooperative?
-   'I am working with '+p.profession+' needs here. '+p.purpose+
-     '. I can discuss what I have actually seen, but make no promise of instruction or membership.':
-   'I have responsibilities to attend to and cannot discuss the work just now.';
- const Core=require('../rules/core'),Time=require('../rules/world'),
-  Health=require('../rules/unified');
- Engine.advance(s,MINUTES);Time.finalizeTime(s,old);
+ if(!sh||!p||!verify(w,p))
+  throw Error('That person is not independently witnessed as available at the current scene');
+ const records=s.table?.emergentConversations?.records||[];
+ if(!Array.isArray(records))
+  throw Error('Invalid personally witnessed conversation history');
+ const question=params.question.trim(),today=records.filter(r=>
+  r.npcId===p.actorId&&r.day===now);
+ if(s.table?.emergentConversations?.lastByDay?.[p.id]===now&&!today.length)
+  throw Error('An earlier conversation has no intact witness; cannot reroll the person’s decision');
+ const repeated=today.find(r=>r.question===question);
+ if(repeated)
+  return {met:true,npcId:p.actorId,name:p.name,profession:p.profession,
+   spoke:repeated.spoke??true,heard:repeated.heard,
+   answerKind:repeated.answerKind||'earlier-witnessed',
+   message:p.name+' already gave this answer; no new exchange occurred.',
+   alreadyAsked:true,minutes:0,noRoll:true,
+   noAutomaticTeaching:true,noContract:true,noCompulsoryFees:true};
+ const recent=today.at(-1);
+ // A new subject is legitimate; it is not a new roll to coerce someone who
+ // already declined the same meeting. The existing direct witness owns consent.
+ let earlierAgreed=recent?.spoke;
+ if(recent&&typeof earlierAgreed!=='boolean'){
+  const event=s.log.find(e=>hash(e)===recent.eventHash&&
+   e.details?.origin==='emergent-person-local-conversation');
+  earlierAgreed=event?.details?.independentlyAgreed;
+  if(typeof earlierAgreed!=='boolean')
+   throw Error('Earlier individual conversation has no valid independent decision witness');
+ }
+ if(recent&&earlierAgreed===false)
+  return {met:true,npcId:p.actorId,name:p.name,profession:p.profession,
+   spoke:false,heard:recent.heard,answerKind:'declined',
+   message:p.name+' has already declined further conversation under these circumstances.',
+   alreadyDeclined:true,minutes:0,noRoll:true,
+   noAutomaticTeaching:true,noContract:true,noCompulsoryFees:true};
+ const duration=recent?6:MINUTES,minute=s.world.minutes%DAY;
+ if(minute<8*60||minute+duration>18*60)
+  throw Error('The person is not currently available for a conversation during this witnessed shift');
+ const strained=p.fatigue>66||w.countries[p.polity].stability<27,
+  cooperative=recent?true:draw(p)<(strained?.38:.74),
+  grounded=cooperative?localReply(s,p,question):null,
+  heard=grounded?.spoken||
+   'I have responsibilities to attend to and cannot discuss this just now.',
+  answerKind=grounded?.kind||'declined';
+ const old=s.world.minutes,Core=require('../rules/core'),
+  Time=require('../rules/world'),Health=require('../rules/unified');
+ Engine.advance(s,duration);Time.finalizeTime(s,old);
  Health.sync(s,{source:'legacy'});
  const witnessed={origin:'emergent-person-local-conversation',
   npcId:p.actorId,personId:p.id,name:p.name,profession:p.profession,
   presence:sh,location:s.world.location,day:now,
-  question:params.question.trim(),independentlyAgreed:cooperative,
-  minutes:MINUTES,noInferredKinship:true,noFreePower:true};
+  question,answerKind,answerSource:grounded?.source||null,
+  independentlyAgreed:cooperative,
+  minutes:duration,noInferredKinship:true,noFreePower:true,
+  noInventedCultureOrBelief:true,noContract:true};
  Core.event(s,'story',p.name+' responds to a local question: “'+heard+'”',witnessed);
  const entry={npcId:p.actorId,name:p.name,profession:p.profession,
-  location:s.world.location,day:now,heard,
-  eventHash:hash(s.log.at(-1)),sourceHash:p.originHash};
+  location:s.world.location,day:now,heard,question,answerKind,
+  spoke:cooperative,eventHash:hash(s.log.at(-1)),sourceHash:p.originHash};
  s.table.emergentConversations||={lastByDay:{},records:[]};
  s.table.emergentConversations.lastByDay[p.id]=now;
  s.table.emergentConversations.records.push(entry);
@@ -283,11 +360,11 @@ function meet(s,params={}){
   eventHash:entry.eventHash});
  if(p.history.length>24)p.history.shift();
  return {met:true,npcId:p.actorId,name:p.name,profession:p.profession,
-  spoke:cooperative,heard,message:p.name+' says: “'+heard+'”',
-  minutes:MINUTES,noAutomaticTeaching:true,noContract:true,
+  spoke:cooperative,heard,answerKind,
+  message:p.name+' says: “'+heard+'”',
+  minutes:duration,noAutomaticTeaching:true,noContract:true,
   noCompulsoryFees:true,noInheritedStatus:true};
 }
-
 function observeLocalWork(s,params={}){
  if(!params||typeof params!=='object'||Array.isArray(params)||
   Object.keys(params).join('|')!=='npcId'||
