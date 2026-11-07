@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 20261107,
-  "rngState": 2324254599,
+  "rngState": 3427154267,
   "sequence": 1,
   "log": [
     {
@@ -89,10 +89,30 @@
         "method": "footing",
         "intent": "Carefully test my footing on the floating reed islands before crossing"
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:50",
+      "type": "roll",
+      "text": "🎲 Keep footing on visible local terrain: d20 16 +5 = 21 vs DC 14 → strong (+7)",
+      "details": {
+        "dice": [
+          16
+        ],
+        "roll": 16,
+        "modifier": 5,
+        "dc": 14,
+        "total": 21,
+        "margin": 7,
+        "degree": "strong",
+        "success": true,
+        "progress": 2,
+        "naturalBonus": 0
+      }
     }
   ],
   "world": {
-    "minutes": 590,
+    "minutes": 605,
     "location": "fen",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -300,7 +320,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 5,
+    "revision": 6,
     "applied": {
       "rt_02_travel_20261107a": {
         "revision": 1,
@@ -476,6 +496,66 @@
             }
           ]
         }
+      },
+      "rt_10_gm_check_20261107a": {
+        "revision": 6,
+        "mode": "check",
+        "hash": "77d2ef433736d28419392b3bb720a1ff658a4950af31670ad0d1af45c58e1e0d",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 10:05",
+          "output": {
+            "check": {
+              "dice": [
+                16
+              ],
+              "roll": 16,
+              "modifier": 5,
+              "dc": 14,
+              "total": 21,
+              "margin": 7,
+              "degree": "strong",
+              "success": true,
+              "progress": 2,
+              "naturalBonus": 0,
+              "practiceSkill": "survival",
+              "ppAwarded": 0,
+              "skillRankBefore": 2,
+              "skillRankAfter": 2,
+              "noExtraRoll": true,
+              "verifiedSceneCheck": "scene_00001",
+              "elapsedMinutes": 15,
+              "scope": "visible-local-terrain-only",
+              "intent": "Carefully test my footing on the floating reed islands before crossing",
+              "noAutomaticMovement": true,
+              "noUnknownDiscoveries": true,
+              "noAutomaticAgreement": true,
+              "noGrantedItems": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 09:50",
+              "type": "roll",
+              "text": "🎲 Keep footing on visible local terrain: d20 16 +5 = 21 vs DC 14 → strong (+7)",
+              "details": {
+                "dice": [
+                  16
+                ],
+                "roll": 16,
+                "modifier": 5,
+                "dc": 14,
+                "total": 21,
+                "margin": 7,
+                "degree": "strong",
+                "success": true,
+                "progress": 2,
+                "naturalBonus": 0
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
@@ -555,14 +635,16 @@
             "intent": "Carefully test my footing on the floating reed islands before crossing"
           }
         },
-        "used": false
+        "used": true,
+        "checkedAtMinute": 590
       }
     },
     "habitatSurveyDaily": {
       "fen": 0
     },
     "sceneCheckEventsUsed": {
-      "339ff106110e2c1dbaa21bed91130d75def628ed54c693eb2f68896a4c3b6ba4": "habitat_fen_00000"
+      "339ff106110e2c1dbaa21bed91130d75def628ed54c693eb2f68896a4c3b6ba4": "habitat_fen_00000",
+      "f395a1bd986da3044861820d1dd293d71757b47413beb3f1d00650a21ad5812d": "scene_00001"
     },
     "habitatSurveyFindings": {
       "habitat_fen_00000": {
