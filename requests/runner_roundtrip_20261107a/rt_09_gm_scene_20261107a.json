@@ -1,0 +1,12 @@
+{
+  "id": "rt_09_gm_scene_20261107a",
+  "campaign": "runner_roundtrip_20261107a",
+  "mode": "rule",
+  "system": "core",
+  "operation": "prepareSceneCheck",
+  "params": {
+    "method": "footing",
+    "intent": "Carefully test my footing on the floating reed islands before crossing"
+  },
+  "expectedHash": "fa974b5981669dcfcec78785ad0d472676b78442a3f23591074b01c3cf3c65fe"
+}
