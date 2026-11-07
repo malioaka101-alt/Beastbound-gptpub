@@ -118,6 +118,24 @@ function reach(s,site){
  const memories=rule(s,'metPeopleStatus').knownPeople;
  A.equal(memories.length,1);A.equal(memories[0].npcId,person.actorId);
  A.equal(memories[0].lastMetAt,s.world.location);
+
+ // Same read-only GM recall works for causally generated people, without
+ // reading their private finances, disposition, goals or remote activity.
+ const context=rule(s,'personContext',{npcId:person.actorId});
+ A.equal(context.known,true);
+ A.equal(context.presentHere,true);
+ A.equal(context.name,person.name);
+ A.equal(context.conversations.length,1);
+ A.equal(context.conversations[0].heard,spoken.heard);
+ A.equal(context.conversations[0].location,s.world.location);
+ A.deepEqual(context.handoffs,[]);
+ A.ok(!JSON.stringify(context).includes('rngState'));
+ A.ok(!JSON.stringify(context).includes('funds'));
+ A.ok(!JSON.stringify(context).includes('personality'));
+ A.ok(!JSON.stringify(context).includes('birthSource'));
+ const unobserved=rule(s,'personContext',{npcId:'emergent:person_9999999'});
+ A.equal(unobserved.known,false);
+
  A.ok(!JSON.stringify(memories).includes('funds'));
  A.ok(!JSON.stringify(memories).includes('purpose'));
  const copy=E.importGame(E.exportGame(s));
