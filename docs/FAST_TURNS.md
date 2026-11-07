@@ -2,9 +2,23 @@
 
 **Play remains inside the private ChatGPT Project. No site, hosting, plugin or paid tier required.** Faster does not mean unverified dice, fabricated outcomes or unsaved changes.
 
+## Live-play speed priority — current instruction (7 November 2026)
+
+**Goal: short, responsive in-chat turns while retaining honest source-backed outcomes.** The in-chat GM should not use the GitHub turn processor for ordinary prose or for rereading information already present in the latest verified save/result. Read the authoritative Project instructions, Table Rules and latest campaign save **together in one parallel connector batch** where required, rather than serial calls and repeated full-document analysis. Reuse those already-verified instructions within this chat unless they change. After an applied turn, use the returned verified mechanical output immediately; don't redundantly query the same status.
+
+**Three turn classes:**
+
+1. **Prose / player-known inspection (fastest):** speak naturally as GM using the currently verified scene and already known board, inventory, journal or public facts. Do not create GitHub requests, roll, spend time, grant items, imply an NPC's consent or advance the world merely to repeat known information. A new observation that changes the witnessed ledger (such as *first* reading previously unknown official field notices) is instead a real engine action.
+2. **Real mechanical change:** execute **one unique request** through the verified local Node runner only when its complete current source and save are actually available; otherwise use the working GitHub request → Actions → result processor once. Confirm the corresponding result/save before stating a roll, decision, cost or clock delta. Avoid repeated run polling and needless extra status requests; fetch the specific result and current save in one parallel batch once the run has finished. No speculative provisional narration or rerolls.
+3. **Session / checkpoint / reset:** checkpoint only where meaningful, on `/save` or at a genuine pickup boundary; don't checkpoint every paragraph. On an explicit full reset **after the current trial**, preserve the last verified trial checkpoint until the user ends the test, then produce a fresh game with fresh character creation and clear authorisation before replacing the active campaign.
+
+**Presentation budget:** 2–5 concise narrative sentences in most everyday turns, natural dialogue only when relevant, and a **small, attractive, consistent fantasy status plate** (name, place/time, useful resources, one focus), not a lengthy repeated AppBlock/CSS implementation, five stacked contract cards or a huge full character sheet. Display detail on request. Never sacrifice a meaningful character moment for a terse log; compress interface, not the fiction.
+
+**Honest limitations:** The active `Beastbound-gptpub` GitHub repository is **public**; the game conversation is private. GitHub Actions startup is a real cost for a first-time state-changing board reading and cannot be skipped by falsely pretending to have run the engine. A Node executable without the **verified complete repository source** does not make local mechanics available. For genuinely consequential turns, correctness and confirmed persistence take priority over speed.
+
 ## Preferred path when an executable Node 22 environment exists
 
-1. Read the latest `docs/PROJECT_CHAT_INSTRUCTIONS.md`, `reference/Beastbound_Table_Rules.md`, `docs/IN_CHAT_SYSTEM_HUD.md`, and the **selected campaign save** from private GitHub. Reuse the local game source only after verifying it matches the current GitHub source/blob hashes. Do not mix campaigns.
+1. Read the latest `docs/PROJECT_CHAT_INSTRUCTIONS.md`, `reference/Beastbound_Table_Rules.md`, `docs/IN_CHAT_SYSTEM_HUD.md`, and the **selected campaign save** from the active public GitHub repository. Reuse the local game source only after verifying it matches the current GitHub source/blob hashes. Do not mix campaigns.
 2. For an action needing a check or a change, create **one unique** turn request with a stable ID and optional `expectedHash`, and execute `scripts/chat-turn.js` **once** against a local copy of the fetched save. The engine records exact dice, time, stamina, politics and other consequences. It produces a new, complete save in the local copy.
 3. Verify `ok` and `applied`, then use GitHub's `update_file` on `saves/<campaign>.json` with the **original blob SHA** and the resulting exact local file content. GitHub acknowledgement is required before claiming the turn was checkpointed. A stale-SHA error is a conflict: **never reroll** and never overwrite an unseen newer save. Reconcile or explain the limitation. A rejected/unchanged action needs no write.
 4. Narrate only the confirmed output, then display the **compact native in-chat fantasy status plate** (see below). Do not paste the engine's old 34-column ASCII panel except as a text-only fallback. Keep the Delta line factual.
@@ -14,7 +28,7 @@ Because tool round trips, GitHub Actions startup and large repeated UI code are 
 
 ## Fallback path when Node cannot run
 
-Write exactly one `requests/<campaign>/<unique-id>.json` to the private repository and fetch its `results/<campaign>/<unique-id>.json` after the private turn workflow runs. Never submit two pending requests to one campaign, and never roll again because the workflow was slow. The workflow no longer runs the complete test suite for every player request: dedicated code-change CI owns regression checks. The engine still validates input, state transitions and duplicate IDs.
+Write exactly one `requests/<campaign>/<unique-id>.json` to the active public repository and fetch its `results/<campaign>/<unique-id>.json` after the private turn workflow runs. Never submit two pending requests to one campaign, and never roll again because the workflow was slow. The workflow no longer runs the complete test suite for every player request: dedicated code-change CI owns regression checks. The engine still validates input, state transitions and duplicate IDs.
 
 ## Fast default everyday panel
 
