@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Current live runner verification and active repository — 7 November 2026
+
+**Active repository:** `malioaka101-alt/Beastbound-gptpub` (public GitHub repository used solely as a ChatGPT text-RPG engine and checkpoint store). Its historical private predecessor `malioaka101-alt/beastsbound-gpt` is preserved, not the target for new turns.
+
+**Verified latest state, superseding the older PR/blocker narrative below:** Public PR #1 and PR #2 were both merged after their respective complete passing GitHub regression runs; `111/111` Node tests passed in [run #42415249455](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42415249455). A true **disposable** GitHub Actions save-and-resume test passed across eight distinct real request-processing runs, including original d20 check, save/checkpoint, independently fetched pickup, stale rejection, no-reroll crash/result recovery, and unaffected campaigns. Read [`docs/LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md`](LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md) for exact request IDs, run links and Git blob hashes. This establishes Finish Line A audit **A3** for the actual repository workflow; it does not claim the game implements every new freeform challenge or every original Master Prompt subsystem.
+
+**Protection:** Aerin's original `saves/aerin_marsh.json` remains unchanged at Git blob `72b1535307fba37e19d26122ba4eb80b46cea31c` (Day 1, 08:00; Morrowfen Crossing). Always use the newest real save when playing and do not replay/overwrite it with the test fixture. The older private-usage, unmerged-PR and blocked Actions paragraphs below are historical development records, **not current execution status**.
+
+
 **Current Finish Line A priority directive (7 November 2026):** Read [`docs/FOUNDATION_COMPLETENESS_AUDIT_2026-11-07.md`](FOUNDATION_COMPLETENESS_AUDIT_2026-11-07.md) before recommending new mechanics. The ordered blockers are (A1) open freeform GM intent → existing source-verified outcomes, (A2) contextual real NPC conversation, (A3) an actual private Actions result/save/resume smoke test, (A4) removal of demonstrable artificial hours and duplicate rule authority, and (A5) bounded source parity accuracy. **Do not** add another trade, gift, plant, crafting, career, teaching or relationship subsystem just to expand coverage. PR #140 contains provisional A1/A2/A4 changes and is **not merged or full-suite verified** because GitHub Actions failed before running steps. The disposable A3 workflow run #42405401477 also failed before steps and produced no result. Never narrate or claim a new outcome for that request. Verified previous live Aerin checkpoint remains unchanged.
 
 
