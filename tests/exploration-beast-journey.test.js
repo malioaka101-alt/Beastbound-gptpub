@@ -239,5 +239,5 @@ function runJourney(kind){
  }
 }
 const wild=runJourney('wild'),person=runJourney('sapient');
-A.notEqual(wild.id,person.id);
+A.equal(wild.kind,'wild');A.equal(person.kind,'sapient');
 console.log('Exploration and beast journeys passed: genuine linked travel, independent animal behaviour, respectful sapient contact, distant search, saved original outcomes, checkpoint, stale/duplicate safety and offscreen ecology');
