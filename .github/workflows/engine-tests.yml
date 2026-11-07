@@ -80,6 +80,7 @@ jobs:
             tests/ordinary-life-npc-journey.test.js
             tests/emergent-careers.test.js
             tests/time-passage.test.js
+            tests/natural-time-flow.test.js
             tests/civil-calendar-evidence.test.js
             tests/fantasy-canon.test.js
             tests/new-campaign.test.js
