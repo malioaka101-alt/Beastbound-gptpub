@@ -3,7 +3,7 @@
   "engineVersion": "0.3.0",
   "seed": 20261107,
   "rngState": 2324254599,
-  "sequence": 0,
+  "sequence": 1,
   "log": [
     {
       "day": 1,
@@ -74,6 +74,20 @@
         "checkId": "habitat_fen_00000",
         "interpreted": true,
         "degree": "success"
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:50",
+      "type": "world",
+      "text": "Black water, floating reed islands, and the low singing of night insects. Current visible weather: cool, with drifting mist.",
+      "details": {
+        "origin": "engine-local-scene",
+        "checkId": "scene_00001",
+        "location": "fen",
+        "biome": "fen",
+        "method": "footing",
+        "intent": "Carefully test my footing on the floating reed islands before crossing"
       }
     }
   ],
@@ -286,7 +300,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 4,
+    "revision": 5,
     "applied": {
       "rt_02_travel_20261107a": {
         "revision": 1,
@@ -423,6 +437,45 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "rt_09_gm_scene_20261107a": {
+        "revision": 5,
+        "mode": "rule",
+        "hash": "70da14884ded4394c4f8522d06101377ff71220666db55d843fafd7bb89f28e5",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 09:50",
+          "output": {
+            "rules": {
+              "prepared": true,
+              "checkId": "scene_00001",
+              "method": "footing",
+              "observed": "Black water, floating reed islands, and the low singing of night insects.",
+              "challenge": "Keep footing on visible local terrain",
+              "noRollYet": true,
+              "noTimeSpentYet": true,
+              "noExtraSourceClaim": true,
+              "scope": "Only this visible terrain; success cannot award movement, discoveries, property, supernatural abilities, or consent",
+              "nextAction": "Resolve the original source-bound checkId once if the GM determines genuine uncertainty"
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 09:50",
+              "type": "world",
+              "text": "Black water, floating reed islands, and the low singing of night insects. Current visible weather: cool, with drifting mist.",
+              "details": {
+                "origin": "engine-local-scene",
+                "checkId": "scene_00001",
+                "location": "fen",
+                "biome": "fen",
+                "method": "footing",
+                "intent": "Carefully test my footing on the floating reed islands before crossing"
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
@@ -469,6 +522,40 @@
         "subject": "wetland margin signs",
         "used": true,
         "checkedAtMinute": 575
+      },
+      "scene_00001": {
+        "checkId": "scene_00001",
+        "origin": "engine-local-scene",
+        "method": "footing",
+        "intent": "Carefully test my footing on the floating reed islands before crossing",
+        "attribute": "dex",
+        "skill": "survival",
+        "dc": 14,
+        "extra": 0,
+        "risky": false,
+        "minutes": 15,
+        "label": "Keep footing on visible local terrain",
+        "location": "fen",
+        "biome": "fen",
+        "worldMinute": 590,
+        "source": "Original established terrain at Whisperfen Wetlands: Black water, floating reed islands, and the low singing of night insects.",
+        "eventIndex": 7,
+        "eventHash": "f395a1bd986da3044861820d1dd293d71757b47413beb3f1d00650a21ad5812d",
+        "observationEvent": {
+          "day": 1,
+          "time": "Day 1, 09:50",
+          "type": "world",
+          "text": "Black water, floating reed islands, and the low singing of night insects. Current visible weather: cool, with drifting mist.",
+          "details": {
+            "origin": "engine-local-scene",
+            "checkId": "scene_00001",
+            "location": "fen",
+            "biome": "fen",
+            "method": "footing",
+            "intent": "Carefully test my footing on the floating reed islands before crossing"
+          }
+        },
+        "used": false
       }
     },
     "habitatSurveyDaily": {
