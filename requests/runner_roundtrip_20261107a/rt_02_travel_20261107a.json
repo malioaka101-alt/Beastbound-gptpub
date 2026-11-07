@@ -1,0 +1,7 @@
+{
+  "id": "rt_02_travel_20261107a",
+  "campaign": "runner_roundtrip_20261107a",
+  "mode": "act",
+  "action": "travel fen",
+  "expectedHash": "940584bb37d193ea139018044c4c179ee969b18d6b166e7c268d66720ef69e3f"
+}
