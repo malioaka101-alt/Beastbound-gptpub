@@ -4,6 +4,68 @@
 const Crypto=require('node:crypto');
 const E=require('../engine.js'),C=require('./core'),W=require('./world'),Health=require('./unified'),Practice=require('./earned-practice');
 const digest=e=>Crypto.createHash('sha256').update(JSON.stringify(e)).digest('hex');
+
+// This is a small GM-to-engine bridge for *existing, visible* local terrain.
+// Natural-language intent is a note, NOT mechanical authority or evidence.
+// The engine owns feature, actor skill, DC, one-use ID and outcome. It never
+// adjudicates an unobserved obstacle, social consent, magic, or travel itself.
+const LOCAL_DC=Object.freeze({settlement:10,forest:12,fen:14,hills:14,ruins:17});
+const LOCAL_METHODS=Object.freeze({
+ footing:{attribute:'dex',skill:'survival',minutes:15,label:'Keep footing on visible local terrain'},
+ reading:{attribute:'wis',skill:'survival',minutes:10,label:'Read the visible local ground'}
+});
+function localSource(s,method){
+ const loc=E.LOCATIONS[s.world.location],task=LOCAL_METHODS[method];
+ if(!loc||!task||!Object.hasOwn(LOCAL_DC,loc.biome)||
+    typeof loc.description!=='string'||loc.description.length<18)
+  throw Error('Only an established local physical scene and supported mundane approach can ground this check');
+ return {loc,task,dc:LOCAL_DC[loc.biome],
+  source:'Original established terrain at '+loc.name+': '+loc.description,
+  observed:loc.description+' Current visible weather: '+s.world.weather+'.'};
+}
+function prepare(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).sort().join('|')!=='intent|method'||
+    typeof p.intent!=='string'||p.intent.trim().length<12||
+    p.intent.trim().length>180||typeof p.method!=='string')
+  throw Error('A local scene attempt accepts only a short original intention and an established mundane method, never a caller DC, skill, result or reward');
+ if(s.battle||s.encounter)
+  throw Error('A generic local check cannot interrupt an actual creature encounter or combat');
+ const status=s.table?.combatants?.player?.status;
+ if(status&&status!=='ok')
+  throw Error('The character cannot attempt routine terrain work while incapacitated or recovering');
+ const {loc,task,dc,source,observed}=localSource(s,p.method);
+ const intent=p.intent.trim(),all=Object.values(s.table?.sceneChecks||{});
+ // Rephrasing an unchanged attempt is a GM judgement, not permission to
+ // roll the identical task repeatedly in this exact source context.
+ if(all.some(x=>x.origin==='engine-local-scene'&&x.location===s.world.location&&
+    x.method===p.method&&x.source===source&&
+    x.intent?.toLowerCase()===intent.toLowerCase()))
+  throw Error('This identical local attempt already has a committed check; do not roll it twice');
+ if(all.some(x=>x.origin==='engine-local-scene'&&x.location===s.world.location&&
+    !x.used&&x.source===source))
+  throw Error('Resolve the existing pending local scene check before recording another');
+ const checkId=E.id(s,'scene');
+ C.event(s,'world',observed,{
+  origin:'engine-local-scene',checkId,location:s.world.location,
+  biome:loc.biome,method:p.method,intent
+ });
+ const eventIndex=s.log.length-1,event=s.log[eventIndex];
+ s.table||={};s.table.sceneChecks||={};
+ s.table.sceneChecks[checkId]={
+  checkId,origin:'engine-local-scene',method:p.method,intent,
+  attribute:task.attribute,skill:task.skill,dc,extra:0,
+  risky:false,minutes:task.minutes,label:task.label,
+  location:s.world.location,biome:loc.biome,worldMinute:s.world.minutes,
+  source,eventIndex,eventHash:digest(event),
+  observationEvent:structuredClone(event),used:false
+ };
+ return {prepared:true,checkId,method:p.method,
+  observed:loc.description,challenge:task.label,
+  noRollYet:true,noTimeSpentYet:true,noExtraSourceClaim:true,
+  scope:'Only this visible terrain; success cannot award movement, discoveries, property, supernatural abilities, or consent',
+  nextAction:'Resolve the original source-bound checkId once if the GM determines genuine uncertainty'};
+}
 function perform(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
     Object.keys(p).length!==1||typeof p.checkId!=='string')
@@ -31,7 +93,7 @@ function perform(s,p={}){
  const rank=C.int(s.player.skills[a.skill]?.rank,'earned character skill rank',0,5);
  const index=C.int(a.eventIndex,'prior witnessed event index',0,1000000);
  const liveScene=s.log[index],
-  archived=a.origin==='engine-habitat-survey'?a.observationEvent:null;
+  archived=['engine-habitat-survey','engine-local-scene'].includes(a.origin)?a.observationEvent:null;
  if(archived&&digest(archived)!==a.eventHash)
   throw Error('The archived original habitat observation was altered');
  const scene=liveScene&&digest(liveScene)===a.eventHash?
@@ -40,6 +102,25 @@ function perform(s,p={}){
     scene.details?.checkId!==id||a.eventHash!==digest(scene)||
     s.table?.sceneCheckEventsUsed?.[a.eventHash])
   throw Error('A one-use, correctly bound prior scene witness must establish this challenge');
+ // The source-bound GM bridge is only the original published local
+ // terrain. The freeform intent cannot choose difficulty, skill, rewards,
+ // NPC assent, equipment, hidden facts, hazards or a successful route.
+ if(a.origin==='engine-local-scene'){
+  const {loc,task,dc,source,observed}=localSource(s,a.method);
+  if(a.biome!==loc.biome||a.source!==source||
+     a.attribute!==task.attribute||a.skill!==task.skill||
+     a.dc!==dc||a.extra!==0||a.minutes!==task.minutes||
+     a.risky!==false||a.label!==task.label||
+     typeof a.intent!=='string'||a.intent.trim().length<12||
+     a.intent.trim().length>180||
+     scene.type!=='world'||scene.text!==observed||
+     scene.details?.origin!=='engine-local-scene'||
+     scene.details?.location!==s.world.location||
+     scene.details?.biome!==loc.biome||
+     scene.details?.method!==a.method||
+     scene.details?.intent!==a.intent)
+   throw Error('The attempted mundane check no longer matches the original visible terrain and source-owned challenge');
+ }
  // Engine-authored ecological scenes must still match their ORIGINAL
  // geographical cause and immutable local challenge, not just a copied tag.
  if(a.origin==='engine-habitat-survey'){
@@ -94,6 +175,9 @@ function perform(s,p={}){
  E.advance(s,a.minutes);
  W.finalizeTime(s,old);
  Health.sync(s,{source:'legacy'});
- return {...check,...practice,verifiedSceneCheck:id,elapsedMinutes:a.minutes};
+ return {...check,...practice,verifiedSceneCheck:id,elapsedMinutes:a.minutes,
+  ...(a.origin==='engine-local-scene'?{scope:'visible-local-terrain-only',
+   intent:a.intent,noAutomaticMovement:true,noUnknownDiscoveries:true,
+   noAutomaticAgreement:true,noGrantedItems:true}: {})};
 }
-module.exports={perform};
+module.exports={perform,prepare};
