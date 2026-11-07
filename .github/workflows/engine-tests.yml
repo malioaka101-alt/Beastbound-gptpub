@@ -77,6 +77,7 @@ jobs:
             tests/group-membership-runner.test.js
             tests/person-presence.test.js
             tests/emergent-people.test.js
+            tests/ordinary-life-npc-journey.test.js
             tests/emergent-careers.test.js
             tests/time-passage.test.js
             tests/civil-calendar-evidence.test.js
