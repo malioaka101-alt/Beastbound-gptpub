@@ -1,0 +1,7 @@
+{
+  "id": "rt_07_stale_20261107a",
+  "ok": false,
+  "applied": false,
+  "error": "Stale checkpoint; reload before processing this turn",
+  "stateHash": "fa974b5981669dcfcec78785ad0d472676b78442a3f23591074b01c3cf3c65fe"
+}
