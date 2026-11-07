@@ -12,6 +12,14 @@ A section is not marked complete just because a data field, broad lore paragraph
 
 **No invented progression:** no making up rank, mastery, forms, beast consent, currency, rare loot, species knowledge or combat rolls when an executable source procedure or evidence is unavailable.
 
+## Current foundation evidence reconciliation — 7 November 2026
+
+**Finish Line A is not complete.** The 108 source-registered tests on last verified merged main PR #138 ran green, but this is a bounded engine suite, not proof of all 57 original canon sections. The actual private runner round-trip was attempted on a strictly separate disposable campaign: GitHub Actions run **42405401477** failed before any job step and created no result file. Do not claim live private checkpoint delivery is proven or attempt in-world narration from that status request. Aerin remains untouched.
+
+Modern working source-backed resource work is wider than the oldest milestones below: native marsh reed **and** ironbloom gathering/returning, limited actual provisioner trade and optional person handoff, atomic inventory flow, original poultice at **both** Morrowfen Crossing infirmary and Lumenfall Annex clinic, and real bounded physical prototype build/repair all share earlier foundations. These are examples, not a complete universal manufacturing economy or a mandatory route through any one institution.
+
+**Priority order now:** A1 open player intent resolved honestly through the existing GM+verified action pipeline; A2 genuinely contextual NPC dialogue and witnessed commitments; A3 private Actions end-to-end save/continue smoke verification (currently blocked before runner steps); A4 removal of demonstrable artificial hours/authority overlaps; A5 evidence reconciliation. Follow [the dated foundation audit](FOUNDATION_COMPLETENESS_AUDIT_2026-11-07.md), not earlier recommendations to add another supplier or material mini-game. PR #140 has provisional A1/A2/A4 code that **must not be called verified or merged** until the required run executes successfully. Complete cosmology, later cultivation stages, law, economy and species-scale simulation remain Finish Line B goals, not excuses to block normal mundane play.
+
 ## Connected implementation streams
 
 1. **Cosmology, geography, causal history and living world (1–5, 11, 34, 44, 55):** strengthen existing seeded world and time ticks into local travel, known seasonal conditions, credible movement, independent news and measurable societal change. Avoid player-driven world creation by looking at a notice.
