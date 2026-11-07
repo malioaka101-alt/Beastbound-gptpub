@@ -4,7 +4,7 @@
 const A=require('node:assert/strict'),FS=require('node:fs'),
  Path=require('node:path'),OS=require('node:os'),
  E=require('../engine.js'),R=require('../rules'),W=require('../rules/world'),
- Realm=require('../world/simulation'),G=require('../world/emergent-people'),
+ Realm=require('../world/simulation'),Atlas=require('../world/atlas'),G=require('../world/emergent-people'),
  People=require('../world/person-presence'),Group=require('../world/emergent-groups'),
  Agency=require('../world/group-member-agency'),Turn=require('../scripts/chat-turn');
 const fresh=seed=>E.newGame({seed,name:'Causally Emergent Individual Test',path:'undecided'});
@@ -123,9 +123,28 @@ function reach(s,site){
  const copy=E.importGame(E.exportGame(s));
  A.deepEqual(copy.table.realm.emergentPeople.people[person.id],person);
  A.deepEqual(rule(copy,'metPeopleStatus').knownPeople,memories);
- A.throws(()=>rule(s,'speakLocalPerson',{
-   npcId:person.actorId,question:'What else do you know about this place?'
- }),/already given one short work conversation today/);
+ // The same question never rerolls someone's decision, and genuinely
+ // different follow-ups are not prohibited by an artificial once-a-day gate.
+ const sameBefore=E.exportGame(s),sameRng=person.rngState;
+ const repeated=rule(s,'speakLocalPerson',{
+  npcId:person.actorId,question:'What are you working on in this region?'
+ });
+ A.equal(repeated.alreadyAsked,true);A.equal(repeated.minutes,0);
+ A.equal(E.exportGame(s),sameBefore);A.equal(person.rngState,sameRng);
+ const followup=rule(s,'speakLocalPerson',{
+  npcId:person.actorId,question:'What else do you know about this place?'
+ });
+ A.equal(followup.met,true);A.equal(followup.noContract,true);
+ if(spoken.spoke){
+  A.equal(followup.minutes,6);A.equal(followup.answerKind,'unverified');
+  A.equal(followup.spoke,true);
+  A.equal(person.rngState,sameRng,'a new topic must not reroll consent');
+  A.equal(s.table.emergentConversations.records.at(-1).question,
+   'What else do you know about this place?');
+ }else{
+  A.equal(followup.alreadyDeclined,true);A.equal(followup.minutes,0);
+  A.equal(E.exportGame(s),sameBefore);
+ }
 }
 {
  const {s,w,person}=fixture(824002);
@@ -196,5 +215,63 @@ function reach(s,site){
    system:'social',operation:'metPeopleStatus',params:{}};
   A.equal(Turn.execute(file,passive).applied,false);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
+}
+{
+ // One existing person's context is enough to express *several* grounded
+ // influences without creating a personality tree or stereotype registry.
+ const {s,person}=fixture(824016);
+ reach(s,person.shift.location);
+ person.rngState=1; // Disposable, independently willing witness.
+ const npcId=person.actorId,oldWorld=E.exportGame(s);
+ const first=rule(s,'speakLocalPerson',{
+  npcId,question:'What work concerns you in this region?'
+ });
+ A.equal(first.spoke,true);
+ A.equal(first.answerKind,'individual-work');
+ A.ok(first.heard.includes(person.profession));
+ A.ok(first.heard.includes(person.purpose.slice(1)));
+ A.equal(first.noAutomaticTeaching,true);
+ A.equal(first.noContract,true);
+ const personRng=person.rngState,oldMinute=s.world.minutes;
+ const cultural=rule(s,'speakLocalPerson',{
+  npcId,question:'What customs and traditions are known around your home?'
+ });
+ const culture=Atlas.C[Atlas.P[person.birthSource.polity].culture],
+  home=Atlas.R[person.birthSource.regionId];
+ A.equal(cultural.answerKind,'home-culture');
+ A.ok(cultural.heard.includes(home.name));
+ A.ok(cultural.heard.includes(culture.customs.slice(1)));
+ A.ok(cultural.heard.includes('not a rule for how every person'));
+ A.equal(s.world.minutes,oldMinute+6);
+ A.equal(person.rngState,personRng);
+ const routes=rule(s,'speakLocalPerson',{
+  npcId,question:'What routes lead out of this place?'
+ });
+ A.equal(routes.answerKind,'public-routes');
+ for(const id of E.LOCATIONS[s.world.location].exits)
+  A.ok(routes.heard.includes(E.LOCATIONS[id].name));
+ const language=rule(s,'speakLocalPerson',{
+  npcId,question:'Which language is recorded for your origins?'
+ });
+ A.equal(language.answerKind,'individual-language');
+ A.ok(language.heard.includes(person.language));
+ const unverified=rule(s,'speakLocalPerson',{
+  npcId,question:'Tell me the private secret the council knows about my family.'
+ });
+ A.equal(unverified.answerKind,'unverified');
+ A.equal(unverified.noContract,true);
+ A.ok(!unverified.heard.includes('private secret'));
+ A.ok(!JSON.stringify(rule(s,'metPeopleStatus')).includes('funds'));
+ const after=E.exportGame(s),rng=person.rngState;
+ const repeat=rule(s,'speakLocalPerson',{
+  npcId,question:'What routes lead out of this place?'
+ });
+ A.equal(repeat.alreadyAsked,true);A.equal(repeat.minutes,0);
+ A.equal(E.exportGame(s),after);A.equal(person.rngState,rng);
+ A.ok(E.exportGame(s)!==oldWorld);
+ const copy=E.importGame(E.exportGame(s));
+ A.equal(copy.table.emergentConversations.records.at(-1).answerKind,'unverified');
+ A.equal(copy.table.emergentConversations.records.at(-1).question,
+  'Tell me the private secret the council knows about my family.');
 }
 console.log('Causally generated persons emerge without authored rosters or player sightings, live independently, can be met in actual scenes and freely choose affiliations across durable saves');
