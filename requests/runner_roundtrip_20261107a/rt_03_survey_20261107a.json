@@ -1,0 +1,9 @@
+{
+  "id": "rt_03_survey_20261107a",
+  "campaign": "runner_roundtrip_20261107a",
+  "mode": "rule",
+  "system": "world",
+  "operation": "habitatSurvey",
+  "params": {},
+  "expectedHash": "7b7687686004982af7d0071e6014a1cba7662d1991bf63f3cb37a466b4adf78e"
+}
