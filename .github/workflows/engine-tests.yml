@@ -90,6 +90,7 @@ jobs:
             tests/beast-agency.test.js
             tests/wild-lives.test.js
             tests/wild-reencounters.test.js
+            tests/exploration-beast-journey.test.js
             tests/wild-relations.test.js
             tests/wild-generations.test.js
             tests/origin-heredity.test.js
