@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Pinned current foundation decision — 7 November 2026, after public PR #7
+
+**Read [`docs/FINISH_LINE_A_READINESS_2026-11-07.md`](FINISH_LINE_A_READINESS_2026-11-07.md) first.** It supersedes the older PR #140, blocked private Actions and 108/111-test snapshots within this long historical file. Active code/checkpoints: **public** `malioaka101-alt/Beastbound-gptpub`; the RPG runs in **private Project chat**, not as a website. Public repository files and checkpoint data are **not** private secret storage. Public PRs #1–#7 are merged and [113/113 complete Node tests passed](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42422519596). Source-bound terrain check [live run](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42419882130) and the real eight-run `requests/ → results/ → saves/ → checkpoint → resumed original-roll recovery` disposable workflow are confirmed. Do not extrapolate complete Master Prompt parity from those verified slices.
+
+**Development and GM boundary:** Stop creating extra personality, relationship, animal, craft, teaching or power subsystems merely to handle ordinary freeform prose. The GM narrates and interprets individual beings, histories, cultures, free player intentions and simple no-roll situations; the original mechanics settle and save actual costs, uncertainty, consent, earned progression and other substantial outcomes. If a desired mechanical consequence is unsupported, preserve the intention honestly as unresolved rather than inventing numbers or arbitrary gates. Use a new foundation PR only for a demonstrated concrete play blocker or explicitly required missing canon capability.
+
+**Active campaign protection:** `saves/aerin_marsh.json` remains exact Git blob `72b1535307fba37e19d26122ba4eb80b46cea31c`; don't borrow Jory's history. The earlier 111-test notice below was correct at its time, but the current inventory is 113. Preserve original Master Prompt, user preferences and Table Rules authority over any summary.
+
+
 ## Current live runner verification and active repository — 7 November 2026
 
 **Active repository:** `malioaka101-alt/Beastbound-gptpub` (public GitHub repository used solely as a ChatGPT text-RPG engine and checkpoint store). Its historical private predecessor `malioaka101-alt/beastsbound-gpt` is preserved, not the target for new turns.
