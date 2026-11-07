@@ -1,5 +1,8 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+**Current Finish Line A priority directive (7 November 2026):** Read [`docs/FOUNDATION_COMPLETENESS_AUDIT_2026-11-07.md`](FOUNDATION_COMPLETENESS_AUDIT_2026-11-07.md) before recommending new mechanics. The ordered blockers are (A1) open freeform GM intent → existing source-verified outcomes, (A2) contextual real NPC conversation, (A3) an actual private Actions result/save/resume smoke test, (A4) removal of demonstrable artificial hours and duplicate rule authority, and (A5) bounded source parity accuracy. **Do not** add another trade, gift, plant, crafting, career, teaching or relationship subsystem just to expand coverage. PR #140 contains provisional A1/A2/A4 changes and is **not merged or full-suite verified** because GitHub Actions failed before running steps. The disposable A3 workflow run #42405401477 also failed before steps and produced no result. Never narrate or claim a new outcome for that request. Verified previous live Aerin checkpoint remains unchanged.
+
+
 ## Cross-system playability pass — 7 November 2026
 
 **User direction:** Stop repeatedly expanding one narrow mechanic. Prioritise useful interactions across an actual scene: truthful information → free choice → source-grounded NPC or beast activity → engine-confirmed consequence → safe checkpoint. Add no separate registry, role gate or general-purpose subsystem merely for architectural completeness.

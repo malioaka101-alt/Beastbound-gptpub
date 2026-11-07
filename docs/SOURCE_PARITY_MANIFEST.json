@@ -112,9 +112,11 @@
       "implementation": "coarse tested",
       "evidence": [
         "world/simulation.js",
-        "world/bestiary.js"
+        "world/bestiary.js",
+        "rules/reed-harvest.js",
+        "tests/native-habitat-material-restoration.test.js"
       ],
-      "unfulfilled": "Regional ecology now also responds to one genuine funded Naturalists field crew intervention after an authentic report and independent delayed visit; outcomes are bounded, allow failure/cancellation and never conjure species or broad repairs. Food webs, migration, habitat succession, resource dependencies, climate and broader species-driven feedback remain incomplete."
+      "unfulfilled": "Regional living ecology now tracks distinct finite Whisperfen reed and Ashwind ironbloom plants: real extraction reduces physical stock, verified native planting uses an actual carried unit and one real Survival check, and only later independent world ticks may establish growth when habitat permits; source-backed guild field crews also sometimes improve limited indicators. Detailed food webs, species reproduction, meteorology, succession and wider interdependent ecosystem dynamics remain incomplete."
     },
     {
       "id": 12,
@@ -352,9 +354,13 @@
       "implementation": "partial",
       "evidence": [
         "world/simulation.js",
-        "rules/unified.js"
+        "rules/unified.js",
+        "rules/equipment.js",
+        "rules/material-handoffs.js",
+        "tests/live-provisioner-trade.test.js",
+        "tests/voluntary-person-material-handoffs.test.js"
       ],
-      "unfulfilled": "Regional indices and Scales ledger work; household property, contracts, individual prices and trade credit missing."
+      "unfulfilled": "An actual source-owned Orrin provisioner sells limited real stock for Scales; player-owned canonical goods can be voluntarily offered to a genuinely present human and accepted goods enter that person's private custody rather than becoming market stock. Broader production, livelihoods, property, bargaining, wage funding, contracts, credit and regional consumer demand remain incomplete. The 08:00–18:00 gift cutoff is still an acknowledged artificial rule on main until its separate guarded repair is merged."
     },
     {
       "id": 36,
@@ -411,9 +417,11 @@
       "title": "Natural language and player personality",
       "implementation": "GM-led",
       "evidence": [
-        "reference/Beastbound_Table_Rules.md"
+        "reference/Beastbound_Table_Rules.md",
+        "scripts/chat-turn.js",
+        "tests/chat-runtime.test.js"
       ],
-      "unfulfilled": "Natural language actions require careful interpretation; no autonomous prose engine can validate every choice."
+      "unfulfilled": "The GM remains responsible for open-ended natural intentions, contextual feasibility and honest narration. The current private runner still depends on exact-match verbs/regular expressions and may fall through to legacy command handling, so arbitrary reasonable acts do not yet have a fully reliable source-bound adjudication bridge. The pending PR #140 repair is not production-verified."
     },
     {
       "id": 42,
@@ -421,9 +429,12 @@
       "implementation": "partial",
       "evidence": [
         "world/notables.js",
-        "rules/agendas.js"
+        "rules/agendas.js",
+        "world/person-presence.js",
+        "rules/npc-conversations.js",
+        "tests/npc-conversations.test.js"
       ],
-      "unfulfilled": "Autonomous professional progression and agendas; full long-term personal goals and dialogue memory partial."
+      "unfulfilled": "Independent people and professionals can pursue sourced work and agendas and offer or decline some real cooperation, but contextual answer-and-response dialogue remains mostly bounded by authored topics; longer personal memories, genuinely nuanced speech and autonomous durable promises remain partial. Improvements being tested in PR #140 must not be treated as merged gameplay."
     },
     {
       "id": 43,
@@ -442,9 +453,12 @@
       "evidence": [
         "rules/world.js",
         "world/simulation.js",
-        "tests/living-world.test.js"
+        "tests/living-world.test.js",
+        "world/person-presence.js",
+        "rules/wilderness-camp.js",
+        "tests/time-passage.test.js"
       ],
-      "unfulfilled": "Overnight sleep now advances independent world sixday/month ticks in addition to real hours, and an open-country scout can find a temporary legitimate campsite through source-grounded terrain and weather. Dynamic daily weather, broader NPC personal timetables and many travel hazards remain partly scene-led."
+      "unfulfilled": "Actual clock, daylight, living-world sixday/month ticks and verified settlement/campsite rest exist. Authored public professionals have witnessed daytime availability; independent workers and named people have source-backed day schedules, not complete hourly personal routines. Weather variety, local transport, exposure, daily economics and many travel hazards remain partial."
     },
     {
       "id": 45,
@@ -502,9 +516,16 @@
       "implementation": "partial",
       "evidence": [
         "rules/unified.js",
-        "engine.js"
+        "engine.js",
+        "rules/physical-work.js",
+        "rules/reed-harvest.js",
+        "world/simulation.js",
+        "rules/field-crafting.js",
+        "rules/creation-prototype.js",
+        "tests/multi-habitat-material-gathering.test.js",
+        "tests/shared-physical-work-journeys.test.js"
       ],
-      "unfulfilled": "The common Lumenfall poultice now permits repeat genuine batches when independently obtained reagents, stamina, source-authored bench and time exist, without an arbitrary daily attempt gate. Separate original craft rolls and resources are stored in append-only evidence while legacy saves retain their first daily record. Diverse recipes, realistic materials quality, equipment maintenance/durability, broader tools, rare provenance and flexible safe workspaces remain unfinished."
+      "unfulfilled": "Atomic item conservation, source-owned limited goods, real purchase and handoffs, two authentic habitat material sources, native replanting, original poultice craft at either the Lumenfall Annex clinic or Morrowfen Crossing infirmary, plus bounded owned reed-indicator invention/repair share physical work and honest checks. All other recipes, diverse material properties and quality, comprehensive tools, equipment maintenance, working rights and broad creative object design remain partially GM-led or unavailable."
     },
     {
       "id": 51,
@@ -512,9 +533,12 @@
       "implementation": "tested save protocol",
       "evidence": [
         "scripts/chat-turn.js",
-        "tests/chat-runtime.test.js"
+        "tests/chat-runtime.test.js",
+        "scripts/process-pending.js",
+        ".github/workflows/private-chat-turns.yml",
+        "tests/private-turn-receipt.test.js"
       ],
-      "unfulfilled": "Turn IDs, journal/pickup work; detailed conversational knowledge and every ongoing agreement not automated."
+      "unfulfilled": "Private file-based turn IDs, original check receipts, atomic local saves, replay and checkpoint contracts are unit-tested. The disposable real GitHub Actions status round-trip attempted 7 November 2026 (run 42405401477) failed before any reported job steps and produced no result, so actual private Actions delivery and cross-session pickup are NOT yet end-to-end verified. The active Aerin checkpoint was not changed."
     },
     {
       "id": 52,
@@ -542,9 +566,10 @@
       "implementation": "GM-led",
       "evidence": [
         "docs/PROJECT_CHAT_INSTRUCTIONS.md",
-        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md",
+        "scripts/chat-turn.js"
       ],
-      "unfulfilled": "Freeform choice and no forced menus enforced narratively, not by simulated-world AI."
+      "unfulfilled": "Player freedom is a governing GM practice, not a whitelist of mechanical commands or automatically simulated intent; old parser phrase limitations and incomplete source-backed mechanical adjudication remain Finish Line A blockers. New PR #140 attempts a source-safe unresolved-intent handoff but is not merged or full-suite verified."
     },
     {
       "id": 55,
