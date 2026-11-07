@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+# Scratch files outside the versioned private saves/ folder
+campaign.json
+campaign-*.json
+campaign_*.json
+*_campaign.json
+random_campaign*.json
+beastbound_save.json
+*.local.json
+*.save.json
+# saves/*.json are intentionally versioned in this PRIVATE repo for chat resumption.

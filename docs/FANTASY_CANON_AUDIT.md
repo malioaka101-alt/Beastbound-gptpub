@@ -1,0 +1,89 @@
+> **Historical v0.9 audit:** See `docs/SOURCE_TO_ENGINE_AUDIT_V11.md` for the current full 57-section verification. In v1.1 the evolution event can no longer succeed as a nametag-only result: a pre-established validated whole-form profile and sourced Vigor/Will are required, and biological/ability changes apply atomically. This file's older note that the result still awaits a profile is outdated. The world and many high-level subsystems remain partial.
+
+# Beastbound Realms — Original-prompt and evolution canon audit (v0.9)
+
+**Private ChatGPT Project fantasy text RPG.** This is a traceable coverage review, **not** a declaration that the complete 57-section Master Prompt has been implemented. Source order: the original `reference/Beastbound_Realms_Unified_Master_Prompt.md` supplies world foundations and priorities; the user's explicit *System Additions*, particularly `00b §4 / 04 §§6.6–6.8`, **revise** the presentation and time conditions of beast evolution; the Table Rules govern scene delivery. Aerin's established facts trump a new worldbuilding guess. Jory's specific story is never imported into Aerin's campaign.
+
+## Overall verdict
+
+**Yes, this must remain a high-fantasy setting, not a political-economy simulator with animal sprites.** The Master Prompt's §1 explicitly calls for kingdoms, empires, dragons, gods, spirits, dungeons, lost civilisations, enchanted forests, magical beast societies, other planes and relics. It also calls for ecology, finance and lawful society: these are the **causes and consequences around the magic**, not a replacement for it. Every significant locality needs recognizable wonders, dangers, traditions, and potential adventure, in addition to farms, weather and guild business.
+
+The tested v0.8 engine supplies six continents, 24 polities, 29 regions, 48 institutions, trade and ecological clocks, a deterministically addressable *capacity* of 239,616 species and 718,848 forms, 48 professional tracks, and private/public events. This audit adds **14 grounded mythic sites, six cultural religious traditions, five realm teachings, and regional fantasy pressures** in `world/mythic.js`. A site's actual sealed energy and ward condition change independently with time; the public API gives only ordinary cultural history and observations. This is a **working first layer**, not a full cosmology or a complete campaign's content.
+
+### Original Master Prompt §1–57: actual coverage
+
+Legend: **Working** means tested source-backed code for that aspect, **Partial** means some code/lore and essential rules missing, **GM** means supported as a storytelling instruction but not enforced mechanically, **Open** means not implemented and must not be invented by a roll. No row alone guarantees the entire section.
+
+| Master sections | Coverage in private chat | Important boundaries / next work |
+| --- | --- | --- |
+| **§1** Premise | **Partial**; entire society has beast-economy, rights, ecology and magical institutions | More everyday magical objects, independent beast settlements, careers and tension between ordinary and wondrous life in actual scenes |
+| **§2** Geography | **Partial**; linked six continents, 29 biomes, 19 trade routes, regional rights and sites | Travel times, maps, sea passages, climate transitions, local dungeons and settlements not all plotted |
+| **§3** Cosmology and planes | **Partial**; five realm *teachings*, Vael/Origin Pattern, rift and soul traditions | Universe origin, actual divine limits, afterlife, realm-entry procedures and authoritative cosmological truth **not settled**. Different faiths' claims are not instant fact |
+| **§4** History | **Partial**; treaty eras, Ash Years, pilgrim traditions and ruins | Competing source records, ancient magic conflicts and historical relic provenance need a documented chronology |
+| **§5** World simulation | **Working coarse layer**; saved sixday/month politics, trade, institutions, ecology, mythic wards | Not citizen-by-citizen simulation, tactical war, automatic prophecy or complete government law; sealed changes do not automatically become player knowledge |
+| **§6** Huge bestiary | **Working generative capacity / Partial ecology**; stable taxonomy and habitat-limited sampling | The large count is **addressable slots, not hand-authored fully distinct monsters**; rare magical life needs authored species profiles when discovered |
+| **§7** Individual beast records | **Partial**; individual relationships, condition, origin, energy and legacy species | Long-lived personal memories, offspring, body parts, adaptive injuries and all magical anatomy are not yet unified |
+| **§8** Grades and potential | **Partial**; grade/level/potential and branch gates available | Cap, physical growth and exceptional lineage outcomes still mixed across the historical prototype and newer rules |
+| **§9** Abilities | **Partial**; authored abilities, spell/Qi budgets, Wards | Non-combat abilities, full cooldown and load rules, spell creation and ecological magical functions need evidence and source-specific rules |
+| **§10** Evolution | **Working event scaffold / Partial full forms**; Maturity, signs, research, catalysts, Cruci­bles and actual grade-based event rolls | Future species anatomy, stats and abilities must already be sourced or designed and recorded before the successful form is played; no invented bonuses, outcomes or branch truth |
+| **§11** Ecology | **Working coarse layer**; biome pools, carrying capacity, migration and stress | Individual trophic networks, reproductive population histories and site-specific life cycles still need authored detail |
+| **§12** Beast intelligence/society | **Partial**; sapience classes, beast polities, rights and consent | Language, real beast government/agents, teaching, diplomacy and independent migration decisions need deeper scene/agent records |
+| **§13** Taming variety | **Partial**; voluntariness and rejection rules, interaction checks | Multi-approach species-appropriate tame/trust training, avoiding forced contracts, still partly adjudicated |
+| **§14** Bonds | **Working numeric foundation**; twelve dimensions, meaningful behaviour events | Relationship memory, fractures, practice-specific consequences and nuanced consent still depend on GM adjudication |
+| **§15** Contracts and rights | **Partial**; willingness, load, sapience consent and active/dissolved contracts | Regional legal enforcement, contract abuse remedies, penalties and specialist contract forms remain partial |
+| **§16** Synchronisation | **Partial**; prerequisites, stage readiness and bonuses | Source-specific feedback risks, recovery, shared techniques and genuine combined evolution not complete |
+| **§17–19** Human supernatural origins and distinct paths | **Partial**; Origin Pattern and separate arithmetic calculators | Never merge all cultivation paths into a universal level; practical learned technique lists and cross-system backlash need verified procedures |
+| **§20** Meridian and 108 Gates | **Partial**; Gate records and derived formulae | Complete weekly Gate-opening/forced-current sequence, deviation tables and all nine stage tests remain unfinished in JS |
+| **§21** Arcane Circles | **Partial**; spells, costs, casting/DC and basic circles | Circle construction, spell load, diagram failure, independent magic research and construction rites incomplete |
+| **§22** Soul Cultivation | **Partial**; soul stages and ethics, public spirit traditions | Full soul techniques, living-soul identity, death interaction and feedback tables open |
+| **§23** Body Refinement | **Partial**; stages/tracks | Full injury/physique integration, surgeries and unique body adaptations open |
+| **§24** Beast-Origin Arts | **Partial**; capacity, potential, rejection arithmetic | Multi-week rejection aftermath, ethical sampling and permanent changes need full signed-in gameplay records |
+| **§25** Rift Practice | **Partial**; stages, archives, mapped rift sites | Actual anchor placement, safe realm transit, pocket realms and dimensional failures open |
+| **§26** Specialist disciplines | **Partial**; institutional and research identities | Distinct crafting/alchemy/divination and profession techniques should not borrow generic combat mechanics |
+| **§27** Sacred/divine traditions | **Partial**; six culturally situated traditions, shrine sites | Gods are independent; mechanically binding miracles, worship benefits and divine power limits **not** implemented |
+| **§28–31** Human evolution, identity, independence | **Partial / GM**; stages and personhood, no forced beast route | Full human evolution crisis and transformations, independent career/power equivalence and anti-taming philosophies need more source-backed mechanics |
+| **§32–33** Professions, schools, guilds | **Partial**; 48 institutional entries, professionals training off screen, qualifications | Service fees, exams, instruction, mastery, rivalries and changing institutional access need play-specific consequences |
+| **§34** Kingdoms, noble families | **Partial**; 24 governments with stability, legitimacy, diplomacy and war indicators | Houses, claimants, actual succession, treaties, military logistics and interacting named rulers open |
+| **§35** Economy | **Working indices / Partial play**; prices, route disruptions, work/contracts, money | Trade indexes are **not** public stall prices; property, debts, wages, production chains and contracts need real local evidence |
+| **§36** Law | **Partial**; sanctuary/personhood codes, jurisdiction differences | Trials, protected status, sanctions, testimony and legal consequences remain GM-driven |
+| **§37–38** Competitions/ratings | **Partial**; prototype events and independent Concord Rating | Full licencing, referee adjudication, schedules, promotion/relegation, rankings and stakes open |
+| **§39–43** PC, NPC, beasts and speech | **GM + Partial**; freeform action, individual motives, awareness, no player mindreading | Persistent relationships, remembrance of dialogue, gossip provenance, scene attendance and distinct voices require scene-ledger work |
+| **§44–45** Calendar and checks | **Working core**; 365-day calendar, validated d20, five-rank skills, time and saved RNG | Action difficulty and scene stakes are GM adjudications; not every ordinary act earns a roll |
+| **§46** Combat | **Working wound exchange / Partial depth**; attack, nonlethal, retreat, de-escalation, Mag­nitude/Wards | Positioning, magical terrain, full spell legality, AI tactics and lasting-injury medicine unfinished |
+| **§47–48** Quests, training, progression | **Partial**; quests, seasons, research, bounded progression, NPC careers | Full discipline milestones, livelihood/travel schedules and potential-specific training not yet source-complete |
+| **§49–50** Health, gear, crafting | **Partial**; authoritative wounds, balm, stamina, inventory and costs | Complex surgery, critical lasting injury and material provenance/forging not fully implemented |
+| **§51–52** Continuity and interface | **Working base**; stable save ledger/turn IDs, journal and 34-character gallery HUD | Rich ceremonial animation is **presentation guidance** provided by the chat interface, not rendered automatically by game-state JS; long-term dialogue knowledge ledger partial |
+| **§53–54** Prose and player freedom | **GM rules**; natural language, no forced options, restrained manhwa dramatic reveals | Not enforceable by pure JS; avoid generic menus and player-character mindreading |
+| **§55–57** World-before-character, start and governing priorities | **Partial**; existing Aerin opening at Morrowfen, six-continent atlas and ongoing independent world | The world is an extensible foundation, not a claim that every kingdom/site/species/soul rule was finished before play |
+
+## Evolution: what the user *actually revised*
+
+The original Master Prompt §10 requires branching, anatomy changes, risks, consent, hidden lines and no level-up-only evolution. It remains binding. **The later user-approved System Additions** (*Scene Style Reference §4; Evolution House Rules §§6.6–6.8*) specify **how that evolution is understood and experienced**:
+
+1. **Magic grown from biology:** a living **Origin Pattern rewrites itself with Vael**. Changes are foreshadowed by magical energy, elemental leakage, magical organ development and a second luminous soul-outline when Soul Sight allows it—not just an animal getting bigger.
+2. **Maturity, not centuries of literal age:** all age/time branch requirements become Maturity years (base ×1, accelerants up to ×10), with Ripening, Pattern Echo, a real Crucible and a documented parental bloodline head start. Biological age still affects lifespan. This is a deliberate house-rule revision, not licence to skip level/potential/catalysts.
+3. **Humble-to-legendary paths:** a common creature can have unknown mythic branches. Legends, shrine records and fossils are *clues*; they are not permission to invent a new branch after seeing a successful roll. A branch's feasibility and special requirements are set in hidden GM truth before research checks.
+4. **The tamer collaborates; the beast chooses:** preparation, mastery, diet, location and catalysts make a chosen route possible. An S2 protected being's guardian and wishes matter; S3+ informed consent cannot be replaced by a relationship bar. A person doesn't own the beast's evolution.
+5. **The Evolution Event is a real risk:** target Grade determines 1/3/5 checks at DC `10 + 2 × Grade` plus branch/known-unmet modifiers, with possible stalls, damage, permanent branch closure or a dangerous twisted form. **Do not roll twice**, including on resuming the same GitHub turn. Severe failure may need a source-backed wound/form ruling.
+6. **Presentation is ceremonial, earned, and source-bound:** first describe the actual new body and Vael spectacle; then optionally show the player-approved animated fantasy reveal (or static text fallback) with **only confirmed** grade, form, abilities and costs. Never imply an ability or new species profile was earned because the animation looks impressive.
+
+The independent JS path now includes `evolution.crucible`, `evolution.signs`, `evolution.event`, `research.mythLead`, plus previously supported `evolution.register`, `advance`, `ripening`, `patternEcho`, `status` and `eligibility`. Branch types include `standard`, `environmental`, `dietary`, `bond-born`, `rare`, `hidden` and `legendary`. A documented route only bypasses innate potential after its special conditions are genuinely met. A failed attempt or a Twisted outcome must not fabricate stats or force a specific monster design. **Complete character-form sheet application is still pending.**
+
+## Fantasy experience requirements for every Project chat
+
+- Let readers encounter **ward-lit ferries, religious vigils, enchanted forests, colossal beasts, forbidden ruins, magical crafts and extraordinary cultures** as normal parts of life, but only where the location and in-world evidence support them. Do not give Aerin a legendary companion, prophecy or magical treasure just to show fantasy off.
+- Anchor the unusual in geography and culture: a frost wyrm's eyrie has treaties and food needs; a pilgrimage shrine has priests, repairs and danger; a rift academy has wards and students. Politics/economy create consequences of those wonders; they must not replace the wonders.
+- Presume **distinct magical disciplines**, not that every high-level ability is elemental spellcasting. Some characters achieve greatness without a beast partner.
+- Give the player real freedom to be a scholar, ranger, farmer, cultivator, breeder, diplomat, artisan, healer, beast advocate, adventurer or ordinary citizen, with independent NPCs doing those things too.
+- The simulation ticks quietly and may generate *leads*, not obligations. Important ancient sites and unknown routes are revealed through observation, rumours, research and dangerous journeys. Sealed lore stays sealed until discovered. No system event may prewrite player emotions or decisions.
+- A scene still uses short sensory narration, actual inline dice only when needed, the compact 34-column HUD and factual Δ changes. The larger animated awakening panel is a rare **verified** milestone, never the default.
+
+## Next source-grounded priorities, in order
+
+1. **Resolve evolved-form state atomically**: establish an actual target species/profile, anatomy, stats and learned abilities before the rite; on success apply a verified transformation, preserving memory and consent. This is crucial before any actual player beast evolves.
+2. **Implement the major power paths end-to-end**: Meridian Gates/forced current/quality and backlash, Arcane construction, Soul/Body/Rift track crises and failed rites, with real resources and recovery.
+3. **Deepen cosmology and fantasy encounters**: specify GM-sealed realm travel/afterlife/divine restrictions and magical site encounters with credible non-combat resolutions before claiming planes are fully playable.
+4. **Persistent agent and scene continuity**: named rulers, beast sovereigns, individual institutions, promises, relationships, quests and consequential rumours; do not simulate every person.
+5. **Complete cultures, law, logistics and economy** in play only where relevant: named courts, wages, festivals, training fees, housing, cross-country travel and realistic ecosystem impacts.
+
+The original Python files were used as **reference, not copied**. The original `turn.py` and `bb_bench.py` are not available, and no implementation should be described as matching them. The master engine and new world remain in the private repository only; Aerin's save has not been advanced by this audit.

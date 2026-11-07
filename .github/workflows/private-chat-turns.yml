@@ -1,0 +1,34 @@
+name: Private Beastbound Chat Turns
+# Migration guard: original push trigger restored after data import.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: beastbound-private-turns
+  cancel-in-progress: false
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Full safety/mechanics tests run only on source-code changes in engine-tests.yml.
+      # Per-turn re-running tests wasted Actions start-up and user wait time.
+      - name: Process private turn requests once
+        run: node scripts/process-pending.js
+      - name: Checkpoint results to private repository
+        run: |
+          git config user.name 'beastbound-turn-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add saves/ results/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Checkpoint private Beastbound chat turn results'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

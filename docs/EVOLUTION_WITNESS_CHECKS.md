@@ -1,0 +1,9 @@
+# Evolution Crucible and witnessed sign interpretation
+
+In private campaign play, the live `evolution.crucible` and `evolution.signs` actions may **not** accept caller-chosen Maturity years, scientific truth, Soul Sight flags, DCs, dice modifiers, locations or narrative sources. The pure formulae in `rules/progress.js` are reference calculations, not standalone playable power grants.
+
+For a **Crucible**, the world must already have a source-dated `beast.crucibleAssessments[branchId][sceneIndex]` entry naming the current individual, its real species/form and branch, the SHA-256 digest of a genuinely recorded relevant story/combat/world/progress event, an observed source and **1–3 independently adjudicated years**. The request supplies only branch key and earlier scene index. The event is credited once, across the beast's branches as already enforced by the existing Crucible ledger. No new dice are rolled and no ancient event is fabricated.
+
+To **recognise signs**, an actual recently witnessed scene and a precommitted `beast.evolutionSignObservations[branchId]` record must match the same individual and current form, the scene's hash, physical location and known distance, plus the observed difficulty (DC 12–18). The engine calculates a real Wisdom + earned Beastlore/Faith & Cosmology check. A source-established learned Soul Sight technique may add +1 within ten metres. A synchronization bonus requires a **matching saved partner ledger**, not a high `beast.syncStage` number alone. The witnessed scene is interpreted once and the actual observation costs ten in-game minutes. Hidden branch prerequisites never appear in player-facing results.
+
+**Limits:** no mechanic currently auto-authors all qualifying dramatic events, unlocks Soul Sight, or maps every evolutionary sign in the ecology. These records must come from trusted, prior GM/world observations, not a fresh chat action. Incomplete evidence fails closed; this is not full 57-section parity.

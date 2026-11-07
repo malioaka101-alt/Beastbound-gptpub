@@ -1,0 +1,75 @@
+> **Historical v0.7 audit:** Superseded for current mechanical coverage by `docs/SOURCE_TO_ENGINE_AUDIT_V11.md` and `docs/SOURCE_PARITY_MANIFEST.json`. This older report describes limitations as they were before the v1.1 multidomain character profiles, early path training, atomic evolved-form application and safe local bridge. Its older claims are not authoritative if a later live test contradicts them.
+
+# Beastbound mechanics audit — private chat-first RPG (v0.7)
+
+**Authority:** `reference/Beastbound_Realms_Unified_Master_Prompt.md` (the world's canon and top priority), `reference/Beastbound_Table_Rules.md` (chat presentation and world-realism constraints), `reference/Beastbound_System_Additions.md` (later documented house rules). Independently implemented JavaScript is verified against the user's uploaded `bb_*.py` behaviour where those references exist. The uploaded Python modules are **not** copied into this repository. The Jory Larkin examples and campaign facts do **not** become facts in Aerin's campaign.
+
+**Scope:** A private text RPG played *in this Project's chat*, with GitHub Actions as a mechanical executor/checkpoint store. There is no website, public hosting, or app release. This audit distinguishes **verified**, **partial** and **not yet implemented** rather than calling a prototype feature complete.
+
+## Canon-to-engine mechanics matrix
+
+| Canon / table section | State now | Observations and next step |
+|---|---|---|
+| Master §§1–5: independent civilisation, cultures, history and world motion | **Partial** | World time, weather, market pressure, guild activity and off-screen agenda clocks exist. Actual states/cultures/history and recurring NPC goals are not densely instantiated. Create a small set of seeded, cause-driven regional records per campaign as the world is explored; don't simulate everyone. |
+| §§6–12: bestiary, ecology, species rarity versus grade, beast individuality and agency | **Partial** | Habitat-based species encounters and deterministic taxonomic hypotheses exist. 311,040 addressable combinations are *not* 311,040 authored, research-verified species. Ecology lacks persistent predation/population webs, reproductive cycles and conservation status. Keep individual beast IDs and observations; don't manufacture impossible habitats. |
+| §§13–16: multiple beast relationships, reciprocal contracts, synchronisation | **Partial, strengthened** | Dimensions, contract Load, willingness, communication limits, care/fracture and numeric Sync thresholds work. A successful seal now updates the actual beast and partner ledger. The old instant `invite` action is blocked in private chat. Contract terms, command consent and Sync failure feedback need deeper scenes and rules. |
+| §§17–31: human Origin Pattern, six+ independent disciplines, evolution, potentials | **Partial** | Stage names, Meridian/Arcane formula calculators, spell/technique costs and evolution Maturity exist. Source-equivalent advancement for all stages, cultivation milestones, failure tables, human evolution and integration rejection remain incomplete; **do not turn these into one generic level**. Higher stage abilities must be demonstrated before use. |
+| §§32–36: professions, economies, legal status, organisations | **Partial** | Paid contracts, basic craft, Talons and source-backed Scales accounting exist. Guild/clinic access and actual time-dependent scarcity, liabilities, law/contract terms and taxes require more event records; no generic loot shop should replace a functioning economy. |
+| §§37–38: competitions, exams, Concord Rating and separate rankings | **Partial** | Several prototype events and separate rankings, plus independent Concord Rating arithmetic. No substantive judge feedback, professional licensing appeals, qualification period scheduling or cross-rank conflation guard beyond the rulebook. |
+| §§39–43: freeform PC, NPC individuality, knowledge and beast personhood | **Partial** | Random family and provenance-aware NPC facts exist; the chat narrator can play an individual. The prototype NPC pool remains small with repetitive canned dialogue. Off-screen agenda clocks are now available without leaking sealed results. Avoid thought-reading the player or implying a wild beast's loyalty. |
+| §§44–45: time and Beastbound d20 | **Verified core, incomplete adjudication** | Actual d20, +5/−5 natural outcomes, five-rank ×2 skill bonuses, degrees, opposed checks, slow world progression, and 365-day Maturity implemented. Risk must be real before rolling; `mode:check` uses known character attributes/skills. Trivial and impossible actions should be resolved by fiction, not dice. |
+| §46: tactical non-lethal combat | **Unified in private chat, partial tactical depth** | All *new chat* combat uses `table.combatants` wounds; `combat.begin/exchange` requires a known encounter, verified beast stats, predeclared independent enemy plan, and supports attack, defence, withdraw, de-escalation. Wards, Magnitude, stamina, serious/critical injury and reaction/brace mechanics work. Legacy HP is historical/read-only; injured old saves require a recorded migration ruling. Detailed position, cover, ability cooldowns, initiative and duel/arena scoring remain incomplete. |
+| §§47–50: opportunities, training, recovery, inventory and crafting | **Partial** | Guild contracts, deadlines, research, basic crafting and sourced healing are present. Skill PP now follows the canonical costs/rank limit with an explicit 4-PP-per-sixday anti-spam *house ruling*. The old prototype Meridian training is not the full 108-Gate progression. A Light wound can mend with a rest or balm; Serious/Critical wounds do not disappear from an HP potion. |
+| §§51–54: ledger, information discipline, 34-character text panel, free speech | **Verified presentation / partial memory** | `panels.js` autogenerates 34-character text boxes; wound status is shown but hidden NPC wound pools are not. Idempotent turn IDs no longer expire after 150 turns; conflicting reused IDs are rejected. The scene pickup, GM-only knowledge, dialogue-only accumulation, NPC memory and full `/panel` variants still need polish. |
+| §§55–57: world-first character setup and player freedom | **Established principles, only partly enacted** | Aerin starts as an ordinary fieldworker at Morrowfen, without a forced partner or prophecy. Many freeform actions require GM adjudication plus a structured engine command; rejected commands must not be treated as a failed attempt in the fiction. |
+
+## Fixes in this sweep
+
+1. **Health authority:** `rules/unified.js` creates the authoritative wound track from an undamaged legacy save, mirrors stamina, guards against HP-only changes, and requires an explicit explanation to migrate an old injured save. `rules/combat.js` and `rules/encounter.js` handle new combat. The legacy engine can no longer use its HP combat, healing or auto-bond routes after migration.
+2. **Recovery with stakes:** wound recovery and healing balm have bounded effects, and wilderness sleep needs an established safe shelter. A Serious or Critical wound is not silently restored by eight hours or legacy HP healing.
+3. **A text scene, not a button battle:** `combat.begin` requires a real encountered beast and a verified stat profile; `combat.exchange` receives both sides' intentions *before* dice, offers retreat/parley, and advances the clock. It does not automatically convert every encounter into a fight.
+4. **Knowledge discipline:** visible enemy state uses observable descriptors. Off-screen agenda records tick only when sixdays or months pass and are disclosed via witnessed events, reports, letters or gossip; private clocks never leak through the public status route.
+5. **Progression reconciliation:** normal checks use rank ×2, skill PP has source cost thresholds and requires Mastery/Grand Trials; Maturity uses 365 days/year. The anti-grind cap of 4 PP per skill per sixday is a **new conservative house ruling**, not a direct quote from the Python engine.
+6. **Correct time behaviour:** chat actions, training, research, travel, rest and explicit world advances share the off-screen calendar tick ledger, so opportunities move when time passes, not only when the user requests a world simulation.
+7. **Honest repeat protection:** the immutable per-save turn ID ledger retains old entries indefinitely; reusing an ID with different input is an error. The Node bridge now uses the same protected handler as GitHub Actions instead of the legacy damage dispatcher.
+8. **Money and research:** Scales can be spent without rounding away partial Talons. New research accidents apply actual wound steps rather than modifying the obsolete HP field; source-backed research truth remains fixed before rolls.
+
+## Text RPG: design decisions and trade-offs
+
+- **Keep one meaningful decision per beat.** A situation is described in prose; the player responds freely. The GM identifies the relevant established rules and runs *one verified turn*, not an artificial multiple-choice tree.
+- **Protect pace.** Don't roll when there is no credible obstacle. An ordinary talking scene needn't invoke the runner until a checkpoint, as the Table Rules specify. Important rolls appear inline and the engine generates one 34-character panel; only include an extra section if it changes the next decision.
+- **Spend detail on consequences, not meters.** Most jobs, relationships and travel should create a few understandable stakes: time, money, wound risk, loyalty, ecological harm, reputation, or a dated obligation. No giant visible spreadsheet every turn.
+- **Independent beast agency is not a charisma check.** S2 preferences and S3+ informed refusal matter even at high trust. A bond and a contract are different; Sync is not a free combat multiplier.
+- **Unknown science stays unknown.** A research project's feasibility and requirements must be established before the first check and cannot be chosen based on the roll. GM-only notes in a private GitHub repo are *not cryptographically hidden from the repository owner*; the model must still withhold them from normal play output.
+- **Incomplete is not impossible.** For an unsupported but plausible action, the GM may produce a canon-compatible ruling and log it, then implement a tested operation. The engine must never silently improvise a number or a creature power.
+
+## Recommended next additions (prioritised; not implemented or claimed as implemented)
+
+**P0 — Before complex fighting or high-tier cultivation:** Finish the same wound system for partners and beasts, including lasting injuries, active position/terrain/cover, initiative and rescue; add source-verified Meridian Gate weekly tracks and breakthroughs. Keep alternate powers on their separate ladders. This is a *coverage limitation*, not licence to roll a generic universal cultivation check.
+
+**P1 — Strongest gameplay value:** A persistent scene ledger (`present agents`, `player-known clues`, `last spoken promises`, `time`, `location`, `stakes`) with `/panel people`, `/journal`, and a `knowledge provenance` check; seed a few independent NPC agenda clocks per region, not the whole continent. Link species sightings to an ecological observations journal so discoveries are earned.
+
+**P2 — Long-campaign support:** Add travel logistics (camp, weather, supply, injuries), barter and qualifications, research tool quality and ethical fallout, nonviolent careers and profession-specific opportunities, and turn-event summaries that support quick checkpoint retrieval and conflict-proof GitHub saving.
+
+**P3 — Optional rather than default:** Seasonal competitions, political clocks, population migration and lineage genetics should deepen only when the campaign engages them. They should not demand off-screen rolls or dump world dashboards during a simple conversation.
+
+### External design research (ideas, NOT Beastbound rules)
+
+The official *Blades in the Dark* SRD illustrates a useful **fiction-first** principle: roll only when the character is truly tested, and let consequences and obstacles drive play. Its progress-clock guidance also offers a way to communicate changing threats and independent faction projects without simulating every citizen. Beastbound retains its **own d20, wound, grade, training and contract mechanics**; no external dice pool, ranks, crew system or setting is imported.
+
+- https://bladesinthedark.com/action-roll
+- https://bladesinthedark.com/progress-clocks
+- https://bladesinthedark.com/effect
+
+## Limits / explicit nonclaims
+
+- The original Python `turn.py` and `bb_bench.py` were not supplied. This is not full parity with missing engine modules.
+- Old `engine.js` paths and the optional local HTML remain **historical prototypes**. The authoritative campaign runner is `scripts/chat-turn.js`, using the JavaScript rules; it blocks obsolete HP combat and healing. Existing saves remain backwards-readable, and changes are never silently converted.
+- Existing legacy in-world economy, some skill training, origin rejection, beast levels, and research mini-games still contain prototype shortcuts; an operation that would alter legacy HP in wound-mode is rejected rather than saved. Do not claim those systems fully unified.
+- Auto-resolving NPC decisions or massive background simulation would weaken this private prose-first RPG. Seed bounded goals and reveal only observable consequences.
+- All game actions are private, and GitHub Actions may require time and included free-tier minutes; no public hosting or publication is needed.
+## Living Realms v0.8 reassessment
+
+The original world-scale gaps have a **tested regional simulation foundation**: six connected continental environments, 24 differentiated polities, 48 working institutions, 29 regional biomes, 19 supply routes, source-grounded yearly and sixday timing, monthly independent diplomatic/economic/ecological updates, and 48 background professionals with bounded PP training. The 239,616 procedural species positions and 718,848 forms are **generative capacity**, not complete authored ecological monographs. Observed local species, readable public reports and seeded hidden-world conditions are recorded and checkpointed without consuming player dice. Every country has resource-based economic pressure, political relations and civic institutions, but full army campaigns, diplomatic negotiations, court cases, career syllabi, cosmology and cross-continent travel remain future work. No world object can claim to have advanced Aerin's campaign without an executed and acknowledged turn.
+
+**Status:** Master Prompt §§2,4–6,11,33–36,44 receive substantially stronger implementations, but are **still partial** in the sense of the prompt's very large fictional universe. The core private JS player progression remains governed by separate, source-backed power systems and is not magically “complete” because regional NPCs can study off-screen. See `docs/LIVING_WORLD_BIBLE.md`, `docs/LIVING_WORLD_ENGINE.md`, and `docs/POWER_SYSTEM_PRESENTATION.md`.

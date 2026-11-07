@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "engineVersion": "0.3.0",
+  "seed": 20261107,
+  "rngState": 162739441,
+  "sequence": 0,
+  "log": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "story",
+      "text": "An independent disposable test traveller arrives at Morrowfen Crossing. No live player campaign state or earned progression is part of this fixture.",
+      "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "story",
+      "text": "Guild registrar Elira Moss has pinned three ordinary contracts to the public board. A lanternfen fox watches the traffic from a distant roof.",
+      "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "world",
+      "text": "A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet.",
+      "details": null
+    }
+  ],
+  "world": {
+    "minutes": 480,
+    "location": "crossing",
+    "marketIndex": 0,
+    "fenPressure": 3,
+    "guildActivity": 0,
+    "faction": {
+      "naturalists": 0,
+      "academy": 0,
+      "wardens": 0
+    },
+    "seen": {},
+    "politics": {
+      "marchCouncil": "stable",
+      "reedClans": "negotiating fishing rights"
+    },
+    "season": {
+      "dayLength": 28,
+      "competitionCycle": 7
+    },
+    "weather": "cool, with drifting mist"
+  },
+  "player": {
+    "name": "Disposable Runner Audit",
+    "age": 36,
+    "background": "fieldworker",
+    "path": "meridian",
+    "health": 64,
+    "maxHealth": 64,
+    "stamina": 52,
+    "maxStamina": 52,
+    "mana": 24,
+    "maxMana": 24,
+    "qi": 14,
+    "maxQi": 14,
+    "coins": 85,
+    "attributes": {
+      "str": 11,
+      "dex": 12,
+      "con": 11,
+      "int": 13,
+      "wis": 13,
+      "cha": 11
+    },
+    "skills": {
+      "survival": {
+        "rank": 2,
+        "xp": 0
+      },
+      "beastcraft": {
+        "rank": 1,
+        "xp": 0
+      },
+      "diplomacy": {
+        "rank": 1,
+        "xp": 0
+      },
+      "cultivation": {
+        "rank": 1,
+        "xp": 0
+      },
+      "arcana": {
+        "rank": 0,
+        "xp": 0
+      },
+      "medicine": {
+        "rank": 0,
+        "xp": 0
+      },
+      "crafting": {
+        "rank": 0,
+        "xp": 0
+      },
+      "combat": {
+        "rank": 0,
+        "xp": 0
+      },
+      "research": {
+        "rank": 0,
+        "xp": 0
+      }
+    },
+    "humanEvolution": {
+      "stage": 0,
+      "stability": 100,
+      "traits": [],
+      "progress": 0
+    },
+    "meridian": {
+      "stage": 0,
+      "gates": [],
+      "foundation": 20,
+      "awareness": 0,
+      "dantianDensity": 0,
+      "stability": 95,
+      "discipline": "foundation student"
+    },
+    "arcane": {
+      "circles": 0,
+      "coreStability": 90,
+      "insight": 0,
+      "geometry": "none",
+      "field": false
+    },
+    "soul": {
+      "phase": 0,
+      "insight": 0,
+      "stability": 95
+    },
+    "body": {
+      "cycles": [],
+      "practice": 0
+    },
+    "rift": {
+      "step": 0,
+      "insight": 0,
+      "anchors": []
+    },
+    "origin": {
+      "phase": 0,
+      "load": 0,
+      "capacity": 3,
+      "stableTraits": [],
+      "candidate": null,
+      "rejectionRisk": 0
+    },
+    "inventory": {
+      "clean_rations": 2,
+      "healing_balm": 1,
+      "marsh_reed": 2
+    },
+    "qualifications": [],
+    "reputation": {
+      "guild": 0,
+      "academy": 0,
+      "local": 0
+    },
+    "rankings": {
+      "fieldwork": 0,
+      "meridian": 0,
+      "arcane": 0,
+      "partnership": 0
+    },
+    "competitionRecord": [],
+    "partnerIds": [],
+    "conditions": [],
+    "injuries": [],
+    "family": {
+      "household": "single guardian",
+      "siblings": 2,
+      "ties": "estranged",
+      "homeTrade": "guild clerks"
+    },
+    "insightPoints": 0,
+    "fame": 0
+  },
+  "beasts": {},
+  "questCatalog": [
+    {
+      "id": "wetland_census",
+      "title": "Wetland Census",
+      "origin": "Naturalists Guild",
+      "objective": "Record three independent beast sightings in the Whisperfen and nearby forest.",
+      "reward": 48,
+      "deadlineDays": 8,
+      "metric": "sightings",
+      "target": 3
+    },
+    {
+      "id": "moss_crystal",
+      "title": "Stable Moss for the Infirmary",
+      "origin": "Infirmary Cooperative",
+      "objective": "Deliver two moss crystals for stabilising overworked meridians.",
+      "reward": 60,
+      "deadlineDays": 12,
+      "metric": "moss_crystal",
+      "target": 2
+    },
+    {
+      "id": "rift_report",
+      "title": "Riftglass Watch",
+      "origin": "Lumenfall Surveyors",
+      "objective": "Visit the Riftglass Outpost and deliver a noninvasive observational report.",
+      "reward": 75,
+      "deadlineDays": 10,
+      "metric": "visit_ruins",
+      "target": 1
+    }
+  ],
+  "quests": {},
+  "npcMemory": {},
+  "sightings": [],
+  "encounter": null,
+  "battle": null,
+  "flags": {
+    "visited": {
+      "crossing": true
+    },
+    "readIntro": false,
+    "freeSourceSample": false,
+    "openingHook": "A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet."
+  },
+  "researchProjects": {},
+  "documentedBranches": {},
+  "npcKnowledge": {}
+}

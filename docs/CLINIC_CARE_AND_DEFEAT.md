@@ -1,0 +1,24 @@
+# Verified Serious-wound clinic care and honest combat defeat
+
+**Scope:** First meaningful recovery procedure for an existing **Serious** wound in a conscious player, plus correct defeat consequences. Original Beastbound canon says injuries persist and require appropriate care, time and resources. The independent wound resolver already supports healing one Serious wound over an actual sixday; it does **not** authorize skipping time or instantly curing Critical injuries.
+
+## Supervised care at the named Lumenfall clinic
+
+- The existing world defines **Lumenfall Annex** (`academy`) with a clinic and **Dr Vael**, an established Origin-pattern physician at that location. This conservative clinic procedure uses only those pre-authored facts.
+- An adult conscious player with an actual Serious wound, no Critical wounds, status `ok`, no immediate combat or wildlife danger and current clinic access may request `health.clinicIntake` (empty params) during a supported local appointment window, 08:00–17:00. This takes 15 minutes and **does not heal anything**. It persists a uniquely identified, source- and scene-hash-bound `clinic_case_...` assessment covering the specific current wound, player and named physician.
+- The first scoped inpatient service costs **30 Talons for six days including room and ordinary meals**. This is a clearly marked **provisional local pricing ruling**, not a verbatim canon tariff, a free world time skip, or a universal healthcare simulation. A partner accompanying the player would require an actual separate welfare/provision plan; this initial procedure conservatively refuses intake recovery while the player has a partner in the roster. It does not consume unrelated medical catalysts.
+- `health.clinicRecover` accepts **only** the actual `caseId` from a live, unspent consultation less than one in-world day old. The original consultation event, clinician, wound state, place, period and fee must still match; changing the wound, changing location, inventing a price or reusing a receipt fails before spending.
+- On lawful completion it records 3,000 Scales (30 Talons) spent, advances the real world exactly **six days**, updates all independent world agendas through the standard calendar tick, restores ordinary stamina, clears Light wounds from six nights of recuperation, and reduces **one Serious wound** using the existing wound-rule sixday interval. It awards no PP, no extra skill check, no new powers, no Critical healing, no change to historical HP and no automatic beast care. Further Serious wounds require another genuine paid sixday admission.
+- `health.clinicStatus` is read-only and displays the patient's observed Serious wound count, eligible known case and own completed receipts. It never manufactures an appointment. Quoting a price or signing a case at another location is unsupported.
+
+The procedure does **not** cover an emergency, an unconscious/dead person, Critical injury surgery, contagious illness, infection, an operating theatre, individual medical policy, specialist veterinary care or legal responsibility. Those require separately authenticated professionals, rescue and consequences. In particular, the user cannot type an `outcome`, `healedWounds` or `days` override.
+
+## Do not trap or revive a knocked-out player
+
+A genuine `combat.exchange` that leaves the player no longer able to act now **ends the active fight**, preserves their exact canonical wound/status record and saves an `table.combatDefeats` incident with the source, opponent and clock. The runner refuses further player movement, combat, rolls, purchases, research, crafting, self-healing or clinic admission while status is `knocked_out`, `incapacitated`, `dying` or `dead`. Read-only player health/combat status and scene checkpointing remain possible.
+
+**No rescuer is invented.** A player being knocked out does not imply a hidden friendly physician conveniently arrived, that a predator left without consequence, that a Mortal wound vanished, or that the patient was transported to the academy for free. Independent rescue, death-clock resolution and Critical care need their own witnessed third-party action and cause/effect flow. This is a correctness step to make that future feature possible; it is not a complete defeat/rescue system.
+
+## Regression and protection
+
+`tests/clinic-and-defeat.test.js` runs on disposable saves and checks the real named physician, no fake consult/diagnosis/fees, paid sixday care, normal world time, preserved Critical limits and historical HP, encounter and partner restrictions, no replayed paid receipt, real nonlethal knock-out ending an active exchange, and blocked actions from an unconscious save. The entire existing engine suite remains required by CI. No real player's existing campaign save is changed.

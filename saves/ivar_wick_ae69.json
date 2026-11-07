@@ -1,0 +1,4242 @@
+{
+  "schemaVersion": 1,
+  "engineVersion": "0.3.0",
+  "seed": 2926136976,
+  "rngState": 3781145817,
+  "sequence": 0,
+  "log": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:30",
+      "type": "story",
+      "text": "The bell over Lumenfall Annex rings without sound. A healer presses two fingers to the warded glass and watches a hairline crack glow gold. A student waits with a stack of unused bandages.",
+      "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:30",
+      "type": "world",
+      "text": "A soundless bell and a cracked ward have interrupted morning lessons at Lumenfall Annex.",
+      "details": null
+    }
+  ],
+  "world": {
+    "minutes": 510,
+    "location": "academy",
+    "marketIndex": 0,
+    "fenPressure": 3,
+    "guildActivity": 0,
+    "faction": {
+      "naturalists": 0,
+      "academy": 0,
+      "wardens": 0
+    },
+    "seen": {},
+    "politics": {
+      "marchCouncil": "stable",
+      "reedClans": "negotiating fishing rights"
+    },
+    "season": {
+      "dayLength": 28,
+      "competitionCycle": 7
+    },
+    "weather": "bright, thin cloud"
+  },
+  "player": {
+    "name": "Ivar Wick",
+    "age": 24,
+    "background": "apprentice",
+    "path": "partner",
+    "health": 64,
+    "maxHealth": 64,
+    "stamina": 52,
+    "maxStamina": 52,
+    "mana": 24,
+    "maxMana": 24,
+    "qi": 14,
+    "maxQi": 14,
+    "coins": 85,
+    "attributes": {
+      "str": 11,
+      "dex": 12,
+      "con": 11,
+      "int": 13,
+      "wis": 13,
+      "cha": 11
+    },
+    "skills": {
+      "survival": {
+        "rank": 1,
+        "xp": 0
+      },
+      "beastcraft": {
+        "rank": 1,
+        "xp": 0
+      },
+      "diplomacy": {
+        "rank": 1,
+        "xp": 0
+      },
+      "cultivation": {
+        "rank": 0,
+        "xp": 0
+      },
+      "arcana": {
+        "rank": 0,
+        "xp": 0
+      },
+      "medicine": {
+        "rank": 0,
+        "xp": 0
+      },
+      "crafting": {
+        "rank": 0,
+        "xp": 0
+      },
+      "combat": {
+        "rank": 0,
+        "xp": 0
+      },
+      "research": {
+        "rank": 0,
+        "xp": 0
+      }
+    },
+    "humanEvolution": {
+      "stage": 0,
+      "stability": 100,
+      "traits": [],
+      "progress": 0
+    },
+    "meridian": {
+      "stage": 0,
+      "gates": [],
+      "foundation": 0,
+      "awareness": 0,
+      "dantianDensity": 0,
+      "stability": 95,
+      "discipline": "unawakened"
+    },
+    "arcane": {
+      "circles": 0,
+      "coreStability": 90,
+      "insight": 0,
+      "geometry": "none",
+      "field": false
+    },
+    "soul": {
+      "phase": 0,
+      "insight": 0,
+      "stability": 95
+    },
+    "body": {
+      "cycles": [],
+      "practice": 0
+    },
+    "rift": {
+      "step": 0,
+      "insight": 0,
+      "anchors": []
+    },
+    "origin": {
+      "phase": 0,
+      "load": 0,
+      "capacity": 3,
+      "stableTraits": [],
+      "candidate": null,
+      "rejectionRisk": 0
+    },
+    "inventory": {
+      "clean_rations": 2,
+      "healing_balm": 1
+    },
+    "qualifications": [],
+    "reputation": {
+      "guild": 0,
+      "academy": 0,
+      "local": 0
+    },
+    "rankings": {
+      "fieldwork": 0,
+      "meridian": 0,
+      "arcane": 0,
+      "partnership": 0
+    },
+    "competitionRecord": [],
+    "partnerIds": [
+      "beast_1"
+    ],
+    "conditions": [],
+    "injuries": [],
+    "insightPoints": 0,
+    "fame": 0,
+    "family": {
+      "household": "extended family",
+      "siblings": 1,
+      "ties": "complicated",
+      "homeTrade": "farmers"
+    },
+    "gender": "male",
+    "capabilityProfile": {
+      "version": 1,
+      "source": "Independent seeded character-creation profile; not an ability unlock",
+      "domains": {
+        "physical": {
+          "strength": {
+            "current": 11,
+            "trained": 0
+          },
+          "speed": {
+            "current": 11,
+            "trained": 0
+          },
+          "agility": {
+            "current": 12,
+            "trained": 0
+          },
+          "endurance": {
+            "current": 10,
+            "trained": 0
+          },
+          "durability": {
+            "current": 13,
+            "trained": 0
+          },
+          "reflexes": {
+            "current": 12,
+            "trained": 0
+          },
+          "coordination": {
+            "current": 10,
+            "trained": 0
+          },
+          "recovery": {
+            "current": 9,
+            "trained": 0
+          }
+        },
+        "energetic": {
+          "capacity": {
+            "current": 11,
+            "trained": 0
+          },
+          "purity": {
+            "current": 15,
+            "trained": 0
+          },
+          "pressureTolerance": {
+            "current": 11,
+            "trained": 0
+          },
+          "circulation": {
+            "current": 14,
+            "trained": 0
+          },
+          "control": {
+            "current": 12,
+            "trained": 0
+          },
+          "recovery": {
+            "current": 9,
+            "trained": 0
+          },
+          "conversionEfficiency": {
+            "current": 15,
+            "trained": 0
+          },
+          "energyPerception": {
+            "current": 13,
+            "trained": 0
+          }
+        },
+        "mental": {
+          "intelligence": {
+            "current": 15,
+            "trained": 0
+          },
+          "concentration": {
+            "current": 11,
+            "trained": 0
+          },
+          "learningSpeed": {
+            "current": 15,
+            "trained": 0
+          },
+          "creativity": {
+            "current": 12,
+            "trained": 0
+          },
+          "tacticalReasoning": {
+            "current": 14,
+            "trained": 0
+          },
+          "memory": {
+            "current": 13,
+            "trained": 0
+          }
+        },
+        "spiritual": {
+          "willpower": {
+            "current": 12,
+            "trained": 0
+          },
+          "soulStability": {
+            "current": 11,
+            "trained": 0
+          },
+          "resonanceSensitivity": {
+            "current": 14,
+            "trained": 0
+          },
+          "identityIntegrity": {
+            "current": 9,
+            "trained": 0
+          },
+          "spiritualResistance": {
+            "current": 13,
+            "trained": 0
+          }
+        }
+      },
+      "potential": {
+        "meridianBreadth": {
+          "latent": 7,
+          "assessments": []
+        },
+        "gateStability": {
+          "latent": 7,
+          "assessments": []
+        },
+        "manaCoreArchitecture": {
+          "latent": 4,
+          "assessments": []
+        },
+        "soulDepth": {
+          "latent": 8,
+          "assessments": []
+        },
+        "soulResilience": {
+          "latent": 5,
+          "assessments": []
+        },
+        "physicalAdaptation": {
+          "latent": 9,
+          "assessments": []
+        },
+        "evolutionaryPlasticity": {
+          "latent": 4,
+          "assessments": []
+        },
+        "elementalAffinity": {
+          "latent": 2,
+          "assessments": []
+        },
+        "bloodlineExpression": {
+          "latent": 5,
+          "assessments": []
+        },
+        "lineageCompatibility": {
+          "latent": 8,
+          "assessments": []
+        },
+        "traitIntegration": {
+          "latent": 7,
+          "assessments": []
+        },
+        "synchronisation": {
+          "latent": 3,
+          "assessments": []
+        },
+        "comprehension": {
+          "latent": 2,
+          "assessments": []
+        },
+        "techniqueCreativity": {
+          "latent": 2,
+          "assessments": []
+        }
+      },
+      "assessmentsMade": 0
+    }
+  },
+  "beasts": {
+    "beast_1": {
+      "id": "beast_1",
+      "name": "Nacre",
+      "species": "fenfox",
+      "sex": "unrecorded",
+      "age": "young adult",
+      "appearance": "Typical lanternfen fox with distinctive pale flecks.",
+      "level": 2,
+      "xp": 0,
+      "speciesGrade": "Common",
+      "individualGrade": "Common",
+      "evolutionStage": "Base",
+      "lineage": "Marshlight",
+      "lineageQuality": 68,
+      "potential": {
+        "growth": 73,
+        "evolution": 77,
+        "intelligence": 49,
+        "bondCompatibility": 90,
+        "adaptability": 87
+      },
+      "hp": 36,
+      "maxHp": 36,
+      "energy": 18,
+      "maxEnergy": 18,
+      "trust": 69,
+      "respect": 56,
+      "communication": 54,
+      "resonance": 58,
+      "coordination": 45,
+      "consent": true,
+      "relationship": "mutual partner",
+      "syncStage": 1,
+      "syncPractice": 0,
+      "needs": {
+        "hunger": 10,
+        "fatigue": 0
+      },
+      "mood": "curious",
+      "injuries": [],
+      "techniques": [
+        "Glimmer Veil"
+      ],
+      "habitatExposure": {},
+      "bondHistory": [
+        "Years of careful partnership prior to Day 1."
+      ],
+      "memory": [],
+      "owner": "Ivar Wick",
+      "branchMaturity": {},
+      "ripeningBySeason": {},
+      "patternEchoByStage": {},
+      "condition": 100
+    }
+  },
+  "questCatalog": [
+    {
+      "id": "wetland_census",
+      "title": "Wetland Census",
+      "origin": "Naturalists Guild",
+      "objective": "Record three independent beast sightings in the Whisperfen and nearby forest.",
+      "reward": 48,
+      "deadlineDays": 8,
+      "metric": "sightings",
+      "target": 3
+    },
+    {
+      "id": "moss_crystal",
+      "title": "Stable Moss for the Infirmary",
+      "origin": "Infirmary Cooperative",
+      "objective": "Deliver two moss crystals for stabilising overworked meridians.",
+      "reward": 60,
+      "deadlineDays": 12,
+      "metric": "moss_crystal",
+      "target": 2
+    },
+    {
+      "id": "rift_report",
+      "title": "Riftglass Watch",
+      "origin": "Lumenfall Surveyors",
+      "objective": "Visit the Riftglass Outpost and deliver a noninvasive observational report.",
+      "reward": 75,
+      "deadlineDays": 10,
+      "metric": "visit_ruins",
+      "target": 1
+    }
+  ],
+  "quests": {},
+  "npcMemory": {},
+  "sightings": [],
+  "encounter": null,
+  "battle": null,
+  "flags": {
+    "visited": {
+      "academy": true
+    },
+    "readIntro": false,
+    "freeSourceSample": false,
+    "openingHook": "A soundless bell and a cracked ward have interrupted morning lessons at Lumenfall Annex."
+  },
+  "researchProjects": {},
+  "documentedBranches": {},
+  "npcKnowledge": {},
+  "chatRuntime": {
+    "revision": 3,
+    "applied": {
+      "ivar_calendar_anchor_1153_01": {
+        "revision": 1,
+        "mode": "rule",
+        "hash": "732cac1cb72024b806ec02c5148302eedad30cf0527d92c2893ee42710740cd4"
+      },
+      "ivar_pickup_save_20261106_v01": {
+        "revision": 2,
+        "mode": "checkpoint",
+        "hash": "2ae053e9ef2efa0dea997d95c08b8a2b6589a804e84c582702dee684d6127da8"
+      },
+      "ivar_capability_init_v11_20261106": {
+        "revision": 3,
+        "mode": "rule",
+        "hash": "988ae2fc780de9971b946c8fbdc0afd013d679bf02cd03030c47d4262c7de0a8"
+      }
+    },
+    "focus": [
+      "The silent healing ward"
+    ],
+    "scene": "Lumenfall Annex, 5 Leaffall 1153 AC, 08:30. The bell above the healing ward swings without sound. A thin golden crack crosses the wardglass. A healer has just warned apprentice Ivar Wick to keep clear until the cause is known. His lanternfen fox partner Nacre has turned toward the glass. A student holds unused bandages nearby. Ivar has not yet acted.",
+    "journal": [
+      {
+        "day": 1,
+        "text": "Saved opening pickup: Ivar Wick is at Lumenfall Annex with Nacre; a healer warned him away from a soundless bell and cracked golden ward. No player action, dice check, or elapsed gameplay time. Use 5 Leaffall 1153 AC, 08:30."
+      }
+    ]
+  },
+  "campaign": {
+    "slug": "ivar_wick_ae69",
+    "version": 1,
+    "startSeed": 2926136976,
+    "characterSource": "engine.randomCharacter + engine.newGame",
+    "rolledBackground": "apprentice",
+    "rolledPath": "partner",
+    "startingLocation": "academy",
+    "identity": "independent male protagonist",
+    "oldCampaignImported": false
+  },
+  "table": {
+    "combatants": {
+      "player": {
+        "name": "Ivar Wick",
+        "toughness": 4,
+        "defense": 11,
+        "vigor": 0,
+        "will": 1,
+        "stamina": 52,
+        "maxStamina": 52,
+        "boxes": [
+          3,
+          2,
+          1
+        ],
+        "wounds": [
+          0,
+          0,
+          0
+        ],
+        "offM": 0,
+        "durM": 0,
+        "sapience": null,
+        "moraleExempt": false,
+        "moraleChecked": false,
+        "braceCost": 3,
+        "wpr": 0,
+        "ward": null,
+        "status": "ok",
+        "dyingRounds": null,
+        "conditions": [],
+        "reactionUsed": false,
+        "pressing": false
+      }
+    },
+    "healthModel": "wounds-v1",
+    "legacyHealth": {
+      "current": 64,
+      "max": 64
+    },
+    "realm": {
+      "version": 1,
+      "worldSeed": 811480873,
+      "rngState": 811480873,
+      "startedAt": 0,
+      "lastTickDay": 0,
+      "calendarAnchor": {
+        "date": {
+          "year": 1153,
+          "month": 10,
+          "day": 5
+        },
+        "source": "Public civil almanac at Lumenfall Annex, recorded at the campaign opening",
+        "atCompletedDay": 0
+      },
+      "ticks": {
+        "sixdays": 0,
+        "months": 0
+      },
+      "countries": {
+        "reedmarch": {
+          "stability": 48,
+          "prosperity": 40,
+          "legitimacy": 45,
+          "treasury": 35,
+          "military": 36,
+          "regime": "council",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "asterwyn": {
+          "stability": 59,
+          "prosperity": 57,
+          "legitimacy": 58,
+          "treasury": 54,
+          "military": 43,
+          "regime": "monarchy",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "crownspine": {
+          "stability": 70,
+          "prosperity": 74,
+          "legitimacy": 71,
+          "treasury": 73,
+          "military": 50,
+          "regime": "confederation",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "saltleague": {
+          "stability": 81,
+          "prosperity": 53,
+          "legitimacy": 45,
+          "treasury": 44,
+          "military": 57,
+          "regime": "merchant republic",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "sahri_wells": {
+          "stability": 57,
+          "prosperity": 70,
+          "legitimacy": 58,
+          "treasury": 63,
+          "military": 64,
+          "regime": "water council",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "red_sultanate": {
+          "stability": 68,
+          "prosperity": 49,
+          "legitimacy": 71,
+          "treasury": 82,
+          "military": 71,
+          "regime": "sultanate",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "stair_guilds": {
+          "stability": 79,
+          "prosperity": 66,
+          "legitimacy": 45,
+          "treasury": 53,
+          "military": 78,
+          "regime": "guild federation",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "pearl_bight": {
+          "stability": 55,
+          "prosperity": 45,
+          "legitimacy": 58,
+          "treasury": 72,
+          "military": 38,
+          "regime": "republic",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "whitewake": {
+          "stability": 66,
+          "prosperity": 62,
+          "legitimacy": 71,
+          "treasury": 43,
+          "military": 45,
+          "regime": "confederation",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "icehollow": {
+          "stability": 77,
+          "prosperity": 41,
+          "legitimacy": 45,
+          "treasury": 62,
+          "military": 52,
+          "regime": "monastic council",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "winter_court": {
+          "stability": 53,
+          "prosperity": 58,
+          "legitimacy": 58,
+          "treasury": 81,
+          "military": 59,
+          "regime": "commons",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "frostmarch": {
+          "stability": 64,
+          "prosperity": 75,
+          "legitimacy": 71,
+          "treasury": 52,
+          "military": 66,
+          "regime": "protectorate",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "cinder_free": {
+          "stability": 75,
+          "prosperity": 54,
+          "legitimacy": 45,
+          "treasury": 71,
+          "military": 73,
+          "regime": "guild republic",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "terrace_union": {
+          "stability": 51,
+          "prosperity": 71,
+          "legitimacy": 58,
+          "treasury": 42,
+          "military": 80,
+          "regime": "federation",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "ashglass_march": {
+          "stability": 62,
+          "prosperity": 50,
+          "legitimacy": 71,
+          "treasury": 61,
+          "military": 40,
+          "regime": "military regency",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "sunforge": {
+          "stability": 73,
+          "prosperity": 67,
+          "legitimacy": 45,
+          "treasury": 80,
+          "military": 47,
+          "regime": "principality",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "tide_assembly": {
+          "stability": 49,
+          "prosperity": 46,
+          "legitimacy": 58,
+          "treasury": 51,
+          "military": 54,
+          "regime": "island assembly",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "reef_cantons": {
+          "stability": 60,
+          "prosperity": 63,
+          "legitimacy": 71,
+          "treasury": 70,
+          "military": 61,
+          "regime": "beast polity",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "storm_peaks": {
+          "stability": 71,
+          "prosperity": 42,
+          "legitimacy": 45,
+          "treasury": 41,
+          "military": 68,
+          "regime": "freehold",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "blackcurrent": {
+          "stability": 82,
+          "prosperity": 59,
+          "legitimacy": 58,
+          "treasury": 60,
+          "military": 75,
+          "regime": "merchant league",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "grassroad": {
+          "stability": 58,
+          "prosperity": 76,
+          "legitimacy": 71,
+          "treasury": 79,
+          "military": 82,
+          "regime": "confederation",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "skyvillage": {
+          "stability": 69,
+          "prosperity": 55,
+          "legitimacy": 45,
+          "treasury": 50,
+          "military": 42,
+          "regime": "communal republic",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "iron_citadel": {
+          "stability": 80,
+          "prosperity": 72,
+          "legitimacy": 58,
+          "treasury": 69,
+          "military": 49,
+          "regime": "military oligarchy",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        },
+        "old_tracks": {
+          "stability": 56,
+          "prosperity": 51,
+          "legitimacy": 71,
+          "treasury": 40,
+          "military": 56,
+          "regime": "beast polity",
+          "rulerTenure": 0,
+          "stressMonths": 0,
+          "cycle": 0,
+          "warExhaustion": 0
+        }
+      },
+      "institutions": {
+        "naturalists_guild": {
+          "funds": 38,
+          "reputation": 42,
+          "capacity": 35,
+          "status": "active",
+          "members": 88,
+          "lastChange": 0
+        },
+        "marsh_council": {
+          "funds": 51,
+          "reputation": 53,
+          "capacity": 52,
+          "status": "active",
+          "members": 83,
+          "lastChange": 0
+        },
+        "lumenfall_annex": {
+          "funds": 64,
+          "reputation": 64,
+          "capacity": 69,
+          "status": "active",
+          "members": 149,
+          "lastChange": 0
+        },
+        "reed_clan_council": {
+          "funds": 77,
+          "reputation": 75,
+          "capacity": 35,
+          "status": "active",
+          "members": 173,
+          "lastChange": 0
+        },
+        "river_wardens": {
+          "funds": 90,
+          "reputation": 86,
+          "capacity": 52,
+          "status": "active",
+          "members": 69,
+          "lastChange": 0
+        },
+        "sanctuary_of_reeds": {
+          "funds": 50,
+          "reputation": 49,
+          "capacity": 69,
+          "status": "active",
+          "members": 114,
+          "lastChange": 0
+        },
+        "orchard_college": {
+          "funds": 63,
+          "reputation": 60,
+          "capacity": 35,
+          "status": "active",
+          "members": 107,
+          "lastChange": 0
+        },
+        "hearth_court": {
+          "funds": 76,
+          "reputation": 71,
+          "capacity": 52,
+          "status": "active",
+          "members": 30,
+          "lastChange": 0
+        },
+        "gate_monastery": {
+          "funds": 89,
+          "reputation": 82,
+          "capacity": 69,
+          "status": "active",
+          "members": 134,
+          "lastChange": 0
+        },
+        "ridge_rescue": {
+          "funds": 49,
+          "reputation": 45,
+          "capacity": 35,
+          "status": "active",
+          "members": 65,
+          "lastChange": 0
+        },
+        "salt_exchange": {
+          "funds": 62,
+          "reputation": 56,
+          "capacity": 52,
+          "status": "active",
+          "members": 52,
+          "lastChange": 0
+        },
+        "mirror_academy": {
+          "funds": 75,
+          "reputation": 67,
+          "capacity": 69,
+          "status": "active",
+          "members": 152,
+          "lastChange": 0
+        },
+        "well_collegium": {
+          "funds": 88,
+          "reputation": 78,
+          "capacity": 35,
+          "status": "active",
+          "members": 128,
+          "lastChange": 0
+        },
+        "cup_guard": {
+          "funds": 48,
+          "reputation": 89,
+          "capacity": 52,
+          "status": "active",
+          "members": 134,
+          "lastChange": 0
+        },
+        "dune_guard": {
+          "funds": 61,
+          "reputation": 52,
+          "capacity": 69,
+          "status": "active",
+          "members": 30,
+          "lastChange": 0
+        },
+        "saffron_consortium": {
+          "funds": 74,
+          "reputation": 63,
+          "capacity": 35,
+          "status": "active",
+          "members": 133,
+          "lastChange": 0
+        },
+        "route_keepers": {
+          "funds": 87,
+          "reputation": 74,
+          "capacity": 52,
+          "status": "active",
+          "members": 145,
+          "lastChange": 0
+        },
+        "stair_institute": {
+          "funds": 47,
+          "reputation": 85,
+          "capacity": 69,
+          "status": "active",
+          "members": 77,
+          "lastChange": 0
+        },
+        "garden_wardens": {
+          "funds": 60,
+          "reputation": 48,
+          "capacity": 35,
+          "status": "active",
+          "members": 34,
+          "lastChange": 0
+        },
+        "rain_school": {
+          "funds": 73,
+          "reputation": 59,
+          "capacity": 52,
+          "status": "active",
+          "members": 41,
+          "lastChange": 0
+        },
+        "ice_rescue": {
+          "funds": 86,
+          "reputation": 70,
+          "capacity": 69,
+          "status": "active",
+          "members": 109,
+          "lastChange": 0
+        },
+        "whitewake_court": {
+          "funds": 46,
+          "reputation": 81,
+          "capacity": 35,
+          "status": "active",
+          "members": 137,
+          "lastChange": 0
+        },
+        "aurora_academy": {
+          "funds": 59,
+          "reputation": 44,
+          "capacity": 52,
+          "status": "active",
+          "members": 41,
+          "lastChange": 0
+        },
+        "veil_archive": {
+          "funds": 72,
+          "reputation": 55,
+          "capacity": 69,
+          "status": "active",
+          "members": 167,
+          "lastChange": 0
+        },
+        "bough_council": {
+          "funds": 85,
+          "reputation": 66,
+          "capacity": 35,
+          "status": "active",
+          "members": 117,
+          "lastChange": 0
+        },
+        "north_watch": {
+          "funds": 45,
+          "reputation": 77,
+          "capacity": 52,
+          "status": "active",
+          "members": 99,
+          "lastChange": 0
+        },
+        "forge_university": {
+          "funds": 58,
+          "reputation": 88,
+          "capacity": 69,
+          "status": "active",
+          "members": 110,
+          "lastChange": 0
+        },
+        "glass_workers": {
+          "funds": 71,
+          "reputation": 51,
+          "capacity": 35,
+          "status": "active",
+          "members": 74,
+          "lastChange": 0
+        },
+        "sky_school": {
+          "funds": 84,
+          "reputation": 62,
+          "capacity": 52,
+          "status": "active",
+          "members": 152,
+          "lastChange": 0
+        },
+        "ledge_guard": {
+          "funds": 44,
+          "reputation": 73,
+          "capacity": 69,
+          "status": "active",
+          "members": 143,
+          "lastChange": 0
+        },
+        "rift_wardens": {
+          "funds": 57,
+          "reputation": 84,
+          "capacity": 35,
+          "status": "active",
+          "members": 94,
+          "lastChange": 0
+        },
+        "boundary_lab": {
+          "funds": 70,
+          "reputation": 47,
+          "capacity": 52,
+          "status": "active",
+          "members": 42,
+          "lastChange": 0
+        },
+        "sunforgers": {
+          "funds": 83,
+          "reputation": 58,
+          "capacity": 69,
+          "status": "active",
+          "members": 146,
+          "lastChange": 0
+        },
+        "tide_assembly_house": {
+          "funds": 43,
+          "reputation": 69,
+          "capacity": 35,
+          "status": "active",
+          "members": 52,
+          "lastChange": 0
+        },
+        "coral_healers": {
+          "funds": 56,
+          "reputation": 80,
+          "capacity": 52,
+          "status": "active",
+          "members": 62,
+          "lastChange": 0
+        },
+        "reef_consistory": {
+          "funds": 69,
+          "reputation": 43,
+          "capacity": 69,
+          "status": "active",
+          "members": 74,
+          "lastChange": 0
+        },
+        "current_singers": {
+          "funds": 82,
+          "reputation": 54,
+          "capacity": 35,
+          "status": "active",
+          "members": 97,
+          "lastChange": 0
+        },
+        "storm_school": {
+          "funds": 42,
+          "reputation": 65,
+          "capacity": 52,
+          "status": "active",
+          "members": 146,
+          "lastChange": 0
+        },
+        "current_exchange": {
+          "funds": 55,
+          "reputation": 76,
+          "capacity": 69,
+          "status": "active",
+          "members": 39,
+          "lastChange": 0
+        },
+        "sea_justice": {
+          "funds": 68,
+          "reputation": 87,
+          "capacity": 35,
+          "status": "active",
+          "members": 167,
+          "lastChange": 0
+        },
+        "herd_council": {
+          "funds": 81,
+          "reputation": 50,
+          "capacity": 52,
+          "status": "active",
+          "members": 141,
+          "lastChange": 0
+        },
+        "grassroad_clinic": {
+          "funds": 41,
+          "reputation": 61,
+          "capacity": 69,
+          "status": "active",
+          "members": 155,
+          "lastChange": 0
+        },
+        "open_peak": {
+          "funds": 54,
+          "reputation": 72,
+          "capacity": 35,
+          "status": "active",
+          "members": 112,
+          "lastChange": 0
+        },
+        "sky_cartographers": {
+          "funds": 67,
+          "reputation": 83,
+          "capacity": 52,
+          "status": "active",
+          "members": 65,
+          "lastChange": 0
+        },
+        "redwall_warcollege": {
+          "funds": 80,
+          "reputation": 46,
+          "capacity": 69,
+          "status": "active",
+          "members": 53,
+          "lastChange": 0
+        },
+        "iron_law_office": {
+          "funds": 40,
+          "reputation": 57,
+          "capacity": 35,
+          "status": "active",
+          "members": 94,
+          "lastChange": 0
+        },
+        "beast_parliament": {
+          "funds": 53,
+          "reputation": 68,
+          "capacity": 52,
+          "status": "active",
+          "members": 127,
+          "lastChange": 0
+        },
+        "translation_fellowship": {
+          "funds": 66,
+          "reputation": 79,
+          "capacity": 69,
+          "status": "active",
+          "members": 103,
+          "lastChange": 0
+        }
+      },
+      "routes": {
+        "trade_1": {
+          "capacity": 45,
+          "risk": 10,
+          "flow": 45,
+          "disrupted": false
+        },
+        "trade_2": {
+          "capacity": 52,
+          "risk": 23,
+          "flow": 52,
+          "disrupted": false
+        },
+        "trade_3": {
+          "capacity": 59,
+          "risk": 36,
+          "flow": 59,
+          "disrupted": false
+        },
+        "trade_4": {
+          "capacity": 66,
+          "risk": 49,
+          "flow": 66,
+          "disrupted": false
+        },
+        "trade_5": {
+          "capacity": 73,
+          "risk": 14,
+          "flow": 73,
+          "disrupted": false
+        },
+        "trade_6": {
+          "capacity": 45,
+          "risk": 27,
+          "flow": 45,
+          "disrupted": false
+        },
+        "trade_7": {
+          "capacity": 52,
+          "risk": 40,
+          "flow": 52,
+          "disrupted": false
+        },
+        "trade_8": {
+          "capacity": 59,
+          "risk": 53,
+          "flow": 59,
+          "disrupted": false
+        },
+        "trade_9": {
+          "capacity": 66,
+          "risk": 18,
+          "flow": 66,
+          "disrupted": false
+        },
+        "trade_10": {
+          "capacity": 73,
+          "risk": 31,
+          "flow": 73,
+          "disrupted": false
+        },
+        "trade_11": {
+          "capacity": 45,
+          "risk": 44,
+          "flow": 45,
+          "disrupted": false
+        },
+        "trade_12": {
+          "capacity": 52,
+          "risk": 57,
+          "flow": 52,
+          "disrupted": false
+        },
+        "trade_13": {
+          "capacity": 59,
+          "risk": 22,
+          "flow": 59,
+          "disrupted": false
+        },
+        "trade_14": {
+          "capacity": 66,
+          "risk": 35,
+          "flow": 66,
+          "disrupted": false
+        },
+        "trade_15": {
+          "capacity": 73,
+          "risk": 48,
+          "flow": 73,
+          "disrupted": false
+        },
+        "trade_16": {
+          "capacity": 45,
+          "risk": 13,
+          "flow": 45,
+          "disrupted": false
+        },
+        "trade_17": {
+          "capacity": 52,
+          "risk": 26,
+          "flow": 52,
+          "disrupted": false
+        },
+        "trade_18": {
+          "capacity": 59,
+          "risk": 39,
+          "flow": 59,
+          "disrupted": false
+        },
+        "trade_19": {
+          "capacity": 66,
+          "risk": 52,
+          "flow": 66,
+          "disrupted": false
+        }
+      },
+      "ecosystems": {
+        "morrowfen_basin": {
+          "pressure": 20,
+          "water": 82,
+          "forage": 84,
+          "quality": 90,
+          "indicators": {
+            "siltgel": {
+              "population": 48,
+              "capacity": 114
+            },
+            "siltspirit": {
+              "population": 70,
+              "capacity": 95
+            },
+            "moonmoth": {
+              "population": 86,
+              "capacity": 107
+            },
+            "reedfox": {
+              "population": 58,
+              "capacity": 107
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "whisperfen": {
+          "pressure": 55,
+          "water": 71,
+          "forage": 58,
+          "quality": 79,
+          "indicators": {
+            "cinderskin": {
+              "population": 62,
+              "capacity": 118
+            },
+            "brineclaw": {
+              "population": 71,
+              "capacity": 91
+            },
+            "kelpeel": {
+              "population": 46,
+              "capacity": 136
+            },
+            "mangrove": {
+              "population": 63,
+              "capacity": 127
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "copperwood": {
+          "pressure": 16,
+          "water": 75,
+          "forage": 87,
+          "quality": 82,
+          "indicators": {
+            "moonmoth": {
+              "population": 87,
+              "capacity": 122
+            },
+            "flinthare": {
+              "population": 51,
+              "capacity": 100
+            },
+            "glasswing": {
+              "population": 51,
+              "capacity": 94
+            },
+            "sporecap": {
+              "population": 56,
+              "capacity": 118
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "ashwind": {
+          "pressure": 36,
+          "water": 86,
+          "forage": 79,
+          "quality": 69,
+          "indicators": {
+            "dawnscale": {
+              "population": 54,
+              "capacity": 101
+            },
+            "flinthare": {
+              "population": 84,
+              "capacity": 116
+            },
+            "frostantler": {
+              "population": 61,
+              "capacity": 93
+            },
+            "skystrider": {
+              "population": 71,
+              "capacity": 109
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "lumenfall": {
+          "pressure": 43,
+          "water": 86,
+          "forage": 81,
+          "quality": 71,
+          "indicators": {
+            "clockwork": {
+              "population": 56,
+              "capacity": 128
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "riftglass": {
+          "pressure": 41,
+          "water": 77,
+          "forage": 70,
+          "quality": 67,
+          "indicators": {
+            "emberkin": {
+              "population": 62,
+              "capacity": 99
+            },
+            "siltgel": {
+              "population": 46,
+              "capacity": 106
+            },
+            "cinderskin": {
+              "population": 86,
+              "capacity": 114
+            },
+            "clockwork": {
+              "population": 60,
+              "capacity": 111
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "orchard_vales": {
+          "pressure": 37,
+          "water": 89,
+          "forage": 62,
+          "quality": 72,
+          "indicators": {
+            "vineheart": {
+              "population": 51,
+              "capacity": 92
+            },
+            "echoquill": {
+              "population": 50,
+              "capacity": 110
+            },
+            "glasswing": {
+              "population": 68,
+              "capacity": 109
+            },
+            "reedfox": {
+              "population": 88,
+              "capacity": 107
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "crownspine_pass": {
+          "pressure": 52,
+          "water": 73,
+          "forage": 57,
+          "quality": 84,
+          "indicators": {
+            "dawnscale": {
+              "population": 61,
+              "capacity": 99
+            },
+            "flinthare": {
+              "population": 78,
+              "capacity": 136
+            },
+            "frostantler": {
+              "population": 47,
+              "capacity": 137
+            },
+            "skystrider": {
+              "population": 76,
+              "capacity": 121
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "mirror_gulf": {
+          "pressure": 47,
+          "water": 66,
+          "forage": 51,
+          "quality": 62,
+          "indicators": {
+            "reefpoly": {
+              "population": 58,
+              "capacity": 105
+            },
+            "siltmussel": {
+              "population": 49,
+              "capacity": 122
+            },
+            "skystrider": {
+              "population": 56,
+              "capacity": 103
+            },
+            "mangrove": {
+              "population": 59,
+              "capacity": 132
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "saffron_exp": {
+          "pressure": 40,
+          "water": 82,
+          "forage": 58,
+          "quality": 62,
+          "indicators": {
+            "emberkin": {
+              "population": 66,
+              "capacity": 95
+            },
+            "sandburrow": {
+              "population": 65,
+              "capacity": 135
+            },
+            "sunspine": {
+              "population": 86,
+              "capacity": 135
+            },
+            "riftmantis": {
+              "population": 80,
+              "capacity": 137
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "well_tableland": {
+          "pressure": 45,
+          "water": 68,
+          "forage": 89,
+          "quality": 86,
+          "indicators": {
+            "miregrazer": {
+              "population": 54,
+              "capacity": 113
+            },
+            "sandburrow": {
+              "population": 79,
+              "capacity": 138
+            },
+            "vineheart": {
+              "population": 79,
+              "capacity": 117
+            },
+            "siltgel": {
+              "population": 85,
+              "capacity": 129
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "copper_stair": {
+          "pressure": 45,
+          "water": 66,
+          "forage": 54,
+          "quality": 74,
+          "indicators": {
+            "sunspine": {
+              "population": 45,
+              "capacity": 115
+            },
+            "sandburrow": {
+              "population": 59,
+              "capacity": 91
+            },
+            "skystrider": {
+              "population": 50,
+              "capacity": 122
+            },
+            "emberkin": {
+              "population": 47,
+              "capacity": 135
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "pearl_gardens": {
+          "pressure": 18,
+          "water": 85,
+          "forage": 60,
+          "quality": 93,
+          "indicators": {
+            "mangrove": {
+              "population": 71,
+              "capacity": 115
+            },
+            "glasswing": {
+              "population": 46,
+              "capacity": 139
+            },
+            "moonmoth": {
+              "population": 63,
+              "capacity": 131
+            },
+            "vineheart": {
+              "population": 54,
+              "capacity": 124
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "skelvik_fjords": {
+          "pressure": 15,
+          "water": 83,
+          "forage": 53,
+          "quality": 80,
+          "indicators": {
+            "siltmussel": {
+              "population": 79,
+              "capacity": 104
+            },
+            "siltspirit": {
+              "population": 49,
+              "capacity": 108
+            },
+            "brineclaw": {
+              "population": 68,
+              "capacity": 122
+            },
+            "frostantler": {
+              "population": 80,
+              "capacity": 135
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "northwood": {
+          "pressure": 55,
+          "water": 76,
+          "forage": 65,
+          "quality": 77,
+          "indicators": {
+            "miregrazer": {
+              "population": 75,
+              "capacity": 91
+            },
+            "frostantler": {
+              "population": 71,
+              "capacity": 105
+            },
+            "sporecap": {
+              "population": 84,
+              "capacity": 132
+            },
+            "gravebeetle": {
+              "population": 69,
+              "capacity": 101
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "aurora_veil": {
+          "pressure": 28,
+          "water": 76,
+          "forage": 70,
+          "quality": 83,
+          "indicators": {
+            "frostantler": {
+              "population": 88,
+              "capacity": 100
+            },
+            "gravebeetle": {
+              "population": 71,
+              "capacity": 92
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "coldgate": {
+          "pressure": 31,
+          "water": 86,
+          "forage": 50,
+          "quality": 69,
+          "indicators": {
+            "frostantler": {
+              "population": 87,
+              "capacity": 128
+            },
+            "gravebeetle": {
+              "population": 81,
+              "capacity": 112
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "forge_basin": {
+          "pressure": 59,
+          "water": 77,
+          "forage": 76,
+          "quality": 84,
+          "indicators": {
+            "cinderskin": {
+              "population": 54,
+              "capacity": 94
+            },
+            "clockwork": {
+              "population": 85,
+              "capacity": 107
+            },
+            "dawnscale": {
+              "population": 85,
+              "capacity": 106
+            },
+            "riftmantis": {
+              "population": 59,
+              "capacity": 123
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "skyterraces": {
+          "pressure": 26,
+          "water": 77,
+          "forage": 55,
+          "quality": 78,
+          "indicators": {
+            "dawnscale": {
+              "population": 82,
+              "capacity": 135
+            },
+            "flinthare": {
+              "population": 63,
+              "capacity": 124
+            },
+            "frostantler": {
+              "population": 58,
+              "capacity": 105
+            },
+            "skystrider": {
+              "population": 71,
+              "capacity": 135
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "ashglass_rift": {
+          "pressure": 29,
+          "water": 77,
+          "forage": 87,
+          "quality": 63,
+          "indicators": {
+            "riftmantis": {
+              "population": 78,
+              "capacity": 118
+            },
+            "gravebeetle": {
+              "population": 77,
+              "capacity": 105
+            },
+            "siltgel": {
+              "population": 77,
+              "capacity": 131
+            },
+            "emberkin": {
+              "population": 75,
+              "capacity": 136
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "sunforge_flats": {
+          "pressure": 32,
+          "water": 76,
+          "forage": 53,
+          "quality": 83,
+          "indicators": {
+            "riftmantis": {
+              "population": 88,
+              "capacity": 96
+            },
+            "dawnscale": {
+              "population": 70,
+              "capacity": 103
+            },
+            "clockwork": {
+              "population": 86,
+              "capacity": 100
+            },
+            "cinderskin": {
+              "population": 86,
+              "capacity": 131
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "waveroot_isles": {
+          "pressure": 53,
+          "water": 79,
+          "forage": 89,
+          "quality": 72,
+          "indicators": {
+            "dawnscale": {
+              "population": 76,
+              "capacity": 91
+            },
+            "glasswing": {
+              "population": 57,
+              "capacity": 138
+            },
+            "skystrider": {
+              "population": 56,
+              "capacity": 139
+            },
+            "mangrove": {
+              "population": 64,
+              "capacity": 136
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "living_atoll": {
+          "pressure": 46,
+          "water": 70,
+          "forage": 91,
+          "quality": 63,
+          "indicators": {
+            "kelpeel": {
+              "population": 89,
+              "capacity": 127
+            },
+            "reefpoly": {
+              "population": 49,
+              "capacity": 125
+            },
+            "abyssquid": {
+              "population": 70,
+              "capacity": 96
+            },
+            "brineclaw": {
+              "population": 79,
+              "capacity": 124
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "rainspire": {
+          "pressure": 36,
+          "water": 75,
+          "forage": 54,
+          "quality": 82,
+          "indicators": {
+            "glasswing": {
+              "population": 88,
+              "capacity": 133
+            },
+            "dawnscale": {
+              "population": 56,
+              "capacity": 124
+            },
+            "abyssquid": {
+              "population": 80,
+              "capacity": 95
+            },
+            "reefpoly": {
+              "population": 89,
+              "capacity": 118
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "deep_chain": {
+          "pressure": 28,
+          "water": 77,
+          "forage": 73,
+          "quality": 74,
+          "indicators": {
+            "abyssquid": {
+              "population": 46,
+              "capacity": 118
+            },
+            "siltgel": {
+              "population": 87,
+              "capacity": 121
+            },
+            "reefpoly": {
+              "population": 83,
+              "capacity": 109
+            },
+            "siltmussel": {
+              "population": 79,
+              "capacity": 92
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "grassroad_steppe": {
+          "pressure": 29,
+          "water": 68,
+          "forage": 73,
+          "quality": 88,
+          "indicators": {
+            "sandburrow": {
+              "population": 58,
+              "capacity": 120
+            },
+            "reedfox": {
+              "population": 48,
+              "capacity": 110
+            },
+            "flinthare": {
+              "population": 87,
+              "capacity": 100
+            },
+            "sunspine": {
+              "population": 60,
+              "capacity": 122
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "open_peak": {
+          "pressure": 54,
+          "water": 82,
+          "forage": 75,
+          "quality": 88,
+          "indicators": {
+            "dawnscale": {
+              "population": 75,
+              "capacity": 101
+            },
+            "flinthare": {
+              "population": 62,
+              "capacity": 108
+            },
+            "frostantler": {
+              "population": 82,
+              "capacity": 121
+            },
+            "skystrider": {
+              "population": 58,
+              "capacity": 103
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "redwall": {
+          "pressure": 25,
+          "water": 89,
+          "forage": 86,
+          "quality": 90,
+          "indicators": {
+            "gravebeetle": {
+              "population": 49,
+              "capacity": 120
+            },
+            "clockwork": {
+              "population": 70,
+              "capacity": 123
+            },
+            "riftmantis": {
+              "population": 55,
+              "capacity": 93
+            },
+            "dawnscale": {
+              "population": 56,
+              "capacity": 90
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        },
+        "many_nest": {
+          "pressure": 48,
+          "water": 80,
+          "forage": 77,
+          "quality": 61,
+          "indicators": {
+            "reedfox": {
+              "population": 60,
+              "capacity": 126
+            },
+            "miregrazer": {
+              "population": 72,
+              "capacity": 105
+            },
+            "sunspine": {
+              "population": 80,
+              "capacity": 130
+            },
+            "sandburrow": {
+              "population": 85,
+              "capacity": 122
+            }
+          },
+          "collapseWarnings": 0,
+          "seasonalMovement": 0,
+          "lastChangeDay": 0
+        }
+      },
+      "diplomacy": {
+        "asterwyn|reedmarch": {
+          "a": "reedmarch",
+          "b": "asterwyn",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "reedmarch|saltleague": {
+          "a": "reedmarch",
+          "b": "saltleague",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "asterwyn|crownspine": {
+          "a": "asterwyn",
+          "b": "crownspine",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "crownspine|saltleague": {
+          "a": "crownspine",
+          "b": "saltleague",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "sahri_wells|stair_guilds": {
+          "a": "sahri_wells",
+          "b": "stair_guilds",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "red_sultanate|sahri_wells": {
+          "a": "sahri_wells",
+          "b": "red_sultanate",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "red_sultanate|stair_guilds": {
+          "a": "red_sultanate",
+          "b": "stair_guilds",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "pearl_bight|sahri_wells": {
+          "a": "pearl_bight",
+          "b": "sahri_wells",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "pearl_bight|saltleague": {
+          "a": "pearl_bight",
+          "b": "saltleague",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "whitewake|winter_court": {
+          "a": "whitewake",
+          "b": "winter_court",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "icehollow|whitewake": {
+          "a": "whitewake",
+          "b": "icehollow",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "icehollow|winter_court": {
+          "a": "icehollow",
+          "b": "winter_court",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "frostmarch|whitewake": {
+          "a": "frostmarch",
+          "b": "whitewake",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "frostmarch|winter_court": {
+          "a": "frostmarch",
+          "b": "winter_court",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "cinder_free|terrace_union": {
+          "a": "cinder_free",
+          "b": "terrace_union",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "ashglass_march|cinder_free": {
+          "a": "cinder_free",
+          "b": "ashglass_march",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "ashglass_march|terrace_union": {
+          "a": "terrace_union",
+          "b": "ashglass_march",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "cinder_free|sunforge": {
+          "a": "sunforge",
+          "b": "cinder_free",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "ashglass_march|sunforge": {
+          "a": "sunforge",
+          "b": "ashglass_march",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "reef_cantons|tide_assembly": {
+          "a": "tide_assembly",
+          "b": "reef_cantons",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "storm_peaks|tide_assembly": {
+          "a": "tide_assembly",
+          "b": "storm_peaks",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "pearl_bight|reef_cantons": {
+          "a": "reef_cantons",
+          "b": "pearl_bight",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "saltleague|storm_peaks": {
+          "a": "storm_peaks",
+          "b": "saltleague",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "blackcurrent|tide_assembly": {
+          "a": "blackcurrent",
+          "b": "tide_assembly",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "blackcurrent|reef_cantons": {
+          "a": "blackcurrent",
+          "b": "reef_cantons",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "grassroad|skyvillage": {
+          "a": "grassroad",
+          "b": "skyvillage",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "grassroad|iron_citadel": {
+          "a": "grassroad",
+          "b": "iron_citadel",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "iron_citadel|skyvillage": {
+          "a": "skyvillage",
+          "b": "iron_citadel",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "grassroad|old_tracks": {
+          "a": "old_tracks",
+          "b": "grassroad",
+          "tension": 23,
+          "status": "cooperation",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        },
+        "iron_citadel|old_tracks": {
+          "a": "old_tracks",
+          "b": "iron_citadel",
+          "tension": 65,
+          "status": "strained",
+          "conflictMonths": 0,
+          "cooldown": 0,
+          "treatyYears": 0,
+          "tradeSanctions": false
+        }
+      },
+      "notables": {
+        "reedmarch_civic": {
+          "id": "reedmarch_civic",
+          "name": "Iri Stonepath",
+          "polity": "reedmarch",
+          "institution": "naturalists_guild",
+          "public": false,
+          "origin": "Reedmarch Compact professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "reedmarch_field": {
+          "id": "reedmarch_field",
+          "name": "Meri Wellkeeper",
+          "polity": "reedmarch",
+          "institution": "marsh_council",
+          "public": false,
+          "origin": "Reedmarch Compact professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "asterwyn_civic": {
+          "id": "asterwyn_civic",
+          "name": "Kora Wellkeeper",
+          "polity": "asterwyn",
+          "institution": "orchard_college",
+          "public": false,
+          "origin": "Asterwyn Crown professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "asterwyn_field": {
+          "id": "asterwyn_field",
+          "name": "Ordan Duskmark",
+          "polity": "asterwyn",
+          "institution": "hearth_court",
+          "public": false,
+          "origin": "Asterwyn Crown professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "crownspine_civic": {
+          "id": "crownspine_civic",
+          "name": "Issa Sailglass",
+          "polity": "crownspine",
+          "institution": "gate_monastery",
+          "public": false,
+          "origin": "Crownspine Holds professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "crownspine_field": {
+          "id": "crownspine_field",
+          "name": "Daim Coldstream",
+          "polity": "crownspine",
+          "institution": "ridge_rescue",
+          "public": false,
+          "origin": "Crownspine Holds professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "saltleague_civic": {
+          "id": "saltleague_civic",
+          "name": "Ansel Wellkeeper",
+          "polity": "saltleague",
+          "institution": "salt_exchange",
+          "public": false,
+          "origin": "Mirror Gulf League professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "saltleague_field": {
+          "id": "saltleague_field",
+          "name": "Solwen Tidewatch",
+          "polity": "saltleague",
+          "institution": "mirror_academy",
+          "public": false,
+          "origin": "Mirror Gulf League professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "sahri_wells_civic": {
+          "id": "sahri_wells_civic",
+          "name": "Meri Coilstone",
+          "polity": "sahri_wells",
+          "institution": "well_collegium",
+          "public": false,
+          "origin": "Sahri Well Covenant professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "sahri_wells_field": {
+          "id": "sahri_wells_field",
+          "name": "Silas of Many Tracks",
+          "polity": "sahri_wells",
+          "institution": "cup_guard",
+          "public": false,
+          "origin": "Sahri Well Covenant professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "red_sultanate_civic": {
+          "id": "red_sultanate_civic",
+          "name": "Solwen Tidewatch",
+          "polity": "red_sultanate",
+          "institution": "dune_guard",
+          "public": false,
+          "origin": "Red Dune Sultanate professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "red_sultanate_field": {
+          "id": "red_sultanate_field",
+          "name": "Ansel Greenway",
+          "polity": "red_sultanate",
+          "institution": "saffron_consortium",
+          "public": false,
+          "origin": "Red Dune Sultanate professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "stair_guilds_civic": {
+          "id": "stair_guilds_civic",
+          "name": "Issa Stonepath",
+          "polity": "stair_guilds",
+          "institution": "route_keepers",
+          "public": false,
+          "origin": "Copper Stair Charter professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "stair_guilds_field": {
+          "id": "stair_guilds_field",
+          "name": "Tallis Coilstone",
+          "polity": "stair_guilds",
+          "institution": "stair_institute",
+          "public": false,
+          "origin": "Copper Stair Charter professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "pearl_bight_civic": {
+          "id": "pearl_bight_civic",
+          "name": "Silas Coldstream",
+          "polity": "pearl_bight",
+          "institution": "garden_wardens",
+          "public": false,
+          "origin": "Pearl Bight Republic professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "pearl_bight_field": {
+          "id": "pearl_bight_field",
+          "name": "Ansel Oathwell",
+          "polity": "pearl_bight",
+          "institution": "rain_school",
+          "public": false,
+          "origin": "Pearl Bight Republic professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "whitewake_civic": {
+          "id": "whitewake_civic",
+          "name": "Thalen Ashbridge",
+          "polity": "whitewake",
+          "institution": "ice_rescue",
+          "public": false,
+          "origin": "Whitewake Jarldoms professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "whitewake_field": {
+          "id": "whitewake_field",
+          "name": "Sova of Highwater",
+          "polity": "whitewake",
+          "institution": "whitewake_court",
+          "public": false,
+          "origin": "Whitewake Jarldoms professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "icehollow_civic": {
+          "id": "icehollow_civic",
+          "name": "Tova Duskmark",
+          "polity": "icehollow",
+          "institution": "aurora_academy",
+          "public": false,
+          "origin": "Icehollow Monastery Lands professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "icehollow_field": {
+          "id": "icehollow_field",
+          "name": "Yar Brightroot",
+          "polity": "icehollow",
+          "institution": "veil_archive",
+          "public": false,
+          "origin": "Icehollow Monastery Lands professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "winter_court_civic": {
+          "id": "winter_court_civic",
+          "name": "Thalen Ashbridge",
+          "polity": "winter_court",
+          "institution": "bough_council",
+          "public": false,
+          "origin": "Winterwood Commons professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "winter_court_field": {
+          "id": "winter_court_field",
+          "name": "Fenna Reedhand",
+          "polity": "winter_court",
+          "institution": "bough_council",
+          "public": false,
+          "origin": "Winterwood Commons professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "frostmarch_civic": {
+          "id": "frostmarch_civic",
+          "name": "Solwen of Highwater",
+          "polity": "frostmarch",
+          "institution": "north_watch",
+          "public": false,
+          "origin": "Frostmarch Protectorate professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "frostmarch_field": {
+          "id": "frostmarch_field",
+          "name": "Vessa Stonepath",
+          "polity": "frostmarch",
+          "institution": "north_watch",
+          "public": false,
+          "origin": "Frostmarch Protectorate professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "cinder_free_civic": {
+          "id": "cinder_free_civic",
+          "name": "Issa Oathwell",
+          "polity": "cinder_free",
+          "institution": "forge_university",
+          "public": false,
+          "origin": "Free Forges of Kareth professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "cinder_free_field": {
+          "id": "cinder_free_field",
+          "name": "Meir Reedhand",
+          "polity": "cinder_free",
+          "institution": "glass_workers",
+          "public": false,
+          "origin": "Free Forges of Kareth professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "terrace_union_civic": {
+          "id": "terrace_union_civic",
+          "name": "Ruhan Skybridge",
+          "polity": "terrace_union",
+          "institution": "sky_school",
+          "public": false,
+          "origin": "Sky Terrace Union professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "terrace_union_field": {
+          "id": "terrace_union_field",
+          "name": "Tallis Tidewatch",
+          "polity": "terrace_union",
+          "institution": "ledge_guard",
+          "public": false,
+          "origin": "Sky Terrace Union professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "ashglass_march_civic": {
+          "id": "ashglass_march_civic",
+          "name": "Tova Oathwell",
+          "polity": "ashglass_march",
+          "institution": "rift_wardens",
+          "public": false,
+          "origin": "Ashglass March professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "ashglass_march_field": {
+          "id": "ashglass_march_field",
+          "name": "Caer Stonepath",
+          "polity": "ashglass_march",
+          "institution": "boundary_lab",
+          "public": false,
+          "origin": "Ashglass March professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "sunforge_civic": {
+          "id": "sunforge_civic",
+          "name": "Sova Ashbridge",
+          "polity": "sunforge",
+          "institution": "sunforgers",
+          "public": false,
+          "origin": "Sunforge Principality professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "sunforge_field": {
+          "id": "sunforge_field",
+          "name": "Ansel Skybridge",
+          "polity": "sunforge",
+          "institution": "sunforgers",
+          "public": false,
+          "origin": "Sunforge Principality professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "tide_assembly_civic": {
+          "id": "tide_assembly_civic",
+          "name": "Meri Coilstone",
+          "polity": "tide_assembly",
+          "institution": "tide_assembly_house",
+          "public": false,
+          "origin": "Tide Assembly professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "tide_assembly_field": {
+          "id": "tide_assembly_field",
+          "name": "Rima Greenway",
+          "polity": "tide_assembly",
+          "institution": "coral_healers",
+          "public": false,
+          "origin": "Tide Assembly professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "reef_cantons_civic": {
+          "id": "reef_cantons_civic",
+          "name": "Speaker Zerin Ashbridge",
+          "polity": "reef_cantons",
+          "institution": "reef_consistory",
+          "public": false,
+          "origin": "Reef Cantons professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "reef_cantons_field": {
+          "id": "reef_cantons_field",
+          "name": "Speaker Kora Reedhand",
+          "polity": "reef_cantons",
+          "institution": "current_singers",
+          "public": false,
+          "origin": "Reef Cantons professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "storm_peaks_civic": {
+          "id": "storm_peaks_civic",
+          "name": "Helian Brightroot",
+          "polity": "storm_peaks",
+          "institution": "storm_school",
+          "public": false,
+          "origin": "Stormpeak Freeholds professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "storm_peaks_field": {
+          "id": "storm_peaks_field",
+          "name": "Meir Ashbridge",
+          "polity": "storm_peaks",
+          "institution": "storm_school",
+          "public": false,
+          "origin": "Stormpeak Freeholds professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "blackcurrent_civic": {
+          "id": "blackcurrent_civic",
+          "name": "Meir Coldstream",
+          "polity": "blackcurrent",
+          "institution": "current_exchange",
+          "public": false,
+          "origin": "Blackcurrent Harbours professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "blackcurrent_field": {
+          "id": "blackcurrent_field",
+          "name": "Yar Oathwell",
+          "polity": "blackcurrent",
+          "institution": "sea_justice",
+          "public": false,
+          "origin": "Blackcurrent Harbours professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "grassroad_civic": {
+          "id": "grassroad_civic",
+          "name": "Kesh Brightroot",
+          "polity": "grassroad",
+          "institution": "herd_council",
+          "public": false,
+          "origin": "Grassroad Confederacy professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "independent",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Secular Practice Foundation",
+            "capacity": 60,
+            "dc": 13
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "grassroad_field": {
+          "id": "grassroad_field",
+          "name": "Caer of Many Tracks",
+          "polity": "grassroad",
+          "institution": "grassroad_clinic",
+          "public": false,
+          "origin": "Grassroad Confederacy professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "skyvillage_civic": {
+          "id": "skyvillage_civic",
+          "name": "Silas of Highwater",
+          "polity": "skyvillage",
+          "institution": "open_peak",
+          "public": false,
+          "origin": "Skyvillage League professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "meridian",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Foundation Tempering",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "skyvillage_field": {
+          "id": "skyvillage_field",
+          "name": "Solwen of Highwater",
+          "polity": "skyvillage",
+          "institution": "sky_cartographers",
+          "public": false,
+          "origin": "Skyvillage League professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "body",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Body Cycle I",
+            "capacity": 150,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "iron_citadel_civic": {
+          "id": "iron_citadel_civic",
+          "name": "Solwen Stonepath",
+          "polity": "iron_citadel",
+          "institution": "redwall_warcollege",
+          "public": false,
+          "origin": "Iron Citadel Dominion professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "arcane",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Core Seeding",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "middle-aged",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "iron_citadel_field": {
+          "id": "iron_citadel_field",
+          "name": "Sova Greenway",
+          "polity": "iron_citadel",
+          "institution": "iron_law_office",
+          "public": false,
+          "origin": "Iron Citadel Dominion professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "rift",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Rift Sense",
+            "capacity": 50,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        },
+        "old_tracks_civic": {
+          "id": "old_tracks_civic",
+          "name": "Speaker Daim Oathwell",
+          "polity": "old_tracks",
+          "institution": "beast_parliament",
+          "public": false,
+          "origin": "Old Tracks Beast Commonwealth professional network",
+          "profession": "civic representative",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "soul",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Soul Phase I",
+            "capacity": 100,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "public-service practice",
+          "memory": [],
+          "life": {
+            "ageBand": "adult",
+            "community": "local institutions",
+            "goal": "protect public service"
+          }
+        },
+        "old_tracks_field": {
+          "id": "old_tracks_field",
+          "name": "Speaker Ruhan Reedhand",
+          "polity": "old_tracks",
+          "institution": "translation_fellowship",
+          "public": false,
+          "origin": "Old Tracks Beast Commonwealth professional network",
+          "profession": "field specialist",
+          "professional": {
+            "rank": 1,
+            "pp": 0,
+            "masteryTrial": false
+          },
+          "discipline": {
+            "path": "specialist",
+            "stage": 0,
+            "trainingPoints": 0,
+            "ready": false,
+            "trainingMonths": 0,
+            "next": "Specialist Rank I",
+            "capacity": 40,
+            "dc": 12
+          },
+          "injuryMonths": 0,
+          "mentoring": "institutional instruction",
+          "memory": [],
+          "life": {
+            "ageBand": "young adult",
+            "community": "local institutions",
+            "goal": "improve field expertise"
+          }
+        }
+      },
+      "market": {
+        "reedmarch": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "asterwyn": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "crownspine": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "saltleague": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "sahri_wells": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "red_sultanate": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "stair_guilds": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "pearl_bight": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "whitewake": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "icehollow": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "winter_court": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "frostmarch": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "cinder_free": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "terrace_union": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "ashglass_march": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "sunforge": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "tide_assembly": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "reef_cantons": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "storm_peaks": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "blackcurrent": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "grassroad": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "skyvillage": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "iron_citadel": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        },
+        "old_tracks": {
+          "grain": 1,
+          "feed": 1,
+          "materials": 1,
+          "medicine": 1,
+          "vael": 1
+        }
+      },
+      "mythic": {
+        "mirrorrush_shrine": {
+          "charge": 41,
+          "seal": 72,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "riftglass_vault": {
+          "charge": 63,
+          "seal": 45,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "crownspine_aerie": {
+          "charge": 33,
+          "seal": 82,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "orchard_starwell": {
+          "charge": 68,
+          "seal": 66,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "well_of_two_moons": {
+          "charge": 65,
+          "seal": 61,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "saffron_sandcrypt": {
+          "charge": 57,
+          "seal": 46,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "aurora_ancestor_gate": {
+          "charge": 68,
+          "seal": 79,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "winterwood_witness": {
+          "charge": 61,
+          "seal": 61,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "ashglass_deep": {
+          "charge": 47,
+          "seal": 81,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "ember_crown": {
+          "charge": 51,
+          "seal": 58,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "reef_remembrance": {
+          "charge": 33,
+          "seal": 46,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "rainspire_skygate": {
+          "charge": 32,
+          "seal": 84,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "old_tracks_sanctum": {
+          "charge": 63,
+          "seal": 87,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        },
+        "open_peak_starstairs": {
+          "charge": 68,
+          "seal": 45,
+          "phase": "quiet",
+          "lastChangeDay": 0,
+          "observations": 0
+        }
+      },
+      "chronicle": [],
+      "sealedChronicle": [],
+      "knownSights": [],
+      "orders": [],
+      "counters": {
+        "wars": 0,
+        "peaceTreaties": 0,
+        "changesOfGovernment": 0,
+        "closures": 0,
+        "reopenings": 0,
+        "ecosystemWarnings": 0
+      },
+      "publicKnowledge": {
+        "notes": []
+      }
+    }
+  }
+}

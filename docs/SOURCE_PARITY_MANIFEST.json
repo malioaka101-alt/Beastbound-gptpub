@@ -1,0 +1,580 @@
+{
+  "authority": [
+    "reference/Beastbound_Realms_Unified_Master_Prompt.md",
+    "reference/Beastbound_System_Additions.md",
+    "reference/Beastbound_Table_Rules.md"
+  ],
+  "policy": "Working is reserved for exercised real operations and bounded scaffolds; never equals full Master Prompt completion. Existing sources take priority over this analysis.",
+  "sections": [
+    {
+      "id": 1,
+      "title": "The premise: a civilisation shaped by beastkind",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "world/mythic.js"
+      ],
+      "unfulfilled": "Magical ecology, beast citizens and everyday crafts have examples, but not scene-complete society."
+    },
+    {
+      "id": 2,
+      "title": "World scale and geography",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "world/simulation.js"
+      ],
+      "unfulfilled": "Six continents and 29 biomes exist; detailed travel times, settlements and logistics are incomplete."
+    },
+    {
+      "id": 3,
+      "title": "Cosmology and planes",
+      "implementation": "partial",
+      "evidence": [
+        "world/mythic.js"
+      ],
+      "unfulfilled": "Realm teachings exist; actual planar law, divine limits, afterlife and entry rules are not implemented."
+    },
+    {
+      "id": 4,
+      "title": "History and historical causality",
+      "implementation": "partial",
+      "evidence": [
+        "docs/LIVING_WORLD_BIBLE.md",
+        "world/mythic.js"
+      ],
+      "unfulfilled": "Source-dated rulers, competing archives, historical events and relic provenance incomplete."
+    },
+    {
+      "id": 5,
+      "title": "World state and simulation",
+      "implementation": "coarse tested",
+      "evidence": [
+        "world/simulation.js",
+        "tests/living-world.test.js"
+      ],
+      "unfulfilled": "Sixday/month state is deterministic and persistent; not a simulation of individual citizens or armies."
+    },
+    {
+      "id": 6,
+      "title": "A bestiary capable of supporting hundreds of thousands of species",
+      "implementation": "procedural foundation",
+      "evidence": [
+        "world/bestiary.js",
+        "tests/living-world.test.js"
+      ],
+      "unfulfilled": "Hundreds of thousands of addressable slots are not authored species histories or automatically safe encounter profiles."
+    },
+    {
+      "id": 7,
+      "title": "Individual beast records",
+      "implementation": "partial",
+      "evidence": [
+        "engine.js",
+        "rules/unified.js"
+      ],
+      "unfulfilled": "Individual partner records exist; anatomy, ecology, sapience and wound models differ among records."
+    },
+    {
+      "id": 8,
+      "title": "Beast grades, levels and potential",
+      "implementation": "partial",
+      "evidence": [
+        "rules/build.js",
+        "rules/progress.js"
+      ],
+      "unfulfilled": "Level/grade/potential have separate fields; species-specific caps and progression not generally completed."
+    },
+    {
+      "id": 9,
+      "title": "Beast abilities and techniques",
+      "implementation": "partial",
+      "evidence": [
+        "rules/build.js",
+        "engine.js"
+      ],
+      "unfulfilled": "Spell/Qi cost calculators work; verified ability/technique catalogues, learning and cooldowns incomplete."
+    },
+    {
+      "id": 10,
+      "title": "Beast evolution",
+      "implementation": "tested event, partial ecosystem",
+      "evidence": [
+        "rules/progress.js",
+        "tests/source-parity.test.js",
+        "tests/fantasy-canon.test.js"
+      ],
+      "unfulfilled": "Pre-authored evolution form is now mandatory for actual success; branching research, biological consequences and downstream ecology still need per-species content."
+    },
+    {
+      "id": 11,
+      "title": "Beast ecology",
+      "implementation": "coarse tested",
+      "evidence": [
+        "world/simulation.js",
+        "world/bestiary.js"
+      ],
+      "unfulfilled": "Regional ecology now also responds to one genuine funded Naturalists field crew intervention after an authentic report and independent delayed visit; outcomes are bounded, allow failure/cancellation and never conjure species or broad repairs. Food webs, migration, habitat succession, resource dependencies, climate and broader species-driven feedback remain incomplete."
+    },
+    {
+      "id": 12,
+      "title": "Beast intelligence and society",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "rules/bonds.js"
+      ],
+      "unfulfilled": "Rights and nonhuman polities are modeled; individual cultures/languages and autonomous beast courts not fully enacted."
+    },
+    {
+      "id": 13,
+      "title": "Taming is not one universal process",
+      "implementation": "partial",
+      "evidence": [
+        "rules/bonds.js",
+        "engine.js"
+      ],
+      "unfulfilled": "Voluntary consent/approach gates exist; diverse species-specific taming social protocols incomplete."
+    },
+    {
+      "id": 14,
+      "title": "Bond mechanics",
+      "implementation": "tested foundation",
+      "evidence": [
+        "rules/bonds.js",
+        "tests/python-reference.test.js"
+      ],
+      "unfulfilled": "Many bond dimensions, events and fractures work; persistent long-term behavioral agency still GM-led."
+    },
+    {
+      "id": 15,
+      "title": "Contracts and rights",
+      "implementation": "partial",
+      "evidence": [
+        "rules/bonds.js",
+        "world/atlas.js"
+      ],
+      "unfulfilled": "Consent/load safeguards implemented; contracts, rights enforcement, case law and remedies still partial."
+    },
+    {
+      "id": 16,
+      "title": "Partnership and synchronisation",
+      "implementation": "partial",
+      "evidence": [
+        "rules/bonds.js",
+        "tests/python-reference.test.js"
+      ],
+      "unfulfilled": "Ten-stage numeric readiness and consent are modeled; all joint techniques, feedback and true shared evolution are not."
+    },
+    {
+      "id": 17,
+      "title": "Humans are evolving supernatural organisms",
+      "implementation": "partial",
+      "evidence": [
+        "rules/character.js",
+        "rules/disciplines.js"
+      ],
+      "unfulfilled": "Human abilities, evolution, mastery and traits now explicitly separated; full transformation not operational."
+    },
+    {
+      "id": 18,
+      "title": "Shared supernatural origin: the Origin Pattern",
+      "implementation": "conceptual only",
+      "evidence": [
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md",
+        "rules/progress.js"
+      ],
+      "unfulfilled": "Shared Origin Pattern is canonical but has no complete biological simulation across humans and species."
+    },
+    {
+      "id": 19,
+      "title": "Power-system architecture",
+      "implementation": "early routes tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "rules/build.js"
+      ],
+      "unfulfilled": "No universal power ladder; early path milestones executable; multidiscipline interference beyond first stages remains open."
+    },
+    {
+      "id": 20,
+      "title": "Meridian Cultivation and Meridian Evolution",
+      "implementation": "early progression tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "rules/build.js",
+        "tests/source-parity.test.js"
+      ],
+      "unfulfilled": "Foundation/Awakening/Gate 1–108 practice scaffolding; Stage IV–IX breakthrough rites and many deviation treatments incomplete."
+    },
+    {
+      "id": 21,
+      "title": "Arcane Circle Architecture",
+      "implementation": "early progression tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "rules/build.js"
+      ],
+      "unfulfilled": "Second Circle construction and its two genuinely earned channels now permit independently learned Ward + Spark in source-verified actual combat, with real casting dice and combined Mana costs. Other Second Circle spells, Circles III–IX, complete spell-learning catalogues, load/interference, geometry transitions and wider Arcane applications remain unfinished."
+    },
+    {
+      "id": 22,
+      "title": "Soul Cultivation and Soul Engineering",
+      "implementation": "first phase tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "rules/build.js"
+      ],
+      "unfulfilled": "Phase I Soul Perception can now sense genuine nearby life-signs from source-attested animal encounters or recent real in-person human meetings (canonical and independent workers), with original check, energy and time. Metre-level city population scans, Soul Phases II–VII, consensual Soul Engineering, trauma repair, contracts and advanced resonance abilities remain unimplemented."
+    },
+    {
+      "id": 23,
+      "title": "Body Refinement and Physique Evolution",
+      "implementation": "first cycle tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "rules/build.js"
+      ],
+      "unfulfilled": "Earned Muscle-Tendon Cycle I now expresses its previously established M1 natural physical force through source-verified Strength-based mundane attacks in wound combat, without magnitude stacking or a mandatory beast partner. Later tissue/organ cycles, comprehensive physical injury tolerance, unarmed/natural reach and specialised transformations remain unimplemented."
+    },
+    {
+      "id": 24,
+      "title": "Beast-Origin and Lineage Arts",
+      "implementation": "calculators only",
+      "evidence": [
+        "rules/build.js",
+        "engine.js"
+      ],
+      "unfulfilled": "Integration load and rejection DC formulas exist; full eight-phase trait integration with safeguards not available in private runner."
+    },
+    {
+      "id": 25,
+      "title": "Rift Practice",
+      "implementation": "first step tested",
+      "evidence": [
+        "rules/disciplines.js",
+        "world/mythic.js"
+      ],
+      "unfulfilled": "Rift Sense training works; anchors, spatial transit and domain effects are not tested systems."
+    },
+    {
+      "id": 26,
+      "title": "Specialist disciplines",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "rules/research.js",
+        "rules/build.js"
+      ],
+      "unfulfilled": "Craft, research, and distinct professions exist; not all specialist techniques and tools are executable."
+    },
+    {
+      "id": 27,
+      "title": "Sacred and divine traditions",
+      "implementation": "world lore only",
+      "evidence": [
+        "world/mythic.js"
+      ],
+      "unfulfilled": "Cultures and shrines exist; divine beings and binding blessing limits are not mechanically verified."
+    },
+    {
+      "id": 28,
+      "title": "Human evolutionary stages",
+      "implementation": "stage ledger only",
+      "evidence": [
+        "rules/build.js",
+        "rules/character.js"
+      ],
+      "unfulfilled": "Human evolution is distinct from discipline ranks but individual transformation crises/effects are not operational."
+    },
+    {
+      "id": 29,
+      "title": "Human attributes and multidimensional potential",
+      "implementation": "seeded profile tested",
+      "evidence": [
+        "rules/character.js",
+        "tests/source-parity.test.js"
+      ],
+      "unfulfilled": "Four detailed current capability domains and sealed independent potential dimensions; deeper clinical protocols and earned change remain partial."
+    },
+    {
+      "id": 30,
+      "title": "Human evolutionary forms and transformation",
+      "implementation": "not implemented",
+      "evidence": [
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+      ],
+      "unfulfilled": "No unified duration/cost/injury/reversion pipeline for physical human transformation states."
+    },
+    {
+      "id": 31,
+      "title": "Independent humanity and beast-rejecting philosophies",
+      "implementation": "narrative and social",
+      "evidence": [
+        "world/atlas.js",
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+      ],
+      "unfulfilled": "Independent secular/anti-beast philosophy exists in lore; full career equivalence and legal conflict not complete."
+    },
+    {
+      "id": 32,
+      "title": "Beast-related professions",
+      "implementation": "partial",
+      "evidence": [
+        "world/notables.js",
+        "world/atlas.js"
+      ],
+      "unfulfilled": "Professions represented; full qualifications, wages, apprenticeships and competency proofs missing."
+    },
+    {
+      "id": 33,
+      "title": "Guilds, academies, sects and organisations",
+      "implementation": "regional simulation",
+      "evidence": [
+        "world/atlas.js",
+        "world/simulation.js"
+      ],
+      "unfulfilled": "48 institutions with changing conditions, not complete curricula, access decisions or NPC leadership."
+    },
+    {
+      "id": 34,
+      "title": "Kingdoms, empires and noble families",
+      "implementation": "coarse simulation",
+      "evidence": [
+        "world/atlas.js",
+        "world/simulation.js"
+      ],
+      "unfulfilled": "24 states and diplomacy/clocks; real military logistics, dynastic genealogy and peace-process logic missing."
+    },
+    {
+      "id": 35,
+      "title": "Economy and resource systems",
+      "implementation": "partial",
+      "evidence": [
+        "world/simulation.js",
+        "rules/unified.js"
+      ],
+      "unfulfilled": "Regional indices and Scales ledger work; household property, contracts, individual prices and trade credit missing."
+    },
+    {
+      "id": 36,
+      "title": "Laws and social systems",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "rules/bonds.js"
+      ],
+      "unfulfilled": "Regional rights and consent rules; procedural court trials and punishments unavailable."
+    },
+    {
+      "id": 37,
+      "title": "Competition culture",
+      "implementation": "prototype",
+      "evidence": [
+        "engine.js",
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+      ],
+      "unfulfilled": "Events and contests exist in legacy prototype; judges, calendar and promotion/licence systems incomplete."
+    },
+    {
+      "id": 38,
+      "title": "Separate ranking systems",
+      "implementation": "partial",
+      "evidence": [
+        "rules/world.js",
+        "engine.js"
+      ],
+      "unfulfilled": "Independent score registers and Concord arithmetic; full qualification and ranking governance partial."
+    },
+    {
+      "id": 39,
+      "title": "The player is a person, not the centre of the world",
+      "implementation": "GM-led",
+      "evidence": [
+        "reference/Beastbound_Table_Rules.md",
+        "docs/PROJECT_CHAT_INSTRUCTIONS.md"
+      ],
+      "unfulfilled": "Player freedom/civic presence are narration rules; NPC motivations not inferred mechanically."
+    },
+    {
+      "id": 40,
+      "title": "Character creation",
+      "implementation": "tested independent start",
+      "evidence": [
+        "scripts/new-campaign.js",
+        "tests/new-campaign.test.js"
+      ],
+      "unfulfilled": "Seeded male starts, backgrounds, family and date; universal demographic variability and examinations incomplete."
+    },
+    {
+      "id": 41,
+      "title": "Natural language and player personality",
+      "implementation": "GM-led",
+      "evidence": [
+        "reference/Beastbound_Table_Rules.md"
+      ],
+      "unfulfilled": "Natural language actions require careful interpretation; no autonomous prose engine can validate every choice."
+    },
+    {
+      "id": 42,
+      "title": "NPC individuality",
+      "implementation": "partial",
+      "evidence": [
+        "world/notables.js",
+        "rules/agendas.js"
+      ],
+      "unfulfilled": "Autonomous professional progression and agendas; full long-term personal goals and dialogue memory partial."
+    },
+    {
+      "id": 43,
+      "title": "Beast personalities and communication",
+      "implementation": "partial",
+      "evidence": [
+        "rules/bonds.js",
+        "engine.js"
+      ],
+      "unfulfilled": "Sapience/consent and bonds exist; full autonomous language/culture and beast interaction history incomplete."
+    },
+    {
+      "id": 44,
+      "title": "Time and daily life",
+      "implementation": "tested calendar",
+      "evidence": [
+        "rules/world.js",
+        "world/simulation.js",
+        "tests/living-world.test.js"
+      ],
+      "unfulfilled": "Overnight sleep now advances independent world sixday/month ticks in addition to real hours, and an open-country scout can find a temporary legitimate campsite through source-grounded terrain and weather. Dynamic daily weather, broader NPC personal timetables and many travel hazards remain partly scene-led."
+    },
+    {
+      "id": 45,
+      "title": "Actions and resolution",
+      "implementation": "tested check core",
+      "evidence": [
+        "rules/core.js",
+        "tests/python-reference.test.js"
+      ],
+      "unfulfilled": "d20 degrees, natural adjustments and skill rank work; GM still decides feasibility and contextual DC."
+    },
+    {
+      "id": 46,
+      "title": "Combat",
+      "implementation": "partial combat",
+      "evidence": [
+        "rules/combat.js",
+        "rules/encounter.js"
+      ],
+      "unfulfilled": "Wounds, Ward and contested exchange tested; movement, spell legality, terrain and complete tactics partial."
+    },
+    {
+      "id": 47,
+      "title": "Quests, contracts and opportunities",
+      "implementation": "partial",
+      "evidence": [
+        "engine.js",
+        "world/simulation.js"
+      ],
+      "unfulfilled": "Naturalists public field requests now lead through personally witnessed survey, independent guild review, funded approval and a real later site visit with risk, cancellation and measurable small ecological consequences. Diverse issuers, negotiation, wages, recurring occupations, contractual stakes and extensive opportunity outcomes remain unfinished."
+    },
+    {
+      "id": 48,
+      "title": "Training and progression",
+      "implementation": "early paths tested",
+      "evidence": [
+        "rules/progress.js",
+        "rules/disciplines.js"
+      ],
+      "unfulfilled": "Training tracks and first power milestones now verified; specialisations, later paths and population careers partial."
+    },
+    {
+      "id": 49,
+      "title": "Injuries, health and recovery",
+      "implementation": "tested wound core",
+      "evidence": [
+        "rules/unified.js",
+        "rules/combat.js"
+      ],
+      "unfulfilled": "The existing wound/recovery model now accepts genuinely scouted, hash-verified outdoor sleeping sites, without making dangerous sites safe or instantly curing serious injuries; advanced surgery, exposure, long-term rehabilitation and lasting critical injuries remain partial."
+    },
+    {
+      "id": 50,
+      "title": "Inventory, equipment and crafting",
+      "implementation": "partial",
+      "evidence": [
+        "rules/unified.js",
+        "engine.js"
+      ],
+      "unfulfilled": "The common Lumenfall poultice now permits repeat genuine batches when independently obtained reagents, stamina, source-authored bench and time exist, without an arbitrary daily attempt gate. Separate original craft rolls and resources are stored in append-only evidence while legacy saves retain their first daily record. Diverse recipes, realistic materials quality, equipment maintenance/durability, broader tools, rare provenance and flexible safe workspaces remain unfinished."
+    },
+    {
+      "id": 51,
+      "title": "Continuity ledger",
+      "implementation": "tested save protocol",
+      "evidence": [
+        "scripts/chat-turn.js",
+        "tests/chat-runtime.test.js"
+      ],
+      "unfulfilled": "Turn IDs, journal/pickup work; detailed conversational knowledge and every ongoing agreement not automated."
+    },
+    {
+      "id": 52,
+      "title": "Status interface",
+      "implementation": "presentation tested",
+      "evidence": [
+        "docs/IN_CHAT_SYSTEM_HUD.md",
+        "panels.js"
+      ],
+      "unfulfilled": "Compact player-known display; UI is client-authored, engine cannot guarantee animation/rendering across platforms."
+    },
+    {
+      "id": 53,
+      "title": "Narrative style",
+      "implementation": "GM-led",
+      "evidence": [
+        "reference/Beastbound_Table_Rules.md",
+        "docs/PROJECT_CHAT_INSTRUCTIONS.md"
+      ],
+      "unfulfilled": "Naturalistic prose is a human-facing GM rule, not mechanistically testable."
+    },
+    {
+      "id": 54,
+      "title": "Player freedom",
+      "implementation": "GM-led",
+      "evidence": [
+        "docs/PROJECT_CHAT_INSTRUCTIONS.md",
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+      ],
+      "unfulfilled": "Freeform choice and no forced menus enforced narratively, not by simulated-world AI."
+    },
+    {
+      "id": 55,
+      "title": "Build the world before beginning",
+      "implementation": "partial",
+      "evidence": [
+        "world/atlas.js",
+        "world/simulation.js"
+      ],
+      "unfulfilled": "Atlas/world generated prior to play but many local settlements, mysteries and citizens not authored."
+    },
+    {
+      "id": 56,
+      "title": "Character creation and opening",
+      "implementation": "tested start",
+      "evidence": [
+        "scripts/new-campaign.js",
+        "tests/new-campaign.test.js"
+      ],
+      "unfulfilled": "Independent seeded campaign, scene, date, companion/family possible; professional power enrolment not fully integrated."
+    },
+    {
+      "id": 57,
+      "title": "Final governing principles",
+      "implementation": "GM governance",
+      "evidence": [
+        "docs/PROJECT_CHAT_INSTRUCTIONS.md",
+        "reference/Beastbound_Realms_Unified_Master_Prompt.md"
+      ],
+      "unfulfilled": "Final governing principles require ongoing human GM judgement and truthful incomplete declarations."
+    }
+  ]
+}

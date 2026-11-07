@@ -1,0 +1,22 @@
+# Verified Copperwood Field Assessment — first playable competitive event
+
+This is a **limited, source-scoped in-world guild assessment**, not a licence to run arbitrary prototype tournaments. The canonical Beastbound Master Prompt values independently held competitions, multiple ranking ladders, qualifications and consequences. The existing engine already defines the Copperwood Field Assessment (Morrowfen Crossing, Ecology, fieldwork ranking, entry 5 Talons, possible 24-Talon award, Survival/Wisdom judging DC 13) and the crossing's guild registrar Elira Moss. This procedure uses those established facts rather than introducing a favourable event on demand.
+
+## Independent event schedule and genuine attendance
+
+The local guild is provisionally modeled as accepting completed Copperwood field reports every **sixth simulation day**, within an actual **09:00–15:00** registration window at Morrowfen Crossing. This sixday cadence is an explicit narrow engine/table scheduling rule, not a quotation from the full source, not proof of an official civil calendar date, and not a generic calendar/event system. The engine computes the upcoming sixth day from world elapsed time; an official calendar anchor does not rewrite past bulletin dates.
+
+- At the crossing with no immediate beast encounter or combat, `competition.notice` (no parameters) spends five in-world minutes to witness the actual scheduled public assessment bulletin. It records the future event day, registrar, fixed fees and authoritative source in the saved ledger. A player cannot choose the day, judge or reward. Another notice for the same event cannot be acquired.
+- `competition.status` (no parameters) is read-only. It shows only a genuinely witnessed upcoming notice, whether today's registration was completed, and the player's own recorded outcomes. It does not reveal a remote unseen bulletin or hidden NPC state.
+- `competition.fieldAssessment` takes **only** a previously resolved `checkId` corresponding to a genuine `world.habitatSurvey` in **Copperwood Verge (`forest`)**. The check must have been completed in the current sixday and authenticated by the original scene event hash, the actual Survival/Wisdom check, the roll-log hash, the original interpreted result and the once-consumed scene witness. Untested assertions, forged scores, old prototype sightings or unrelated fen/hills reports fail before payment.
+- The player must be physically at the crossing on the **sixth day** during 09:00–15:00 and still have an **unused** notice for that event. Submission costs the actual five Talons and **120 in-world minutes**. The guild registrar grades the original report using its recorded total against the event's original DC 13: Distinction (margin +10), Merit (+5), Pass (0), or Unplaced (negative).
+- A placed result earns `min(30, 10 + margin)` fieldwork ranking points, an existing competition qualification, +2 guild reputation and the original 24-Talon prize. Unplaced submissions consume their entry fee and earn no prize or ranking points. There is **no second die**, no fresh PP roll and no automatic beast Grade.
+- A persistent per-event receipt and globally used report ID prohibit duplicate registration, second prizes, second ratings or re-submitting the same report next sixday. New real fieldwork and a different scheduled event are needed.
+
+The independent, participant-specific scoring of a local guild judge is approximated by the old single-report field assessment formula. This is **not** a full competition bracket, adjudication by multiple autonomous competitors, a nationwide ranking season, arbitrary official access, ceremony/awards scheduler or comprehensive qualification licensing system. There is no general authority to use `compete <id>` or grant rewards for other competitions.
+
+## Example play sequence
+
+At the crossing: `mode:"rule", system:"competition", operation:"notice", params:{}`. Travel to Copperwood Verge and call `world.habitatSurvey`, then resolve the returned `checkId` via `mode:"check"`. Return to the crossing during the announced sixth-day time window and submit `mode:"rule", system:"competition", operation:"fieldAssessment", params:{"checkId":"<the_actual_prior_id>"}`. To inspect the genuine public record, use `competition.status`.
+
+For tests, `tests/field-competition.test.js` uses only disposable saves. This addition does not alter historical competition records, original campaign saves, raw reference formulas, or already completed rankings.

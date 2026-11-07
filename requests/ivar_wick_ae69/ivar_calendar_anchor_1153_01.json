@@ -1,0 +1,15 @@
+{
+  "id": "ivar_calendar_anchor_1153_01",
+  "campaign": "ivar_wick_ae69",
+  "mode": "rule",
+  "system": "world",
+  "operation": "setCalendar",
+  "params": {
+    "date": {
+      "year": 1153,
+      "month": 10,
+      "day": 5
+    },
+    "source": "Public civil almanac at Lumenfall Annex, recorded at the campaign opening"
+  }
+}

@@ -1,0 +1,25 @@
+# Narrow source-verified external rescue — a real physician, not the player's free action
+
+The canonical Beastbound world requires actual rescue/rehabilitation, nonlethal consequences, persistent injuries and independent agency. A previously knocked-out protagonist became unable to act but lacked a supported external rescue process. **This is the first tightly bounded third-party emergency response**, not a broad wilderness evacuation system or specialist surgery.
+
+## Reproducible external witness
+
+The private wound-combat system now records an immutable SHA-256 digest and original log event index for each real post-combat collapse, including actual battlefield location, independently sourced opponent disposition, observed incapacitation status and world minute.
+
+A cautious or defensive animal whose *pre-assessed combat behaviour is nonlethal* and whose own attack has disabled an opponent now **withdraws after the attack** under one explicitly limited behavioural ruling. The record says so and retains the original opponent's species/personality evidence. Territorial/predatory or lethal assailants are **not** assumed to withdraw. An animal fleeing before an attack cannot also cause a knockout. The player has no operation to choose the opponent's disposition, claim the area is clear or backdate the incident.
+
+The only supported external responder is **Dr Vael**, the existing explicitly named Origin-pattern physician located at **Lumenfall Annex** (`academy`), where the existing real `clinic` facility exists. A genuine nonlethal `knocked_out` incident must have occurred **there**, and an independently recorded safe opponent departure must precede any intervention. There is no new supernatural ambulance, invented rescuer, instant long-range travel, phantom backup or default rescue for crossings, ruins, swamps or forests. An encounter in the academy itself needs legitimate provenance: the ordinary local wilderness spawning rules do not automatically put an aggressive beast on campus. The tests use explicitly disposable assessed battle fixtures, not live fabricated encounters.
+
+## Authoritative operation and outcome
+
+The **outside world**, not an unconscious player's spoken action, may resolve `mode:"rule", system:"health", operation:"physicianRescue", params:{}` during the supported **08:00–17:00** daytime response period, within **60 minutes of the real collapse**. The patient must still be `knocked_out`, with a real Critical wound, no unhandled encounter/fight and the existing authoritative wound model. The original defeat log event/hash, assessed animal behaviour, its actual departure and the named real physician are independently checked **before** the simulated intervention. No caller may choose a medical success check, wound reduction, rescuer, response delay, treatment bill or outcome.
+
+Dr Vael attends for 30 real minutes, then monitors for four real hours. This consumes **270 in-world minutes**, advances the actual world and the save's off-screen calendar if relevant, and adds a persistent one-time clinical response receipt. The player remains **incapacitated**, under medical observation. Their exact Light/Serious/Critical wounds remain unchanged, original HP remains historical, no additional die is rolled and no contract/power/skill/money/item is awarded. The physician can render immediate attention and document the condition but cannot instantly repair a Critical injury by assertion. This small emergency response is conservatively treated as a **non-billed initial duty of care**; no general free healthcare right or insurer is established.
+
+`health.rescueStatus` is read-only and reveals the patient's consciousness and whether a genuinely witnessed safe nearby physician response is available. It does not conjure hidden NPC routes. Reuse of the same witnessed defeat is barred by a durable saved receipt and the global chat turn ID ledger.
+
+The unconscious player remains barred from normal player actions even after this intervention. A specialist, evidence-backed Critical-wound recovery and eventual discharge procedure must still be implemented. An `incapacitated` or `dying` person cannot currently be rescued through this route, and a fatal character is never revived.
+
+**House-ruling boundaries:** The original Master Prompt does not give a universal post-defeat AI, hospital shift roster or specific number of emergency observation hours. The source-derived cautious/defensive retreat, daytime local clinic watch and 270-minute observation are **bounded provisional local adjudications**. No source-wide guarantee of rescue is claimed.
+
+`tests/physician-rescue.test.js` checks genuinely resolved independent cautious/predatory defeat, source hash and biome conditions, real doctor's presence, unsupported remote and late calls, exact four-hour observation plus 30-minute attendance, preserved Critical wounds, no new dice, one case per defeat, file-backed replay, and no unconsciously chosen actions. All tests use disposable saves; no active campaign changes.

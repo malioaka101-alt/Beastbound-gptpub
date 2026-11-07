@@ -1,0 +1,139 @@
+name: Beastbound Engine Tests
+# Private-repository minute budget: one complete runner, only for PRs or
+# explicit manual runs. Never duplicate a merge with a push-triggered suite.
+on:
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: beastbound-engine-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  # Keep the existing required check name 'test', but charge just one
+  # runner's runtime instead of four separately rounded runners plus gate.
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run entire regression inventory; stop on first failure
+        shell: bash
+        run: |
+          tests=(
+            tests/smoke.test.js
+            tests/individual-earned-evidence.test.js
+            tests/causal-learning.test.js
+            tests/independent-contacts.test.js
+            tests/foundation-gate-integration.test.js
+            tests/arcane-second-circle.test.js
+            tests/contextual-theory-guidance.test.js
+            tests/flexible-discipline-practice.test.js
+            tests/sapient-beast-personhood.test.js
+            tests/beast-ecological-learning.test.js
+            tests/chat-runtime.test.js
+            tests/npc-conversations.test.js
+            tests/voluntary-person-material-handoffs.test.js
+            tests/social-houses.test.js
+            tests/government-offices.test.js
+            tests/open-civic-petitions.test.js
+            tests/public-hearings.test.js
+            tests/voluntary-mediation.test.js
+            tests/earned-family-service.test.js
+            tests/chat-runner-contract.test.js
+            tests/private-turn-receipt.test.js
+            tests/legacy-social-competition-guard.test.js
+            tests/quest-shortcut-guard.test.js
+            tests/field-competition.test.js
+            tests/first-contact.test.js
+            tests/scene-check-provenance.test.js
+            tests/habitat-survey.test.js
+            tests/wildlife-observation.test.js
+            tests/earned-practice.test.js
+            tests/reed-harvest.test.js
+            tests/core-contest-guard.test.js
+            tests/engine.test.js
+            tests/additions.test.js
+            tests/python-translation.test.js
+            tests/python-reference.test.js
+            tests/unified-chat.test.js
+            tests/panel-gallery.test.js
+            tests/living-world.test.js
+            tests/agent-initiatives.test.js
+            tests/knowledge-diffusion.test.js
+            tests/adaptive-ambitions.test.js
+            tests/professional-peers.test.js
+            tests/professional-peers-longrun.test.js
+            tests/family-members.test.js
+            tests/family-members-longrun.test.js
+            tests/family-mandates.test.js
+            tests/emergent-groups.test.js
+            tests/group-membership.test.js
+            tests/group-membership-runner.test.js
+            tests/person-presence.test.js
+            tests/emergent-people.test.js
+            tests/emergent-careers.test.js
+            tests/time-passage.test.js
+            tests/civil-calendar-evidence.test.js
+            tests/fantasy-canon.test.js
+            tests/new-campaign.test.js
+            tests/bond-witness.test.js
+            tests/bond-care.test.js
+            tests/bond-consent.test.js
+            tests/bond-grade.test.js
+            tests/beast-agency.test.js
+            tests/wild-lives.test.js
+            tests/wild-reencounters.test.js
+            tests/wild-relations.test.js
+            tests/wild-generations.test.js
+            tests/origin-heredity.test.js
+            tests/species-care-plan.test.js
+            tests/evolution-provenance.test.js
+            tests/evolution-bypasses.test.js
+            tests/evolution-consent.test.js
+            tests/evolution-observations.test.js
+            tests/evolution-disclosure.test.js
+            tests/research-provenance.test.js
+            tests/research-habitat-fieldwork.test.js
+            tests/combat-profile.test.js
+            tests/combat-agency.test.js
+            tests/combat-raw-guard.test.js
+            tests/combat-player-attack.test.js
+            tests/open-learning-routes.test.js
+            tests/earned-senses.test.js
+            tests/self-taught-basic-techniques.test.js
+            tests/arcane-spark.test.js
+            tests/arcane-ward.test.js
+            tests/meridian-qi-strike.test.js
+            tests/combat-cover.test.js
+            tests/clinic-and-defeat.test.js
+            tests/physician-rescue.test.js
+            tests/critical-rehabilitation.test.js
+            tests/conscious-critical-referral.test.js
+            tests/field-crafting.test.js
+            tests/creation-design.test.js
+            tests/rank-depth-prototypes.test.js
+            tests/lifelong-mastery.test.js
+            tests/gear-transactions.test.js
+            tests/natural-equipment-combat-bridge.test.js
+            tests/live-provisioner-trade.test.js
+            tests/real-supplies-to-medicine-journey.test.js
+            tests/voluntary-wild-food-offer.test.js
+            tests/shared-material-flow.test.js
+            tests/multi-habitat-material-gathering.test.js
+            tests/shared-physical-work-journeys.test.js
+            tests/native-habitat-material-restoration.test.js
+            tests/natural-creative-work.test.js
+            tests/combat-recover.test.js
+            tests/legacy-injury-migration.test.js
+            tests/wilderness-shelter.test.js
+            tests/source-parity.test.js
+            tests/source-coverage.test.js
+          )
+          for test in "${tests[@]}"; do
+            echo "::group::$test"
+            node "$test" || exit 1
+            echo "::endgroup::"
+          done

@@ -1,0 +1,17 @@
+{
+  "id": "ivar_capability_init_v11_20261106",
+  "ok": true,
+  "applied": true,
+  "revision": 3,
+  "stateHash": "c17f07a8eba8f75b968db5f1c768ef25523537ea0b95592ffa987e7e1ae4bb8a",
+  "clock": "Day 1, 08:30",
+  "output": {
+    "rules": {
+      "profileCreated": true,
+      "attributesPreserved": true
+    }
+  },
+  "events": [],
+  "panel": "╔═ IVAR · 5 LEAFFALL 1153 ═══════╗\n║ 08:30 · Morning · bright       ║\n║ Lumenfall Annex           85 T ║\n║ STA  ██████████          52/52 ║\n║ QI   ██████████          14/14 ║\n╟─ NACRE ────────────────────────╢\n║ Lanternfen Fox · L2     Common ║\n║ ESS  ██████████          18/18 ║\n║ TRUST███████░░░         69/100 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ The silent healing ward      ║\n╚════════════════════════════════╝",
+  "recap": "CAMPAIGN: Ivar Wick (seed 2926136976)\nSCENE: Lumenfall Annex, 5 Leaffall 1153 AC, 08:30. The bell above the healing ward swings without sound. A thin golden crack crosses the wardglass. A healer has just warned apprentice Ivar Wick to keep clear until the cause is known. His lanternfen fox partner Nacre has turned toward the glass. A student holds unused bandages nearby. Ivar has not yet acted.\nPC: apprentice, partner; 85 T\nJOURNAL: The bell over Lumenfall Annex rings without sound. A healer presses two fingers to the warded glass and watches a hairline crack glow gold. A student waits with a stack of unused bandages. | A soundless bell and a cracked ward have interrupted morning lessons at Lumenfall Annex.\nCURRENT: A soundless bell and a cracked ward have interrupted morning lessons at Lumenfall Annex."
+}
