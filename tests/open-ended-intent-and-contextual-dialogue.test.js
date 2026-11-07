@@ -105,7 +105,7 @@ try{
  A.equal(load().world.minutes,beforeGround.world.minutes);
  const prepared=read();
  const tampered=load();
- tampered.table.sceneChecks[pCheck.checkId].dc=2;
+ tampered.table.sceneChecks[pCheck.checkId].dc=6;
  write(tampered);
  const dishonest=read(),dishonestRng=load().rngState;
  A.throws(()=>Turn.execute(file,{id:'gm_forged_difficulty_001',mode:'check',checkId:pCheck.checkId}),
