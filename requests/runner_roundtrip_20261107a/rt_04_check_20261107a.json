@@ -1,0 +1,7 @@
+{
+  "id": "rt_04_check_20261107a",
+  "campaign": "runner_roundtrip_20261107a",
+  "mode": "check",
+  "checkId": "habitat_fen_00000",
+  "expectedHash": "18193ce3c5bad3750cd17880f632e0bcadf83dc2ed6bbe40be282994cd9fa15c"
+}
