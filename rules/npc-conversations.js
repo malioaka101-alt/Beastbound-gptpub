@@ -146,12 +146,14 @@ function converse(s,p={}){
  s.table||={};s.table.npcConversations||={visits:{},records:[]};
  const saved=s.table.npcConversations;saved.visits||={};saved.records||=[];
  if(!Array.isArray(saved.records))throw Error('NPC memory is not a valid list');
- saved.visits[id]||={};
- // Legacy visits prove the actual authored topic, NOT that any unrelated
- // question was asked. An uncertain first question must not counterfeit
- // the original theoretical explanation. Separate records track meetings.
- if(standardWitness&&!saved.visits[id][String(day)])
-  saved.visits[id][String(day)]=record.eventHash;
+ // Legacy visits prove the actual authored topic, NOT that an unrelated
+ // question was asked. Never create even an empty visit map for a wholly
+ // unverified exchange; only the separately witnessed record is retained.
+ if(standardWitness){
+  saved.visits[id]||={};
+  if(!saved.visits[id][String(day)])
+   saved.visits[id][String(day)]=record.eventHash;
+ }
  saved.records.push(record);
  if(!greeted){
   s.npcMemory||={};s.npcMemory[npc.name]=prior+1;
