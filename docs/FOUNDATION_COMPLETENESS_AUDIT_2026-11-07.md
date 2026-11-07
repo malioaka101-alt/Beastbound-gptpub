@@ -1,4 +1,7 @@
 # Beastbound — Foundation-completeness audit
+
+> **Current-state correction (later 7 November 2026):** This document is a dated **108-test historical baseline**. Its claims about an unmerged private PR #140, unavailable Actions execution and nonexistent save/resume verification are **no longer current**. The public successor `malioaka101-alt/Beastbound-gptpub` has merged PRs #1–#7; [113/113 mandatory Node tests passed](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42422519596). Real disposable Actions save/checkpoint/resume/roll recovery is confirmed in [`LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md`](LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md). For the **current, deliberately conservative readiness decision and outstanding limitations**, read [`FINISH_LINE_A_READINESS_2026-11-07.md`](FINISH_LINE_A_READINESS_2026-11-07.md). This preserves the original audit evidence instead of silently rewriting its earlier observations.
+
 **7 November 2026 · Private project · Evidence snapshot: main at `00fd11debc4850357f5c78775641fc55ab4397b8`**
 
 ## Verdict and scope

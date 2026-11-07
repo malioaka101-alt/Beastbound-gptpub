@@ -1,24 +1,26 @@
-# Beastbound private ChatGPT Project execution — technical specification
+# Beastbound ChatGPT Project execution — technical specification
 
-**No website. No public hosting. No subscription.** The repository is a *private* game-state and engine store. The text RPG takes place in ChatGPT Project chats. The repo contains the rules, the real JavaScript kernel, saves, and an optional private Actions turn runner.
+**No website or separate hosting plan is required.** The RPG is played privately in ChatGPT Project chats. The active GitHub repository, `malioaka101-alt/Beastbound-gptpub`, is **public** and stores the JavaScript engine, rules, code tests and checkpoint files. Public repository contents (including committed campaign saves, requests and results) must not be treated as private storage. The historical private repository is a frozen backup, not the active runner.
+
+**Current evidence (7 November 2026):** The public runner successfully processed real disposable status, action, precommitted check, checkpoint, resume, stale request and original-roll recovery; see [`docs/LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md`](LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md). The verified 113-test inventory includes NPC, GM-terrain and independent beast journeys; see [`docs/FINISH_LINE_A_READINESS_2026-11-07.md`](FINISH_LINE_A_READINESS_2026-11-07.md). The original older workflow-blocker notes are historical, not current failures.
 
 ## How it works
 
-- Read: GitHub connector loads `saves/aerin_marsh.json`, `reference/Beastbound_Table_Rules.md`, and any required rules. The Table Rules are a supplementary digest; the original source files win if they conflict.
+- Read: GitHub connector loads the active `saves/aerin_marsh.json` (unless a different campaign is named), `docs/PROJECT_CHAT_INSTRUCTIONS.md`, `reference/Beastbound_Table_Rules.md`, and any required rules. The Table Rules are a supplementary digest; the original source files win if they conflict.
 - Live code available: run `node scripts/chat-turn.js saves/aerin_marsh.json request.json` in the chat's code-execution environment, then push the updated JSON with an existing blob SHA guard through the GitHub connector.
-- Live code **not** available: create a *private* GitHub request file `requests/aerin_marsh/<unique_id>.json`. The `Private Beastbound Chat Turns` workflow uses the same engine and updates `results/aerin_marsh/<unique_id>.json` and `saves/aerin_marsh.json`. Fetch the result before narrating the mechanical outcome. GitHub Actions on private repositories is subject to GitHub's free-tier usage allowances; it is not instant.
+- Live code **not** available: commit a unique JSON request in the **public active repository** at `requests/aerin_marsh/<unique_id>.json`. The legacy-named `Private Beastbound Chat Turns` GitHub Actions workflow uses the same engine and commits `results/aerin_marsh/<unique_id>.json` and `saves/aerin_marsh.json`. Retrieve the **committed** result before narrating any mechanical outcome. Job queuing, failure or GitHub execution limits may still delay or prevent delivery.
 - No tool call needed for inconsequential dialogue. Use `checkpoint` before changing chats or after ~12–15 turns to preserve the pickup point and factual notes.
 - Read the current saved file just before scheduling a turn. Request `expectedHash` is optional but recommended; it is the SHA-256 digest of the *raw* save bytes, not the GitHub blob SHA.
 
 ## Example request (non-destructive)
 
-Save as `requests/aerin_marsh/resume_0001.json` on **main**:
+For an explicitly requested, non-destructive live status turn, save the following illustrative JSON to `requests/aerin_marsh/resume_0001.json` on **main** (only if that ID does not already exist):
 
 ```json
 {"id":"resume_0001","campaign":"aerin_marsh","mode":"status"}
 ```
 
-The workflow generates the corresponding JSON result without changing Aerin's character state. Until the result file appears, do not state that a turn happened.
+When successfully processed, the workflow commits the corresponding result without changing Aerin's character state. Until the result file is confirmed, do not claim that a new result or save was produced.
 
 ## Action examples: safe and source-grounded
 
@@ -56,12 +58,12 @@ See `docs/UNIFIED_CHAT_RUNNER.md` for v0.7 supported wound combat, safe sleep, h
 
 - Requests are JSON data only; no supplied text is executed as shell code.
 - The runner validates campaign names, IDs, modes and check values. It tracks stable turn IDs and revisions to avoid repeat rolls. The `expectedHash` guard prevents replaying stale actions.
-- Each processed request generates a private result; state is serialized and saved together. GitHub commits provide historical checkpoints. A failed run is **not** a saved turn.
+- Each successfully processed request generates a committed result; state is serialized and saved together. GitHub commits provide historical checkpoints. A failed run is **not** a saved turn. These committed files are publicly readable in the active repository.
 - `panels.js` generates the 34-column, code-block-compatible core and expanded panels; it uses player-visible state, not sealed research truth.
 - Show **only actually recorded** Soul Reserve, Qi, Mana, health, inventory and time; do not fabricate numerical pools or infer private actor attributes. Use the established civil calendar only when a real dated anchor exists; otherwise display the current Day N and recorded clock.
-- Saved data and engine scripts stay in the private repository. Private GitHub repo content is still visible to its collaborators: for strictly GM-only secrets, separate authorised storage is required.
-- The existing engine is a partial **JavaScript prototype**. The original `bb_*.py` source modules were supplied in chat as **behavioural references**, not to be copied. The `turn.py` CLI and `bb_bench.py` benchmark module were not supplied. Several mechanics are now independently implemented in `rules/` and compared against reference vectors; clean old HP saves now support a tested, reversible-in-history wound migration in **Project chat**; injured old saves require explicit adjudication, never a guessed conversion. Legacy browser/HP actions are not yet unified.
-- GitHub Actions jobs can fail, be delayed or exhaust included minutes. The local Node runner remains the fallback; do not imply automatic seamless execution.
+- Saved data and engine scripts stay in the **public active GitHub repository**. Never commit passwords, genuinely private personal details or other sensitive secrets there. The user-facing game remains in the ChatGPT Project; public code and saves do not imply public gameplay.
+- The existing engine is a partial **JavaScript implementation**. The original `bb_*.py` source modules were supplied in chat as **behavioural references**, not to be copied. The `turn.py` CLI and `bb_bench.py` benchmark module were not supplied. Several mechanics are now independently implemented in `rules/` and compared against reference vectors; clean old HP saves now support a tested, reversible-in-history wound migration in **Project chat**; injured old saves require explicit adjudication, never a guessed conversion. Legacy browser/HP actions are not yet unified.
+- GitHub Actions jobs can fail, be delayed or exhaust included minutes. The local Node runner remains the fallback where the project code is available; do not imply automatic seamless execution.
 
 ## Playing style
 

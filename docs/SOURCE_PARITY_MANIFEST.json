@@ -51,9 +51,10 @@
       "implementation": "coarse tested",
       "evidence": [
         "world/simulation.js",
-        "tests/living-world.test.js"
+        "tests/living-world.test.js",
+        "tests/exploration-beast-journey.test.js"
       ],
-      "unfulfilled": "Sixday/month state is deterministic and persistent; not a simulation of individual citizens or armies."
+      "unfulfilled": "Sixday/month changes and source-backed individual living-world behaviours are deterministic and persistent; this does not represent every citizen's hourly schedule, political consequence or whole-world population."
     },
     {
       "id": 6,
@@ -114,9 +115,11 @@
         "world/simulation.js",
         "world/bestiary.js",
         "rules/reed-harvest.js",
-        "tests/native-habitat-material-restoration.test.js"
+        "tests/native-habitat-material-restoration.test.js",
+        "world/wild-lives.js",
+        "tests/exploration-beast-journey.test.js"
       ],
-      "unfulfilled": "Regional living ecology now tracks distinct finite Whisperfen reed and Ashwind ironbloom plants: real extraction reduces physical stock, verified native planting uses an actual carried unit and one real Survival check, and only later independent world ticks may establish growth when habitat permits; source-backed guild field crews also sometimes improve limited indicators. Detailed food webs, species reproduction, meteorology, succession and wider interdependent ecosystem dynamics remain incomplete."
+      "unfulfilled": "Conserved local materials, regional resources, some independent ecology and real off-screen animal behaviour/limited skill learning are tested, including across saved turns. Full species food webs, ecological populations, advanced reproduction, migration, seasons and climate remain incomplete."
     },
     {
       "id": 12,
@@ -419,9 +422,12 @@
       "evidence": [
         "reference/Beastbound_Table_Rules.md",
         "scripts/chat-turn.js",
-        "tests/chat-runtime.test.js"
+        "tests/chat-runtime.test.js",
+        "tests/open-ended-intent-and-contextual-dialogue.test.js",
+        "rules/scene-check.js",
+        "docs/OPEN_INTENT_AND_CONVERSATION_BRIDGE.md"
       ],
-      "unfulfilled": "The GM remains responsible for open-ended natural intentions, contextual feasibility and honest narration. The current private runner still depends on exact-match verbs/regular expressions and may fall through to legacy command handling, so arbitrary reasonable acts do not yet have a fully reliable source-bound adjudication bridge. The pending PR #140 repair is not production-verified."
+      "unfulfilled": "The GM interprets unrestricted natural-language intent; unknown actions are now returned honestly unresolved rather than falsely succeeded or rejected by legacy parser assumptions. A source-authenticated terrain footing/reading check can be precommitted and resolved once, but not every novel physical, social or supernatural action has a lawful numerical handoff. The engine does not own player dialogue or personality."
     },
     {
       "id": 42,
@@ -432,9 +438,13 @@
         "rules/agendas.js",
         "world/person-presence.js",
         "rules/npc-conversations.js",
-        "tests/npc-conversations.test.js"
+        "tests/npc-conversations.test.js",
+        "world/emergent-people.js",
+        "tests/emergent-people.test.js",
+        "tests/ordinary-life-npc-journey.test.js",
+        "rules/material-handoffs.js"
       ],
-      "unfulfilled": "Independent people and professionals can pursue sourced work and agendas and offer or decline some real cooperation, but contextual answer-and-response dialogue remains mostly bounded by authored topics; longer personal memories, genuinely nuanced speech and autonomous durable promises remain partial. Improvements being tested in PR #140 must not be treated as merged gameplay."
+      "unfulfilled": "Individual generated workers have established regional background, profession, personal purpose, temperament, witnessed conversations, independent work offers/refusals and remembered concrete consequences. The GM still interprets voice, private nuance, culture and changing beliefs; fully general living relationships, agreements, legal promises and detailed hour-by-hour lives are not modelled."
     },
     {
       "id": 43,
@@ -442,9 +452,12 @@
       "implementation": "partial",
       "evidence": [
         "rules/bonds.js",
-        "engine.js"
+        "engine.js",
+        "world/wild-lives.js",
+        "world/sapient-beast-persons.js",
+        "tests/exploration-beast-journey.test.js"
       ],
-      "unfulfilled": "Sapience/consent and bonds exist; full autonomous language/culture and beast interaction history incomplete."
+      "unfulfilled": "Source-backed independent animal responses, observed individual memory, habitat-linked searches and genuinely voluntary sapient contact are tested. Full species languages, autonomous nonhuman cultures, deep biographies, consent protocols and complete long-term relationships remain partial."
     },
     {
       "id": 44,
@@ -466,9 +479,12 @@
       "implementation": "tested check core",
       "evidence": [
         "rules/core.js",
-        "tests/python-reference.test.js"
+        "tests/python-reference.test.js",
+        "rules/scene-check.js",
+        "tests/scene-check-provenance.test.js",
+        "tests/open-ended-intent-and-contextual-dialogue.test.js"
       ],
-      "unfulfilled": "d20 degrees, natural adjustments and skill rank work; GM still decides feasibility and contextual DC."
+      "unfulfilled": "The d20 core, real actor ranks, one-use source-witnessed checks, world/time costs, refusals and bounded GM local-terrain preparation are tested; the GM still judges feasibility, and unknown consequential scenes cannot invent arbitrary DCs, staked rewards or hidden participants."
     },
     {
       "id": 46,
@@ -536,9 +552,13 @@
         "tests/chat-runtime.test.js",
         "scripts/process-pending.js",
         ".github/workflows/private-chat-turns.yml",
-        "tests/private-turn-receipt.test.js"
+        "tests/private-turn-receipt.test.js",
+        "tests/private-process-pending-integration.test.js",
+        "docs/LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md",
+        "tests/ordinary-life-npc-journey.test.js",
+        "tests/exploration-beast-journey.test.js"
       ],
-      "unfulfilled": "Private file-based turn IDs, original check receipts, atomic local saves, replay and checkpoint contracts are unit-tested. The disposable real GitHub Actions status round-trip attempted 7 November 2026 (run 42405401477) failed before any reported job steps and produced no result, so actual private Actions delivery and cross-session pickup are NOT yet end-to-end verified. The active Aerin checkpoint was not changed."
+      "unfulfilled": "Private Project chat play uses a public GitHub repository as code/checkpoint store. Disposable real Actions runs verified source-bound action → result/save → checkpoint → subsequent request pickup, stale refusal and original-roll recovery without reroll (see live verification report). A second ChatGPT chat was not separately opened; GitHub delivery failures and complete canon-world ledger coverage are not eliminated."
     },
     {
       "id": 52,
@@ -567,9 +587,12 @@
       "evidence": [
         "docs/PROJECT_CHAT_INSTRUCTIONS.md",
         "reference/Beastbound_Realms_Unified_Master_Prompt.md",
-        "scripts/chat-turn.js"
+        "scripts/chat-turn.js",
+        "rules/scene-check.js",
+        "tests/open-ended-intent-and-contextual-dialogue.test.js",
+        "docs/FINISH_LINE_A_READINESS_2026-11-07.md"
       ],
-      "unfulfilled": "Player freedom is a governing GM practice, not a whitelist of mechanical commands or automatically simulated intent; old parser phrase limitations and incomplete source-backed mechanical adjudication remain Finish Line A blockers. New PR #140 attempts a source-safe unresolved-intent handoff but is not merged or full-suite verified."
+      "unfulfilled": "Player freedom is primarily a GM responsibility, not a command list. Unrecognised intentions are preserved without fictional mechanical rewards; source-supported local terrain can use a real precommitted check. Arbitrary novel combat, pathfinding, diplomacy, craft and power consequences are not automatically mechanically resolved by the JS runner."
     },
     {
       "id": 55,
