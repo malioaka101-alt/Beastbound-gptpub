@@ -25,11 +25,18 @@
       "type": "world",
       "text": "A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet.",
       "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 09:15",
+      "type": "travel",
+      "text": "You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects.",
+      "details": null
     }
   ],
   "world": {
-    "minutes": 480,
-    "location": "crossing",
+    "minutes": 555,
+    "location": "fen",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -56,7 +63,7 @@
     "path": "meridian",
     "health": 64,
     "maxHealth": 64,
-    "stamina": 52,
+    "stamina": 48,
     "maxStamina": 52,
     "mana": 24,
     "maxMana": 24,
@@ -223,7 +230,8 @@
   "battle": null,
   "flags": {
     "visited": {
-      "crossing": true
+      "crossing": true,
+      "fen": true
     },
     "readIntro": false,
     "freeSourceSample": false,
@@ -231,5 +239,33 @@
   },
   "researchProjects": {},
   "documentedBranches": {},
-  "npcKnowledge": {}
+  "npcKnowledge": {},
+  "chatRuntime": {
+    "revision": 1,
+    "applied": {
+      "rt_02_travel_20261107a": {
+        "revision": 1,
+        "mode": "act",
+        "hash": "4c60521b5074f0b667971795ae07e21530a3b5c44b498dc8508f47a466e100f3",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 09:15",
+          "output": {
+            "message": ""
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 09:15",
+              "type": "travel",
+              "text": "You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects.",
+              "details": null
+            }
+          ],
+          "message": ""
+        }
+      }
+    },
+    "focus": []
+  }
 }

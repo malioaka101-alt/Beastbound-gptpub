@@ -1,0 +1,23 @@
+{
+  "id": "rt_02_travel_20261107a",
+  "ok": true,
+  "applied": true,
+  "revision": 1,
+  "stateHash": "7b7687686004982af7d0071e6014a1cba7662d1991bf63f3cb37a466b4adf78e",
+  "clock": "Day 1, 09:15",
+  "output": {
+    "message": ""
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 09:15",
+      "type": "travel",
+      "text": "You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects.",
+      "details": null
+    }
+  ],
+  "message": "",
+  "panel": "╔═ ROUNDTRIP · DAY 1 ════════════╗\n║ 09:15 · Morning · cool         ║\n║ Whisperfen Wetlands       85 T ║\n║ STA  █████████░          48/52 ║\n║ QI   ██████████          14/14 ║\n╚════════════════════════════════╝",
+  "recap": "CAMPAIGN: Roundtrip Save Resume Fixture (seed 20261107)\nSCENE: Whisperfen Wetlands, Day 1, 09:15\nPC: fieldworker, meridian; 85 T\nJOURNAL: Guild registrar Elira Moss has pinned three ordinary contracts to the public board. A lanternfen fox watches the traffic from a distant roof. | A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet. | You travel from Morrowfen Crossing to Whisperfen Wetlands. Black water, floating reed islands, and the low singing of night insects.\nCURRENT: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet."
+}
