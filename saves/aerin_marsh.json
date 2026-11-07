@@ -25,10 +25,46 @@
       "type": "world",
       "text": "A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet.",
       "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:05",
+      "type": "world",
+      "text": "A Naturalists Guild notice at Morrowfen Crossing requests forest field observations for a current public habitat concern.",
+      "details": {
+        "origin": "naturalists-guild-field-bulletin-v1",
+        "noticeId": "field_forest_0",
+        "issuer": "naturalists_guild",
+        "habitat": "forest",
+        "region": "copperwood",
+        "termsHash": "44e195d00bb25450a192149895cf19ae643f6bcf0a5b6e8d23c0f43fdd42f987",
+        "issueDay": 0,
+        "deadlineDay": 5,
+        "postedAt": "crossing",
+        "observedAtMinute": 485
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:05",
+      "type": "world",
+      "text": "A Naturalists Guild notice at Morrowfen Crossing requests fen field observations for a current public habitat concern.",
+      "details": {
+        "origin": "naturalists-guild-field-bulletin-v1",
+        "noticeId": "field_fen_0",
+        "issuer": "naturalists_guild",
+        "habitat": "fen",
+        "region": "whisperfen",
+        "termsHash": "e087706e0f95888fbadfdae5ec051840b17f949e051af98826799b043848e835",
+        "issueDay": 0,
+        "deadlineDay": 5,
+        "postedAt": "crossing",
+        "observedAtMinute": 485
+      }
     }
   ],
   "world": {
-    "minutes": 480,
+    "minutes": 485,
     "location": "crossing",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -231,5 +267,193 @@
   },
   "researchProjects": {},
   "documentedBranches": {},
-  "npcKnowledge": {}
+  "npcKnowledge": {},
+  "chatRuntime": {
+    "revision": 1,
+    "applied": {
+      "aerin_board_read_20261107_001": {
+        "revision": 1,
+        "mode": "act",
+        "hash": "fe8415e0b8788c270f979c71f8b5cc5bc970053626b32989c939da601dcd0b44",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:05",
+          "output": {
+            "opportunity": {
+              "read": true,
+              "minutes": 5,
+              "newNotices": 2,
+              "knownNotices": [
+                {
+                  "noticeId": "field_forest_0",
+                  "issuer": "Naturalists Guild",
+                  "habitat": "forest",
+                  "place": "Copperwood Verge",
+                  "objective": "Personally observe and submit an authentic local Copperwood Verge habitat report",
+                  "condition": "routine seasonal habitat monitoring",
+                  "risks": [
+                    "logging",
+                    "nesting loss"
+                  ],
+                  "issueDay": 0,
+                  "deadlineDay": 5,
+                  "state": "unmarked",
+                  "reward": "No promised currency or qualification; verified field record only"
+                },
+                {
+                  "noticeId": "field_fen_0",
+                  "issuer": "Naturalists Guild",
+                  "habitat": "fen",
+                  "place": "Whisperfen Wetlands",
+                  "objective": "Personally observe and submit an authentic local Whisperfen Wetlands habitat report",
+                  "condition": "elevated habitat pressure",
+                  "risks": [
+                    "erosion",
+                    "pollution"
+                  ],
+                  "issueDay": 0,
+                  "deadlineDay": 5,
+                  "state": "unmarked",
+                  "reward": "No promised currency or qualification; verified field record only"
+                }
+              ],
+              "note": "The public board is an invitation, not a guarantee of an NPC contract, wages, professional rank, outcome or private animal discovery"
+            },
+            "message": "You read the actual Naturalists Guild bulletin, with real local fieldwork needs but no promised reward."
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:05",
+              "type": "world",
+              "text": "A Naturalists Guild notice at Morrowfen Crossing requests forest field observations for a current public habitat concern.",
+              "details": {
+                "origin": "naturalists-guild-field-bulletin-v1",
+                "noticeId": "field_forest_0",
+                "issuer": "naturalists_guild",
+                "habitat": "forest",
+                "region": "copperwood",
+                "termsHash": "44e195d00bb25450a192149895cf19ae643f6bcf0a5b6e8d23c0f43fdd42f987",
+                "issueDay": 0,
+                "deadlineDay": 5,
+                "postedAt": "crossing",
+                "observedAtMinute": 485
+              }
+            },
+            {
+              "day": 1,
+              "time": "Day 1, 08:05",
+              "type": "world",
+              "text": "A Naturalists Guild notice at Morrowfen Crossing requests fen field observations for a current public habitat concern.",
+              "details": {
+                "origin": "naturalists-guild-field-bulletin-v1",
+                "noticeId": "field_fen_0",
+                "issuer": "naturalists_guild",
+                "habitat": "fen",
+                "region": "whisperfen",
+                "termsHash": "e087706e0f95888fbadfdae5ec051840b17f949e051af98826799b043848e835",
+                "issueDay": 0,
+                "deadlineDay": 5,
+                "postedAt": "crossing",
+                "observedAtMinute": 485
+              }
+            }
+          ],
+          "message": "You read the actual Naturalists Guild bulletin, with real local fieldwork needs but no promised reward."
+        }
+      }
+    },
+    "focus": []
+  },
+  "table": {
+    "publicFieldNotices": {
+      "notices": {
+        "field_forest_0": {
+          "origin": "naturalists-guild-field-bulletin-v1",
+          "id": "field_forest_0",
+          "issuer": "naturalists_guild",
+          "postedAt": "crossing",
+          "registrar": "Elira Moss",
+          "habitat": "forest",
+          "region": "copperwood",
+          "issueDay": 0,
+          "deadlineDay": 5,
+          "objective": "Personally observe and submit an authentic local Copperwood Verge habitat report",
+          "condition": "routine seasonal habitat monitoring",
+          "risks": [
+            "logging",
+            "nesting loss"
+          ],
+          "compensation": "No promised currency or qualification; verified field record only",
+          "worldIssueHash": "89e3f50bfed3064fe42eee43b1764f8f0aac8628c7757e8ab2f912af6895e1cc",
+          "termsHash": "44e195d00bb25450a192149895cf19ae643f6bcf0a5b6e8d23c0f43fdd42f987",
+          "sourceEvent": {
+            "day": 1,
+            "time": "Day 1, 08:05",
+            "type": "world",
+            "text": "A Naturalists Guild notice at Morrowfen Crossing requests forest field observations for a current public habitat concern.",
+            "details": {
+              "origin": "naturalists-guild-field-bulletin-v1",
+              "noticeId": "field_forest_0",
+              "issuer": "naturalists_guild",
+              "habitat": "forest",
+              "region": "copperwood",
+              "termsHash": "44e195d00bb25450a192149895cf19ae643f6bcf0a5b6e8d23c0f43fdd42f987",
+              "issueDay": 0,
+              "deadlineDay": 5,
+              "postedAt": "crossing",
+              "observedAtMinute": 485
+            }
+          },
+          "sourceEventHash": "68cd4c5c3dd63359ea88a8b45472731eb5374554889b00f9f5abd0a42112df77",
+          "seenAtMinute": 485,
+          "interest": "unmarked",
+          "submitted": null
+        },
+        "field_fen_0": {
+          "origin": "naturalists-guild-field-bulletin-v1",
+          "id": "field_fen_0",
+          "issuer": "naturalists_guild",
+          "postedAt": "crossing",
+          "registrar": "Elira Moss",
+          "habitat": "fen",
+          "region": "whisperfen",
+          "issueDay": 0,
+          "deadlineDay": 5,
+          "objective": "Personally observe and submit an authentic local Whisperfen Wetlands habitat report",
+          "condition": "elevated habitat pressure",
+          "risks": [
+            "erosion",
+            "pollution"
+          ],
+          "compensation": "No promised currency or qualification; verified field record only",
+          "worldIssueHash": "6ceb4a4d351e93b871920438ee172b1964d27aaf9d602540218949295f71b70f",
+          "termsHash": "e087706e0f95888fbadfdae5ec051840b17f949e051af98826799b043848e835",
+          "sourceEvent": {
+            "day": 1,
+            "time": "Day 1, 08:05",
+            "type": "world",
+            "text": "A Naturalists Guild notice at Morrowfen Crossing requests fen field observations for a current public habitat concern.",
+            "details": {
+              "origin": "naturalists-guild-field-bulletin-v1",
+              "noticeId": "field_fen_0",
+              "issuer": "naturalists_guild",
+              "habitat": "fen",
+              "region": "whisperfen",
+              "termsHash": "e087706e0f95888fbadfdae5ec051840b17f949e051af98826799b043848e835",
+              "issueDay": 0,
+              "deadlineDay": 5,
+              "postedAt": "crossing",
+              "observedAtMinute": 485
+            }
+          },
+          "sourceEventHash": "e3b7d5cdeacf6d638ba8b50aa9d4d824710665adb07432d328f17148a64ff79f",
+          "seenAtMinute": 485,
+          "interest": "unmarked",
+          "submitted": null
+        }
+      },
+      "usedReports": {}
+    }
+  }
 }

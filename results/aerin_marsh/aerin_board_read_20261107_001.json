@@ -1,0 +1,92 @@
+{
+  "id": "aerin_board_read_20261107_001",
+  "ok": true,
+  "applied": true,
+  "revision": 1,
+  "stateHash": "2aa235509dfc78c62639d1b8b7624f2fe255bcb1c1f065e3928573f70fcd14a9",
+  "clock": "Day 1, 08:05",
+  "output": {
+    "opportunity": {
+      "read": true,
+      "minutes": 5,
+      "newNotices": 2,
+      "knownNotices": [
+        {
+          "noticeId": "field_forest_0",
+          "issuer": "Naturalists Guild",
+          "habitat": "forest",
+          "place": "Copperwood Verge",
+          "objective": "Personally observe and submit an authentic local Copperwood Verge habitat report",
+          "condition": "routine seasonal habitat monitoring",
+          "risks": [
+            "logging",
+            "nesting loss"
+          ],
+          "issueDay": 0,
+          "deadlineDay": 5,
+          "state": "unmarked",
+          "reward": "No promised currency or qualification; verified field record only"
+        },
+        {
+          "noticeId": "field_fen_0",
+          "issuer": "Naturalists Guild",
+          "habitat": "fen",
+          "place": "Whisperfen Wetlands",
+          "objective": "Personally observe and submit an authentic local Whisperfen Wetlands habitat report",
+          "condition": "elevated habitat pressure",
+          "risks": [
+            "erosion",
+            "pollution"
+          ],
+          "issueDay": 0,
+          "deadlineDay": 5,
+          "state": "unmarked",
+          "reward": "No promised currency or qualification; verified field record only"
+        }
+      ],
+      "note": "The public board is an invitation, not a guarantee of an NPC contract, wages, professional rank, outcome or private animal discovery"
+    },
+    "message": "You read the actual Naturalists Guild bulletin, with real local fieldwork needs but no promised reward."
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:05",
+      "type": "world",
+      "text": "A Naturalists Guild notice at Morrowfen Crossing requests forest field observations for a current public habitat concern.",
+      "details": {
+        "origin": "naturalists-guild-field-bulletin-v1",
+        "noticeId": "field_forest_0",
+        "issuer": "naturalists_guild",
+        "habitat": "forest",
+        "region": "copperwood",
+        "termsHash": "44e195d00bb25450a192149895cf19ae643f6bcf0a5b6e8d23c0f43fdd42f987",
+        "issueDay": 0,
+        "deadlineDay": 5,
+        "postedAt": "crossing",
+        "observedAtMinute": 485
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:05",
+      "type": "world",
+      "text": "A Naturalists Guild notice at Morrowfen Crossing requests fen field observations for a current public habitat concern.",
+      "details": {
+        "origin": "naturalists-guild-field-bulletin-v1",
+        "noticeId": "field_fen_0",
+        "issuer": "naturalists_guild",
+        "habitat": "fen",
+        "region": "whisperfen",
+        "termsHash": "e087706e0f95888fbadfdae5ec051840b17f949e051af98826799b043848e835",
+        "issueDay": 0,
+        "deadlineDay": 5,
+        "postedAt": "crossing",
+        "observedAtMinute": 485
+      }
+    }
+  ],
+  "message": "You read the actual Naturalists Guild bulletin, with real local fieldwork needs but no promised reward.",
+  "panel": "╔═ AERIN · DAY 1 ════════════════╗\n║ 08:05 · Morning · cool         ║\n║ Morrowfen Crossing        85 T ║\n║ STA  ██████████          52/52 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Damaged reed-bank notice     ║\n╚════════════════════════════════╝",
+  "recap": "CAMPAIGN: Aerin Marsh (seed 1355150487)\nSCENE: Morrowfen Crossing, Day 1, 08:05\nPC: fieldworker, meridian; 85 T\nJOURNAL: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet. | A Naturalists Guild notice at Morrowfen Crossing requests forest field observations for a current public habitat concern. | A Naturalists Guild notice at Morrowfen Crossing requests fen field observations for a current public habitat concern.\nCURRENT: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet."
+}
