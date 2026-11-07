@@ -105,6 +105,7 @@ function act(s,{system,operation,params={}}={}){
  if(!params||typeof params!=='object'||Array.isArray(params))throw Error('Invalid rule parameters');
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
+  case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
   case 'character.initialize':return {profileCreated:!!Character.ensure(s),attributesPreserved:true};
   case 'character.status':return Character.publicStatus(s);
   case 'character.assessPotential':return Character.assess(s,params);

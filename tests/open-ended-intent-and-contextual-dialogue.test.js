@@ -69,6 +69,71 @@ try{
  A.equal(duplicate.duplicate,true);A.equal(duplicate.recovered,true);
  A.equal(read(),held);A.equal(load().rngState,once);
 
+ // The GM can choose a sourced mundane *method*, not dictate the die,
+ // obstacle, skill, DC, success, material, NPC consent or route. The same
+ // engine-owned sceneCheck / core.check pair resolves different freeform
+ // phrasing without adding one parser branch per plausible terrain action.
+ const currentFen=read(),beforeGround=load(),beforeRng=beforeGround.rngState;
+ for(const wrong of [
+  {method:'footing',intent:'Carefully balance my way along the floating reed islands',dc:2},
+  {method:'npc-agreement',intent:'Convince a stranger to sign my contract'},
+  {method:'magic',intent:'Summon an impossible legendary beast and claim it as mine'},
+  {method:'reading',intent:'look',result:'exceptional'}
+ ]){
+  A.throws(()=>Turn.execute(file,{id:'gm_invalid_ground_'+String(Object.keys(wrong).length)+wrong.method,
+   mode:'rule',system:'core',operation:'prepareSceneCheck',params:wrong}),
+   /only a short original intention|supported mundane approach/);
+  A.equal(read(),currentFen);A.equal(load().rngState,beforeRng);
+ }
+ const intent='Carefully balance my way along the floating reed islands';
+ const offer=Turn.execute(file,{
+  id:'gm_prepare_footing_001',mode:'rule',
+  system:'core',operation:'prepareSceneCheck',
+  params:{method:'footing',intent}
+ });
+ A.equal(offer.applied,true);
+ A.equal(offer.output.rules.prepared,true);
+ A.equal(offer.output.rules.noRollYet,true);
+ A.equal(offer.output.rules.noTimeSpentYet,true);
+ A.equal(offer.output.rules.observed,E.LOCATIONS.fen.description);
+ const pCheck=load().table.sceneChecks[offer.output.rules.checkId];
+ A.equal(pCheck.origin,'engine-local-scene');
+ A.equal(pCheck.method,'footing');A.equal(pCheck.attribute,'dex');
+ A.equal(pCheck.skill,'survival');A.equal(pCheck.dc,14);
+ A.equal(pCheck.risky,false);
+ A.equal(load().rngState,beforeRng);
+ A.equal(load().world.minutes,beforeGround.world.minutes);
+ const prepared=read();
+ const tampered=load();
+ tampered.table.sceneChecks[pCheck.checkId].dc=6;
+ write(tampered);
+ const dishonest=read(),dishonestRng=load().rngState;
+ A.throws(()=>Turn.execute(file,{id:'gm_forged_difficulty_001',mode:'check',checkId:pCheck.checkId}),
+  /original visible terrain and source-owned challenge/);
+ A.equal(read(),dishonest);A.equal(load().rngState,dishonestRng);
+ FS.writeFileSync(file,prepared);
+ const skillPP=load().player.skills.survival.xp;
+ const proof=Turn.execute(file,{id:'gm_scene_checked_001',mode:'check',checkId:pCheck.checkId});
+ A.equal(proof.applied,true);A.equal(proof.ok,true);
+ A.equal(proof.output.check.verifiedSceneCheck,pCheck.checkId);
+ A.equal(proof.output.check.noAutomaticMovement,true);
+ A.equal(proof.output.check.noUnknownDiscoveries,true);
+ A.equal(proof.output.check.noAutomaticAgreement,true);
+ A.equal(proof.output.check.noGrantedItems,true);
+ A.equal(proof.output.check.elapsedMinutes,15);
+ A.equal(load().world.location,'fen');
+ A.equal(load().world.minutes,beforeGround.world.minutes+15);
+ A.equal(load().player.skills.survival.xp,skillPP,
+  'unsourced risk cannot mint free practice points');
+ A.equal(load().table.sceneChecks[pCheck.checkId].used,true);
+ const locked=read(),onceGround=load().rngState;
+ A.equal(Turn.execute(file,{id:'gm_scene_checked_001',mode:'check',checkId:pCheck.checkId}).duplicate,true);
+ A.equal(read(),locked);A.equal(load().rngState,onceGround);
+ A.throws(()=>Turn.execute(file,{id:'gm_repeat_same_ground_001',mode:'rule',
+  system:'core',operation:'prepareSceneCheck',params:{method:'footing',intent}}),
+  /identical local attempt already has a committed check/);
+ A.equal(read(),locked);A.equal(load().rngState,onceGround);
+
  // Real authored professionals can discuss more than one relevant question
  // without a generic once-per-day ban or a fictitious new friend rank.
  write(s);
