@@ -31,6 +31,26 @@ function validRecord(s,a){
     !['fortitude','balance'].includes(a.mode)||
     !Number.isInteger(a.activationStamina)||a.activationStamina!==ACTIVATION_STAMINA||
     !Number.isInteger(a.activationRoll)||a.activationRoll<1||a.activationRoll>20||
+    !Number.isInteger(a.sourceCon)||a.sourceCon<1||a.sourceCon>30||
+    !Number.isInteger(a.sourceSurvival)||a.sourceSurvival<0||a.sourceSurvival>5||
+    a.originalRollEvent?.type!=='roll'||
+    !a.originalRollEvent.details||
+    a.originalRollHash!==hash(a.originalRollEvent)||
+    a.originalRollEvent.details.roll!==a.activationRoll||
+    a.originalRollEvent.details.dc!==16||
+    a.originalRollEvent.details.modifier!==
+      Math.floor((a.sourceCon-10)/2)+2*a.sourceSurvival||
+    a.originalRollEvent.details.naturalBonus!==
+      C.naturalAdjustment(a.activationRoll)||
+    a.originalRollEvent.details.total!==a.activationRoll+
+      a.originalRollEvent.details.modifier+
+      a.originalRollEvent.details.naturalBonus||
+    a.originalRollEvent.details.margin!==
+      a.originalRollEvent.details.total-16||
+    a.originalRollEvent.details.success!==a.success||
+    a.originalRollEvent.details.degree!==a.activationDegree||
+    a.originalRollEvent.details.degree!==
+      C.degree(a.originalRollEvent.details.margin,true)||
     !Number.isInteger(a.upkeepSpent)||a.upkeepSpent<0||
     (a.revertedMinute!==undefined&&
       (!Number.isInteger(a.revertedMinute)||
@@ -114,6 +134,10 @@ function activate(s,id,{combat=false}={}){
   rank=C.int(p.skills?.survival?.rank,'actually trained Survival',0,5);
  const check=C.check(s,{modifier:Math.floor((con-10)/2)+2*rank,
   dc:16,label:'Personally developed Organ Aspect activation'});
+ // Keep the original engine dice receipt independent of the rolling
+ // on-screen narration journal, which legitimately rotates over time.
+ const originalRollEvent=structuredClone(s.log.at(-1));
+ const originalRollHash=hash(originalRollEvent);
  p.stamina-=ACTIVATION_STAMINA;
  const here=s.table?.combatants?.player;
  if(here)here.stamina=p.stamina;
@@ -134,6 +158,7 @@ function activate(s,id,{combat=false}={}){
   cooldownUntil:begins+(check.success?duration:1)+COOLDOWN_MINUTES,
   activationStamina:ACTIVATION_STAMINA,activationRoll:check.roll,
   activationDegree:check.degree,success:check.success,
+  sourceCon:con,sourceSurvival:rank,originalRollEvent,originalRollHash,
   upkeepSpent:0,backlash
  };
  s.table||={};s.table.personalAspect=state;
