@@ -458,7 +458,19 @@ const CIVIC_APPLICATIONS=Object.freeze([
   skill:'beastcraft',attribute:'wis',dc:15,minutes:60,stamina:2,
   energy:null,energyCost:0,
   knownWork:'check a personally mapped and originally witnessed local species’ documented ecology',
-  actualEffect:'a public animal-safe field note, never bloodline capture or a free trait'}
+  actualEffect:'a public animal-safe field note, never bloodline capture or a free trait'},
+ {id:'lumenfall_clinic_quality',name:'Lumenfall medical quality and poultice audit',method:'field_poultice',
+  source:'specialist-observation',location:'academy',region:'lumenfall',
+  skill:'medicine',attribute:'int',dc:15,minutes:60,stamina:2,
+  energy:null,energyCost:0,
+  knownWork:'survey existing public medical preparation records and sterile field-care standards without diagnosing an invented patient',
+  actualEffect:'a dated medical quality report; no healing item, patient or licence granted'},
+ {id:'crossing_mutual_signals',name:'Crossing voluntary human-beast signal practicum',method:'reciprocal_signals',
+  source:'willing-partnership',location:'crossing',region:'morrowfen_basin',
+  skill:'beastcraft',attribute:'wis',dc:16,minutes:60,stamina:2,
+  energy:null,energyCost:0,
+  knownWork:'observe one real willing partner’s preferred signals, separately from commands, contracts or hidden thoughts',
+  actualEffect:'an ethical communication field note, without compelling a beast, gaining bond stages or teaching a human-only power'}
 ]);
 const MAP=items=>Object.freeze(Object.fromEntries(items.map(x=>[x.id,Object.freeze(x)])));
 const L=MAP(HISTORICAL_LEGACIES),N=MAP(RENOWNED),M=MAP(PUBLIC_METHODS),
@@ -503,7 +515,9 @@ function validate(){
     x.source==='body-organ'&&method.path!=='body'||
     x.source==='rift-anchor'&&method.path!=='rift'||
     x.source==='origin-map'&&method.path!=='beast-origin'||
-    x.source==='ordinary'&&method.path!=='mundane')
+    x.source==='ordinary'&&method.path!=='mundane'||
+    x.source==='specialist-observation'&&method.path!=='specialist'||
+    x.source==='willing-partnership'&&method.path!=='partnership')
    throw Error('Professional power-path source cannot masquerade as another discipline');
  }
  return {historicalLegacies:HISTORICAL_LEGACIES.length,
