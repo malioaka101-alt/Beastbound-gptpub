@@ -1,5 +1,13 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+
+## Organic world creations — source-verified live connections (8 November 2026)
+
+During foundation development and future play, consult `docs/ORGANIC_CREATION_WORLD_LOOP.md`. The actual world now supports a limited authored-design → sealed research plan → verified research/proof/independent replication → voluntary local publication → separate funded institutional review; independent NPC practical methods created from repeated verified work → creator's future task-specific practical competence; and mutually chosen, maintained adult **households** from genuine repeated independent contact. Consult `world.localResearchStatus`, `world.localInnovationsStatus`, `world.localHouseholdsStatus` and `world.realmStatus` **only for player-known locally released evidence**; read-only calls never initiate creation. `research.prepareDesign` supports an authenticated **mundane physical water-indicator** design only; other imagined apparatus or magic cannot create its own scientific truth. An on-screen GM still decides prose, scene details and which witnessed objective actions are appropriate, not the engine.
+
+Never grant magical techniques from ordinary field practices, private bloodline lore from a chosen home, automatic learning to contacts, or a favourable world adoption just because a paper report was filed. No active campaign exists. **These are presently bounded first causal routes, not an implemented universal magic invention/genealogy/great-house factory.**
+
+
 ## ACTIVE STATE — trial ended by user; no active campaign (8 November 2026)
 
 The user **explicitly ended Aerin's playtest and asked for a full reset**. Do **not** resume, load, recreate, or adopt `saves/aerin_marsh.json` as the default: the active save and Aerin's trial request/result artifacts have been removed from the latest branch. **There is currently no active playable campaign.** Do not silently use Jory's, Ivar's or any validation campaigns as a replacement. Until the user explicitly begins a new game, work on **foundation development**, especially the **distinct canon power systems and earned structural progression**. Old Aerin descriptions and instructions in this long historical document are archived historical context and **not live directives**; the user-supplied original Master Prompt still takes precedence.
