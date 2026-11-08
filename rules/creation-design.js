@@ -160,7 +160,7 @@ function analysis(s,raw){
  if(p.novelty==='rediscovery'&&!known.documented)
   gaps.push('Rediscovery needs an actual existing source; a self-declared tradition is not a source');
  if(p.medium!=='technique'&&p.medium!=='ritual'&&
-  p.materials.length===0)
+  p.medium!=='aspect-form'&&p.materials.length===0)
   gaps.push('A tangible design needs a real bill of materials or explicitly established reusable facility');
  const missingMaterials=p.materials.filter(m=>
   !Number.isInteger(s.player.inventory?.[m.id])||s.player.inventory[m.id]<m.quantity)
