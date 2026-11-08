@@ -48,7 +48,7 @@ for(let seed=1;seed<=100;seed++){
   A.equal(Presence.proof(w,p.actorId,s.world.location,0,p.shift),true);
   A.equal(person.meetingIsNotAssent,true);
  }
- if(s.campaign.origin.travelBeforePlay){
+ if(s.player.startingContext.birthRegionId!=='morrowfen_basin'){
   distant++;
   A.equal(people.length,0,'A character from a foreign country cannot summon distant kin');
  }
