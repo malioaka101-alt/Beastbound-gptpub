@@ -106,14 +106,14 @@ unconscious.table.combatants||={};
 unconscious.table.combatants.player={status:'knocked_out'};
 A.throws(()=>Kin.talk(unconscious,{npcId:actor.npcId,
  question:'How is the family doing?'}),/inability to communicate/);
-const initialMinutes=local.world.minutes;
+const initialMinutes=local.world.minutes,initialCoins=local.player.coins;
 const q={npcId:actor.npcId,question:'What is the work of our household?'};
 const response=Rules.act(local,{system:'social',operation:'speakOriginRelative',params:q});
 A.equal(local.world.minutes,initialMinutes+response.minutes);
 A.equal(response.noAutomaticBenefits,true);
 A.equal(local.player.meridian.stage,0);
 A.equal(local.player.arcane.circles,0);
-A.equal(local.player.coins,85);
+A.equal(local.player.coins,initialCoins);
 A.equal(Kin.status(local).relatives.find(r=>r.npcId===actor.npcId).
  lastPersonallyHeard,response.heard);
 const previousClock=local.world.minutes,prevRng=person.rngState;
