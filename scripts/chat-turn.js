@@ -216,6 +216,12 @@ function nonConsequentialAction(s,action){
  if(['known campsites','campsites','shelter status'].includes(action)){
   return {message:'Only personally witnessed, currently usable rest sites are shown, not automatically safe land.',shelter:Health.shelterStatus(s)};
  }
+ if(['my family','known relatives','family background','my relatives',
+   'family roots'].includes(action)){
+  const family=Rules.act(s,{system:'social',
+   operation:'originRelativesStatus',params:{}});
+  return {message:'Known relatives and only personally witnessed conversations; no hidden locations, sentiments, money, inherited abilities or promises.',family};
+ }
  if(['my handoffs','my offered goods','my material gifts',
    'inspect handoffs'].includes(action)){
   const given=Rules.act(s,{system:'social',
