@@ -136,6 +136,17 @@ function create(options={}){
  if(!['male','female','nonbinary','unspecified','other'].includes(gender))
   throw Error('Unsupported gender descriptor; use a simple starting identity and describe more naturally in play');
  const originalIdentity=generatedIdentity(n,base);
+ if(options.name!==undefined&&typeof options.name==='string'&&
+   /^[\p{L}\p{M}][\p{L}\p{M}' .-]{2,39}$/u.test(options.name.trim())){
+  // A fully chosen identity names its own ordinary household, rather
+  // than retaining the surname of a separately rolled example person.
+  const oldSurname=originalIdentity.name.split(/\s+/).at(-1);
+  const newSurname=options.name.trim().split(/\s+/).at(-1);
+  originalIdentity.name=options.name.trim();
+  originalIdentity.family.members=originalIdentity.family.members.map(m=>
+   ({...m,name:m.name.endsWith(' '+oldSurname)?
+     m.name.slice(0,-oldSurname.length)+newSurname:m.name}));
+ }
  const chosenOpening=options.startLocation?
   OPENINGS.find(o=>o.location===options.startLocation):
   pick(OPENINGS,((n>>>16)^(n>>>3))>>>0);
