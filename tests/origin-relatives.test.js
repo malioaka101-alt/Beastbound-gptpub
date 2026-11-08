@@ -59,6 +59,17 @@ for(let seed=1;seed<=100;seed++){
 }
 A.ok(seenKnown>80,'Random starting households preserve named individual identities');
 A.ok(distant>40,'Independent family origins must cover remote places');
+// Saves produced before this foundation must not retroactively invent
+// living actors merely because they retained named background relatives.
+const older=fresh(400000,{mode:'guided',homeRegion:'morrowfen_basin',
+ startLocation:'crossing'});
+delete older.table.realm.originKin;
+const olderBefore=Engine.exportGame(older);
+const olderFamily=Kin.status(older);
+A.ok(olderFamily.relatives.every(x=>x.npcId===null));
+A.equal(Presence.localStatus(older,Realm.peek(older)).people.some(x=>
+ x.npcId.startsWith('origin-kin:')),false);
+A.equal(Engine.exportGame(older),olderBefore);
 const remote=fresh(400001,{mode:'guided',homeRegion:'forge_basin',
  startLocation:'crossing',originKind:'renowned-family',
  houseId:'emberhand',houseRelation:'birth-branch'});
