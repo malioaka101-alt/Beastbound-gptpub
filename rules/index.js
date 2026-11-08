@@ -49,6 +49,7 @@ const Mediation=require('./voluntary-mediation');
 const EmergentGroups=require('./emergent-groups');
 const GroupInvitations=require('./group-invitations');
 const Senses=require('./first-stage-senses');
+const RiftAnchors=require('./rift-anchors');
 const SoulThreads=require('./soul-threading');
 const PersonPresence=require('../world/person-presence');
 const WildLives=require('../world/wild-lives');
@@ -248,6 +249,9 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.perceive':return Senses.perceive(s,params);
   case 'rift.senseStatus':return Senses.riftStatus(s,params);
   case 'rift.sense':return Senses.senseRift(s,params);
+  case 'rift.anchorStatus':return RiftAnchors.status(s);
+  case 'rift.anchorWork':return RiftAnchors.mark(s,params);
+  case 'rift.orient':return RiftAnchors.orient(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
