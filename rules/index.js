@@ -65,6 +65,7 @@ const OriginRelatives=require('../world/origin-relatives');
 const LivedPlaces=require('../world/lived-places');
 const GmCampaignOpening=require('../scripts/gm-campaign-opening');
 const Cosmology=require('../world/cosmology-ledger');
+const CausalHistory=require('../world/causal-history');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -294,6 +295,10 @@ function act(s,{system,operation,params={}}={}){
   case 'opportunity.status':return FieldOpportunities.publicStatus(s,params);
   case 'opportunity.interest':return FieldOpportunities.interest(s,params);
   case 'opportunity.file':return FieldOpportunities.file(s,params);
+  case 'world.historyStatus':return CausalHistory.status(s,params);
+  case 'world.historyRecordEvent':return CausalHistory.recordEvent(s,params);
+  case 'world.historyInterpret':return CausalHistory.interpret(s,params);
+  case 'world.historyEffect':return CausalHistory.effect(s,params);
   case 'world.cosmologyStatus':return Cosmology.status(s,params);
   case 'world.cosmologyAuthorPlane':return Cosmology.authorPlane(s,params);
   case 'world.cosmologyRecordFact':return Cosmology.recordFact(s,params);
