@@ -6,6 +6,7 @@ const GuildFieldwork=require('./guild-fieldwork');
 const ResearchPublications=require('./research-publications');
 const IndividualInnovations=require('./independent-innovations');
 const EmergentHouseholds=require('./emergent-households');
+const OriginRelatives=require('./origin-relatives');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -479,6 +480,7 @@ function tick(s,weekDays=[],monthDays=[]){
    // anywhere in the known simulated geography, without player observation.
    // Their independent decisions are dated and source-bound.
    EmergentPeople.sixday(s,w,day);
+   OriginRelatives.sixday(w,day);
    // People with genuine overlapping work-shift witnesses may freely meet
    // and share limited ordinary information without automatic teaching.
    IndependentContacts.sixday(w,day);
