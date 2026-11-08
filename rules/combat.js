@@ -175,12 +175,20 @@ function recover(s,{id,enduranceTrained=false}={}){
  // *consume* Stamina or drive the wound-model pool below zero.
  // Earned physiological adaptation improves one existing legal Recover action.
  // It does not grant an extra turn, remove an injury or change beast actions.
- let organBonus=0;
+ let organBonus=0,schoolBreath=0;
  if(id==='player'&&s.player?.body?.cycles?.includes('Organ Cycle')){
-  try{require('./disciplines').organEarned(s);organBonus=1;}
-  catch{} // An edited cycle label is not proof of adapted organs.
+  try{
+   require('./disciplines').organEarned(s);
+   organBonus=1;
+   // A named rescue breathing method must come from an actual later
+   // professional field demonstration with authenticated prior work.
+   // The same physical breathing supports one already-legal Recover,
+   // not extra turns, health restoration or an inherited technique.
+   if(require('./world-practice').earnedSchoolApplication(
+     s,'openpeak_rescue_breath'))schoolBreath=1;
+  }catch{} // Stage numbers, invented school membership and unverifiable reports grant no benefits.
  }
- c.stamina=Math.min(c.maxStamina,c.stamina+Math.max(0,2+c.vigor+organBonus));
+ c.stamina=Math.min(c.maxStamina,c.stamina+Math.max(0,2+c.vigor+organBonus+schoolBreath));
  return {gained:c.stamina-old,uses:c.recoverUses};
 }
 function rest(s,{id,nights=0,weeks=0}={}){
