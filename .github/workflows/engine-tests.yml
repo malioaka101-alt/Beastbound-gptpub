@@ -92,6 +92,7 @@ jobs:
             tests/fantasy-canon.test.js
             tests/new-campaign.test.js
             tests/campaign-origins.test.js
+            tests/starting-kin-lives.test.js
             tests/bond-witness.test.js
             tests/bond-care.test.js
             tests/bond-consent.test.js
