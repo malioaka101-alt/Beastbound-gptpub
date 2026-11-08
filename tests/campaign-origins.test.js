@@ -26,7 +26,8 @@ for(let seed=1;seed<=180;seed++){
  A.equal(s.campaign.oldCampaignImported,false);
  A.ok(Atlas.R[s.player.startingContext.birthRegionId]);
  A.ok(E.LOCATIONS[s.world.location]);
- A.equal(s.world.location,s.campaign.startingLocation);
+ A.equal(s.campaign.startingLocation,null);
+ A.equal(s.campaign.openingState,'awaiting-gm');
  A.equal(s.table.realm.ticks.sixdays,0);
  A.equal(s.player.humanEvolution.stage,0);
  A.equal(s.player.arcane.circles,0);
@@ -114,7 +115,7 @@ A.equal(maker.state.player.pronouns,'they/them');
 A.equal(maker.state.player.background,'shipwright');
 A.equal(maker.state.player.rift.step,0);
 A.equal(maker.state.player.startingContext.birthRegionId,'forge_basin');
-A.equal(maker.state.player.startingContext.travelBeforePlay,true);
+A.equal(maker.state.player.startingContext.travelBeforePlay,false);
 A.equal(maker.state.player.history.ownOccupation,'independent hull repairer');
 A.equal(maker.state.player.history.personalGoal,'learn safer emergency routes');
 A.equal(maker.state.player.family.familyIdentity.noHereditaryRank,true);
