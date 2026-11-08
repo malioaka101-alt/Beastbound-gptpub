@@ -220,6 +220,9 @@ function act(s,{system,operation,params={}}={}){
   case 'creation.evaluate':return Creation.evaluate(s,params);
   case 'creation.draft':return Creation.draft(s,params);
   case 'creation.status':return Creation.status(s,params);
+  case 'creation.personalStatus':return Creation.personalStatus(s,params);
+  case 'creation.personalDevelop':return Creation.developPersonal(s,params);
+  case 'creation.personalUse':return Creation.usePersonal(s,params);
   case 'creation.prototype':return CreationPrototype.build(s,params);
   case 'creation.calibrate':return CreationPrototype.calibrate(s,params);
   case 'creation.measure':return CreationPrototype.measure(s,params);
