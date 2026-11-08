@@ -8,6 +8,7 @@ const IndividualInnovations=require('./independent-innovations');
 const EmergentHouseholds=require('./emergent-households');
 const OriginRelatives=require('./origin-relatives');
 const Cosmology=require('./cosmology-ledger');
+const CausalHistory=require('./causal-history');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -23,7 +24,7 @@ function seedFor(s){const n=(s.seed>>>0)||1355150487;return ((n^0x9e3779b9)>>>0)
 function initial(s,startingDay=0){
  const w={version:1,worldSeed:seedFor(s),rngState:seedFor(s),startedAt:startingDay,lastTickDay:startingDay,
   calendarAnchor:null,ticks:{sixdays:0,months:0},countries:{},institutions:{},routes:{},ecosystems:{},diplomacy:{},notables:N.seedNotables(),houses:Houses.seed(),governance:Gov.seed(),
-  market:{},mythic:Mythic.seed(),cosmology:Cosmology.seed(),chronicle:[],sealedChronicle:[],knownSights:[],orders:[],counters:{wars:0,peaceTreaties:0,changesOfGovernment:0,closures:0,reopenings:0,ecosystemWarnings:0},
+  market:{},mythic:Mythic.seed(),cosmology:Cosmology.seed(),causalHistory:CausalHistory.seed(),chronicle:[],sealedChronicle:[],knownSights:[],orders:[],counters:{wars:0,peaceTreaties:0,changesOfGovernment:0,closures:0,reopenings:0,ecosystemWarnings:0},
   publicKnowledge:{notes:[]}};
  for(const p of A.polities){w.countries[p.id]={...p.initial,regime:p.government,rulerTenure:0,stressMonths:0,cycle:0,warExhaustion:0};
   w.market[p.id]={grain:1,feed:1,materials:1,medicine:1,vael:1};}
@@ -534,9 +535,9 @@ const RANGE_TRADE={wetland:'barge and reed markets',forest:'timber and herbal su
 function publicAtlas(s,{type,id}={}){
  if(!['continent','polity','region','institution','culture','festival'].includes(type))throw Error('Unknown atlas type');
  const row=A.safeLookup(type,id);if(!row)throw Error('Unknown named location or organisation');
- if(type==='polity')return {name:row.name,continent:A.safeLookup('continent',row.continent)?.name,government:row.government,capital:row.capital,culture:A.C[row.culture].name,language:row.language,food:row.food,craft:row.craft,customs:row.customs,rights:row.rights,trade:row.resources,knownPressures:row.contested};
- if(type==='region')return {name:row.name,continent:A.safeLookup('continent',row.continent)?.name,polity:A.P[row.polity]?.name,biome:row.biome,terrain:row.traits,neighbors:row.neighbors||[],dangers:row.dangers,goods:row.goods};
- if(type==='institution')return {name:row.name,type:row.type,location:A.P[row.polity]?.name,knownWork:row.specialty,funding:row.funding,origin:row.roots,
+ if(type==='polity')return {historicalInfluences:CausalHistory.status(s,{targetType:type,targetId:id}).effects,name:row.name,continent:A.safeLookup('continent',row.continent)?.name,government:row.government,capital:row.capital,culture:A.C[row.culture].name,language:row.language,food:row.food,craft:row.craft,customs:row.customs,rights:row.rights,trade:row.resources,knownPressures:row.contested};
+ if(type==='region')return {historicalInfluences:CausalHistory.status(s,{targetType:type,targetId:id}).effects,name:row.name,continent:A.safeLookup('continent',row.continent)?.name,polity:A.P[row.polity]?.name,biome:row.biome,terrain:row.traits,neighbors:row.neighbors||[],dangers:row.dangers,goods:row.goods};
+ if(type==='institution')return {historicalInfluences:CausalHistory.status(s,{targetType:type,targetId:id}).effects,name:row.name,type:row.type,location:A.P[row.polity]?.name,knownWork:row.specialty,funding:row.funding,origin:row.roots,
    publiclyKnownMethods:Renown.PUBLIC_METHODS.filter(x=>x.institution===id).
     map(x=>({name:x.name,path:x.path,learningEvidence:x.learning,
      actualProcedureAvailable:!!x.actualRule})),
@@ -549,7 +550,7 @@ function publicAtlas(s,{type,id}={}){
      publiclyAssociatedFamily:require('./social-houses').byId[x.house].name,
      noHereditaryPowerAwarded:true})),
    membershipOrTeachingNotGranted:true};
- return {...row};
+ return {...row,...(type==='culture'?{historicalInfluences:CausalHistory.status(s,{targetType:type,targetId:id}).effects}:{})};
 }
 function publicEconomy(s,{polity=null}={}){
  const w=peek(s),id=polity||polityOf(s);
