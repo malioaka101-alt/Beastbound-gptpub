@@ -1,5 +1,7 @@
 # Beastbound ChatGPT Project execution — technical specification
 
+**Narrative is the GM's work.** This is solely the technical execution contract. The GM authors living scenes and responds to unrestricted player intent; code supplies bounded mechanical outcomes and save truth, not a script. See `docs/GM_NARRATIVE_AND_ENGINE_BOUNDARY.md` and the authoritative Master Prompt. Never narrate unreturned roll results or invent off-screen NPC replies.
+
 **Current status (8 November 2026):** The user explicitly ended the Aerin trial. No active campaign exists in the current tree. The former `saves/aerin_marsh.json` and its `requests/aerin_marsh/` / `results/aerin_marsh/` files were removed; references below to those paths describe the historical example, **not** an active game. A new campaign will require an explicit new-game request, a separately generated save and its own date/identity. Do not resume Ivar or development fixtures by default.
 
 
