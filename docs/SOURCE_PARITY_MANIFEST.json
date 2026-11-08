@@ -413,7 +413,7 @@
         "scripts/new-campaign.js",
         "tests/new-campaign.test.js"
       ],
-      "unfulfilled": "Seeded male starts, backgrounds, family and date; universal demographic variability and examinations incomplete."
+      "unfulfilled": "The existing engine has seeded demographic variation and extended lived histories. Player age may be their only requested input, and an actual first scene is always GM-authored. Full preexisting legal offices, dependants and lifetime social history remain only partly modeled."
     },
     {
       "id": 41,
@@ -612,7 +612,7 @@
         "scripts/new-campaign.js",
         "tests/new-campaign.test.js"
       ],
-      "unfulfilled": "Independent seeded campaign, scene, date, companion/family possible; professional power enrolment not fully integrated."
+      "unfulfilled": "New campaigns have seeded independent identity, genuine family ties, a civil date and age-derived pre-game ordinary history. There are no prewritten first-scene hooks; a live GM start requires an authored existing/new place and a saved opening. Complex prior social offices and professional qualifications remain partial."
     },
     {
       "id": 57,
