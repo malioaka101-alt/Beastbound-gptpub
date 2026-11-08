@@ -96,20 +96,20 @@ const act=(s,params)=>Rules.act(s,{system:'body',operation:'organWork',params});
  A.equal(D.organEarned(restored).cycle,3);
  // Actual combat Recover retains its one legal action; organ adaptation
  // improves stamina restored without granting a second turn or healing.
- c.stamina-=5;p.stamina=c.stamina;c.recoverUses=0;
+ c.stamina-=10;p.stamina=c.stamina;c.recoverUses=0;
  const beforeRec=c.stamina,oldUses=c.recoverUses;
  const result=Combat.recover(s,{id:'player'});
- A.equal(result.gained,Math.min(5,Math.max(0,3+c.vigor)));
+ A.equal(result.gained,Math.min(10,Math.max(0,3+c.vigor)));
  A.equal(c.recoverUses,oldUses+1);
  A.equal(c.stamina,beforeRec+result.gained);
  const second=Combat.recover(s,{id:'player'});
  A.equal(second.gained,0,'Organ work cannot reset encounter recovery uses');
  const forged=f(723555);
  forged.player.body.cycles.push('Organ Cycle');
- forged.table.combatants.player.stamina-=5;
+ forged.table.combatants.player.stamina-=10;
  const fprev=forged.table.combatants.player.stamina;
  const noBonus=Combat.recover(forged,{id:'player'});
- A.equal(noBonus.gained,Math.min(5,Math.max(0,2+forged.table.combatants.player.vigor)));
+ A.equal(noBonus.gained,Math.min(10,Math.max(0,2+forged.table.combatants.player.vigor)));
  A.equal(forged.table.combatants.player.stamina,fprev+noBonus.gained);
  const snapshot=E.exportGame(s),rng=s.rngState;
  A.throws(()=>act(s,{focus:'integrated',minutes:15}),/genuinely completed/);
