@@ -129,6 +129,7 @@ jobs:
             tests/conscious-critical-referral.test.js
             tests/field-crafting.test.js
             tests/creation-design.test.js
+            tests/organic-creation-world-integration.test.js
             tests/personal-creation-expressions.test.js
             tests/personal-arcane-meridian-combat.test.js
             tests/personal-body-aspect.test.js
