@@ -61,6 +61,7 @@ const ResearchPublications=require('../world/research-publications');
 const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
+const OriginRelatives=require('../world/origin-relatives');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -331,6 +332,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupMembersStatus':return GroupInvitations.status(s,params);
   case 'social.personContext':return knownPersonContext(s,params);
+  case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
+  case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);
   case 'social.localPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
       Object.keys(params).length)throw Error('Real local people status is read-only and accepts no invented individual or presence');

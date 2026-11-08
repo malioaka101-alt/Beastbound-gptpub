@@ -8,6 +8,7 @@ const Houses=require('../world/social-houses');
 const Heritage=require('../world/renown-and-practice');
 const Groups=require('../world/emergent-groups');
 const Realm=require('../world/simulation');
+const OriginRelatives=require('../world/origin-relatives');
 const Engine=require('../engine');
 
 const KINDS=Object.freeze([
@@ -231,6 +232,7 @@ function install(s,planned){
   s.campaign.origin.connection.groupId=made.id;
   s.player.startingContext.connection.groupId=made.id;
  }
+ OriginRelatives.install(s,Realm.peek(s));
  return s.player.startingContext;
 }
 module.exports={KINDS,NONHUMAN_HOUSES,prepare,install,number};
