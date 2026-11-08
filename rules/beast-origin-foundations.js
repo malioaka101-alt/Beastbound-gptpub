@@ -283,11 +283,11 @@ function screening(s,params={}){
  C.event(s,'progress','Provisional '+axis+' compatibility screen: '+result+
   '; biological integration is still unproven.',{
   origin:'beast-origin-compatibility-screen-v1',candidateId,axis,
-  originalCheck:check,minutes,staminaSpent,riskFlags,
+  originalCheck:check,minutes,staminaSpent:fatigue,riskFlags,
   provisional:true,approvedForSeeding:false
  });
  return {candidateId,axis,basis:rule.basis,result,check,minutes,
-  staminaSpent,riskFlags,feeTalons:0,route:'independent',
+  staminaSpent:fatigue,riskFlags,feeTalons:0,route:'independent',
   noIntegrationDone:true,noNewTrait:true,
   donorConsentNotEstablished:true,
   screeningOnly:true,approvalForSeeding:false,
