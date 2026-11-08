@@ -65,6 +65,7 @@ function read(s){
   arcane:{circles:a.circles||0,circleName:phase(ARCANE,a.circles||0),
    coreIgnited:a.coreIgnited===true,coreStability:a.coreStability,
    arcanaSkillRank:skill(p,'arcana'),manaCoreEstablished:a.coreIgnited===true,
+   ...(a.circles>=2?{matrix:Disc.matrixStatus(s)}:{}),
    training:verifiedTrain('arcane'),
    note:'A legacy Mana reservoir does not itself prove an ignited Core or a completed Circle'},
   soul:{phase:soul.phase||0,phaseName:phase(SOUL,soul.phase||0),
