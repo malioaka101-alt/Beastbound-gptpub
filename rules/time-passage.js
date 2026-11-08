@@ -53,4 +53,47 @@ function passage(s,p={}){
  return {...result,precommitted:true,rationsConsumed:days,
   unchangedLocation:s.world.location,source:'prior witnessed local downtime'};
 }
-module.exports={passage};
+// GM-adjudicated elapsed time uses the existing clock and world ticks.
+// The numeric duration is a narrative judgement from the GM, not a
+// character power, fixed minimum duration for an action or earned result.
+// Short scene intervals, weeks and months all use exactly the same clock.
+// The one-year-per-call limit is a PROCESSING guard, not a world time gate:
+// the GM may continue through subsequent verified intervals when warranted.
+const TECHNICAL_MAX_MINUTES=365*1440;
+function wait(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).length!==1||!Number.isInteger(p.minutes)||
+    p.minutes<1||p.minutes>TECHNICAL_MAX_MINUTES)
+  throw Error('Elapsed scene time accepts only an actual positive integer of minutes, up to one processing year; no selected rewards, skills or outcomes');
+ if(s.battle||s.encounter)
+  throw Error('An unresolved beast encounter or battle requires a real scene resolution, not a time skip');
+ const loc=E.LOCATIONS[s.world?.location];
+ if(!loc||loc.biome!=='settlement')
+  throw Error('This ordinary-life timeskip requires an established safe settlement; remote travel, wilderness and hazardous periods need their actual circumstances');
+ const c=s.table?.combatants?.player;
+ if(c&&['dying','dead','knocked_out','incapacitated'].includes(c.status))
+  throw Error('A character unable to act needs actual external care, not an inferred unattended routine');
+ const old=s.world.minutes,oldCompletedDay=Math.floor(old/1440);
+ // A long interval does not itself establish how the PC ate, slept, earned
+ // money, conducted research, cared for partners or survived disruptions.
+ // Those depend on authentic campaign facts and dedicated existing rules.
+ // It records passage ONLY; the GM must establish the ordinary circumstances
+ // before requesting it and must not grant off-screen activity rewards here.
+ E.advance(s,p.minutes);
+ const ticks=W.finalizeTime(s,old);
+ Health.sync(s,{source:'legacy'});
+ const daysPassed=Math.floor(s.world.minutes/1440)-oldCompletedDay;
+ C.event(s,'story','A period of ordinary life passes at '+loc.name+'.',{
+  origin:'gm-judged-ordinary-time',location:s.world.location,
+  elapsedMinutes:p.minutes,daysPassed,
+  noResearchOrWorkProgress:true,noAutomaticWages:true,
+  noAutomaticAgreement:true,lifeNeedsRequireActualContext:true
+ });
+ return {waited:true,elapsedMinutes:p.minutes,daysPassed,
+  location:s.world.location,clock:E.clock(s),
+  sixdayTicks:ticks.sixdayTicks,monthTicks:ticks.monthTicks,
+  noTrainingOrResearchAward:true,noAutomaticWagesOrContracts:true,
+  lifeNeedsNotCertified:true,
+  note:'This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently.'};
+}
+module.exports={passage,wait};
