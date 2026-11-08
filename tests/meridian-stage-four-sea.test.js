@@ -58,7 +58,7 @@ const make=(seed=183501)=>{
  // Its transition source is real; the first 107 are isolated, synthetic
  // fixture prerequisites, not an attempt to retroactively author a live save.
  let last=null;
- for(let i=0;i<12;i++){
+ for(let i=0;i<80;i++){
   last=R.act(s,{system:'meridian',operation:'gatePractice',params:{
    force:false,minutes:15}});
   if(last.opened)break;
