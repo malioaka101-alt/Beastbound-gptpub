@@ -109,7 +109,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
 {
  const s=New.create({seed:9281621,slug:'hud_dynamic_001'}).state;
  const hud=P.hudData(s),before=E.exportGame(s),rng=s.rngState;
- A.ok(hud.focus.length>0);
+ A.equal(hud.focus.length,0,'The GM has not authored a first scene or predetermined narrative focus');
  A.equal(hud.context?.kind==='known-public-notices',false);
  A.equal(s.rngState,rng);
  A.equal(E.exportGame(s),before,'HUD lookup must be read-only');
