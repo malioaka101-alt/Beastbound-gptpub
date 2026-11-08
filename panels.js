@@ -44,7 +44,8 @@ const date = s => {
   return `DAY ${E.day(s)}`;
 };
 const weather = s => String(s.world?.weather||'Fair').split(/[ ,]/)[0] || 'Fair';
-const location = s => E.LOCATIONS[s.world.location]?.name || String(s.world.location||'Unknown place');
+const location = s => E.LOCATIONS[s.world.location]?.name ||
+ require('./world/lived-places').get(s,s.world.location)?.name || String(s.world.location||'Unknown place');
 const time = s => E.clock(s).split(', ')[1]||'08:00';
 const now = s => {
   if(s.chatRuntime?.focus?.length)return s.chatRuntime.focus.slice(0,2);
