@@ -1,7 +1,7 @@
 'use strict';
 // One text-RPG combat exchange: a player intent and an independently committed
 // NPC/beast plan are resolved together, never after the GM sees a favourable die.
-const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design');
+const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design'),Aspect=require('./personal-aspect');
 const COVER=Object.freeze({
  forest:{kind:'copperwood trunks',source:'Engine-established copperwood trunks in Copperwood Verge'},
  ruins:{kind:'ward-stone masonry',source:'Engine-established ward-stone masonry at Riftglass Outpost'}
@@ -60,7 +60,7 @@ function exchange(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!
    ['intent','attackId','techniqueId','nonlethal','playerBrace','personalDesignId'].includes(k)))
   throw Error('Player attack bonuses, damage, Qi spending, enemy plans and encounter DCs cannot be caller-selected');
- if(!['attack','cast','ward','dual_cast','technique','defend','recover','withdraw','parley','yield_space','take_cover'].includes(p.intent))throw Error('Player intent required: attack, cast, ward, dual_cast, technique, defend, recover, withdraw, parley, yield_space or take_cover');
+ if(!['attack','cast','ward','dual_cast','technique','defend','recover','withdraw','parley','yield_space','take_cover','aspect','revert'].includes(p.intent))throw Error('Player intent required: attack, cast, ward, dual_cast, technique, defend, recover, withdraw, parley, yield_space or take_cover');
  if(p.playerBrace!==undefined&&![true,false,'auto'].includes(p.playerBrace))
   throw Error('Player bracing must be a real reaction choice');
  if(p.nonlethal!==undefined&&typeof p.nonlethal!=='boolean')
@@ -69,8 +69,12 @@ function exchange(s,p={}){
   throw Error('Weapon action and nonlethal strike apply only to an actual attack intent');
  if(!['cast','ward','technique'].includes(p.intent)&&p.techniqueId!==undefined)
   throw Error('Only a real attack spell, defensive Ward or Meridian technique may name a previously learned technique');
- if(p.personalDesignId!==undefined&&!['cast','technique'].includes(p.intent))
+ if(p.personalDesignId!==undefined&&!['cast','technique','aspect'].includes(p.intent))
   throw Error('A personal combat expression must be used through its exact original learned strike action, not a free action or dual cast');
+ if(p.intent==='aspect'&&p.personalDesignId===undefined)
+  throw Error('A narrated release requires an actually developed individual aspect source');
+ if(p.intent==='aspect'&&p.techniqueId!==undefined)
+  throw Error('A personal physique release is not a second spell or learned attack');
  // Refuse an already recorded collapse before cover, equipment or spell preflight.
  // Those checks must not mutate an unusable in-memory encounter on rejection.
  const recordedPlayer=s.table?.combatants?.player;
@@ -90,10 +94,13 @@ function exchange(s,p={}){
  const meridian=p.intent==='technique'?QiStrike.attackProfile(s,p.techniqueId):null;
  // Validate the original design, completed personal work, native learned
  // profile AND extra energy/stamina before enemy decisions or any dice.
- const variation=p.personalDesignId===undefined?null:
+ const variation=p.personalDesignId===undefined||p.intent==='aspect'?null:
   Creation.combatPersonal(s,p.personalDesignId,p.intent,spell||meridian);
  const activeSpell=variation&&p.intent==='cast'?variation.profile:spell;
  const activeMeridian=variation&&p.intent==='technique'?variation.profile:meridian;
+ if(p.intent==='aspect')Aspect.preflight(s,p.personalDesignId,{combat:true});
+ if(p.intent==='revert'&&!Aspect.present(s))
+  throw Error('No original living aspect is available to voluntarily release');
  const wardProfile=['ward','dual_cast'].includes(p.intent)?
   ArcaneWard.profile(s,dual?'arcane_ward':p.techniqueId):null;
  if(dual&&C.int(s.player.mana,'real available Mana',0,100000)<
@@ -117,9 +124,20 @@ function exchange(s,p={}){
  const decision=Agency.choose(s),enemyPlan=decision.plan;
  let ownResult=null,enemyResult=null;
  const atkOpts={attackerId:'player',targetId:fight.enemyId};
+ // One actual minute of active-physique exertion costs physical Stamina.
+ // This is charged before its defensive effect can protect against a real
+ // opponent. If exhausted the aspect collapses, never bestows free armor.
+ const aspectUpkeep=['aspect','revert'].includes(p.intent)?
+   {spent:0,active:!!Aspect.present(s)}:Aspect.spendCombatUpkeep(s);
  // Moving to strike or withdraw means stepping out of previously occupied cover.
  if(['attack','cast','dual_cast','technique','withdraw'].includes(p.intent))fight.playerCover=null;
- if(p.intent==='attack'){
+ if(p.intent==='aspect'){
+  ownResult=Aspect.activate(s,p.personalDesignId,{combat:true});
+  ownResult.action='personally developed physique release';
+ }else if(p.intent==='revert'){
+  ownResult=Aspect.revert(s,{combat:true});
+  ownResult.action='voluntary aspect reversion';
+ }else if(p.intent==='attack'){
   ownResult=Combat.attack(s,{...atkOpts,modifier:action.modifier,damage:action.damage,
    offM:action.offM,brace:false,nonlethal:isNonlethal});
   ownResult.verifiedActionId=action.actionId;
@@ -231,7 +249,7 @@ function exchange(s,p={}){
  if(enemyPlan==='retreat'){
   // Independent NPC/beast intent; no automatic surrender or death.
   s.battle=null;enemyResult={retreated:true};
- }else if(enemyPlan==='attack'&&enemy.status==='ok'){
+ }else if(enemyPlan==='attack'&&enemy.status==='ok'&&player.status==='ok'){
   enemyResult=Combat.attack(s,{attackerId:fight.enemyId,targetId:'player',modifier:enemy.attackModifier,damage:enemy.damage,
     activeDefense:p.intent==='defend',coverBonus:fight.playerCover?2:0,
     brace:p.playerBrace??'auto',nonlethal:decision.nonlethal});
@@ -276,7 +294,7 @@ function exchange(s,p={}){
   s.battle=null;
  }else if(enemy.status!=='ok'||enemyPlan==='retreat')s.battle=null;
  else {Combat.newRound(s,{ids:['player',fight.enemyId]});fight.round++;}
- const r={ownResult,enemyResult,enemyPlan,round:fight.round,elapsedMinutes:1,ended:!s.battle,
+ const r={ownResult,enemyResult,enemyPlan,aspectUpkeep,round:fight.round,elapsedMinutes:1,ended:!s.battle,
    defeated,rescueRequired:defeated,
    player:Combat.publicCombatant(player),opponent:Combat.observedCombatant(enemy)};
  C.event(s,'combat',`Exchange: ${p.intent} against ${enemyPlan}; ${r.ended?'the engagement ends':'the engagement continues'}.`,null);
