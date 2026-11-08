@@ -215,7 +215,7 @@ const spec=()=>({title:'Field Reed Water Witness',
    ['world','localResearchStatus'],
    ['world','localInnovationsStatus'],
    ['world','localHouseholdsStatus']]){
-   const result=Turn.execute(file,{id:'organic_inspect_'+operation,
+   const result=Turn.execute(file,{id:'organic_inspect_'+operation.toLowerCase(),
     mode:'rule',system,operation,params:{}});
    A.equal(result.ok,true);
    A.equal(result.applied,false,operation+' must be a pure inspection');
