@@ -6,6 +6,7 @@ const GuildFieldwork=require('./guild-fieldwork');
 const ResearchPublications=require('./research-publications');
 const IndividualInnovations=require('./independent-innovations');
 const EmergentHouseholds=require('./emergent-households');
+const StartingKin=require('./starting-kin');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -447,6 +448,9 @@ function tickMonth(w,day){
  }
  Houses.month(w,day,v=>event(w,v));
  FamilyMembers.month(w,day,v=>event(w,v));
+ // Individual relatives from this campaign's pre-play facts make their
+ // own monthly decisions without changing the player's resources or rolls.
+ StartingKin.month(w,day);
  EmergentHouseholds.month(w,day);
  AgentInitiatives.month(w,day,v=>event(w,v));
  EmergentGroups.syncWorkerFounders(w,day,v=>event(w,v));
