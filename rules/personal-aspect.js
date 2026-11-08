@@ -31,6 +31,11 @@ function validRecord(s,a){
     !['fortitude','balance'].includes(a.mode)||
     !Number.isInteger(a.activationStamina)||a.activationStamina!==ACTIVATION_STAMINA||
     !Number.isInteger(a.activationRoll)||a.activationRoll<1||a.activationRoll>20||
+    !Number.isInteger(a.upkeepSpent)||a.upkeepSpent<0||
+    (a.revertedMinute!==undefined&&
+      (!Number.isInteger(a.revertedMinute)||
+       a.revertedMinute<a.beganMinute||
+       a.revertedMinute>=a.endsMinute))||
     typeof a.proofHash!=='string'||!/^[a-f0-9]{64}$/.test(a.proofHash))
    return null;
  try{
@@ -44,12 +49,13 @@ function validRecord(s,a){
 }
 function present(s){
  const a=s.table?.personalAspect;
- if(!a)return null;
+ if(!a||a.success!==true)return null;
  const proof=validRecord(s,a);
  if(!proof)return null;
  const current=s.world?.minutes;
  if(!Number.isInteger(current)||current<a.beganMinute||
-    current>=a.endsMinute)return null;
+    current>=a.endsMinute||
+    a.revertedMinute!==undefined&&current>=a.revertedMinute)return null;
  if(s.table?.combatants?.player?.status&&s.table.combatants.player.status!=='ok')
   return null;
  return {a,...proof};
@@ -115,11 +121,12 @@ function activate(s,id,{combat=false}={}){
  }
  // A failed actual activation cannot create an active form. Nevertheless
  // it records a cooldown; a narration-only retry does not reroll freely.
+ const begins=now+(combat?0:1);
  const state={
   origin:ORIGIN,designId:id,name:e.name,mode:e.aspectMode,
   proofHash,sourceHash:e.characterBasis.sourceHash,
-  beganMinute:now,endsMinute:now+(check.success?duration:1),
-  cooldownUntil:now+(check.success?duration:1)+COOLDOWN_MINUTES,
+  beganMinute:begins,endsMinute:begins+(check.success?duration:1),
+  cooldownUntil:begins+(check.success?duration:1)+COOLDOWN_MINUTES,
   activationStamina:ACTIVATION_STAMINA,activationRoll:check.roll,
   activationDegree:check.degree,success:check.success,
   upkeepSpent:0,backlash
@@ -154,8 +161,10 @@ function revert(s,{combat=false}={}){
  if(!here)throw Error('There is no active personally earned aspect to release');
  const now=s.world.minutes;
  const a=here.a;
- a.endsMinute=now+(!combat?1:1);
- a.cooldownUntil=a.endsMinute+COOLDOWN_MINUTES;
+ a.revertedMinute=now;
+ // The old original maximum stays on the receipt, preventing a rushed
+ // rollback from pretending to recover the organs faster than normal.
+ a.cooldownUntil=Math.max(a.cooldownUntil,now+COOLDOWN_MINUTES);
  if(!combat){
   const before=s.world.minutes;E.advance(s,1);
   W.finalizeTime(s,before);Health.sync(s,{source:'legacy'});
