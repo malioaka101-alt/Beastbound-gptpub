@@ -31,7 +31,7 @@ const TRADE_LIFE={
  'beast handlers':'The feeding and care of working beasts shaped the household.',
  craftspeople:'Workshop orders, tools and repairs shaped the household.'
 };
-function generatedIdentity(seed,base){
+function generatedIdentity(seed,base,age){
  // This is identity generation only. It does not consume game RNG or
  // make hidden predictions about relatives, resources or future consent.
  const u=Number(seed)>>>0;
@@ -44,11 +44,15 @@ function generatedIdentity(seed,base){
  const members=[],n=family.household==='two guardians'?2:
   family.household==='independent household'?0:1;
  for(let i=0;i<n;i++)members.push({
-  relation:i===0?'guardian':'second guardian',
+  // The recorded childhood household is not proof that a much older
+  // character still has living guardians. Their living named relatives
+  // can be younger adult kin instead.
+  relation:age>=55?(i===0?'adult relative':'younger relative'):
+   i===0?'guardian':'second guardian',
   name:pick(RELATIVE_GIVEN,h(10+i*7))+' '+surname
  });
  if(family.household==='extended family')members.push({
-  relation:'older relative',name:pick(RELATIVE_GIVEN,h(32))+' '+surname
+  relation:age>=55?'adult cousin':'older relative',name:pick(RELATIVE_GIVEN,h(32))+' '+surname
  });
  for(let i=0;i<family.siblings;i++){
   let person=pick(RELATIVE_GIVEN,h(50+i*11));
@@ -116,7 +120,7 @@ function create(options={}){
   String(options.gender).trim().toLowerCase();
  if(!['male','female','nonbinary','unspecified','other'].includes(gender))
   throw Error('Unsupported gender descriptor; use a simple starting identity and describe more naturally in play');
- const originalIdentity=generatedIdentity(n,base);
+ const originalIdentity=generatedIdentity(n,base,age);
  if(options.name!==undefined&&typeof options.name==='string'&&
    /^[\p{L}\p{M}][\p{L}\p{M}' .-]{2,39}$/u.test(options.name.trim())){
   // A fully chosen identity names its own ordinary household, rather
