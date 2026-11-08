@@ -14,7 +14,7 @@ const Realm=require('../world/simulation');
 function fresh(seed,opts={}){
  return N.create({seed,slug:'campaign_origin_fixture',...opts});
 }
-const observed=new Set(),regions=new Set(),worlds=new Set();
+const observed=new Set(),regions=new Set(),worlds=new Set(),physiques=new Set(),appearances=new Set();
 for(let seed=1;seed<=180;seed++){
  const a=fresh(seed),b=fresh(seed);
  A.deepEqual(a,b,'A random founding must reproduce the exact character and world');
@@ -40,6 +40,13 @@ for(let seed=1;seed<=180;seed++){
  observed.add(s.player.startingContext.originKind);
  regions.add(s.player.startingContext.birthRegionId);
  worlds.add(s.player.startingContext.continent);
+ physiques.add(Object.values(s.player.attributes).join(','));
+ appearances.add(s.player.appearance);
+ A.ok(Object.values(s.player.attributes).every(x=>
+  Number.isInteger(x)&&x>=8&&x<=17));
+ A.equal(a.summary.appearance,s.player.appearance);
+ A.equal(a.summary.attributes.str,s.player.attributes.str);
+ A.equal(s.player.capabilityProfile.potential.soulDepth.assessments.length,0);
  if(s.player.startingContext.originKind==='renowned-family'){
   const h=Houses.byId[s.player.startingContext.connection.houseId];
   A.ok(Heritage.RENOWNED.some(x=>x.house===h.id));
@@ -67,6 +74,8 @@ A.ok(observed.has('community'));
 A.ok(observed.has('ordinary'));
 A.ok(regions.size>=12,'Random homes must use the cross-continental source atlas');
 A.ok(worlds.size>=5,'Founding history cannot remain confined to one country');
+A.ok(physiques.size>=70,'Initial physical and mental attributes must meaningfully vary');
+A.ok(appearances.size>=35,'Opening appearance is varied without fixed personality');
 
 const heir=fresh(3245001,{originKind:'renowned-family',
  houseId:'openpeak',houseRelation:'birth-branch',
