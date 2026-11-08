@@ -58,6 +58,7 @@ const WildLives=require('../world/wild-lives');
 const Creation=require('./creation-design');
 const DesignResearch=require('./design-research');
 const ResearchPublications=require('../world/research-publications');
+const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
 const PersonalAspect=require('./personal-aspect');
@@ -374,6 +375,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.wait':return TimePassage.wait(s,params);
   case 'research.prepareDesign':return DesignResearch.prepare(s,params);
   case 'research.designPlansStatus':return DesignResearch.status(s,params);
+  case 'research.inviteReplication':return ResearchReplication.invite(s,params);
   case 'research.publish':return ResearchPublications.submit(s,params);
   case 'research.start':return ResearchGuard.start(s,params);
   case 'research.survey':return ResearchGuard.survey(s,params);
