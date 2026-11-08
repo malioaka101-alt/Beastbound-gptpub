@@ -379,9 +379,23 @@ function actualPersonalSource(s,system){
    channels:a.channels,integrity:a.integrity};
  }else if(system==='meridian'){
   const Disc=require('./disciplines'),a=Disc.seaStatus(s),w=s.table?.meridianSeaFormation;
-  if(p.meridian?.stage!==4||!a.formed||!w?.completed||
+  const phys=s.table?.powerPhysiology?.meridian,last=w?.attempts?.at(-1);
+  if(p.meridian?.stage!==4||!a.formed||
      !p.meridian.dantianSea||p.meridian.dantianSea.rings!==1||
-     !Array.isArray(w.attempts)||!w.attempts.length)
+     w?.points!==5||!Number.isInteger(w?.formedAtMinute)||
+     w.formedAtMinute!==p.meridian.dantianSea.formedAtMinute||
+     !Array.isArray(w.attempts)||!w.attempts.length||
+     !last?.formed||last.progress!==5||
+     last.minute!==w.formedAtMinute||
+     !Number.isInteger(last.roll)||last.roll<1||last.roll>20||
+     !Array.isArray(phys?.gateRecords)||phys.gateRecords.length!==108||
+     !Array.isArray(p.meridian.gates)||p.meridian.gates.length!==108||
+     ![36,72,108].every(gate=>phys.transitions?.some(t=>
+       t.gate===gate&&t.day===phys.gateRecords[gate-1]?.day))||
+     !phys.gateRecords.every((g,i)=>g.number===i+1&&
+       p.meridian.gates[i]?.number===g.number&&
+       p.meridian.gates[i]?.quality===g.quality&&
+       Number.isInteger(g.day)&&g.day>=1&&g.day<=E.day(s)))
    throw Error('A genuinely developed, recorded Stage IV Dantian Sea is required');
   source={kind:'meridian-sea',proof:hash(p.meridian.dantianSea),
    stage:4,rings:p.meridian.dantianSea.rings};
@@ -460,12 +474,27 @@ function earnedPersonal(s,id){
  if(counted!==PERSONAL_REQUIRED||rec.completedMinute!==
     rec.attempts.at(-1).startedMinute+rec.attempts.at(-1).minutes)
   throw Error('The personal technique was not genuinely developed to a completed result');
- const use='soul'===p.system&&p.medium==='technique'&&
+ const soulUse=p.system==='soul'&&p.medium==='technique'&&
   p.function==='sense'&&p.magnitude===0&&p.range==='self'&&
-  p.area==='single'&&p.duration==='instant'?'soul-perception-personal-precision':null;
+  p.area==='single'&&p.duration==='instant';
+ const combatUse=['arcane','meridian'].includes(p.system)&&
+  p.medium==='technique'&&p.function==='strike'&&p.magnitude===0&&
+  p.range==='close'&&p.area==='single'&&p.duration==='instant';
+ const use=soulUse?'soul-perception-personal-precision':
+  combatUse?p.system==='arcane'?'arcane-spark-personal-variation':
+   'meridian-qi-strike-personal-variation':null;
+ // A genuinely strong physical constitution develops controlled impact,
+ // while perception and coordination favour precision. Based on the
+ // character's strongest facet at the first experiment, not a preset
+ // school technique or caller-supplied roll modifier.
+ const dominant=rec.identity.strongestFacets?.[0]?.attribute;
+ const signatureMode=combatUse?
+  ['str','con'].includes(dominant)?'impact':'precision':null;
  return {id,name:p.title,system:p.system,medium:p.medium,
   mechanism:p.function,characterBasis:rec.identity,
   developmentCompleted:true,earnedVariation:!!use,usableAdapter:use,
+  ...(signatureMode?{signatureMode,
+    signatureBasis:rec.identity.strongestFacets[0]}:{}),
   notAnAutomaticTransformation:true,
   missingMechanism:use?null:'The chosen manifestation still needs an authenticated exact execution adapter, costs, physical limits and counterplay'};
 }
@@ -489,6 +518,7 @@ function personalStatus(s,p={}){
    strongestFacets:r.identity?.strongestFacets||[],
    personallyEarnedHistory:r.identity?.personallyEarnedHistory||[],
    usableAdapter:earned?.usableAdapter||null,
+   signatureMode:earned?.signatureMode||null,
    ...(!earned&&r.completed?{reason}:{}),
    noFreeTransformation:true,noFreeNewSpell:true};
  }),source:'Existing creation.draft dossiers shaped by actual recorded personal anatomy, skill and lived work'};
@@ -510,6 +540,17 @@ function developPersonal(s,p={}){
     s.table.combatants.player.status!=='ok')
   throw Error('A real safe scene and a conscious practitioner are required');
  const identity=personalIdentity(s,design.system),spec=PERSONAL_SOURCE[design.system];
+ // Developing a personal strike means refining an EXISTING individually
+ // mastered combat technique, not receiving a spell from Circle level.
+ const combatVariation=['arcane','meridian'].includes(design.system)&&
+  design.medium==='technique'&&design.function==='strike'&&
+  design.magnitude===0&&design.range==='close'&&
+  design.area==='single'&&design.duration==='instant';
+ if(combatVariation){
+  if(design.system==='arcane')
+   require('./arcane-spark').attackProfile(s,'arcane_spark');
+  else require('./meridian-qi-strike').attackProfile(s,'qi_strike');
+ }
  const rec=d.personalDevelopment;
  if(rec&&(rec.completed||rec.origin!==PERSONAL_ORIGIN||
     rec.designId!==id||rec.proposalHash!==d.proposalHash||
@@ -571,6 +612,7 @@ function developPersonal(s,p={}){
   progress:record.progress,required:PERSONAL_REQUIRED,
   developed:completed,staminaSpent,energySpent,elapsedMinutes:minutes,
   characterBasis:record.identity,usableAdapter:applied?.usableAdapter||null,
+  signatureMode:applied?.signatureMode||null,
   noFreeTransformation:true,noInventedPower:true,
   note:applied?.missingMechanism||'Develop the original design through real effort before a supported ability can be exercised'};
 }
@@ -594,6 +636,42 @@ function usePersonal(s,p={}){
   personallyDeveloped:true,noExtraPowerCopied:true}};
 }
 
+
+// Source-verified combat variation for the EXISTING exchange resolver.
+// The native learned technique remains the underlying action and the
+// opponent still independently chooses its response before the one roll.
+function combatPersonal(s,id,intent,nativeProfile){
+ if(!['cast','technique'].includes(intent))
+  throw Error('Only a genuinely learned Arcane Spark or Qi Strike can carry this personal combat expression');
+ const e=earnedPersonal(s,id);
+ const wanted=intent==='cast'?'arcane-spark-personal-variation':
+  'meridian-qi-strike-personal-variation';
+ const technique=intent==='cast'?'arcane_spark':'qi_strike';
+ if(e.usableAdapter!==wanted||nativeProfile?.techniqueId!==technique)
+  throw Error('The developed expression does not match this exact learned action');
+ const resource=intent==='cast'?'mana':'qi',extra=intent==='cast'?1:2;
+ const base=intent==='cast'?nativeProfile.manaCost:nativeProfile.qiCost;
+ const p=s.player;
+ if(!Number.isInteger(p[resource])||p[resource]<base+extra)
+  throw Error('The personal expression needs the original learned technique cost plus additional real '+resource);
+ if(!Number.isInteger(p.stamina)||p.stamina<1||
+    s.table?.combatants?.player&&s.table.combatants.player.stamina<1)
+  throw Error('The individual combat expression also consumes one real Stamina');
+ const mode=e.signatureMode;
+ if(!['precision','impact'].includes(mode))
+  throw Error('No genuine character-derived precision or physical force was recorded');
+ return {id:e.id,name:e.name,mode,
+  sourceMilestone:e.characterBasis.milestone,
+  sourceFacet:e.signatureBasis,
+  resource,extraEnergy:extra,extraStamina:1,
+  profile:{...nativeProfile,
+   modifier:nativeProfile.modifier+(mode==='precision'?1:0),
+   damage:nativeProfile.damage+(mode==='impact'?1:0),
+   ...(intent==='cast'?{manaCost:base+extra}:{qiCost:base+extra})
+  },
+  noSecondRoll:true,noAutomaticEvolution:true,noFreeForm:true};
+}
+
 module.exports={ORIGIN,PERSONAL_ORIGIN,FUNCTIONS,SYSTEMS,input,analysis,evaluate,draft,status,
- personalStatus,developPersonal,earnedPersonal,personalForUse,usePersonal,
+ personalStatus,developPersonal,earnedPersonal,personalForUse,usePersonal,combatPersonal,
  _debug:{hash,attained,arcaneBudget,sealedResearch}};
