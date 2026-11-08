@@ -6,6 +6,7 @@
 const Crypto=require('node:crypto');
 const RiftAnchors=require('./rift-anchors');
 const SoulThreads=require('./soul-threading');
+const Creation=require('./creation-design');
 const E=require('../engine.js'),Core=require('./core'),W=require('./world'),
  Build=require('./build'),U=require('./unified'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
@@ -134,12 +135,18 @@ function soulStatus(s,p={}){
   threadVerified:(()=>{try{return SoulThreads.earned(s).phase===2;}catch{return false;}})(),
   description:'Phase I senses only limited self-structure and witnessed nearby living signatures. It is not mindreading, beast taming, remote location detection or a licence to extract a soul.'};
 }
-function perceive(s,p={}){
- noParams(p);const soul=stageProof(s,'soul',SOUL);scene(s);
+function perceive(s,p={},personalId){
+ noParams(p);
+ const personal=personalId===undefined?null:Creation.personalForUse(s,personalId);
+ const soul=stageProof(s,'soul',SOUL);scene(s);
  const range=Core.int(soul.perceptionRange,'earned range in metres',10,5000),
   max=Core.int(soul.maxReserve,'earned Soul reserve limit',1,10000),
   available=Core.int(soul.reserve,'actual Soul reserve',0,max);
- if(available<SOUL_COST)throw Error('Not enough actual Soul reserve for Soul Perception; meaningful rest is needed');
+ const totalCost=SOUL_COST+(personal?1:0);
+ if(available<totalCost)throw Error('Not enough actual Soul reserve for the chosen Soul Perception expression; meaningful rest is needed');
+ if(personal&&(!Number.isInteger(s.player.stamina)||s.player.stamina<1||
+    s.table?.combatants?.player&&s.table.combatants.player.stamina<1))
+  throw Error('Personal Soul Perception precision additionally requires real Stamina');
  // An unmeasured or distant animal cannot be invented inside the actual
  // Soul Perception range. The practitioner can still sense their own pattern.
  const beast=livingBeast(s,range),
@@ -152,12 +159,13 @@ function perceive(s,p={}){
  })();
  const threadBonus=verifiedThreads?2:0;
  const start=s.world.minutes,location=s.world.location,
-  dc=beast||person?14:12,modifier=Math.floor((attr-10)/2)+2*rank+threadBonus;
+  dc=beast||person?14:12,modifier=Math.floor((attr-10)/2)+2*rank+threadBonus+(personal?1:0);
  Core.event(s,'world','The practitioner concentrates on their own established spiritual pattern'+
   (beast?' while a genuinely encountered animal is nearby.':
    person?' while a recently spoken-to person remains present.':'.'),{
   origin:'earned-bounded-soul-perception',site:location,
-  stage:soul.phase,rangeMetres:range,cost:SOUL_COST,minutes:SOUL_MINUTES,
+  stage:soul.phase,rangeMetres:range,cost:totalCost,minutes:SOUL_MINUTES,
+  ...(personal?{personalDesignId:personal.id,personalStyleSource:personal.characterBasis.sourceHash}:{}),
   nearbyBeastId:beast?.id||null,encounterHash:beast?.encounterHash||null,
   recentlySpokenPersonWitnessHash:person?.witnessHash||null,
   cannotReadThoughts:true,noSoulExtraction:true,noHiddenGrade:true
@@ -165,13 +173,19 @@ function perceive(s,p={}){
  const witnessIndex=s.log.length-1,witnessHash=digest(s.log[witnessIndex]);
  const check=Core.check(s,{modifier,dc,label:'Earned Soul Perception: present living resonance',risky:false});
  const rollIndex=s.log.length-1,rollHash=digest(s.log[rollIndex]);
- soul.reserve-=SOUL_COST;
+ soul.reserve-=totalCost;
+ if(personal){
+  s.player.stamina-=1;
+  if(s.table?.combatants?.player)
+   s.table.combatants.player.stamina=s.player.stamina;
+ }
  const old=s.world.minutes;
  E.advance(s,SOUL_MINUTES);W.finalizeTime(s,old);U.sync(s,{source:'legacy'});
  const success=check.success;
  const report={origin:'earned-bounded-soul-perception',
   attemptDay:E.day(s),worldMinute:s.world.minutes,location,
-  phase:soul.phase,cost:SOUL_COST,rangeMetres:range,
+  phase:soul.phase,cost:totalCost,rangeMetres:range,
+  ...(personal?{personalDesignId:personal.id,personalStyleSource:personal.characterBasis.sourceHash}:{}),
   verifiedThreadConcentrationBonus:threadBonus,
   success,degree:check.degree,nearbyBeastId:beast?.id||null,
   encounterHash:beast?.encounterHash||null,
@@ -196,7 +210,9 @@ function perceive(s,p={}){
   nearbyRecentConversant:sensedPerson,
   sourceWitnessHash:witnessHash,checkEventHash:rollHash});
  return {performed:true,discipline:'soul',phase:soul.phase,
-  success,check,remainingReserve:soul.reserve,energySpent:SOUL_COST,
+  success,check,remainingReserve:soul.reserve,energySpent:totalCost,
+  personalExpressionBonus:personal?1:0,
+  personalExtraStaminaSpent:personal?1:0,
   threadConcentrationBonus:threadBonus,
   minutes:SOUL_MINUTES,rangeMetres:range,ownSoulAwareness:success,
   nearbyLifeSign:sensedBeast||sensedPerson,
@@ -220,7 +236,11 @@ function focusBonus(s,id){
  if(w?.type!=='world'||digest(w)!==f.witnessHash||
   w.details?.origin!=='earned-bounded-soul-perception'||
   w.details?.nearbyBeastId!==id||w.details?.encounterHash!==f.encounterHash||
-  w.details?.cost!==SOUL_COST||w.details?.rangeMetres!==f.rangeMetres||
+  w.details?.cost!==f.cost||!([SOUL_COST,SOUL_COST+1].includes(f.cost))||
+  (f.cost!==SOUL_COST&&(()=>{
+   try{return Creation.personalForUse(s,f.personalDesignId).characterBasis.sourceHash!==f.personalStyleSource;}
+   catch{return true;}
+  })())||w.details?.rangeMetres!==f.rangeMetres||
   r?.type!=='roll'||digest(r)!==f.rollHash||
   r.details?.success!==true||r.details?.degree!==f.degree)return 0;
  return 1;

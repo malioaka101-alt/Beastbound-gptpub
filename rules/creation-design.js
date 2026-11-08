@@ -35,7 +35,7 @@ const SYSTEMS=Object.freeze({
  healing:{skill:'medicine',key:'healing',name:'diagnosis, anatomy and medicine'},
  partnership:{skill:'beastcraft',key:'sync',name:'independent consenting beast with shared coordination'}
 });
-const MEDIUMS=['technique','device','medicine','ritual','formation','tool','infrastructure','shared-work'];
+const MEDIUMS=['technique','device','medicine','ritual','aspect-form','formation','tool','infrastructure','shared-work'];
 const NOVELTY=['rediscovery','variant','novel','breakthrough'];
 const RANGE=['self','touch','close','medium','long','extreme'],
  AREA=['single','3m','10m','25m','100m'],
@@ -160,7 +160,7 @@ function analysis(s,raw){
  if(p.novelty==='rediscovery'&&!known.documented)
   gaps.push('Rediscovery needs an actual existing source; a self-declared tradition is not a source');
  if(p.medium!=='technique'&&p.medium!=='ritual'&&
-  p.materials.length===0)
+  p.medium!=='aspect-form'&&p.materials.length===0)
   gaps.push('A tangible design needs a real bill of materials or explicitly established reusable facility');
  const missingMaterials=p.materials.filter(m=>
   !Number.isInteger(s.player.inventory?.[m.id])||s.player.inventory[m.id]<m.quantity)
@@ -228,6 +228,11 @@ function analysis(s,raw){
   gaps.push('This primitive still only supports superficial repair; major healing needs another verified medical mechanism');
  if(p.duration==='permanent')
   gaps.push('Persistent effects need source-backed endurance, maintenance, environmental degradation and failure modes; permanence is not awarded by a word');
+ if(p.medium==='aspect-form'){
+  gaps.push('A proposed personal transformation requires authenticated anatomy, support and activation fuel, duration, strain, injury, cooldown, mental effects and reversibility before any appearance or trait changes');
+  if(p.range!=='self'||p.area!=='single')
+   gaps.push('A bodily aspect-form cannot claim to transform other people or a whole area without its own verified separate mechanism');
+ }
  if(['device','medicine','formation','infrastructure','tool'].includes(p.medium)&&
   p.system!=='mundane')
   gaps.push('A real worksite, compatible substrate and commissioned build procedure must be witnessed');
@@ -323,8 +328,272 @@ function status(s,p={}){
    medium:x.envelope.medium,system:x.envelope.system,
    boundMechanism:x.envelope.function,effectGrade:x.envelope.effectGrade,
    gaps:x.gaps.slice(),status:x.status,prototypeId:x.prototypeId||null,
+   ...(x.personalDevelopment?{personalExpression:{
+    progress:x.personalDevelopment.progress,required:PERSONAL_REQUIRED,
+    identityMilestone:x.personalDevelopment.identity?.milestone,
+    originalCharacter:x.personalDevelopment.identity?.character,
+    completed:(()=>{try{return earnedPersonal(s,x.id).developmentCompleted;}catch{return false;}})(),
+    independentlyLearnedForm:false
+   }}:{}),
    noItemCreated:!x.prototypeId,noTechniqueLearned:true};
  }),note:'Only your actual recorded unproven inventions; a proposal is not a hidden completed item, spell or verified world fact.'};
 }
-module.exports={ORIGIN,FUNCTIONS,SYSTEMS,input,analysis,evaluate,draft,status,
+
+// Personal expressions are a DEVELOPMENT PATH inside the same creation
+// dossier, not another universal cultivation ladder.  A name, proposed form
+// and school rank remain insufficient to wield any unverified mechanism.
+// The engine gathers only actually earned, player-known personal sources.
+const PERSONAL_ORIGIN='character-authored-creation-expression-v1';
+const PERSONAL_REQUIRED=3;
+const PERSONAL_MEDIA=Object.freeze(['technique','ritual','aspect-form']);
+const PERSONAL_SOURCE=Object.freeze({
+ soul:Object.freeze({name:'Soul Threading',skill:'cultivation',attribute:'wis',resource:'soul'}),
+ arcane:Object.freeze({name:'Third Circle Resonance Matrix',skill:'arcana',attribute:'int',resource:'mana'}),
+ meridian:Object.freeze({name:'Dantian Sea Formation',skill:'cultivation',attribute:'wis',resource:'qi'}),
+ body:Object.freeze({name:'Organ Cycle Refinement',skill:'survival',attribute:'con',resource:'stamina'}),
+ rift:Object.freeze({name:'Rift Anchor Marking',skill:'arcana',attribute:'int',resource:'stamina'})
+});
+function actualPersonalSource(s,system){
+ const spec=PERSONAL_SOURCE[system],p=s.player;
+ if(!spec)throw Error('This path has no verified personal manifestation anatomy yet; a draft may be saved, but a power cannot be invented from an unmeasured structure');
+ let source;
+ if(system==='soul'){
+  const Thread=require('./soul-threading');
+  const achieved=Thread.earned(s);
+  if(achieved.phase!==2)throw Error('Genuinely earned Soul Threading is required');
+  source={kind:'soul-threading',proof:hash(p.soul.threadProof),
+   integrity:achieved.integrity,links:achieved.links};
+ }else if(system==='rift'){
+  const Anchors=require('./rift-anchors'),a=Anchors.earned(s);
+  if(p.rift.step!==2)throw Error('Earn an actual spatial reference before developing personal Rift expressions');
+  source={kind:'rift-anchor',proof:hash(p.rift.anchorProof),
+   location:a.location,integrity:a.integrity};
+ }else if(system==='body'){
+  const Disc=require('./disciplines'),a=Disc.organEarned(s);
+  source={kind:'organ-refinement',proof:hash(p.body.organAdaptation),
+   cycles:a.cycle,systems:a.systems};
+ }else if(system==='arcane'){
+  const Disc=require('./disciplines'),a=Disc.verifyThirdCircle(s);
+  source={kind:'arcane-matrix',proof:hash(p.arcane.matrixGeometry),
+   proofSource:hash(s.table.arcaneArchitecture.circle3),
+   channels:a.channels,integrity:a.integrity};
+ }else if(system==='meridian'){
+  const Disc=require('./disciplines'),a=Disc.seaStatus(s),w=s.table?.meridianSeaFormation;
+  if(p.meridian?.stage!==4||!a.formed||!w?.completed||
+     !p.meridian.dantianSea||p.meridian.dantianSea.rings!==1||
+     !Array.isArray(w.attempts)||!w.attempts.length)
+   throw Error('A genuinely developed, recorded Stage IV Dantian Sea is required');
+  source={kind:'meridian-sea',proof:hash(p.meridian.dantianSea),
+   stage:4,rings:p.meridian.dantianSea.rings};
+ }
+ return {spec,source};
+}
+function originalDesign(s,id){
+ if(typeof id!=='string'||!/^design_[1-9][0-9]*$/.test(id))
+  throw Error('A genuine existing invention dossier ID is required');
+ const d=s.table?.creationDesigns?.records?.[id];
+ if(!d||d.origin!==ORIGIN||d.id!==id||d.source?.id!==id||
+    d.source.creator!==s.player.name||d.source.origin!==ORIGIN||
+    d.sourceHash!==hash(d.source)||
+    d.proposalHash!==hash(d.proposal)||
+    d.source.proposalHash!==d.proposalHash||
+    d.scopeHash!==d.source.scopeHash||
+    !['unproven-concept','trial-failed','prototyped'].includes(d.status)||
+    d.implementedEffect!==false)
+  throw Error('A personal expression must extend the original source-verified creation.draft, not an invented design');
+ const p=input(d.proposal);
+ if(!PERSONAL_MEDIA.includes(p.medium)||!PERSONAL_SOURCE[p.system])
+  throw Error('An earned personal expression needs a genuine discipline technique, ritual or aspect-form design and a real verified power foundation');
+ if(d.prototypeId)throw Error('A previously prototyped device cannot be relabelled as a learned personal manifestation');
+ return {d,p};
+}
+function personalIdentity(s,system){
+ const {spec,source}=actualPersonalSource(s,system),p=s.player;
+ const attrs=Object.entries(p.attributes).filter(([k,v])=>
+  ['str','dex','con','int','wis','cha'].includes(k)&&
+  Number.isInteger(v)&&v>=1&&v<=30)
+  .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+ const skills=Object.entries(p.skills||{}).filter(([,v])=>
+  Number.isInteger(v?.rank)&&v.rank>=0&&v.rank<=5)
+  .sort((a,b)=>b[1].rank-a[1].rank||a[0].localeCompare(b[0]));
+ const history=(s.table?.disciplineTraining?.[system]?.history||[])
+  .filter(x=>x&&Number.isInteger(x.day)&&x.day>=1&&
+   x.day<=E.day(s)&&typeof x.change==='string')
+  .slice(-4).map(x=>({day:x.day,earned:x.change.slice(0,180)}));
+ return {source,sourceHash:hash(source),milestone:spec.name,
+  character:p.name,background:String(p.background||'unknown').slice(0,80),
+  chosenPath:String(p.path||'undecided').slice(0,80),
+  trainedSpecialties:skills.slice(0,3).map(([skill,v])=>({skill,rank:v.rank})),
+  strongestFacets:attrs.slice(0,2).map(([attribute,value])=>({attribute,value})),
+  personallyEarnedHistory:history};
+}
+function earnedPersonal(s,id){
+ const {d,p}=originalDesign(s,id),rec=d.personalDevelopment;
+ if(!rec||rec.origin!==PERSONAL_ORIGIN||rec.designId!==id||
+    rec.proposalHash!==d.proposalHash||!rec.identity||
+    rec.identityHash!==hash(rec.identity)||
+    rec.identity.character!==s.player.name||
+    !Array.isArray(rec.attempts)||rec.attempts.length<1||
+    !Number.isInteger(rec.progress)||rec.progress!==PERSONAL_REQUIRED||
+    !rec.completed||!Number.isInteger(rec.completedMinute)||
+    rec.completedMinute>s.world.minutes||
+    rec.attemptsHash!==hash(rec.attempts))
+  throw Error('The claimed individual technique has no authentic completed creation-development record');
+ const identity=personalIdentity(s,p.system);
+ if(identity.sourceHash!==rec.identity.sourceHash)
+  throw Error('The personal technique has lost its original verified physical, arcane or spiritual source');
+ let counted=0;
+ for(const a of rec.attempts){
+  if(!a||!Number.isInteger(a.startedMinute)||a.startedMinute<d.source.finishedAtMinute||
+     !Number.isInteger(a.minutes)||a.minutes<15||a.minutes>480||
+     a.startedMinute+a.minutes>s.world.minutes||
+     a.originalCheck?.type!=='roll'||
+     a.rollHash!==hash(a.originalCheck)||
+     !['success','strong','exceptional','setback','failure','severe failure'].includes(a.degree)||
+     a.earned!==({'exceptional':3,'strong':2,'success':1}[a.degree]||0)||
+     a.originalCheck.details?.degree!==a.degree||
+     !Number.isInteger(a.staminaSpent)||a.staminaSpent<1||
+     !Number.isInteger(a.energySpent)||a.energySpent<0)
+   throw Error('The personal technique work needs real recorded effort and original skill checks');
+  counted=Math.min(PERSONAL_REQUIRED,counted+a.earned);
+ }
+ if(counted!==PERSONAL_REQUIRED||rec.completedMinute!==
+    rec.attempts.at(-1).startedMinute+rec.attempts.at(-1).minutes)
+  throw Error('The personal technique was not genuinely developed to a completed result');
+ const use='soul'===p.system&&p.medium==='technique'&&
+  p.function==='sense'&&p.magnitude===0&&p.range==='self'&&
+  p.area==='single'&&p.duration==='instant'?'soul-perception-personal-precision':null;
+ return {id,name:p.title,system:p.system,medium:p.medium,
+  mechanism:p.function,characterBasis:rec.identity,
+  developmentCompleted:true,earnedVariation:!!use,usableAdapter:use,
+  notAnAutomaticTransformation:true,
+  missingMechanism:use?null:'The chosen manifestation still needs an authenticated exact execution adapter, costs, physical limits and counterplay'};
+}
+function personalStatus(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).some(k=>k!=='id'))
+  throw Error('Personal creation status cannot provide a claimed stage, effect or check');
+ const ledger=s.table?.creationDesigns?.records||{};
+ const rows=p.id?[ledger[p.id]].filter(Boolean):Object.values(ledger)
+  .filter(x=>x?.personalDevelopment);
+ return {expressions:rows.slice(-35).map(d=>{
+  const {p:design}=originalDesign(s,d.id),r=d.personalDevelopment;
+  if(!r)return {id:d.id,started:false,completed:false};
+  let earned=null,reason=null;
+  if(r.completed)try{earned=earnedPersonal(s,d.id);}catch(e){reason=e.message;}
+  return {id:d.id,name:design.title,system:design.system,
+   medium:design.medium,progress:r.progress||0,required:PERSONAL_REQUIRED,
+   completed:!!earned,characterBasis:r.identity?.character,
+   milestone:r.identity?.milestone,
+   trainedSpecialties:r.identity?.trainedSpecialties||[],
+   strongestFacets:r.identity?.strongestFacets||[],
+   personallyEarnedHistory:r.identity?.personallyEarnedHistory||[],
+   usableAdapter:earned?.usableAdapter||null,
+   ...(!earned&&r.completed?{reason}:{}),
+   noFreeTransformation:true,noFreeNewSpell:true};
+ }),source:'Existing creation.draft dossiers shaped by actual recorded personal anatomy, skill and lived work'};
+}
+function developPersonal(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).some(k=>!['id','minutes','approach'].includes(k)))
+  throw Error('Only a real existing design, actual practice duration and personal method may be supplied');
+ const {id,minutes=120,approach}=p;
+ const {d,p:design}=originalDesign(s,id);
+ C.int(minutes,'actual personal technique development minutes',15,480);
+ if(typeof approach!=='string'||approach.trim().length<12||
+    approach.length>500||/[\u0000-\u001f]/.test(approach))
+  throw Error('Describe your actual experimental approach; declaring a rank or automatic form is not practice');
+ if(s.battle||s.encounter)
+  throw Error('An unresolved encounter cannot be skipped for an independent creative training period');
+ if(!E.LOCATIONS[s.world.location]||
+    s.table?.combatants?.player?.status&&
+    s.table.combatants.player.status!=='ok')
+  throw Error('A real safe scene and a conscious practitioner are required');
+ const identity=personalIdentity(s,design.system),spec=PERSONAL_SOURCE[design.system];
+ const rec=d.personalDevelopment;
+ if(rec&&(rec.completed||rec.origin!==PERSONAL_ORIGIN||
+    rec.designId!==id||rec.proposalHash!==d.proposalHash||
+    rec.identityHash!==hash(rec.identity)||
+    rec.identity.sourceHash!==identity.sourceHash||
+    !Array.isArray(rec.attempts)||
+    !Number.isInteger(rec.progress)||rec.progress<0||
+    rec.progress>=PERSONAL_REQUIRED))
+  throw Error('Continue the same previously witnessed individual practice; never replace it with a favourable new design');
+ const staminaSpent=Math.ceil(minutes/120);
+ const energySpent=design.system==='soul'?1:
+  ['arcane','meridian'].includes(design.system)?2:0;
+ const pchar=s.player;
+ if(!Number.isInteger(pchar.stamina)||pchar.stamina<staminaSpent||
+    s.table?.combatants?.player&&
+    s.table.combatants.player.stamina<staminaSpent)
+  throw Error('Actual physical stamina is required for personal creative practice');
+ const energy=spec.resource==='soul'?pchar.soul.reserve:
+  spec.resource==='mana'?pchar.mana:spec.resource==='qi'?pchar.qi:pchar.stamina;
+ if(!Number.isInteger(energy)||energy<energySpent)
+  throw Error('An actual available discipline energy source is required');
+ const start=s.world.minutes,rank=C.int(pchar.skills?.[spec.skill]?.rank??0,
+  'earned personal practice skill',0,5),attribute=C.int(pchar.attributes?.[spec.attribute],
+  'practised attribute',1,30);
+ const budget=B.effectGrade(design.magnitude,{trivial:design.magnitude===0});
+ const dc=15+Math.min(6,budget);
+ const check=C.check(s,{modifier:Math.floor((attribute-10)/2)+2*rank,
+  dc,label:spec.name+' — '+design.title.slice(0,42)+' personal experiment'});
+ pchar.stamina-=staminaSpent;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=pchar.stamina;
+ if(design.system==='soul')pchar.soul.reserve-=energySpent;
+ if(design.system==='arcane')pchar.mana-=energySpent;
+ if(design.system==='meridian')pchar.qi-=energySpent;
+ const record=rec||{origin:PERSONAL_ORIGIN,designId:id,
+  proposalHash:d.proposalHash,identity,
+  identityHash:hash(identity),progress:0,completed:false,attempts:[]};
+ record.progress=Math.min(PERSONAL_REQUIRED,record.progress+check.progress);
+ const originalCheck=structuredClone(s.log.at(-1));
+ const entry={startedMinute:start,minutes,approach:approach.trim(),
+  originalCheck,rollHash:hash(originalCheck),degree:check.degree,
+  earned:check.progress,staminaSpent,energySpent};
+ record.attempts.push(entry);
+ let completed=false;
+ if(record.progress>=PERSONAL_REQUIRED){
+  record.completed=true;record.completedMinute=start+minutes;
+  record.attemptsHash=hash(record.attempts);completed=true;
+ }
+ d.personalDevelopment=record;
+ E.advance(s,minutes);W.finalizeTime(s,start);H.sync(s,{source:'legacy'});
+ C.event(s,'research',completed?
+  'This practitioner has developed an individual expression of the recorded design, subject to its original physical and technique limits.':
+  'An original experimental personal technique is refined from the practitioner’s actual abilities.',{
+  origin:PERSONAL_ORIGIN,id,identityHash:record.identityHash,
+  originalCheck:check,progress:record.progress,
+  staminaSpent,energySpent,minutes,completed,
+  noAutomaticTransformation:true,noInventedTechnique:true});
+ const applied=completed?earnedPersonal(s,id):null;
+ return {id,name:design.title,system:design.system,check,
+  progress:record.progress,required:PERSONAL_REQUIRED,
+  developed:completed,staminaSpent,energySpent,elapsedMinutes:minutes,
+  characterBasis:record.identity,usableAdapter:applied?.usableAdapter||null,
+  noFreeTransformation:true,noInventedPower:true,
+  note:applied?.missingMechanism||'Develop the original design through real effort before a supported ability can be exercised'};
+}
+function personalForUse(s,id){
+ const e=earnedPersonal(s,id);
+ if(e.usableAdapter!=='soul-perception-personal-precision')
+  throw Error('This individual form has no established runnable effect; it needs documented physiological or spell adaptation before activation');
+ return e;
+}
+function usePersonal(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).sort().join('|')!=='id')
+  throw Error('Use only an already earned personal design ID; no chosen success, grade, secret target, energy or bonus');
+ const e=personalForUse(s,p.id);
+ // Reuse the very same bounded Soul Perception action, original single die,
+ // ecology, personal presence, and privacy protections. The optional style
+ // is read-only source-verified before the real action consumes resources.
+ const result=require('./first-stage-senses').perceive(s,{},p.id);
+ return {...result,expression:{id:e.id,name:e.name,
+  sourceMilestone:e.characterBasis.milestone,
+  personallyDeveloped:true,noExtraPowerCopied:true}};
+}
+
+module.exports={ORIGIN,PERSONAL_ORIGIN,FUNCTIONS,SYSTEMS,input,analysis,evaluate,draft,status,
+ personalStatus,developPersonal,earnedPersonal,personalForUse,usePersonal,
  _debug:{hash,attained,arcaneBudget,sealedResearch}};
