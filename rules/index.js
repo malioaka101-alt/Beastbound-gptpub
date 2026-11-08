@@ -59,6 +59,7 @@ const Creation=require('./creation-design');
 const DesignResearch=require('./design-research');
 const ResearchPublications=require('../world/research-publications');
 const IndividualInnovations=require('../world/independent-innovations');
+const EmergentHouseholds=require('../world/emergent-households');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -304,6 +305,10 @@ function act(s,{system,operation,params={}}={}){
   case 'world.localResearchStatus':{
    if(Object.keys(params).length)throw Error('Local world research status is read-only');
    return ResearchPublications.visible(s,Realm.peek(s));
+  }
+  case 'world.localHouseholdsStatus':{
+   if(Object.keys(params).length)throw Error('Local household status is read-only');
+   return EmergentHouseholds.visible(s,Realm.peek(s));
   }
   case 'world.localInnovationsStatus':{
    if(Object.keys(params).length)throw Error('Local independent methods status is read-only');
