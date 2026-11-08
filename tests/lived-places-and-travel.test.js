@@ -96,8 +96,8 @@ A.equal(Presence.localStatus(s,Realm.peek(s)).people.some(x=>x.name==='Mira Quil
 const after=Engine.importGame(Engine.exportGame(s));
 const existing=after.table.realm.livedPlaces.places[place.placeId];
 existing.description='Forged perfect city of riches';
-A.equal(Places.verifyPlace(existing),true,
- 'A place can be renamed only by a witnessed new fact, but this confirms whether origin verification covers mutable descriptions');
+A.equal(Places.verifyPlace(existing),false,
+ 'Canonical place description is sealed; additional observed facts are appended rather than rewriting original scene history');
 
 const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-authored-places-'));
 try{
