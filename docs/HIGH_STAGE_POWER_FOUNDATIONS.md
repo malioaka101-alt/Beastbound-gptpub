@@ -116,6 +116,26 @@ The original Master Prompt §§19–25 and 30 allow personally developed techniq
 
 The disposable `tests/personal-creation-expressions.test.js` proves actual Phase I training, Phase II threading and original personal development, two distinct character profiles for the same named design, actual paid Soul Perception application, earned-result provenance checks, an aspect-form proposal with no free transformation and private turn-ID replay; it joins the full existing regression inventory.
 
+## Personal technique variations in earned Arcane III and Meridian IV combat
+
+**Same creation system, not a new class or universal signature ladder.** The original `creation.draft`, `creation.personalDevelop`, `creation.personalStatus` and `creation.status` now support one additional genuine combat family for Arcane Third Circle and Meridian Stage IV, alongside the already-running Soul II Perception variation.
+
+An Arcane III caster must have completed the actual source-verified three-Circle resonance matrix **and learned their own original Arcane Spark** through recorded legitimate study. A Meridian IV practitioner must have a real Dantian Sea with original 108-Gate source history **and independently learned the authentic first-gate Qi Strike**. The stage by itself does not teach either strike. A personal technique is developed through the *existing* original design dossier with `medium: technique`, `function: strike`, `magnitude: 0`, `range: close`, `area: single`, `duration: instant`. The original freeform title and purpose remain author-chosen, but cannot mint a new affinity, reach, target, auto-hit, damage number, material or additional spell.
+
+### Genuine individual differentiation
+
+The original creation record already captures the practitioner's identity, most-developed attributes, practiced specialties, power physiology and earned history. The beginning of genuine experimental work **freezes those individual traits as the source** of the resulting signature. If the strongest recorded facet is Strength or Constitution, the expression is a controlled **impact** form: +1 to the existing learned technique's base damage. Other dominant facets produce a controlled **precision** form: +1 to the existing check modifier, not a new die. Both are one bounded tested example of individual consequence, not a law that everyone with the same attribute permanently receives the same transformation. Actual technique-specific mechanisms, source and development remain distinct.
+
+The player may use the **plain, unchanged original technique** or explicitly choose to spend the extra power on their genuine individual `personalDesignId` inside the existing `combat.exchange`. Preflight verifies the original learned technique, the correct original design, completed original-check development, the intended match to `cast/arcane_spark` or `technique/qi_strike`, and enough *additional* resources **before enemy decisions and all dice**. Arcane Spark needs +1 actual Mana and +1 Stamina in addition to the real Arcane casting cost. Qi Strike needs +2 actual Qi and +1 Stamina in addition to the real Qi cost. The preexisting casting threshold, hit/wound/ward model, nonlethal status, enemy agency, one-turn action economy and source bounds do not change. A forged design ID, user damage/bonus parameter, wrong intent, resource shortage or unrelated title fails closed without rolling.
+
+A new personal Arcane/Meridian expression cannot be invoked through `creation.personalUse` as a free out-of-combat attack; its actual use is always a real `combat.exchange`. A creative draft without an authenticated known basic technique cannot proceed to a usable strike by itself. The Arcane matrix and Meridian Sea do **not** grant spells or transformations automatically.
+
+**Meridian provenance correction:** the real Stage IV work record stores its completion in `points: 5`, the original final attempt and `formedAtMinute`. The earlier general personal-creation code mistakenly checked an unused `completed` flag. This integration checks the true recorded Stage IV geometry, original 108 Gates, dated transitions and final formation instead.
+
+`tests/personal-arcane-meridian-combat.test.js` uses disposable characters with valid original stage witnesses, genuinely earned Arcane III and Meridian IV work, actual original basic technique learning, source-derived personal variants, two different character facets producing different playable results, real independent-opponent wound combat, extra-resource enforcement, forged-result refusal and exact private runner turn replay. Full prior regressions remain mandatory.
+
+**Still upcoming:** distinct personal Arcane Ward constructions, Meridian projection and reinforcement profiles, enduring form states, cooldown and body-mass injury effects, dynamic domains and genuine Beast-Origin expression will each need their own physics, source rights and executable counterplay. They must reuse existing discipline and creation history, not become an extra arbitrary rank ladder.
+
 ## Distinct future advanced work — NOT implemented by this milestone
 
 | Independent discipline | Source-defined higher path | Next evidence-backed engineering slice |
