@@ -102,13 +102,30 @@ function characterData(state){
  const s=E.importGame(state),p=s.player,f=p.family||null,h=p.history||null;
  return {name:p.name,age:p.age,background:p.background,path:p.path,
   ...(p.gender?{gender:p.gender}:{}),
+  ...(p.pronouns?{pronouns:p.pronouns}:{}),
+  ...(p.startingContext?{origin:{
+   kind:p.startingContext.originKind,
+   homeland:p.startingContext.birthRegionName,
+   regionId:p.startingContext.birthRegionId,
+   connectedName:p.startingContext.connection?.houseName||
+    p.startingContext.connection?.institutionName||
+    p.startingContext.connection?.familyName||
+    p.startingContext.connection?.name||null,
+   relation:p.startingContext.connection?.relation||
+    p.startingContext.connection?.role||null,
+   newGroupId:p.startingContext.connection?.groupId||null,
+   remoteHome:p.startingContext.travelBeforePlay===true,
+   noUnearnedPowers:true
+  }}:{}),
   ...(f?{family:{household:f.household,siblings:f.siblings,
    ties:f.ties,homeTrade:f.homeTrade,
    ...(Array.isArray(f.members)?{members:f.members.map(x=>({
     relation:x.relation,name:x.name
    }))}:{})}}:{}),
   ...(h?{knownHistory:{upbringing:h.upbringing,
-   earlyWork:h.earlyWork,familySituation:h.familySituation}}:{})
+   earlyWork:h.earlyWork,familySituation:h.familySituation,
+   ...(h.personalGoal?{personalGoal:h.personalGoal}:{}),
+   ...(h.ownOccupation?{ownOccupation:h.ownOccupation}:{})}}:{})
  };
 }
 function hudData(state){
@@ -226,6 +243,14 @@ function full(state,name){
   lines.push(row(p.name.toUpperCase()),row(`${p.age} · ${p.background}`),row('Path: '+p.path));
   const profile=characterData(s);
   if(!Realm.calendar(s).absoluteDate)sec('CIVIL DATE',['Unrecorded in this older save']);
+  if(profile.origin)sec('EARLY ROOTS',[
+   ...wrapText('Home: '+profile.origin.homeland),
+   ...(profile.origin.connectedName?
+     wrapText('Connection: '+profile.origin.connectedName):[]),
+   ...(profile.origin.relation?
+     wrapText('Tie: '+profile.origin.relation):[]),
+   ...(profile.origin.remoteHome?['Travelled before first scene']:[])
+  ]);
   if(profile.family){
    sec('FAMILY & ROOTS',[
     'Household: '+profile.family.household,
@@ -238,7 +263,11 @@ function full(state,name){
   }
   if(profile.knownHistory)sec('KNOWN HISTORY',[
    ...wrapText(profile.knownHistory.upbringing),
-   ...wrapText(profile.knownHistory.earlyWork)
+   ...wrapText(profile.knownHistory.earlyWork),
+   ...(profile.knownHistory.ownOccupation?
+     wrapText('Occupation: '+profile.knownHistory.ownOccupation):[]),
+   ...(profile.knownHistory.personalGoal?
+     wrapText('Goal: '+profile.knownHistory.personalGoal):[])
   ]);
   const attrs=Object.entries(p.attributes||{});
   const pairs=[];for(let i=0;i<attrs.length;i+=2){const a=attrs[i],b=attrs[i+1];pairs.push(`${a[0].toUpperCase()} ${a[1]}`+(b?` │ ${b[0].toUpperCase()} ${b[1]}`:''));}
