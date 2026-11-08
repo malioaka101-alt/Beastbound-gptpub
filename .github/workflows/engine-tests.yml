@@ -130,6 +130,7 @@ jobs:
             tests/field-crafting.test.js
             tests/creation-design.test.js
             tests/personal-creation-expressions.test.js
+            tests/personal-arcane-meridian-combat.test.js
             tests/rank-depth-prototypes.test.js
             tests/lifelong-mastery.test.js
             tests/gear-transactions.test.js
