@@ -2,9 +2,7 @@
 // Recognised research can become genuine world knowledge when its author
 // VOLUNTARILY submits it. Public notices are not free power or automatic
 // adoption; a real, independently funded institution may study it later.
-const Crypto=require('node:crypto'),Atlas=require('./atlas'),
- E=require('../engine.js'),W=require('../rules/world'),
- Unified=require('../rules/unified');
+const Crypto=require('node:crypto'),Atlas=require('./atlas');
 const ORIGIN='independent-recognised-research-world-publication-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function store(w){
@@ -69,6 +67,8 @@ function submit(s,params={}){
    actualStatus:project.status,actualReplications:project.replications,
    independentTesters:names.map(([who,t])=>({
     name:who,source:t.source,checkedAtMinute:t.checkedAtMinute}))};
+ const E=require('../engine.js'),W=require('../rules/world'),
+  Unified=require('../rules/unified');
  const old=s.world.minutes;
  s.player.stamina-=1;
  E.advance(s,elapsed);W.finalizeTime(s,old);Unified.sync(s,{source:'legacy'});
