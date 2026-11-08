@@ -16,12 +16,11 @@ function originalPerception(s){
  const p=s.player,so=p?.soul,history=s.table?.disciplineTraining?.soul?.history||[];
  const witness=history.find(x=>x?.target==='phase1'&&
   x.change==='Phase I Soul Perception; first stable perception');
- const foundation=Build.soulProfile(1,{
-  will:Math.floor(((p.attributes?.wis??10)-10)/2)});
+ const foundation=Build.soulProfile(1,{will:0});
  if(!so||so.phase!==1||!witness||!Number.isInteger(witness.day)||
     witness.day<1||witness.day>E.day(s)||
     !Number.isInteger(so.stability)||so.stability<1||so.stability>100||
-    so.maxReserve!==foundation.soulReserve||
+    !Number.isInteger(so.maxReserve)||so.maxReserve<1||so.maxReserve>1000||
     so.perceptionRange!==foundation.perceptionRangeMetres||
     !Number.isInteger(so.reserve)||so.reserve<0||so.reserve>so.maxReserve)
   throw Error('Soul Threading requires genuinely earned and internally consistent Phase I Soul Perception');
@@ -81,10 +80,13 @@ function earned(s){
     x.change==='Phase I Soul Perception; first stable perception'&&
     Number.isInteger(x.day)&&x.day>=1&&x.day<=finish.day))
   throw Error('Phase II requires the original earned Phase I perception history');
- const profile=Build.soulProfile(2,{
-  will:Math.floor(((p.attributes?.wis??10)-10)/2)});
- if(so.maxReserve!==profile.soulReserve||
-    so.perceptionRange!==profile.perceptionRangeMetres)
+ const profile=Build.soulProfile(2,{will:0});
+ if(!Number.isInteger(so.maxReserve)||so.maxReserve<profile.soulReserve||
+    so.maxReserve!==proof.maxReserve||
+    so.perceptionRange!==profile.perceptionRangeMetres||
+    so.perceptionRange!==proof.perceptionRange||
+    !Number.isInteger(so.reserve)||so.reserve<0||
+    so.reserve>so.maxReserve) 
   throw Error('Saved Phase II soul capacity does not match the actual earned structure');
  return {phase:2,integrity:so.threadIntegrity,links:{...reconstructed},
   concentrationBonus:2,source:ORIGIN,noMindreading:true};
@@ -163,7 +165,9 @@ function work(s,params={}){
   so.perceptionRange=next.perceptionRangeMetres;
   so.threadLinks={...ledger.links};so.threadIntegrity=integrity;
   so.threadProof={source:ORIGIN,links:{...ledger.links},
-   integrity,completedMinute:start+minutes,
+   integrity,maxReserve:so.maxReserve,
+   perceptionRange:so.perceptionRange,
+   completedMinute:start+minutes,
    workHash:digest(ledger.attempts),
    mindreading:false,noAutomaticContract:true};
   s.table.disciplineTraining.soul.history.push({
