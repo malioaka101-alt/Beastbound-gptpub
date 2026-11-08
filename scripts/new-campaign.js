@@ -167,6 +167,25 @@ function create(options={}){
  const state=E.newGame({...base,seed:n,name,age,randomStart:false,
   beastName:pick(PARTNER_NAMES,((n>>>9)^(n>>>18))>>>0)});
  state.player.gender=gender;
+ // Seeded ordinary starting variation is independent of social prestige.
+ // The original six d20 attributes remain within plausible human bounds;
+ // separate latent potential is still sealed by rules/character.js.
+ for(const key of ['str','dex','con','int','wis','cha']){
+  const starting=state.player.attributes[key];
+  state.player.attributes[key]=Math.max(8,Math.min(17,
+   starting+(Origins.number(n,'ordinary-attribute:'+key)%7)-3));
+ }
+ const appearance=options.appearance===undefined?
+  (pick(['short','tall','average-height','compact','lean','broad-shouldered'],
+    Origins.number(n,'appearance-build'))+'; '+
+   pick(['dark','light','silver-streaked','copper-toned','brown','auburn'],
+    Origins.number(n,'appearance-hair'))+' hair; '+
+   pick(['dark','hazel','grey','green','blue','amber'],
+    Origins.number(n,'appearance-eyes'))+' eyes'):
+  String(options.appearance).trim();
+ if(appearance.length<6||appearance.length>240)
+  throw Error('Appearance should be a short description, not an acquired power');
+ state.player.appearance=appearance;
  if(options.pronouns!==undefined){
   if(typeof options.pronouns!=='string'||options.pronouns.trim().length<2||
     options.pronouns.trim().length>40)
@@ -201,6 +220,8 @@ function create(options={}){
  state.log.push({day:1,time:E.clock(state),type:'world',
   text:'The public civil almanac dates the morning '+dateView.absoluteDate+'.',details:null});
  return {state,summary:{seed:n,slug,name,age,gender,
+  appearance:state.player.appearance,
+  attributes:{...state.player.attributes},
   background:state.player.background,path:state.player.path,
   location:start.location,family:state.player.family,
   history:state.player.history,origin,
