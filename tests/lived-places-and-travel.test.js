@@ -7,7 +7,7 @@ const Places=require('../world/lived-places'),Panels=require('../panels');
 const Presence=require('../world/person-presence'),Turn=require('../scripts/chat-turn');
 const create=(seed=44566)=>New.create({slug:'freeform_place_fixture',seed,mode:'guided'}).state;
 const place={placeId:'winding_lane_01',name:'Winding Lantern Hamlet',
- regionId:'morrowfen_basin',kind:'riverside community',
+ regionId:'morrowfen_basin',kind:'riverside community',sceneType:'settlement',
  description:'Low reed-roof houses share a raised stone path beside the river. Barges pass below distant lanterns.',
  culture:'Residents exchange seasonal flood notices, honour established beast crossings, and disagree about how much riverbank should be cleared.',
  notables:[{name:'Mira Quill',context:'A locally known document restorer, whose current whereabouts and willingness to speak have not been established.'}],
@@ -37,6 +37,7 @@ A.equal(Presence.localStatus(s,Realm.peek(s)).people.some(x=>x.name==='Mira Quil
 const read=Rules.act(s,{system:'world',operation:'placeStatus',params:{placeId:place.placeId}});
 A.equal(read.place.knownFamilies[0].name,'Quill family');
 A.equal(read.current,false);
+A.equal(read.place.sceneType,'settlement');
 const beforeRead=Engine.exportGame(s);
 Rules.act(s,{system:'world',operation:'placeStatus',params:{}});
 A.equal(Engine.exportGame(s),beforeRead);
@@ -76,6 +77,7 @@ A.ok(Engine.coreHud(s).includes(place.name.slice(0,15)));
 A.equal(Panels.hudData(s).location,place.name);
 A.ok(Panels.core(s).includes(place.name.slice(0,12)));
 A.equal(Rules.act(s,{system:'world',operation:'placeStatus',params:{placeId:place.placeId}}).current,true);
+A.equal(Rules.act(s,{system:'health',operation:'shelterStatus',params:{}}).settlementShelter,true);
 A.equal(Presence.localStatus(s,Realm.peek(s)).people.length,0);
 A.equal(Engine.importGame(Engine.exportGame(s)).world.location,place.placeId);
 A.equal(Engine.exportGame(s).includes('Winding Lantern Hamlet'),true);
