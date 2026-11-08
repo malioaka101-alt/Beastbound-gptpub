@@ -480,9 +480,17 @@ function earnedPersonal(s,id){
  const combatUse=['arcane','meridian'].includes(p.system)&&
   p.medium==='technique'&&p.function==='strike'&&p.magnitude===0&&
   p.range==='close'&&p.area==='single'&&p.duration==='instant';
+ // A completed personal Body Ward aspect may manifest actual already
+ // refined human organs. No beast traits, wings or extra new tissues.
+ // Its specific defensive anatomy still derives from the individual's
+ // source-verified constitution recorded in this same design dossier.
+ const bodyAspect=p.system==='body'&&p.medium==='aspect-form'&&
+  p.function==='ward'&&p.magnitude===0&&p.range==='self'&&
+  p.area==='single'&&['round','1min','10min'].includes(p.duration);
  const use=soulUse?'soul-perception-personal-precision':
   combatUse?p.system==='arcane'?'arcane-spark-personal-variation':
-   'meridian-qi-strike-personal-variation':null;
+   'meridian-qi-strike-personal-variation':
+  bodyAspect?'body-organ-personal-aspect':null;
  // A genuinely strong physical constitution develops controlled impact,
  // while perception and coordination favour precision. Based on the
  // character's strongest facet at the first experiment, not a preset
@@ -490,12 +498,17 @@ function earnedPersonal(s,id){
  const dominant=rec.identity.strongestFacets?.[0]?.attribute;
  const signatureMode=combatUse?
   ['str','con'].includes(dominant)?'impact':'precision':null;
+ const aspectMode=bodyAspect?
+  ['str','con'].includes(dominant)?'fortitude':'balance':null;
  return {id,name:p.title,system:p.system,medium:p.medium,
   mechanism:p.function,characterBasis:rec.identity,
   developmentCompleted:true,earnedVariation:!!use,usableAdapter:use,
   ...(signatureMode?{signatureMode,
     signatureBasis:rec.identity.strongestFacets[0]}:{}),
-  notAnAutomaticTransformation:true,
+  ...(aspectMode?{aspectMode,
+    aspectBasis:rec.identity.strongestFacets[0],
+    boundedToExistingOrgans:true,reversible:true}:{}),
+  notAnAutomaticTransformation:!bodyAspect,
   missingMechanism:use?null:'The chosen manifestation still needs an authenticated exact execution adapter, costs, physical limits and counterplay'};
 }
 function personalStatus(s,p={}){
@@ -519,6 +532,7 @@ function personalStatus(s,p={}){
    personallyEarnedHistory:r.identity?.personallyEarnedHistory||[],
    usableAdapter:earned?.usableAdapter||null,
    signatureMode:earned?.signatureMode||null,
+   aspectMode:earned?.aspectMode||null,
    ...(!earned&&r.completed?{reason}:{}),
    noFreeTransformation:true,noFreeNewSpell:true};
  }),source:'Existing creation.draft dossiers shaped by actual recorded personal anatomy, skill and lived work'};
@@ -613,6 +627,7 @@ function developPersonal(s,p={}){
   developed:completed,staminaSpent,energySpent,elapsedMinutes:minutes,
   characterBasis:record.identity,usableAdapter:applied?.usableAdapter||null,
   signatureMode:applied?.signatureMode||null,
+  aspectMode:applied?.aspectMode||null,
   noFreeTransformation:true,noInventedPower:true,
   note:applied?.missingMechanism||'Develop the original design through real effort before a supported ability can be exercised'};
 }
@@ -626,7 +641,11 @@ function usePersonal(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
     Object.keys(p).sort().join('|')!=='id')
   throw Error('Use only an already earned personal design ID; no chosen success, grade, secret target, energy or bonus');
- const e=personalForUse(s,p.id);
+ const e=earnedPersonal(s,p.id);
+ if(e.usableAdapter==='body-organ-personal-aspect')
+  return require('./personal-aspect').activate(s,p.id,{combat:false});
+ if(e.usableAdapter!=='soul-perception-personal-precision')
+  throw Error('This individual form has no established runnable effect; it needs documented physiological or spell adaptation before activation');
  // Reuse the very same bounded Soul Perception action, original single die,
  // ecology, personal presence, and privacy protections. The optional style
  // is read-only source-verified before the real action consumes resources.
@@ -640,6 +659,12 @@ function usePersonal(s,p={}){
 // Source-verified combat variation for the EXISTING exchange resolver.
 // The native learned technique remains the underlying action and the
 // opponent still independently chooses its response before the one roll.
+function revertPersonal(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).length)
+  throw Error('Releasing an active aspect takes one real physical action; no chosen instant cooldown or free form reversion');
+ return require('./personal-aspect').revert(s,{combat:false});
+}
 function combatPersonal(s,id,intent,nativeProfile){
  if(!['cast','technique'].includes(intent))
   throw Error('Only a genuinely learned Arcane Spark or Qi Strike can carry this personal combat expression');
@@ -673,5 +698,5 @@ function combatPersonal(s,id,intent,nativeProfile){
 }
 
 module.exports={ORIGIN,PERSONAL_ORIGIN,FUNCTIONS,SYSTEMS,input,analysis,evaluate,draft,status,
- personalStatus,developPersonal,earnedPersonal,personalForUse,usePersonal,combatPersonal,
+ personalStatus,developPersonal,earnedPersonal,personalForUse,usePersonal,revertPersonal,combatPersonal,
  _debug:{hash,attained,arcaneBudget,sealedResearch}};
