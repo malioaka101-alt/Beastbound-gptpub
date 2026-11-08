@@ -2,7 +2,7 @@
 // Source-grounded, read-only distinction between discipline structure,
 // learned skill rank, anatomical progress and separate human evolution.
 // Never infer an awakening from a legacy resource pool or a technique name.
-const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading');
+const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading'),Anchors=require('./rift-anchors');
 const MERIDIAN=['Preparatory: Stage I not yet attained',
  'Stage I — Foundation Tempering','Stage II — Meridian Awakening',
  'Stage III — 108 Gate Opening','Stage IV — Dantian Sea Formation',
@@ -76,6 +76,7 @@ function read(s){
    ...(completed.length>=2?{organCycle:Disc.organStatus(s)}:{}),
    training:verifiedTrain('body')},
   rift:{step:rift.step||0,stepName:phase(RIFT,rift.step||0),
+   ...(rift.step>=1?{anchors:Anchors.status(s)}:{}),
    training:verifiedTrain('rift')},
   origin:{phase:origin.phase||0,load:origin.load??0,
    capacity:origin.capacity??0,stableTraits:[...(origin.stableTraits||[])],
