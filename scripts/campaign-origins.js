@@ -220,8 +220,8 @@ function install(s,planned){
  s.player.startingContext=structuredClone(planned.context);
  s.campaign.origin=structuredClone(planned.context);
  if(planned.createdGroup){
-  const group=planned.createdGroup,day=Math.floor(s.world.minutes/1440);
-  const event={day:day+1,time:Engine.clock(s),type:'story',
+  const group=planned.createdGroup,day=0;
+  const event={day:0,time:'Before the first played scene',type:'story',
    text:'Before the first played scene, '+s.player.name+
     ' had declared the modest '+group.name+' working association.',
    details:{origin:'informal-player-group-founding',id:group.id,
