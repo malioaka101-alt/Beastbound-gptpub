@@ -15,6 +15,10 @@ const s=create();
 const original=Engine.exportGame(s),rng=s.rngState,coins=s.player.coins;
 const empty=Rules.act(s,{system:'world',operation:'cosmologyStatus',params:{}});
 A.equal(empty.planes.length,Mythic.REALMS.length);
+A.equal(Cosmos.peek(s).planes.mortal.facts.length,1);
+A.equal(Cosmos.peek(s).planes.divine.facts[0].kind,'law');
+A.ok(empty.planes.every(p=>p.facts.length===0),
+ 'GM-only underlying law never leaks into public metaphysical teachings');
 A.equal(empty.publicBoundaries.length,Cosmos.EXEMPLARS.length);
 A.ok(empty.planes.every(x=>x.publicTradition===true));
 A.ok(empty.planes.some(x=>x.name==='The Spirit Veil'));
