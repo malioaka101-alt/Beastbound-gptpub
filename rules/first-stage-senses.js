@@ -4,6 +4,7 @@
 // Canon: Unified Master Prompt §§19, 22, 25 and 45.
 // Both are bounded, costly, source-witnessed actions after earned rites.
 const Crypto=require('node:crypto');
+const RiftAnchors=require('./rift-anchors');
 const SoulThreads=require('./soul-threading');
 const E=require('../engine.js'),Core=require('./core'),W=require('./world'),
  Build=require('./build'),U=require('./unified'),
@@ -271,7 +272,9 @@ function senseRift(s,p={}){
  const dc=risk==='unstable'?17:risk==='elevated'?15:13;
  const int=Core.int(s.player.attributes.int,'recorded Intelligence',1,30),
   rank=Core.int(s.player.skills?.arcana?.rank,'earned Arcana rank',0,5),
-  modifier=Math.floor((int-10)/2)+2*rank;
+  modifier=Math.floor((int-10)/2)+2*rank+
+   RiftAnchors.orientationBonus(s,sampleHash);
+ const orientationBonus=RiftAnchors.orientationBonus(s,sampleHash);
  const started=s.world.minutes;
  Core.event(s,'world','The practitioner studies known exterior boundary pressure at Riftglass Outpost without attempting to enter the sealed vault.',{
   origin:'earned-rift-sense-exterior',siteId:pre.siteId,location,
@@ -281,6 +284,7 @@ function senseRift(s,p={}){
  });
  const witnessHash=digest(s.log.at(-1));
  const check=Core.check(s,{modifier,dc,label:'Earned Rift Sense: exterior boundary coherence',risky:false});
+ if(orientationBonus)RiftAnchors.consumeOrientation(s,sampleHash);
  const rollHash=digest(s.log.at(-1));
  s.player.stamina-=RIFT_STAMINA;
  if(c){c.stamina-=RIFT_STAMINA;U.sync(s,{source:'wounds'});}
@@ -296,7 +300,8 @@ function senseRift(s,p={}){
   origin:'earned-rift-sense-exterior',day:E.day(s),worldMinute:s.world.minutes,
   location,siteId:pre.siteId,sourceSnapshotHash:sampleHash,
   success:check.success,degree:check.degree,staminaSpent:RIFT_STAMINA,
-  minutes:RIFT_MINUTES,witnessHash,rollHash,publicObservation});
+  minutes:RIFT_MINUTES,witnessHash,rollHash,publicObservation,
+  orientationBonus});
  s.table.perceptionPractice.riftAttempts=s.table.perceptionPractice.riftAttempts.slice(-50);
  Core.event(s,'progress',publicObservation,{
   origin:'earned-rift-sense-observation',siteId:pre.siteId,
@@ -305,6 +310,7 @@ function senseRift(s,p={}){
  return {performed:true,discipline:'rift',step:rift.step,
   success:check.success,check,minutes:RIFT_MINUTES,
   staminaSpent:RIFT_STAMINA,publicObservation,
+  orientationBonus,
   noVaultEntry:true,noTeleportation:true,noHiddenRouteRevealed:true};
 }
 module.exports={SOUL_COST,RIFT_STAMINA,SOUL_MINUTES,RIFT_MINUTES,
