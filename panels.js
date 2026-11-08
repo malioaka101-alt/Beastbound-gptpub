@@ -248,7 +248,7 @@ function full(state,name){
   // starting preparation, beast level or human evolutionary stage.
   // Long canonical names wrap rather than silently disappearing at column 30.
   const power=PowerOverview.read(s);
-  sec('DISCIPLINE STAGES',[
+  sec('POWER STAGES',[
    ...wrapText('Meridian: '+power.meridian.stageName),
    ...wrapText('Arcane: '+power.arcane.circleName),
    ...wrapText('Soul: '+power.soul.phaseName),
@@ -259,12 +259,12 @@ function full(state,name){
    'Origin phase '+power.origin.phase+' (separate)'
   ]);
   if(power.meridian.startingPreparatoryFoundation!==undefined)
-   sec('STARTING PREPARATION',[
+   sec('START PREPARATION',[
     'Meridian foundation '+power.meridian.startingPreparatoryFoundation,
     'Not earned track progress'
    ]);
   if(power.meridian.legacyPreparatoryFoundation!==undefined)
-   sec('OLDER PREPARATION',[
+   sec('LEGACY PREPARATION',[
     'Legacy foundation '+power.meridian.legacyPreparatoryFoundation,
     'Not earned track progress'
    ]);
