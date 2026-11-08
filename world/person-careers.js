@@ -141,12 +141,14 @@ function work(w,p,day,context='independent-duty',assistance=null){
   throw Error('Cooperative work needs an actual separately resolved and witnessed player skill check');
  const support=assisted&&assistance.success?
    (['strong','exceptional'].includes(assistance.degree)?2:1):0;
- const c=ensure(p),job=task(w,p),local=w.ecosystems[p.regionId],
+ const c=ensure(p),job=task(w,p),
+  innovation=require('./independent-innovations').workBonus(w,p,job.method),
+  local=w.ecosystems[p.regionId],
   polity=w.countries[p.polity],
   originalSkill=c.competenceRank,
   dc=job.difficulty+Math.floor(originalSkill/2),
   modifier=originalSkill*2+Math.floor((c.aptitude-5)/2)-
-   (p.fatigue>70?3:p.fatigue>45?1:0)+support,
+   (p.fatigue>70?3:p.fatigue>45?1:0)+support+innovation.bonus,
   roll=1+Math.floor(draw(p)*20),
   total=roll+modifier+(roll===20?5:roll===1?-5:0),
   margin=total-dc,
@@ -184,6 +186,8 @@ function work(w,p,day,context='independent-duty',assistance=null){
  }
  const receiptSource={origin:WORK,personId:p.id,personOriginHash:p.originHash,
   day,context,regionId:p.regionId,profession:p.profession,task:job,
+  ...(innovation.methodId?{appliedLimitedMethodId:innovation.methodId,
+   independentlyTestedMethodBonus:innovation.bonus}:{}),
   ...(assisted?{assistance:{skill:assistance.skill,checkEventHash:assistance.rollEventHash,
    success:assistance.success,degree:assistance.degree,support}}:{}),
   before:original,roll,modifier,dc,total,margin,
