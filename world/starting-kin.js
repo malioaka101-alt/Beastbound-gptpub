@@ -46,8 +46,14 @@ function seed(s,w){
    'person-rng:'+sourceHash+':'+id)||0x524b4b01;
   const p={id,origin:ORIGIN,sourceHash,memberIndex:i,
    name:m.name,relation:m.relation,
+   // Guardian and older-relative roles establish an adult social role.
+   // Siblings may be young children: their age and paid-work capacity
+   // have not been verified, so we do not invent a job or wage.
+   economicMode:['guardian','second guardian','older relative'].includes(m.relation)?
+    'adult-household-role':'age-or-work-unverified',
    birthRegionId:context.birthRegionId,regionId:context.birthRegionId,
-   personalFunds:5+number(w.worldSeed,'funds:'+sourceHash+':'+id)%17,
+   personalFunds:['guardian','second guardian','older relative'].includes(m.relation)?
+    5+number(w.worldSeed,'funds:'+sourceHash+':'+id)%17:0,
    focus:FOCUSES[number(w.worldSeed,'focus:'+sourceHash+':'+id)%FOCUSES.length],
    rngState:personalSeed,lastMonthDay:0,
    anchorHash:hash({origin:ORIGIN,sourceHash,id}),
@@ -79,6 +85,8 @@ function verify(w){
   if(!p||p.id!==id||p.memberIndex!==i||p.origin!==ORIGIN||
    p.sourceHash!==t.sourceHash||p.name!==m.name||p.relation!==m.relation||
    p.birthRegionId!==t.source.regionId||!Atlas.R[p.regionId]||
+   p.economicMode!==(['guardian','second guardian','older relative']
+    .includes(m.relation)?'adult-household-role':'age-or-work-unverified')||
    !Number.isInteger(p.personalFunds)||p.personalFunds<0||p.personalFunds>60||
    !FOCUSES.includes(p.focus)||!Number.isInteger(p.rngState)||p.rngState<1||
    !Number.isInteger(p.lastMonthDay)||p.lastMonthDay<0||
@@ -123,6 +131,13 @@ function month(w,day){
   if(!eco||!host)throw Error('An individual relative needs a real local economy and habitat');
   const before=state(p),roll=1+Math.floor(draw(p)*20);
   let action='ordinary-personal-maintenance';
+  if(p.economicMode==='age-or-work-unverified'){
+   // A sibling might be a minor, student, dependent or adult. Their
+   // possible livelihood and travel are not decided by that relationship.
+   if(roll>=16)p.focus=FOCUSES[(FOCUSES.indexOf(p.focus)+1)%FOCUSES.length];
+   record(p,day,'independent-private-life-with-unverified-age',roll,before);
+   actions++;continue;
+  }
   // Relocation is local, paid and restricted to actual authored adjacent
   // regions. This does NOT establish a playable transcontinental route.
   const neighbours=(region.neighbors||[]).filter(id=>
