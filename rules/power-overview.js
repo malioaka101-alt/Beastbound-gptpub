@@ -81,7 +81,7 @@ function read(s){
   origin:{phase:origin.phase||0,load:origin.load??0,
    preliminaryResearch:OriginFoundations.status(s),
    capacity:origin.capacity??0,stableTraits:[...(origin.stableTraits||[])],
-   nextWork:'Trait-mapping, compatibility and stabilisation depend on actual recorded material and evidence; not a Meridian stage'},
+   nextWork:'Witnessed ecology supports preliminary pattern research; full anatomy, source rights and compatibility evidence are required before any trait seeding or expression'},
   humanEvolution:{stage:evo.stage||0,stageName:phase(HUMAN,evo.stage||0),
    stability:evo.stability??null,
    traits:[...(evo.traits||[])]},
