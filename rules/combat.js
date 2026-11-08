@@ -74,6 +74,7 @@ function get(s,id){const c=s.table?.combatants?.[id];if(!c)throw Error('Combatan
 function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,press=false,charge=false,calledShot=false,activeDefense=false,coverBonus=0,brace='auto',nonlethal=false,castingDC=null,manaCost=null,arena=false}={}){
   if(arena)throw Error('Arena wards not ported yet: use non-arena combat only');
   const c=get(s,targetId),att=attackerId?get(s,attackerId):null;
+  const aspect=require('./personal-aspect').defensiveEffect(s,targetId);
   if(c.status!=='ok')throw Error('Combatant no longer able to fight');
   if(att && att.status!=='ok')throw Error('Attacker cannot act while incapacitated, fleeing or dying');
   if(brace!==true&&brace!==false&&brace!=='auto')throw Error('Invalid bracing option');
@@ -88,7 +89,7 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
   if(att&&(press||charge))att.pressing=true;
   const {dice,kept}=C.roll(s,adv);
   const total=kept+modifier+extra;
-  const defense=c.defense+(activeDefense?3:0)+coverBonus-(c.pressing?2:0);
+  const defense=c.defense+aspect.defense+(activeDefense?3:0)+coverBonus-(c.pressing?2:0);
   if(activeDefense)c.reactionUsed=true;
   // Attack spells must clear the casting threshold on THIS roll; no second die.
   if(castingDC!==null && total+C.naturalAdjustment(kept)<castingDC){
@@ -110,7 +111,7 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
   const durability=Math.max(0,c.durM-(calledShot?2:0));
   const hasWard=!!c.ward&&c.ward.steps>0;
   const effectiveDurability=Math.max(durability,hasWard?c.ward.magnitude:0);
-  let steps=severity(damageTotal,c.toughness)+offM-effectiveDurability+(kept===20?1:0)-(nonlethal?1:0);
+  let steps=severity(damageTotal,c.toughness+aspect.toughness)+offM-effectiveDurability+(kept===20?1:0)-(nonlethal?1:0);
   let ward=null,braced=false,wound=null;
   if(hasWard&&steps>0){
     c.ward.steps=Math.max(0,c.ward.steps-steps);
