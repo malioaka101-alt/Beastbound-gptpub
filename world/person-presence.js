@@ -3,7 +3,8 @@
 // physically verifiable local duties. A public professional listing never
 // itself means somebody is available for a personal conversation.
 const Crypto=require('node:crypto'),Atlas=require('./atlas'),
- Engine=require('../engine.js'),Emergent=require('./emergent-people');
+ Engine=require('../engine.js'),Emergent=require('./emergent-people'),
+ Kin=require('./origin-relatives');
 const SOURCE='Independent local duty itinerary of an established named professional';
 const hash=v=>Crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
 function seed(w){
@@ -91,6 +92,7 @@ function identity(w,id){
    goal:p.purpose,topic:p.profession,polity:p.polity,
    source:'independently-generated-lived-person'};
  }
+ if(id.startsWith('origin-kin:'))return Kin.identity(w,id);
  if(!id.startsWith('notable:'))return null;
  const n=w.notables?.[id.slice(8)];
  if(!n||id!=='notable:'+n.id)return null;
@@ -104,6 +106,10 @@ function resolve(w,id,location,day){
  if(!n||!Number.isInteger(day)||!Engine.LOCATIONS[location])return null;
  if(n.source==='engine-local-npc')
   return n.location===location?{...n,presence:null}:null;
+ if(n.source==='seeded-independent-family-person'){
+  const shift=Kin.presence(w,id,location,day);
+  return shift?{...n,location,presence:shift}:null;
+ }
  if(n.source==='independently-generated-lived-person'){
   const shift=Emergent.presence(w,id,location,day);
   return shift?{...n,location,presence:shift}:null;
@@ -117,6 +123,8 @@ function resolve(w,id,location,day){
 function proof(w,id,location,day,shift){
  if(id in Engine.NPCS)return !shift&&
   Engine.NPCS[id].location===location;
+ if(id?.startsWith('origin-kin:'))return !!(shift&&
+  Kin.presence(w,id,location,day)?.hash===shift.hash);
  if(id?.startsWith('emergent:'))return !!(shift&&
   Emergent.presence(w,id,location,day)?.hash===shift.hash);
  return !!(shift&&verified(w,shift)&&shift.npcId===id&&
@@ -133,10 +141,12 @@ function localStatus(s,w){
   Engine.NPCS[id].location===location):[];
  const visiting=Object.keys(w.personPresence?.roster||{}).map(id=>
   'notable:'+id).filter(id=>resolve(w,id,location,day));
+ const kin=ordinaryDayShift?Object.values(w.originKin?.people||{})
+  .map(p=>p.actorId).filter(id=>resolve(w,id,location,day)):[];
  const created=Object.values(w.emergentPeople?.people||{})
   .map(p=>p.actorId).filter(id=>resolve(w,id,location,day));
  return {location,day:day+1,
-  people:[...native,...visiting,...created].map(id=>{
+  people:[...native,...visiting,...kin,...created].map(id=>{
    const n=resolve(w,id,location,day);
    return {npcId:id,name:n.name,profession:n.profession,
     actuallyPresent:true,meetingIsNotAssent:true};
