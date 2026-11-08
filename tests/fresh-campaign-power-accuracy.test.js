@@ -53,7 +53,7 @@ for(let seed=1;seed<=120;seed++){
    s.player.meridian.foundation);
   A.equal(v.meridian.legacyPreparatoryFoundation,undefined);
   A.match(v.meridian.warning,/not verified current training-track progress/);
-  A.ok(detail.includes('STARTING PREPAR'));
+  A.ok(detail.includes('START PREPAR'));
  }
  // Sync belongs to actual saved partners and is never a human power stage.
  for(const id of s.player.partnerIds||[]){
