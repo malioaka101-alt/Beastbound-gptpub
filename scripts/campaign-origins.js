@@ -99,7 +99,7 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
     'distant-kin','adopted','ward']);
   if(!['birth-branch','distant-kin','adopted','ward'].includes(relation))
    throw Error('Unknown family connection; character creation cannot create a formal title');
-  if(['birth-branch','adopted'].includes(relation)){
+  if(relation==='birth-branch'){
    const surname=surnameFromHouse(h);
    name=resurname(name,surname);
    for(const m of f.members)if(m.relation!=='sibling'||relation==='birth-branch')
