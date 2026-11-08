@@ -268,6 +268,8 @@ function status(s){
    pair=target?spec.tracks[target]:null;
   const gateCount=system==='meridian'?s.player.meridian.gates?.length||0:0,
    seaReady=system==='meridian'&&s.player.meridian.stage===3&&gateCount===108,
+   arcaneThree=system==='arcane'&&s.player.arcane.coreIgnited===true&&
+    s.player.arcane.circles===2,
    arcaneTwo=system==='arcane'&&s.player.arcane.coreIgnited===true&&
     s.player.arcane.circles===1,
    gateAvailable=system==='meridian'&&s.player.meridian.stage>=2&&
@@ -277,7 +279,7 @@ function status(s){
    gateDC=gateAvailable?(nextGate<=36?13:nextGate<=72?16:19)+
     (milestone?3:0):null;
   systems[system]={
-   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':'advanced stage: procedure not implemented'),
+   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':arcaneThree?'Third Circle — Matrix Formation':'advanced stage: procedure not implemented'),
    current:system==='meridian'?s.player.meridian.stage:
     system==='arcane'?(s.player.arcane.coreIgnited?'Core ignited':'No Core')+
      '; '+s.player.arcane.circles+' Circles':
@@ -287,19 +289,20 @@ function status(s){
     gateAvailable&&s.table?.meridianGateTraining?.gate===nextGate?
      s.table.meridianGateTraining.progress:
     seaReady?s.table?.meridianSeaFormation?.points||0:
+    arcaneThree?s.table?.arcaneMatrixRevision?.progress||0:
     arcaneTwo?s.table?.arcaneCircleRevision?.progress||0:0,
    required:pair?.[0]??(gateAvailable?
-    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneTwo?4:null),
-   dc:pair?.[1]??(seaReady?21:arcaneTwo?17:gateDC),
+    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneThree?6:arcaneTwo?4:null),
+   dc:pair?.[1]??(seaReady?21:arcaneThree?20:arcaneTwo?17:gateDC),
    availableMethods:target?methodsFor(system,target):[],
    nextEligibleDay:rec?.cooldownUntil||0,
    trainingRoutes:target||gateAvailable?['established','independent']:
     seaReady?['independent']:
-    arcaneTwo?['independent']:[],
-   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo)&&
+    arcaneTwo||arcaneThree?['independent']:[],
+   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree)&&
     SELF_SITES[system].includes(s.world.location),
    independentPracticeFeeTalons:0,
-   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneTwo?17:gateDC,
+   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:gateDC,
    independentBreakthroughExtraDC:target?3:null,
    ...(target?{practiceSession:{
     minimumMinutes:15,maximumMinutes:480,
@@ -307,6 +310,14 @@ function status(s){
     defaultRoute:'independent',noCompulsoryTeacher:true,
     noUniversalTuition:true,noMinimumCalendarDays:true,
     omittedMinutes:'legacy sixday course for existing callers'
+   }}:{}),
+   ...(arcaneThree?{matrixWork:{
+    goal:'Build a stable three-Circle resonance matrix, not a free compound spell',
+    focusMethods:[...MATRIX_FOCI],requiredIntegrity:6,
+    manaSpentPerAttempt:4,
+    sessionMinutes:{minimum:15,default:180,maximum:480},
+    noCompulsoryTeacher:true,noUniversalTuition:true,
+    noFreeSpells:true
    }}:{}),
    ...(arcaneTwo?{circleWork:{
     goal:'Reconfigure the real First Circle for two stable mana channels',
@@ -798,4 +809,219 @@ function seaWork(s,params={}){
  };
 }
 
-module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork};
+
+// Third Arcane Circle: a true three-Circle resonant matrix is a redesign of
+// two earned channels, NOT a renamed Meridian Gate, a purchased school rank,
+// or automatic access to compound spells. Preserve the original Core, first
+// geometry and all earlier known formulae.
+const MATRIX_SOURCE='earned-third-circle-matrix-formation-v1';
+const MATRIX_FOCI=Object.freeze([
+ 'resonance','cross-coupling','formula-feedback','integrated'
+]);
+const matrixHash=x=>Crypto.createHash('sha256')
+ .update(JSON.stringify(x)).digest('hex');
+function secondCircleEvidence(s){
+ const a=s.player?.arcane,profile=Build.arcaneProfile(2);
+ const history=s.table?.disciplineTraining?.arcane?.history||[];
+ const core=history.find(h=>h.target==='core'&&
+  h.change==='Mana Core ignited, no Circle yet');
+ const first=history.find(h=>h.target==='circle1'&&
+  typeof h.change==='string'&&h.change.startsWith('First Circle constructed; '));
+ const second=history.find(h=>h.target==='circle2'&&
+  h.change==='Second Circle constructed; dual channels integrated from the original First Circle');
+ const work=s.table?.arcaneCircleRevision,proof=s.table?.arcaneArchitecture?.circle2;
+ const attempts=work?.attempts;
+ const last=Array.isArray(attempts)?attempts.at(-1):null;
+ if(!a||a.coreIgnited!==true||
+    typeof a.geometry!=='string'||a.geometry.trim().length<10||
+    !Number.isInteger(a.coreStability)||a.coreStability<0||a.coreStability>100||
+    !core||!first||!second||
+    ![core,first,second].every(h=>Number.isInteger(h.day)&&h.day>=1&&h.day<=E.day(s))||
+    !(core.day<=first.day&&first.day<=second.day)||
+    first.change!=='First Circle constructed; '+a.geometry||
+    second.witnessSource!=='first-circle-architecture-revision-v1'||
+    work?.target!==2||work.originalGeometry!==a.geometry||
+    work.progress!==4||work.completed!==true||
+    !Array.isArray(attempts)||attempts.length<1||
+    proof?.stage!=='Second Circle — Dual Channeling'||proof.number!==2||
+    proof.priorGeometry!==a.geometry||
+    proof.integratedDesign!==last?.design||
+    proof.developedFromFirstCircleDay!==first.day||
+    proof.originalSource!=='first-circle-architecture-revision-v1'||
+    proof.noNewSpellGranted!==true||proof.channelCount!==2||
+    proof.structuredMana!==profile.mana||
+    proof.attemptCount!==attempts.length||
+    !Number.isInteger(proof.completedMinute)||
+    proof.completedMinute>s.world.minutes||
+    proof.completedMinute-last.startedMinute<15||
+    proof.completedMinute-last.startedMinute>480||
+    second.quality!==last.result||
+    attempts.some(x=>!Number.isInteger(x.startedMinute)||
+      x.startedMinute<0||x.startedMinute>s.world.minutes||
+      x.manaSpent!==2||x.sourceDay!==first.day||
+      x.firstGeometry!==a.geometry||
+      !['success','strong','exceptional','setback','failure','severe failure'].includes(x.result)||
+      x.earnedIntegrity!==(x.result==='exceptional'?4:
+       x.result==='strong'?3:x.result==='success'?2:0))||
+    attempts.reduce((n,x)=>n+x.earnedIntegrity,0)<4)
+  throw Error('The Third Circle needs the genuinely earned First/Second Circle source chain and original dual-channel design');
+ return {a,profile,first,second,work,proof};
+}
+function thirdPrerequisites(s){
+ const chain=secondCircleEvidence(s),a=chain.a,p=chain.profile;
+ if(a.circles!==2||a.channels!==p.channels||
+    a.structuredMana!==p.mana||
+    a.maxComplexity!==p.maxComplexity||
+    a.intake!==p.intake||
+    a.loadTolerance!==p.loadTolerance||
+    a.preparedCapacity!==p.prepared)
+  throw Error('Matrix work needs a currently intact Second Circle, not a claimed higher Circle or legacy Mana reserve');
+ if(a.coreStability<45)
+  throw Error('The existing Mana Core is too unstable for a three-Circle matrix');
+ if(s.table?.arcaneArchitecture?.circle3||a.matrixGeometry)
+  throw Error('An existing Third Circle cannot be duplicated');
+ return chain;
+}
+function verifyThirdCircle(s){
+ const chain=secondCircleEvidence(s),a=chain.a;
+ const p=Build.arcaneProfile(3);
+ const work=s.table?.arcaneMatrixRevision,proof=s.table?.arcaneArchitecture?.circle3;
+ const attempts=work?.attempts,last=Array.isArray(attempts)?attempts.at(-1):null;
+ if(a.circles!==3||a.channels!==p.channels||a.structuredMana!==p.mana||
+    a.maxComplexity!==p.maxComplexity||a.intake!==p.intake||
+    a.loadTolerance!==p.loadTolerance||a.preparedCapacity!==p.prepared||
+    !Number.isInteger(a.matrixIntegrity)||a.matrixIntegrity<40||
+    a.matrixIntegrity>100||
+    work?.target!==3||work.progress!==6||work.completed!==true||
+    work.secondCircleHash!==matrixHash(chain.proof)||
+    !Array.isArray(attempts)||attempts.length===0||
+    attempts.some(x=>!Number.isInteger(x.startedMinute)||
+      x.startedMinute<0||x.startedMinute>s.world.minutes||
+      x.manaSpent!==4||x.staminaSpent<1||
+      !MATRIX_FOCI.includes(x.focus)||
+      !['success','strong','exceptional','setback','failure','severe failure'].includes(x.degree)||
+      x.earned!==(x.degree==='exceptional'?6:
+       x.degree==='strong'?3:x.degree==='success'?2:0))||
+    attempts.reduce((n,x)=>n+x.earned,0)<6||
+    proof?.stage!=='Third Circle — Matrix Formation'||
+    proof.number!==3||proof.source!==MATRIX_SOURCE||
+    proof.secondCircleHash!==work.secondCircleHash||
+    proof.matrixGeometry!==a.matrixGeometry||
+    proof.matrixGeometry!==last?.design||
+    proof.integrity!==a.matrixIntegrity||
+    proof.channels!==p.channels||proof.structuredMana!==p.mana||
+    proof.noAutomaticSpells!==true||proof.earnedFromSecondCircleDay!==chain.second.day||
+    !Number.isInteger(proof.completedMinute)||
+    proof.completedMinute>s.world.minutes||
+    proof.completedMinute-last.startedMinute<15||
+    proof.completedMinute-last.startedMinute>480)
+  throw Error('Third Circle Matrix Formation lacks consistent original earned structural evidence');
+ return {stage:proof.stage,number:3,channels:p.channels,integrity:a.matrixIntegrity,
+  first:chain.first,second:chain.second,proof};
+}
+function matrixStatus(s){
+ const a=s.player?.arcane||{},work=s.table?.arcaneMatrixRevision;
+ if(a.circles>=3){
+  try{const verified=verifyThirdCircle(s);return {
+   formed:true,verified:true,stage:verified.stage,
+   integrity:verified.integrity,channels:verified.channels,
+   noAutomaticSpells:true};}
+  catch(e){return {formed:false,verified:false,reason:e.message,
+   noAutomaticSpells:true};}
+ }
+ let available=true,reason=null;
+ try{thirdPrerequisites(s);}catch(e){available=false;reason=e.message;}
+ return {formed:false,ready:available,progress:work?.progress||0,required:6,
+  focusMethods:[...MATRIX_FOCI],noMandatoryTeacher:true,noAutomaticSpells:true,
+  ...(reason?{reason}:{}),
+  note:'Earn a stable third resonance layer; no compound spell or formula is granted by rank alone'};
+}
+function matrixWork(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).some(k=>!['design','focus','minutes','guidanceId','route'].includes(k)))
+  throw Error('Matrix work accepts only genuine geometry design, focus, duration, optional witnessed theory and route; not chosen checks, ranks or spells');
+ const {design,focus='integrated',minutes=180,route='independent',guidanceId}=params;
+ if(route!=='independent')
+  throw Error('The Third Circle currently has only a verified self-directed architecture route; no invented compulsory academy');
+ if(!MATRIX_FOCI.includes(focus))
+  throw Error('The Circle matrix needs real resonance, cross-coupling, formula feedback or integrated work');
+ if(typeof design!=='string'||design.trim().length<30||design.length>500)
+  throw Error('Describe the three interacting Circle geometries and feedback, not a rank declaration');
+ C.int(minutes,'actual matrix construction minutes',15,480);
+ const self=independentSite(s,'arcane',{shortSession:true});
+ const chain=thirdPrerequisites(s);
+ const theory=witnessedTheory(s,'arcane',guidanceId);
+ const a=chain.a,manaSpent=4,staminaSpent=Math.ceil(minutes/120);
+ if(!Number.isInteger(s.player.mana)||s.player.mana<manaSpent||
+    !Number.isInteger(s.player.stamina)||s.player.stamina<staminaSpent)
+  throw Error('Matrix work requires four real Mana and physical Stamina');
+ const previous=s.table?.arcaneMatrixRevision;
+ const secondCircleHash=matrixHash(chain.proof);
+ if(previous&&(previous.target!==3||previous.secondCircleHash!==secondCircleHash||
+    !Number.isInteger(previous.progress)||previous.progress<0||
+    previous.progress>6||previous.completed===true||
+    !Array.isArray(previous.attempts)||previous.attempts.length>500))
+  throw Error('Third Circle work must extend the same witnessed Second Circle, never replace its source');
+ const record=previous||{target:3,secondCircleHash,progress:0,
+  attempts:[],completed:false};
+ const start=s.world.minutes,designNote=design.trim();
+ const coreMod=a.coreStability>=85?1:a.coreStability<60?-2:0;
+ const check=C.check(s,{modifier:modifier(s,'arcane')+coreMod+(theory?.bonus||0),
+  dc:20,label:'Third Circle — resonant matrix '+focus});
+ const earned=check.degree==='exceptional'?6:check.degree==='strong'?3:
+  check.degree==='success'?2:0;
+ s.player.mana-=manaSpent;s.player.stamina-=staminaSpent;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
+ let backlash=false;
+ if(check.degree==='severe failure'){
+  backlash=true;a.coreStability=Math.max(0,a.coreStability-9);
+  U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
+  U.sync(s,{source:'wounds'});
+ }else if(check.success)a.coreStability=Math.min(100,a.coreStability+1);
+ record.progress=Math.min(6,record.progress+earned);
+ const entry={startedMinute:start,location:self.site,focus,design:designNote,
+  degree:check.degree,roll:check.roll,earned,manaSpent,staminaSpent};
+ record.attempts.push(entry);
+ s.table.arcaneMatrixRevision=record;
+ let formed=false;
+ if(record.progress>=6){
+  const next=Build.arcaneProfile(3);
+  const integrity=Math.min(100,Math.max(40,
+   58+Math.max(0,check.margin)*2+Math.min(12,record.attempts.length*2)-
+   Math.max(0,80-a.coreStability)));
+  a.circles=3;a.channels=next.channels;a.structuredMana=next.mana;
+  a.maxComplexity=next.maxComplexity;a.intake=next.intake;
+  a.loadTolerance=next.loadTolerance;a.preparedCapacity=next.prepared;
+  a.matrixGeometry=designNote;a.matrixIntegrity=integrity;
+  s.player.maxMana=Math.max(s.player.maxMana,next.mana);
+  const proof={stage:'Third Circle — Matrix Formation',number:3,
+   source:MATRIX_SOURCE,secondCircleHash,
+   earnedFromSecondCircleDay:chain.second.day,
+   matrixGeometry:designNote,integrity,channels:next.channels,
+   structuredMana:next.mana,completedMinute:start+minutes,
+   noAutomaticSpells:true};
+  s.table.arcaneArchitecture.circle3=proof;
+  s.table.disciplineTraining.arcane.history.push({
+   day:E.day(s),target:'circle3',quality:check.degree,
+   change:'Third Circle constructed; the three-Circle resonance matrix is stable',
+   witnessSource:MATRIX_SOURCE});
+  record.progress=6;record.completed=true;formed=true;
+ }
+ E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ C.event(s,'progress',formed?
+  'The third Mana Circle settles into a verified stable resonance matrix.':
+  backlash?'Unstable matrix feedback strains the Mana Core.':
+  'Three-Circle resonance work continues.',{
+   source:MATRIX_SOURCE,design:designNote,focus,site:self.site,
+   originalCheck:check,earned,progress:record.progress,formed,backlash,
+   manaSpent,staminaSpent,minutes,noAutomaticSpell:true,
+   ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}: {})
+ });
+ return {system:'arcane',target:'circle3',formed,progress:record.progress,
+  required:6,focus,check,backlash,minutes,manaSpent,staminaSpent,
+  route,feeTalons:0,coreStability:a.coreStability,
+  ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}:{}),
+  noAutomaticSpell:true,independent:true};
+}
+
+module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle};
