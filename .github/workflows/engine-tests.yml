@@ -67,6 +67,7 @@ jobs:
             tests/panel-gallery.test.js
             tests/dynamic-hud-identity.test.js
             tests/power-foundations.test.js
+            tests/body-organ-cycle-three.test.js
             tests/fresh-campaign-power-accuracy.test.js
             tests/living-world.test.js
             tests/agent-initiatives.test.js

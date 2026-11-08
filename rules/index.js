@@ -182,6 +182,8 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
+  case 'body.organStatus':return Disciplines.organStatus(s);
+  case 'body.organWork':return Disciplines.organWork(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);

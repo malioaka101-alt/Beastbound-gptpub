@@ -268,6 +268,7 @@ function status(s){
    pair=target?spec.tracks[target]:null;
   const gateCount=system==='meridian'?s.player.meridian.gates?.length||0:0,
    seaReady=system==='meridian'&&s.player.meridian.stage===3&&gateCount===108,
+   bodyThree=system==='body'&&s.player.body?.cycles?.length===2,
    arcaneThree=system==='arcane'&&s.player.arcane.coreIgnited===true&&
     s.player.arcane.circles===2,
    arcaneTwo=system==='arcane'&&s.player.arcane.coreIgnited===true&&
@@ -279,7 +280,7 @@ function status(s){
    gateDC=gateAvailable?(nextGate<=36?13:nextGate<=72?16:19)+
     (milestone?3:0):null;
   systems[system]={
-   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':arcaneThree?'Third Circle — Matrix Formation':'advanced stage: procedure not implemented'),
+   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':arcaneThree?'Third Circle — Matrix Formation':bodyThree?'Cycle III — Organ Refinement':'advanced stage: procedure not implemented'),
    current:system==='meridian'?s.player.meridian.stage:
     system==='arcane'?(s.player.arcane.coreIgnited?'Core ignited':'No Core')+
      '; '+s.player.arcane.circles+' Circles':
@@ -290,19 +291,20 @@ function status(s){
      s.table.meridianGateTraining.progress:
     seaReady?s.table?.meridianSeaFormation?.points||0:
     arcaneThree?s.table?.arcaneMatrixRevision?.progress||0:
-    arcaneTwo?s.table?.arcaneCircleRevision?.progress||0:0,
+    arcaneTwo?s.table?.arcaneCircleRevision?.progress||0:
+    bodyThree?Object.values(s.table?.organCycleWork?.systems||{}).reduce((n,x)=>n+x,0):0,
    required:pair?.[0]??(gateAvailable?
-    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneThree?6:arcaneTwo?4:null),
-   dc:pair?.[1]??(seaReady?21:arcaneThree?20:arcaneTwo?17:gateDC),
+    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneThree?6:arcaneTwo?4:bodyThree?8:null),
+   dc:pair?.[1]??(seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:gateDC),
    availableMethods:target?methodsFor(system,target):[],
    nextEligibleDay:rec?.cooldownUntil||0,
    trainingRoutes:target||gateAvailable?['established','independent']:
     seaReady?['independent']:
-    arcaneTwo||arcaneThree?['independent']:[],
-   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree)&&
+    arcaneTwo||arcaneThree||bodyThree?['independent']:[],
+   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree||bodyThree)&&
     SELF_SITES[system].includes(s.world.location),
    independentPracticeFeeTalons:0,
-   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:gateDC,
+   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:gateDC,
    independentBreakthroughExtraDC:target?3:null,
    ...(target?{practiceSession:{
     minimumMinutes:15,maximumMinutes:480,
@@ -310,6 +312,13 @@ function status(s){
     defaultRoute:'independent',noCompulsoryTeacher:true,
     noUniversalTuition:true,noMinimumCalendarDays:true,
     omittedMinutes:'legacy sixday course for existing callers'
+   }}:{}),
+   ...(bodyThree?{organWork:{
+    methods:[...ORGAN_FOCI],tissueIntegrityRequiredPerSystem:2,
+    integratedBiologyNeeded:true,
+    sessionMinutes:{minimum:15,default:120,maximum:480},
+    noCompulsoryTeacher:true,noMandatoryAge:true,noFixedCalendarGate:true,
+    noFreeQiManaOrEvolution:true
    }}:{}),
    ...(arcaneThree?{matrixWork:{
     goal:'Build a stable three-Circle resonance matrix, not a free compound spell',
@@ -1024,4 +1033,180 @@ function matrixWork(s,params={}){
   noAutomaticSpell:true,independent:true};
 }
 
-module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle};
+
+// Canon §23: Organ Cycle is a biological transformation, not Meridian Stage III,
+// a universal character rank, or mere elapsed training. The functional
+// systems represented here are heart, lungs, liver and kidneys; integrated
+// work includes their coordination with other organs. Exceptional integrated
+// practice can advance several tissues in the SAME genuine check.
+const ORGAN_NAMES=Object.freeze(['heart','lungs','liver','kidneys']);
+const ORGAN_FOCI=Object.freeze([...ORGAN_NAMES,'integrated']);
+const ORGAN_ORIGIN='earned-body-organ-cycle-iii-v1';
+const organDigest=x=>Crypto.createHash('sha256')
+ .update(JSON.stringify(x)).digest('hex');
+const organPoints=()=>({heart:0,lungs:0,liver:0,kidneys:0});
+function organPrerequisites(s){
+ const p=s.player,body=p?.body,h=s.table?.disciplineTraining?.body?.history||[];
+ if(!body||!Array.isArray(body.cycles)||body.cycles.length!==2||
+    body.cycles[0]!=='Muscle-Tendon Cycle'||body.cycles[1]!=='Bone-Marrow Cycle')
+  throw Error('Organ Cycle needs genuinely completed Muscle-Tendon and Bone-Marrow physiology');
+ const first=h.find(x=>x?.target==='cycle1'&&
+   x.change==='Completed Cycle I Muscle-Tendon refinement; +2 stamina, Might +1, M1 natural force');
+ const second=h.find(x=>x?.target==='cycle2'&&
+   x.change==='Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box');
+ if(!first||!second||!Number.isInteger(first.day)||!Number.isInteger(second.day)||
+    first.day<1||second.day<first.day||second.day>E.day(s))
+  throw Error('Earlier Body refinement requires its original earned, dated Cycle I and II records');
+ const c=s.table?.combatants?.player;
+ if(!c||s.table.healthModel!=='wounds-v1'||!Number.isInteger(c.toughness)||
+    !Array.isArray(c.boxes)||c.boxes.length!==3)
+  throw Error('Organ stress requires a consistent existing wound-model physiology');
+ if(s.battle||s.encounter||c.status!=='ok')
+  throw Error('Organ remodelling cannot proceed during immediate danger or incapacity');
+ return {first,second};
+}
+function organEarned(s){
+ const body=s.player?.body,work=s.table?.organCycleWork,
+  proof=body?.organAdaptation,
+  h=s.table?.disciplineTraining?.body?.history||[],
+  final=h.find(x=>x?.target==='cycle3'&&
+    x.change==='Completed Cycle III Organ refinement; integrated heart, lungs, liver and kidneys');
+ if(!body||body.cycles?.[2]!=='Organ Cycle'||
+    body.cycles.length!==3||!work?.completed||!proof||!final||
+    final.witnessSource!==ORGAN_ORIGIN||
+    !Array.isArray(work.attempts)||work.attempts.length<1||
+    !Number.isInteger(final.day)||final.day<1||final.day>E.day(s)||
+    proof.originalSource!==ORGAN_ORIGIN||
+    proof.attemptsHash!==organDigest(work.attempts)||
+    !Number.isInteger(proof.completedMinute)||
+    proof.completedMinute>s.world.minutes)
+  throw Error('The Organ Cycle needs its original verified tissue-work history');
+ const reconstructed=organPoints();
+ let integrated=false;
+ for(const x of work.attempts){
+  if(!ORGAN_FOCI.includes(x.focus)||!Number.isInteger(x.minute)||
+     x.minute<0||x.minute>s.world.minutes||
+     !Number.isInteger(x.minutes)||x.minutes<15||x.minutes>480||
+     !['success','strong','exceptional','setback','failure','severe failure'].includes(x.degree)||
+     x.earned!==(x.degree==='exceptional'?3:
+      x.degree==='strong'?2:x.degree==='success'?1:0))
+   throw Error('Invalid earned organ refinement attempt');
+  if(x.earned){
+   if(x.focus==='integrated'){
+    integrated=true;
+    for(const organ of ORGAN_NAMES)
+     reconstructed[organ]=Math.min(2,reconstructed[organ]+
+      (x.degree==='exceptional'?2:1));
+   }else reconstructed[x.focus]=Math.min(2,
+      reconstructed[x.focus]+x.earned);
+  }
+ }
+ if(!integrated||ORGAN_NAMES.some(k=>reconstructed[k]<2)||
+    ORGAN_NAMES.some(k=>proof.systems?.[k]!==reconstructed[k])||
+    proof.completedMinute<work.attempts.at(-1).minute+
+      work.attempts.at(-1).minutes)
+  throw Error('Organ Cycle is not an integrated, witnessed full-body transformation');
+ return {cycle:3,systems:structuredClone(reconstructed),source:ORGAN_ORIGIN};
+}
+function organStatus(s){
+ if(s.player?.body?.cycles?.includes('Organ Cycle')){
+  try{return {earned:true,...organEarned(s)};}
+  catch(e){return {earned:false,reason:e.message};}
+ }
+ let ready=true,reason=null;
+ try{organPrerequisites(s);}catch(e){ready=false;reason=e.message;}
+ const work=s.table?.organCycleWork,systems=work?.systems||organPoints();
+ return {earned:false,ready,focusMethods:[...ORGAN_FOCI],
+  systems:Object.fromEntries(ORGAN_NAMES.map(k=>[k,systems[k]||0])),
+  requiredPerSystem:2,
+  integratedMethodNeeded:true,
+  noCompulsoryTeacher:true,noMinimumCalendarDays:true,
+  ...(reason?{reason}:{}),
+  note:'Whole-body Organ Cycle, not a single organ skill or a Meridian rank'};
+}
+function organWork(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).some(k=>!['focus','minutes','approach','guidanceId'].includes(k)))
+  throw Error('Organ refinement accepts genuine organ focus, duration, descriptive approach and witnessed optional theory; not chosen anatomy, bonuses or outcomes');
+ const {focus='integrated',minutes=120,approach,guidanceId}=params;
+ if(!ORGAN_FOCI.includes(focus))
+  throw Error('Select heart, lungs, liver, kidneys or integrated organ work');
+ C.int(minutes,'actual organ work minutes',15,480);
+ if(approach!==undefined&&(typeof approach!=='string'||
+   approach.trim().length<8||approach.length>240))
+  throw Error('Describe actual tissue work, not an awarded constitution');
+ organPrerequisites(s);
+ const self=independentSite(s,'body',{shortSession:true});
+ const theory=witnessedTheory(s,'body',guidanceId);
+ const fatigue=Math.ceil(minutes/120),p=s.player;
+ if(!Number.isInteger(p.stamina)||p.stamina<fatigue)
+  throw Error('Organ adaptation requires available Stamina for real exertion');
+ const old=s.table?.organCycleWork;
+ if(old&&(old.completed||!old.systems||!Array.isArray(old.attempts)||
+   old.attempts.length>500||ORGAN_NAMES.some(k=>
+    !Number.isInteger(old.systems[k])||old.systems[k]<0||old.systems[k]>2)||
+   typeof old.integrated!=='boolean'))
+  throw Error('Existing Organ Cycle work is inconsistent with recorded tissue adaptation');
+ const work=old||{systems:organPoints(),integrated:false,attempts:[],completed:false};
+ const start=s.world.minutes;
+ p.stamina-=fatigue;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=p.stamina;
+ const check=C.check(s,{modifier:modifier(s,'body')+
+  (theory?.bonus||0),dc:17,
+  label:'Organ Cycle III — '+focus+' adaptation'});
+ const earned=check.progress;
+ if(earned){
+  if(focus==='integrated'){
+   work.integrated=true;
+   for(const organ of ORGAN_NAMES)
+    work.systems[organ]=Math.min(2,work.systems[organ]+
+     (check.degree==='exceptional'?2:1));
+  }else work.systems[focus]=Math.min(2,work.systems[focus]+earned);
+ }
+ let setback=null;
+ if(check.degree==='severe failure'){
+  setback='organ strain';
+  U.ensurePlayer(s);
+  Combat.harm(s,Combat.get(s,'player'),2);
+  U.sync(s,{source:'wounds'});
+ }
+ const record={minute:start,minutes,focus,degree:check.degree,
+  originalRoll:check.roll,earned,
+  site:self.site,
+  ...(approach?{approach:approach.trim()}:{}),
+  source:independentSource('body','organ-'+focus,self.site)};
+ work.attempts.push(record);
+ s.table.organCycleWork=work;
+ let completedCycle=false;
+ if(work.integrated&&ORGAN_NAMES.every(k=>work.systems[k]>=2)){
+  const c=s.table.combatants.player;
+  p.body.cycles.push('Organ Cycle');
+  staminaGain(s,2);
+  c.toughness+=1;c.boxes[2]+=1;
+  p.body.organAdaptation={
+   systems:structuredClone(work.systems),originalSource:ORGAN_ORIGIN,
+   completedMinute:start+minutes,attemptsHash:organDigest(work.attempts)};
+  s.table.disciplineTraining.body.history.push({
+   day:E.day(s),target:'cycle3',quality:check.degree,
+   change:'Completed Cycle III Organ refinement; integrated heart, lungs, liver and kidneys',
+   witnessSource:ORGAN_ORIGIN});
+  work.completed=true;completedCycle=true;
+ }
+ E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ C.event(s,'progress',completedCycle?
+  'Body Organ Cycle III integrated across heart, lungs, liver and kidneys.':
+  'Body Organ Cycle III '+focus+' work tested.',{
+   origin:ORGAN_ORIGIN,record,originalCheck:check,
+   tissueProgress:structuredClone(work.systems),integrated:work.integrated,
+   completedCycle,staminaSpent:fatigue,setback,
+   ...(completedCycle?{staminaCapacityAdded:2,toughnessAdded:1,
+    criticalWoundBoxAdded:1,noQiOrManaUnlock:true}:{})
+  });
+ return {system:'body',target:'cycle3',focus,check,earned,
+  systems:structuredClone(work.systems),integrated:work.integrated,
+  completed:completedCycle,staminaSpent:fatigue,minutes,
+  feeTalons:0,route:'independent',setback,
+  noMandatoryTeacher:true,noAutomaticOtherPower:true};
+}
+
+module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
