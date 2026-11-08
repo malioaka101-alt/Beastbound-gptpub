@@ -339,11 +339,24 @@ function schoolWitnessValid(r){
 // in the ORIGINAL Recover action; it never awards a new combat turn.
 function earnedSchoolApplication(s,schoolId){
  const school=Lore.T[schoolId];if(!school)return false;
- const reports=s.table?.realm?.culturalPractice?.reports||[];
- return reports.some(r=>
-  r.origin===SOURCE&&r.creator===s.player?.name&&
+ const archive=s.table?.realm?.culturalPractice;
+ const matches=r=>r?.origin===SOURCE&&r.creator===s.player?.name&&
   r.receipt?.school?.traditionId===schoolId&&
-  r.receipt?.check?.success===true&&verifyReport(r));
+  r.receipt?.check?.success===true&&verifyReport(r);
+ // The ordinary rolling field-report archive is capped. Keep one
+ // permanent ORIGINAL report receipt inside the SAME professional
+ // archive so genuine bodily knowledge does not disappear after a long
+ // working career. This is evidence, not an extra learned-skill rank.
+ const proof=archive?.schoolProofs?.[schoolId];
+ if(proof?.origin===SCHOOL_SOURCE&&
+    proof.creator===s.player?.name&&
+    proof.id===proof.report?.id&&
+    Number.isInteger(proof.earnedAtMinute)&&
+    proof.earnedAtMinute===proof.report?.receipt?.startedMinute+
+      proof.report?.receipt?.minutes&&
+    proof.earnedAtMinute<=s.world.minutes&&
+    matches(proof.report))return true;
+ return (archive?.reports||[]).some(matches);
 }
 function workStatus(s,params={}){
  only(params,['id']);
@@ -436,6 +449,13 @@ function practice(s,params={}){
   published:check.success,releaseDay:Math.floor((start+minutes)/1440)+1,
   response:null,reviewedDay:null};
  ledger.reports.push(saved);if(ledger.reports.length>140)ledger.reports.shift();
+ if(school&&check.success){
+  ledger.schoolProofs ||= {};
+  ledger.schoolProofs[school.school.id]={
+   origin:SCHOOL_SOURCE,creator:p.name,id:saved.id,
+   earnedAtMinute:start+minutes,report:structuredClone(saved)
+  };
+ }
  E.advance(s,minutes);W.finalizeTime(s,start);
  H.sync(s,{source:'legacy'});
  if(check.success){
