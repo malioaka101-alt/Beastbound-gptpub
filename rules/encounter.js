@@ -1,7 +1,7 @@
 'use strict';
 // One text-RPG combat exchange: a player intent and an independently committed
 // NPC/beast plan are resolved together, never after the GM sees a favourable die.
-const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel');
+const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design');
 const COVER=Object.freeze({
  forest:{kind:'copperwood trunks',source:'Engine-established copperwood trunks in Copperwood Verge'},
  ruins:{kind:'ward-stone masonry',source:'Engine-established ward-stone masonry at Riftglass Outpost'}
@@ -58,7 +58,7 @@ function begin(s,p={}){
 function exchange(s,p={}){
  const fight=s.battle;if(!fight||fight.mode!=='wounds-v1')throw Error('No canonical wound-model combat scene is active');
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!
-   ['intent','attackId','techniqueId','nonlethal','playerBrace'].includes(k)))
+   ['intent','attackId','techniqueId','nonlethal','playerBrace','personalDesignId'].includes(k)))
   throw Error('Player attack bonuses, damage, Qi spending, enemy plans and encounter DCs cannot be caller-selected');
  if(!['attack','cast','ward','dual_cast','technique','defend','recover','withdraw','parley','yield_space','take_cover'].includes(p.intent))throw Error('Player intent required: attack, cast, ward, dual_cast, technique, defend, recover, withdraw, parley, yield_space or take_cover');
  if(p.playerBrace!==undefined&&![true,false,'auto'].includes(p.playerBrace))
@@ -69,6 +69,8 @@ function exchange(s,p={}){
   throw Error('Weapon action and nonlethal strike apply only to an actual attack intent');
  if(!['cast','ward','technique'].includes(p.intent)&&p.techniqueId!==undefined)
   throw Error('Only a real attack spell, defensive Ward or Meridian technique may name a previously learned technique');
+ if(p.personalDesignId!==undefined&&!['cast','technique'].includes(p.intent))
+  throw Error('A personal combat expression must be used through its exact original learned strike action, not a free action or dual cast');
  // Refuse an already recorded collapse before cover, equipment or spell preflight.
  // Those checks must not mutate an unusable in-memory encounter on rejection.
  const recordedPlayer=s.table?.combatants?.player;
@@ -86,6 +88,12 @@ function exchange(s,p={}){
  const spell=['cast','dual_cast'].includes(p.intent)?
   Spark.attackProfile(s,dual?'arcane_spark':p.techniqueId):null;
  const meridian=p.intent==='technique'?QiStrike.attackProfile(s,p.techniqueId):null;
+ // Validate the original design, completed personal work, native learned
+ // profile AND extra energy/stamina before enemy decisions or any dice.
+ const variation=p.personalDesignId===undefined?null:
+  Creation.combatPersonal(s,p.personalDesignId,p.intent,spell||meridian);
+ const activeSpell=variation&&p.intent==='cast'?variation.profile:spell;
+ const activeMeridian=variation&&p.intent==='technique'?variation.profile:meridian;
  const wardProfile=['ward','dual_cast'].includes(p.intent)?
   ArcaneWard.profile(s,dual?'arcane_ward':p.techniqueId):null;
  if(dual&&C.int(s.player.mana,'real available Mana',0,100000)<
@@ -123,12 +131,28 @@ function exchange(s,p={}){
     weaponActionId:action.actionId,noAdditionalDamageRoll:true});
   }
  }else if(p.intent==='cast'){
-  ownResult=Combat.attack(s,{...atkOpts,modifier:spell.modifier,
-    damage:spell.damage,offM:spell.offM,brace:false,
-    nonlethal:spell.nonlethal,castingDC:spell.castingDC,
-    manaCost:spell.manaCost});
+  if(variation){
+   s.player.stamina-=variation.extraStamina;
+   player.stamina-=variation.extraStamina;
+  }
+  ownResult=Combat.attack(s,{...atkOpts,modifier:activeSpell.modifier,
+    damage:activeSpell.damage,offM:activeSpell.offM,brace:false,
+    nonlethal:activeSpell.nonlethal,castingDC:activeSpell.castingDC,
+    manaCost:activeSpell.manaCost});
   ownResult.verifiedTechniqueId=spell.techniqueId;
   ownResult.learnedTechniqueSource=spell.source;
+  if(variation){
+   ownResult.personalExpression={id:variation.id,name:variation.name,
+    mode:variation.mode,sourceFacet:variation.sourceFacet,
+    extraManaSpent:variation.extraEnergy,
+    extraStaminaSpent:variation.extraStamina,noExtraAction:true};
+   C.event(s,'combat','The original personally developed Arcane Spark variation is woven into the existing one-spell exchange.',{
+    origin:'character-authored-creation-expression-v1',
+    designId:variation.id,mode:variation.mode,
+    sourceMilestone:variation.sourceMilestone,
+    extraManaBudgeted:variation.extraEnergy,
+    extraStaminaSpent:variation.extraStamina,noSecondRoll:true});
+  }
  }else if(p.intent==='dual_cast'){
   ownResult=DualArcane.cast(s,player,atkOpts,wardProfile,spell,dual);
  }else if(p.intent==='ward'){
@@ -136,13 +160,29 @@ function exchange(s,p={}){
  }else if(p.intent==='technique'){
   // Honest source-attested Meridian reinforcement, with all Qi spent before
   // its one attack roll. Not a spell: no Arcane casting DC or Mana conversion.
-  s.player.qi-=meridian.qiCost;
-  ownResult=Combat.attack(s,{...atkOpts,modifier:meridian.modifier,
-   damage:meridian.damage,offM:meridian.offM,brace:false,
-   nonlethal:meridian.nonlethal});
+  s.player.qi-=activeMeridian.qiCost;
+  if(variation){
+   s.player.stamina-=variation.extraStamina;
+   player.stamina-=variation.extraStamina;
+  }
+  ownResult=Combat.attack(s,{...atkOpts,modifier:activeMeridian.modifier,
+   damage:activeMeridian.damage,offM:activeMeridian.offM,brace:false,
+   nonlethal:activeMeridian.nonlethal});
   ownResult.verifiedTechniqueId=meridian.techniqueId;
-  ownResult.qiSpent=meridian.qiCost;
+  ownResult.qiSpent=activeMeridian.qiCost;
   ownResult.learnedTechniqueSource=meridian.source;
+  if(variation){
+   ownResult.personalExpression={id:variation.id,name:variation.name,
+    mode:variation.mode,sourceFacet:variation.sourceFacet,
+    extraQiSpent:variation.extraEnergy,
+    extraStaminaSpent:variation.extraStamina,noExtraAction:true};
+   C.event(s,'combat','The practitioner applies the originally developed Qi Strike variation in the existing one-action exchange.',{
+    origin:'character-authored-creation-expression-v1',
+    designId:variation.id,mode:variation.mode,
+    sourceMilestone:variation.sourceMilestone,
+    extraQiSpent:variation.extraEnergy,
+    extraStaminaSpent:variation.extraStamina,noSecondRoll:true});
+  }
  }else if(p.intent==='take_cover'){
   const obstacle=COVER[fight.terrain];
   fight.playerCover={
