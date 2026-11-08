@@ -4,6 +4,10 @@
 
 # Beastbound Realms — ChatGPT Project Text RPG
 
+## Living personal relatives
+
+Fresh campaigns now include independently progressing, persistently saved individual lives for already known starting family members. Their monthly livelihood or neighbouring-region decisions do not give the player coins or reveal hidden NPC information. A person appearing on the character's family sheet does **not** mean they are physically present or automatically willing to help. See `docs/INDIVIDUAL_STARTING_KIN_LIVES.md`.
+
 ## Random or guided new campaign starts
 
 **No campaign is active.** Only on an explicit new-game request, the GM can use scripts/new-campaign.js to roll a complete reproducible character or honour selectively chosen background details. The starting identity can have an ordinary newly generated family, a birth/ward connection to an existing historic or truly renowned house, a regional/institutional history, or a modest source-grounded informal association (one verified founder, no implied other members). These are backgrounds, **not free magical powers, inherited offices, titles or access**. The original 57-section Master Prompt and docs/CAMPAIGN_INITIALISATION_2026-11-08.md govern the initial scene. Home regions may be cross-continental; current mechanically playable locations remain the six Reedmarch sites.
