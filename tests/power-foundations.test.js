@@ -81,8 +81,9 @@ const A=require('node:assert/strict'),
    A.equal(sample.table.combatants.player.toughness,oldToughness+1);
    A.equal(sample.table.combatants.player.boxes[1],oldBoxes+1);
    A.equal(D.status(sample).systems.body.target,
-    'advanced stage: procedure not implemented');
+    'Cycle III — Organ Refinement');
    A.equal(Power.read(sample).body.nextCycle,'Organ Cycle');
+   A.equal(Power.read(sample).body.organCycle.ready,true);
    A.match(P.full(sample,'power'),/Body: 2\/7 cycles/);
    break;
   }else{
