@@ -55,6 +55,7 @@ const SoulThreads=require('./soul-threading');
 const PersonPresence=require('../world/person-presence');
 const WildLives=require('../world/wild-lives');
 const Creation=require('./creation-design');
+const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
 const Lifepath=require('./mastery-lifepath');
@@ -223,6 +224,8 @@ function act(s,{system,operation,params={}}={}){
   case 'creation.personalStatus':return Creation.personalStatus(s,params);
   case 'creation.personalDevelop':return Creation.developPersonal(s,params);
   case 'creation.personalUse':return Creation.usePersonal(s,params);
+  case 'creation.personalRevert':return Creation.revertPersonal(s,params);
+  case 'creation.aspectStatus':return PersonalAspect.status(s,params);
   case 'creation.prototype':return CreationPrototype.build(s,params);
   case 'creation.calibrate':return CreationPrototype.calibrate(s,params);
   case 'creation.measure':return CreationPrototype.measure(s,params);
