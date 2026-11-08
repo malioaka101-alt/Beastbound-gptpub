@@ -5,6 +5,7 @@ const Crypto=require('node:crypto'),A=require('./atlas'),B=require('./bestiary')
 const GuildFieldwork=require('./guild-fieldwork');
 const ResearchPublications=require('./research-publications');
 const IndividualInnovations=require('./independent-innovations');
+const EmergentHouseholds=require('./emergent-households');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -446,6 +447,7 @@ function tickMonth(w,day){
  }
  Houses.month(w,day,v=>event(w,v));
  FamilyMembers.month(w,day,v=>event(w,v));
+ EmergentHouseholds.month(w,day);
  AgentInitiatives.month(w,day,v=>event(w,v));
  EmergentGroups.syncWorkerFounders(w,day,v=>event(w,v));
  EmergentGroups.month(w,day,v=>event(w,v));
@@ -480,7 +482,8 @@ function tick(s,weekDays=[],monthDays=[]){
    // People with genuine overlapping work-shift witnesses may freely meet
    // and share limited ordinary information without automatic teaching.
    IndependentContacts.sixday(w,day);
-   IndividualInnovations.consider(w,day,v=>event(w,v));nW++;}
+   IndividualInnovations.consider(w,day,v=>event(w,v));
+   EmergentHouseholds.sixday(w,day,v=>event(w,v));nW++;}
   if(mo.has(day)){tickMonth(w,day);nM++;}
   w.lastTickDay=day;
  }
@@ -512,6 +515,7 @@ function publicStatus(s){const w=peek(s),r=A.R[locationRegion(s)],p=A.P[r.polity
     relatedHouse:require('./social-houses').byId[x.house].name})),
   newlyPublishedLocalMethods:IndividualInnovations.visible(s,w).localPracticalMethods.slice(-4),
   locallyReplicatedResearch:ResearchPublications.visible(s,w).publishedLocalResearch.slice(-4),
+  newLocalHouseholds:EmergentHouseholds.visible(s,w).localEstablishedHouseholds.slice(-4),
   sharedLocalMethods:Renown.PUBLIC_METHODS.filter(x=>
     Renown.RENOWNED.some(n=>n.polity===r.polity&&n.institution===x.institution)).
     slice(0,4).map(x=>({name:x.name,path:x.path,knowledgeIsNotMastery:true})),
