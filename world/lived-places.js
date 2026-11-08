@@ -51,6 +51,11 @@ function verifyPlace(p){
   !p.founding||p.foundingHash!==hash(p.founding)||
   p.founding.source!==SOURCE||p.founding.placeId!==p.id||
   p.founding.regionId!==p.regionId||p.founding.worldMinute!==p.establishedMinute||
+  p.founding.name!==p.name||p.founding.kind!==p.kind||
+  p.founding.description!==p.description||p.founding.culture!==p.culture||
+  p.founding.notablesHash!==hash(p.notables)||
+  p.founding.familiesHash!==hash(p.families)||
+  p.founding.organisationsHash!==hash(p.organisations)||
   !Array.isArray(p.notables)||!Array.isArray(p.families)||
   !Array.isArray(p.organisations)||!Array.isArray(p.notes)||
   p.notes.length>120||p.notes.some(n=>n?.seal!==hash(n?.source)||
@@ -95,6 +100,10 @@ function establish(s,p={}){
   x.regionId===regionId))
   throw Error('That named place is already established in this region');
  const source={source:SOURCE,placeId,regionId,worldMinute:now,
+  name:p.name.trim(),kind:(p.kind||'settlement').trim(),
+  description:p.description.trim(),culture:(p.culture||'').trim(),
+  notablesHash:hash(notables),familiesHash:hash(families),
+  organisationsHash:hash(organisations),
   gmContext:'An in-scene GM-authored place added without rewinding the world',
   noNPCConsent:true,noExtraPlayerResources:true};
  const place={source:SOURCE,id:placeId,name:p.name.trim(),regionId,
