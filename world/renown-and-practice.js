@@ -51,7 +51,7 @@ const HISTORICAL_LEGACIES=Object.freeze([
   combatLegacy:'Well defenders practice restraint and cistern protection; the tale teaches no free water conjuring.'},
  {id:'starlens_vigil',name:'The Unclosed Vigil of Starlens',
   era:'Longwinter Covenant',polity:'icehollow',institution:'aurora_academy',house:'starlens',
-  status:'deceased observatory witnesses remembered in conflicting archives',
+  status:'deceased historical observatory witnesses remembered in conflicting archives',
   history:'Aurora Academy preserves Starlens accounts that separated dangerous auroral fluctuations from travelling star-beast sightings; the primary observer is not securely identified.',
   renown:'Northern legendary scholarly vigilance, no certified Soul Domain or celestial bloodline',
   dailyLegacy:'Observer logs separate witnessed phenomena from spiritual hypotheses.',
