@@ -117,6 +117,9 @@ function replication(s,p={}){
     typeof t.source!=='string'||t.source.trim().length<18||
     !Number.isInteger(t.worldMinute)||t.worldMinute<0||t.worldMinute>s.world.minutes)
   throw Error('A documented independent replication opportunity and tester are required');
+ if(t.origin===require('./research-replication').ORIGIN&&
+   !require('./research-replication').verify(s,t))
+  throw Error('The witnessed independent professional replication opportunity was altered');
  const rank=C.int(t.skillRank,'recorded external tester skill',0,5);
  const ability=C.int(t.abilityScore,'recorded external tester ability',1,30);
  const mod=Math.floor((ability-10)/2)+2*rank;
