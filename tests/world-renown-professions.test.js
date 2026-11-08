@@ -71,8 +71,9 @@ const base=()=>E.newGame({seed:882181,name:'Morrowfen Civic Researcher',
  A.ok(old.publiclyKnownMethods.some(x=>x.name==='Arcane Spark'));
  A.ok(old.publicRenown.some(x=>x.publiclyAssociatedFamily==='Emberhand Foundry Kin'));
  A.equal(old.membershipOrTeachingNotGranted,true);
- const w=act(s,'world','realmOverview');
+ const w=act(s,'world','realmStatus');
  A.ok(w.renownedPublicInstitutions.some(x=>x.name==='Lumenfall Annex'));
+ A.equal(act(s,'world','realmOverview').renownedWorldTraditions,11);
  A.ok(w.sharedLocalMethods.every(x=>x.knowledgeIsNotMastery));
  const work=act(s,'world','culturalPracticeStatus');
  A.ok(work.possibleWork.some(x=>x.id==='ferry_route_survey'));
