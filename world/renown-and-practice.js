@@ -41,8 +41,7 @@ const HISTORICAL_LEGACIES=Object.freeze([
   history:'Ashglass evacuation ledgers honour successive ward teams after the volcanic rupture. Accounts disagree on who first measured the surviving boundary anchors.',
   renown:'Legendary containment service, not authenticated Realm Walking',
   dailyLegacy:'Evacuation keys, pressure checks and refuge maps outrank dramatic forbidden crossings.',
-  combatLegacy:'Later wardens use anchor discipline in defensive withdrawal; the memorial grants no remote teleportation.'}
-
+  combatLegacy:'Later wardens use anchor discipline in defensive withdrawal; the memorial grants no remote teleportation.'},
  {id:'first_cup_waterkeeper',name:'The Waterkeeper of the First Cup',
   era:'Age of First Paths',polity:'sahri_wells',institution:'well_collegium',house:'firstcup',
   status:'ancient public water-custodian title; the original bearer is disputed',
@@ -169,8 +168,7 @@ const RENOWNED=Object.freeze([
   defenseUse:'protecting passages is not commanding a sovereign species',
   division:'border intrusion and imperfect recognition by human states',
   tradeoff:'no one acquires an Origin Pattern by hearing another lineage’s history',
-  site:'old_tracks_sanctum'}
-
+  site:'old_tracks_sanctum'},
  {id:'pathlight_routes',institution:'route_keepers',house:'pathlight',
   polity:'stair_guilds',region:'copper_stair',era:'Age of First Paths',
   standing:'world-renowned caravan survival and rescue charter',
@@ -294,8 +292,7 @@ const PUBLIC_METHODS=Object.freeze([
   learning:'real local observations and honest skill checks; no special power requirement',kind:'public profession method',
   civilian:'field ecology, wetland conservation and incident records',
   combat:'surveys identify hazards but do not manufacture an opponent’s stats',
-  actualRule:'world.habitatSurvey',note:'ordinary professionals remain genuinely useful'}
-
+  actualRule:'world.habitatSurvey',note:'ordinary professionals remain genuinely useful'},
  {id:'vital_pacing',name:'Circulatory Work Pacing',path:'body',institution:'ridge_rescue',
   learning:'ordinary observation of human breathing and genuine physical conditioning',kind:'common rescue method',
   civilian:'safe rope-team shifts, lift duty and fatigue-aware relief without a magical form',
