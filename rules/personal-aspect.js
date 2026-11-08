@@ -86,32 +86,36 @@ function status(s,params={}){
   source:'the player-authored form, earned actual Organ Cycle and individual creation history'
  };
 }
-function activate(s,id,{combat=false}={}){
- if(combat!==!!s.battle)throw Error('In combat, an aspect release is a full ordinary exchange subject to the independent opponent; outside combat it is a one-minute real action');
- if(!combat&&s.encounter)throw Error('Resolve the current immediate creature encounter before uninterrupted physiological change');
- if(!E.LOCATIONS[s.world?.location])throw Error('The actual physical scene must be known');
- const {e,proofHash}=template(s,id);
- const old=s.table?.personalAspect,now=s.world.minutes;
+function preflight(s,id,{combat=false}={}){
+ if(combat!==!!s.battle)
+  throw Error('During combat, releasing an aspect takes a full original exchange subject to the independent opponent');
+ if(!combat&&s.encounter)
+  throw Error('Resolve an immediate creature encounter before uninterrupted physiological change');
+ if(!E.LOCATIONS[s.world?.location])throw Error('The current physical scene must exist');
+ const {e,proofHash}=template(s,id),old=s.table?.personalAspect;
  if(old&&!validRecord(s,old))
-  throw Error('Unverified earlier active form state must be reconciled; do not overwrite a forged transformation');
- if(old&&now<old.endsMinute)
-  throw Error('A living aspect is already active; it cannot be stacked, extended or reset');
- if(old&&now<old.cooldownUntil)
-  throw Error('The personally adapted tissues require genuine recovery before another release');
+  throw Error('Unverified earlier active form state must be reconciled');
+ if(old&&present(s))throw Error('A living aspect cannot be stacked or extended');
+ if(old&&s.world.minutes<old.cooldownUntil)
+  throw Error('Real bodily recovery is required before another release');
  const here=s.table?.combatants?.player;
- if(here&&here.status!=='ok')throw Error('An incapacitated practitioner cannot initiate a form');
+ if(here&&here.status!=='ok')throw Error('An incapacitated practitioner cannot release a form');
  if(!Number.isInteger(s.player.stamina)||s.player.stamina<ACTIVATION_STAMINA||
     here&&here.stamina<ACTIVATION_STAMINA)
-  throw Error('Releasing the personal physique requires two real Stamina');
+  throw Error('The release requires two actual remaining Stamina');
+ const duration=({round:1,'1min':1,'10min':3})[
+  s.table.creationDesigns.records[id].proposal.duration];
+ if(!duration)throw Error('The original aspect proposal needs a genuinely supported duration');
+ return {e,proofHash,duration,now:s.world.minutes};
+}
+function activate(s,id,{combat=false}={}){
+ const {e,proofHash,duration,now}=preflight(s,id,{combat});
  const p=s.player,con=C.int(p.attributes?.con,'actually earned Constitution',1,30),
   rank=C.int(p.skills?.survival?.rank,'actually trained Survival',0,5);
  const check=C.check(s,{modifier:Math.floor((con-10)/2)+2*rank,
   dc:16,label:'Personally developed Organ Aspect activation'});
  p.stamina-=ACTIVATION_STAMINA;
  if(here)here.stamina=p.stamina;
- const duration=({round:1,'1min':1,'10min':3})[
-  s.table.creationDesigns.records[id].proposal.duration];
- if(!duration)throw Error('The developed individual aspect exceeds the currently supported measured body endurance');
  let backlash=null;
  if(check.degree==='severe failure'){
   backlash='organ-pressure and circulatory strain';
@@ -201,5 +205,5 @@ function defensiveEffect(s,targetId){
  return here.a.mode==='balance'?
   {defense:1,toughness:0}:{defense:0,toughness:1};
 }
-module.exports={ORIGIN,status,activate,revert,present,
+module.exports={ORIGIN,status,preflight,activate,revert,present,
  spendCombatUpkeep,defensiveEffect};
