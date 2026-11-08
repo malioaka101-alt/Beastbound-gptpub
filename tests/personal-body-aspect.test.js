@@ -129,6 +129,16 @@ for(const balance of [false,true]){
  A.equal(view.noNewBeastTraits,true);
  const signed=E.importGame(E.exportGame(s));
  A.equal(Aspect.status(signed).active,true);
+ const forgedOutcome=E.importGame(E.exportGame(signed));
+ forgedOutcome.table.personalAspect.success=false;
+ A.equal(Aspect.status(forgedOutcome).active,false,
+  'An edited success flag is not an original activation roll');
+ A.deepEqual(Aspect.defensiveEffect(forgedOutcome,'player'),
+  {defense:0,toughness:0});
+ const forgedDie=E.importGame(E.exportGame(signed));
+ forgedDie.table.personalAspect.activationRoll=20;
+ A.equal(Aspect.status(forgedDie).active,false,
+  'A chosen favourable activation die is not an engine outcome');
  A.deepEqual(Aspect.defensiveEffect(signed,'player'),
   balance?{defense:1,toughness:0}:{defense:0,toughness:1});
  A.deepEqual(Aspect.defensiveEffect(signed,'fox'),{defense:0,toughness:0});
