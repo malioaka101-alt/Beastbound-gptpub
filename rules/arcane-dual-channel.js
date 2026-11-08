@@ -3,8 +3,17 @@
 // Only individually verified, already learned Arcane Spark and Ward can
 // use two channels together; no extra spell, NPC submission or free damage.
 const E=require('../engine.js'),B=require('./build'),C=require('./core'),
+ Disciplines=require('./disciplines'),
  Combat=require('./combat'),Ward=require('./arcane-ward'),Spark=require('./arcane-spark');
 function verify(s){
+ // Third Circle retains the Second's actually learned dual-channel function.
+ // Validate the *whole* later matrix chain first. Do not treat an edited
+ // circles:3 counter as proof of an independently earned Second Circle.
+ if(s.player?.arcane?.circles===3){
+  Disciplines.verifyThirdCircle(s);
+  return {circles:3,channels:2,stage:'Second Circle — Dual Channeling',
+   provenThirdMatrix:true};
+ }
  const a=s.player?.arcane,profile=B.arcaneProfile(2),
   history=s.table?.disciplineTraining?.arcane?.history,
   original=history?.find(x=>x.target==='circle1'&&

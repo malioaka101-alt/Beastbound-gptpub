@@ -30,6 +30,7 @@ jobs:
             tests/foundation-gate-integration.test.js
             tests/meridian-stage-four-sea.test.js
             tests/arcane-second-circle.test.js
+            tests/arcane-third-circle-matrix.test.js
             tests/contextual-theory-guidance.test.js
             tests/flexible-discipline-practice.test.js
             tests/sapient-beast-personhood.test.js
