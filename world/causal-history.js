@@ -112,7 +112,7 @@ function status(s,p={}){
  const h=inspect(s);validate(h);
  if(p.eventId!==undefined){
   const e=h.events[p.eventId];
-  return e?.visibility==='public'?{known:true,event:publicEvent(e,ledger)}:{known:false};
+  return e?.visibility==='public'?{known:true,event:publicEvent(e,h)}:{known:false};
  }
  if(p.targetType!==undefined||p.targetId!==undefined){
   if(!entity(p.targetType,p.targetId))throw Error('An actual existing atlas subject is required for historical context');
