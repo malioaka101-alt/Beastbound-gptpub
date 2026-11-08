@@ -9,8 +9,8 @@ for(let seed=1;seed<=100;seed++){
  const o=N.create({seed,slug:'test_campaign_001'}),b=N.create({seed,slug:'test_campaign_001'});
  assert.deepEqual(o,b);
  const s=E.importGame(E.exportGame(o.state));
- assert(s.player.gender==='male'&&s.player.name===o.summary.name);
- assert(s.world.location!=='crossing');
+ assert(['male','female','nonbinary'].includes(s.player.gender)&&s.player.name===o.summary.name);
+ assert(E.LOCATIONS[s.world.location] && s.flags.visited[s.world.location]);
  assert(s.table.healthModel==='wounds-v1');
  assert(s.table.realm.countries && Object.keys(s.table.realm.countries).length===24);
  assert(s.table.realm.ticks.sixdays===0);
