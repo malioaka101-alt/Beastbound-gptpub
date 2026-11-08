@@ -1,5 +1,10 @@
 # Beastbound — In-chat fantasy system HUD (official, 6 November 2026)
 
+
+## Active-game state (8 November 2026)
+
+**There is no active campaign.** The user explicitly ended and reset Aerin's trial; old Aerin and independent Ivar examples lower in this file are **historical illustrations only**, not defaults. Never render any of their stats, dates, partners, families or powers as the current player state. Display a character panel only when a newly created and confirmed campaign save exists. For actual power sheets, use the new read-only `rules/power-overview.js` `power.status` and `/panel power`: skill ranks, physical stage, gates, Circles, cycles, Soul phases, Rift steps, Origin integration and human evolution are **not equivalent measurements**. Stage 0 must be described as preparatory/not-awakened, and an old foundation count or resource pool is not proof of a newer stage.
+
 ## Primary principle: interface serves immersion (newest player preference, 6 November 2026)
 
 **The player wants to inhabit a believable fantasy world, not watch a system dashboard narrate it.** Treat natural grounded prose, authentic dialogue, autonomous beings and cause-and-effect as the experience. The small styled HUD is **an out-of-story reading aid** for calendar, location, resources and the one relevant thread—not an in-world projection or continual magical effect. Make it subtle, short, and easy to skip; never put its look, animations or color language into the fictional world by default. In particular the earlier teal/indigo/gold palette is an optional interface accent, **not a visual filter over every location or beast**.
