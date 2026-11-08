@@ -119,7 +119,7 @@ function install(s,w){
 function sixday(w,day){
  const t=ensure(w);
  if(!t)return {changed:0,absent:true};
- if(!Number.isInteger(day)||day<6||day%6!==0)
+ if(!Number.isInteger(day)||day<1)
   throw Error('Independent relatives advance on the established sixday clock');
  if(t.lastSixday>=day)return {changed:0,duplicate:true};
  let changed=0;
