@@ -73,6 +73,22 @@ A.equal(adult.state.player.livedYears.phase,'established-adulthood');
 A.ok(adult.state.player.coins>=20);
 A.equal(adult.state.player.arcane.circles,0);
 A.equal(adult.state.world.location,'adult_lantern_shop');
+// Leadership is an established GM-authored past, not a role-class roll.
+// It does not silently create a treasury, compelled followers or free power.
+const head=N.create({seed:70133,slug:'gm_leadership_biography',mode:'gm',age:46,
+ role:'leader of the Northbank weaving household',
+ lifeHistory:'The family selected this person to coordinate its weaving contracts twelve years ago, and those responsibilities still shape the household.',
+ lifeCircumstance:'Regular decisions over supplier debts, workshop maintenance and mutually agreed family duties.',
+ originKind:'new-family',homeRegion:'morrowfen_basin'});
+A.equal(head.state.player.history.ownOccupation,'leader of the Northbank weaving household');
+A.match(head.state.player.history.earlyWork,/selected this person to coordinate/);
+A.match(head.state.player.history.lifeCircumstance,/supplier debts/);
+A.equal(head.state.player.arcane.circles,0);
+A.equal(head.state.player.meridian.stage,0);
+A.equal(head.state.campaign.openingState,'awaiting-gm');
+A.equal(Age.verify(head.state.player.livedYears),true);
+A.equal(head.state.player.livedYears.work,'leader of the Northbank weaving household');
+A.equal(head.state.player.family.house?.noAutomaticOffice===false,false);
 const senior=N.create({seed:70122,slug:'gm_later_life_case',mode:'gm',age:82});
 A.equal(senior.state.player.livedYears.phase,'later-life');
 A.ok(senior.state.player.family.members.every(x=>!['guardian','second guardian','older relative'].includes(x.relation)));
