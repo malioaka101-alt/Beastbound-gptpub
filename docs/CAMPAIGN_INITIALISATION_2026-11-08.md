@@ -2,6 +2,8 @@
 
 **Foundation: 8 November 2026.** Source: original Beastbound Master Prompt §§39–41, 54–57, alongside the existing Atlas, renowned history, social houses, institutions, professional life, independent organisations and executable JavaScript engine. This is an **initialisation capability**, not a new universal power, profession or relationship ladder. The text RPG remains in private ChatGPT Project conversations; the GitHub source repository is public. **No campaign is active** and Aerin's ended trial is not imported.
 
+**Updated opening authority:** `docs/GM_AGE_DRIVEN_STARTS.md` supersedes this document wherever it describes a seeded six-site *opening scene*, selected opening *hook* or a compulsory creation interface. The player can supply age alone. The GM now authors every actual first scene and records a new or existing real location without choosing from predetermined vignettes. The previous fixed scenes have been removed from `scripts/new-campaign.js`; the older six sites remain in-world only as already authored locations.
+
 ## A beginning belongs to the world
 
 A campaign begins **only when the player requests a new game**. The GM offers natural freeform creation or a complete random start, without demanding a lengthy questionnaire or a beast choice. A unique slug and a nonzero seed establish one new save, source record and opening; existing checkpoints are never overwritten.
