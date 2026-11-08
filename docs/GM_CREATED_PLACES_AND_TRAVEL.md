@@ -12,7 +12,7 @@ The GM should write vivid and distinctive introductions. The engine must not wri
 
 `world/lived-places.js` adds a per-campaign, source-sealed `table.realm.livedPlaces` registry. The existing six named Reedmarch sites and the world Atlas remain canonical. Each newly introduced site has:
 
-- `placeId` (stable slug), `name`, `regionId` (an existing Atlas region), optional `kind` and `culture`, and a GM-authored `description`.
+- `placeId` (stable slug), `name`, `regionId` (an existing Atlas region), optional `kind`, `sceneType` (`settlement`, `wilderness`, `structure` or `unknown`) and `culture`, and a GM-authored `description`. A locally established settlement can use ordinary settlement time/rest rules without being confused with the region's underlying biome.
 - Optional `notables`, `families`, and `organisations` references as `[{name,context}]`. These are *known narrative facts*, **not simulated nearby NPCs, confirmed memberships, legal offices, goods, money or automatic permission**.
 - A sealed founding record and an append-only context-note ledger. The GM can add a witnessed reference or change of circumstances instead of rewriting or erasing earlier established descriptions.
 
@@ -24,6 +24,7 @@ Rules.act(s, {system:'world',operation:'establishPlace',params:{
   name:'Reedbank Mill',
   regionId:'morrowfen_basin',
   kind:'riverside workplace',
+  sceneType:'settlement',
   description:'A mill and adjoining dwellings stand above the old seasonal flood line.',
   culture:'Millworkers post water-level notices and argue over safe beast passages.',
   notables:[{name:'Hesta Venn',context:'Known locally as a ledger keeper; present whereabouts unconfirmed.'}],
