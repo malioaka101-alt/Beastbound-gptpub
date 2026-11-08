@@ -127,7 +127,9 @@ function characterData(state){
   ...(h?{knownHistory:{upbringing:h.upbringing,
    earlyWork:h.earlyWork,familySituation:h.familySituation,
    ...(h.personalGoal?{personalGoal:h.personalGoal}:{}),
-   ...(h.ownOccupation?{ownOccupation:h.ownOccupation}:{})}}:{})
+   ...(h.ownOccupation?{ownOccupation:h.ownOccupation}:{}),
+   ...(h.lifeCircumstance?{lifeCircumstance:h.lifeCircumstance}:{}),
+   ...(Number.isInteger(h.priorWorkYears)?{priorWorkYears:h.priorWorkYears}:{})}}:{})
  };
 }
 function hudData(state){
