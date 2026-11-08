@@ -219,6 +219,7 @@ function actualSource(s,job){
   case 'willing-partnership':{
    const partner=(s.player?.partnerIds||[]).map(id=>s.beasts?.[id])
     .find(b=>b&&b.owner===s.player.name&&
+     b.away!==true&&(!b.location||b.location===s.world.location)&&
      b.consent===true&&b.relationship==='mutual partner'&&
      Number.isInteger(b.trust)&&b.trust>=40&&
      Number.isInteger(b.respect)&&b.respect>=30&&
