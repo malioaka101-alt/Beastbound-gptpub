@@ -40,13 +40,21 @@ function prepare(seed,age,{role,goal}={}){
   ]):age<12?'household and community life':'education, household work or early apprenticeships';
  const ownWork=typeof role==='string'&&role.trim()?role.trim():
   adult?work.work:age>=12?'learning and occasional supervised work':'no established adult occupation';
- const practice=adult&&years>0?Math.min(2,1+Math.floor(years/12)):0;
+ const chosenRole=typeof role==='string'&&role.trim()?role.trim():null;
+ const knownSkill=chosenRole?
+  (/heal|medic|physic|clinic|nurs/i.test(chosenRole)?'medicine':
+   /craft|smith|repair|shipwright|weav|build|tailor|carpent|artist/i.test(chosenRole)?'crafting':
+   /trade|merch|negotiat|diplomat|steward|council/i.test(chosenRole)?'diplomacy':
+   /research|archiv|study|tutor|scholar/i.test(chosenRole)?'research':
+   /animal|beast|herd|stable|handler/i.test(chosenRole)?'beastcraft':
+   /scout|ranger|field|sail|hunter|courier/i.test(chosenRole)?'survival':null):work.skill;
+ const practice=adult&&years>0&&knownSkill?Math.min(2,1+Math.floor(years/12)):0;
  const funds=adult?(20+number(seed,'prior-savings')%170):age>=12?number(seed,'small-pocket-money')%18:0;
  const known={source:SOURCE,age,phase:lifePhase,
   work:ownWork,workHistory:adult?work.context:
    age>=12?'Life experience may include learning, family duties or interests; no professional qualification is assumed.':
     'Early life, family and community shape experience; an adult job or legal office is not presumed.',
-  priorWorkYears:years,ordinaryPractice:practice?{skill:work.skill,rankCap:practice}:null,
+  priorWorkYears:years,ordinaryPractice:practice?{skill:knownSkill,rankCap:practice}:null,
   circumstance:varied,personalGoal:typeof goal==='string'?goal.trim():null,
   fundsSource:adult?'Modest prior savings from an independently lived biography':
    age>=12?'Small personal funds, if any; household resources belong to their owners':
