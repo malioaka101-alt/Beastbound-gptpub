@@ -343,7 +343,8 @@ function execute(savePath, req) {
  // prepared plans never creates a turn receipt or commits incidental state.
  if(req.mode==='rule'&&['research.designPlansStatus',
    'world.localResearchStatus','world.localInnovationsStatus',
-   'world.localHouseholdsStatus'].includes(req.system+'.'+req.operation)){
+   'world.localHouseholdsStatus',
+   'world.knownRelativesStatus'].includes(req.system+'.'+req.operation)){
    const viewed=Rules.act(s,req);
    return {id:req.id,ok:true,applied:false,revision:runtime.revision,
     stateHash:preHash,output:{rules:viewed},
