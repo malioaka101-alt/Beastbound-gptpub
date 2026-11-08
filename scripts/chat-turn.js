@@ -324,11 +324,11 @@ function execute(savePath, req) {
     ...(receipt?{recovered:true,originalRevision:previous.revision,
       clock:receipt.clock,output:receipt.output,events:receipt.events,
       ...(receipt.message!==undefined?{message:receipt.message}:{})}:{}),
-    stateHash:preHash,panel:P.core(s),recap:recap(s)};
+    stateHash:preHash,panel:P.core(s),hud:P.hudData(s),recap:recap(s)};
  }
 
  if(req.expectedHash && req.expectedHash!==preHash)return {id:req.id,ok:false,applied:false,error:'Stale checkpoint; reload before processing this turn',stateHash:preHash};
- if(req.mode==='status')return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,panel:P.core(s),recap:recap(s)};
+ if(req.mode==='status')return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,panel:P.core(s),hud:P.hudData(s),recap:recap(s)};
  const consciousness=s.table?.combatants?.player?.status;
  if(['incapacitated','knocked_out','rehabilitating','dying','dead'].includes(consciousness)){
    const passive=new Set(['health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.physicianRescue','health.criticalCare','health.criticalRehab','combat.status','combat.sceneStatus']);
@@ -343,7 +343,7 @@ function execute(savePath, req) {
  if(req.mode==='act'&&typeof req.action==='string'){
   const reading=nonConsequentialAction(s,req.action.trim().toLowerCase());
   if(reading)return {id:req.id,ok:true,applied:false,revision:runtime.revision,
-   stateHash:preHash,output:reading,message:reading.message,panel:P.core(E.importGame(saved)),
+   stateHash:preHash,output:reading,message:reading.message,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved)),
    recap:recap(s)};
  }
  const oldRng=s.rngState, oldMinutes=s.world.minutes, oldLog=s.log.length;
@@ -673,7 +673,7 @@ function execute(savePath, req) {
  } else if(req.mode==='rule'){
    if(typeof req.system!=='string'||typeof req.operation!=='string')throw Error('Rule system and operation required');
    response.rules=Rules.act(s,req);
-   if(['research.status','evolution.status','evolution.eligibility','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved))};
+   if(['research.status','evolution.status','evolution.eligibility','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
  } else if(req.mode==='check'){
    // The processor's validated campaign field addresses the save; it is not
    // a caller-selected check attribute, DC, modifier or rolled outcome.
@@ -698,7 +698,7 @@ function execute(savePath, req) {
  Health.validate(s);
  const changed=(ok || s.rngState!==oldRng || s.world.minutes!==oldMinutes) && JSON.stringify(s)!==before;
 
- if(!changed)return {id:req.id,ok,applied:false,revision:runtime.revision,message:response.message,output:response,stateHash:preHash,panel:P.core(E.importGame(saved))};
+ if(!changed)return {id:req.id,ok,applied:false,revision:runtime.revision,message:response.message,output:response,stateHash:preHash,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
  runtime.applied ||= {};
  runtime.revision=(Number(runtime.revision)||0)+1;
  // Archive only the original player-facing outcome, dice/events and clock
@@ -716,7 +716,7 @@ function execute(savePath, req) {
  return {id:req.id,ok,applied:true,revision:runtime.revision,stateHash:hash(next),
   clock:receipt.clock,output:receipt.output,events:receipt.events,
   ...(receipt.message!==undefined?{message:receipt.message}:{}),
-  panel:P.core(s),recap:recap(s)};
+  panel:P.core(s),hud:P.hudData(s),recap:recap(s)};
 }
 module.exports={execute,hash,legalId};
 if(require.main===module){
