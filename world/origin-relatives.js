@@ -58,6 +58,8 @@ function verify(w,p){
   p.shift.personId===p.id&&p.shift.npcId===p.actorId&&
   p.shift.name===p.name&&p.shift.regionId===t.homeRegionId&&
   p.shift.location===site(t.homeRegionId)&&
+  p.shift.sourceHash===p.sourceHash&&
+  p.shift.scheduledAtDay===p.shift.fromDay&&
   Number.isInteger(p.shift.fromDay)&&
   p.shift.fromDay===p.lastSixday&&
   p.shift.throughDay===p.shift.fromDay+5;
@@ -183,11 +185,12 @@ function status(s,p={}){
   throw Error('Starting kin ledger is from a different campaign or family');
  if(!Array.isArray(heard))throw Error('Personal family recollections need a valid saved ledger');
  return {home:Atlas.R[s.player.startingContext?.birthRegionId]?.name||null,
-  relatives:owned.map((x,i)=>({npcId:'origin-kin:kin_'+(i+1),
+  relatives:owned.map((x,i)=>({npcId:t?'origin-kin:kin_'+(i+1):null,
    name:x.name,relation:x.relation,
    lastPersonallyHeard:heard.filter(v=>v.npcId==='origin-kin:kin_'+(i+1))
     .at(-1)?.heard||null})),
-  note:'Known family identity is not current location, current consent, affection, pay, private thoughts or a magical birthright. Only personally witnessed conversation is added.'};
+  note:t?'Known family identity is not current location, current consent, affection, pay, private thoughts or a magical birthright. Only personally witnessed conversation is added.':
+   'An older save has named relatives but no independently established kin actors; do not invent their presence or retroactively create private lives.'};
 }
 function answer(s,p,question){
  const q=question.toLowerCase(),reg=Atlas.R[p.regionId],
