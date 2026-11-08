@@ -4,6 +4,7 @@ const fs=require('node:fs'), crypto=require('node:crypto');
 const E=require('../engine.js'), P=require('../panels.js'), Rules=require('../rules');
 const Health=Rules.unified, Core=Rules.core;
 const PersonPresence=require('../world/person-presence');
+const LivedPlaces=require('../world/lived-places');
 const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
 const legalId=x=>typeof x==='string' && /^[a-z0-9][a-z0-9_-]{4,79}$/.test(x);
 const recap=s=>s.chatRuntime?.scene ? E.recap(s).replace(/^SCENE:.*$/m,'SCENE: '+s.chatRuntime.scene) : E.recap(s);
@@ -12,7 +13,7 @@ const LOOK_WORDS=new Set(['look','look around','where am i','scene','surrounding
 const PANELS=Object.freeze({status:'status',stats:'character',character:'character',
  inventory:'bag',bag:'bag',beasts:'tamer',journal:'journal',quests:'quests'});
 function localScene(s){
- const loc=E.LOCATIONS[s.world?.location];
+ const loc=LivedPlaces.location(s,s.world?.location);
  if(!loc)throw Error('This save has no established local scene');
  const people=PersonPresence.localStatus(s,Rules.realm.peek(s)).people;
  const b=s.encounter?.beastId?s.beasts?.[s.encounter.beastId]:null;
@@ -20,7 +21,9 @@ function localScene(s){
   (!b.location||b.location===s.world.location);
  return {location:s.world.location,name:loc.name,
   description:loc.description,
-  exits:loc.exits.map(id=>({id,name:E.LOCATIONS[id].name})),
+  exits:loc.exits.map(id=>({id,name:E.LOCATIONS[id]?.name||LivedPlaces.location(s,id)?.name||id})),
+  ...(loc.canonical?{}:{culture:loc.culture,
+   establishedDetails:LivedPlaces.status(s,{placeId:s.world.location}).place}),
   nearbyPeople:people.map(x=>({npcId:x.npcId,name:x.name,
    profession:x.profession,meetingIsNotAssent:true})),
   publicGuildFieldBoard:s.world.location==='crossing'&&E.NPCS.elira?.location==='crossing',
@@ -680,8 +683,12 @@ function execute(savePath, req) {
      // Retain only the explicitly established ordinary legacy movement /
      // exploration bridge. Never let an unfamiliar intention fall through to
      // retired quest, instant prize, automatic power or other old shortcuts.
-     const r=E.dispatch(s,req.action);ok=r.ok;response.message=r.message;
-     if(ok)Health.sync(s,{source:'legacy'});
+     if(!E.LOCATIONS[s.world.location]){
+      Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
+     }else{
+      const r=E.dispatch(s,req.action);ok=r.ok;response.message=r.message;
+      if(ok)Health.sync(s,{source:'legacy'});
+     }
    }else{
      // Open-ended play is a GM decision, not a parser error and not an excuse
      // to select a DC, loot, NPC consent or skill outcome. An unrecognized
@@ -697,7 +704,7 @@ function execute(savePath, req) {
    // neither requesting historic context nor inspecting one's own earned
    // physique/practice is itself a new player action or storytelling.
    response.rules=Rules.act(s,req);
-   if(['research.status','evolution.status','evolution.eligibility','origin.researchStatus','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','power.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.heritage','world.culturalPracticeStatus','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.originRelativesStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.personalStatus','creation.aspectStatus','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
+   if(['research.status','evolution.status','evolution.eligibility','origin.researchStatus','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','power.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.placeStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.heritage','world.culturalPracticeStatus','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.originRelativesStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.personalStatus','creation.aspectStatus','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
  } else if(req.mode==='check'){
    // The processor's validated campaign field addresses the save; it is not
    // a caller-selected check attribute, DC, modifier or rolled outcome.
