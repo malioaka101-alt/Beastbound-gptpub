@@ -159,6 +159,18 @@ for(const great of Lore.RENOWNED){
   approach:'Interpret this real companion’s gestures and check whether it chooses to participate'}),
   /willing|consent|mutual/);
  partner.needs.hunger=10;
+ partner.away=true;
+ const noPresence=E.exportGame(s);
+ A.throws(()=>act(s,'culturalPractice',{id:'crossing_mutual_signals',minutes:60,
+  approach:'Observe a mutually agreed signal with this actual companion only if it is here and willing'}),
+  /willing|consent|mutual/);
+ A.equal(E.exportGame(s),noPresence);
+ partner.away=false;
+ partner.location='forest';
+ A.throws(()=>act(s,'culturalPractice',{id:'crossing_mutual_signals',minutes:60,
+  approach:'Observe an actual travelling companion only when it is physically beside the practitioner'}),
+  /willing|consent|mutual/);
+ partner.location='crossing';
  const start=s.world.minutes;
  const r=act(s,'culturalPractice',{id:'crossing_mutual_signals',minutes:60,
   approach:'Offer a voluntary non-command exercise to my actual familiar companion, observe its independent signs and respect refusal'});
