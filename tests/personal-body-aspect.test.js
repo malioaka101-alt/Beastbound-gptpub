@@ -182,7 +182,11 @@ for(const balance of [false,true]){
  A.ok(['attack','hold','retreat'].includes(exchange.enemyPlan));
  A.equal(exchange.aspectUpkeep.spent,0,'Activation does not also bill a full extra combat minute');
  A.equal(s.world.minutes,start+1);
- A.equal(s.player.stamina,sta-2);
+ // An autonomous incoming beast strike can additionally require a real
+ // brace or impose other injury: never falsely assume only player stamina
+ // costs occur within a jointly resolved combat exchange.
+ A.ok(s.player.stamina<=sta-2);
+ A.equal(s.table.combatants.player.stamina,s.player.stamina);
  A.equal(s.player.humanEvolution.stage,0);
  A.equal(s.player.origin.phase,0);
  // If an independently committed opponent attacks, original Combat.attack
@@ -195,7 +199,8 @@ for(const balance of [false,true]){
   const r=act(s,'combat','exchange',{intent:'defend'});
   A.equal(r.aspectUpkeep.spent,1);
   A.equal(s.world.minutes,next+1);
-  A.equal(s.player.stamina,before-1);
+  A.ok(s.player.stamina<=before-1);
+  A.equal(s.table.combatants.player.stamina,s.player.stamina);
  }
 }
 {
