@@ -132,8 +132,8 @@ function create(options={}){
    ({...m,name:m.name.endsWith(' '+oldSurname)?
      m.name.slice(0,-oldSurname.length)+newSurname:m.name}));
  }
- // Preserve the known five-site seed mapping for historical starts
- // while adding the working Crossing as an occasional genuine new start.
+ // No opening scenes or seeded location hooks: the GM selects actual
+ // circumstances and creates the first scene as prose, once.
  const opening=options.gmOpening??null;
  const start=opening?GmOpening.verify(opening):null;
  if(options.startLocation!==undefined&&
