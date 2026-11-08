@@ -9,7 +9,7 @@ const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
  soul:{skill:'cultivation',attribute:'wis',focus:['self-awareness','identity-ward','resonance'],tracks:{phase1:[100,12]}},
- body:{skill:'survival',attribute:'con',focus:['muscle','tendon','recovery'],tracks:{cycle1:[150,12]}},
+ body:{skill:'survival',attribute:'con',focus:['muscle','tendon','recovery','bone','marrow'],tracks:{cycle1:[150,12],cycle2:[180,14]}},
  rift:{skill:'arcana',attribute:'int',focus:['boundaries','orientation','anchor-theory'],tracks:{sense:[50,12]}}
 };
 const permitted=(s,system)=>s.world.location==='academy'||
@@ -124,10 +124,16 @@ function currentTarget(s,system){
   case 'meridian':return p.meridian.stage===0?'foundation':p.meridian.stage===1?'awakening':null;
   case 'arcane':return !p.arcane.coreIgnited?'core':p.arcane.circles===0?'circle1':null;
   case 'soul':return p.soul.phase===0?'phase1':null;
-  case 'body':return p.body.cycles.length===0?'cycle1':null;
+  case 'body':return p.body.cycles.length===0?'cycle1':
+   p.body.cycles.length===1&&p.body.cycles[0]==='Muscle-Tendon Cycle'?'cycle2':null;
   case 'rift':return p.rift.step===0?'sense':null;
   default:return null;
  }
+}
+function methodsFor(system,target){
+ if(system==='body')return target==='cycle1'?['muscle','tendon','recovery']:
+   target==='cycle2'?['bone','marrow','recovery']:[];
+ return KEYS[system]?.focus||[];
 }
 function state(s,system){
  if(!KEYS[system])throw Error('Unsupported discipline');
@@ -283,7 +289,7 @@ function status(s){
    required:pair?.[0]??(gateAvailable?
     nextGate<=36?3:nextGate<=72?5:8:arcaneTwo?4:null),
    dc:pair?.[1]??(arcaneTwo?17:gateDC),
-   availableMethods:target?spec.focus:[],
+   availableMethods:target?methodsFor(system,target):[],
    nextEligibleDay:rec?.cooldownUntil||0,
    trainingRoutes:target||gateAvailable?['established','independent']:
     arcaneTwo?['independent']:[],
@@ -323,7 +329,9 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  const short=minutes!==undefined;
  if(short)C.int(minutes,'actual practice session minutes',15,480);
  const spec=KEYS[system];if(!spec)throw Error('Unknown discipline');
- if(!spec.focus.includes(method))throw Error('Method does not belong to the chosen discipline');
+ const chosenTarget=currentTarget(s,system);
+ if(!methodsFor(system,chosenTarget).includes(method))
+  throw Error('Practice method does not belong to the current biological or spiritual stage');
  if(!['established','independent'].includes(route))throw Error('Choose an actual supported practice route');
  if(typeof partTime!=='boolean')throw Error('Part-time practice must be explicitly true or false');
  const self=route==='independent'?independentSite(s,system,{shortSession:short}):null;
@@ -464,7 +472,23 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
    if(target==='core'){s.player.arcane.coreIgnited=true;s.player.arcane.geometry='seeded core';s.player.arcane.structuredMana=Build.arcaneProfile(0).mana;change='Mana Core ignited, no Circle yet';}
    else{s.player.arcane.circles=1;s.player.arcane.geometry=geometry.trim().slice(0,100);const c=Build.arcaneProfile(1);s.player.arcane.structuredMana=c.mana;s.player.arcane.channels=c.channels;s.player.arcane.maxComplexity=c.maxComplexity;change='First Circle constructed; '+s.player.arcane.geometry;}
   }else if(system==='soul'){s.player.soul.phase=1;const profile=Build.soulProfile(1,{will:Math.floor((s.player.attributes.wis-10)/2)});s.player.soul.reserve=profile.soulReserve;s.player.soul.maxReserve=profile.soulReserve;s.player.soul.perceptionRange=profile.perceptionRangeMetres;change='Phase I Soul Perception; first stable perception';}
-  else if(system==='body'){s.player.body.cycles.push('Muscle-Tendon Cycle');staminaGain(s,2);s.table.combatants.player.offM=Math.max(s.table.combatants.player.offM,1);s.player.attributes.str+=1;if(s.player.capabilityProfile)s.player.capabilityProfile.domains.physical.strength.current=Math.min(20,s.player.capabilityProfile.domains.physical.strength.current+1);change='Completed Cycle I Muscle-Tendon refinement; +2 stamina, Might +1, M1 natural force';}
+  else if(system==='body'){
+    U.ensurePlayer(s);
+    if(target==='cycle1'){
+     s.player.body.cycles.push('Muscle-Tendon Cycle');staminaGain(s,2);
+     s.table.combatants.player.offM=Math.max(s.table.combatants.player.offM,1);
+     s.player.attributes.str+=1;
+     if(s.player.capabilityProfile)s.player.capabilityProfile.domains.physical.strength.current=Math.min(20,s.player.capabilityProfile.domains.physical.strength.current+1);
+     change='Completed Cycle I Muscle-Tendon refinement; +2 stamina, Might +1, M1 natural force';
+    }else if(target==='cycle2'){
+     if(s.player.body.cycles.length!==1||s.player.body.cycles[0]!=='Muscle-Tendon Cycle')
+      throw Error('Bone-Marrow refining requires an authentically completed Muscle-Tendon Cycle');
+     s.player.body.cycles.push('Bone-Marrow Cycle');
+     const c=s.table.combatants.player;
+     c.toughness+=1;c.boxes[1]+=1;
+     change='Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box';
+    }
+   }
   else if(system==='rift'){s.player.rift.step=1;s.player.rift.sense={scope:'boundary weakness and spatial pressure only',requires:'Nearby anomaly or measured weak boundary',notTeleportation:true};change='Step I Rift Sense; bounded sensitivity to anomalies';}
   record.history.push({day:E.day(s),target,quality:check.degree,change});record.points=0;record.methods={};record.target=currentTarget(s,system);
   outcome='breakthrough';
