@@ -36,9 +36,11 @@ function apply(s,p){
   throw Error('An opening can only be authored once for a fresh untouched campaign');
  const oldDate=Realm.calendar(s);
  if(!oldDate.absoluteDate)throw Error('Opening requires the campaign civil calendar established first');
+ // The first sighting and the first scene share one honest recorded time;
+ // otherwise the place could appear founded after the alleged opening.
+ s.world.minutes=p.hour*60+p.minute;
  if(p.place)Places.establish(s,p.place);
  s.world.location=siteId;
- s.world.minutes=p.hour*60+p.minute;
  s.world.weather=p.weather.trim();
  s.flags.visited={[siteId]:true};
  delete s.flags.openingHook;
