@@ -119,6 +119,7 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
  }else if(originKind==='institution'){
   const i=options.institutionId?Atlas.I[options.institutionId]:
    pick(seed,'institution',Atlas.institutions.filter(x=>
+    (!options.homeRegion||x.polity===region.polity)&&
     x.polity!=='reef_cantons'&&x.polity!=='old_tracks'));
   if(!i)throw Error('Choose a genuine institution from the world atlas');
   if(options.homeRegion&&region.polity!==i.polity)
