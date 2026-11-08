@@ -37,10 +37,8 @@ function firstProof(s){
   throw Error('Anchor Marking requires authentically earned Rift Sense and its original safety limits');
  return witness;
 }
-function readings(s){
- const h=s.table?.perceptionPractice?.riftAttempts;
- return (Array.isArray(h)?h:[]).filter(x=>
-  x?.origin==='earned-rift-sense-exterior'&&x.success===true&&
+function validReading(s,x){
+ return !!(x?.origin==='earned-rift-sense-exterior'&&x.success===true&&
   ['success','strong','exceptional'].includes(x.degree)&&
   x.location==='ruins'&&x.siteId==='riftglass_vault'&&
   x.staminaSpent===2&&x.minutes===12&&
@@ -51,6 +49,10 @@ function readings(s){
   Number.isInteger(x.worldMinute)&&x.worldMinute>=0&&
   x.worldMinute<=s.world.minutes&&
   Number.isInteger(x.day)&&x.day>=1&&x.day<=E.day(s));
+}
+function readings(s){
+ const h=s.table?.perceptionPractice?.riftAttempts;
+ return (Array.isArray(h)?h:[]).filter(x=>validReading(s,x));
 }
 function reading(s){
  const matches=readings(s);
@@ -88,7 +90,14 @@ function prerequisites(s){
  if(s.player.rift.anchorProof||
     (s.player.rift.anchors||[]).some(x=>x?.id===SITE))
   throw Error('The exterior Riftglass anchor has already been established');
- const previous=reading(s);
+ const old=s.table?.riftAnchorWork;
+ // Preserve a once witnessed local reading as the anchor's original source
+ // even if later ordinary sensing or rolling journal compaction evicts its
+ // older entry. Another new observation must not erase earned work.
+ const previous=old?old.originalObservation:reading(s);
+ if(!validReading(s,previous)||
+    old&&digest(previous)!==old.readingHash)
+  throw Error('Existing anchor work has lost or altered its original observed boundary source');
  return {previous,readingHash:digest(previous),environment:environment(s)};
 }
 function earned(s){
@@ -111,8 +120,13 @@ function earned(s){
    proof.completedMinute<work.attempts.at(-1).minute+
      work.attempts.at(-1).minutes)
   throw Error('Rift Anchor Marking lacks its original earned geographic witness');
- const evidence=readings(s).find(x=>digest(x)===proof.readingHash);
- if(!evidence)throw Error('The saved anchor references a missing or altered original Rift Sense measurement');
+ // The first authentic measurement is deliberately checkpointed inside
+ // the earned work receipt, because the ordinary perception journal keeps
+ // just the latest 50 observations. Expiring a display buffer never erases
+ // a real established spatial anchor.
+ const evidence=work.originalObservation;
+ if(!validReading(s,evidence)||digest(evidence)!==proof.readingHash)
+  throw Error('The saved anchor references a missing or altered original Rift Sense measurement');
  const axes=initialAxes();let integrated=false;
  for(const x of work.attempts){
   if(!x||!FOCI.includes(x.focus)||!Number.isInteger(x.minute)||
@@ -181,7 +195,7 @@ function mark(s,params={}){
    AXES.some(k=>!Number.isInteger(old.axes[k])||old.axes[k]<0||old.axes[k]>2)))
   throw Error('Unreconciled earlier spatial-reference history cannot be silently rewritten');
  const work=old||{axes:initialAxes(),integrated:false,attempts:[],
-  readingHash,completed:false};
+  readingHash,originalObservation:structuredClone(previous),completed:false};
  const cost=2+Math.ceil(minutes/120);
  if(!Number.isInteger(s.player.stamina)||s.player.stamina<cost||
    s.table?.combatants?.player&&s.table.combatants.player.stamina<cost)
