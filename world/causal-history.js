@@ -102,8 +102,8 @@ function ensure(s){
  validate(w.causalHistory);
  return w.causalHistory;
 }
-function publicEvent(e){
- return {id:e.id,era:e.era,period:e.period,account:e.account,causes:e.causes,
+function publicEvent(e,ledger){
+ return {id:e.id,era:e.era,period:e.period,account:e.account,causes:e.causes.filter(c=>ledger.events[c]?.visibility==='public'),
   interpretations:e.interpretations.filter(x=>x.visibility==='public').map(x=>({id:x.id,speaker:x.speaker,claim:x.claim,basis:x.basis})),
   effects:e.effects.filter(x=>x.visibility==='public').map(x=>({id:x.id,targetType:x.targetType,targetId:x.targetId,dimension:x.dimension,change:x.change,continuity:x.continuity,precededBy:x.precededBy}))};
 }
@@ -112,7 +112,7 @@ function status(s,p={}){
  const h=inspect(s);validate(h);
  if(p.eventId!==undefined){
   const e=h.events[p.eventId];
-  return e?.visibility==='public'?{known:true,event:publicEvent(e)}:{known:false};
+  return e?.visibility==='public'?{known:true,event:publicEvent(e,ledger)}:{known:false};
  }
  if(p.targetType!==undefined||p.targetId!==undefined){
   if(!entity(p.targetType,p.targetId))throw Error('An actual existing atlas subject is required for historical context');
@@ -121,7 +121,7 @@ function status(s,p={}){
     .map(x=>({eventId:e.id,era:e.era,dimension:x.dimension,change:x.change,continuity:x.continuity,precededBy:x.precededBy})));
   return {targetType:p.targetType,targetId:p.targetId,name:entity(p.targetType,p.targetId),effects};
  }
- return {events:Object.values(h.events).filter(e=>e.visibility==='public').map(publicEvent)};
+ return {events:Object.values(h.events).filter(e=>e.visibility==='public').map(e=>publicEvent(e,h))};
 }
 function recordEvent(s,p={}){
  keys(p,['eventId','era','period','account','basis'],['year','scopeType','scopeId','causes','visibility']);
@@ -138,9 +138,12 @@ function recordEvent(s,p={}){
  const year=p.year??null;
  if(year!==null&&causes.some(c=>h.events[c].year!==null&&h.events[c].year>year))
   throw Error('An established historical cause cannot happen later than its effect');
- const current=require('./simulation').calendar(s);
- if(year!==null&&current.absoluteDate&&year>current.date?.year)
-  throw Error('A historical past event cannot be invented in the campaign future');
+ const anchor=s.table?.realm?.calendarAnchor;
+ if(year!==null&&anchor){
+  const worldYear=require('../rules/world').addDate(anchor.date,
+   Math.floor(s.world.minutes/1440)-anchor.atCompletedDay).year;
+  if(year>worldYear)throw Error('A historical past event cannot be invented in the campaign future');
+ }
  const base={source:SOURCE,id:p.eventId,era:p.era.trim(),period:p.period.trim(),
   account:p.account.trim(),basis:p.basis.trim(),year,scopeType:p.scopeType??null,
   scopeId:p.scopeId??null,causes:[...causes],visibility:p.visibility||'public',
