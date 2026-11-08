@@ -4,6 +4,7 @@ const E=require('../engine.js'), Unified=require('./unified'), Encounter=require
 const Realm=require('../world/simulation');
 const Character=require('./character');
 const Disciplines=require('./disciplines');
+const PowerOverview=require('./power-overview');
 const Spark=require('./arcane-spark');
 const ArcaneWard=require('./arcane-ward');
 const DualArcane=require('./arcane-dual-channel');
@@ -168,6 +169,7 @@ function act(s,{system,operation,params={}}={}){
   case 'character.status':return Character.publicStatus(s);
   case 'character.assessPotential':return Character.assess(s,params);
   case 'discipline.status':return Disciplines.status(s);
+  case 'power.status':return PowerOverview.read(s);
   case 'arcane.sparkStudy':return Spark.learn(s,params);
   case 'arcane.sparkStatus':return Spark.status(s,params);
   case 'arcane.wardStudy':return ArcaneWard.study(s,params);

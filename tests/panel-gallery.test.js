@@ -1,17 +1,18 @@
 'use strict';
 const assert=require('node:assert/strict');
 const E=require('../engine.js'),P=require('../panels.js');
-const source=require('../saves/aerin_marsh.json');
-const clean=E.importGame(source);
+// Synthetic legacy-format character: no player campaign checkpoint dependency.
+const clean=E.newGame({seed:47731,name:'Fixture Tester',background:'fieldworker',path:'meridian',randomStart:true});
+clean.flags.openingHook='A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet.';
 const is34=p=>{for(const line of p.split('\n'))assert.equal(Array.from(line).length,34,JSON.stringify(line));};
 // Exact-width visual regression: match the balanced section framing
 // in the user's gallery, including the small trailing dash.
 assert.equal(P.section('GUILD NOTICE','unsigned'),'╟─ GUILD NOTICE ────── unsigned ─╢');
 assert.equal(P.section('MIRAGE FOX KIT','settling'),'╟─ MIRAGE FOX KIT ──── settling ─╢');
 assert.equal(P.section('NOW'),'╟─ NOW ──────────────────────────╢');
-is34(['╔═ AERIN · DAY 1 ════════════════╗',P.section('EVOLUTIONARY BRANCH','unconfirmed'),'╚════════════════════════════════╝'].join('\n'));
+is34(['╔═ FIXTURE · DAY 1 ══════════════╗',P.section('EVOLUTIONARY BRANCH','unconfirmed'),'╚════════════════════════════════╝'].join('\n'));
 const core=P.core(clean);
-is34(core);assert.match(core,/AERIN · DAY 1/);assert.match(core,/STA  ██████████/);assert.match(core,/Morrowfen Crossing/);
+is34(core);assert.match(core,/FIXTURE · DAY 1/);assert.match(core,/STA  ██████████/);assert.match(core,/Morrowfen Crossing/);
 assert.match(core,/Damaged reed-bank notice/);assert.doesNotMatch(core,/Sorrel|JORY|WREN/);
 assert.equal(core.split('\n').filter(x=>x.includes('╟─ NOW')).length,1);
 for(const name of ['menu','status','character','tamer','quests','bag','people','world','journal','research'])is34(P.full(clean,name));

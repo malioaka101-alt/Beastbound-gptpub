@@ -5,8 +5,8 @@ const E=require('../engine.js'),P=require('../panels.js'),R=require('../rules'),
 const Scene=require('./scene-witness-fixture');
 let assertions=0;const eq=(a,b)=>{assert.deepEqual(a,b);assertions++;},yes=x=>{assert(x);assertions++;};
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'bb-rules-'));
-const save=path.join(temp,'aerin.json');
-const fresh=()=>{const s=E.importGame(fs.readFileSync(path.join(__dirname,'..','saves','aerin_marsh.json'),'utf8'));fs.writeFileSync(save,E.exportGame(s)+'\n');return s;};
+const save=path.join(temp,'translation-fixture.json');
+const fresh=()=>{const s=E.newGame({seed:924317,name:'Translation Fixture',background:'fieldworker',path:'meridian',randomStart:true});fs.writeFileSync(save,E.exportGame(s)+'\n');return s;};
 const read=()=>E.importGame(fs.readFileSync(save,'utf8'));
 const act=(id,system,operation,params={})=>Turn.execute(save,{id,mode:'rule',system,operation,params});
 try{
@@ -50,8 +50,8 @@ try{
  // Casting one roll, DC and Defense, never fabricate damage/wound without full §01b.
  const mage=E.newGame({seed:987});mage.player.mana=100;const spell=R.core.castAttack(mage,{modifier:12,complexity:8,manaCost:12,defense:14,specialised:true});
  eq(spell.castingDC,17);yes(spell.manaSpent>=6&&spell.manaSpent<=12);yes(!spell.hit||spell.damagePending===true);
- // Real private-turn wiring. No Aerin progress from a read-only call.
- const initial=read();eq(initial.player.name,'Aerin Marsh');const startHash=Turn.hash(fs.readFileSync(save));
+ // Real private-turn wiring. No external campaign progress from a read-only call.
+ const initial=read();eq(initial.player.name,'Translation Fixture');const startHash=Turn.hash(fs.readFileSync(save));
  assert.throws(()=>act('port_read_001','bond','consent',{beastId:'missing'}));assertions++;eq(Turn.hash(fs.readFileSync(save)),startHash);
  const sourcePlan=read();
  sourcePlan.table ||= {};sourcePlan.table.researchPlans ||= {};

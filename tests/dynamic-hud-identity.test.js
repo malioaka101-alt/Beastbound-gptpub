@@ -1,6 +1,6 @@
 'use strict';
 // The small in-chat HUD must derive from current save, never a manually
-// duplicated old Aerin/Ivar dashboard or invented civil/relative facts.
+// duplicated old individual-campaign dashboard or invented civil/relative facts.
 const A=require('node:assert/strict'),FS=require('node:fs'),
  OS=require('node:os'),Path=require('node:path'),
  E=require('../engine'),P=require('../panels'),
@@ -8,9 +8,14 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  Turn=require('../scripts/chat-turn'),
  World=require('../rules/world'),Realm=require('../world/simulation');
 {
- const legacy=E.importGame(require('../saves/aerin_marsh.json'));
+ const legacy=E.newGame({seed:88373,name:'Legacy Example',age:36,background:'fieldworker',path:'meridian',randomStart:true});
+ legacy.world.minutes=485;
+ legacy.player.family={household:'single guardian',siblings:2,ties:'estranged',homeTrade:'guild clerks'};
+ legacy.table={publicFieldNotices:{notices:{
+  one:{seenAtMinute:485},two:{seenAtMinute:485}
+ }}};
  const hud=P.hudData(legacy),identity=P.characterData(legacy);
- A.equal(hud.name,'Aerin Marsh');
+ A.equal(hud.name,'Legacy Example');
  A.equal(hud.identity.age,36);
  A.equal(hud.identity.background,'fieldworker');
  A.equal(hud.date.known,false);
@@ -29,7 +34,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  A.equal(identity.family.homeTrade,'guild clerks');
  A.equal(identity.family.ties,'estranged');
  A.equal(identity.family.members,undefined,
-  'Do not invent named relatives for the old trial campaign');
+  'Do not invent named relatives for the unanchored legacy fixture');
  A.equal(identity.knownHistory,undefined);
  A.match(P.full(legacy,'character'),/FAMILY & ROOTS/);
  A.match(P.full(legacy,'character'),/Unrecorded in this older save/);

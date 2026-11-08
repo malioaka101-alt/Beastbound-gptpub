@@ -88,7 +88,7 @@ assert.throws(()=>S.anchorCalendar(anchored,{date:{year:1147,month:9,day:3},sour
 // from an actual player action commit exactly once across save/reload.
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'bb-realm-')),file=path.join(dir,'sandbox.json');
 try{
- const ar=E.importGame(fs.readFileSync(path.join(__dirname,'../saves/aerin_marsh.json'),'utf8'));
+ const ar=E.newGame({seed:771197,name:'Realm Fixture',background:'fieldworker',path:'meridian'});
  const original=E.exportGame(ar);fs.writeFileSync(file,original+'\n');
  const beforeFile=fs.readFileSync(file,'utf8');
  const query=Turn.execute(file,{id:'realm_query_001',mode:'rule',system:'world',operation:'realmStatus'});
@@ -122,7 +122,7 @@ try{
  eq(again.duplicate,true);eq(fs.readFileSync(file,'utf8'),checkpoint);
  const wrong=Turn.execute(file,{...last,params:{days:90}});
  eq(wrong.applied,false);eq(fs.readFileSync(file,'utf8'),checkpoint);
- eq(E.exportGame(E.importGame(fs.readFileSync(path.join(__dirname,'../saves/aerin_marsh.json'),'utf8'))),original);
+ eq(E.exportGame(E.newGame({seed:771197,name:'Realm Fixture',background:'fieldworker',path:'meridian'})),original);
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
 // Long-run stress: wars, ceasefires, regular mandates, trade, institution
 // rises/falls and habitat indicators must be stable, bounded and reproducible.
