@@ -207,6 +207,13 @@ function create(options={}){
  Character.ensure(state);
  Realm.ensure(state);
  const origin=Origins.install(state,plan);
+ // A lived adult biography can establish a genuine ordinary profession,
+ // changed livelihood or self-employment before the first playable moment.
+ // It never assigns a fixed class, NPC agreement, legal office or powers.
+ state.player.history.earlyWork=lived.workHistory;
+ state.player.history.ownOccupation||=lived.work;
+ state.player.history.lifeCircumstance=lived.circumstance;
+ state.player.history.priorWorkYears=lived.priorWorkYears;
  // GM-created opening happens only after identity and founding records exist.
  const date=startingDate(n);
  // Civil time and the one world clock remain the only in-world calendar.
