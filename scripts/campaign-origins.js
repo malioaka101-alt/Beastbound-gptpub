@@ -62,17 +62,29 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
  if(!Engine.LOCATIONS[startLocation])throw Error('Opening needs a real executable scene location');
  const mode=options.mode??'random';
  if(!['random','guided'].includes(mode))throw Error('Start mode must be random or guided');
- const originKind=kind(seed,options.originKind,mode);
+ const implied=options.originKind??(options.houseId?
+   (RENOWNED_HOUSES.has(options.houseId)?'renowned-family':'historic-family'):
+   options.institutionId?'institution':options.groupName?'new-organisation':undefined);
+ let originKind=kind(seed,implied,mode);
  const available=Atlas.regions.filter(r=>r.polity!=='reef_cantons'&&r.polity!=='old_tracks');
  let region=options.homeRegion?
   Atlas.R[options.homeRegion]:pick(seed,'home-region',available);
  if(!region)throw Error('The chosen homeland must exist in the established world atlas');
+ if(options.homeRegion&&implied===undefined){
+  const houses=Houses.houses.filter(h=>h.polity===region.polity&&
+   !NONHUMAN_HOUSES.has(h.id));
+  const renowned=houses.some(h=>RENOWNED_HOUSES.has(h.id));
+  if((originKind==='renowned-family'&&!renowned)||
+    (originKind==='historic-family'&&!houses.length))
+   originKind='new-family';
+ }
  const f=structuredClone(identity.family),history=structuredClone(identity.history);
  let name=identity.name,connection=null,createdGroup=null;
  if(originKind==='historic-family'||originKind==='renowned-family'){
   if(options.institutionId||options.groupName)
    throw Error('House lineage and institutional/group origins are distinct starting options');
   const pool=Houses.houses.filter(h=>!NONHUMAN_HOUSES.has(h.id)&&
+    (!options.homeRegion||h.polity===region.polity)&&
     (originKind!=='renowned-family'||RENOWNED_HOUSES.has(h.id)));
   const h=options.houseId?Houses.byId[options.houseId]:
     pick(seed,'historical-house',pool);
