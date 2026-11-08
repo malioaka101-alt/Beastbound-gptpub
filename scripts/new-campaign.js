@@ -8,9 +8,72 @@ const Unified=require('../rules/unified');
 const Realm=require('../world/simulation');
 const Character=require('../rules/character');
 
-const SURNAME_ALTERNATES=['Ash','Briar','Dawn','Fen','Graves','Hollow','Reed','Stone','Thorne','Vale','Wick'];
+// Seeded cultural-name pools: identity is independent of the opening location.
+// Keep personal/family names plausible rather than automatically naming a PC
+// after the nearest biome or repeating the short legacy Aerin/Marsh pools.
+const GIVEN_NAMES=['Aldren','Bastian','Bennet','Caelan','Cedric','Cyran','Darric','Davin','Eamon','Edrin','Emric','Farren','Galen','Gerrit','Hadren','Hollis','Ilan','Iver','Joren','Joric','Kellan','Kerrin','Leoric','Lucan','Maddoc','Merren','Nolan','Oren','Perrin','Roric','Savin','Sethren','Tavren','Tomas','Varen','Weylan','Yoren'];
+const FAMILY_NAMES=['Aldwyne','Beller','Caddis','Carrow','Dalmere','Dennet','Ellery','Farrow','Fellin','Garrick','Gell','Harker','Hollan','Kestrel','Larkin','Lennox','Maddren','Merrit','Norrin','Orwell','Pell','Rennet','Sayer','Selwick','Tollen','Varrick','Vell','Warran','Weller','Wyst'];
+const RELATIVE_GIVEN=['Adela','Alys','Beren','Corvin','Della','Emmen','Etta','Fenna','Garren','Hedra','Hestin','Iona','Jerrit','Kessa','Lorra','Merren','Nessa','Orlan','Ressa','Selda','Tolan','Vera'];
+const BACKGROUND_LIFE={
+ apprentice:'Learned by assisting working hands and keeping track of tasks that others rarely noticed.',
+ fieldworker:'Spent seasons travelling practical routes and noting where soil, water and animals changed the work.',
+ scholar:'Spent years reading, copying and comparing records; much of the world remains untested outside books.',
+ healer:'Worked among ordinary injuries and recovery, learning that patients rarely fit a tidy lesson.'
+};
+const TRADE_LIFE={
+ ferrymen:'Boats and their timetables shaped the household.',
+ farmers:'Planting, harvest and weather shaped the household.',
+ 'guild clerks':'Ledgers, public requests and working hours shaped the household.',
+ 'market traders':'Prices, arrivals and customers shaped the household.',
+ 'beast handlers':'The feeding and care of working beasts shaped the household.',
+ craftspeople:'Workshop orders, tools and repairs shaped the household.'
+};
+function generatedIdentity(seed,base){
+ // This is identity generation only. It does not consume game RNG or
+ // make hidden predictions about relatives, resources or future consent.
+ const u=Number(seed)>>>0;
+ const h=(n)=>{let x=(u^(n*0x9e3779b9))>>>0;
+  x=Math.imul(x^(x>>>16),0x7feb352d);
+  x=Math.imul(x^(x>>>15),0x846ca68b);
+  return (x^(x>>>16))>>>0;};
+ const surname=pick(FAMILY_NAMES,h(2)),given=pick(GIVEN_NAMES,h(1));
+ const family=structuredClone(base.family);
+ const members=[],n=family.household==='two guardians'?2:
+  family.household==='independent household'?0:1;
+ for(let i=0;i<n;i++)members.push({
+  relation:i===0?'guardian':'second guardian',
+  name:pick(RELATIVE_GIVEN,h(10+i*7))+' '+surname
+ });
+ if(family.household==='extended family')members.push({
+  relation:'older relative',name:pick(RELATIVE_GIVEN,h(32))+' '+surname
+ });
+ for(let i=0;i<family.siblings;i++){
+  let person=pick(RELATIVE_GIVEN,h(50+i*11));
+  if(members.some(x=>x.name===person+' '+surname))
+   person=pick(RELATIVE_GIVEN,h(55+i*13));
+  members.push({relation:'sibling',name:person+' '+surname});
+ }
+ // Do not silently assign two different known relatives the same full name.
+ const seen=new Set();
+ for(const member of members){
+  let i=0;
+  while(seen.has(member.name)&&i<RELATIVE_GIVEN.length){
+   const next=pick(RELATIVE_GIVEN,(h(70+i*19)+i)%RELATIVE_GIVEN.length);
+   member.name=next+' '+surname;i++;
+  }
+  if(seen.has(member.name))throw Error('Unable to make distinct relative names');
+  seen.add(member.name);
+ }
+ family.members=members;
+ const history={
+  upbringing:TRADE_LIFE[family.homeTrade],
+  earlyWork:BACKGROUND_LIFE[base.background],
+  familySituation:family.household+'; '+family.ties,
+  note:'These are the character’s known beginnings, not private motives, binding occupations, finances or future relationships.'
+ };
+ return {name:given+' '+surname,family,history};
+}
 const PARTNER_NAMES=['Mote','Tallow','Pip','Flicker','Cinder','Nacre','Lilt','Thimble'];
-const MALE_GIVEN=['Bran','Kael','Orin','Tarin','Fen','Darian','Soren','Corren','Ewan','Rowan','Ivar','Merric'];
 const OPENINGS=[
  {location:'forest',hour:7,minute:20,weather:'cool, with silver pollen',focus:'The copperwood waystone',
   scene:'A copper-bark waystone hums beside the trail. A pathwarden has chained a second, smaller marker to it, though the chain does not touch the earth. A winged shimmer passes above the roots, out of reach.',
@@ -41,15 +104,13 @@ function create({seed,slug,gender='male'}={}){
  if(!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(slug||''))throw Error('Valid unique campaign slug required');
  if(gender!=='male')throw Error('This starting generator is currently configured for the requested male lead');
  const base=E.randomCharacter(n);
- const given=pick(MALE_GIVEN,((n>>>8)^n)>>>0);
- let surname=base.name.split(' ').slice(1).join(' ');
- // The new default must not accidentally appear to be Aerin's family sequel.
- if(surname==='Marsh')surname=pick(SURNAME_ALTERNATES,((n>>>13)^n)>>>0);
- const name=given+' '+surname;
+ const identity=generatedIdentity(n,base);
+ const name=identity.name;
  // Use the actual original engine to derive character sheet, background and path.
  const state=E.newGame({...base,seed:n,name,randomStart:false,beastName:pick(PARTNER_NAMES,((n>>>9)^(n>>>18))>>>0)});
  state.player.gender='male';
- state.player.family=base.family;
+ state.player.family=identity.family;
+ state.player.history=identity.history;
  const start=pick(OPENINGS,((n>>>16)^(n>>>3))>>>0);
  state.world.location=start.location;
  state.world.minutes=start.hour*60+start.minute;
@@ -62,7 +123,7 @@ function create({seed,slug,gender='male'}={}){
  state.chatRuntime={revision:0,applied:{},focus:[start.focus],scene:start.scene};
  state.campaign={slug,version:1,startSeed:n,characterSource:'engine.randomCharacter + engine.newGame',
   rolledBackground:base.background,rolledPath:base.path,startingLocation:start.location,
-  identity:'independent male protagonist',oldCampaignImported:false};
+  identity:'independent male protagonist',identityGeneration:'seeded culturally plausible personal-and-family names, independent of destination',oldCampaignImported:false};
  Unified.ensurePlayer(state);
  Character.ensure(state);
  Realm.ensure(state);
@@ -72,7 +133,7 @@ function create({seed,slug,gender='male'}={}){
  const dateView=Realm.anchorCalendar(state,{date,source:'Public civil almanac at the opening settlement, established at campaign creation'});
  state.campaign.startDate=date;
  state.log.push({day:1,time:E.clock(state),type:'world',text:`The public civil almanac dates the morning ${dateView.absoluteDate}.`,details:null});
- return {state,summary:{seed:n,slug,location:start.location,name,age:state.player.age,background:state.player.background,path:state.player.path,clock:E.clock(state),date:dateView.absoluteDate,focus:start.focus,scene:start.scene}};
+ return {state,summary:{seed:n,slug,location:start.location,name,age:state.player.age,background:state.player.background,path:state.player.path,family:identity.family,history:identity.history,clock:E.clock(state),date:dateView.absoluteDate,focus:start.focus,scene:start.scene}};
 }
 function secureSeed(){return crypto.randomBytes(4).readUInt32BE(0)||1;}
 if(require.main===module){

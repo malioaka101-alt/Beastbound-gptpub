@@ -63,6 +63,7 @@ jobs:
             tests/python-reference.test.js
             tests/unified-chat.test.js
             tests/panel-gallery.test.js
+            tests/dynamic-hud-identity.test.js
             tests/living-world.test.js
             tests/agent-initiatives.test.js
             tests/knowledge-diffusion.test.js

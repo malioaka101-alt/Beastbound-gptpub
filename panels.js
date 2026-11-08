@@ -93,6 +93,76 @@ const close = lines => {
  if(lines.some(l=>cp(l).length!==WIDTH))throw Error('Panel width failure');
  return lines.join('\n');
 };
+// One source-of-truth view model for the *native in-chat* everyday HUD.
+// The fallback 34-column box is not the presentation API. Each real turn can
+// return these small fields once; the GM does not rebuild CSS or reread files.
+// Only active-save player-known facts are allowed; no hidden NPC intentions.
+function characterData(state){
+ const s=E.importGame(state),p=s.player,f=p.family||null,h=p.history||null;
+ return {name:p.name,age:p.age,background:p.background,path:p.path,
+  ...(p.gender?{gender:p.gender}:{}),
+  ...(f?{family:{household:f.household,siblings:f.siblings,
+   ties:f.ties,homeTrade:f.homeTrade,
+   ...(Array.isArray(f.members)?{members:f.members.map(x=>({
+    relation:x.relation,name:x.name
+   }))}:{})}}:{}),
+  ...(h?{knownHistory:{upbringing:h.upbringing,
+   earlyWork:h.earlyWork,familySituation:h.familySituation}}:{})
+ };
+}
+function hudData(state){
+ const s=E.importGame(state),p=s.player,calendar=Realm.calendar(s),
+  loc=location(s),hour=Number(time(s).slice(0,2)),
+  resources=[{key:'stamina',label:'Stamina',current:p.stamina,max:p.maxStamina}];
+ if(p.path==='meridian'||p.meridian?.stage>0||p.qi<p.maxQi)
+  if(Number.isFinite(p.maxQi)&&p.maxQi>0)
+   resources.push({key:'qi',label:'Qi',current:p.qi,max:p.maxQi});
+ if(p.path==='arcane'||p.arcane?.circles>0)
+  if(Number.isFinite(p.maxMana)&&p.maxMana>0)
+   resources.push({key:'mana',label:'Mana',current:p.mana,max:p.maxMana});
+ if(Number.isFinite(p.soul?.reserveMax)&&p.soul.reserveMax>0)
+  resources.push({key:'soul',label:'Soul',current:p.soul.reserve,max:p.soul.reserveMax});
+ const woundState=wound(s),wounds=woundState?.wounds||[];
+ if(s.battle||s.encounter||wounds.some(x=>x>0)||
+    (!woundState&&p.health<p.maxHealth))
+  resources.unshift({key:'health',label:'Health',current:p.health,max:p.maxHealth});
+ const conditions=[...(p.conditions||[]).map(x=>typeof x==='string'?x:x.type||'Condition')];
+ if(woundState?.status&&woundState.status!=='ok')
+  conditions.push(woundState.status);
+ const partners=(p.partnerIds||[]).filter(id=>s.beasts?.[id])
+  .slice(0,2).map(id=>({
+   name:s.beasts[id].name,
+   species:E.SPECIES[s.beasts[id].species]?.name||s.beasts[id].species,
+   ...(Number.isFinite(s.beasts[id].energy)&&Number.isFinite(s.beasts[id].maxEnergy)?
+    {energy:s.beasts[id].energy,maxEnergy:s.beasts[id].maxEnergy}:{})
+  }));
+ let focus=now(s).slice(0,2);
+ let context=null;
+ if(s.battle)context={kind:'combat',title:'In conflict',detail:'The active encounter has not ended'};
+ else if(s.encounter&&s.beasts?.[s.encounter.beastId]){
+  const b=s.beasts[s.encounter.beastId];
+  context={kind:'beast',title:b.name,
+   detail:s.encounter.observed&&s.encounter.observation?
+    s.encounter.observation:'Nearby; its intentions are not established'};
+ }else if(s.world.location==='crossing'){
+  const known=Object.values(s.table?.publicFieldNotices?.notices||{})
+   .filter(n=>n&&n.seenAtMinute<=s.world.minutes);
+  if(known.length)context={kind:'known-public-notices',
+   title:'Guild board',detail:known.length+' postings personally read'};
+ }
+ if(!focus.length&&context)focus=[context.title];
+ return {name:p.name,identity:{age:p.age,background:p.background,path:p.path,
+    ...(p.meridian?.discipline&&p.path==='meridian'?
+       {discipline:p.meridian.discipline}:{})},
+  date:{absolute:calendar.absoluteDate||null,
+    label:calendar.absoluteDate||'Civil date unrecorded',
+    known:!!calendar.absoluteDate,relativeDay:calendar.day,
+    ...(calendar.weekday?{weekday:calendar.weekday}:{})},
+  time:time(s),daypart:daypart(hour),location:loc,
+  weather:s.world.weather||'Unknown',coins:p.coins,
+  currency:E.money(p.coins),resources,conditions,partners,
+  focus,context};
+}
 function core(state,extra=[]){
  const s=E.importGame(state),p=s.player;
  const lines=[top(p.name.split(/\s+/)[0].toUpperCase()+' · '+date(s)),row(`${time(s)} · ${daypart(Number(time(s).slice(0,2)))} · ${weather(s)}`),row(pair(location(s),E.money(p.coins)))];
@@ -153,6 +223,22 @@ function full(state,name){
   const recent=(s.chatRuntime?.journal||[]).slice(-3).map(x=>'◆ '+x.text);sec('LATEST CHANGES',recent);
  }else if(key==='character'){
   lines.push(row(p.name.toUpperCase()),row(`${p.age} · ${p.background}`),row('Path: '+p.path));
+  const profile=characterData(s);
+  if(!Realm.calendar(s).absoluteDate)sec('CIVIL DATE',['Unrecorded in this older save']);
+  if(profile.family){
+   sec('FAMILY & ROOTS',[
+    'Household: '+profile.family.household,
+    'Siblings: '+profile.family.siblings,
+    'Ties: '+profile.family.ties,
+    'Home trade: '+profile.family.homeTrade
+   ]);
+   if(profile.family.members?.length)sec('KNOWN RELATIVES',
+    profile.family.members.map(x=>'◆ '+x.name+' · '+x.relation));
+  }
+  if(profile.knownHistory)sec('KNOWN HISTORY',[
+   ...wrapText(profile.knownHistory.upbringing),
+   ...wrapText(profile.knownHistory.earlyWork)
+  ]);
   const attrs=Object.entries(p.attributes||{});
   const pairs=[];for(let i=0;i<attrs.length;i+=2){const a=attrs[i],b=attrs[i+1];pairs.push(`${a[0].toUpperCase()} ${a[1]}`+(b?` │ ${b[0].toUpperCase()} ${b[1]}`:''));}
   sec('ATTRIBUTES',pairs);
@@ -207,4 +293,4 @@ function full(state,name){
  }
  return close(lines);
 }
-module.exports={WIDTH,core,full,clip:limit,bar,pair,section,row,top};
+module.exports={WIDTH,core,full,hudData,characterData,clip:limit,bar,pair,section,row,top};
