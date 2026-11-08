@@ -7,6 +7,7 @@ const E=require('../engine');
 const Unified=require('../rules/unified');
 const Realm=require('../world/simulation');
 const Character=require('../rules/character');
+const Origins=require('./campaign-origins');
 
 // Seeded cultural-name pools: identity is independent of the opening location.
 // Keep personal/family names plausible rather than automatically naming a PC
@@ -75,6 +76,9 @@ function generatedIdentity(seed,base){
 }
 const PARTNER_NAMES=['Mote','Tallow','Pip','Flicker','Cinder','Nacre','Lilt','Thimble'];
 const OPENINGS=[
+ {location:'crossing',hour:8,minute:15,weather:'cool canal breeze',focus:'A working river morning',
+  scene:'On the Morrowfen boardwalk, ferry crews measure the water against old public marks. A ledger clerk speaks with a porter while traders arrange their stalls; nobody has yet asked you for anything.',
+  hook:'A fresh public tide reading leaves local workers comparing the river against last season’s marks.'},
  {location:'forest',hour:7,minute:20,weather:'cool, with silver pollen',focus:'The copperwood waystone',
   scene:'A copper-bark waystone hums beside the trail. A pathwarden has chained a second, smaller marker to it, though the chain does not touch the earth. A winged shimmer passes above the roots, out of reach.',
   hook:'The waystone is floating a finger-width above its foundation. A pathwarden asks for witnesses, not guesses.'},
@@ -99,19 +103,66 @@ function startingDate(seed){
  if(!n)throw Error('A nonzero unsigned seed is required');
  return {year:1140+((n>>>6)%31),month:1+((n>>>11)%12),day:1+((n>>>17)%30)};
 }
-function create({seed,slug,gender='male'}={}){
- const n=Number(seed)>>>0;if(!n)throw Error('A nonzero unsigned seed is required');
- if(!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(slug||''))throw Error('Valid unique campaign slug required');
- if(gender!=='male')throw Error('This starting generator is currently configured for the requested male lead');
+function create(options={}){
+ if(!options||typeof options!=='object'||Array.isArray(options))
+  throw Error('Campaign creation expects one options object');
+ const {seed,slug}=options,n=Number(seed)>>>0;
+ if(!n)throw Error('A nonzero unsigned seed is required');
+ if(!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(slug||''))
+  throw Error('Valid unique campaign slug required');
+ const mode=options.mode??'random';
+ if(!['random','guided'].includes(mode))
+  throw Error('Campaign generation must be random or guided');
  const base=E.randomCharacter(n);
- const identity=generatedIdentity(n,base);
- const name=identity.name;
- // Use the actual original engine to derive character sheet, background and path.
- const state=E.newGame({...base,seed:n,name,randomStart:false,beastName:pick(PARTNER_NAMES,((n>>>9)^(n>>>18))>>>0)});
- state.player.gender='male';
- state.player.family=identity.family;
- state.player.history=identity.history;
- const start=pick(OPENINGS,((n>>>16)^(n>>>3))>>>0);
+ const mechanicalBackground=options.background===undefined?
+  (mode==='guided'?'apprentice':base.background):
+  String(options.background).trim().toLowerCase();
+ if(!/^[a-z][a-z -]{1,59}$/.test(mechanicalBackground))
+  throw Error('Background must be a plausible, clearly named past occupation');
+ const path=options.path===undefined?
+  (mode==='guided'?'undecided':base.path):
+  String(options.path).trim().toLowerCase();
+ if(!['undecided','meridian','arcane','origin','partner',
+   'soul','body','rift','specialist','independent'].includes(path))
+  throw Error('Starting path is an interest or supported preparation, not an invented stage');
+ base.background=mechanicalBackground;base.path=path;
+ const age=options.age===undefined?base.age:options.age;
+ if(!Number.isInteger(age)||age<13||age>110)
+  throw Error('Choose a plausible age between 13 and 110 for the current human engine');
+ const gender=options.gender===undefined?
+  (mode==='guided'?'unspecified':
+   pick(['male','female','nonbinary'],Origins.number(n,'gender'))):
+  String(options.gender).trim().toLowerCase();
+ if(!['male','female','nonbinary','unspecified','other'].includes(gender))
+  throw Error('Unsupported gender descriptor; use a simple starting identity and describe more naturally in play');
+ const originalIdentity=generatedIdentity(n,base);
+ const chosenOpening=options.startLocation?
+  OPENINGS.find(o=>o.location===options.startLocation):
+  pick(OPENINGS,((n>>>16)^(n>>>3))>>>0);
+ if(!chosenOpening)throw Error('Start location must be one of the currently executable world sites');
+ const plan=Origins.prepare(n,base,originalIdentity,{...options,slug,mode},chosenOpening.location);
+ const alternate={female:['Adela','Alys','Cerys','Della','Elen','Fenna','Iona','Kessa','Liora','Mira','Nessa','Rhea','Selda','Tavira','Vera','Ysolde'],
+  nonbinary:['Aven','Cairn','Eris','Hollis','Ilan','Kerrin','Lark','Maren','Neris','Oren','Perrin','Sable','Tarin','Vale','Wren','Yoren']};
+ let name=plan.name;
+ if(options.name!==undefined){
+  if(typeof options.name!=='string'||!/^[\p{L}\p{M}][\p{L}\p{M}' .-]{2,39}$/u.test(options.name.trim()))
+   throw Error('A character name must be a plausible name within the engine’s 40-character storage limit');
+  name=options.name.trim();
+ }else if(alternate[gender]){
+  const given=pick(alternate[gender],Origins.number(n,'chosen-given-name'));
+  name=given+' '+plan.name.trim().split(/\s+/).at(-1);
+ }
+ if(name.length>40)throw Error('Generated name exceeds the original character storage limit');
+ const state=E.newGame({...base,seed:n,name,age,randomStart:false,
+  beastName:pick(PARTNER_NAMES,((n>>>9)^(n>>>18))>>>0)});
+ state.player.gender=gender;
+ if(options.pronouns!==undefined){
+  if(typeof options.pronouns!=='string'||options.pronouns.trim().length<2||
+    options.pronouns.trim().length>40)
+   throw Error('Pronoun preference must be concise');
+  state.player.pronouns=options.pronouns.trim();
+ }
+ const start=chosenOpening;
  state.world.location=start.location;
  state.world.minutes=start.hour*60+start.minute;
  state.world.weather=start.weather;
@@ -121,26 +172,38 @@ function create({seed,slug,gender='male'}={}){
  state.log.push({day:1,time:E.clock(state),type:'story',text:start.scene,details:null});
  state.log.push({day:1,time:E.clock(state),type:'world',text:start.hook,details:null});
  state.chatRuntime={revision:0,applied:{},focus:[start.focus],scene:start.scene};
- state.campaign={slug,version:1,startSeed:n,characterSource:'engine.randomCharacter + engine.newGame',
-  rolledBackground:base.background,rolledPath:base.path,startingLocation:start.location,
-  identity:'independent male protagonist',identityGeneration:'seeded culturally plausible personal-and-family names, independent of destination',oldCampaignImported:false};
+ state.campaign={slug,version:2,startSeed:n,
+  characterSource:'engine.randomCharacter + engine.newGame + source-grounded seeded origins',
+  rolledBackground:base.background,rolledPath:base.path,
+  startingLocation:start.location,
+  identity:'independently generated human character',
+  identityGeneration:'seeded and user-adjustable across names, origins, professions and family histories',
+  oldCampaignImported:false};
  Unified.ensurePlayer(state);
  Character.ensure(state);
  Realm.ensure(state);
+ const origin=Origins.install(state,plan);
  const date=startingDate(n);
- // The public civil almanac fixes this campaign's date at creation; its
- // original opening scene/time is unchanged, and no world ticks are spent.
- const dateView=Realm.anchorCalendar(state,{date,source:'Public civil almanac at the opening settlement, established at campaign creation'});
+ // Civil time and the one world clock remain the only in-world calendar.
+ const dateView=Realm.anchorCalendar(state,{date,source:'Public civil almanac at campaign creation'});
  state.campaign.startDate=date;
- state.log.push({day:1,time:E.clock(state),type:'world',text:`The public civil almanac dates the morning ${dateView.absoluteDate}.`,details:null});
- return {state,summary:{seed:n,slug,location:start.location,name,age:state.player.age,background:state.player.background,path:state.player.path,family:identity.family,history:identity.history,clock:E.clock(state),date:dateView.absoluteDate,focus:start.focus,scene:start.scene}};
+ state.log.push({day:1,time:E.clock(state),type:'world',
+  text:'The public civil almanac dates the morning '+dateView.absoluteDate+'.',details:null});
+ return {state,summary:{seed:n,slug,name,age,gender,
+  background:state.player.background,path:state.player.path,
+  location:start.location,family:state.player.family,
+  history:state.player.history,origin,
+  clock:E.clock(state),date:dateView.absoluteDate,
+  focus:start.focus,scene:start.scene}};
 }
 function secureSeed(){return crypto.randomBytes(4).readUInt32BE(0)||1;}
 if(require.main===module){
  const out=process.argv[2],slug=process.argv[3],seed=process.argv[4]?Number(process.argv[4]):secureSeed();
  if(!out||!slug)throw Error('Usage: node scripts/new-campaign.js <save.json> <campaign_slug> [seed]');
  if(fs.existsSync(out))throw Error('Campaign already exists; will not overwrite an old save');
- const {state,summary}=create({seed,slug});fs.writeFileSync(out,E.exportGame(state)+'\n',{flag:'wx'});
+ const extra=process.argv[5]?JSON.parse(fs.readFileSync(process.argv[5],'utf8')):{};
+ const {state,summary}=create({...extra,seed,slug});
+ fs.writeFileSync(out,E.exportGame(state)+'\n',{flag:'wx'});
  process.stdout.write(JSON.stringify(summary,null,2)+'\n');
 }
 module.exports={create,secureSeed,startingDate,OPENINGS};
