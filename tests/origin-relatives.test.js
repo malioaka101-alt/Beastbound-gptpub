@@ -97,6 +97,15 @@ A.ok(local&&actor,'Some independently scheduled family members are genuinely in 
 const w=Realm.peek(local),person=w.originKin.people[actor.npcId.slice('origin-kin:'.length)];
 A.equal(Kin.verify(w,person),true);
 A.equal(Presence.identity(w,actor.npcId).name,actor.name);
+const forgedKnown=Engine.importGame(Engine.exportGame(local));
+const forgedIndex=Number(actor.npcId.slice('origin-kin:kin_'.length))-1;
+forgedKnown.player.family.members[forgedIndex].name='Forged Relative';
+A.throws(()=>Kin.status(forgedKnown),/no longer matches their saved individual origin/);
+const unconscious=Engine.importGame(Engine.exportGame(local));
+unconscious.table.combatants||={};
+unconscious.table.combatants.player={status:'knocked_out'};
+A.throws(()=>Kin.talk(unconscious,{npcId:actor.npcId,
+ question:'How is the family doing?'}),/inability to communicate/);
 const initialMinutes=local.world.minutes;
 const q={npcId:actor.npcId,question:'What is the work of our household?'};
 const response=Rules.act(local,{system:'social',operation:'speakOriginRelative',params:q});
