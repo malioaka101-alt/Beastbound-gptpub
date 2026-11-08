@@ -5,7 +5,7 @@ const Engine=require('../engine'),New=require('../scripts/new-campaign');
 const Rules=require('../rules'),Realm=require('../world/simulation');
 const Places=require('../world/lived-places'),Panels=require('../panels');
 const Presence=require('../world/person-presence'),Turn=require('../scripts/chat-turn');
-const create=(seed=44566)=>New.create({slug:'freeform_place_fixture',seed,mode:'guided'}).state;
+const create=(seed=44566)=>New.create({slug:'freeform_place_fixture',seed,mode:'guided',startLocation:'crossing'}).state;
 const place={placeId:'winding_lane_01',name:'Winding Lantern Hamlet',
  regionId:'morrowfen_basin',kind:'riverside community',sceneType:'settlement',
  description:'Low reed-roof houses share a raised stone path beside the river. Barges pass below distant lanterns.',
