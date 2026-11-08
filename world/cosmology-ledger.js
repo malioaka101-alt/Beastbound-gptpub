@@ -26,10 +26,26 @@ const EXEMPLARS=Object.freeze([
   siteId:'ashglass_deep',description:'Old reports speak of changing geometry; neither an open route nor a reliable return is established.'}
 ]);
 function founding(d){return {source:SOURCE,recordedMinute:0,...d};}
+// Sole universal laws seeded here are explicit in the original Master Prompt.
+// They do not decide unknown afterlife fates, god origins, unseen portals or
+// other deliberately open cosmological matters; the GM authors those later.
+const CANON_LAWS=Object.freeze([
+ {planeId:'mortal',domain:'origin-pattern',statement:'Humans and beasts share an underlying inheritable Origin Pattern linking biology, soul and supernatural energy, without becoming identical organisms.',
+  basis:'Original Master Prompt section 18, shared Origin Pattern.'},
+ {planeId:'liminal',domain:'boundary-conditions',statement:'Rift travel has distinct boundary physics and requires accurate spatial preparation, mapping and safeguards; observing a seam alone never proves safe passage.',
+  basis:'Original Master Prompt section 25, Rift Practice.'},
+ {planeId:'divine',domain:'independent-divinity',statement:'Divine beings possess independent agency and their favour is not guaranteed by vows, relics, shrines or a mortal request.',
+  basis:'Original Master Prompt sections 3 and 27, cosmology and divine traditions.'}
+]);
+function canonFact(c){
+ const raw={source:SOURCE,planeId:c.planeId,domain:c.domain,kind:'law',
+  statement:c.statement,basis:c.basis,visibility:'gm-only',recordedMinute:0};
+ return {...raw,seal:hash(raw)};
+}
 function canonicalPlanes(){return Object.fromEntries(Mythic.REALMS.map((r,i)=>{
  const record=founding({id:r.id,name:r.name,category:CATEGORIES[i],
   description:r.public,visibility:'public',publicTradition:true});
- return [r.id,{...record,originHash:hash(record),facts:[]}];
+ return [r.id,{...record,originHash:hash(record),facts:CANON_LAWS.filter(x=>x.planeId===r.id).map(canonFact)}];
 }));}
 function canonicalBoundaries(){return Object.fromEntries(EXEMPLARS.map(x=>{
  const record=founding({...x,visibility:'public',hypothetical:true,
