@@ -11,7 +11,7 @@ const E=require('../engine.js'),C=require('./core'),W=require('./world'),
  Lore=require('../world/renown-and-practice'),Realm=require('../world/simulation');
 const SOURCE='public-civic-discipline-practicum-v1';
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
-const ALLOWED_TYPES=Object.freeze(['local','overview','history','legend','renown','common','restricted','profession']);
+const ALLOWED_TYPES=Object.freeze(['local','overview','history','legend','renown','common','school','restricted','profession']);
 function only(params,keys){
  if(!params||typeof params!=='object'||Array.isArray(params)||
     Object.keys(params).some(k=>!keys.includes(k)))
@@ -51,15 +51,26 @@ function legacy(x){
   ...(x.site?{publiclyDescribedSite:Mythic.publicLore({type:'site',id:x.site}).name}:{}),
   noVerifiedPersonalPowerRank:true,noLivingNPCInvented:true};
 }
-function renowned(x){
- const h=housePublic(x.house),i=institutionPublic(x.institution);
+function renowned(s,x){
+ const h=housePublic(x.house),i=institutionPublic(x.institution),
+  localState=place(s).polity===x.polity?
+   Realm.peek(s).institutions?.[x.institution]?.status:
+   'remote current operating status not locally confirmed';
  return {id:x.id,name:i.name,standing:x.standing,
+  locallyVerifiedOperatingStatus:localState||'no current office report',
   polity:Atlas.P[x.polity].name,region:Atlas.R[x.region].name,
   house:h.name,publicHouseObligation:h.publicObligation,
   foundingContext:Atlas.history.find(e=>e.era===x.era)?.event||null,
   knownHistory:x.history,culturalPaths:[...x.paths],
   civilianUse:x.publicService,defensiveUse:x.defenseUse,
   currentPublicDispute:x.division,limit:x.tradeoff,
+  associatedSharedMethods:Lore.PUBLIC_METHODS.filter(m=>m.institution===x.institution)
+   .map(m=>({id:m.id,name:m.name,path:m.path})),
+  associatedSchoolTeachings:Lore.SCHOOL_TRADITIONS.filter(m=>m.institution===x.institution)
+   .map(m=>({id:m.id,name:m.name,commonMethod:m.common})),
+  originalProfessionalWork:Lore.CIVIC_APPLICATIONS.filter(j=>
+    Lore.M[j.method]?.institution===x.institution)
+   .map(j=>({id:j.id,site:E.LOCATIONS[j.location].name,method:j.method})),
   ...(x.site?{relatedPublicSite:Mythic.publicLore({type:'site',id:x.site})}:{}),
   regionalInfluenceNotCombatPower:true,
   schoolAttendanceNotMembership:true};
@@ -72,7 +83,24 @@ function publicMethod(x){
   ...(x.actualRule?{existingEngineProcedure:x.actualRule}:
     {implementation:'socially known theory; no runnable supernatural effect implemented'}),
   sourceLimit:x.note,publicKnowledgeDoesNotTeachIt:true,
-  personallyDevelopedTechniquesRemainDistinct:true};
+  personallyDevelopedTechniquesRemainDistinct:true,
+  identifiableSchoolTeachings:Lore.SCHOOL_TRADITIONS.filter(t=>t.common===x.id)
+   .map(t=>({id:t.id,name:t.name,institution:Atlas.I[t.institution].name,
+    family:Houses.byId[t.house].name,learningNotGranted:true}))};
+}
+function school(s,x){
+ const common=Lore.M[x.common],institution=Atlas.I[x.institution];
+ return {id:x.id,name:x.name,
+  organisation:institutionPublic(x.institution),associatedHouse:housePublic(x.house),
+  background:x.lineage,existingCommonFoundation:publicMethod(common),
+  civilianUse:x.civilian,defensiveOrCombatUse:x.combat,
+  availableWaysToInvestigate:x.access,sourceLimit:x.limit,
+  locallyVerifiedOperatingStatus:place(s).polity===institution.polity?
+   Realm.peek(s).institutions?.[x.institution]?.status||'unconfirmed locally':
+   'current remote operating status unverified',
+  status:'publicly identified syllabus; actual formulas and personal mastery require original sources',
+  notAnInheritedSkill:true,notPersonallyEarnedFromReading:true,
+  notAFreeGuildMembership:true};
 }
 function restricted(x){
  return {id:x.id,name:x.label,
@@ -131,11 +159,14 @@ function publicLore(s,params={}){
   entries:list(Lore.HISTORICAL_LEGACIES,legacy),
   note:'Attributed public legacies are not mechanically verified living NPCs or peak-stage rankings'};
  if(type==='renown')return {category:'selective world-renowned institutions and their households',
-  entries:list(Lore.RENOWNED,renowned),
+  entries:list(Lore.RENOWNED,x=>renowned(s,x)),
   note:'Fame, academic reputation, political standing, family position and supernatural stages are separate'};
  if(type==='common')return {category:'publicly recognised shared methods',
   entries:list(Lore.PUBLIC_METHODS,publicMethod),
   note:'A named generic technique remains separate from original personal creations and from restricted house teachings'};
+ if(type==='school')return {category:'recognisable institutional teaching traditions',
+  entries:list(Lore.SCHOOL_TRADITIONS,x=>school(s,x)),
+  note:'School-specific methods sit between public foundational practice, private household formulas and individually created arts. Real skill, source, instruction or independent discovery remain necessary'};
  if(type==='restricted')return {category:'publicly named restricted traditions',
   entries:list(Lore.RESTRICTED_METHODS,restricted),
   note:'Their actual formulas, secrets, hereditary markers and present owners remain unknown'};
@@ -150,6 +181,10 @@ function publicLore(s,params={}){
      knownFor:x.publicService})),
   historicalLegends:Lore.HISTORICAL_LEGACIES.filter(x=>!selectedPolity||x.polity===selectedPolity).
     map(x=>({id:x.id,name:x.name,knownFor:x.renown})),
+  institutionalTeachingTraditions:Lore.SCHOOL_TRADITIONS.filter(x=>
+    !selectedPolity||Atlas.I[x.institution]?.polity===selectedPolity)
+    .map(x=>({id:x.id,name:x.name,
+      organisation:Atlas.I[x.institution].name,commonMethod:x.common})),
   pathsRepresented:[...new Set(Lore.PUBLIC_METHODS.map(x=>x.path))],
   caveat:'Only a selective public reputation layer; no universal strongest-person ranking or guaranteed mythic powers'};
  const r=Atlas.R[region],pol=Atlas.P[polity];
@@ -164,12 +199,40 @@ function publicLore(s,params={}){
   sharedPublicMethods:Lore.PUBLIC_METHODS.filter(x=>
     local.some(y=>y.institution===x.institution)).slice(0,10).map(x=>
       ({name:x.name,path:x.path,learningEvidence:x.learning})),
+  identifiedLocalSchoolTeachings:Lore.SCHOOL_TRADITIONS.filter(x=>
+    Atlas.I[x.institution]?.polity===polity).slice(0,6)
+    .map(x=>({id:x.id,name:x.name,
+      institution:Atlas.I[x.institution].name,
+      generalPractice:Lore.M[x.common].name,
+      noLearnedSkillFromAssociation:true})),
   noNewSocialRankOrPowerFromReading:true};
 }
 function actualSource(s,job){
  switch(job.source){
   case 'ordinary':return {type:'trained human field practice',
    physicalSite:s.world.location};
+  case 'specialist-observation':return {
+   type:'ordinary supervised-clinic source assessment',
+   physicalSite:s.world.location,
+   noImaginaryPatient:true,noMagicalItemCreated:true};
+  case 'willing-partnership':{
+   const partner=(s.player?.partnerIds||[]).map(id=>s.beasts?.[id])
+    .find(b=>b&&b.owner===s.player.name&&
+     b.consent===true&&b.relationship==='mutual partner'&&
+     Number.isInteger(b.trust)&&b.trust>=40&&
+     Number.isInteger(b.respect)&&b.respect>=30&&
+     Array.isArray(b.bondHistory)&&b.bondHistory.some(h=>
+      typeof h==='string'&&h.includes('Years of careful partnership prior to Day 1.'))&&
+     (b.needs?.hunger||0)<80&&
+     (b.needs?.fatigue||0)<80&&
+     !(b.injuries||[]).length);
+   if(!partner)
+    throw Error('Actual present mutual beast cooperation with a witnessed starting bond, ongoing willingness, welfare and original consent is needed; a claim or surname cannot speak for a beast');
+   return {type:'original witnessed reciprocal human-beast relationship',
+    individualId:partner.id,species:partner.species,
+    source:'Existing voluntary starting partnership recorded in this actual engine save',
+    currentWillingness:true,noCommandedBeast:true};
+  }
   case 'meridian-gate':{
    const g=require('./meridian-qi-strike').gate(s);
    return {type:'original opened first Meridian Gate',
