@@ -108,12 +108,15 @@ function publicLore(s,params={}){
  if(id!==undefined&&['local','overview'].includes(type))
   throw Error('Choose a particular public historical, school or practice entry');
  const selectedPolity=params.polity;
- const filter=(items)=>items.filter(x=>
-  (id===undefined||x.id===id)&&
-  (selectedPolity===undefined||x.polity===selectedPolity)&&
-  (path===undefined||x.path===path||x.paths?.includes(path)||
-    x.method&&Lore.M[x.method]?.path===path||
-    type==='restricted'&&Lore.M[x.id]?.path===path));
+ const filter=(items)=>items.filter(x=>{
+  const home=x.polity||Atlas.I[x.institution]?.polity||
+    Atlas.R[x.region]?.polity||
+    Houses.byId[x.house]?.polity;
+  return (id===undefined||x.id===id)&&
+   (selectedPolity===undefined||home===selectedPolity)&&
+   (path===undefined||x.path===path||x.paths?.includes(path)||
+    x.method&&Lore.M[x.method]?.path===path);
+ });
  const list=(items,render)=>{
   const filtered=filter(items);
   if(id!==undefined&&!filtered.length)
@@ -121,7 +124,8 @@ function publicLore(s,params={}){
   return filtered.map(render);
  };
  if(type==='history')
-  return {category:'established world history',records:Atlas.history.map(e=>({...e})),
+  return {category:'established world history',records:Atlas.history.
+   filter(e=>id===undefined||e.era===id).map(e=>({...e})),
    note:'Published eras predate the player; precise individual deeds require credible evidence'};
  if(type==='legend')return {category:'historical renown',
   entries:list(Lore.HISTORICAL_LEGACIES,legacy),
