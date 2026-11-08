@@ -59,13 +59,14 @@ A.throws(()=>Rules.act(s,{system:'world',operation:'travelTo',params:{
 A.throws(()=>Rules.act(s,{system:'world',operation:'travelTo',params:{
  destinationId:place.placeId,minutes:150,journey:'Known path following the eastern bank, with no contested crossing.',uncontested:false}}),/GM-supported journey/);
 A.equal(Engine.exportGame(s),beforeBlocked);
+const beforeTripMinutes=s.world.minutes;
 const trip=Rules.act(s,{system:'world',operation:'travelTo',params:{
  destinationId:place.placeId,minutes:185,
  journey:'The player follows the confirmed low riverbank path, passing the already visible reed cottages without any dangerous crossings.',
  means:'walking',uncontested:true}});
 A.equal(trip.arrived,true);
 A.equal(s.world.location,place.placeId);
-A.equal(s.world.minutes,185+(8*60));
+A.equal(s.world.minutes,beforeTripMinutes+185);
 A.equal(s.flags.visited[place.placeId],true);
 A.equal(s.player.coins,initCoins);
 A.equal(s.rngState,initRng);
