@@ -134,6 +134,7 @@ jobs:
             tests/personal-body-aspect.test.js
             tests/world-renown-professions.test.js
             tests/connected-world-schools-and-work.test.js
+            tests/heritage-school-applied-practice.test.js
             tests/rank-depth-prototypes.test.js
             tests/lifelong-mastery.test.js
             tests/gear-transactions.test.js
