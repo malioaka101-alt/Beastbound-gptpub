@@ -30,7 +30,7 @@ delete old.table.realm.cosmology;
 const preOld=Engine.exportGame(old);
 A.equal(Rules.act(old,{system:'world',operation:'cosmologyStatus',params:{}}).planes.length,5);
 A.equal(Engine.exportGame(old),preOld,'Old saves remain read-only until a real authored event');
-const hidden={planeId:'silent_reach_01',name:'The Silent Reach',category:'other',
+const hidden={planeId:'silent_reach_01',name:'The Silent Reach',category:'ancestral_memory',
  description:'A GM-established inaccessible deep realm whose true coordinates remain sealed.',
  visibility:'gm-only'};
 const made=Rules.act(s,{system:'world',operation:'cosmologyAuthorPlane',params:hidden});
