@@ -3,6 +3,7 @@
 // every printed field is drawn from the active save and player-known facts.
 const E = require('./engine.js');
 const Realm = require('./world/simulation');
+const PowerOverview=require('./rules/power-overview');
 const WIDTH = 34, INNER = 30;
 const cp = value => Array.from(String(value ?? ''));
 const limit = (value, n=INNER) => {
@@ -193,7 +194,7 @@ function core(state,extra=[]){
  return close(lines);
 }
 function panelMenu(s){
- const names=['Status','Character','Tamer','Quests','Bag','People','World','Journal'];
+ const names=['Status','Character','Power','Tamer','Quests','Bag','People','World','Journal'];
  if(Object.keys(s.researchProjects||{}).length)names.push('Research');
  for(const id of s.player.partnerIds||[])if(s.beasts[id])names.push(s.beasts[id].name);
  if(s.taming)names.push('Taming');if(s.store?.open)names.push('Store');
@@ -208,7 +209,7 @@ function full(state,name){
  const aliases={sheet:'character',hero:'character',char:'character',me:'character',inventory:'bag',npcs:'people',calendar:'world',news:'world',goals:'quests',career:'tamer',licence:'tamer'};
  const key=aliases[String(name).toLowerCase()]||String(name).toLowerCase();
  const partnerId=(p.partnerIds||[]).find(id=>s.beasts[id]?.name?.toLowerCase()===key);
- const standing=['status','character','tamer','quests','bag','people','world','journal','research'];
+ const standing=['status','character','power','tamer','quests','bag','people','world','journal','research'];
  if(!standing.includes(key)&&!partnerId)throw Error('Unknown panel: '+name);
  const lines=[top(key.toUpperCase()),row(pair(date(s),time(s))),row(pair(location(s),weather(s))),row(pair(`STA ${p.stamina}/${p.maxStamina}`,E.money(p.coins))),heavy()];
  const sec=(label,items,hint='')=>{if(items?.length){lines.push(section(label,hint));detail(lines,items);}};
@@ -244,6 +245,29 @@ function full(state,name){
   sec('ATTRIBUTES',pairs);
   sec('SKILLS',Object.entries(p.skills||{}).map(([k,v])=>[k,('●'.repeat(Math.min(v.rank,5))+'○'.repeat(Math.max(0,5-v.rank)))+' +'+(v.rank*2)]));
   sec('POWERS',[`Meridian gates ${p.meridian?.gates?.length||0}/108`,`Arcane circles ${p.arcane?.circles||0}/9`, `Body cycles ${p.body?.cycles?.length||0}`]);
+ }else if(key==='power'){
+  const v=PowerOverview.read(s);
+  sec('MERIDIAN',[
+   '◆ '+v.meridian.stageName,
+   ['Cultivation skill',v.meridian.cultivationSkillRank],
+   ['Opened Gates',v.meridian.gatesOpened+'/108'],
+   ['Qi',v.meridian.qi.current+'/'+v.meridian.qi.max],
+   ['Training',v.meridian.training.progress+'/'+(v.meridian.training.required??'?')]
+  ]);
+  if(v.meridian.legacyPreparatoryFoundation!==undefined)
+   sec('OLDER SAVE',['Legacy foundation '+v.meridian.legacyPreparatoryFoundation,
+    'Not verified track progress']);
+  sec('ARCANE',[
+   v.arcane.coreIgnited?'Mana Core ignited':'No ignited Mana Core',
+   ['Circles',v.arcane.circles],['Arcana skill',v.arcane.arcanaSkillRank]
+  ]);
+  sec('OTHER DISCIPLINES',[
+   '◆ '+v.soul.phaseName,
+   '◆ Body: '+v.body.completedCycles+'/'+v.body.totalNamedCycles+' cycles',
+   '◆ '+v.rift.stepName,
+   '◆ Origin load '+v.origin.load+'/'+v.origin.capacity,
+   '◆ Human: '+v.humanEvolution.stageName
+  ]);
  }else if(key==='tamer'){
   sec('PARTNERS',(p.partnerIds||[]).map(id=>s.beasts[id]?'◆ '+s.beasts[id].name:null).filter(Boolean).length?(p.partnerIds||[]).map(id=>s.beasts[id]?'◆ '+s.beasts[id].name:null).filter(Boolean):['No bonded partner']);
   sec('STANDING',[['Local reputation',p.reputation?.local??0]]);
