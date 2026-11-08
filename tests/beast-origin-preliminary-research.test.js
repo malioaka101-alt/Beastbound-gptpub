@@ -133,7 +133,9 @@ const screen=(s,params)=>rule(s,'screenCompatibility',params);
   if(axis==='energetic'){
    A.ok(r.riskFlags.some(x=>/throughput/.test(x)),
     'An unawakened energetic architecture is a caution, not a mandatory rank gate');
-   A.equal(r.result,'caution');
+   // The existing energetic limitation never becomes 'promising'. A
+   // failed original roll may still be inconclusive rather than caution.
+   A.ok(['caution','inconclusive'].includes(r.result));
   }
  }
  A.equal(s.player.stamina,s0-4);
