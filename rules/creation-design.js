@@ -328,6 +328,13 @@ function status(s,p={}){
    medium:x.envelope.medium,system:x.envelope.system,
    boundMechanism:x.envelope.function,effectGrade:x.envelope.effectGrade,
    gaps:x.gaps.slice(),status:x.status,prototypeId:x.prototypeId||null,
+   ...(x.personalDevelopment?{personalExpression:{
+    progress:x.personalDevelopment.progress,required:PERSONAL_REQUIRED,
+    identityMilestone:x.personalDevelopment.identity?.milestone,
+    originalCharacter:x.personalDevelopment.identity?.character,
+    completed:(()=>{try{return earnedPersonal(s,x.id).developmentCompleted;}catch{return false;}})(),
+    independentlyLearnedForm:false
+   }}:{}),
    noItemCreated:!x.prototypeId,noTechniqueLearned:true};
  }),note:'Only your actual recorded unproven inventions; a proposal is not a hidden completed item, spell or verified world fact.'};
 }
