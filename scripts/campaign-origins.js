@@ -76,7 +76,7 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
     (originKind!=='renowned-family'||RENOWNED_HOUSES.has(h.id)));
   const h=options.houseId?Houses.byId[options.houseId]:
     pick(seed,'historical-house',pool);
-  if(!h||NONHUMAN_HOUSES.has(h.id)||
+  if(!h||(NONHUMAN_HOUSES.has(h.id)&&!['ward','adopted'].includes(options.houseRelation))||
     (originKind==='renowned-family'&&!RENOWNED_HOUSES.has(h.id)))
    throw Error('Historical human birth lineage must be an existing suitable house');
   if(options.homeRegion&&region.polity!==h.polity)
@@ -93,6 +93,7 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
    for(const m of f.members)if(m.relation!=='sibling'||relation==='birth-branch')
     m.name=resurname(m.name,surname);
   }
+  f.homeTrade=h.role;
   f.house={id:h.id,name:h.name,kind:h.kind,polity:h.polity,relation,
    knownPublicDuty:h.duty,knownPublicDispute:h.dispute,
    noAutomaticOffice:true,noAutomaticPrivateMethod:true};
@@ -178,6 +179,7 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
   history.upbringing='An ordinary '+f.homeTrade+' household in '+region.name+
    '; '+Atlas.P[region.polity].customs;
  }
+ if(!history.earlyWork)history.earlyWork='Early work and study in '+base.background+'; no invented professional qualification or supernatural rank.';
  if(options.goal!==undefined)history.personalGoal=textField(options.goal,'Personal goal',240);
  if(options.role!==undefined)history.ownOccupation=textField(options.role,'Occupation',100);
  const startRegion=Atlas.R[Atlas.LOCATION_REGION[startLocation]];
