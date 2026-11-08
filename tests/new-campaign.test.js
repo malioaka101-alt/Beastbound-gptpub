@@ -10,7 +10,8 @@ for(let seed=1;seed<=100;seed++){
  assert.deepEqual(o,b);
  const s=E.importGame(E.exportGame(o.state));
  assert(['male','female','nonbinary'].includes(s.player.gender)&&s.player.name===o.summary.name);
- assert(E.LOCATIONS[s.world.location] && s.flags.visited[s.world.location]);
+ assert(E.LOCATIONS[s.world.location] && s.campaign.openingState==='awaiting-gm');
+ assert.deepEqual(s.flags.visited,{});
  assert(s.table.healthModel==='wounds-v1');
  assert(s.table.realm.countries && Object.keys(s.table.realm.countries).length===24);
  assert(s.table.realm.ticks.sixdays===0);
@@ -28,7 +29,8 @@ for(let seed=1;seed<=100;seed++){
  assert(s.campaign.oldCampaignImported===false);
  assert(!JSON.stringify(s).includes('Aerin Marsh'));
  assert.equal(s.player.family.household,o.state.player.family.household);
- assert(s.chatRuntime.focus.length===1);
+ assert(s.chatRuntime.focus.length===0);
+ assert.equal(s.chatRuntime.scene,null);
  assert(S.publicStatus(s).region);
 }
 // Ivar's recorded seed must reproduce exactly the approved start date.
