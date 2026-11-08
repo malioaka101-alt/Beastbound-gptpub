@@ -600,12 +600,15 @@ function execute(savePath, req) {
        const named=person,
         inquiry=question||'Could we talk about the work you do here?';
        const people=PersonPresence.localStatus(s,Rules.realm.peek(s)).people.filter(p=>
-        p.npcId.startsWith('emergent:')&&
+        (p.npcId.startsWith('emergent:')||
+         p.npcId.startsWith('origin-kin:'))&&
         (p.name.toLowerCase()===named||
          (named.length>=4&&p.name.toLowerCase().startsWith(named))));
        if(people.length!==1)
         throw Error('A single established NPC name or actually present person is required for a witnessed conversation');
-       response.npc=Rules.act(s,{system:'social',operation:'speakLocalPerson',
+       response.npc=Rules.act(s,{system:'social',
+        operation:people[0].npcId.startsWith('origin-kin:')?
+         'speakOriginRelative':'speakLocalPerson',
         params:{npcId:people[0].npcId,question:inquiry}});
        response.message=response.npc.message;
      }
@@ -688,7 +691,7 @@ function execute(savePath, req) {
    // neither requesting historic context nor inspecting one's own earned
    // physique/practice is itself a new player action or storytelling.
    response.rules=Rules.act(s,req);
-   if(['research.status','evolution.status','evolution.eligibility','origin.researchStatus','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','power.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.heritage','world.culturalPracticeStatus','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.personalStatus','creation.aspectStatus','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
+   if(['research.status','evolution.status','evolution.eligibility','origin.researchStatus','bond.consent','bond.consentStatus','bond.gradeStatus','combat.status','combat.sceneStatus','gear.offers','gear.status','bond.status','bond.evidenceStatus','bond.careStatus','bond.syncReadiness','health.status','health.clinicStatus','health.rescueStatus','health.criticalStatus','health.shelterStatus','character.status','discipline.status','power.status','soul.perceptionStatus','rift.senseStatus','arcane.sparkStatus','arcane.wardStatus','arcane.dualChannelStatus','meridian.qiStrikeStatus','world.agendaStatus','world.realmStatus','world.governmentStatus','world.realmOverview','world.atlas','world.heritage','world.culturalPracticeStatus','world.calendar','world.news','world.market','world.species','world.habitatSurveyStatus','world.plantingStatus','competition.status','npc.status','social.status','social.groupsStatus','social.groupMembersStatus','social.localPeopleStatus','social.metPeopleStatus','social.originRelativesStatus','social.materialHandoffsStatus','social.witnessedPersonWorkStatus','social.assistedWorkStatus','social.localWorkOffersStatus','opportunity.status','social.sapientBeastMemoriesStatus','social.petitionStatus','social.hearingStatus','social.mediationStatus','craft.status','creation.evaluate','creation.status','creation.personalStatus','creation.aspectStatus','creation.prototypeStatus','rankings.detail','world.wildBehaviourStatus','world.wildMemoriesStatus','world.sightingStatus','world.professionals','world.initiativesStatus','world.diffusionStatus','world.ambitionsStatus','world.peersStatus','world.familyMembersStatus','world.mythic'].includes(req.system+'.'+req.operation))return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,output:response,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
  } else if(req.mode==='check'){
    // The processor's validated campaign field addresses the save; it is not
    // a caller-selected check attribute, DC, modifier or rolled outcome.
