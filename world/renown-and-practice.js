@@ -41,7 +41,28 @@ const HISTORICAL_LEGACIES=Object.freeze([
   history:'Ashglass evacuation ledgers honour successive ward teams after the volcanic rupture. Accounts disagree on who first measured the surviving boundary anchors.',
   renown:'Legendary containment service, not authenticated Realm Walking',
   dailyLegacy:'Evacuation keys, pressure checks and refuge maps outrank dramatic forbidden crossings.',
-  combatLegacy:'Later wardens use anchor discipline in defensive withdrawal; the memorial grants no remote teleportation.'}
+  combatLegacy:'Later wardens use anchor discipline in defensive withdrawal; the memorial grants no remote teleportation.'},
+ {id:'first_cup_waterkeeper',name:'The Waterkeeper of the First Cup',
+  era:'Age of First Paths',polity:'sahri_wells',institution:'well_collegium',house:'firstcup',
+  status:'ancient public water-custodian title; the original bearer is disputed',
+  history:'The oldest Sahriel well accounts remember a custodian who challenged armed seizure of communal wells. Which person spoke first, and whether any supernatural water was used, remain disputed.',
+  renown:'Continental water-rights founding legend, no verified miraculous spell or Circle count',
+  dailyLegacy:'Water assessors and caravan physicians sample, measure and share water before settling ownership.',
+  combatLegacy:'Well defenders practice restraint and cistern protection; the tale teaches no free water conjuring.'},
+ {id:'starlens_vigil',name:'The Unclosed Vigil of Starlens',
+  era:'Longwinter Covenant',polity:'icehollow',institution:'aurora_academy',house:'starlens',
+  status:'deceased historical observatory witnesses remembered in conflicting archives',
+  history:'Aurora Academy preserves Starlens accounts that separated dangerous auroral fluctuations from travelling star-beast sightings; the primary observer is not securely identified.',
+  renown:'Northern legendary scholarly vigilance, no certified Soul Domain or celestial bloodline',
+  dailyLegacy:'Observer logs separate witnessed phenomena from spiritual hypotheses.',
+  combatLegacy:'Winter patrols use warnings and measured perception rather than claimed prophecy.'},
+ {id:'reef_concord_mediator',name:'The Shellsong Accord Speaker',
+  era:'Current Century',polity:'reef_cantons',institution:'reef_consistory',house:'shellsong',
+  status:'historical treaty speaker; present identity and private kin records unavailable',
+  history:'The reef record remembers a Shellsong mediator who refused to equate rescue with being another species’ companion. Later harbour accords retained each person’s right to decline a pact.',
+  renown:'World-renowned voluntary interspecies diplomacy precedent, not earned joint-evolution evidence',
+  dailyLegacy:'Translators distinguish a conversation, a rescue, and a freely chosen partnership.',
+  combatLegacy:'Sea rescue crews can protect one another without treating reef citizens as commanded beasts.'},
 ]);
 const RENOWNED=Object.freeze([
  {id:'seven_estuary_scholars',institution:'lumenfall_annex',house:'marshglass',
@@ -147,7 +168,34 @@ const RENOWNED=Object.freeze([
   defenseUse:'protecting passages is not commanding a sovereign species',
   division:'border intrusion and imperfect recognition by human states',
   tradeoff:'no one acquires an Origin Pattern by hearing another lineage’s history',
-  site:'old_tracks_sanctum'}
+  site:'old_tracks_sanctum'},
+ {id:'pathlight_routes',institution:'route_keepers',house:'pathlight',
+  polity:'stair_guilds',region:'copper_stair',era:'Age of First Paths',
+  standing:'world-renowned caravan survival and rescue charter',
+  history:'Pathlight caravan kin and the Route Keepers preserve open hazard reports and rescue obligations inherited from Copper Stair compacts older than several toll guilds.',
+  paths:['body','meridian','partnership','runes'],
+  publicService:'safe cargo, open rescue debts, shared route charts and reliable warning beacons',
+  defenseUse:'escort, restraint and honestly learned reinforcement, never coerced mounts',
+  division:'commercial tolls against the right to an emergency refuge',
+  tradeoff:'a famous caravan name is not a licence or learned Meridian technique'},
+ {id:'coral_medicine',institution:'coral_healers',house:'tidecord',
+  polity:'tide_assembly',region:'waveroot_isles',era:'Current Century',
+  standing:'world-renowned cross-species maritime clinical network',
+  history:'Tidecord harbour organisers and the Coral Healers College fund clinics and reef-safe medical training in the wake of sea-person treaty reforms.',
+  paths:['body','soul','medicine','alchemy','partnership'],
+  publicService:'reef-safe patient care, tidal injury triage, sheltered transport and medicine',
+  defenseUse:'consensual rescue and realistic clinical stabilisation, not instant regeneration',
+  division:'harbour finances versus nonhuman patient access and coastal conservation',
+  tradeoff:'professional fame cannot bestow a cure, medical qualification or patient consent'},
+ {id:'stormpeak_rescue',institution:'storm_school',house:'rainspire',
+  polity:'storm_peaks',region:'rainspire',era:'Current Century',
+  standing:'legendary storm rescue and wind-route teaching tradition',
+  history:'Rainspire households and Storm School preserve records of dangerous cliff evacuations and winter shelters, alongside disputes about wind-sail patents.',
+  paths:['arcane','meridian','body','rift'],
+  publicService:'storm route maps, safe highland evacuation and shared shelters',
+  defenseUse:'genuine weather protection and practiced bodily rescue, never unearned flight',
+  division:'emergency shelter access versus maintaining costly storm routes',
+  tradeoff:'a renowned storm school cannot confer wings or a magical wind affinity'},
 ]);
 const PUBLIC_METHODS=Object.freeze([
  {id:'qi_gates',name:'Primary Flow and First-Gate Circulation',path:'meridian',institution:'gate_monastery',
@@ -244,7 +292,95 @@ const PUBLIC_METHODS=Object.freeze([
   learning:'real local observations and honest skill checks; no special power requirement',kind:'public profession method',
   civilian:'field ecology, wetland conservation and incident records',
   combat:'surveys identify hazards but do not manufacture an opponent’s stats',
-  actualRule:'world.habitatSurvey',note:'ordinary professionals remain genuinely useful'}
+  actualRule:'world.habitatSurvey',note:'ordinary professionals remain genuinely useful'},
+ {id:'vital_pacing',name:'Circulatory Work Pacing',path:'body',institution:'ridge_rescue',
+  learning:'ordinary observation of human breathing and genuine physical conditioning',kind:'common rescue method',
+  civilian:'safe rope-team shifts, lift duty and fatigue-aware relief without a magical form',
+  combat:'paced exertion and earned physical resilience; no free stamina or armour',
+  actualRule:null,note:'public training theory, not a separate executable body-action bonus'},
+ {id:'meridian_splint',name:'Pressure-Sparing Meridian Splinting',path:'meridian',institution:'orchard_college',
+  learning:'verified primary channel knowledge, medical practice and patient consent',kind:'shared clinical method',
+  civilian:'noninvasive limb support and supervised circulation assessments',
+  combat:'careful restraint and extraction without automatically learning Qi Strike',
+  actualRule:null,note:'specialised treatment needs a real patient and a clinical source check'},
+ {id:'soul_cant',name:'Consent-First Resonance Cant',path:'soul',institution:'reef_consistory',
+  learning:'actual interpreted communication, witnesses and authenticated Soul control',kind:'shared cultural method',
+  civilian:'reef treaty translation and memory-sensitive mediation',
+  combat:'consensual disengagement signals, not compulsions or private thoughts',
+  actualRule:null,note:'knowing the pattern does not make a beast understand human speech'},
+ {id:'arcane_cooling',name:'Resonance-Safe Kiln Sequencing',path:'arcane',institution:'forge_university',
+  learning:'real Circle geometry, the operator’s craft and measured industrial heat',kind:'common workshop method',
+  civilian:'glass annealing, kiln monitoring and emergency shutdown',
+  combat:'prepared geometry may aid safety but cannot create a free fire spell',
+  actualRule:null,note:'needs actual machinery, energy and a documented technical trial'},
+]);
+// Publicly identified organisation-specific curricula. These are neither
+// universal common techniques nor family-exclusive formulas, and no
+// affiliation/name proves that a given individual has learned one.
+const SCHOOL_TRADITIONS=Object.freeze([
+ {id:'gate_rope_lift',institution:'gate_monastery',house:'stonepath',
+  common:'qi_gates',name:'Gate–Rope Rescue Weave',
+  lineage:'Crownspine rescue drills developed around damaged cliff passages',
+  civilian:'Measured Gate circulation works alongside real ropes and trained climbers in avalanche lifts',
+  combat:'Stance and load control for retreat, not automatic force projection',
+  access:'Institutional field exercises or independently verifiable equivalent rescue practice',
+  limit:'A practised lift cannot open unearned Meridian Gates or rescue an unobserved traveller'},
+ {id:'ember_return',institution:'forge_university',house:'emberhand',
+  common:'arcane_circles',name:'Emberhand Cooling-Return Schema',
+  lineage:'Post-Ash-Years workshops teach Circle-load logs beside glass-worker safety records',
+  civilian:'Repeatable kiln thermal inspection, heat-load accounting and emergency shutdown planning',
+  combat:'Prepared caster safety can inform Arcane Ward without granting a new formula',
+  access:'Workshop training and genuine personal Circle and industrial instrument evidence',
+  limit:'Family association never grants fire spells, a Mana Core or a usable worksite'},
+ {id:'sky_echo_separation',institution:'aurora_academy',house:'starlens',
+  common:'soul_threading',name:'Starlens Echo-Source Separation',
+  lineage:'Longwinter observatory records warn against treating every sky signal as a person',
+  civilian:'Clinical and astronomical note separation, memory-sensitive testimony and identity safety',
+  combat:'An actual Soul practitioner can distinguish personal concentration from witnessed signal',
+  access:'Source-verified perceptual work and instruction with actual recordings or equivalent experiments',
+  limit:'A record is not mindreading, Soul Domain access or consent'},
+ {id:'openpeak_rescue_breath',institution:'open_peak',house:'openpeak',
+  common:'organ_conditioning',name:'Open Peak Relief Breath',
+  lineage:'Public cliff-flight rescues and independent human training without mandatory beast bonds',
+  civilian:'Altitude recovery, lift-load recovery and fatigue-conscious patient transport',
+  combat:'Existing physical endurance may improve only when a measured body supports it',
+  access:'Independent medical/body practice or willing tuition without a fixed fee or age gate',
+  limit:'A named breathing method cannot confer a personal transformation or new organ'},
+ {id:'sealwall_three_marks',institution:'rift_wardens',house:'sealwarden',
+  common:'rift_anchor',name:'Sealwall Three-Marker Protocol',
+  lineage:'After the Ash Years, refuge maps distinguished safe reference bearings from guessed portals',
+  civilian:'Evacuation key auditing and local measured boundary-path checks',
+  combat:'Source-verified anchors guide measured withdrawal, not teleportation',
+  access:'Actual surveyed boundary, spatial evidence and safe field supervision or equivalent self-study',
+  limit:'Protected map keys are not published and no one gets a free Rift Fold Step'},
+ {id:'marshglass_no_take',institution:'lumenfall_annex',house:'marshglass',
+  common:'origin_mapping',name:'Marshglass No-Take Pattern Audit',
+  lineage:'Post-Estuary field biologists argued for observation before extraction',
+  civilian:'Noninvasive ecology, differential diagnosis and patient/animal welfare review',
+  combat:'Knowledge of a beast ecological pattern does not copy its special technique',
+  access:'Original witnessed animals and a source-checked research method, not hereditary right',
+  limit:'A culture of caution does not prove a rare bloodline or a person’s compatibility'},
+ {id:'shellsong_reciprocal',institution:'reef_consistory',house:'shellsong',
+  common:'reciprocal_signals',name:'Shellsong Reciprocal Current Signs',
+  lineage:'Reef court mediators distinguished invitation, evacuation and partnership consent',
+  civilian:'Species-respecting reef diplomacy, tidal alerts and voluntary shared travel',
+  combat:'Defensive coordination only when each individual freely agrees',
+  access:'Culturally appropriate instruction or respectful independently witnessed mutual signals',
+  limit:'Restricted expressive meaning is not disclosed by the syllabus; no involuntary bond'},
+ {id:'first_cup_quality',institution:'well_collegium',house:'firstcup',
+  common:'alchemical_assay',name:'First Cup Aquifer Assay',
+  lineage:'Well custodian obligations precede some Sahriel caravan states',
+  civilian:'Reagent measurements and independent checks before granting human water access',
+  combat:'Protect cisterns with ordinary security; no water-conjuring formula',
+  access:'Practical laboratory study and public water-ethics training',
+  limit:'Without real reagents and safety measures this remains theory only'},
+ {id:'redwall_node_plan',institution:'redwall_warcollege',house:'redwall',
+  common:'formation_discipline',name:'Redwall Shelter-Node Plan',
+  lineage:'Iron Citadel defence engineers adapted supply-route calculations to shelter geometry',
+  civilian:'Bridge loading, emergency shelters and supply-chain redundancy',
+  combat:'Actual built and energised formation nodes may support defence once tested',
+  access:'Military instruction is one path; independent civil engineering can discover equivalent geometry',
+  limit:'A formation diagram is not a free magic shield, military office or rank'}
 ]);
 const RESTRICTED_METHODS=Object.freeze([
  {id:'marshglass_private',house:'marshglass',institution:'lumenfall_annex',path:'beast-origin',
@@ -319,14 +455,26 @@ const CIVIC_APPLICATIONS=Object.freeze([
   skill:'beastcraft',attribute:'wis',dc:15,minutes:60,stamina:2,
   energy:null,energyCost:0,
   knownWork:'check a personally mapped and originally witnessed local species’ documented ecology',
-  actualEffect:'a public animal-safe field note, never bloodline capture or a free trait'}
+  actualEffect:'a public animal-safe field note, never bloodline capture or a free trait'},
+ {id:'lumenfall_clinic_quality',name:'Lumenfall medical quality and poultice audit',method:'field_poultice',
+  source:'specialist-observation',location:'academy',region:'lumenfall',
+  skill:'medicine',attribute:'int',dc:15,minutes:60,stamina:2,
+  energy:null,energyCost:0,
+  knownWork:'survey existing public medical preparation records and sterile field-care standards without diagnosing an invented patient',
+  actualEffect:'a dated medical quality report; no healing item, patient or licence granted'},
+ {id:'crossing_mutual_signals',name:'Crossing voluntary human-beast signal practicum',method:'reciprocal_signals',
+  source:'willing-partnership',location:'crossing',region:'morrowfen_basin',
+  skill:'beastcraft',attribute:'wis',dc:16,minutes:60,stamina:2,
+  energy:null,energyCost:0,
+  knownWork:'observe one real willing partner’s preferred signals, separately from commands, contracts or hidden thoughts',
+  actualEffect:'an ethical communication field note, without compelling a beast, gaining bond stages or teaching a human-only power'}
 ]);
 const MAP=items=>Object.freeze(Object.fromEntries(items.map(x=>[x.id,Object.freeze(x)])));
 const L=MAP(HISTORICAL_LEGACIES),N=MAP(RENOWNED),M=MAP(PUBLIC_METHODS),
- R=MAP(RESTRICTED_METHODS),J=MAP(CIVIC_APPLICATIONS);
+ T=MAP(SCHOOL_TRADITIONS),R=MAP(RESTRICTED_METHODS),J=MAP(CIVIC_APPLICATIONS);
 function validate(){
  const ids=new Set();
- for(const [group,all] of Object.entries({HISTORICAL_LEGACIES,RENOWNED,PUBLIC_METHODS,RESTRICTED_METHODS,CIVIC_APPLICATIONS})){
+ for(const [group,all] of Object.entries({HISTORICAL_LEGACIES,RENOWNED,PUBLIC_METHODS,SCHOOL_TRADITIONS,RESTRICTED_METHODS,CIVIC_APPLICATIONS})){
   for(const x of all){
    if(ids.has(group+':'+x.id))throw Error('Duplicated historical world identity');
    ids.add(group+':'+x.id);
@@ -349,6 +497,11 @@ function validate(){
    if(x.method&&!M[x.method])throw Error('Professional bridge needs a genuine public method '+x.id);
   }
  }
+ for(const x of SCHOOL_TRADITIONS){
+  if(!M[x.common]||!Atlas.I[x.institution]||!Houses.byId[x.house]||
+     Houses.byId[x.house].polity!==Atlas.I[x.institution].polity)
+   throw Error('A named school teaching must correspond to an original common method and actual local house');
+ }
  for(const x of PUBLIC_METHODS)if(!Atlas.I[x.institution])
   throw Error('A public method requires an actual educational or service institution');
  for(const x of CIVIC_APPLICATIONS){
@@ -359,13 +512,16 @@ function validate(){
     x.source==='body-organ'&&method.path!=='body'||
     x.source==='rift-anchor'&&method.path!=='rift'||
     x.source==='origin-map'&&method.path!=='beast-origin'||
-    x.source==='ordinary'&&method.path!=='mundane')
+    x.source==='ordinary'&&method.path!=='mundane'||
+    x.source==='specialist-observation'&&method.path!=='specialist'||
+    x.source==='willing-partnership'&&method.path!=='partnership')
    throw Error('Professional power-path source cannot masquerade as another discipline');
  }
  return {historicalLegacies:HISTORICAL_LEGACIES.length,
   renowned:RENOWNED.length,publicMethods:PUBLIC_METHODS.length,
+  schoolTraditions:SCHOOL_TRADITIONS.length,
   restrictedMethods:RESTRICTED_METHODS.length,civicApplications:CIVIC_APPLICATIONS.length};
 }
 validate();
 module.exports={HISTORICAL_LEGACIES,RENOWNED,PUBLIC_METHODS,
- RESTRICTED_METHODS,CIVIC_APPLICATIONS,L,N,M,R,J,validate};
+ SCHOOL_TRADITIONS,RESTRICTED_METHODS,CIVIC_APPLICATIONS,L,N,M,T,R,J,validate};

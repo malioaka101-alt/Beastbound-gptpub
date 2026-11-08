@@ -1,6 +1,6 @@
 'use strict';
 // Original Beastbound Master Prompt defines requirements, not country names.
-// This atlas is NEW AUTHORING for Aerin's wider world. It is not Jory's save.
+// These named atlas entries are WORLD-LEVEL NEW AUTHORING, not facts from any past player campaign or a replacement for the original Master Prompt.
 const CONTINENTS = [
  {id:'valedryn',name:'Valedryn',land:'Westwind continental shelf',climate:'oceanic west, rain-shadow east',seas:['Mirror Gulf','Saltwater Reach'],barriers:['Crownspine Range','Veilfen watershed'],history:'Canal republics emerged after the Seven Estuary Treaty; upland citadels still contest grazing rights.',ecology:'river wetlands, oakwoods, alpine herbfields, mist rifts'},
  {id:'sahriel',name:'Sahriel',land:'southern sandstone shield',climate:'monsoon coasts, interior deserts',seas:['Glasswind Sea','Pearl Bight'],barriers:['Copper Stair','Saffron Expanse'],history:'Old aquifer compacts preceded the caravan city leagues; wells remain political institutions.',ecology:'salt pans, flood oases, dune gardens, storm-chasing beasts'},

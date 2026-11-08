@@ -13,7 +13,7 @@ const act=(s,system,operation,params={})=>R.act(s,{system,operation,params});
 const allRules=FS.readFileSync(Path.join(__dirname,'../rules/index.js'),'utf8');
 const methods=Lore.PUBLIC_METHODS;
 A.deepEqual(Lore.validate(),{
- historicalLegacies:5,renowned:11,publicMethods:19,restrictedMethods:6,civicApplications:7});
+ historicalLegacies:8,renowned:14,publicMethods:23,schoolTraditions:9,restrictedMethods:6,civicApplications:9});
 A.equal(new Set(methods.map(x=>x.id)).size,methods.length);
 for(const path of ['meridian','arcane','soul','body','rift','beast-origin',
  'partnership','specialist','mundane']){
@@ -49,8 +49,9 @@ const base=()=>E.newGame({seed:882181,name:'Morrowfen Civic Researcher',
 {
  const s=base(),before=E.exportGame(s),rng=s.rngState;
  const overview=act(s,'world','heritage',{type:'overview'});
- A.equal(overview.renowned.length,11);
- A.equal(overview.historicalLegends.length,5);
+ A.equal(overview.renowned.length,14);
+ A.equal(overview.institutionalTeachingTraditions.length,9);
+ A.equal(overview.historicalLegends.length,8);
  A.ok(overview.eraSummaries.some(x=>x.era==='Ash Years'));
  const local=act(s,'world','heritage');
  A.equal(local.polity,Atlas.P.reedmarch.name);
@@ -62,6 +63,11 @@ const base=()=>E.newGame({seed:882181,name:'Morrowfen Civic Researcher',
  A.equal(legend.era,'Ash Years');
  A.equal(legend.noVerifiedPersonalPowerRank,true);
  A.ok(legend.establishedHistoricalContext.includes('volcanic empire'));
+ const school=act(s,'world','heritage',{type:'school',id:'marshglass_no_take'}).entries[0];
+ A.equal(school.existingCommonFoundation.id,'origin_mapping');
+ A.equal(school.associatedHouse.name,'Marshglass Lineage');
+ A.equal(school.notPersonallyEarnedFromReading,true);
+ A.equal(school.locallyVerifiedOperatingStatus,'active');
  A.equal(act(s,'world','heritage',{type:'restricted',id:'marshglass_private'}).
   entries[0].privateFormula,'not supplied by public history');
  const famous=act(s,'world','heritage',{type:'renown',id:'reef_speakers'}).entries[0];
@@ -70,11 +76,15 @@ const base=()=>E.newGame({seed:882181,name:'Morrowfen Civic Researcher',
  const old=act(s,'world','atlas',{type:'institution',id:'forge_university'});
  A.ok(old.publiclyKnownMethods.some(x=>x.name==='Arcane Spark'));
  A.ok(old.publicRenown.some(x=>x.publiclyAssociatedFamily==='Emberhand Foundry Kin'));
+ A.ok(old.publiclyNamedSchoolTraditions.some(x=>x.name==='Emberhand Cooling-Return Schema'));
  A.equal(old.membershipOrTeachingNotGranted,true);
  const w=act(s,'world','realmStatus');
  A.ok(w.renownedPublicInstitutions.some(x=>x.name==='Lumenfall Annex'));
- A.equal(act(s,'world','realmOverview').renownedWorldTraditions,11);
+ A.equal(act(s,'world','realmOverview').renownedWorldTraditions,14);
+ A.equal(act(s,'world','realmOverview').institutionSpecificTeachings,9);
+ A.equal(act(s,'world','realmOverview').civilianProfessionalApplications,9);
  A.ok(w.sharedLocalMethods.every(x=>x.knowledgeIsNotMastery));
+ A.ok(w.locallyIdentifiedSchoolPractices.every(x=>x.noFreeSkillGranted));
  const work=act(s,'world','culturalPracticeStatus');
  A.ok(work.possibleWork.some(x=>x.id==='ferry_route_survey'));
  A.deepEqual(work.knownPersonalReports,[]);
@@ -84,6 +94,8 @@ const base=()=>E.newGame({seed:882181,name:'Morrowfen Civic Researcher',
   {type:'legend',id:'nonexistent_king'},
   {type:'secret',id:'riftglass_vault'},
   {type:'common',id:'arcane_spark',guaranteedSpell:true},
+  {type:'school',id:'gate_rope_lift',grantTechnique:true},
+  {type:'school',id:'unknown_mythic_institute'},
   {type:'restricted',id:'sealwarden_maps',secretFormula:true},
   {type:'overview',id:'fake_imperial_charter'},
   {type:'renown',path:'divine-ultimate'}
