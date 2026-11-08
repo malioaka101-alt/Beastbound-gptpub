@@ -144,7 +144,7 @@ function visible(s,w){
   if(r.source.polity!==polity||r.source.releaseDay>now)continue;
   records.push({id:r.id,title:r.source.title,author:r.source.author,
    kind:r.source.kind,publishedDay:r.source.releaseDay+1,
-   status:r.reviewDay!==null&&r.reviewDay<=now?
+   status:r.reviewDay!==null&&r.reviewDay+2<=now?
     r.reviewStatus:'awaiting independent review',
    adoptingInstitution:r.reviewDay!==null&&r.reviewDay+2<=now?
     Atlas.I[r.institutionId]?.name||null:null,
