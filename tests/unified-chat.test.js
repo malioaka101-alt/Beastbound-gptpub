@@ -3,12 +3,12 @@ const A=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const E=require('../engine'),Rules=require('../rules'),H=Rules.unified,Combat=Rules.combat,Turn=require('../scripts/chat-turn'),Panels=require('../panels');
 const Scene=require('./scene-witness-fixture');
-const dir=fs.mkdtempSync(path.join(os.tmpdir(),'bb-unify-')),file=path.join(dir,'aerin.json');
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'bb-unify-')),file=path.join(dir,'synthetic.json');
 const load=()=>E.importGame(fs.readFileSync(file,'utf8'));
 const write=s=>fs.writeFileSync(file,E.exportGame(s)+'\n');
 let assertions=0;const eq=(a,b,msg)=>{A.deepEqual(a,b,msg);assertions++;};
 try{
- const original=E.importGame(fs.readFileSync(path.join(__dirname,'../saves/aerin_marsh.json'),'utf8'));
+ const original=E.newGame({seed:811173,name:'Wound Model Fixture',background:'fieldworker',path:'meridian'});
  const originalText=E.exportGame(original);
  write(original);
  const look=Turn.execute(file,{id:'unify_status_001',mode:'rule',system:'health',operation:'status'});
@@ -145,6 +145,6 @@ try{
  eq(Turn.execute(bulk,{id:'ledger_0000',mode:'checkpoint',scene:'Chronicle beat 0'}).duplicate,true);
  const spoof=Turn.execute(bulk,{id:'ledger_0000',mode:'checkpoint',scene:'Change the past'});
  eq(spoof.applied,false);A.match(spoof.error,/different request/);assertions++;
- eq(E.exportGame(original),originalText); // Never changed the actual Aerin checkpoint.
+ eq(E.exportGame(original),originalText); // Never changed the original disposable fixture.
  console.log(`Unified text-RPG tests passed (${assertions} deterministic assertions)`);
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
