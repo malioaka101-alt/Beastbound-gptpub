@@ -496,6 +496,10 @@ function publicStatus(s){const w=peek(s),r=A.R[locationRegion(s)],p=A.P[r.polity
   sharedLocalMethods:Renown.PUBLIC_METHODS.filter(x=>
     Renown.RENOWNED.some(n=>n.polity===r.polity&&n.institution===x.institution)).
     slice(0,4).map(x=>({name:x.name,path:x.path,knowledgeIsNotMastery:true})),
+  locallyIdentifiedSchoolPractices:Renown.SCHOOL_TRADITIONS.filter(x=>
+    A.I[x.institution].polity===r.polity).slice(0,4)
+    .map(x=>({name:x.name,organisation:A.I[x.institution].name,
+     commonBasis:Renown.M[x.common].name,noFreeSkillGranted:true})),
   knownProfessionals:N.publicKnown(s,w.notables).filter(x=>x.community===p.name).slice(0,4),
   conservationNotice:publicNews(s).items.some(e=>/habitat|beast tracks|migration/i.test(e.text))?'Recent published naturalist warning':'No current public report'};
 }
@@ -509,6 +513,10 @@ function publicAtlas(s,{type,id}={}){
    publiclyKnownMethods:Renown.PUBLIC_METHODS.filter(x=>x.institution===id).
     map(x=>({name:x.name,path:x.path,learningEvidence:x.learning,
      actualProcedureAvailable:!!x.actualRule})),
+   publiclyNamedSchoolTraditions:Renown.SCHOOL_TRADITIONS.filter(x=>x.institution===id)
+    .map(x=>({name:x.name,commonFoundation:Renown.M[x.common].name,
+     publiclyAssociatedFamily:require('./social-houses').byId[x.house].name,
+     noTechniqueLearnedByAffiliation:true})),
    publicRenown:Renown.RENOWNED.filter(x=>x.institution===id).
     map(x=>({standing:x.standing,documentedHistory:x.history,
      publiclyAssociatedFamily:require('./social-houses').byId[x.house].name,
@@ -570,6 +578,8 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
   renownedWorldTraditions:Renown.RENOWNED.length,
   historicalLegacies:Renown.HISTORICAL_LEGACIES.length,
   publicTechniqueTraditions:Renown.PUBLIC_METHODS.length,
+  institutionSpecificTeachings:Renown.SCHOOL_TRADITIONS.length,
+  civilianProfessionalApplications:Renown.CIVIC_APPLICATIONS.length,
   generatedSpeciesCapacity:B.SPECIES_COUNT,regionalFormCapacity:B.FORM_COUNT,mythicSites:Mythic.SITES.length,mythicTraditions:Mythic.TRADITIONS.length,realmTraditions:Mythic.REALMS.length,backgroundProfessionals:Object.keys(w.notables||{}).length,elapsedSixdayTicks:w.ticks.sixdays,elapsedMonthTicks:w.ticks.months,
   note:'These are configured systems and catalogue capacity; not a claim of personally authored species or full individual-citizen simulation'};}
 module.exports={initial,ensure,peek,localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
