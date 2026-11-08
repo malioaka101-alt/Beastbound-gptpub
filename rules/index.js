@@ -50,6 +50,7 @@ const EmergentGroups=require('./emergent-groups');
 const GroupInvitations=require('./group-invitations');
 const Senses=require('./first-stage-senses');
 const RiftAnchors=require('./rift-anchors');
+const OriginFoundations=require('./beast-origin-foundations');
 const SoulThreads=require('./soul-threading');
 const PersonPresence=require('../world/person-presence');
 const WildLives=require('../world/wild-lives');
@@ -172,6 +173,9 @@ function act(s,{system,operation,params={}}={}){
   case 'character.assessPotential':return Character.assess(s,params);
   case 'discipline.status':return Disciplines.status(s);
   case 'power.status':return PowerOverview.read(s);
+  case 'origin.researchStatus':return OriginFoundations.status(s);
+  case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
+  case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
   case 'arcane.sparkStudy':return Spark.learn(s,params);
   case 'arcane.sparkStatus':return Spark.status(s,params);
   case 'arcane.wardStudy':return ArcaneWard.study(s,params);
