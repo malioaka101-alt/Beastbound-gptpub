@@ -56,6 +56,7 @@ jobs:
             tests/scene-check-provenance.test.js
             tests/habitat-survey.test.js
             tests/wildlife-observation.test.js
+            tests/beast-origin-preliminary-research.test.js
             tests/earned-practice.test.js
             tests/reed-harvest.test.js
             tests/core-contest-guard.test.js
