@@ -341,6 +341,12 @@ function execute(savePath, req) {
   req.mode!=='status'&&!(req.mode==='rule'&&req.system==='world'&&
    req.operation==='authorOpening'))
   throw Error('This campaign has no playable opening yet: the GM must first author a unique real scene and starting place');
+ if(req.mode==='status'&&s.campaign?.requiresGmOpening&&
+    s.campaign.openingState!=='authored')
+  return {id:req.id,ok:true,applied:false,openingPending:true,
+   revision:runtime.revision,stateHash:preHash,
+   knownCharacter:{name:s.player.name,age:s.player.age},
+   note:'The GM has not authored the first scene. The technical save location is not a played or player-known starting place.'};
  if(req.mode==='status')return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,panel:P.core(s),hud:P.hudData(s),recap:recap(s)};
  const consciousness=s.table?.combatants?.player?.status;
  if(['incapacitated','knocked_out','rehabilitating','dying','dead'].includes(consciousness)){
