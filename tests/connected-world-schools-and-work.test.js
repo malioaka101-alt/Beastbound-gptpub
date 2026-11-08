@@ -23,7 +23,7 @@ for(const x of Lore.SCHOOL_TRADITIONS){
  A.ok(x.civilian.length>30);
  A.ok(x.combat.length>30);
  A.ok(x.access.length>16);
- A.match(x.limit,/no |cannot |not |without |needs |requires/i);
+ A.match(x.limit,/no |cannot |not |never |without |needs |requires/i);
 }
 for(const figure of Lore.HISTORICAL_LEGACIES){
  const country=Atlas.P[figure.polity],school=Atlas.I[figure.institution],
