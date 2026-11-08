@@ -102,6 +102,7 @@ function characterData(state){
  const s=E.importGame(state),p=s.player,f=p.family||null,h=p.history||null;
  return {name:p.name,age:p.age,background:p.background,path:p.path,
   ...(p.gender?{gender:p.gender}:{}),
+  ...(p.appearance?{appearance:p.appearance}:{}),
   ...(p.pronouns?{pronouns:p.pronouns}:{}),
   ...(p.startingContext?{origin:{
    kind:p.startingContext.originKind,
@@ -243,6 +244,7 @@ function full(state,name){
   lines.push(row(p.name.toUpperCase()),row(`${p.age} · ${p.background}`),row('Path: '+p.path));
   const profile=characterData(s);
   if(!Realm.calendar(s).absoluteDate)sec('CIVIL DATE',['Unrecorded in this older save']);
+  if(profile.appearance)sec('APPEARANCE',wrapText(profile.appearance));
   if(profile.origin)sec('EARLY ROOTS',[
    ...wrapText('Home: '+profile.origin.homeland),
    ...(profile.origin.connectedName?
