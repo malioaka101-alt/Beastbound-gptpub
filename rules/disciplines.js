@@ -331,7 +331,7 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  const spec=KEYS[system];if(!spec)throw Error('Unknown discipline');
  const chosenTarget=currentTarget(s,system);
  if(!methodsFor(system,chosenTarget).includes(method))
-  throw Error('Practice method does not belong to the current biological or spiritual stage');
+  throw Error('Method does not belong to the current biological or spiritual stage');
  if(!['established','independent'].includes(route))throw Error('Choose an actual supported practice route');
  if(typeof partTime!=='boolean')throw Error('Part-time practice must be explicitly true or false');
  const self=route==='independent'?independentSite(s,system,{shortSession:short}):null;
