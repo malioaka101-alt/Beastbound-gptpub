@@ -49,6 +49,7 @@ const Mediation=require('./voluntary-mediation');
 const EmergentGroups=require('./emergent-groups');
 const GroupInvitations=require('./group-invitations');
 const Senses=require('./first-stage-senses');
+const SoulThreads=require('./soul-threading');
 const PersonPresence=require('../world/person-presence');
 const WildLives=require('../world/wild-lives');
 const Creation=require('./creation-design');
@@ -242,6 +243,8 @@ function act(s,{system,operation,params={}}={}){
   case 'core.castAttack':throw Error('Raw spell attack calculations are not playable spells. The private chat casting route requires source-verified learned abilities, geometry, costs and prerequisites');
   case 'core.wardHit':throw Error('Direct Ward depletion without a resolved attack is not a playable Project operation; use the wound combat resolver');
   case 'soul.perceptionStatus':return Senses.soulStatus(s,params);
+  case 'soul.threadStatus':return SoulThreads.status(s);
+  case 'soul.threadWork':return SoulThreads.work(s,params);
   case 'soul.perceive':return Senses.perceive(s,params);
   case 'rift.senseStatus':return Senses.riftStatus(s,params);
   case 'rift.sense':return Senses.senseRift(s,params);
