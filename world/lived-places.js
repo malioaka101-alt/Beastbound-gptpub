@@ -52,6 +52,8 @@ function verifyPlace(p){
   p.founding.source!==SOURCE||p.founding.placeId!==p.id||
   p.founding.regionId!==p.regionId||p.founding.worldMinute!==p.establishedMinute||
   p.founding.name!==p.name||p.founding.kind!==p.kind||
+  p.founding.sceneType!==p.sceneType||
+  !['settlement','wilderness','structure','unknown'].includes(p.sceneType)||
   p.founding.description!==p.description||p.founding.culture!==p.culture||
   p.founding.notablesHash!==hash(p.notables)||
   p.founding.familiesHash!==hash(p.families)||
@@ -78,16 +80,19 @@ function location(s,placeId=s.world.location){
  const place=get(s,placeId);
  if(!place)return null;
  return {id:place.id,name:place.name,description:place.description,
-  biome:Atlas.R[place.regionId].biome,facilities:[],spawns:[],exits:[],
+  biome:place.sceneType==='settlement'?'settlement':Atlas.R[place.regionId].biome,
+  facilities:[],spawns:[],exits:[],
   regionId:place.regionId,canonical:false,kind:place.kind,
+  sceneType:place.sceneType,
   culture:place.culture};
 }
 function establish(s,p={}){
- keys(p,['placeId','name','regionId','description'],['kind','culture','notables','families','organisations']);
+ keys(p,['placeId','name','regionId','description'],['kind','sceneType','culture','notables','families','organisations']);
  const {placeId,regionId}=p;
  if(!id(placeId)||!Atlas.R[regionId]||!phrase(p.name,3,100)||
   !phrase(p.description,16,900)||
   !phrase(p.kind===undefined?'settlement':p.kind,3,70)||
+  !['settlement','wilderness','structure','unknown'].includes(p.sceneType||'unknown')||
   !phrase(p.culture===undefined?'':p.culture,0,600))
    throw Error('A GM-authored place needs a real region and a plausible name and visible description');
  const E=require('../engine.js');
@@ -101,13 +106,15 @@ function establish(s,p={}){
   throw Error('That named place is already established in this region');
  const source={source:SOURCE,placeId,regionId,worldMinute:now,
   name:p.name.trim(),kind:(p.kind||'settlement').trim(),
+  sceneType:p.sceneType||'unknown',
   description:p.description.trim(),culture:(p.culture||'').trim(),
   notablesHash:hash(notables),familiesHash:hash(families),
   organisationsHash:hash(organisations),
   gmContext:'An in-scene GM-authored place added without rewinding the world',
   noNPCConsent:true,noExtraPlayerResources:true};
  const place={source:SOURCE,id:placeId,name:p.name.trim(),regionId,
-  kind:(p.kind||'settlement').trim(),description:p.description.trim(),
+  kind:(p.kind||'settlement').trim(),sceneType:p.sceneType||'unknown',
+  description:p.description.trim(),
   culture:(p.culture||'').trim(),establishedMinute:now,
   notables,families,organisations,notes:[],
   founding:source,foundingHash:hash(source)};
@@ -122,7 +129,7 @@ function establish(s,p={}){
  return {established:true,place:publicPlace(place),noFreeNPCOrItem:true};
 }
 function publicPlace(p){
- return {id:p.id,name:p.name,kind:p.kind,
+ return {id:p.id,name:p.name,kind:p.kind,sceneType:p.sceneType,
   regionId:p.regionId,region:Atlas.R[p.regionId].name,
   description:p.description,culture:p.culture,
   knownNotables:p.notables.map(x=>({...x})),
