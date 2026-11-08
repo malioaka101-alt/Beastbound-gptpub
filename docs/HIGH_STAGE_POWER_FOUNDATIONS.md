@@ -58,13 +58,25 @@ A full physiological remodel is not identical to an instantly healed injury, pro
 
 `tests/body-organ-cycle-three.test.js` uses disposable bodies with source-dated prior cycle history, real new work rolls, an earned physical change, actual combat Recover, forged/no-evidence refusal, severe possible injury and turn-ID replay. All older body/health/combat tests remain mandatory.
 
+## Fourth independent advanced development — Soul Phase II, Soul Threading
+
+The original Master Prompt §22 treats soul as **consciousness, identity, memory, spiritual stability and soul–body resonance**. Phase II links the practitioner's own mind, soul and body; it is neither biological Organ Cycle nor Arcane Circle construction. Successful Soul Threading strengthens concentration and identity anchoring, not the ability to read secrets, own another soul, force contracts or raise the dead.
+
+The new `soul.threadStatus` and `soul.threadWork` use existing Phase I Soul Perception's dated breakthrough and personally established Soul reservoir as prerequisites. Independent mind, body and resonance exercises or genuine integrated whole-self work can earn 2 points of integrity on each link; integrative work must be earned and cannot be bypassed by writing a bigger Phase number. Exceptional real outcomes can integrate multiple links at once; **no mandatory tutor, price, minimum age, calendar interval or set count of sessions** is imposed. Sessions actually consume 2 Soul reserve, real stamina and 15–480 minutes, and resolve one protected Cultivation/Wisdom check. Severe spiritual backlash can lower stability and cause a real wound.
+
+Only the verified integrated outcome grants Phase II, records mind/body/resonance links and Soul-thread integrity, and upgrades the canonical Soul reserve capacity and bounded perception range **without refilling energy for free**. The original Phase I ability remains available. It now receives an authentic **+2 concentration modifier on its existing Soul Perception check** only when Soul Phase II is fully proven; the check still consumes the original energy and time, and still requires a real current player-known local scene. This is a present, useful spiritual effect with a check and cost, not an automatic ability to see unseen beasts, infer souls, learn names or force a partnership.
+
+`tests/soul-phase-two-threading.test.js` checks dated Phase I history, both individual and integrative routes, true risk, costs, earned capacity, actual perception use, forged proof/bonus refusal and file-backed turn-ID replay. It runs alongside all older Soul perception, partnership and combat regressions.
+
+Later Soul Phases III–VII remain unimplemented: resonance lattices, consensual contracts and spiritual tools, Soul Forge, Inner Sanctuary, bounded Soul Domain and living soul architecture will require their own structural evidence, legal/ethical obligations, countermeasures, resource constraints and real uses. No system should acquire those powers merely by reaching Phase II.
+
 ## Distinct future advanced work — NOT implemented by this milestone
 
 | Independent discipline | Source-defined higher path | Next evidence-backed engineering slice |
 |---|---|---|
 | **Meridian** | V Meridian Web Integration; VI Living Intent; VII Physique–Meridian Integration; VIII Living Domain; IX Transcendent Constitution | Verified Primary/Extraordinary/Branch web integration and one real bounded Stage IV projection or reinforcement use before any Stage V+ grant |
 | **Arcane** | III Matrix Formation (this PR); IV Dynamic Architecture; V Field Projection; VI Living Lattice; VII Astral Architecture; VIII Law Interpretation; IX World Circuit | Next: source-backed compound spell formula and use of the earned III matrix, then independently built dynamic IV geometry |
-| **Soul** | II Soul Threading through VII Living Soul Architecture | Source-backed soul-body threading, identity stability and specific consent-bound applications; never spontaneous mindreading or resurrection |
+| **Soul** | II Soul Threading (this PR) through VII Living Soul Architecture | Next: real resonance lattice and consent-bound spiritual applications, without mindreading or resurrection |
 | **Body** | III Organ (this PR); IV Nerve-Sense; V Blood-Essence; VI Adaptive Physique; VII Evolved Physique | Next: authentic Nerve-Sense organ-link work and situational uses of earned organs, without assuming fixed ordering across every school |
 | **Rift** | II Anchor Marking through VIII Boundary Domain | Actual environmental anchors and mapped spatial measurements before displacement, storage or domain work |
 | **Beast-Origin** | Mapping through Personal Evolution (eight source procedures) | Individual sourced trait, anatomy/consent, compatibility and rejection before any acquired biological organ |

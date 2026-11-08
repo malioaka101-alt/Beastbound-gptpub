@@ -5,6 +5,7 @@
 const C=require('./core'),E=require('../engine'),W=require('./world');
 const U=require('./unified'),Combat=require('./combat'),Build=require('./build');
 const Crypto=require('node:crypto');
+const SoulThreads=require('./soul-threading');
 const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
@@ -269,6 +270,7 @@ function status(s){
   const gateCount=system==='meridian'?s.player.meridian.gates?.length||0:0,
    seaReady=system==='meridian'&&s.player.meridian.stage===3&&gateCount===108,
    bodyThree=system==='body'&&s.player.body?.cycles?.length===2,
+   soulTwo=system==='soul'&&s.player.soul?.phase===1,
    arcaneThree=system==='arcane'&&s.player.arcane.coreIgnited===true&&
     s.player.arcane.circles===2,
    arcaneTwo=system==='arcane'&&s.player.arcane.coreIgnited===true&&
@@ -280,7 +282,7 @@ function status(s){
    gateDC=gateAvailable?(nextGate<=36?13:nextGate<=72?16:19)+
     (milestone?3:0):null;
   systems[system]={
-   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':arcaneThree?'Third Circle — Matrix Formation':bodyThree?'Cycle III — Organ Refinement':'advanced stage: procedure not implemented'),
+   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':arcaneThree?'Third Circle — Matrix Formation':bodyThree?'Cycle III — Organ Refinement':soulTwo?'Phase II — Soul Threading':'advanced stage: procedure not implemented'),
    current:system==='meridian'?s.player.meridian.stage:
     system==='arcane'?(s.player.arcane.coreIgnited?'Core ignited':'No Core')+
      '; '+s.player.arcane.circles+' Circles':
@@ -292,19 +294,20 @@ function status(s){
     seaReady?s.table?.meridianSeaFormation?.points||0:
     arcaneThree?s.table?.arcaneMatrixRevision?.progress||0:
     arcaneTwo?s.table?.arcaneCircleRevision?.progress||0:
-    bodyThree?Object.values(s.table?.organCycleWork?.systems||{}).reduce((n,x)=>n+x,0):0,
+    bodyThree?Object.values(s.table?.organCycleWork?.systems||{}).reduce((n,x)=>n+x,0):
+    soulTwo?Object.values(s.table?.soulThreadWork?.links||{}).reduce((n,x)=>n+x,0):0,
    required:pair?.[0]??(gateAvailable?
-    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneThree?6:arcaneTwo?4:bodyThree?8:null),
-   dc:pair?.[1]??(seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:gateDC),
-   availableMethods:target?methodsFor(system,target):[],
+    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneThree?6:arcaneTwo?4:bodyThree?8:soulTwo?6:null),
+   dc:pair?.[1]??(seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:soulTwo?16:gateDC),
+   availableMethods:target?methodsFor(system,target):soulTwo?[...SoulThreads.FOCI]:[],
    nextEligibleDay:rec?.cooldownUntil||0,
    trainingRoutes:target||gateAvailable?['established','independent']:
     seaReady?['independent']:
-    arcaneTwo||arcaneThree||bodyThree?['independent']:[],
-   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree||bodyThree)&&
+    arcaneTwo||arcaneThree||bodyThree||soulTwo?['independent']:[],
+   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree||bodyThree||soulTwo)&&
     SELF_SITES[system].includes(s.world.location),
    independentPracticeFeeTalons:0,
-   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:gateDC,
+   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:soulTwo?16:gateDC,
    independentBreakthroughExtraDC:target?3:null,
    ...(target?{practiceSession:{
     minimumMinutes:15,maximumMinutes:480,
@@ -312,6 +315,14 @@ function status(s){
     defaultRoute:'independent',noCompulsoryTeacher:true,
     noUniversalTuition:true,noMinimumCalendarDays:true,
     omittedMinutes:'legacy sixday course for existing callers'
+   }}:{}),
+   ...(soulTwo?{threadWork:{
+    methods:[...SoulThreads.FOCI],
+    requiredPerLink:2,integratedSoulBodyWork:true,
+    reserveSpentPerAttempt:2,
+    sessionMinutes:{minimum:15,default:120,maximum:480},
+    noCompulsoryTeacher:true,noFixedCalendarGate:true,
+    noFreeMindReadingOrContract:true
    }}:{}),
    ...(bodyThree?{organWork:{
     methods:[...ORGAN_FOCI],tissueIntegrityRequiredPerSystem:2,

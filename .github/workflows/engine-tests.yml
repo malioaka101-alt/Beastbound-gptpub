@@ -115,6 +115,7 @@ jobs:
             tests/combat-player-attack.test.js
             tests/open-learning-routes.test.js
             tests/earned-senses.test.js
+            tests/soul-phase-two-threading.test.js
             tests/self-taught-basic-techniques.test.js
             tests/arcane-spark.test.js
             tests/arcane-ward.test.js
