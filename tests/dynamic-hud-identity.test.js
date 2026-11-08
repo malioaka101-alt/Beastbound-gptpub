@@ -123,7 +123,12 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  A.ok(!P.hudData(s).resources.some(x=>x.key==='health'));
 }
 {
- const x=New.create({seed:5618742,slug:'hud_fileturn_001'});
+ // This exercised interval needs a real safe settlement opening, not a
+ // fabricated uneventful wilderness absence. The known seeded annex starts
+ // in an actual established settlement under the existing map.
+ const x=New.create({seed:2926136976,slug:'hud_fileturn_001'});
+ A.equal(x.state.world.location,'academy');
+ A.equal(E.LOCATIONS[x.state.world.location].biome,'settlement');
  const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-dynamic-hud-')),
   path=Path.join(dir,'save.json');
  try{
