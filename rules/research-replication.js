@@ -16,9 +16,9 @@ function verify(s,t){
   t.skillRank!==t.proof.skillRank||
   t.abilityScore!==10||
   t.proof.origin!==ORIGIN||
-  t.proof.projectId!==t.proof.projectId||
   t.proof.npcId!==t.testerId||
   t.proof.author!==s.player.name||
+  !/^[a-z][a-z0-9_-]{1,48}$/.test(t.proof.projectId)||
   t.proof.skillRank<1||t.proof.skillRank>5||
   !Number.isInteger(t.worldMinute)||t.worldMinute!==t.proof.acceptedAtMinute||
   t.worldMinute>s.world.minutes||
@@ -26,7 +26,7 @@ function verify(s,t){
   t.proof.requestedMinutes!==MINUTES||
   t.proof.location!==t.proof.shift?.location||
   t.proof.npcId!==t.proof.shift?.npcId||
-  t.proof.shift?.hash!==Presence.hash((({hash,...b})=>b)(t.proof.shift)) ||
+  t.proof.shift?.hash!==Presence.hash((({hash:seal,...body})=>body)(t.proof.shift))||
   t.proof.npcId!== 'notable:'+t.proof.notableId||
   t.proof.name!==t.proof.shift.name||
   t.proof.polity!==t.proof.shift.polity||
