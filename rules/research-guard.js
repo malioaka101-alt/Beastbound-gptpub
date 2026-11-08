@@ -36,6 +36,9 @@ function start(s,p={}){
     plan.parameters.id!==p.id||plan.parameters.dc!==undefined||
     plan.parameters.track!==undefined)
   throw Error('Research requires a precommitted project truth and source before any investigation');
+ if(plan.origin===require('./design-research').ORIGIN&&
+   !require('./design-research').verifyPlan(s,plan))
+  throw Error('Authenticated design research truth or physical source has been altered');
  const field=plan.parameters.skill;
  // A sealed research plan does not itself confer subject expertise.
  const earnedRank=C.int(s.player.skills?.[field]?.rank,'actual research lead rank',0,5);
