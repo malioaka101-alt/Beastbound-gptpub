@@ -74,7 +74,7 @@ function validate(v,s=null){
  for(const [id,p] of Object.entries(v.planes)){
   if(!slug(id)||p.id!==id||!verifyOrigin(p)||
    !phrase(p.name,3,100)||!phrase(p.description,15,900)||
-   !CATEGORIES.includes(p.category)||!VIS.includes(p.visibility)||
+   !slug(p.category)||!VIS.includes(p.visibility)||
    !Array.isArray(p.facts)||p.facts.length>200||
    p.facts.some(x=>!verifyFact(x,id)))
    throw Error('Saved plane has lost its original GM account or coherent facts');
@@ -120,7 +120,7 @@ function status(s,p={}){
 function authorPlane(s,p={}){
  allowed(p,['planeId','name','category','description'],['visibility']);
  if(!slug(p.planeId)||!phrase(p.name,3,100)||
-  !CATEGORIES.includes(p.category)||!phrase(p.description,15,900)||
+  !slug(p.category)||!phrase(p.description,15,900)||
   !VIS.includes(p.visibility||'public'))
   throw Error('A GM-established plane needs a distinct ID, nature and source-grounded description');
  const v=ensure(s);
