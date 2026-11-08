@@ -140,7 +140,8 @@ A.equal(Atlas.R.ashwind.polity,'reedmarch',
  const witness=forgery.table.realm.culturalPractice.reports.at(-1);
  witness.receipt.school.witnesses[0].receipt.check.roll=20;
  A.equal(Civic.verifyReport(witness),false);
- A.equal(Civic.earnedSchoolApplication(forgery,school),false);
+ A.equal(Civic.earnedSchoolApplication(forgery,school),true,
+  'A corrupted rolling copy must not erase the independently archived authentic original school demonstration');
  const forgedRank=E.importGame(snapshot);
  forgedRank.player.body.cycles=[];
  A.equal(Civic.earnedSchoolApplication(forgedRank,school),true,
