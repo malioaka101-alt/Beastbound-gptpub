@@ -69,15 +69,18 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
   A.ok(profile.family.members);
   A.equal(profile.family.members.filter(x=>x.relation==='sibling').length,
    p.family.siblings);
-  A.ok(profile.family.members.every(x=>x.name.endsWith(
-   p.name.split(' ').at(-1))));
+  // An adopted or warded person need not share every relative's surname.
+  // For an ordinary birth branch, original immediate kin retain the name.
+  if(!['adopted','ward'].includes(p.family.house?.relation))
+   A.ok(profile.family.members.every(x=>x.name.endsWith(
+    p.name.split(' ').at(-1))));
   A.equal(new Set(profile.family.members.map(x=>x.name)).size,
    profile.family.members.length,'All personally known family members need distinct names');
   A.ok(profile.knownHistory.upbringing.length>30);
   A.ok(profile.knownHistory.earlyWork.length>30);
   A.equal(x.summary.family.household,p.family.household);
   A.equal(x.summary.history.earlyWork,profile.knownHistory.earlyWork);
-  A.ok(!p.name.includes('Marsh'));
+  A.notEqual(p.name,'Aerin Marsh','A historical Marshglass line is not the ended Aerin trial');
   A.equal(s.campaign.oldCampaignImported,false);
   A.ok(!JSON.stringify(x).includes('Aerin Marsh'));
   A.equal(hud.context?.kind==='known-public-notices',false);
