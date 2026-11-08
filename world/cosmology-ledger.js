@@ -129,9 +129,9 @@ function authorPlane(s,p={}){
   description:p.description.trim(),visibility:p.visibility||'public',
   publicTradition:false,recordedMinute:s.world.minutes});
  v.planes[p.planeId]={...origin,originHash:hash(origin),facts:[]};
- require('../rules/core').event(s,'world','A cosmological world account was established: '+origin.name+'.',
-  {source:SOURCE,planeId:p.planeId,playerKnown:origin.visibility==='public',
-   noPortalOpened:true,noDivineFavour:true});
+ if(origin.visibility==='public')
+  require('../rules/core').event(s,'world','A cosmological world account was established: '+origin.name+'.',
+   {source:SOURCE,planeId:p.planeId,noPortalOpened:true,noDivineFavour:true});
  return {recorded:true,planeId:p.planeId,playerKnown:origin.visibility==='public'};
 }
 function recordFact(s,p={}){
@@ -150,10 +150,10 @@ function recordFact(s,p={}){
  if(plane.facts.some(f=>f.seal===seal))return {alreadyRecorded:true,mutated:false};
  if(plane.facts.length>=200)throw Error('Cosmological record requires an archive before further additions');
  plane.facts.push({...source,seal});
- require('../rules/core').event(s,'world','An account about '+plane.name+' has been documented.',{
-  source:SOURCE,planeId:plane.id,domain:source.domain,kind:source.kind,
-  factSeal:seal,playerKnown:source.visibility==='public',
-  noPowerGranted:true});
+ if(source.visibility==='public')
+  require('../rules/core').event(s,'world','An account about '+plane.name+' has been documented.',{
+   source:SOURCE,planeId:plane.id,domain:source.domain,kind:source.kind,
+   factSeal:seal,noPowerGranted:true});
  return {recorded:true,planeId:plane.id,kind:source.kind,
   playerKnown:source.visibility==='public',noInstantMagic:true};
 }
@@ -175,9 +175,9 @@ function authorBoundary(s,p={}){
   description:p.description.trim(),visibility:p.visibility||'public',
   hypothetical:true,noProvenPassage:true,recordedMinute:s.world.minutes});
  v.boundaries[p.boundaryId]={...origin,originHash:hash(origin),observations:[]};
- require('../rules/core').event(s,'world','A realm-boundary site has been recorded: '+origin.name+'.',
-  {source:SOURCE,boundaryId:p.boundaryId,planeId:p.planeId,
-   playerKnown:origin.visibility==='public',noFreeTransit:true});
+ if(origin.visibility==='public')
+  require('../rules/core').event(s,'world','A realm-boundary site has been recorded: '+origin.name+'.',
+   {source:SOURCE,boundaryId:p.boundaryId,planeId:p.planeId,noFreeTransit:true});
  return {recorded:true,boundaryId:p.boundaryId,noPassageCreated:true};
 }
 function observeBoundary(s,p={}){
@@ -209,9 +209,9 @@ function observeBoundary(s,p={}){
  if(b.observations.some(x=>x.seal===seal))return {alreadyRecorded:true,mutated:false};
  if(b.observations.length>=100)throw Error('Boundary observation record is full; archive before adding more');
  b.observations.push({...o,seal});
- require('../rules/core').event(s,'world','The realm-boundary signs at '+b.name+' were observed.',
-  {source:SOURCE,boundaryId:b.id,observationSeal:seal,
-   visible:b.visibility==='public',noPassageGranted:true});
+ if(b.visibility==='public')
+  require('../rules/core').event(s,'world','The realm-boundary signs at '+b.name+' were observed.',
+   {source:SOURCE,boundaryId:b.id,observationSeal:seal,noPassageGranted:true});
  return {observed:true,boundaryId:b.id,worldMinute:s.world.minutes,
   neverAutoCrosses:true,noBlessing:true,noUnverifiedRewards:true};
 }
