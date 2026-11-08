@@ -17,6 +17,13 @@ for(let seed=1;seed<=72;seed++){
  A.deepEqual(t.source.knownMembers.map(x=>({
   relation:x.relation,name:x.name})),s.player.family.members);
  A.equal(Kin.verify(Realm.peek(s)),true);
+ for(const p of Object.values(t.people)){
+  if(p.relation==='sibling'){
+   A.equal(p.economicMode,'age-or-work-unverified');
+   A.equal(p.personalFunds,0,
+    'An age-unverified sibling cannot begin with invented paid wages');
+  }
+ }
  const copy=E.importGame(E.exportGame(s));
  A.deepEqual(copy,s,'Fresh family histories survive the existing save schema');
  A.deepEqual(fresh(seed),s,'Creating a fresh character reuses its original seed outcome');
@@ -56,6 +63,12 @@ for(let seed=1;seed<=72;seed++){
   A.equal(p.headHash,p.history.at(-1).hash);
   A.ok(p.personalFunds>=0&&p.personalFunds<=60);
   A.equal(p.birthRegionId,home);
+  if(p.relation==='sibling'){
+   A.equal(p.personalFunds,0);
+   A.equal(p.regionId,home);
+   A.equal(p.history[1].source.action,
+    'independent-private-life-with-unverified-age');
+  }
   A.notEqual(p.name,s.player.name,'PC and kin are not one simulated actor');
  }
  A.deepEqual({coins:s.player.coins,stamina:s.player.stamina,
