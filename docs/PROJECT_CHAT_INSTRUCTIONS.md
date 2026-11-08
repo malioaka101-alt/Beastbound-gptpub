@@ -1,5 +1,12 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## ACTIVE STATE — trial ended by user; no active campaign (8 November 2026)
+
+The user **explicitly ended Aerin's playtest and asked for a full reset**. Do **not** resume, load, recreate, or adopt `saves/aerin_marsh.json` as the default: the active save and Aerin's trial request/result artifacts have been removed from the latest branch. **There is currently no active playable campaign.** Do not silently use Jory's, Ivar's or any validation campaigns as a replacement. Until the user explicitly begins a new game, work on **foundation development**, especially the **distinct canon power systems and earned structural progression**. Old Aerin descriptions and instructions in this long historical document are archived historical context and **not live directives**; the user-supplied original Master Prompt still takes precedence.
+
+No character has a current date, actions or position until a separate new campaign is deliberately created and checkpointed. Do not import the prior trial's identity, time, work, family, magic or choices into that new start. The 'full reset after the trial' condition has now been met; no additional reset of a non-existent campaign is needed.
+
+
 ## Dynamic everyday HUD and genuine character roots — newest player direction
 
 The player observed that early character presentation is thin, names feel artificially tied to local place names, the everyday panel omits actual civil dates, and the panel should adapt cleanly to the scene without rebuilding elaborate styling each turn. **Use `docs/IN_CHAT_SYSTEM_HUD.md` adaptive HUD v2** as current authority. `panels.hudData(state)` returns a compact player-known view model for native in-chat styling; successful and read-only `scripts/chat-turn.js` responses include `hud` alongside the text-only `panel` fallback. Read the returned fields, not a manually fabricated scene dashboard. Show the actual anchored date (day/month/year AC) where established, identity and relevant resources, plus one contextual detail. Use `panels.characterData(state)` or the expanded character panel for known household, named relatives and background on demand. **Do not render every personal detail in every ordinary scene.**
