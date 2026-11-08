@@ -47,10 +47,16 @@ function valid(w,r){
    r.source.firstTrialDay<p.birthSource.day)return false;
  // Original source-work witnesses have immutable content; the first
  // three proofs must actually be part of the person's sealed career.
- return r.source.originalWorkHashes.every(sh=>
-  p.career.workReceipts.some(x=>x.sourceHash===sh&&
-   x.source?.task?.method===r.source.method&&
-   x.source.outcome?.success===true));
+ const proofs=r.source.originalWorkProofs;
+ return Array.isArray(proofs)&&proofs.length===3&&
+  new Set(proofs.map(x=>x.source.day)).size===3&&proofs.every(x=>
+  x.sourceHash===hash(x.source)&&
+  x.source?.origin===Careers.WORK&&
+  x.source?.personId===p.id&&
+  x.source?.personOriginHash===p.originHash&&
+  x.source?.task?.method===r.source.method&&
+  x.source?.outcome?.success===true&&
+  x.source?.day<=r.source.firstTrialDay);
 }
 function workBonus(w,p,method){
  const r=w.independentInnovations?.records?.['method_'+p.id+'_'+method];
@@ -111,7 +117,8 @@ function consider(w,day,emit){
      title:p.name.split(' of ')[0]+'’s '+method.replace(/-/g,' ')+
       ' field practice',
      purpose:task.goal,domain:task.domain,
-     originalWorkHashes:unique.slice(0,3).map(x=>x.sourceHash)};
+     originalWorkProofs:unique.slice(0,3).map(x=>({
+      source:structuredClone(x.source),sourceHash:x.sourceHash}))};
     const r={id,origin:ORIGIN,source,sourceHash:hash(source),
      attempts:[attempt],status:passed?'tested':'reworking',
      releaseDay:passed?day+6:null};
