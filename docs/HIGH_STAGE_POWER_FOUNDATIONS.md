@@ -46,6 +46,18 @@ The follow-on development sequence must respect the original required physical p
 - **Beast-Origin:** Pattern Mapping, Compatibility Testing, Trait Seeding, Rejection, Stabilisation, Expression, Adaptation and Personal Evolution require source rights, structural compatibility, integration load and informed consent whenever relevant. Borrowed beast essence is not automatic spell reproduction.
 - **Human evolution, partners and specialist crafts:** permanent Origin Pattern transformations, bilateral beast synchronisation and runes/formation/alchemical technique mastery each have their own original canon; never count them as Meridian Gates, Arcane Circles or character skill ranks.
 
+## Third distinct power path — Body Refinement Cycle III, Organ Cycle (this PR)
+
+The original Master Prompt §23 describes **organ-level supernatural physiology**, independent of Qi storage or Mana Circle architecture. The heart, lungs, liver, kidneys and supporting systems must actually adapt; writing "Cycle III" or possessing a large Stamina pool is not a transformation.
+
+The new `body.organStatus` and `body.organWork` implement a bounded anatomical training slice through the established protected rules runner. Work first validates saved Cycle I and II histories, their actual physical wound-model constitution and current safety. Ordinary individual-organ conditioning and integrated organ work are both real routes; meaningful integrated success must cover the heart, lungs, liver and kidneys, while other organs are part of the systemic response rather than an overlooked extra stage. **Exceptional, successful whole-body conditioning may complete multiple structures in one true attempt.** No invented school fee, mandatory tutor or minimum age/calendar/number of sessions is imposed.
+
+Each attempted 15–480-minute session consumes real Stamina and resolves an engine-owned Constitution/Survival check at the current stage. Success makes recorded anatomical progress, failure costs effort, and severe failure can cause an actual wound. Completion grants an earned **+2 Stamina capacity, +1 Toughness and one extra Critical wound box**, without changing Qi, Mana, Soul, Rift, beast relationships or human evolution. An original saved organ-history receipt is required before the existing legal **combat Recover** action gains +1 additional Stamina, bounded by the normal maximum and the same action-use limit. A forged `cycles: ['Organ Cycle']` entry produces no enhancement.
+
+A full physiological remodel is not identical to an instantly healed injury, protection from every poison, or an evolved constitution. The tested Organ Cycle does not grant automatic supernatural respiration, environmental immunity, permanent high-organ regenerations, medical training or the later Nerve–Sense/Blood-Essence cycles. Such abilities need separately witnessed mechanisms and counterplay. The original prompt allows different schools and cycle ordering; this initial playable pathway is one verified route after the existing first two cycles, **not** a ban on other biologically supported progression orders adjudicated by a GM.
+
+`tests/body-organ-cycle-three.test.js` uses disposable bodies with source-dated prior cycle history, real new work rolls, an earned physical change, actual combat Recover, forged/no-evidence refusal, severe possible injury and turn-ID replay. All older body/health/combat tests remain mandatory.
+
 ## Distinct future advanced work — NOT implemented by this milestone
 
 | Independent discipline | Source-defined higher path | Next evidence-backed engineering slice |
@@ -53,7 +65,7 @@ The follow-on development sequence must respect the original required physical p
 | **Meridian** | V Meridian Web Integration; VI Living Intent; VII Physique–Meridian Integration; VIII Living Domain; IX Transcendent Constitution | Verified Primary/Extraordinary/Branch web integration and one real bounded Stage IV projection or reinforcement use before any Stage V+ grant |
 | **Arcane** | III Matrix Formation (this PR); IV Dynamic Architecture; V Field Projection; VI Living Lattice; VII Astral Architecture; VIII Law Interpretation; IX World Circuit | Next: source-backed compound spell formula and use of the earned III matrix, then independently built dynamic IV geometry |
 | **Soul** | II Soul Threading through VII Living Soul Architecture | Source-backed soul-body threading, identity stability and specific consent-bound applications; never spontaneous mindreading or resurrection |
-| **Body** | III Organ; IV Nerve-Sense; V Blood-Essence; VI Adaptive Physique; VII Evolved Physique | Tissue-specific organ and nervous-system work after genuinely completed first two cycles, with physiological consequences |
+| **Body** | III Organ (this PR); IV Nerve-Sense; V Blood-Essence; VI Adaptive Physique; VII Evolved Physique | Next: authentic Nerve-Sense organ-link work and situational uses of earned organs, without assuming fixed ordering across every school |
 | **Rift** | II Anchor Marking through VIII Boundary Domain | Actual environmental anchors and mapped spatial measurements before displacement, storage or domain work |
 | **Beast-Origin** | Mapping through Personal Evolution (eight source procedures) | Individual sourced trait, anatomy/consent, compatibility and rejection before any acquired biological organ |
 | **Human evolution** | Awakened, Refined, Transformed, Ascendant, Transcendent, Higher Evolved | Separate earned biological transformation evidence — never a stage automatically inherited from a discipline |
