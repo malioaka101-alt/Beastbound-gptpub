@@ -147,9 +147,14 @@ function create(options={}){
    ({...m,name:m.name.endsWith(' '+oldSurname)?
      m.name.slice(0,-oldSurname.length)+newSurname:m.name}));
  }
+ // Preserve the known five-site seed mapping for historical starts
+ // while adding the working Crossing as an occasional genuine new start.
+ const establishedOpening=pick(OPENINGS.filter(o=>o.location!=='crossing'),
+  ((n>>>16)^(n>>>3))>>>0);
  const chosenOpening=options.startLocation?
   OPENINGS.find(o=>o.location===options.startLocation):
-  pick(OPENINGS,((n>>>16)^(n>>>3))>>>0);
+  Origins.number(n,'working-crossing-start')%11===0?
+   OPENINGS.find(o=>o.location==='crossing'):establishedOpening;
  if(!chosenOpening)throw Error('Start location must be one of the currently executable world sites');
  const plan=Origins.prepare(n,base,originalIdentity,{...options,slug,mode},chosenOpening.location);
  const alternate={female:['Adela','Alys','Cerys','Della','Elen','Fenna','Iona','Kessa','Liora','Mira','Nessa','Rhea','Selda','Tavira','Vera','Ysolde'],
