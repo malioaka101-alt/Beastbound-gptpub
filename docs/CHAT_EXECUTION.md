@@ -1,5 +1,8 @@
 # Beastbound ChatGPT Project execution — technical specification
 
+**Current status (8 November 2026):** The user explicitly ended the Aerin trial. No active campaign exists in the current tree. The former `saves/aerin_marsh.json` and its `requests/aerin_marsh/` / `results/aerin_marsh/` files were removed; references below to those paths describe the historical example, **not** an active game. A new campaign will require an explicit new-game request, a separately generated save and its own date/identity. Do not resume Ivar or development fixtures by default.
+
+
 **No website or separate hosting plan is required.** The RPG is played privately in ChatGPT Project chats. The active GitHub repository, `malioaka101-alt/Beastbound-gptpub`, is **public** and stores the JavaScript engine, rules, code tests and checkpoint files. Public repository contents (including committed campaign saves, requests and results) must not be treated as private storage. The historical private repository is a frozen backup, not the active runner.
 
 **Current evidence (7 November 2026):** The public runner successfully processed real disposable status, action, precommitted check, checkpoint, resume, stale request and original-roll recovery; see [`docs/LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md`](LIVE_SAVE_RESUME_VERIFICATION_2026-11-07.md). The verified 113-test inventory includes NPC, GM-terrain and independent beast journeys; see [`docs/FINISH_LINE_A_READINESS_2026-11-07.md`](FINISH_LINE_A_READINESS_2026-11-07.md). The original older workflow-blocker notes are historical, not current failures.
