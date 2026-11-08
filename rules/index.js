@@ -61,6 +61,7 @@ const ResearchPublications=require('../world/research-publications');
 const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
+const StartingKin=require('../world/starting-kin');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -318,6 +319,10 @@ function act(s,{system,operation,params={}}={}){
   case 'world.ambitionsStatus':return Realm.publicAmbitions(s,params);
   case 'world.peersStatus':return Realm.publicPeers(s,params);
   case 'world.familyMembersStatus':return Realm.publicFamilyMembers(s,params);
+  case 'world.knownRelativesStatus':{
+   if(Object.keys(params).length)throw Error('Known starting family status is read-only');
+   return StartingKin.known(s,Realm.peek(s));
+  }
   case 'world.revealProfessional':return Realm.revealProfessional(s,params);
   case 'world.publishNews':return Realm.revealNews(s,params);
   case 'competition.notice':return FieldCompetition.notice(s,params);
