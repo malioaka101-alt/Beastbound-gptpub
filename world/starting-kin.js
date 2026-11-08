@@ -164,7 +164,7 @@ function known(s,w){
  return {members:source.knownMembers.map(m=>({
   name:m.name,relation:m.relation,
   lastEstablishedHome:Atlas.R[source.regionId].name,
-  lastEstablishedHomeIsCurrentPresence:false})),
+  currentPresenceVerified:false})),
   lifeLedgerAvailable:true,
   note:'These are personally known early relationships. Their current whereabouts, funds, mood, willingness, private work and recent choices remain unknown until witnessed or communicated.'};
 }
