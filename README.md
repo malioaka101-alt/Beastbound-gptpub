@@ -1,22 +1,24 @@
+> **Active state — 8 November 2026:** This is the **public** `malioaka101-alt/Beastbound-gptpub` source repository for a **private ChatGPT Project RPG**. There is **no active campaign**. Aerin's concluded trial save and request/result artifacts have been deleted; never resume or recreate that trial by default. Start a fresh character only on the player's explicit request. Historical campaign and formerly private-repository references below document earlier development, not current operating instructions.
+
 > **Current power-system audit (v1.1):** `docs/SOURCE_TO_ENGINE_AUDIT_V11.md` is the honest section-by-section (all 57 Master Prompt sections + later additions) mechanical coverage ledger. `rules/character.js` supplies a four-domain seeded capability sheet and separately assessed potential; `rules/disciplines.js` supplies time/cost/risk-backed early discipline training and 108-Gate progression; `rules/progress.js` requires validated complete form profiles before successful beast evolution. Legacy shortcuts are blocked in private turns. **Full high-tier power and civilisation parity is not yet implemented.** Ivar's separate save is protected, and play remains in private Project chats.
 
-# Beastbound Realms — PRIVATE ChatGPT Project RPG
+# Beastbound Realms — ChatGPT Project Text RPG
 
-**This is a private text RPG played inside the Beastbound ChatGPT Project. It is not a public website or a game to publish.**
+**Beastbound is played privately inside the ChatGPT Project. This GitHub source repository is public; it is not a public game website, and campaign material stored here must not be treated as confidential.**
 
-The ChatGPT conversation is the play interface: write actions and dialogue naturally. ChatGPT narrates the world and interprets intent; the tested JavaScript engine (`engine.js`) resolves numerical actions, progression, world ticks and saves. The private GitHub repository holds rules and campaign checkpoints between chat sessions.
+The ChatGPT conversation is the play interface: write actions and dialogue naturally. ChatGPT narrates the world and interprets intent; the tested JavaScript engine (`engine.js`) resolves numerical actions, progression, world ticks and saves. The connected public GitHub repository holds engine rules and any explicitly created campaign checkpoints between chat sessions.
 
-## Private chat execution (no public hosting)
+## Chat execution (no website hosting)
 
 Read `reference/Beastbound_Table_Rules.md` for 34-character panels, NPC knowledge, scene style, honest dice and world continuity. The original authoritative rules take precedence when a digest differs.
 
-**New in the private chat runtime:** `panels.js` makes exactly 34-character status panels; `scripts/chat-turn.js` applies a single idempotent turn and saves a checkpoint; `scripts/process-pending.js` plus a private GitHub Actions workflow can run a turn when the chat itself cannot execute JavaScript. Everything remains in this **private** repository. The optional Actions workflow is subject to free-tier minutes, and it's not instantaneous. See `docs/CHAT_EXECUTION.md`.
+**New in the chat runtime:** `panels.js` makes exactly 34-character status panels; `scripts/chat-turn.js` applies a single idempotent turn and saves a checkpoint; `scripts/process-pending.js` plus a private GitHub Actions workflow can run a turn when the chat itself cannot execute JavaScript. The repository is **public**, while gameplay remains within private Project chats. The optional Actions workflow is subject to free-tier minutes, and it's not instantaneous. See `docs/CHAT_EXECUTION.md`.
 
 ## Play inside a Project chat
 
 1. Open the **Beastbound** ChatGPT Project.
-2. Say **"Resume Aerin Marsh from the private GitHub save"** or begin a new campaign.
-3. The GM reads `docs/PROJECT_CHAT_INSTRUCTIONS.md`, loads `saves/aerin_marsh.json` and runs the engine through the available code-execution environment.
+2. To play, explicitly request a **new campaign**. There is currently no active campaign; Aerin's trial ended and her save and turn artifacts were removed.
+3. The GM reads `docs/PROJECT_CHAT_INSTRUCTIONS.md`, the Master Prompt and Table Rules, creates a new character only when requested, and uses the actual saved state and verified engine for that new campaign.
 4. You respond in natural language. Rolls and state changes are computed by the engine, not improvised.
 5. At a checkpoint, the GM updates the private GitHub save, preserving the previous history through Git commits.
 
@@ -26,7 +28,7 @@ The repository connection lets ChatGPT **read and write files**, but GitHub does
 
 - `engine.js`: deterministic JavaScript game rules and state transitions.
 - `bridge.js`: Node.js CLI for command-based state updates.
-- `saves/aerin_marsh.json`: initial random campaign checkpoint (seed 1355150487, no beast partner).
+- `saves/`: future campaign checkpoints, only after explicit creation. The historical Aerin trial save is deleted.
 - `reference/`: unified master prompt and compiled house-rule additions; the Jory Larkin examples **do not** become Aerin's campaign history.
 - `docs/PROJECT_CHAT_INSTRUCTIONS.md`: run, resume, narrate and checkpoint in chats.
 - `tests/smoke.test.js` and GitHub Actions: engine checks only.
@@ -50,13 +52,11 @@ This is a **private, natural-language text RPG**, not an online game or software
 
 ```bash
 node tests/smoke.test.js
-node bridge.js hud --save saves/aerin_marsh.json
 node tests/chat-runtime.test.js
-node bridge.js recap --save saves/aerin_marsh.json
 node bridge.js act --save /tmp/disposable.json --id travel_00001 --action "travel fen"
 ```
 
-**Never publish** this repository, reference documents or campaign saves. The website-deployment workflow has been removed, and the repository remains **private**. No hosting, subscription or GitHub Pages is required.
+**Public-repository caution:** do not commit secrets or confidential campaign/player information. The ChatGPT RPG itself remains private, and no hosting, subscription or GitHub Pages is required.
 
 ## Compatibility
 

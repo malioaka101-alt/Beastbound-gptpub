@@ -36,6 +36,9 @@ function start(s,p={}){
     plan.parameters.id!==p.id||plan.parameters.dc!==undefined||
     plan.parameters.track!==undefined)
   throw Error('Research requires a precommitted project truth and source before any investigation');
+ if(plan.origin===require('./design-research').ORIGIN&&
+   !require('./design-research').verifyPlan(s,plan))
+  throw Error('Authenticated design research truth or physical source has been altered');
  const field=plan.parameters.skill;
  // A sealed research plan does not itself confer subject expertise.
  const earnedRank=C.int(s.player.skills?.[field]?.rank,'actual research lead rank',0,5);
@@ -114,6 +117,9 @@ function replication(s,p={}){
     typeof t.source!=='string'||t.source.trim().length<18||
     !Number.isInteger(t.worldMinute)||t.worldMinute<0||t.worldMinute>s.world.minutes)
   throw Error('A documented independent replication opportunity and tester are required');
+ if(t.origin===require('./research-replication').ORIGIN&&
+   !require('./research-replication').verify(s,t))
+  throw Error('The witnessed independent professional replication opportunity was altered');
  const rank=C.int(t.skillRank,'recorded external tester skill',0,5);
  const ability=C.int(t.abilityScore,'recorded external tester ability',1,30);
  const mod=Math.floor((ability-10)/2)+2*rank;

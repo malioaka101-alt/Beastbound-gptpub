@@ -56,6 +56,11 @@ const SoulThreads=require('./soul-threading');
 const PersonPresence=require('../world/person-presence');
 const WildLives=require('../world/wild-lives');
 const Creation=require('./creation-design');
+const DesignResearch=require('./design-research');
+const ResearchPublications=require('../world/research-publications');
+const ResearchReplication=require('./research-replication');
+const IndividualInnovations=require('../world/independent-innovations');
+const EmergentHouseholds=require('../world/emergent-households');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -298,6 +303,18 @@ function act(s,{system,operation,params={}}={}){
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);
   case 'world.diffusionStatus':return Realm.publicDiffusion(s,params);
+  case 'world.localResearchStatus':{
+   if(Object.keys(params).length)throw Error('Local world research status is read-only');
+   return ResearchPublications.visible(s,Realm.peek(s));
+  }
+  case 'world.localHouseholdsStatus':{
+   if(Object.keys(params).length)throw Error('Local household status is read-only');
+   return EmergentHouseholds.visible(s,Realm.peek(s));
+  }
+  case 'world.localInnovationsStatus':{
+   if(Object.keys(params).length)throw Error('Local independent methods status is read-only');
+   return IndividualInnovations.visible(s,Realm.peek(s));
+  }
   case 'world.ambitionsStatus':return Realm.publicAmbitions(s,params);
   case 'world.peersStatus':return Realm.publicPeers(s,params);
   case 'world.familyMembersStatus':return Realm.publicFamilyMembers(s,params);
@@ -356,6 +373,10 @@ function act(s,{system,operation,params={}}={}){
   case 'world.agendaStatus':return {agendas:Agendas.publicStatus(s)};
   case 'world.advance':return TimePassage.passage(s,params);
   case 'world.wait':return TimePassage.wait(s,params);
+  case 'research.prepareDesign':return DesignResearch.prepare(s,params);
+  case 'research.designPlansStatus':return DesignResearch.status(s,params);
+  case 'research.inviteReplication':return ResearchReplication.invite(s,params);
+  case 'research.publish':return ResearchPublications.submit(s,params);
   case 'research.start':return ResearchGuard.start(s,params);
   case 'research.survey':return ResearchGuard.survey(s,params);
   case 'research.week':return ResearchGuard.week(s,params);

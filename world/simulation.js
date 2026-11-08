@@ -3,6 +3,9 @@
 // Never use player RNG or print hidden clocks and stats in player-facing replies.
 const Crypto=require('node:crypto'),A=require('./atlas'),B=require('./bestiary'),E=require('../engine.js'),N=require('./notables'),Mythic=require('./mythic'),Houses=require('./social-houses'),Gov=require('./government-offices'),Civic=require('./civic-petitions'),PublicHearings=require('./public-hearings'),Mediation=require('./voluntary-mediation'),AgentInitiatives=require('./agent-initiatives'),KnowledgeDiffusion=require('./knowledge-diffusion'),AdaptiveAmbitions=require('./adaptive-ambitions'),ProfessionalPeers=require('./professional-peers'),FamilyMembers=require('./family-members'),EmergentGroups=require('./emergent-groups'),GroupMemberAgency=require('./group-member-agency'),PersonPresence=require('./person-presence'),WildLives=require('./wild-lives'),WildRelations=require('./wild-relations'),WildGenerations=require('./wild-generations'),EmergentPeople=require('./emergent-people'),SapientBeasts=require('./sapient-beast-persons'),IndependentContacts=require('./independent-contacts');
 const GuildFieldwork=require('./guild-fieldwork');
+const ResearchPublications=require('./research-publications');
+const IndividualInnovations=require('./independent-innovations');
+const EmergentHouseholds=require('./emergent-households');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -292,6 +295,7 @@ function tickSixday(w,day){
  // Earlier independently published real civic/practice reports can affect
  // later professional attention. The world chooses whether to acknowledge.
  reviewPublicPractice(w,day);
+ ResearchPublications.review(w,day,()=>random(w),v=>event(w,v));
  // Local ecological indicators follow carrying capacity, habitat stress and food.
  for(const r of A.regions){const e=w.ecosystems[r.id];const extraction=(r.goods.includes('ore')||r.goods.includes('vael'))&&w.ticks.sixdays%2===0?3:0;
   const inheritedPressure=r.id==='whisperfen'&&w.ticks.sixdays%7===0?1:0;
@@ -443,6 +447,7 @@ function tickMonth(w,day){
  }
  Houses.month(w,day,v=>event(w,v));
  FamilyMembers.month(w,day,v=>event(w,v));
+ EmergentHouseholds.month(w,day);
  AgentInitiatives.month(w,day,v=>event(w,v));
  EmergentGroups.syncWorkerFounders(w,day,v=>event(w,v));
  EmergentGroups.month(w,day,v=>event(w,v));
@@ -476,7 +481,9 @@ function tick(s,weekDays=[],monthDays=[]){
    EmergentPeople.sixday(s,w,day);
    // People with genuine overlapping work-shift witnesses may freely meet
    // and share limited ordinary information without automatic teaching.
-   IndependentContacts.sixday(w,day);nW++;}
+   IndependentContacts.sixday(w,day);
+   IndividualInnovations.consider(w,day,v=>event(w,v));
+   EmergentHouseholds.sixday(w,day,v=>event(w,v));nW++;}
   if(mo.has(day)){tickMonth(w,day);nM++;}
   w.lastTickDay=day;
  }
@@ -506,6 +513,9 @@ function publicStatus(s){const w=peek(s),r=A.R[locationRegion(s)],p=A.P[r.polity
     x.polity===r.polity).slice(0,4).map(x=>({
     name:A.I[x.institution].name,publicPurpose:x.publicService,
     relatedHouse:require('./social-houses').byId[x.house].name})),
+  newlyPublishedLocalMethods:IndividualInnovations.visible(s,w).localPracticalMethods.slice(-4),
+  locallyReplicatedResearch:ResearchPublications.visible(s,w).publishedLocalResearch.slice(-4),
+  newLocalHouseholds:EmergentHouseholds.visible(s,w).localEstablishedHouseholds.slice(-4),
   sharedLocalMethods:Renown.PUBLIC_METHODS.filter(x=>
     Renown.RENOWNED.some(n=>n.polity===r.polity&&n.institution===x.institution)).
     slice(0,4).map(x=>({name:x.name,path:x.path,knowledgeIsNotMastery:true})),

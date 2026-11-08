@@ -337,6 +337,18 @@ function execute(savePath, req) {
      throw Error('The player is '+consciousness+
        '; no conscious movement, combat, craft, rolls or self-treatment can occur without witnessed external rescue');
  }
+ // Organic world inspections are genuinely read-only even when
+ // older checkpoints lazily initialise a background realm on first look.
+ // Reading public research, individual methods, a household, or personal
+ // prepared plans never creates a turn receipt or commits incidental state.
+ if(req.mode==='rule'&&['research.designPlansStatus',
+   'world.localResearchStatus','world.localInnovationsStatus',
+   'world.localHouseholdsStatus'].includes(req.system+'.'+req.operation)){
+   const viewed=Rules.act(s,req);
+   return {id:req.id,ok:true,applied:false,revision:runtime.revision,
+    stateHash:preHash,output:{rules:viewed},
+    panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved))};
+ }
  // Inspection is real information, not an action that burns a turn, evicts
  // witnessed history or fabricates a time tick. Never call legacy dispatch
  // merely for a harmless look, menu or self-status.
