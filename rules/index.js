@@ -5,6 +5,7 @@ const Realm=require('../world/simulation');
 const Character=require('./character');
 const Disciplines=require('./disciplines');
 const PowerOverview=require('./power-overview');
+const WorldPractice=require('./world-practice');
 const Spark=require('./arcane-spark');
 const ArcaneWard=require('./arcane-ward');
 const DualArcane=require('./arcane-dual-channel');
@@ -267,6 +268,9 @@ function act(s,{system,operation,params={}}={}){
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
   case 'world.realmOverview':return Realm.synopsis(s);
   case 'world.atlas':return Realm.publicAtlas(s,params);
+  case 'world.heritage':return WorldPractice.publicLore(s,params);
+  case 'world.culturalPracticeStatus':return WorldPractice.workStatus(s,params);
+  case 'world.culturalPractice':return WorldPractice.practice(s,params);
   case 'world.calendar':return Realm.calendar(s);
   case 'world.setCalendar':return CivilCalendar.anchor(s,params);
   case 'world.news':return Realm.publicNews(s,params);
