@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Sequential Master Prompt depth foundations (8 November 2026)
+
+The player has explicitly requested that the **25 remaining depth areas** be saved as a permanent checklist and developed **in number order**. Read `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md` and work first on #01 cosmology (`docs/COSMOLOGY_FOUNDATION.md`), then #02 historical causality, and so on. This work is incremental, **not a ban on play before all 25 are complete**. A checked foundation means a coherent extensible GM-authored data-and-consequence mechanism, existing-system integration, save persistence and a successful source-backed test, **not** an encyclopaedia of prebuilt species, places or NPCs.
+
+The GM is the imaginative author of realms, history, cultures, people, positions, techniques, scenes and events. The engine is the **continuity record and mechanical worker**: it stores independently motivated persons, relationships, provenance, natural limits, time, costs, consequences, and verified rolls. The engine should not randomly decide whether the GM is allowed to establish an adult as a family leader or automatically invent gods/planes/beasts to populate a world. Seed a few concrete compatible examples to demonstrate each mechanism; the registry must allow other types, original creations and changing circumstances to become important later. Prefer extensions to `world/mythic.js`, `world/simulation.js`, `world/lived-places.js`, existing rules and source records rather than unrelated parallel generators.
+
+Cosmology specifically reuses the five existing public mythical realm teachings and site pressure/ticks. `world/cosmology-ledger.js` holds newly GM-authored true cosmological laws separately from public contested beliefs, and links potential boundaries to actual mythic sites or newly established physical places. Recording a cosmological belief or boundary **does not** grant travel, blessings, resurrection, knowledge of secret soul fates or personal powers. Only physically witnessed boundary signs may be recorded locally; independent instability cannot be declared away.
+
+
 ## Age-only creation; GM authors the entire opening (8 November 2026)
 
 **User correction:** There is **NO preset or randomized opening-scene menu**. When asked to start a new private text-RPG campaign, the player may supply **only their chosen age**, or nothing; all remaining background and first-scene details are the GM's responsibility in the coherent living world. Read `docs/GM_AGE_DRIVEN_STARTS.md` before creating a campaign. The GM writes a unique first scene, family/community context, visible location, culture, NPC facts and time as actual prose, then records the witnessed setting using `gmOpening` or `world.authorOpening`. No new game may be played with a provisional internal location treated as the player's real opening. Do not ask for a class, faction, profession, beast, path or town selection.
