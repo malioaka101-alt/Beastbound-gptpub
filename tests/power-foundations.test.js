@@ -83,7 +83,10 @@ const A=require('node:assert/strict'),
    A.equal(D.status(sample).systems.body.target,
     'Cycle III — Organ Refinement');
    A.equal(Power.read(sample).body.nextCycle,'Organ Cycle');
-   A.equal(Power.read(sample).body.organCycle.ready,true);
+   // This deliberately synthetic fixture manually inserted Cycle I and
+   // therefore cannot prove the two original earned anatomical histories.
+   A.equal(Power.read(sample).body.organCycle.ready,false);
+   A.match(Power.read(sample).body.organCycle.reason,/original earned/);
    A.match(P.full(sample,'power'),/Body: 2\/7 cycles/);
    break;
   }else{
