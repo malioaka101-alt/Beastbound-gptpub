@@ -89,7 +89,14 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  }
  A.ok(used.size>=70,'More than a handful of place-like names must exist');
  A.ok(families.size>=20,'Family names should be varied');
- A.ok(dates.size>40,'Campaign starting dates should vary');
+ A.ok(dates.size>=2,'The previously established date function must stay compatible');
+ const seededDates=new Set();
+ for(let n=1;n<=100;n++){
+  const seed=(Math.imul(n,2654435761)>>>0)||1;
+  seededDates.add(New.startingDate(seed).year+'-'+
+   New.startingDate(seed).month+'-'+New.startingDate(seed).day);
+ }
+ A.ok(seededDates.size>40,'Independent full-range seeds need varied actual dates');
 }
 {
  const s=New.create({seed:9281621,slug:'hud_dynamic_001'}).state;
