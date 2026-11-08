@@ -60,9 +60,12 @@ function resurname(original,surname){
 function prepare(seed,base,identity,options={},startLocation='crossing'){
  if(!options||typeof options!=='object'||Array.isArray(options))
   throw Error('Starting choices must be a plain options object');
- if(!Engine.LOCATIONS[startLocation])throw Error('Opening needs a real executable scene location');
+ const authoredRegion=options.gmOpening?.place?.regionId;
+ if(!Engine.LOCATIONS[startLocation]&&!(authoredRegion&&Atlas.R[authoredRegion]&&
+   options.gmOpening.place.placeId===startLocation))
+  throw Error('Opening must be an existing site or a GM-authored place in the real world');
  const mode=options.mode??'random';
- if(!['random','guided'].includes(mode))throw Error('Start mode must be random or guided');
+ if(!['random','guided','gm'].includes(mode))throw Error('Start mode must be random, guided or GM-authored');
  const implied=options.originKind??(options.houseId?
    (RENOWNED_HOUSES.has(options.houseId)?'renowned-family':'historic-family'):
    options.institutionId?'institution':options.groupName?'new-organisation':undefined);
@@ -196,12 +199,13 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
  if(!history.earlyWork)history.earlyWork='Early work and study in '+base.background+'; no invented professional qualification or supernatural rank.';
  if(options.goal!==undefined)history.personalGoal=textField(options.goal,'Personal goal',240);
  if(options.role!==undefined)history.ownOccupation=textField(options.role,'Occupation',100);
- const startRegion=Atlas.R[Atlas.LOCATION_REGION[startLocation]];
+ const startRegion=Atlas.R[authoredRegion||Atlas.LOCATION_REGION[startLocation]];
  const context={version:1,seed:(Number(seed)>>>0),originKind,
   birthRegionId:region.id,birthRegionName:region.name,
   homePolity:region.polity,continent:region.continent,
-  openingRegionId:startRegion.id,openingSite:startLocation,
-  travelBeforePlay:region.polity!==startRegion.polity,
+  openingRegionId:options.gmOpening?startRegion.id:null,
+  openingSite:options.gmOpening?startLocation:null,
+  travelBeforePlay:options.gmOpening?region.polity!==startRegion.polity:false,
   connection,knownHouseholdMembers:f.members.map(m=>({name:m.name,relation:m.relation})),
   worldSource:'Authored Atlas and social-house history, or a seeded modest beginning',
   explicitOptions:Object.keys(options).filter(k=>!['slug'].includes(k)).sort(),
@@ -216,18 +220,18 @@ function install(s,planned){
  s.player.startingContext=structuredClone(planned.context);
  s.campaign.origin=structuredClone(planned.context);
  if(planned.createdGroup){
-  const group=planned.createdGroup,day=Math.floor(s.world.minutes/1440);
-  const event={day:day+1,time:Engine.clock(s),type:'story',
+  const group=planned.createdGroup,day=0;
+  const event={day:0,time:'Before the first played scene',type:'story',
    text:'Before the first played scene, '+s.player.name+
     ' had declared the modest '+group.name+' working association.',
    details:{origin:'informal-player-group-founding',id:group.id,
     name:group.name,kind:group.kind,purpose:group.purpose,
-    polity:Atlas.R[Atlas.LOCATION_REGION[s.world.location]].polity,
+    polity:planned.context.homePolity,
     founder:s.player.name,otherMembersConfirmed:false}};
   // This is a rolled, pre-game fact that the user asked to generate,
   // not an unconsented decision imposed during live play.
   const made=Groups.createPlayer(Realm.peek(s),{...group,
-   founder:s.player.name,place:s.world.location,day,event});
+   founder:s.player.name,place:planned.context.birthRegionId,day,event});
   s.log.push(event);
   s.campaign.origin.connection.groupId=made.id;
   s.player.startingContext.connection.groupId=made.id;

@@ -60,13 +60,18 @@ jobs:
             tests/earned-practice.test.js
             tests/reed-harvest.test.js
             tests/core-contest-guard.test.js
+            tests/gm-age-openings.test.js
+            tests/new-campaign.test.js
+            tests/campaign-origins.test.js
+            tests/origin-relatives.test.js
+            tests/lived-places-and-travel.test.js
+            tests/dynamic-hud-identity.test.js
             tests/engine.test.js
             tests/additions.test.js
             tests/python-translation.test.js
             tests/python-reference.test.js
             tests/unified-chat.test.js
             tests/panel-gallery.test.js
-            tests/dynamic-hud-identity.test.js
             tests/power-foundations.test.js
             tests/body-organ-cycle-three.test.js
             tests/fresh-campaign-power-accuracy.test.js
@@ -90,10 +95,6 @@ jobs:
             tests/natural-time-flow.test.js
             tests/civil-calendar-evidence.test.js
             tests/fantasy-canon.test.js
-            tests/new-campaign.test.js
-            tests/campaign-origins.test.js
-            tests/origin-relatives.test.js
-            tests/lived-places-and-travel.test.js
             tests/bond-witness.test.js
             tests/bond-care.test.js
             tests/bond-consent.test.js

@@ -109,7 +109,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
 {
  const s=New.create({seed:9281621,slug:'hud_dynamic_001'}).state;
  const hud=P.hudData(s),before=E.exportGame(s),rng=s.rngState;
- A.ok(hud.focus.length>0);
+ A.equal(hud.focus.length,0,'The GM has not authored a first scene or predetermined narrative focus');
  A.equal(hud.context?.kind==='known-public-notices',false);
  A.equal(s.rngState,rng);
  A.equal(E.exportGame(s),before,'HUD lookup must be read-only');
@@ -131,10 +131,13 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  A.ok(!P.hudData(s).resources.some(x=>x.key==='health'));
 }
 {
- // This exercised interval needs a real safe settlement opening, not a
- // fabricated uneventful wilderness absence. The known seeded annex starts
- // in an actual established settlement under the existing map.
- const x=New.create({seed:2926136976,slug:'hud_fileturn_001'});
+ // A real settlement opening is specifically authored by the GM.
+ // The same historical seed no longer forces the Annex or a scripted hook.
+ const x=New.create({seed:2926136976,slug:'hud_fileturn_001',mode:'gm',
+  gmOpening:{locationId:'academy',
+   scene:'At the quiet teaching annex the public records are being checked while regular clinic work continues in the adjoining rooms.',
+   focus:'An ordinary teaching morning',weather:'clear and cold',
+   hour:8,minute:30}});
  A.equal(x.state.world.location,'academy');
  A.equal(E.LOCATIONS[x.state.world.location].biome,'settlement');
  const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-dynamic-hud-')),

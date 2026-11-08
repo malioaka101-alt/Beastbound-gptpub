@@ -27,7 +27,10 @@ function finalizeTime(s,oldMinutes){
  t.calendar.sixdays.push(...weeks);t.calendar.months.push(...months);
  const agendas=Agendas.tick(s,weeks,months);
  const realm=Realm.tick(s,weeks,months);
- return {sixdayTicks:weeks,monthTicks:months,publicAgendas:agendas.visible,worldSimulation:{sixdays:realm.sixdays,months:realm.months,localNews:realm.publicNotices}};
+ const lifeAge=require('../scripts/age-lived-history').sync(s);
+ return {sixdayTicks:weeks,monthTicks:months,publicAgendas:agendas.visible,
+  ...(lifeAge.changed?{birthday:lifeAge.to}:{}),
+  worldSimulation:{sixdays:realm.sixdays,months:realm.months,localNews:realm.publicNotices}};
 }
 function advance(s,days){int(days,'days',0,10000);const oldMinutes=s.world.minutes;E.advance(s,days*1440);
  const ticks=finalizeTime(s,oldMinutes);
