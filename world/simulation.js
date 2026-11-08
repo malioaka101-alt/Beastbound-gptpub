@@ -229,6 +229,19 @@ function reviewPublicPractice(w,day){
   if(r.reviewedDay!==null||!r.published||r.releaseDay>day)continue;
   const spec=Renown.J[r.jobId],method=Renown.M[spec.method],
    office=w.institutions[method.institution];
+  // A public field note is not instantly delivered to an institution
+  // across oceans. Already established world geography is the source
+  // of a coarse mail/courier lag; no hidden teleportation or remote
+  // immediate reward. Local reports retain the existing normal timing.
+  const sourcePolity=A.R[spec.region]?.polity,
+   destinationPolity=A.I[method.institution]?.polity,
+   sourceContinent=A.P[sourcePolity]?.continent,
+   destinationContinent=A.P[destinationPolity]?.continent;
+  if(!sourceContinent||!destinationContinent)
+   throw Error('An independently reviewed public technique needs original atlas transport geography');
+  const transitDays=sourcePolity===destinationPolity?0:
+   sourceContinent===destinationContinent?6:30;
+  if(r.releaseDay+transitDays>day)continue;
   if(!office)throw Error('A public method cannot be adopted by an organisation absent from the live world');
   const possible=office.status==='active'&&office.funds>20&&office.capacity>25,
    accepted=possible&&random(w)<Math.min(0.75,
