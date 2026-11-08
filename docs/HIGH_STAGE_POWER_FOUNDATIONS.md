@@ -70,6 +70,22 @@ Only the verified integrated outcome grants Phase II, records mind/body/resonanc
 
 Later Soul Phases III–VII remain unimplemented: resonance lattices, consensual contracts and spiritual tools, Soul Forge, Inner Sanctuary, bounded Soul Domain and living soul architecture will require their own structural evidence, legal/ethical obligations, countermeasures, resource constraints and real uses. No system should acquire those powers merely by reaching Phase II.
 
+## Fifth independent power path — Rift II, Anchor Marking (this PR)
+
+**Canon basis:** Master Prompt §25 requires spatial reference points that genuinely help orient practitioners in abnormal dimensional pressure. Rift Sense (Step I) detects locally measurable boundary weakness. Anchor Marking (Step II) fixes a reliably observed *reference*; it is **not** Fold Step, teleportation, map-making by omniscience, entry into the sealed Riftglass vault or a protected-site permit.
+
+The first source-backed reference site is the **already existing public exterior wardline at Riftglass Outpost**. The current prototype does not fabricate new spatial anomalies at ordinary towns, allow caller-selected coordinates, or interpret any saved map coordinate as permission to traverse a seal. This is a bounded initial site integration, not a canonical claim that all future Rift anchor work must occur at this one site.
+
+`rift.anchorStatus` reads actual prerequisite evidence: genuinely earned Step I Rift Sense, the original safety restrictions and a **successful Riftglass exterior observation** with its saved boundary sample and original event hashes. A mere high Arcana skill or Rift rank number cannot replace field measurement.
+
+`rift.anchorWork` records genuine bearing, spatial resonance and reference stability, with the choice of focused or integrated physical-spatial approaches. Each component must reach 2/2 integrity from actual checks; integrated work must occur. A real exceptional result can complete the reference promptly, without compulsory tutors, tuition, a minimum number of days or age/rank gates. Each 15–480-minute attempt consumes existing Stamina, uses the real spatial environment's risk for the engine's Arcana/Intelligence DC, and can inflict actual shear-related wounds and accumulated spatial strain. A successful outcome installs exactly one exterior anchor with its genuine observation reference, individual integrity and source digest, and sets earned Step II. The safe exterior reference reveals no protected vault plans.
+
+**Usable, earned ability:** `rift.orient` spends 1 real Stamina and 10 minutes on a new engine-owned check at the genuinely marked site. A successful orientation stores a **one-use 60-minute local bearing**, tied to its original earned anchor and the exact current independently simulated boundary snapshot. The next `rift.sense` at that same unchanged site may consume the bearing for a **+2 orientation modifier on the original Rift Sense check**, without changing its energy/time cost, access rights or player-known-only observation. The bonus is lost after use, expiry, departure, changed boundary conditions or invalid saved history. This is preparation and better stability assessment, **not** a playable Fold Step or blanket immunity to involuntary displacement.
+
+`tests/rift-anchor-marking.test.js` starts with actual individual early Rift training and first-stage field sensing, then exercises complete Step II structural work, danger, true resource/time costs, forged record rejection, public status, actual oriented Rift Sense and private turn-ID replay. No active campaign save is touched.
+
+**Not implemented here:** Rift III Fold Step, spatial boundary-weaving, Pocket Architecture, Rift Adaptation, Realm Walking, Boundary Domain, and a general displacement resolver that can actually apply an anchor as a rescue counter. Those require separate precise position, line-of-effect, source permissions, energy, hazards and counters. Future genuine locations can receive legitimate measured anchor definitions when their physical sources exist.
+
 ## Distinct future advanced work — NOT implemented by this milestone
 
 | Independent discipline | Source-defined higher path | Next evidence-backed engineering slice |
@@ -78,7 +94,7 @@ Later Soul Phases III–VII remain unimplemented: resonance lattices, consensual
 | **Arcane** | III Matrix Formation (this PR); IV Dynamic Architecture; V Field Projection; VI Living Lattice; VII Astral Architecture; VIII Law Interpretation; IX World Circuit | Next: source-backed compound spell formula and use of the earned III matrix, then independently built dynamic IV geometry |
 | **Soul** | II Soul Threading (this PR) through VII Living Soul Architecture | Next: real resonance lattice and consent-bound spiritual applications, without mindreading or resurrection |
 | **Body** | III Organ (this PR); IV Nerve-Sense; V Blood-Essence; VI Adaptive Physique; VII Evolved Physique | Next: authentic Nerve-Sense organ-link work and situational uses of earned organs, without assuming fixed ordering across every school |
-| **Rift** | II Anchor Marking through VIII Boundary Domain | Actual environmental anchors and mapped spatial measurements before displacement, storage or domain work |
+| **Rift** | II Anchor Marking (this PR); III Fold Step through VIII Boundary Domain | Next: actual measured line-of-effect and voluntary short displacement after genuine anchors, with counters and the first displacement-safety resolver |
 | **Beast-Origin** | Mapping through Personal Evolution (eight source procedures) | Individual sourced trait, anatomy/consent, compatibility and rejection before any acquired biological organ |
 | **Human evolution** | Awakened, Refined, Transformed, Ascendant, Transcendent, Higher Evolved | Separate earned biological transformation evidence — never a stage automatically inherited from a discipline |
 | **Human–beast Sync** | Ten reciprocal stages | Individual partner choice, trust, understanding and authentic shared work, never unilateral power transfer |
