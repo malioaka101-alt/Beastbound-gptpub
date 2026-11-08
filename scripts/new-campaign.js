@@ -1,6 +1,6 @@
 'use strict';
 // Creates an independent seed-reproducible campaign from the actual Beastbound
-// engine. Cosmetic identity and opening scene rolls do NOT consume combat dice.
+// engine. Identity and pre-game life generation never consume combat dice.
 const fs=require('node:fs');
 const crypto=require('node:crypto');
 const E=require('../engine');
@@ -8,8 +8,10 @@ const Unified=require('../rules/unified');
 const Realm=require('../world/simulation');
 const Character=require('../rules/character');
 const Origins=require('./campaign-origins');
+const Age=require('./age-lived-history');
+const GmOpening=require('./gm-campaign-opening');
 
-// Seeded cultural-name pools: identity is independent of the opening location.
+// Seeded cultural-name pools: identity is independent of the GM-authored opening.
 // Keep personal/family names plausible rather than automatically naming a PC
 // after the nearest biome or repeating the short legacy Aerin/Marsh pools.
 const GIVEN_NAMES=['Aldren','Bastian','Bennet','Caelan','Cedric','Cyran','Darric','Davin','Eamon','Edrin','Emric','Farren','Galen','Gerrit','Hadren','Hollis','Ilan','Iver','Joren','Joric','Kellan','Kerrin','Leoric','Lucan','Maddoc','Merren','Nolan','Oren','Perrin','Roric','Savin','Sethren','Tavren','Tomas','Varen','Weylan','Yoren'];
@@ -75,26 +77,6 @@ function generatedIdentity(seed,base){
  return {name:given+' '+surname,family,history};
 }
 const PARTNER_NAMES=['Mote','Tallow','Pip','Flicker','Cinder','Nacre','Lilt','Thimble'];
-const OPENINGS=[
- {location:'crossing',hour:8,minute:15,weather:'cool canal breeze',focus:'A working river morning',
-  scene:'On the Morrowfen boardwalk, ferry crews measure the water against old public marks. A ledger clerk speaks with a porter while traders arrange their stalls; nobody has yet asked you for anything.',
-  hook:'A fresh public tide reading leaves local workers comparing the river against last season’s marks.'},
- {location:'forest',hour:7,minute:20,weather:'cool, with silver pollen',focus:'The copperwood waystone',
-  scene:'A copper-bark waystone hums beside the trail. A pathwarden has chained a second, smaller marker to it, though the chain does not touch the earth. A winged shimmer passes above the roots, out of reach.',
-  hook:'The waystone is floating a finger-width above its foundation. A pathwarden asks for witnesses, not guesses.'},
- {location:'fen',hour:6,minute:40,weather:'low mist, cool air',focus:'A bell beneath the water',
-  scene:'At the Whisperfen crossing a ferrywoman is pulling her boat ashore. A bell keeps sounding from below the black water, although the shrine bell above it hangs still. She has refused two passengers.',
-  hook:'An underwater bell is sounding beside a silent ferry shrine. The ferrywoman has halted crossings.'},
- {location:'hills',hour:9,minute:10,weather:'warm, with ashwind gusts',focus:'The hillside fireglow',
-  scene:'On the Ashwind track, a crevice spits blue sparks into the morning wind. A ridgewalker waits beside a broken warning slate while a tiny cinderskin newt warms itself on the far side of the stone.',
-  hook:'A hillside fissure is sending out blue sparks. The ridgewalker asks travellers to keep clear until the cause is known.'},
- {location:'academy',hour:8,minute:30,weather:'bright, thin cloud',focus:'The silent healing ward',
-  scene:'The bell over Lumenfall Annex rings without sound. A healer presses two fingers to the warded glass and watches a hairline crack glow gold. A student waits with a stack of unused bandages.',
-  hook:'A soundless bell and a cracked ward have interrupted morning lessons at Lumenfall Annex.'},
- {location:'ruins',hour:7,minute:55,weather:'cold, unsettled mist',focus:'The outpost boundary',
-  scene:'At Riftglass Outpost, a containment stone sheds flakes of violet light into the dust. Two surveyors argue over the line of safe ground. Beyond the posts, the air appears to fold around a dead tree.',
-  hook:'One containment stone has begun shedding violet light. Surveyors will not let anyone cross the ward line.'}
-];
 const pick=(arr,n)=>arr[n%arr.length];
 // The campaign clock starts on an actual civil date, not an unanchored "Day 1".
 // Calendar selection is deterministic from the campaign seed and uses no dice.
@@ -111,24 +93,23 @@ function create(options={}){
  if(!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(slug||''))
   throw Error('Valid unique campaign slug required');
  const mode=options.mode??'random';
- if(!['random','guided'].includes(mode))
-  throw Error('Campaign generation must be random or guided');
+ if(!['random','guided','gm'].includes(mode))
+  throw Error('Campaign generation supports an unprompted GM-authored life or explicit override');
  const base=E.randomCharacter(n);
+ const age=options.age===undefined?base.age:options.age;
+ Age.phase(age);
  const mechanicalBackground=options.background===undefined?
-  (mode==='guided'?'apprentice':base.background):
+  (age<12?'young learner':mode==='guided'?'apprentice':base.background):
   String(options.background).trim().toLowerCase();
  if(!/^[a-z][a-z -]{1,59}$/.test(mechanicalBackground))
   throw Error('Background must be a plausible, clearly named past occupation');
  const path=options.path===undefined?
-  (mode==='guided'?'undecided':base.path):
+  (age<12||mode==='guided'?'undecided':base.path):
   String(options.path).trim().toLowerCase();
  if(!['undecided','meridian','arcane','origin','partner',
    'soul','body','rift','specialist','independent'].includes(path))
   throw Error('Starting path is an interest or supported preparation, not an invented stage');
  base.background=mechanicalBackground;base.path=path;
- const age=options.age===undefined?base.age:options.age;
- if(!Number.isInteger(age)||age<13||age>110)
-  throw Error('Choose a plausible age between 13 and 110 for the current human engine');
  const gender=options.gender===undefined?
   (mode==='guided'?'unspecified':
    pick(['male','female','nonbinary'],Origins.number(n,'gender'))):
@@ -149,14 +130,15 @@ function create(options={}){
  }
  // Preserve the known five-site seed mapping for historical starts
  // while adding the working Crossing as an occasional genuine new start.
- const establishedOpening=pick(OPENINGS.filter(o=>o.location!=='crossing'),
-  ((n>>>16)^(n>>>3))>>>0);
- const chosenOpening=options.startLocation?
-  OPENINGS.find(o=>o.location===options.startLocation):
-  Origins.number(n,'working-crossing-start')%11===0?
-   OPENINGS.find(o=>o.location==='crossing'):establishedOpening;
- if(!chosenOpening)throw Error('Start location must be one of the currently executable world sites');
- const plan=Origins.prepare(n,base,originalIdentity,{...options,slug,mode},chosenOpening.location);
+ const opening=options.gmOpening??null;
+ const start=opening?GmOpening.verify(opening):null;
+ if(options.startLocation!==undefined&&
+  (!E.LOCATIONS[options.startLocation]||start))
+  throw Error('A fixed starting location is only a GM or compatibility selection; use gmOpening for a full authored scene');
+ // A legacy default location is temporary engine scaffolding, not a played
+ // scene, a selected adventure, or evidence of travel from the birthplace.
+ const modelSite=start?.siteId||options.startLocation||'crossing';
+ const plan=Origins.prepare(n,base,originalIdentity,{...options,slug,mode},modelSite);
  const alternate={female:['Adela','Alys','Cerys','Della','Elen','Fenna','Iona','Kessa','Liora','Mira','Nessa','Rhea','Selda','Tavira','Vera','Ysolde'],
   nonbinary:['Aven','Cairn','Eris','Hollis','Ilan','Kerrin','Lark','Maren','Neris','Oren','Perrin','Sable','Tarin','Vale','Wren','Yoren']};
  let name=plan.name;
@@ -197,41 +179,47 @@ function create(options={}){
    throw Error('Pronoun preference must be concise');
   state.player.pronouns=options.pronouns.trim();
  }
- const start=chosenOpening;
- state.world.location=start.location;
- state.world.minutes=start.hour*60+start.minute;
- state.world.weather=start.weather;
- state.flags.visited={[start.location]:true};
- state.flags.openingHook=start.hook;
+ // No preset scenes, seeded dramatic hooks, mandatory tutorial or player
+ // personality. The only first playable scene must be written by the GM.
+ state.world.location=E.LOCATIONS[modelSite]?modelSite:'crossing';
+ state.world.minutes=8*60;
+ state.flags.visited={};
+ delete state.flags.openingHook;
+ state.flags.openingAuthored=false;
  state.log=[];state.sequence=0;
- state.log.push({day:1,time:E.clock(state),type:'story',text:start.scene,details:null});
- state.log.push({day:1,time:E.clock(state),type:'world',text:start.hook,details:null});
- state.chatRuntime={revision:0,applied:{},focus:[start.focus],scene:start.scene};
+ state.chatRuntime={revision:0,applied:{},focus:[],scene:null};
  state.campaign={slug,version:2,startSeed:n,
   characterSource:'engine.randomCharacter + engine.newGame + source-grounded seeded origins',
   rolledBackground:base.background,rolledPath:base.path,
-  startingLocation:start.location,
+  startingLocation:null,openingState:'awaiting-gm',
+  openingAuthorship:'GM writes scene and creates a real place when needed',
+  requiresGmOpening:mode==='gm',
   identity:'independently generated human character',
   identityGeneration:'seeded and user-adjustable across names, origins, professions and family histories',
   oldCampaignImported:false};
+ const lived=Age.prepare(n,age,options);
+ Age.install(state,lived);
  Unified.ensurePlayer(state);
  Character.ensure(state);
  Realm.ensure(state);
  const origin=Origins.install(state,plan);
+ // GM-created opening happens only after identity and founding records exist.
  const date=startingDate(n);
  // Civil time and the one world clock remain the only in-world calendar.
  const dateView=Realm.anchorCalendar(state,{date,source:'Public civil almanac at campaign creation'});
  state.campaign.startDate=date;
  state.log.push({day:1,time:E.clock(state),type:'world',
-  text:'The public civil almanac dates the morning '+dateView.absoluteDate+'.',details:null});
+  text:'The public civil almanac dates '+dateView.absoluteDate+'.',details:null});
+ if(opening)GmOpening.apply(state,opening);
  return {state,summary:{seed:n,slug,name,age,gender,
   appearance:state.player.appearance,
   attributes:{...state.player.attributes},
   background:state.player.background,path:state.player.path,
-  location:start.location,family:state.player.family,
-  history:state.player.history,origin,
+  location:state.campaign.startingLocation,family:state.player.family,
+  history:state.player.history,origin,livedYears:lived,
   clock:E.clock(state),date:dateView.absoluteDate,
-  focus:start.focus,scene:start.scene}};
+  openingState:state.campaign.openingState,
+  focus:state.chatRuntime.focus,scene:state.chatRuntime.scene}};
 }
 function secureSeed(){return crypto.randomBytes(4).readUInt32BE(0)||1;}
 if(require.main===module){
@@ -246,4 +234,4 @@ if(require.main===module){
  fs.writeFileSync(out,E.exportGame(state)+'\n',{flag:'wx'});
  process.stdout.write(JSON.stringify(summary,null,2)+'\n');
 }
-module.exports={create,secureSeed,startingDate,OPENINGS};
+module.exports={create,secureSeed,startingDate};
