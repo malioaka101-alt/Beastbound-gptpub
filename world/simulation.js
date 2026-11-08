@@ -3,6 +3,7 @@
 // Never use player RNG or print hidden clocks and stats in player-facing replies.
 const Crypto=require('node:crypto'),A=require('./atlas'),B=require('./bestiary'),E=require('../engine.js'),N=require('./notables'),Mythic=require('./mythic'),Houses=require('./social-houses'),Gov=require('./government-offices'),Civic=require('./civic-petitions'),PublicHearings=require('./public-hearings'),Mediation=require('./voluntary-mediation'),AgentInitiatives=require('./agent-initiatives'),KnowledgeDiffusion=require('./knowledge-diffusion'),AdaptiveAmbitions=require('./adaptive-ambitions'),ProfessionalPeers=require('./professional-peers'),FamilyMembers=require('./family-members'),EmergentGroups=require('./emergent-groups'),GroupMemberAgency=require('./group-member-agency'),PersonPresence=require('./person-presence'),WildLives=require('./wild-lives'),WildRelations=require('./wild-relations'),WildGenerations=require('./wild-generations'),EmergentPeople=require('./emergent-people'),SapientBeasts=require('./sapient-beast-persons'),IndependentContacts=require('./independent-contacts');
 const GuildFieldwork=require('./guild-fieldwork');
+const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
 const num=(x,label,min,max)=>{if(!Number.isInteger(x)||x<min||x>max)throw Error(`Invalid ${label}`);return x;};
@@ -211,6 +212,44 @@ function event(w,{day,region,subject,text,channel='guild report',publiclyKnown=t
  return v;
 }
 function quickContext(w){return {activeWars:Object.values(w.diplomacy).filter(x=>x.status==='war').length,disruptedRoutes:Object.values(w.routes).filter(x=>x.disrupted).length};}
+// A real individual's field report enters the established regional public
+// bulletin. On a later WORLD sixday, the relevant independent institution
+// may assess it against its own funds/capacity. Publication is not a hiring
+// contract, guild membership, supernatural technique or guaranteed favour.
+function reviewPublicPractice(w,day){
+ const ledger=w.culturalPractice;
+ if(!ledger)return {reviewed:0,adopted:0};
+ if(!Array.isArray(ledger.reports)||!Number.isInteger(ledger.counter))
+  throw Error('Professional evidence archive is not a valid independent world record');
+ const work=require('../rules/world-practice');
+ let reviewed=0,adopted=0;
+ for(const r of ledger.reports){
+  if(!work.verifyReport(r))
+   throw Error('A public professional report was altered or invented; an independent institution cannot accept it');
+  if(r.reviewedDay!==null||!r.published||r.releaseDay>day)continue;
+  const spec=Renown.J[r.jobId],method=Renown.M[spec.method],
+   office=w.institutions[method.institution];
+  if(!office)throw Error('A public method cannot be adopted by an organisation absent from the live world');
+  const possible=office.status==='active'&&office.funds>20&&office.capacity>25,
+   accepted=possible&&random(w)<Math.min(0.75,
+     0.25+office.capacity/250+(r.receipt.check.degree==='exceptional'?0.08:0));
+  r.reviewedDay=day;
+  r.response=accepted?'independently acknowledged for further study':
+   possible?'filed without acceptance':'not reviewed operationally due to limited institutional capacity';
+  reviewed++;
+  if(accepted){
+   adopted++;
+   office.reputation=clamp(office.reputation+1);
+   event(w,{day,region:spec.region,subject:'civil-practice:'+r.id,
+    text:AtlasName(method.institution)+' records an outside '+spec.name.toLowerCase()+
+      ' field report for further institutional review; no employment, teaching or family standing follows.',
+    channel:'guild dispatch',publiclyKnown:true,releaseDay:day+2,severity:'routine'});
+  }
+ }
+ return {reviewed,adopted};
+}
+function AtlasName(id){return A.I[id]?.name||id;}
+
 function tickSixday(w,day){
  w.ticks.sixdays++;
  Mythic.tick(w,day,{phase:'sixday',event:e=>event(w,e)});
@@ -237,6 +276,9 @@ function tickSixday(w,day){
   else if(t.status==='suspended'&&t.funds>39&&t.capacity>29&&day-t.lastChange>=30){t.status='active';t.lastChange=day;w.counters.reopenings++;
    event(w,{day,region:i.polity,subject:i.id,text:`${i.name} reopens its services under revised support.`,channel:'guild dispatch',releaseDay:day+3,severity:'important'});}
  }
+ // Earlier independently published real civic/practice reports can affect
+ // later professional attention. The world chooses whether to acknowledge.
+ reviewPublicPractice(w,day);
  // Local ecological indicators follow carrying capacity, habitat stress and food.
  for(const r of A.regions){const e=w.ecosystems[r.id];const extraction=(r.goods.includes('ore')||r.goods.includes('vael'))&&w.ticks.sixdays%2===0?3:0;
   const inheritedPressure=r.id==='whisperfen'&&w.ticks.sixdays%7===0?1:0;
@@ -447,6 +489,13 @@ function publicStatus(s){const w=peek(s),r=A.R[locationRegion(s)],p=A.P[r.polity
   publicNews:publicNews(s).items,observedSpecies:w.knownSights.filter(x=>x.region===r.id).slice(-4).map(x=>({name:x.name,day:x.day})),
   // No private numerical strengths, hidden clocks, country finances or forecast conflicts.
   knownInstitutions:A.institutions.filter(x=>x.polity===r.polity).slice(0,5).map(x=>x.name),
+  renownedPublicInstitutions:Renown.RENOWNED.filter(x=>
+    x.polity===r.polity).slice(0,4).map(x=>({
+    name:A.I[x.institution].name,publicPurpose:x.publicService,
+    relatedHouse:require('./social-houses').byId[x.house].name})),
+  sharedLocalMethods:Renown.PUBLIC_METHODS.filter(x=>
+    Renown.RENOWNED.some(n=>n.polity===r.polity&&n.institution===x.institution)).
+    slice(0,4).map(x=>({name:x.name,path:x.path,knowledgeIsNotMastery:true})),
   knownProfessionals:N.publicKnown(s,w.notables).filter(x=>x.community===p.name).slice(0,4),
   conservationNotice:publicNews(s).items.some(e=>/habitat|beast tracks|migration/i.test(e.text))?'Recent published naturalist warning':'No current public report'};
 }
@@ -456,7 +505,15 @@ function publicAtlas(s,{type,id}={}){
  const row=A.safeLookup(type,id);if(!row)throw Error('Unknown named location or organisation');
  if(type==='polity')return {name:row.name,continent:A.safeLookup('continent',row.continent)?.name,government:row.government,capital:row.capital,culture:A.C[row.culture].name,language:row.language,food:row.food,craft:row.craft,customs:row.customs,rights:row.rights,trade:row.resources,knownPressures:row.contested};
  if(type==='region')return {name:row.name,continent:A.safeLookup('continent',row.continent)?.name,polity:A.P[row.polity]?.name,biome:row.biome,terrain:row.traits,neighbors:row.neighbors||[],dangers:row.dangers,goods:row.goods};
- if(type==='institution')return {name:row.name,type:row.type,location:A.P[row.polity]?.name,knownWork:row.specialty,funding:row.funding,origin:row.roots};
+ if(type==='institution')return {name:row.name,type:row.type,location:A.P[row.polity]?.name,knownWork:row.specialty,funding:row.funding,origin:row.roots,
+   publiclyKnownMethods:Renown.PUBLIC_METHODS.filter(x=>x.institution===id).
+    map(x=>({name:x.name,path:x.path,learningEvidence:x.learning,
+     actualProcedureAvailable:!!x.actualRule})),
+   publicRenown:Renown.RENOWNED.filter(x=>x.institution===id).
+    map(x=>({standing:x.standing,documentedHistory:x.history,
+     publiclyAssociatedFamily:require('./social-houses').byId[x.house].name,
+     noHereditaryPowerAwarded:true})),
+   membershipOrTeachingNotGranted:true};
  return {...row};
 }
 function publicEconomy(s,{polity=null}={}){
