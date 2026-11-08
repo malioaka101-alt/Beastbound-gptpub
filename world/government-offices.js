@@ -137,7 +137,9 @@ function report(w,id){
   limitation:'Public office does not imply automatic inherited techniques, permission to bind beasts, marriage, or allegiance from residents'};
 }
 function local(s,w){
- const region=A.LOCATION_REGION[s.world?.location],polity=A.R[region]?.polity;
+ const region=A.LOCATION_REGION[s.world?.location]||
+  require('./lived-places').get(s,s.world?.location)?.regionId,
+  polity=A.R[region]?.polity;
  if(!polity)throw Error('An actual visited region is required to report local public government');
  return report(w,polity);
 }
