@@ -72,6 +72,7 @@ function read(s){
    training:verifiedTrain('soul')},
   body:{cycles:[...completed],completedCycles:completed.length,
    totalNamedCycles:BODY.length,nextCycle:BODY[completed.length]||null,
+   ...(completed.length>=2?{organCycle:Disc.organStatus(s)}:{}),
    training:verifiedTrain('body')},
   rift:{step:rift.step||0,stepName:phase(RIFT,rift.step||0),
    training:verifiedTrain('rift')},
