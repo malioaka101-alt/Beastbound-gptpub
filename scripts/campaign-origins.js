@@ -7,6 +7,7 @@ const Atlas=require('../world/atlas');
 const Houses=require('../world/social-houses');
 const Heritage=require('../world/renown-and-practice');
 const Groups=require('../world/emergent-groups');
+const StartingKin=require('../world/starting-kin');
 const Realm=require('../world/simulation');
 const Engine=require('../engine');
 
@@ -231,6 +232,9 @@ function install(s,planned){
   s.campaign.origin.connection.groupId=made.id;
   s.player.startingContext.connection.groupId=made.id;
  }
+ // Previously named relatives become separately persistent individuals,
+ // never automatically present, agreeable, enrolled or magically trained.
+ StartingKin.seed(s,Realm.peek(s));
  return s.player.startingContext;
 }
 module.exports={KINDS,NONHUMAN_HOUSES,prepare,install,number};
