@@ -29,6 +29,9 @@ function valid(w,h){
   !Number.isInteger(h.commonFunds)||h.commonFunds<0||h.commonFunds>1000||
   !Array.isArray(h.history)||h.history.some(x=>
     !Number.isInteger(x.day)||x.day<h.source.foundedDay))return false;
+ const [a,b]=h.source.founders.map(f=>w.emergentPeople?.people?.[f.id]);
+ if(!a||!b||!choice(w,a,b,h.source.foundedDay)||
+  !choice(w,b,a,h.source.foundedDay))return false;
  return h.source.founders.every(f=>{
   const p=w.emergentPeople?.people?.[f.id];
   return p&&People.verify(w,p)&&p.originHash===f.originHash&&
@@ -106,7 +109,7 @@ function month(w,day){
   // No offscreen income, forged children, compelled work or magic privileges.
   const paid=[a,b].map(p=>p.funds>=2?1:0);
   if(paid[0]+paid[1]===2){
-   a.funds--;b.funds--;home.commonFunds+=2;
+   a.funds--;b.funds--;home.commonFunds=Math.min(1000,home.commonFunds+2);
    home.commonFunds--;
    a.fatigue=Math.max(0,a.fatigue-1);
    b.fatigue=Math.max(0,b.fatigue-1);
