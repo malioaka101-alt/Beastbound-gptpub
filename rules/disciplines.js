@@ -1050,9 +1050,9 @@ function organPrerequisites(s){
  if(!body||!Array.isArray(body.cycles)||body.cycles.length!==2||
     body.cycles[0]!=='Muscle-Tendon Cycle'||body.cycles[1]!=='Bone-Marrow Cycle')
   throw Error('Organ Cycle needs genuinely completed Muscle-Tendon and Bone-Marrow physiology');
- const first=h.find(x=>x.target==='cycle1'&&
+ const first=h.find(x=>x?.target==='cycle1'&&
    x.change==='Completed Cycle I Muscle-Tendon refinement; +2 stamina, Might +1, M1 natural force');
- const second=h.find(x=>x.target==='cycle2'&&
+ const second=h.find(x=>x?.target==='cycle2'&&
    x.change==='Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box');
  if(!first||!second||!Number.isInteger(first.day)||!Number.isInteger(second.day)||
     first.day<1||second.day<first.day||second.day>E.day(s))
@@ -1069,7 +1069,7 @@ function organEarned(s){
  const body=s.player?.body,work=s.table?.organCycleWork,
   proof=body?.organAdaptation,
   h=s.table?.disciplineTraining?.body?.history||[],
-  final=h.find(x=>x.target==='cycle3'&&
+  final=h.find(x=>x?.target==='cycle3'&&
     x.change==='Completed Cycle III Organ refinement; integrated heart, lungs, liver and kidneys');
  if(!body||body.cycles?.[2]!=='Organ Cycle'||
     body.cycles.length!==3||!work?.completed||!proof||!final||
