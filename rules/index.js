@@ -63,6 +63,7 @@ const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
 const OriginRelatives=require('../world/origin-relatives');
 const LivedPlaces=require('../world/lived-places');
+const GmCampaignOpening=require('../scripts/gm-campaign-opening');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -292,6 +293,7 @@ function act(s,{system,operation,params={}}={}){
   case 'opportunity.status':return FieldOpportunities.publicStatus(s,params);
   case 'opportunity.interest':return FieldOpportunities.interest(s,params);
   case 'opportunity.file':return FieldOpportunities.file(s,params);
+  case 'world.authorOpening':return GmCampaignOpening.apply(s,params);
   case 'world.placeStatus':return LivedPlaces.status(s,params);
   case 'world.establishPlace':return LivedPlaces.establish(s,params);
   case 'world.recordPlaceNote':return LivedPlaces.note(s,params);
