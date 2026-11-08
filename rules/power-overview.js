@@ -2,7 +2,7 @@
 // Source-grounded, read-only distinction between discipline structure,
 // learned skill rank, anatomical progress and separate human evolution.
 // Never infer an awakening from a legacy resource pool or a technique name.
-const E=require('../engine.js'),Disc=require('./disciplines');
+const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading');
 const MERIDIAN=['Preparatory: Stage I not yet attained',
  'Stage I — Foundation Tempering','Stage II — Meridian Awakening',
  'Stage III — 108 Gate Opening','Stage IV — Dantian Sea Formation',
@@ -69,6 +69,7 @@ function read(s){
    training:verifiedTrain('arcane'),
    note:'A legacy Mana reservoir does not itself prove an ignited Core or a completed Circle'},
   soul:{phase:soul.phase||0,phaseName:phase(SOUL,soul.phase||0),
+   ...(soul.phase>=1?{threading:Thread.status(s)}:{}),
    training:verifiedTrain('soul')},
   body:{cycles:[...completed],completedCycles:completed.length,
    totalNamedCycles:BODY.length,nextCycle:BODY[completed.length]||null,
