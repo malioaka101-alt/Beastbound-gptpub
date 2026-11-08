@@ -243,7 +243,8 @@ function full(state,name){
   const attrs=Object.entries(p.attributes||{});
   const pairs=[];for(let i=0;i<attrs.length;i+=2){const a=attrs[i],b=attrs[i+1];pairs.push(`${a[0].toUpperCase()} ${a[1]}`+(b?` │ ${b[0].toUpperCase()} ${b[1]}`:''));}
   sec('ATTRIBUTES',pairs);
-  sec('SKILLS',Object.entries(p.skills||{}).map(([k,v])=>[k,'Rank '+v.rank+' · +'+(v.rank*2)]));
+  sec('SKILLS',Object.entries(p.skills||{}).map(([k,v])=>[k,
+   'Rank '+v.rank+' '+('●'.repeat(Math.min(v.rank,5))+'○'.repeat(Math.max(0,5-v.rank)))+' +'+(v.rank*2)]));
   // A discipline's actual attained stage is not a skill rank, stored Qi,
   // starting preparation, beast level or human evolutionary stage.
   // Long canonical names wrap rather than silently disappearing at column 30.
