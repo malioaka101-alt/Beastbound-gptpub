@@ -270,6 +270,81 @@ function actualSource(s,job){
   default:throw Error('Unknown mechanical source, not a new public technique');
  }
 }
+// A publicly named school curriculum can be independently reconstructed
+// through source-verified *ordinary* practice. It is not an organisation
+// membership test, permission to read private folios or a generic mastery
+// currency. The existing professional reports are its only evidence.
+const SCHOOL_SOURCE='independent-public-school-method-application-v1';
+function methodsAtJob(job){
+ return Lore.SCHOOL_TRADITIONS.filter(t=>t.common===job.method);
+}
+function originalWorkWitness(report,job,creator,now){
+ return !!(report&&report.origin===SOURCE&&
+  report.jobId===job.id&&report.creator===creator&&
+  report.receipt?.school===undefined&&
+  report.published===true&&
+  Number.isInteger(report.receipt?.startedMinute)&&
+  report.receipt.startedMinute+report.receipt.minutes<=now&&
+  verifyReport(report));
+}
+function supportingWork(s,job){
+ const records=s.table?.realm?.culturalPractice?.reports||[];
+ const witnessed=records.filter(r=>originalWorkWitness(r,job,s.player.name,s.world.minutes))
+  .sort((a,b)=>a.receipt.startedMinute-b.receipt.startedMinute);
+ const strong=witnessed.filter(x=>['strong','exceptional'].includes(x.receipt.check.degree));
+ const selected=strong.length?[strong.at(-1)]:witnessed.slice(-2);
+ if(!strong.length&&selected.length<2)return [];
+ return selected.map(r=>({
+  id:r.id,origin:r.origin,creator:r.creator,jobId:r.jobId,
+  receipt:structuredClone(r.receipt),receiptHash:r.receiptHash,
+  published:r.published
+ }));
+}
+function eligibleSchool(s,job,schoolId){
+ const school=Lore.T[schoolId];
+ if(!school||school.common!==job.method)
+  throw Error('A historical school method must have this same genuine original professional foundation, not an invented affinity or prestige');
+ const records=supportingWork(s,job);
+ if(!records.length)
+  throw Error('Independent public-syllabus experimentation needs one strongly verified or two successful ordinary previous work reports at the actual workplace');
+ return {school,records};
+}
+function schoolWitnessValid(r){
+ const sch=r?.receipt?.school;
+ if(!sch)return true; // historic plain cultural practice receipts
+ if(sch.origin!==SCHOOL_SOURCE||sch.traditionId!==sch.publicId||
+    !Lore.T[sch.traditionId]||Lore.T[sch.traditionId].common!==
+    Lore.J[r.jobId]?.method||
+    sch.bonus!==1||sch.extraStamina!==1||sch.extraMinutes!==15||
+    sch.privateTeachingClaimed!==false||
+    !Array.isArray(sch.witnesses)||![1,2].includes(sch.witnesses.length))
+  return false;
+ const prior=sch.witnesses;
+ if(prior.length===2&&
+    (prior[0].id===prior[1].id||
+     prior.some(x=>!x.receipt?.check?.success)))
+  return false;
+ if(prior.length===1&&!['strong','exceptional'].includes(prior[0].receipt?.check?.degree))
+  return false;
+ return prior.every(x=>
+  x.receipt?.school===undefined&&
+  x.origin===SOURCE&&x.creator===r.creator&&
+  x.jobId===r.jobId&&x.published===true&&
+  x.receipt?.startedMinute+x.receipt?.minutes<=r.receipt.startedMinute&&
+  verifyReport(x));
+}
+// Player-known evidence that the player has actually applied a publicly
+// identified school method, distinct from reading its lore, being kin or
+// possessing a high stage. The first engine-backed combat bridge uses this
+// in the ORIGINAL Recover action; it never awards a new combat turn.
+function earnedSchoolApplication(s,schoolId){
+ const school=Lore.T[schoolId];if(!school)return false;
+ const reports=s.table?.realm?.culturalPractice?.reports||[];
+ return reports.some(r=>
+  r.origin===SOURCE&&r.creator===s.player?.name&&
+  r.receipt?.school?.traditionId===schoolId&&
+  r.receipt?.check?.success===true&&verifyReport(r));
+}
 function workStatus(s,params={}){
  only(params,['id']);
  const {location}=place(s),jobs=Lore.CIVIC_APPLICATIONS.filter(x=>
@@ -277,7 +352,16 @@ function workStatus(s,params={}){
  if(params.id&&!jobs.length)throw Error('The requested public professional application does not take place here');
  const ledger=s.table?.realm?.culturalPractice?.reports||[];
  return {site:E.LOCATIONS[location].name,
-  possibleWork:jobs.map(application),
+  possibleWork:jobs.map(x=>({
+   ...application(x),
+   publiclyIdentifiedSchoolApplications:methodsAtJob(x).map(t=>({
+    id:t.id,name:t.name,
+    mode:'independent equivalent study from public school account',
+    realPriorWorkEvidence:supportingWork(s,x).length>0,
+    personallyApplied:earnedSchoolApplication(s,t.id),
+    noGuildMembershipOrPrivateFormula:true
+   }))
+  })),
   knownPersonalReports:ledger.filter(x=>x.origin===SOURCE&&x.creator===s.player.name)
    .slice(-20).map(x=>({id:x.id,method:Lore.J[x.jobId]?.name||'previous work',
     success:x.receipt?.check?.success===true,
@@ -286,8 +370,8 @@ function workStatus(s,params={}){
   noAutomaticEmployment:true,noMasteryOrPromotion:true};
 }
 function practice(s,params={}){
- only(params,['id','minutes','approach']);
- const {id,minutes,approach}=params,{location,region}=place(s);
+ only(params,['id','minutes','approach','schoolId']);
+ const {id,minutes,approach,schoolId}=params,{location,region}=place(s);
  const job=Lore.J[id];
  if(!job||job.location!==location||job.region!==region)
   throw Error('Practice an actually established local profession, not a remote fictional worksite');
@@ -296,13 +380,14 @@ function practice(s,params={}){
  const p=s.player,combatant=s.table?.combatants?.player;
  if(combatant&&combatant.status!=='ok')
   throw Error('An incapacitated character cannot perform independent fieldwork');
- if(!Number.isInteger(minutes)||minutes<job.minutes||minutes>480)
+ if(!Number.isInteger(minutes)||minutes<job.minutes+(schoolId?15:0)||minutes>480)
   throw Error('Actual fieldwork needs its site-appropriate full duration, not an instant paper qualification');
  if(typeof approach!=='string'||approach.trim().length<14||approach.length>350||
     /[\u0000-\u001f]/.test(approach))
   throw Error('Describe your real physical or professional method, without a chosen effect or result');
  const source=actualSource(s,job);
- const stamina=Math.max(job.stamina,Math.ceil(minutes/60));
+ const school=schoolId===undefined?null:eligibleSchool(s,job,schoolId);
+ const stamina=Math.max(job.stamina,Math.ceil(minutes/60))+(school?1:0);
  const energy=job.energy==='soul'?p.soul?.reserve:job.energy?p[job.energy]:null;
  if(!Number.isInteger(p.stamina)||p.stamina<stamina||
     combatant&&combatant.stamina<stamina)
@@ -315,14 +400,22 @@ function practice(s,params={}){
   'actual practising '+job.attribute,1,30);
  const start=s.world.minutes,sourceHash=digest(source);
  const woundPenalty=combatant?Combat.penalty(combatant):0;
- const check=C.check(s,{modifier:Math.floor((attr-10)/2)+2*skill-woundPenalty,
-  dc:job.dc,label:'Civilian '+job.name});
+ const check=C.check(s,{
+  modifier:Math.floor((attr-10)/2)+2*skill-woundPenalty+(school?1:0),
+  dc:job.dc,label:'Civilian '+job.name+(school?' — independently studied '+school.school.name:'')});
  p.stamina-=stamina;
  if(combatant)combatant.stamina=p.stamina;
  if(job.energy==='soul')p.soul.reserve-=job.energyCost;
  else if(job.energy)p[job.energy]-=job.energyCost;
  const originalRollEvent=structuredClone(s.log.at(-1));
  const receipt={
+  ...(school?{school:{
+   origin:SCHOOL_SOURCE,traditionId:school.school.id,
+   publicId:school.school.id,
+   bonus:1,extraStamina:1,extraMinutes:15,
+   privateTeachingClaimed:false,
+   witnesses:school.records
+  }}:{}),
   source:SOURCE,jobId:job.id,methodId:job.method,creator:p.name,
   location,region,startedMinute:start,day:Math.floor(start/1440),
   minutes,staminaSpent:stamina,
@@ -361,6 +454,8 @@ function practice(s,params={}){
   source:SOURCE,workId:idWork,originalCheck:check,
   sourceProofHash:sourceHash,minutes,staminaSpent:stamina,
   energySpent:job.energyCost,reported:check.success,
+  ...(school?{originalPublicTradition:school.school.name,schoolBonus:1,
+   independentReconstruction:true,noPrivateFamilyKnowledge:true}:{}),
   noFreeSpell:true,noFreeMembership:true,noAutomaticSocialPromotion:true
  });
  return {id:idWork,job:job.name,
@@ -369,6 +464,9 @@ function practice(s,params={}){
   staminaSpent:stamina,energySpent:job.energyCost,
   ...(job.energy?{energy:job.energy}:{}),
   publiclyReviewable:check.success,
+  ...(school?{originalPublicTradition:school.school.name,
+    schoolBonusApplied:1,personallyPractisedMethod:check.success,
+    noInstitutionalTeachingOrMembership:true}:{}),
   actualResult:check.success?job.actualEffect:'inconclusive observation; no new world claim',
   noFreeProfessionalRank:true,noTechniqueLearned:true,
   noEmployingInstitutionAssigned:true,noGuaranteedOrganisationalReaction:true};
@@ -397,9 +495,16 @@ function verifyReport(r){
     !/^[0-9a-f]{64}$/.test(r.receipt.sourceProofHash||'')||
     r.receipt.check.dc!==Lore.J[r.jobId].dc||
     r.receipt.check.success!==r.published||
+    !schoolWitnessValid(r)||
+    (r.receipt.school&&(
+     r.receipt.staminaSpent<Math.max(Lore.J[r.jobId].stamina,
+       Math.ceil(r.receipt.minutes/60))+1||
+     r.receipt.minutes<Lore.J[r.jobId].minutes+15
+    ))||
     r.receipt.check.margin!==r.receipt.originalRollEvent.details?.margin||
     r.receipt.check.success!==(r.receipt.check.margin>=0))
   return false;
  return true;
 }
-module.exports={SOURCE,publicLore,workStatus,practice,verifyReport};
+module.exports={SOURCE,SCHOOL_SOURCE,publicLore,workStatus,practice,
+ verifyReport,earnedSchoolApplication};
