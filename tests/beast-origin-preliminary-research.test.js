@@ -40,7 +40,7 @@ const screen=(s,params)=>rule(s,'screenCompatibility',params);
  const old=E.exportGame(s),rng=s.rngState;
  A.deepEqual(rule(s,'researchStatus').research,[]);
  A.equal(rule(s,'researchStatus').originPhase,0);
- A.throws(()=>study(s,{beastId:'imaginary_fox',focus:'habitat'}),/actual identified/);
+ A.throws(()=>study(s,{beastId:'imaginary_fox',focus:'habitat'}),/original successful noninvasive wildlife observation/);
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
  for(const fake of [
   {beastId:'imaginary_fox',focus:'habitat',species:'fenfox'},
