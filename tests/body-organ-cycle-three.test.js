@@ -120,7 +120,8 @@ const act=(s,params)=>Rules.act(s,{system:'body',operation:'organWork',params});
 {
  let seen=false;
  for(let seed=810001;seed<810080&&!seen;seed++){
-  const s=f(seed);s.player.attributes.con=10;s.player.skills.survival.rank=0;
+  const s=f(seed);s.rngState=(Math.imul(seed,2654435761)>>>0)||1;
+  s.player.attributes.con=10;s.player.skills.survival.rank=0;
   const r=act(s,{focus:'integrated',minutes:15});
   if(r.check.degree==='severe failure'){
    seen=true;A.equal(r.setback,'organ strain');
