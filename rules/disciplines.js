@@ -267,6 +267,7 @@ function status(s){
    rec=s.table?.disciplineTraining?.[system],
    pair=target?spec.tracks[target]:null;
   const gateCount=system==='meridian'?s.player.meridian.gates?.length||0:0,
+   seaReady=system==='meridian'&&s.player.meridian.stage===3&&gateCount===108,
    arcaneTwo=system==='arcane'&&s.player.arcane.coreIgnited===true&&
     s.player.arcane.circles===1,
    gateAvailable=system==='meridian'&&s.player.meridian.stage>=2&&
@@ -276,7 +277,7 @@ function status(s){
    gateDC=gateAvailable?(nextGate<=36?13:nextGate<=72?16:19)+
     (milestone?3:0):null;
   systems[system]={
-   target:target||(gateAvailable?'Gate '+nextGate+'/108':arcaneTwo?'Second Circle — Dual Channeling':'advanced stage: procedure not implemented'),
+   target:target||(gateAvailable?'Gate '+nextGate+'/108':seaReady?'Stage IV — Dantian Sea Formation':arcaneTwo?'Second Circle — Dual Channeling':'advanced stage: procedure not implemented'),
    current:system==='meridian'?s.player.meridian.stage:
     system==='arcane'?(s.player.arcane.coreIgnited?'Core ignited':'No Core')+
      '; '+s.player.arcane.circles+' Circles':
@@ -285,18 +286,20 @@ function status(s){
    progress:target?(rec?.target===target?rec.points:0):
     gateAvailable&&s.table?.meridianGateTraining?.gate===nextGate?
      s.table.meridianGateTraining.progress:
+    seaReady?s.table?.meridianSeaFormation?.points||0:
     arcaneTwo?s.table?.arcaneCircleRevision?.progress||0:0,
    required:pair?.[0]??(gateAvailable?
-    nextGate<=36?3:nextGate<=72?5:8:arcaneTwo?4:null),
-   dc:pair?.[1]??(arcaneTwo?17:gateDC),
+    nextGate<=36?3:nextGate<=72?5:8:seaReady?5:arcaneTwo?4:null),
+   dc:pair?.[1]??(seaReady?21:arcaneTwo?17:gateDC),
    availableMethods:target?methodsFor(system,target):[],
    nextEligibleDay:rec?.cooldownUntil||0,
    trainingRoutes:target||gateAvailable?['established','independent']:
+    seaReady?['independent']:
     arcaneTwo?['independent']:[],
-   independentAvailableAtCurrentSite:!!(target||gateAvailable||arcaneTwo)&&
+   independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo)&&
     SELF_SITES[system].includes(s.world.location),
    independentPracticeFeeTalons:0,
-   independentPracticeDC:pair?pair[1]+2:arcaneTwo?17:gateDC,
+   independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneTwo?17:gateDC,
    independentBreakthroughExtraDC:target?3:null,
    ...(target?{practiceSession:{
     minimumMinutes:15,maximumMinutes:480,
@@ -311,6 +314,12 @@ function status(s){
     sessionMinutes:{minimum:15,default:180,maximum:480},
     manaSpentPerAttempt:2,noCompulsoryTeacher:true,
     optionalWitnessedTheory:true,noFreeSpellOnConstruction:true
+   }}:{}),
+   ...(seaReady?{dantianSeaWork:{
+    methods:[...SEA_METHODS],requiredIntegrity:5,
+    sessionMinutes:{minimum:15,default:120,maximum:480},
+    qiSpentPerAttempt:8,noCompulsoryTeacher:true,
+    noFreeTechnique:true
    }}:{}),
    ...(gateAvailable?{gatePractice:{
     nextGate,structuralTransition:milestone,
@@ -416,7 +425,7 @@ function meridianQi(s){
  const m=s.player.meridian,phys=s.table?.powerPhysiology?.meridian;
  const grades=phys?.gateRecords||[],P=grades.filter(g=>g.quality==='Perfect').length,
   S=grades.filter(g=>g.quality==='Sound').length,F=grades.filter(g=>g.quality==='Flawed').length;
- const profile=Build.meridianProfile(m.stage,{meridians:12,gatesP:P,gatesS:S,gatesF:F});
+ const profile=Build.meridianProfile(m.stage,{meridians:12,gatesP:P,gatesS:S,gatesF:F,seaRings:m.dantianSea?.rings||0});
  m.stableQiLimit=profile.qi;m.flow=profile.flow;m.recoveryRate=profile.recovery;
  if(profile.qi>s.player.maxQi){const diff=profile.qi-s.player.maxQi;s.player.maxQi=profile.qi;s.player.qi+=diff;}
  return profile;
@@ -622,4 +631,171 @@ function gatePractice(s,params={}){
   minutes,actualElapsedDays:minutes/1440,
   tuitionTalons:0,theoreticalGuidance:theory};
 }
-module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork};
+
+// Stage IV begins after the actual 108-Gate anatomy, not after a claimed
+// count, player-written teacher statement, chosen DC or generic power rank.
+// Existing Stage III sources retain their original history; no migration
+// guesses old completed gates or awards a higher stage from stored Qi.
+function seaPrerequisites(s){
+ const p=s.player?.meridian,phys=s.table?.powerPhysiology?.meridian;
+ if(!p||p.stage!==3)throw Error('Dantian Sea formation requires genuine Stage III completion');
+ if(!phys||phys.primaryMapped!==12||
+    !['Perfect','Firm','Sound','Thin','Cracked'].includes(phys.foundationQuality)||
+    !Array.isArray(phys.gateRecords)||!Array.isArray(p.gates)||
+    phys.gateRecords.length!==108||p.gates.length!==108)
+  throw Error('All 108 individually recorded, anatomically consistent Meridian Gates are required');
+ const history=s.table?.disciplineTraining?.meridian?.history||[];
+ if(!history.some(h=>h.target==='foundation'&&
+      typeof h.change==='string'&&h.change.startsWith('Stage I Foundation Tempering; ')&&
+      Number.isInteger(h.day)&&h.day>=1&&h.day<=E.day(s))||
+    !history.some(h=>h.target==='awakening'&&
+      typeof h.change==='string'&&h.change.startsWith('Stage II Meridian Awakening; ')&&
+      Number.isInteger(h.day)&&h.day>=1&&h.day<=E.day(s)))
+   throw Error('The original earned Foundation and Primary Awakening records must exist');
+ let perfect=0,flawed=0,lastDay=0;
+ for(let i=0;i<108;i++){
+  const a=p.gates[i],b=phys.gateRecords[i],
+    band=i<36?'Lower':i<72?'Middle':'High';
+  if(!a||!b||a.number!==i+1||b.number!==i+1||
+     a.band!==band||b.band!==band||
+     !['Perfect','Sound','Flawed'].includes(a.quality)||
+     b.quality!==a.quality||
+     !Number.isInteger(b.day)||b.day<1||
+     b.day<lastDay||b.day>E.day(s))
+   throw Error('Meridian Gate provenance is missing, unordered or incompatible with the current anatomy');
+  lastDay=b.day;
+  if(a.quality==='Perfect')perfect++;
+  if(a.quality==='Flawed')flawed++;
+ }
+ for(const gate of [36,72,108]){
+  const receipt=phys.transitions?.find(t=>t.gate===gate);
+  const actual=phys.gateRecords[gate-1];
+  if(!receipt||receipt.day!==actual.day||
+     receipt.quality!==actual.quality||
+     !['independent','established'].includes(receipt.route)||
+     typeof receipt.source!=='string'||receipt.source.length<16)
+   throw Error('The Lower, Middle and High Gate transitions require their original saved source receipts');
+ }
+ if(!Number.isInteger(p.stability)||p.stability<1||p.stability>100)
+  throw Error('Dantian Sea work requires a recorded, viable circulation stability');
+ if(s.battle||s.encounter||s.table?.combatants?.player?.status&&
+    s.table.combatants.player.status!=='ok')
+  throw Error('No high-pressure Dantian formation during combat, immediate danger or incapacity');
+ return {perfect,flawed,foundationQuality:phys.foundationQuality};
+}
+const SEA_METHODS=Object.freeze(['compression','circulation','stabilisation','integrated']);
+function seaStatus(s){
+ const m=s.player.meridian,sea=m.dantianSea;
+ if(m.stage>=4)return {stage:m.stage,formed:!!sea,
+  sea:sea?{rings:sea.rings,density:sea.density,purity:sea.purity,
+    stability:sea.stability,source:sea.source}:null,
+  note:'Structural Dantian capacity is not a free learned technique, human evolution or another discipline'};
+ let readiness=false,reason=null,quality=null;
+ try{quality=seaPrerequisites(s);readiness=true;}catch(e){reason=e.message;}
+ const work=s.table?.meridianSeaFormation;
+ return {stage:m.stage,formed:false,ready:readiness,
+  ...(reason?{reason}:{}),progress:work?.points||0,required:5,
+  availableMethods:[...SEA_METHODS],
+  noCompulsoryTeacher:true,noMinimumCalendarDays:true,
+  earned108Gates:readiness?108:m.gates?.length||0,
+  ...(readiness?{foundationQuality:quality.foundationQuality}:{}),
+  note:'One attempted Stage IV formation is earned through a genuine independent check, with paid Qi/Stamina/time and setbacks. No free technique'};
+}
+function seaWork(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).some(k=>!['method','minutes','guidanceId','approach'].includes(k)))
+  throw Error('Dantian formation accepts only an actual method, duration, optional witnessed theory and descriptive approach; no chosen stage, dice, bonus or result');
+ const {method,minutes=120,guidanceId,approach}=params;
+ if(!SEA_METHODS.includes(method))throw Error('Choose a physically credible Dantian compression, circulation, stabilisation or integrated method');
+ C.int(minutes,'actual Dantian formation minutes',15,480);
+ if(approach!==undefined&&
+    (typeof approach!=='string'||approach.trim().length<8||approach.length>240))
+  throw Error('An optional Dantian approach must describe an actual attempt, not a claimed result');
+ const quality=seaPrerequisites(s);
+ const self=independentSite(s,'meridian',{shortSession:true});
+ const theory=witnessedTheory(s,'meridian',guidanceId);
+ const energySpent=8,staminaSpent=Math.ceil(minutes/120);
+ if(s.player.qi<energySpent||s.player.stamina<staminaSpent)
+  throw Error('Dantian Sea formation requires eight available Qi and real Stamina');
+ const record=s.table.meridianSeaFormation ||= {
+  points:0,attempts:[],formedAtMinute:null
+ };
+ if(record.formedAtMinute!==null||s.player.meridian.dantianSea)
+  throw Error('Dantian Sea already exists; the same formation cannot be awarded twice');
+ if(!Number.isInteger(record.points)||record.points<0||record.points>5||
+    !Array.isArray(record.attempts)||record.attempts.length>500)
+  throw Error('Invalid Stage IV work ledger; no roll may be made');
+ const now=s.world.minutes,oldCurrentQi=s.player.qi,
+  baseMod=modifier(s,'meridian'),flaws=quality.flawed,
+  foundationBonus=quality.foundationQuality==='Perfect'?2:
+    quality.foundationQuality==='Firm'?1:0,
+  gateBonus=Math.min(2,Math.floor(quality.perfect/36)),
+  dc=21+Math.floor(flaws/18)+
+    (s.player.meridian.stability<70?2:0);
+ // The user's wording names how they attempt the work but cannot set DC,
+ // talent, output, difficulty, quality or another character's permission.
+ s.player.qi-=energySpent;
+ s.player.stamina-=staminaSpent;
+ if(s.table?.combatants?.player)
+  s.table.combatants.player.stamina=s.player.stamina;
+ const check=C.check(s,{modifier:baseMod+foundationBonus+gateBonus+
+   (theory?.bonus||0),dc,label:'Stage IV Dantian Sea '+method});
+ const earned=check.degree==='exceptional'?5:check.progress;
+ record.points=Math.min(5,record.points+earned);
+ let backlash=null;
+ if(check.degree==='severe failure'){
+  backlash='Qi pressure injury';
+  s.player.meridian.stability=Math.max(1,s.player.meridian.stability-4);
+  U.ensurePlayer(s);
+  Combat.harm(s,Combat.get(s,'player'),2);
+  U.sync(s,{source:'wounds'});
+ }
+ let formed=false,profile=null;
+ if(record.points>=5){
+  const purity=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/36)-
+    Math.floor(flaws/27)));
+  const density=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/27)-
+    Math.floor(flaws/36)));
+  s.player.meridian.stage=4;
+  s.player.meridian.dantianSea={
+   rings:1,density,purity,stability:s.player.meridian.stability,
+   source:'Self-directed formation from 108 saved Gates, three witnessed transitions and an original Dantian check',
+   formedAtMinute:now
+  };
+  s.player.meridian.dantianDensity=density;
+  const spentCurrent=s.player.qi;
+  profile=meridianQi(s);
+  // Newly earned storage capacity must not conjure an instantly full sea.
+  s.player.qi=spentCurrent;
+  record.formedAtMinute=now;
+  formed=true;
+ }
+ const result={minute:now,method,source:independentSource('meridian','dantian-sea',self.site),
+  roll:check.roll,degree:check.degree,earned,
+  ...(approach?{approach:approach.trim().slice(0,240)}:{}),
+  progress:record.points,formed};
+ record.attempts.push(result);
+ E.advance(s,minutes);W.finalizeTime(s,now);
+ U.sync(s,{source:'legacy'});
+ C.event(s,'progress',formed?
+  'Stage IV Dantian Sea formed; a single structural sea ring now exists.':
+  'Stage IV Dantian Sea work '+record.points+'/5',{
+   origin:'stage-iv-earned-dantian-sea-v1',
+   method,originalCheck:check,record:result,formed,
+   qiSpent:oldCurrentQi-s.player.qi,staminaSpent,
+   ...(formed?{sea:s.player.meridian.dantianSea,
+    capacity:s.player.maxQi,
+    learnedTechnique:false,humanEvolutionAwarded:false}:{}),
+   backlash
+  });
+ return {system:'meridian',stage:s.player.meridian.stage,
+  target:'Dantian Sea Formation',method,check,earned,
+  progress:record.points,required:5,formed,
+  qiSpent:energySpent,staminaSpent,minutes,
+  route:'independent',feeTalons:0,backlash,
+  ...(profile?{profile:{qiCapacity:s.player.maxQi,flow:profile.flow,
+    recovery:profile.recovery,seaRings:1,learnedTechnique:false}}:{})
+ };
+}
+
+module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork};
