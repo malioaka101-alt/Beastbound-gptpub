@@ -120,6 +120,10 @@ const spec=()=>({title:'Field Reed Water Witness',
 {
  const s=fresh(7852002),w=Realm.ensure(s),t=People.ensure(w);
  const reg=Atlas.R.morrowfen_basin;
+ w.countries.reedmarch.stability=42;
+ w.countries.reedmarch.prosperity=75;
+ w.ecosystems.morrowfen_basin.pressure=39;
+ w.ecosystems.morrowfen_basin.quality=80;
  const d=People.sourceDemand(w,reg);
  A.ok(d,'An authentic local material or livelihood demand should be available');
  const p=People._debug.make(w,t,0,d);
@@ -157,8 +161,13 @@ const spec=()=>({title:'Field Reed Water Witness',
 // Creation of a family *household* is neither imposed by a family roster
 // nor inferred from a single conversation. Distinct real people must act.
 {
- const s=fresh(7852003),w=Realm.ensure(s),t=People.ensure(w),
-  reg=Atlas.R.morrowfen_basin,d=People.sourceDemand(w,reg);
+ const s=fresh(7852003),w=Realm.ensure(s),t=People.ensure(w);
+ const reg=Atlas.R.morrowfen_basin;
+ w.countries.reedmarch.stability=42;
+ w.countries.reedmarch.prosperity=75;
+ w.ecosystems.morrowfen_basin.pressure=39;
+ w.ecosystems.morrowfen_basin.quality=80;
+ const d=People.sourceDemand(w,reg);
  A.ok(d);
  const a=People._debug.make(w,t,0,d),b=People._debug.make(w,t,0,d);
  a.funds=60;b.funds=60;
