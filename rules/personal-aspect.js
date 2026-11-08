@@ -115,6 +115,7 @@ function activate(s,id,{combat=false}={}){
  const check=C.check(s,{modifier:Math.floor((con-10)/2)+2*rank,
   dc:16,label:'Personally developed Organ Aspect activation'});
  p.stamina-=ACTIVATION_STAMINA;
+ const here=s.table?.combatants?.player;
  if(here)here.stamina=p.stamina;
  let backlash=null;
  if(check.degree==='severe failure'){
@@ -185,8 +186,8 @@ function spendCombatUpkeep(s){
  const p=s.player,c=s.table?.combatants?.player;
  if(!Number.isInteger(p.stamina)||p.stamina<UPKEEP_PER_EXCHANGE||
     c&&c.stamina<UPKEEP_PER_EXCHANGE){
-  here.a.endsMinute=s.world.minutes;
-  here.a.cooldownUntil=s.world.minutes+COOLDOWN_MINUTES;
+  here.a.revertedMinute=s.world.minutes;
+  here.a.cooldownUntil=Math.max(here.a.cooldownUntil,s.world.minutes+COOLDOWN_MINUTES);
   C.event(s,'progress','The earned aspect subsides under real fatigue; insufficient physical stamina cannot sustain it.',{
    origin:ORIGIN,designId:here.a.designId,noExtraFreeEnergy:true});
   return {spent:0,active:false,collapsed:true};
