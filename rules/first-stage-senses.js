@@ -4,6 +4,7 @@
 // Canon: Unified Master Prompt §§19, 22, 25 and 45.
 // Both are bounded, costly, source-witnessed actions after earned rites.
 const Crypto=require('node:crypto');
+const SoulThreads=require('./soul-threading');
 const E=require('../engine.js'),Core=require('./core'),W=require('./world'),
  Build=require('./build'),U=require('./unified'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
@@ -129,6 +130,7 @@ function soulStatus(s,p={}){
   reserve:earned?soul.reserve:null,maxReserve:earned?soul.maxReserve:null,
   perceptionRangeMetres:earned?soul.perceptionRange:null,
   uses:(s.table?.perceptionPractice?.soulAttempts||[]).length,
+  threadVerified:(()=>{try{return SoulThreads.earned(s).phase===2;}catch{return false;}})(),
   description:'Phase I senses only limited self-structure and witnessed nearby living signatures. It is not mindreading, beast taming, remote location detection or a licence to extract a soul.'};
 }
 function perceive(s,p={}){
@@ -143,8 +145,13 @@ function perceive(s,p={}){
   person=personallyWitnessedNearbyPerson(s,range);
  const attr=Core.int(s.player.attributes.wis,'recorded Wisdom',1,30),
   rank=Core.int(s.player.skills?.cultivation?.rank,'earned Cultivation rank',0,5);
+ const verifiedThreads=(()=>{
+  if(soul.phase<2)return false;
+  try{return SoulThreads.earned(s).phase===2;}catch{return false;}
+ })();
+ const threadBonus=verifiedThreads?2:0;
  const start=s.world.minutes,location=s.world.location,
-  dc=beast||person?14:12,modifier=Math.floor((attr-10)/2)+2*rank;
+  dc=beast||person?14:12,modifier=Math.floor((attr-10)/2)+2*rank+threadBonus;
  Core.event(s,'world','The practitioner concentrates on their own established spiritual pattern'+
   (beast?' while a genuinely encountered animal is nearby.':
    person?' while a recently spoken-to person remains present.':'.'),{
@@ -164,6 +171,7 @@ function perceive(s,p={}){
  const report={origin:'earned-bounded-soul-perception',
   attemptDay:E.day(s),worldMinute:s.world.minutes,location,
   phase:soul.phase,cost:SOUL_COST,rangeMetres:range,
+  verifiedThreadConcentrationBonus:threadBonus,
   success,degree:check.degree,nearbyBeastId:beast?.id||null,
   encounterHash:beast?.encounterHash||null,
   nearbyPersonWitnessHash:person?.witnessHash||null,witnessIndex,witnessHash,
@@ -188,6 +196,7 @@ function perceive(s,p={}){
   sourceWitnessHash:witnessHash,checkEventHash:rollHash});
  return {performed:true,discipline:'soul',phase:soul.phase,
   success,check,remainingReserve:soul.reserve,energySpent:SOUL_COST,
+  threadConcentrationBonus:threadBonus,
   minutes:SOUL_MINUTES,rangeMetres:range,ownSoulAwareness:success,
   nearbyLifeSign:sensedBeast||sensedPerson,
   recentConversantSignature:sensedPerson,noNamesRead:true,noBeastMindRead:true,
