@@ -176,6 +176,8 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.wardStatus':return ArcaneWard.status(s,params);
   case 'arcane.dualChannelStatus':return DualArcane.status(s,params);
   case 'arcane.circleWork':return Disciplines.arcaneCircleWork(s,params);
+  case 'arcane.matrixStatus':return Disciplines.matrixStatus(s);
+  case 'arcane.matrixWork':return Disciplines.matrixWork(s,params);
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
