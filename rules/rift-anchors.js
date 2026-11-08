@@ -70,7 +70,7 @@ function environment(s){
  // Keep all raw world pressures and vault condition private. The public
  // observation is the only player-reported site assessment.
  const v={siteId:'riftglass_vault',phase:site.phase,
-  charge:site.charge,seal:site.seal,pressure:eco.pressure,
+  charge:site.charge,seal:site.seal,ecosystemPressure:eco.pressure,
   worldSeed:w.worldSeed,day:Math.floor(s.world.minutes/1440)};
  const risk=site.phase==='unstable'||site.seal<35?'unstable':
   site.phase==='surging'||site.charge>72||eco.pressure>73?'elevated':'contained';
