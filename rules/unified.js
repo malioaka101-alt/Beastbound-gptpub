@@ -95,7 +95,7 @@ function verifiedShelter(s,id,hours){
  return site;
 }
 function shelterStatus(s){
- const loc=E.LOCATIONS[s.world.location];
+ const loc=require('../world/lived-places').location(s);
  if(loc?.biome==='settlement')return {settlementShelter:true,available:[]};
  const found=[];
  for(const [id,site] of Object.entries(s.table?.sleepShelters||{})){
@@ -114,7 +114,7 @@ function sleep(s,params={}){
  // Only a full night unlocks night-scale resources, wound recovery and
  // another genuine encounter Recover use. Short rests need separate rules.
  C.int(hours,'sleep hours',8,12);if(s.battle||s.encounter)throw Error('Cannot sleep during an unresolved encounter');
- const loc=E.LOCATIONS[s.world.location];
+ const loc=require('../world/lived-places').location(s);
  if(loc?.biome!=='settlement')verifiedShelter(s,shelterId,hours);
  else if(shelterId!==undefined)throw Error('A wilderness shelter ID does not apply to normal settlement sleep');
  ensurePlayer(s);const c=s.table.combatants.player;

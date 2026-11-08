@@ -13,7 +13,8 @@ const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
 const num=(x,label,min,max)=>{if(!Number.isInteger(x)||x<min||x>max)throw Error(`Invalid ${label}`);return x;};
 const safe=x=>typeof x==='string'&&x.length>=8&&x.length<=220;
 const worldDay=s=>Math.floor(s.world.minutes/1440);
-const locationRegion=s=>A.LOCATION_REGION[s.world.location]||'morrowfen_basin';
+const locationRegion=s=>A.LOCATION_REGION[s.world.location]||
+ require('./lived-places').get(s,s.world.location)?.regionId||'morrowfen_basin';
 const polityOf=s=>A.R[locationRegion(s)]?.polity||'reedmarch';
 function random(w){let x=w.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;w.rngState=x>>>0||0x593f56bc;return w.rngState/4294967296;}
 function noise(w,lo=-2,hi=2){return lo+Math.floor(random(w)*(hi-lo+1));}

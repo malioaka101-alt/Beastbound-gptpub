@@ -93,6 +93,7 @@ jobs:
             tests/new-campaign.test.js
             tests/campaign-origins.test.js
             tests/origin-relatives.test.js
+            tests/lived-places-and-travel.test.js
             tests/bond-witness.test.js
             tests/bond-care.test.js
             tests/bond-consent.test.js

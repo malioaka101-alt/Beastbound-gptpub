@@ -175,10 +175,15 @@
     }
     return integrateState(s);
   }
+  function localPlace(s,id=s.world.location){
+    return LOCATIONS[id]||require('./world/lived-places').location(s,id);
+  }
   function travel(s,target){
     if(s.battle)return fail(s,'You cannot travel mid-combat; retreat or resolve it first.');
     if(s.encounter)return fail(s,'Resolve or leave the nearby beast encounter before travelling.');
-    target=resolveLocation(target);const here=LOCATIONS[s.world.location];if(!target||!here.exits.includes(target))return fail(s,`Travel must follow a linked route. From here: ${here.exits.map(x=>LOCATIONS[x].name).join(', ')}.`);
+    target=resolveLocation(target);const here=LOCATIONS[s.world.location];
+    if(!here)return fail(s,'Newly established places require the GM-judged world.travelTo operation; no legacy route or free transfer is implied.');
+    if(!target||!here.exits.includes(target))return fail(s,`Travel must follow a linked route. From here: ${here.exits.map(x=>LOCATIONS[x].name).join(', ')}.`);
     const old=s.world.location;s.world.location=target;s.flags.visited[target]=true;advance(s, target==='ruins'?145:75);
     s.player.stamina=clamp(s.player.stamina-4,0,s.player.maxStamina);
     log(s,'travel',`You travel from ${LOCATIONS[old].name} to ${LOCATIONS[target].name}. ${LOCATIONS[target].description}`);
@@ -444,7 +449,7 @@
     if(r.margin<0)return success(s,'The mixture separates. The materials are spent and the product is unsafe to use.');
     s.player.inventory.healing_balm=(s.player.inventory.healing_balm||0)+1;return success(s,'Crafted one Healing Balm with controlled ingredients and a clean field kit.');
   }
-  function status(s){return {time:clock(s),location:LOCATIONS[s.world.location].name,player:copy(s.player),partners:s.player.partnerIds.map(x=>copy(s.beasts[x])),encounter:s.encounter?copy(s.beasts[s.encounter.beastId]):null,battle:s.battle?copy(s.battle):null,quests:copy(s.quests),world:copy(s.world)};}
+  function status(s){return {time:clock(s),location:localPlace(s).name,player:copy(s.player),partners:s.player.partnerIds.map(x=>copy(s.beasts[x])),encounter:s.encounter?copy(s.beasts[s.encounter.beastId]):null,battle:s.battle?copy(s.battle):null,quests:copy(s.quests),world:copy(s.world)};}
   function help(s){return success(s,'Commands: branches, ripening, pattern echo, research, research start Title | kind | Grade | novelty, research survey <id>, research week <id>, research fieldwork <id>, research hypothesis <id> | claim, research proof <id>, research validate <id>, knows <NPC>, hud, recap; plus look, travel <place>, explore, observe, approach, offer food, invite, leave, forage, talk <person>, guild, quest accept <id>, quest submit <id>, train meridian|arcane|soul|body|rift|origin|beast, buy <item>, craft field_poultice, competitions, compete <id>, rest, heal, evolve, evolve human, attack, defend, soothe, retreat, qi strike, arcane spark, status, inventory, help.');}
   function dispatch(s,phrase){
     if(!s||s.schemaVersion!==1)throw Error('Invalid or unsupported save state.');
@@ -452,7 +457,10 @@
     if(!x)return fail(s,'Enter an action. Type help for example commands.');
     if(s.table?.healthModel==='wounds-v1' && ['fight','start combat','confront','attack','defend','soothe','retreat','qi strike','arcane spark','rest','sleep','heal','use balm','invite','propose partnership','form bond','evolve','evolve partner'].includes(x))
       return fail(s,'Legacy combat, healing, partnership and automatic evolution are retired after wound migration. Use the private chat rule runner.');
-    if(/^(look|where am i|scene|surroundings)$/.test(x))return success(s,`${LOCATIONS[s.world.location].name}: ${LOCATIONS[s.world.location].description} Routes: ${LOCATIONS[s.world.location].exits.map(k=>LOCATIONS[k].name).join(', ')}.`);
+    if(/^(look|where am i|scene|surroundings)$/.test(x)){
+      const here=localPlace(s);
+      return success(s,`${here.name}: ${here.description} ${here.exits?.length?'Routes: '+here.exits.map(k=>LOCATIONS[k]?.name||k).join(', ')+'.':'Other journeys depend on the established world and GM-adjudicated travel.'}`);
+    }
     if(x==='help'||x==='commands')return help(s);
     if(x==='hud')return success(s,coreHud(s));
     if(x==='recap')return success(s,recap(s));
@@ -497,7 +505,7 @@
   function verify(s){
     if(!s||s.schemaVersion!==1||!s.player||!s.world||!s.beasts)throw Error('Invalid save data.');
     if(s.player.meridian.gates.length>108||s.player.arcane.circles>9||s.player.origin.load>s.player.origin.capacity)throw Error('Save data violates progression constraints.');
-    if(!LOCATIONS[s.world.location])throw Error('Save location is invalid.');
+    if(!localPlace(s))throw Error('Save location is invalid.');
     return true;
   }
   function exportGame(s){integrateState(s);verify(s);return JSON.stringify(s,null,2);}
@@ -843,13 +851,13 @@
     const lower='╚'+'═'.repeat(32)+'╝';
     const p=s.player;
     const focus=s.encounter?`Wild ${s.beasts[s.encounter.beastId]?.name||'beast'} nearby`:s.battle?'In combat':'Free to act';
-    return [outer,line(p.name.toUpperCase()+' · '+clock(s)),line(LOCATIONS[s.world.location].name+' · '+money(p.coins)),
+    return [outer,line(p.name.toUpperCase()+' · '+clock(s)),line(localPlace(s).name+' · '+money(p.coins)),
       line('STA '+p.stamina+'/'+p.maxStamina+' · HP '+p.health+'/'+p.maxHealth),
       line('SOUL '+p.soul.phase+' · Qi '+p.qi+'/'+p.maxQi),line('NOW: '+focus),lower].join('\n');
   }
   function recap(s){
     integrateState(s);
-    return ['CAMPAIGN: '+s.player.name+' (seed '+s.seed+')','SCENE: '+LOCATIONS[s.world.location].name+', '+clock(s),
+    return ['CAMPAIGN: '+s.player.name+' (seed '+s.seed+')','SCENE: '+localPlace(s).name+', '+clock(s),
       'PC: '+s.player.background+', '+s.player.path+'; '+money(s.player.coins),
       'JOURNAL: '+(s.log.filter(x=>!['roll','notice'].includes(x.type)).slice(-3).map(x=>x.text).join(' | ')||'No journal entries'),
       'CURRENT: '+(s.flags.openingHook||'No opening hook')].join('\n');

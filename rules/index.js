@@ -62,6 +62,7 @@ const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
 const OriginRelatives=require('../world/origin-relatives');
+const LivedPlaces=require('../world/lived-places');
 const PersonalAspect=require('./personal-aspect');
 const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
@@ -291,6 +292,10 @@ function act(s,{system,operation,params={}}={}){
   case 'opportunity.status':return FieldOpportunities.publicStatus(s,params);
   case 'opportunity.interest':return FieldOpportunities.interest(s,params);
   case 'opportunity.file':return FieldOpportunities.file(s,params);
+  case 'world.placeStatus':return LivedPlaces.status(s,params);
+  case 'world.establishPlace':return LivedPlaces.establish(s,params);
+  case 'world.recordPlaceNote':return LivedPlaces.note(s,params);
+  case 'world.travelTo':return LivedPlaces.travel(s,params);
   case 'world.observe':return Wildlife.observe(s,params);
   case 'world.watchWildBeast':return WildLives.watch(s,params);
   case 'world.giveWildSpace':return WildLives.giveSpace(s,params);

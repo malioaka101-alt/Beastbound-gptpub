@@ -67,7 +67,7 @@ function wait(s,p={}){
   throw Error('Elapsed scene time accepts only an actual positive integer of minutes, up to one processing year; no selected rewards, skills or outcomes');
  if(s.battle||s.encounter)
   throw Error('An unresolved beast encounter or battle requires a real scene resolution, not a time skip');
- const loc=E.LOCATIONS[s.world?.location];
+ const loc=require('../world/lived-places').location(s,s.world?.location);
  if(!loc||loc.biome!=='settlement')
   throw Error('This ordinary-life timeskip requires an established safe settlement; remote travel, wilderness and hazardous periods need their actual circumstances');
  const c=s.table?.combatants?.player;
