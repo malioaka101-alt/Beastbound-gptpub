@@ -181,12 +181,13 @@ function status(s,p={}){
 // narrative route and resources. Unresolved danger must be adjudicated before
 // claiming the destination is reached; this never silently resolves hazards.
 function travel(s,p={}){
- keys(p,['destinationId','minutes','journey','uncontested'],['means']);
+ keys(p,['destinationId','minutes','journey','uncontested'],['means','arrivalWeather']);
  if(typeof p.destinationId!=='string'||!location(s,p.destinationId)||
   p.destinationId===s.world.location||
   !Number.isInteger(p.minutes)||p.minutes<1||p.minutes>365*1440||
   !phrase(p.journey,25,850)||p.uncontested!==true||
-  (p.means!==undefined&&!phrase(p.means,3,100)))
+  (p.means!==undefined&&!phrase(p.means,3,100))||
+  (p.arrivalWeather!==undefined&&!phrase(p.arrivalWeather,3,140)))
    throw Error('Ordinary travel needs an established destination and GM-supported journey, elapsed time and already resolved hazards');
  if(s.battle||s.encounter)
   throw Error('The present conflict or nearby beast encounter must be resolved before departing');
@@ -201,6 +202,7 @@ function travel(s,p={}){
    startMinute:start,elapsedMinutes:p.minutes,
    describedRoute:p.journey.trim(),means:p.means?.trim()||'GM-established travel',
    fromRegion:beforeRegion,toRegion:afterRegion,
+   ...(p.arrivalWeather?{observedArrivalWeather:p.arrivalWeather.trim()}:{}),
    hazardsAlreadyResolved:true,
    notAnNPCArrival:true,noAutomaticTreasure:true,
    noUnverifiedFareOrProvisioning:true};
@@ -209,6 +211,7 @@ function travel(s,p={}){
  // established transactions or checks; a route description awards none.
  const E=require('../engine.js');
  s.world.location=p.destinationId;
+ if(p.arrivalWeather)s.world.weather=p.arrivalWeather.trim();
  s.flags.visited[p.destinationId]=true;
  E.advance(s,p.minutes);
  const ticks=require('../rules/world').finalizeTime(s,start);
