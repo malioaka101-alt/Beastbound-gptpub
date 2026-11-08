@@ -60,6 +60,7 @@ function read(s){
       warning:'Starting preparation is not verified current training-track progress'}:
      {legacyPreparatoryFoundation:m.foundation,
       warning:'Legacy foundation value is not verified current training-track progress'}):{}),
+   ...(m.stage>=3?{dantianSea:Disc.seaStatus(s)}:{}),
    training:verifiedTrain('meridian')},
   arcane:{circles:a.circles||0,circleName:phase(ARCANE,a.circles||0),
    coreIgnited:a.coreIgnited===true,coreStability:a.coreStability,

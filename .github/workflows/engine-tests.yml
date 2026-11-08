@@ -28,6 +28,7 @@ jobs:
             tests/causal-learning.test.js
             tests/independent-contacts.test.js
             tests/foundation-gate-integration.test.js
+            tests/meridian-stage-four-sea.test.js
             tests/arcane-second-circle.test.js
             tests/contextual-theory-guidance.test.js
             tests/flexible-discipline-practice.test.js

@@ -181,6 +181,8 @@ function act(s,{system,operation,params={}}={}){
   case 'discipline.practice':return Disciplines.practice(s,params);
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
+  case 'meridian.seaStatus':return Disciplines.seaStatus(s);
+  case 'meridian.seaWork':return Disciplines.seaWork(s,params);
   case 'core.opposed':throw Error('Direct opposed rolls are not playable without independently witnessed participants, fixed skills and a precommitted contest');
   case 'core.contestForce':throw Error('Direct force contests are not playable without sourced combatants, established magnitudes and scene prerequisites');
   case 'combat.begin':return CombatProvenance.begin(s,params);
