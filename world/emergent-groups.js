@@ -127,7 +127,8 @@ function record(r,e,day,kind,details,emit,notice=null){
  return row;
 }
 function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
- const r=ensure(w),polity=Atlas.R[Atlas.LOCATION_REGION[place]]?.polity;
+ const r=ensure(w),polity=Atlas.R[Atlas.LOCATION_REGION[place]||
+  (Atlas.R[place]?place:w.livedPlaces?.places?.[place]?.regionId)]?.polity;
  if(!polity||!name||!kind||!purpose||!founder||!event||r.entries[id])
   throw Error('An actual local founder and unique witnessed group declaration are required');
  if(Object.prototype.hasOwnProperty.call(w.houses||{},id))
