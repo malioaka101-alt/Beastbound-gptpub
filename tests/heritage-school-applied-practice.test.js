@@ -167,6 +167,16 @@ A.equal(Atlas.R.ashwind.polity,'reedmarch',
  // and altered bloodlines do not acquire professional status.
  const saved=E.importGame(snapshot);
  A.equal(Civic.earnedSchoolApplication(saved,school),true);
+ A.equal(saved.table.realm.culturalPractice.schoolProofs[school].report.receipt.school.traditionId,school);
+ // World careers outlast the bounded rolling report list. The ORIGINAL
+ // verified demonstration remains within the same professional archive.
+ const compacted=E.importGame(snapshot);
+ compacted.table.realm.culturalPractice.reports=[];
+ A.equal(Civic.earnedSchoolApplication(compacted,school),true);
+ const corruptPermanent=E.importGame(E.exportGame(compacted));
+ corruptPermanent.table.realm.culturalPractice.schoolProofs[school]
+  .report.receipt.originalRollEvent.details.roll=20;
+ A.equal(Civic.earnedSchoolApplication(corruptPermanent,school),false);
  A.equal(saved.player.qualifications.some(x=>x==='open_peak'),false);
  A.equal(saved.player.arcane.circles,0);
  A.equal(saved.player.meridian.stage,0);
