@@ -53,6 +53,17 @@ function generatedIdentity(seed,base){
    person=pick(RELATIVE_GIVEN,h(55+i*13));
   members.push({relation:'sibling',name:person+' '+surname});
  }
+ // Do not silently assign two different known relatives the same full name.
+ const seen=new Set();
+ for(const member of members){
+  let i=0;
+  while(seen.has(member.name)&&i<RELATIVE_GIVEN.length){
+   const next=pick(RELATIVE_GIVEN,(h(70+i*19)+i)%RELATIVE_GIVEN.length);
+   member.name=next+' '+surname;i++;
+  }
+  if(seen.has(member.name))throw Error('Unable to make distinct relative names');
+  seen.add(member.name);
+ }
  family.members=members;
  const history={
   upbringing:TRADE_LIFE[family.homeTrade],
