@@ -181,8 +181,15 @@ function status(s,p={}){
   heard=s.table?.originKinConversations?.records||[];
  if(t&&(t.ownerName!==s.player.name||
   t.seed!==s.campaign?.startSeed||
+  t.homeRegionId!==s.player.startingContext?.birthRegionId||
   owned.length!==Object.keys(t.people).length))
   throw Error('Starting kin ledger is from a different campaign or family');
+ if(t)for(const [i,member] of owned.entries()){
+  const person=t.people['kin_'+(i+1)];
+  if(!person||!verify(s.table.realm,person)||
+   person.name!==member.name||person.relation!==member.relation)
+   throw Error('A claimed known relative no longer matches their saved individual origin');
+ }
  if(!Array.isArray(heard))throw Error('Personal family recollections need a valid saved ledger');
  return {home:Atlas.R[s.player.startingContext?.birthRegionId]?.name||null,
   relatives:owned.map((x,i)=>({npcId:t?'origin-kin:kin_'+(i+1):null,
@@ -219,8 +226,10 @@ function talk(s,{npcId,question,...extras}={}){
  if(Object.keys(extras).length||typeof npcId!=='string'||
   typeof question!=='string'||question.trim().length<5||question.length>300)
   throw Error('Ask an actual present relative a real question without supplying their response');
- if(s.battle||s.encounter||s.table?.combatants?.player?.status==='incapacitated')
-  throw Error('A live threat or incapacitation prevents a settled family conversation');
+ if(s.battle||s.encounter||
+   ['incapacitated','knocked_out','rehabilitating','dying','dead']
+    .includes(s.table?.combatants?.player?.status))
+  throw Error('A live threat or inability to communicate prevents a settled family conversation');
  const w=require('./simulation').peek(s),day=Math.floor(s.world.minutes/DAY),
   minute=s.world.minutes%DAY,shift=presence(w,npcId,s.world.location,day),
   person=w.originKin?.people?.[npcId.slice('origin-kin:'.length)];
