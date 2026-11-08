@@ -59,7 +59,8 @@ function prepare(seed,age,{role,goal}={}){
   fundsSource:adult?'Modest prior savings from an independently lived biography':
    age>=12?'Small personal funds, if any; household resources belong to their owners':
     'No assumed personally owned funds or business assets',
-  funds,distinctHistory:true,
+  funds,nextBirthdayInDays:1+number(seed,'next-birthday')%365,
+  distinctHistory:true,
   noFixedCareer:true,noFixedTemperament:true,noAutomaticAdultAuthority:true,
   noAutomaticRightsOrAffection:true,noInheritedPowers:true,noNPCConsent:true};
  return {...known,seal:hash(known)};
@@ -67,7 +68,8 @@ function prepare(seed,age,{role,goal}={}){
 function verify(r){
  if(!r||r.source!==SOURCE||!Number.isInteger(r.age)||
   !['childhood','adolescence','young-adulthood','established-adulthood','later-life'].includes(r.phase)||
-  r.phase!==phase(r.age))return false;
+  r.phase!==phase(r.age)||!Number.isInteger(r.nextBirthdayInDays)||
+  r.nextBirthdayInDays<1||r.nextBirthdayInDays>365)return false;
  const {seal,...body}=r;return hash(body)===seal;
 }
 function install(state,life){
@@ -91,4 +93,29 @@ function install(state,life){
  return {phase:life.phase,work:life.work,priorWorkYears:life.priorWorkYears,
   noAutomaticOffice:true};
 }
-module.exports={SOURCE,LIVES,phase,prepare,verify,install};
+// Birthdays continue through the one civil clock. Starting life history
+// remains immutable, and age never grants an automatic new class, licence,
+// social standing, ability or guaranteed opportunity.
+function sync(s){
+ const lived=s.player?.livedYears;
+ if(!lived)return {changed:false,legacy:true};
+ if(!verify(lived))throw Error('The original lived-years record was altered');
+ const completed=Math.floor(s.world.minutes/1440),offset=lived.nextBirthdayInDays;
+ if(!Number.isInteger(completed)||completed<0)
+  throw Error('Cannot age against an invalid or reversed world clock');
+ const years=completed>=offset?1+Math.floor((completed-offset)/365):0;
+ const actual=lived.age+years;
+ if(!Number.isInteger(s.player.age)||s.player.age<lived.age||s.player.age>actual)
+  throw Error('The character age is not supported by their saved lived history and calendar');
+ if(actual===s.player.age)return {changed:false,age:actual,years};
+ const previous=s.player.age;
+ s.player.age=actual;
+ require('../rules/core').event(s,'world',
+  'The recorded life of '+s.player.name+' now reaches age '+actual+'.',{
+  origin:'source-grounded-lived-years-birthday',previousAge:previous,
+  currentAge:actual,completedWorldDays:completed,
+  nextBirthdayInDays:offset,noAutoPower:true,
+  noAutoJob:true,noAutomaticSocialStatus:true});
+ return {changed:true,from:previous,to:actual,years};
+}
+module.exports={SOURCE,LIVES,phase,prepare,verify,install,sync};
