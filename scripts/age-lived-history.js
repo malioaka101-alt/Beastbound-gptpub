@@ -29,7 +29,11 @@ function phase(age){
  if(age<65)return 'established-adulthood';
  return 'later-life';
 }
-function prepare(seed,age,{role,goal}={}){
+function prepare(seed,age,{role,goal,lifeHistory,lifeCircumstance}={}){
+ for(const [label,value,max] of [['lifeHistory',lifeHistory,700],['lifeCircumstance',lifeCircumstance,350]]){
+  if(value!==undefined&&(typeof value!=='string'||value.trim().length<12||value.trim().length>max))
+   throw Error('GM-authored '+label+' needs a concrete, plausible established pre-game fact');
+ }
  const lifePhase=phase(age),adult=age>=18,work=pick(seed,'work',LIVES),
   years=adult?Math.min(age-16,number(seed,'experience-years')%Math.max(1,Math.min(32,age-14)+1)):0,
   varied=adult?pick(seed,'prior-circumstances',[
@@ -51,11 +55,15 @@ function prepare(seed,age,{role,goal}={}){
  const practice=adult&&years>0&&knownSkill?Math.min(2,1+Math.floor(years/12)):0;
  const funds=adult?(20+number(seed,'prior-savings')%170):age>=12?number(seed,'small-pocket-money')%18:0;
  const known={source:SOURCE,age,phase:lifePhase,
-  work:ownWork,workHistory:adult?work.context:
-   age>=12?'Life experience may include learning, family duties or interests; no professional qualification is assumed.':
-    'Early life, family and community shape experience; an adult job or legal office is not presumed.',
+  work:ownWork,workHistory:lifeHistory?.trim()||
+   (chosenRole?'The GM establishes this character\'s past as '+chosenRole+
+    '; actual authority, dependants, responsibilities and assets belong in the matching saved world records.':
+    adult?work.context:
+    age>=12?'Life experience may include learning, family duties or interests; no professional qualification is assumed.':
+    'Early life, family and community shape experience; an adult job or legal office is not presumed.'),
   priorWorkYears:years,ordinaryPractice:practice?{skill:knownSkill,rankCap:practice}:null,
-  circumstance:varied,personalGoal:typeof goal==='string'?goal.trim():null,
+  circumstance:lifeCircumstance?.trim()||varied,
+  personalGoal:typeof goal==='string'?goal.trim():null,
   fundsSource:adult?'Modest prior savings from an independently lived biography':
    age>=12?'Small personal funds, if any; household resources belong to their owners':
     'No assumed personally owned funds or business assets',
