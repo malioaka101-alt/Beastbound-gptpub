@@ -77,6 +77,19 @@ A.ok(worlds.size>=5,'Founding history cannot remain confined to one country');
 A.ok(physiques.size>=70,'Initial physical and mental attributes must meaningfully vary');
 A.ok(appearances.size>=35,'Opening appearance is varied without fixed personality');
 
+for(let seed=1;seed<=30;seed++){
+ const chosen=fresh(450000+seed,{homeRegion:'forge_basin'});
+ A.equal(chosen.state.player.startingContext.birthRegionId,'forge_basin',
+  'A specified regional childhood must not be rerolled away by social origins');
+}
+const inferredHouse=fresh(500011,{houseId:'briarhall'});
+A.equal(inferredHouse.state.player.family.house.id,'briarhall');
+const inferredGroup=fresh(500012,{groupName:'Morrowfen Rescue Circle'});
+A.equal(inferredGroup.state.player.startingContext.originKind,'new-organisation');
+A.equal(Groups.lookup(Realm.peek(inferredGroup.state),
+ inferredGroup.state.player.startingContext.connection.groupId).charter.name,
+ 'Morrowfen Rescue Circle');
+
 const heir=fresh(3245001,{originKind:'renowned-family',
  houseId:'openpeak',houseRelation:'birth-branch',
  path:'body',gender:'female'});
