@@ -172,7 +172,14 @@ function recover(s,{id,enduranceTrained=false}={}){
  const old=c.stamina;
  // Poor Vigor can prevent recovery, but never makes the Recover action
  // *consume* Stamina or drive the wound-model pool below zero.
- c.stamina=Math.min(c.maxStamina,c.stamina+Math.max(0,2+c.vigor));
+ // Earned physiological adaptation improves one existing legal Recover action.
+ // It does not grant an extra turn, remove an injury or change beast actions.
+ let organBonus=0;
+ if(id==='player'&&s.player?.body?.cycles?.includes('Organ Cycle')){
+  try{require('./disciplines').organEarned(s);organBonus=1;}
+  catch{} // An edited cycle label is not proof of adapted organs.
+ }
+ c.stamina=Math.min(c.maxStamina,c.stamina+Math.max(0,2+c.vigor+organBonus));
  return {gained:c.stamina-old,uses:c.recoverUses};
 }
 function rest(s,{id,nights=0,weeks=0}={}){
