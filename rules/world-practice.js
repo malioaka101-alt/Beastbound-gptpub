@@ -143,6 +143,7 @@ function publicLore(s,params={}){
   return (id===undefined||x.id===id)&&
    (selectedPolity===undefined||home===selectedPolity)&&
    (path===undefined||x.path===path||x.paths?.includes(path)||
+    x.common&&Lore.M[x.common]?.path===path||
     x.method&&Lore.M[x.method]?.path===path);
  });
  const list=(items,render)=>{
