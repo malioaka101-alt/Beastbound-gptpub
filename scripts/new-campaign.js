@@ -230,10 +230,13 @@ function create(options={}){
 }
 function secureSeed(){return crypto.randomBytes(4).readUInt32BE(0)||1;}
 if(require.main===module){
- const out=process.argv[2],slug=process.argv[3],seed=process.argv[4]?Number(process.argv[4]):secureSeed();
- if(!out||!slug)throw Error('Usage: node scripts/new-campaign.js <save.json> <campaign_slug> [seed]');
+ const out=process.argv[2],slug=process.argv[3],arg=process.argv[4],
+  optionsFile=process.argv[5]||(arg&&arg.endsWith('.json')?arg:null),
+  seed=arg&&!arg.endsWith('.json')?Number(arg):secureSeed();
+ if(!out||!slug)
+  throw Error('Usage: node scripts/new-campaign.js <save.json> <campaign_slug> [seed] [options.json]');
  if(fs.existsSync(out))throw Error('Campaign already exists; will not overwrite an old save');
- const extra=process.argv[5]?JSON.parse(fs.readFileSync(process.argv[5],'utf8')):{};
+ const extra=optionsFile?JSON.parse(fs.readFileSync(optionsFile,'utf8')):{};
  const {state,summary}=create({...extra,seed,slug});
  fs.writeFileSync(out,E.exportGame(state)+'\n',{flag:'wx'});
  process.stdout.write(JSON.stringify(summary,null,2)+'\n');
