@@ -94,7 +94,7 @@ function exchange(s,p={}){
  const meridian=p.intent==='technique'?QiStrike.attackProfile(s,p.techniqueId):null;
  // Validate the original design, completed personal work, native learned
  // profile AND extra energy/stamina before enemy decisions or any dice.
- const variation=p.personalDesignId===undefined?null:
+ const variation=p.personalDesignId===undefined||p.intent==='aspect'?null:
   Creation.combatPersonal(s,p.personalDesignId,p.intent,spell||meridian);
  const activeSpell=variation&&p.intent==='cast'?variation.profile:spell;
  const activeMeridian=variation&&p.intent==='technique'?variation.profile:meridian;
