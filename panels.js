@@ -243,8 +243,38 @@ function full(state,name){
   const attrs=Object.entries(p.attributes||{});
   const pairs=[];for(let i=0;i<attrs.length;i+=2){const a=attrs[i],b=attrs[i+1];pairs.push(`${a[0].toUpperCase()} ${a[1]}`+(b?` │ ${b[0].toUpperCase()} ${b[1]}`:''));}
   sec('ATTRIBUTES',pairs);
-  sec('SKILLS',Object.entries(p.skills||{}).map(([k,v])=>[k,('●'.repeat(Math.min(v.rank,5))+'○'.repeat(Math.max(0,5-v.rank)))+' +'+(v.rank*2)]));
-  sec('POWERS',[`Meridian gates ${p.meridian?.gates?.length||0}/108`,`Arcane circles ${p.arcane?.circles||0}/9`, `Body cycles ${p.body?.cycles?.length||0}`]);
+  sec('SKILLS',Object.entries(p.skills||{}).map(([k,v])=>[k,
+   'Rank '+v.rank+' '+('●'.repeat(Math.min(v.rank,5))+'○'.repeat(Math.max(0,5-v.rank)))+' +'+(v.rank*2)]));
+  // A discipline's actual attained stage is not a skill rank, stored Qi,
+  // starting preparation, beast level or human evolutionary stage.
+  // Long canonical names wrap rather than silently disappearing at column 30.
+  const power=PowerOverview.read(s);
+  sec('POWER STAGES',[
+   ...wrapText('Meridian: '+power.meridian.stageName),
+   ...wrapText('Arcane: '+power.arcane.circleName),
+   ...wrapText('Soul: '+power.soul.phaseName),
+   ...wrapText('Body: '+(power.body.completedCycles?
+    power.body.completedCycles+'/7 cycles; latest '+power.body.cycles.at(-1):
+    '0/7 cycles; not refined')),
+   ...wrapText('Rift: '+power.rift.stepName),
+   'Origin phase '+power.origin.phase+' (separate)'
+  ]);
+  if(power.meridian.startingPreparatoryFoundation!==undefined)
+   sec('START PREPARATION',[
+    'Meridian foundation '+power.meridian.startingPreparatoryFoundation,
+    'Not earned track progress'
+   ]);
+  if(power.meridian.legacyPreparatoryFoundation!==undefined)
+   sec('LEGACY PREPARATION',[
+    'Legacy foundation '+power.meridian.legacyPreparatoryFoundation,
+    'Not earned track progress'
+   ]);
+  sec('HUMAN EVOLUTION',[power.humanEvolution.stageName]);
+  const partners=(p.partnerIds||[]).map(id=>s.beasts?.[id]).filter(Boolean);
+  sec('PARTNERSHIP',partners.length?
+   partners.flatMap(b=>wrapText(b.name+': sync stage '+
+    (Number.isInteger(b.syncStage)?b.syncStage:'unrecorded')+
+    ' (not a human rank)')):['No recorded partner']);
  }else if(key==='power'){
   const v=PowerOverview.read(s);
   sec('MERIDIAN',[
@@ -257,7 +287,13 @@ function full(state,name){
   if(v.meridian.legacyPreparatoryFoundation!==undefined)
    sec('OLDER SAVE',['Legacy foundation '+v.meridian.legacyPreparatoryFoundation,
     'Not verified track progress']);
+  if(v.meridian.startingPreparatoryFoundation!==undefined)
+   sec('STARTING PREPARATION',[
+    'Foundation '+v.meridian.startingPreparatoryFoundation,
+    'Not verified track progress'
+   ]);
   sec('ARCANE',[
+   ...wrapText('◆ '+v.arcane.circleName),
    v.arcane.coreIgnited?'Mana Core ignited':'No ignited Mana Core',
    ['Circles',v.arcane.circles],['Arcana skill',v.arcane.arcanaSkillRank]
   ]);

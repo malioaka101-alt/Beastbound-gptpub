@@ -55,8 +55,11 @@ function read(s){
    qi:{current:p.qi,max:p.maxQi},stability:m.stability,
    foundationQuality:s.table?.powerPhysiology?.meridian?.foundationQuality||null,
    ...(stage===0&&m.foundation>0&&!verifiedStage?
-    {legacyPreparatoryFoundation:m.foundation,
-     warning:'Legacy foundation value is not verified current training-track progress'}:{}),
+    (s.campaign?.oldCampaignImported===false?
+     {startingPreparatoryFoundation:m.foundation,
+      warning:'Starting preparation is not verified current training-track progress'}:
+     {legacyPreparatoryFoundation:m.foundation,
+      warning:'Legacy foundation value is not verified current training-track progress'}):{}),
    training:verifiedTrain('meridian')},
   arcane:{circles:a.circles||0,circleName:phase(ARCANE,a.circles||0),
    coreIgnited:a.coreIgnited===true,coreStability:a.coreStability,
