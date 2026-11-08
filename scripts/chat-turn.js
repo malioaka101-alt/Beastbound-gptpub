@@ -337,6 +337,10 @@ function execute(savePath, req) {
  }
 
  if(req.expectedHash && req.expectedHash!==preHash)return {id:req.id,ok:false,applied:false,error:'Stale checkpoint; reload before processing this turn',stateHash:preHash};
+ if(s.campaign?.requiresGmOpening&&s.campaign.openingState!=='authored'&&
+  req.mode!=='status'&&!(req.mode==='rule'&&req.system==='world'&&
+   req.operation==='authorOpening'))
+  throw Error('This campaign has no playable opening yet: the GM must first author a unique real scene and starting place');
  if(req.mode==='status')return {id:req.id,ok:true,applied:false,revision:runtime.revision,stateHash:preHash,panel:P.core(s),hud:P.hudData(s),recap:recap(s)};
  const consciousness=s.table?.combatants?.player?.status;
  if(['incapacitated','knocked_out','rehabilitating','dying','dead'].includes(consciousness)){
