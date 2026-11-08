@@ -200,4 +200,29 @@ const spec=()=>({title:'Field Reed Water Witness',
  rule(s,'world','localHouseholdsStatus');
  A.equal(E.exportGame(s),snap,'Reading a household does not create children or tick the world');
 }
+// Protected public-world inspections must not write a live save merely
+// because a world ledger is lazily initialised by a read-only inquiry.
+{
+ const s=fresh(7852004);
+ s.world.location='crossing';
+ const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-organic-reads-'));
+ try{
+  const file=Path.join(dir,'disposable.json');
+  FS.writeFileSync(file,E.exportGame(s)+'\n');
+  const saved=FS.readFileSync(file,'utf8');
+  for(const [system,operation] of [
+   ['research','designPlansStatus'],
+   ['world','localResearchStatus'],
+   ['world','localInnovationsStatus'],
+   ['world','localHouseholdsStatus']]){
+   const result=Turn.execute(file,{id:'organic_inspect_'+operation,
+    mode:'rule',system,operation,params:{}});
+   A.equal(result.ok,true);
+   A.equal(result.applied,false,operation+' must be a pure inspection');
+   A.ok(result.output.rules);
+   A.equal(FS.readFileSync(file,'utf8'),saved,
+    operation+' must leave every original save byte untouched');
+  }
+ }finally{FS.rmSync(dir,{recursive:true,force:true});}
+}
 console.log('Organic world creation bridge: verified design research and public institution decisions, real NPC-earned methods, autonomous chosen-family households, long-run replay and read-only views');
