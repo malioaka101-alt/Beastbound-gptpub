@@ -137,6 +137,14 @@ function measured(seed=1521102){
  const saved=E.importGame(E.exportGame(s));
  A.deepEqual(saved.player.rift.anchorProof,s.player.rift.anchorProof);
  A.equal(Anchor.earned(saved).id,Anchor.SITE);
+ // Ordinary sensory journals are bounded. Compacting or rotating that
+ // journal must not erase the original measured anchor or earned ability.
+ const rotated=E.importGame(E.exportGame(saved));
+ rotated.table.perceptionPractice.riftAttempts=[];
+ A.equal(Anchor.earned(rotated).id,Anchor.SITE);
+ const corrupted=E.importGame(E.exportGame(rotated));
+ corrupted.table.riftAnchorWork.originalObservation.sourceSnapshotHash='f'.repeat(64);
+ A.throws(()=>Anchor.earned(corrupted),/original Rift Sense measurement/);
  const noSecond=E.exportGame(s),rng=s.rngState;
  A.throws(()=>rule(s,'rift','anchorWork',{focus:'integrated'}),
   /genuinely completed Step I|new Step II anchor/);
