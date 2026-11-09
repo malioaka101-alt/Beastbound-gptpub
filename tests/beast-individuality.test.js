@@ -39,7 +39,7 @@ const coin=s.player.coins,baseline=JSON.stringify(b.techniques),
 A.throws(()=>op(s,'beastTechniqueRecord',{beastId:b.id}),/requires|source|field|unique/i);
 A.throws(()=>op(s,'beastIndividualObserve',{beastId:b.id,
  category:'distinct-voice',description:'Its call has an irregular echo in the thicket.',
- basis:'No original individual behaviour has yet been watched.'}),/observed individual action/);
+ basis:'No original individual behaviour has yet been watched.'}),/witnessed individual life|observed individual action/);
 const observed=op(s,'watchWildBeast');
 A.equal(observed.watched,true);
 A.equal(Individual.verify(b),true);
