@@ -35,9 +35,9 @@ function event(s,index,origin){
   throw Error('An actual personally witnessed local soul structure event is required');
  return structuredClone(x);
 }
-function profile(s){
- return Build.soulProfile(3,{
-  will:Math.floor(((s.player.attributes?.wis??10)-10)/2)});
+const currentWill=s=>Math.floor(((s.player.attributes?.wis??10)-10)/2);
+function profile(s,earnedWill=currentWill(s)){
+ return Build.soulProfile(3,{will:earnedWill});
 }
 function verify(s){
  const soul=s.player?.soul,root=s.table?.soulArchitecture,record=root?.lattice;
@@ -99,13 +99,13 @@ function verify(s){
     return false;
    strain=a.strainAfter;
   }else{
-   if(a.reserveSpent!==4||a.pointsAtAttempt!==GOAL||
+   if(a.reserveSpent!==4||!integer(a.willAtFormation,-10,20)||a.pointsAtAttempt!==GOAL||
     a.strainAtAttempt>2||a.formed!==a.check.success)
     return false;
    if(a.formed){
     if(success)return false;
     success=receipt;
-    const capacity=a.capacity,expected=profile(s);
+    const capacity=a.capacity,expected=profile(s,a.willAtFormation);
     if(!capacity||
      !integer(capacity.oldReserve,a.reserveSpent,10000)||
      !integer(capacity.oldMaxReserve,0,10000)||
@@ -121,7 +121,7 @@ function verify(s){
  if((soul.phase||0)>=3&&!success)return false;
  if(soul.phase===2&&success)return false;
  if(success&&soul.phase===3){
-  const capacity=success.source.capacity,expected=profile(s);
+  const capacity=success.source.capacity,expected=profile(s,success.source.willAtFormation);
   if(soul.maxReserve<capacity.newMaxReserve||
    soul.perceptionRange!==expected.perceptionRangeMetres||
    soul.resonanceLatticeIntegrity!==1)return false;
@@ -257,9 +257,10 @@ function complete(s,p={}){
  const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
   2*(s.player.skills?.cultivation?.rank||0)+Math.floor(so.stability/25)-2,
   dc:21,label:'Soul Phase III Resonance Lattice independent identity boundary trial'});
- const checkEvent=structuredClone(s.log.at(-1));let capacity=null;
+ const checkEvent=structuredClone(s.log.at(-1));
+ const willAtFormation=currentWill(s);let capacity=null;
  if(check.success){
-  const next=profile(s);
+  const next=profile(s,willAtFormation);
   so.phase=3;so.maxReserve=Math.max(oldMaxReserve,next.soulReserve);
   so.perceptionRange=next.perceptionRangeMetres;
   so.resonanceLatticeIntegrity=1;
@@ -267,7 +268,7 @@ function complete(s,p={}){
    oldMaxReserve,newMaxReserve:so.maxReserve,
    perceptionRange:so.perceptionRange};
  }
- const source={origin:ORIGIN,kind:'form',minute:at,minutes,
+ const source={origin:ORIGIN,kind:'form',minute:at,minutes,willAtFormation,
   reserveSpent,staminaSpent,witness:wit,witnessHash:hash(wit),
   check:structuredClone(check),checkEvent,checkEventHash:hash(checkEvent),
   roll:check.roll,pointsAtAttempt:r.points,strainAtAttempt:r.strain,
