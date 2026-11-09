@@ -206,6 +206,11 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.formulaWork':return require('./arcane-source-formulas').work(s,params);
   case 'arcane.formulaProbe':return require('./arcane-source-formulas').probe(s,params);
   case 'arcane.formulaRepair':return require('./arcane-source-formulas').repair(s,params);
+  case 'arcane.fieldStatus':return require('./arcane-field-projection').status(s);
+  case 'arcane.fieldMap':return require('./arcane-field-projection').map(s,params);
+  case 'arcane.fieldWork':return require('./arcane-field-projection').work(s,params);
+  case 'arcane.fieldForm':return require('./arcane-field-projection').form(s,params);
+  case 'arcane.fieldPulse':return require('./arcane-field-projection').pulse(s,params);
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
