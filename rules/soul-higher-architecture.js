@@ -31,9 +31,9 @@ const phrase=(x,lo=12,hi=900)=>typeof x==='string'&&x.trim().length>=lo&&x.trim(
 const accepts=(p,allowed)=>p&&typeof p==='object'&&!Array.isArray(p)&&
  Object.keys(p).every(k=>allowed.includes(k));
 function spec(stage){if(!integer(stage,4,7))throw Error('Only the source-established IV–VII Soul architectures can be studied here');return SPEC[stage];}
-function profile(s,stage){
- return Build.soulProfile(stage,{
-  will:Math.floor(((s.player.attributes?.wis??10)-10)/2)});
+const currentWill=s=>Math.floor(((s.player.attributes?.wis??10)-10)/2);
+function profile(s,stage,earnedWill=currentWill(s)){
+ return Build.soulProfile(stage,{will:earnedWill});
 }
 function sourceEvent(s,index,origin,stage){
  if(!integer(index,0,s.log.length-1))
@@ -129,14 +129,15 @@ function verify(s){
      return false;
     strain=a.strainAfter;
    }else{
-    if(a.pointsAtAttempt!==6||a.strainAtAttempt>2||
+    if(!integer(a.willAtFormation,-10,20)||
+     a.pointsAtAttempt!==6||a.strainAtAttempt>2||
      a.reserveSpent!==settings.cost+3||
      a.formed!==a.check.success)
      return false;
     if(a.formed){
      if(success)return false;
      success=t;
-     const cap=a.capacity,p=profile(s,stage);
+     const cap=a.capacity,p=profile(s,stage,a.willAtFormation);
      if(!cap||!integer(cap.oldReserve,a.reserveSpent,100000)||
       !integer(cap.oldMaxReserve,0,100000)||
       cap.newReserve!==cap.oldReserve-a.reserveSpent||
@@ -156,7 +157,8 @@ function verify(s){
  }
  if((soul?.phase||0)!==maxFormed)return false;
  if(soul.phase>=4){
-  const p=profile(s,soul.phase),advanced=h.records[soul.phase];
+  const advanced=h.records[soul.phase],
+   p=profile(s,soul.phase,advanced.transition.source.willAtFormation);
   if(soul.maxReserve<advanced.transition.source.capacity.newMaxReserve||
    soul.perceptionRange!==p.perceptionRangeMetres||
    soul.higherSoulIdentity!==advanced.source.design)
@@ -322,9 +324,10 @@ function complete(s,p={}){
  const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
   2*(s.player.skills?.cultivation?.rank||0)+Math.floor(soul.stability/25)-2,
   dc:current.dc+3,label:'Phase '+p.phase+' '+current.name+' independent identity and structural proof'});
- const checkEvent=structuredClone(s.log.at(-1));let capacity=null;
+ const checkEvent=structuredClone(s.log.at(-1));
+ const willAtFormation=currentWill(s);let capacity=null;
  if(check.success){
-  const next=profile(s,p.phase);
+  const next=profile(s,p.phase,willAtFormation);
   soul.phase=p.phase;
   soul.maxReserve=Math.max(oldMaxReserve,next.soulReserve);
   soul.perceptionRange=next.perceptionRangeMetres;
@@ -332,7 +335,7 @@ function complete(s,p={}){
   capacity={oldReserve,newReserve:soul.reserve,oldMaxReserve,
    newMaxReserve:soul.maxReserve,perceptionRange:soul.perceptionRange};
  }
- const source={origin:ORIGIN,kind:'test',phase:p.phase,minute:before,
+ const source={origin:ORIGIN,kind:'test',phase:p.phase,minute:before,willAtFormation,
   minutes,reserveSpent,staminaSpent,witness:wit,witnessHash:digest(wit),
   check:structuredClone(check),checkEvent,checkEventHash:digest(checkEvent),
   roll:check.roll,pointsAtAttempt:r.points,strainAtAttempt:r.strain,
