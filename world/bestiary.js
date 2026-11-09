@@ -46,7 +46,20 @@ const parse=id=>{
 function hash(input){let h=2166136261;for(let i=0;i<input.length;i++){h=Math.imul(h^input.charCodeAt(i),16777619);}return h>>>0;}
 const sizeNames=['Tiny','Small','Medium','Large','Huge'];
 const seasonal=['spring-breeding','summer-breeding','autumn-breeding','year-round','wet-season-breeding','long-cycle','dry-season-breeding','cold-season-breeding'];
-function lookup(id,{knownBranches=false}={}){
+function lookup(id,{knownBranches=false,state=null}={}){
+ if(typeof id==='string'&&id.startsWith('gm:')){
+  if(!state)throw Error('A GM species is a particular saved-world fact, not a global catalogue slot');
+  const w=bioView(state);bioValidate(w);
+  const record=w.species[id];
+  if(!record||record.visibility!=='public')
+   throw Error('No identified public taxonomy for this GM-authored species');
+  return {id,name:record.name,taxonomy:{...record.taxonomy},
+   biome:record.habitatRegions.map(k=>BioAtlas.R[k]?.biome).filter(Boolean),
+   role:record.ecologicalRole,diet:record.diet,mechanism:record.affinity,
+   reproduction:record.reproduction.mode,rarity:'unclassified',
+   canonical:false,fromSavedWorld:true,knownEvolutionBranches:[],
+   note:'No physical encounter, verified ability or evolutionary branch was created by this biological account'};
+ }
  if(typeof id==='string'&&id.startsWith('authored:')){
   const key=id.slice(9),d=E.SPECIES[key];if(!d)throw Error('Unknown authored species');
   return {id,name:d.name,taxonomy:{family:d.family||'unrecorded',lineage:d.lineage},biome:d.habitat,role:d.role,diet:d.diet,rarity:d.grade,
@@ -299,7 +312,7 @@ function bioNote(s,p={}){
 function bioAge(s,{speciesId,ageDays}={}){
  if(!bioInt(ageDays,0,500000))throw Error('A biological development calculation needs an actual measured age in days');
  const reg=bioView(s);bioValidate(reg);
- const e=reg.species[speciesId];if(!e)return {profileKnown:false};
+ const e=reg.species[speciesId];if(!e||e.visibility!=='public')return {profileKnown:false};
  const cycle=e.reproduction;
  const lifeStage=cycle.juvenileDays===null||cycle.adultDays===null?'unresolved':
   ageDays<cycle.juvenileDays?'dependent':
