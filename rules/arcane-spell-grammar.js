@@ -17,7 +17,7 @@ const only=(x,k)=>x&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).every(key=>k.includes(key));
 const PLAN_KEYS=['family','damage','rng','area','duration','magnitude',
  'conditions','stunned','extraTargets','speed','analogueTier','specialised','worldCircuit'];
-const GATE=['shape','sense','utility','veil','ward','link'];
+const NONCOMBAT=['shape','sense','utility','veil','ward','link'];
 function scene(s,index,origin,formulaId){
  if(!int(index,0,s.log.length-1))throw Error('An existing individual witnessed formula scene is required');
  const e=s.log[index];
