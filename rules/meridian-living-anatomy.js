@@ -138,6 +138,74 @@ function verify(s){
    registered.add(key);
   }
  }
+ const witnesses=new Set();
+ let success=null;
+ for(const receipt of net.integrationAttempts){
+  const a=receipt?.source;
+  if(receipt?.origin!==ORIGIN||receipt.seal!==hash(a)||
+   a?.origin!==ORIGIN||a.kind!=='stage-v-integrated-network-test'||
+   !a.witness||a.witnessHash!==hash(a.witness)||
+   a.witness.type!=='story'||a.witness.details?.origin!==TRANSITION||
+   !Array.isArray(a.witness.details?.routeIds)||
+   !Array.isArray(a.routes)||!a.routes.length||
+   a.routeHash!==hash(a.routes)||
+   !integer(a.startedMinute,0,s.world.minutes)||
+   !integer(a.minutes,30,480)||
+   !integer(a.qiSpent,8,100)||!integer(a.staminaSpent,1,20)||
+   !integer(a.extraordinary,1,8)||a.stageBefore!==4||
+   a.stageAfter!==(a.formed?5:4)||
+   !a.checkEvent||a.checkEventHash!==hash(a.checkEvent)||
+   a.checkEvent.type!=='roll'||hash(a.checkEvent.details)!==hash(a.check)||
+   a.check?.roll!==a.roll||!integer(a.roll,1,20)||
+   a.formed!==a.check.success||
+   witnesses.has(a.witnessHash))
+   return false;
+  witnesses.add(a.witnessHash);
+  const ids=a.routes.map(x=>x.id);
+  if(ids.join('|')!==a.witness.details.routeIds.join('|')||
+   a.routes.some(x=>{
+    const present=net.routes[x.id];
+    return !present||x.sourceHash!==present.seal||
+     !integer(x.integrated,x.required,20)||
+     x.integrated>present.integrity||
+     x.required!==present.required||x.unresolved!==0;
+   }))
+   return false;
+  const kinds=new Set(a.routes.flatMap(x=>
+   net.routes[x.id].source.segments.map(y=>y.kind)));
+  if(Object.keys(segments).some(x=>!kinds.has(x)))return false;
+  const extra=new Set(a.routes.flatMap(x=>net.routes[x.id].source.segments)
+   .filter(x=>x.kind==='extraordinary').map(x=>x.number));
+  if(extra.size!==a.extraordinary||a.qiSpent!==8+a.extraordinary)return false;
+  if(a.formed){
+   if(success)return false;
+   success=receipt;
+   const capacity=a.capacity,profile=meridianProfile(s,5,a.extraordinary);
+   if(!capacity||
+    capacity.newMax!==Math.max(capacity.oldMax,profile.qi)||
+    capacity.newQi!==capacity.oldQi-a.qiSpent||
+    capacity.flow!==profile.flow||
+    capacity.recovery!==profile.recovery||
+    !integer(capacity.oldQi,a.qiSpent,100000)||
+    !integer(capacity.oldMax,0,100000))
+    return false;
+  }else if(a.capacity!==null)return false;
+ }
+ if(net.transitions.length!==(success?1:0)||
+  (success&&(
+   net.transitions[0].seal!==success.seal||
+   hash(net.transitions[0].source)!==hash(success.source))))
+  return false;
+ if(s.player.meridian.stage>=5&&!success)return false;
+ if(s.player.meridian.stage===4&&success)return false;
+ if(success&&s.player.meridian.stage===5){
+  const cap=success.source.capacity,
+   profile=meridianProfile(s,5,success.source.extraordinary);
+  if(s.player.maxQi<cap.newMax||
+   s.player.meridian.stableQiLimit!==profile.qi||
+   s.player.meridian.flow!==cap.flow||
+   s.player.meridian.recoveryRate!==cap.recovery)return false;
+ }
  return true;
 }
 function ensure(s){
