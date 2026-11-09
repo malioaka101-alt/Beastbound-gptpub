@@ -310,6 +310,11 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.latticePractice':return require('./soul-resonance-lattice').practice(s,params);
   case 'soul.latticeRepair':return require('./soul-resonance-lattice').repair(s,params);
   case 'soul.latticeComplete':return require('./soul-resonance-lattice').complete(s,params);
+  case 'soul.higherStatus':return require('./soul-higher-architecture').status(s);
+  case 'soul.higherMap':return require('./soul-higher-architecture').map(s,params);
+  case 'soul.higherPractice':return require('./soul-higher-architecture').practice(s,params);
+  case 'soul.higherRepair':return require('./soul-higher-architecture').repair(s,params);
+  case 'soul.higherComplete':return require('./soul-higher-architecture').complete(s,params);
   case 'soul.perceive':return Senses.perceive(s,params);
   case 'rift.senseStatus':return Senses.riftStatus(s,params);
   case 'rift.sense':return Senses.senseRift(s,params);
