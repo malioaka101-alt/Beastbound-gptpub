@@ -69,7 +69,11 @@ function verifyInstitution(w,p,id){
   !['public','gm-only'].includes(inst.origin.visibility)||!journal(inst)||
   !nonneg(inst.lastReviewMonth)||!Array.isArray(inst.sessions)||inst.sessions.length>100||
   inst.sessions.some(x=>!x||x.origin!==SESSION||x.seal!==hash(x.source)||
-    x.source?.details?.institutionId!==id||x.source?.details?.polityId!==p))
+    x.source?.details?.institutionId!==id||x.source?.details?.polityId!==p||
+    x.source.eventHash!==hash(x.source.event)||
+    x.source.event?.details?.origin!==SESSION||
+    x.source.event?.details?.location!==x.source.details.location||
+    hash(x.source.event.details)!==hash(x.source.details)))
   throw Error('Institutional origin, witnessed law or historical decisions were changed');
  return inst;
 }
@@ -142,6 +146,16 @@ function proceeding(s,p={}){
     !valid(t.terms,24,1000))
    throw Error('A beast polity cannot claim a treaty without the other real polity authorising the same original terms');
  }
+ // Validate the actual extant diplomatic relationship before writing any
+ // civic session receipt, so rejected sources never partly mutate a save.
+ const treatyOther=d.treaty?.polities?.[1];
+ const diplomaticTie=d.treaty?Object.values(w.diplomacy).find(y=>
+  y.a===p.polityId&&y.b===treatyOther||
+  y.a===treatyOther&&y.b===p.polityId):null;
+ if(d.treaty&&!diplomaticTie)
+  throw Error('The proposed treaty has no actual diplomatic relationship');
+ if(diplomaticTie?.civicTreaties?.some(y=>y.source?.eventHash===evHash))
+  throw Error('A bilateral scene cannot ratify duplicate treaty entries');
  const source={origin:SESSION,eventHash:evHash,event:structuredClone(ev),
   details:structuredClone(d),sessionDay:Math.floor(s.world.minutes/1440),
   participatingBeasts:actual.map(b=>({id:b.id,lifeSourceHash:b.sapientLife.sourceHash}))};
@@ -153,13 +167,8 @@ function proceeding(s,p={}){
  // Treaty text belongs inside actual diplomatic relationships; it makes no
  // automatic war/peace, trade, rights or party loyalty change.
  if(d.treaty){
-  const x=d.treaty.polities[1];
-  const target=Object.values(w.diplomacy).find(y=>
-   y.a===p.polityId&&y.b===x||y.a===x&&y.b===p.polityId);
-  if(!target)throw Error('The proposed treaty has no actual diplomatic relationship');
+  const target=diplomaticTie;
   target.civicTreaties||=[];
-  if(target.civicTreaties.some(y=>y.source?.eventHash===evHash))
-   throw Error('A bilateral scene cannot ratify duplicate treaty entries');
   target.civicTreaties.push({source:{origin:ROOT,polities:[...d.treaty.polities],
    terms:d.treaty.terms,eventHash:evHash,day:source.sessionDay},seal:hash({
    origin:ROOT,polities:[...d.treaty.polities],terms:d.treaty.terms,
@@ -234,7 +243,13 @@ function status(s,p={}){
   x.origin.visibility==='public'&&(!p.institutionId||p.institutionId===x.id))
   .map(x=>({id:x.id,name:x.origin.name,kind:x.origin.kind,
    mandate:x.origin.mandate,communication:x.origin.language,
-   medium:x.origin.medium,publicProceedings:x.sessions.filter(e=>e.source.details.visibility==='public').map(e=>({
+   medium:x.origin.medium,
+   publicOffices:x.sessions.filter(e=>e.source.details.visibility==='public'&&
+     e.source.details.office).map(e=>({
+      title:e.source.details.office.title,
+      acceptedById:e.source.details.office.holderId,
+      witnessedAcceptance:true})).slice(-8),
+   publicProceedings:x.sessions.filter(e=>e.source.details.visibility==='public').map(e=>({
     topic:e.source.details.topic,result:e.source.details.result})).slice(-8)}));
  const households=Object.values(t.households).filter(x=>{
   if(x?.origin!==HOME||x.seal!==hash(x.source)||
