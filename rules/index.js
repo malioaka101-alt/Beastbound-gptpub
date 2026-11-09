@@ -206,6 +206,11 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.formulaLearn':return require('./arcane-spell-grammar').learn(s,params);
   case 'arcane.formulaCast':return require('./arcane-spell-grammar').cast(s,params);
   case 'arcane.formulaRepair':return require('./arcane-spell-grammar').repair(s,params);
+  case 'arcane.higherStatus':return require('./arcane-higher-circles').status(s);
+  case 'arcane.higherMap':return require('./arcane-higher-circles').map(s,params);
+  case 'arcane.higherWork':return require('./arcane-higher-circles').work(s,params);
+  case 'arcane.higherRepair':return require('./arcane-higher-circles').repair(s,params);
+  case 'arcane.higherComplete':return require('./arcane-higher-circles').complete(s,params);
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
