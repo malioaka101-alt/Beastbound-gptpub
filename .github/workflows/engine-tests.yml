@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/soul-resonance-lattice.test.js
             tests/arcane-higher-architecture.test.js
             tests/earned-pair-synchronisation.test.js
             tests/voluntary-beast-social-arrangements.test.js
