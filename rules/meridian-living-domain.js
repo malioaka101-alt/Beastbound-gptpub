@@ -145,7 +145,12 @@ function verifySource(s){
    a.witness.details?.origin!==PULSE||
    a.witness.details?.domainId!==a.id||
    a.radius!==plan.source.radius||
-   a.location!==plan.source.location||
+   a.location!==a.witness.details.location||
+   (a.location===plan.source.location?
+     a.biome!==plan.source.biome:
+     (!P(a.witness.details.ambientSupport,24,800)||
+      a.witness.details.radiusMetres!==a.radius||
+      a.biome!==a.witness.details.biome))||
    a.sustainedUntil!==(a.sustained?a.minute+a.minutes:null)||
    used.has(a.witnessHash))return false;
   used.add(a.witnessHash);
@@ -289,12 +294,18 @@ function pulse(s,p={}){
  const plan=net?.domainPlans?.[p.id];
  if(!plan||!net.domainTests?.some(x=>x.source.formed&&x.source.id===p.id)||
   s.player?.meridian?.stage<8||!verify(s)||
-  s.world.location!==plan.source.location||s.battle||s.encounter)
+  s.battle||s.encounter)
   throw Error('A real earned local limited domain without unresolved danger is required');
  const witness=scene(s,p.witnessIndex,PULSE,p.id,plan.source.routeId);
+ const place=location(s);
  if(!P(witness.details?.environmentCounter,24,800)||
   !P(witness.details?.independentBoundary,24,800))
   throw Error('Real ambient interference and independent external limits must be observed');
+ if(s.world.location!==plan.source.location&&
+  (!P(witness.details?.ambientSupport,24,800)||
+   witness.details?.biome!==place.biome||
+   witness.details?.radiusMetres!==plan.source.radius))
+  throw Error('A learned domain can travel only with new locally witnessed physical environmental support and unchanged measured range');
  const wHash=H(witness);
  if(net.domainPulses.some(x=>x.source.witnessHash===wHash))
   throw Error('That environmental domain attempt has already been resolved');
@@ -314,7 +325,7 @@ function pulse(s,p={}){
   witness,witnessHash:wHash,roll:check.roll,check:structuredClone(check),
   rollEvent,rollEventHash:H(rollEvent),sustained:check.success,
   sustainedUntil:check.success?before+minutes:null,
-  radius:plan.source.radius,location:plan.source.location};
+  radius:plan.source.radius,location:s.world.location,biome:place.biome};
  net.domainPulses.push({origin:SOURCE,source,seal:H(source)});
  E.advance(s,minutes);require('./world').finalizeTime(s,before);
  if(!verify(s))throw Error('Independent environment counter and actual domain cost verification failed');
