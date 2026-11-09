@@ -55,7 +55,7 @@ function sourcePerson(s,id){
  const b=s.beasts?.[id];
  if(!b||!b.sapientLife||!Sapient.verify(b)||b.owner||
   s.player.partnerIds?.includes(id)||b.relationship!=='wild'||
-  b.location!==s.world.location)
+  b.away===true||b.location!==s.world.location)
   throw Error('An independently documented sapient beast person is required, never an owned animal or invented official');
  return b;
 }
