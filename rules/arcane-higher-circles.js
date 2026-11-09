@@ -251,6 +251,7 @@ function work(s,p={}){
   !int(s.player.stamina,stamina,100000))
   throw Error('The original Core lacks actual available Mana or Stamina for this work');
  const start=s.world.minutes;s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
    2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/30)-2,
   dc:spec.dc,label:'Earned Arcane '+spec.name+' physical calibration'});
@@ -289,6 +290,7 @@ function repair(s,p={}){
   throw Error('Repair needs genuine Mana and physical effort');
  const start=s.world.minutes,prior=r.strain;
  s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
    2*(s.player.skills.arcana?.rank||0),
   dc:14,label:'Actual physical Arcane '+p.stage+' Circle interference repair'});
@@ -326,6 +328,7 @@ function complete(s,p={}){
   throw Error('Real existing Mana and Stamina must fund a structural breakthrough');
  const start=s.world.minutes,oldMana=s.player.mana,oldMax=s.player.maxMana;
  s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
    2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/30)-2,
   dc:spec.dc+3,label:'Arcane '+spec.name+' independent physical integration'});
