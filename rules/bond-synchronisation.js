@@ -282,6 +282,8 @@ function design(s,p={}){
  if(life.methods[p.methodId])throw Error('This pair already recorded that named original method');
  const human=s.table?.meridianTechniques?.[p.humanTechniqueId]||
   s.table?.arcaneTechniques?.[p.humanTechniqueId];
+ if(!human||human.techniqueId!==p.humanTechniqueId||!human.rollHash)
+  throw Error('The specific human source technique has not genuinely been learned');
  if(human?.route==='independent')
   require('./self-taught-basic-techniques').profile(s,p.humanTechniqueId);
  else if(p.humanTechniqueId==='qi_strike')
@@ -319,6 +321,8 @@ function demonstration(s,p={}){
  if(!m||r.syncStage<5)throw Error('No truly learned individual pair design exists');
  const human=s.table?.meridianTechniques?.[m.source.humanTechniqueId]||
   s.table?.arcaneTechniques?.[m.source.humanTechniqueId];
+ if(!human||human.techniqueId!==m.source.humanTechniqueId)
+  throw Error('Underlying earned human method is no longer recorded');
  if(human?.route==='independent')
   require('./self-taught-basic-techniques').profile(s,m.source.humanTechniqueId);
  else if(m.source.humanTechniqueId==='qi_strike')
