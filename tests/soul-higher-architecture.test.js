@@ -238,6 +238,10 @@ function originalPhase3(seed=875001){
  A.equal(High.verify(copy),true);
  copy.table.soulArchitecture.higher.records[7].transition.source.capacity.newReserve+=100;
  A.equal(High.verify(copy),false);
+ const beforeForgedRead=E.exportGame(copy),rngForgedRead=copy.rngState;
+ A.throws(()=>act(copy,'ethicalStatus'),/Original source-earned Soul Phase/);
+ A.equal(E.exportGame(copy),beforeForgedRead);
+ A.equal(copy.rngState,rngForgedRead);
  const altered=E.importGame(snapshot);
  altered.table.soulArchitecture.higher.records[6].attempts[0].source.points=100;
  A.equal(High.verify(altered),false);
