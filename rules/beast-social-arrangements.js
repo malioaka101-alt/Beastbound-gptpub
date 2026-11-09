@@ -48,8 +48,19 @@ function historyValid(row,b){
  let seal=row.archive?.seal||row.originHash,minute=row.archive?.minute||row.source.minute;
  if(row.archive&&(
    !int(row.archive.minute,row.source.minute,1000000000)||
-   row.archive.checksum!==hash({originHash:row.originHash,seal,minute})))return false;
+   row.archive.checksum!==hash({originHash:row.originHash,seal,minute,
+    startMinute:row.archive.startMinute,endMinute:row.archive.endMinute})))return false;
  let lastStatus=row.archive?.status||'proposed',seen=new Set();
+ const accepted=row.events.find(ev=>['accepted','contact-only'].includes(ev.source?.outcome));
+ const start=accepted?.source.minute??row.archive?.startMinute;
+ if(start!==undefined){
+  const expectedEnd=accepted?.source.outcome==='contact-only'?
+   null:(row.source.durationDays?start+row.source.durationDays*1440:null);
+  if(row.startMinute!==start||
+   (accepted&&row.endMinute!==expectedEnd)||
+   (row.archive&&row.archive.startMinute!==row.startMinute))
+   return false;
+ }else if(row.startMinute!==undefined||row.endMinute!==undefined)return false;
  for(const ev of row.events){
   const v=ev?.source;
   if(!v||v.origin!==ORIGIN||v.id!==row.id||v.beastId!==b.id||
@@ -84,12 +95,19 @@ function append(s,b,row,outcome,details={}){
   minute,outcome,details:structuredClone(details),previous:row.headHash};
  const ev={source,seal:hash(source)};
  row.events.push(ev);row.headHash=ev.seal;row.status=outcome;
+ if(outcome==='accepted'||outcome==='contact-only'){
+  row.startMinute=minute;
+  row.endMinute=outcome==='accepted'&&row.source.durationDays?
+   minute+row.source.durationDays*1440:null;
+ }
  if(row.events.length>140){
   const old=row.events.splice(0,40),last=old.at(-1);
   row.archive={seal:last.seal,minute:last.source.minute,
-   status:last.source.outcome};
+   status:last.source.outcome,startMinute:row.startMinute,
+   endMinute:row.endMinute};
   row.archive.checksum=hash({originHash:row.originHash,
-   seal:row.archive.seal,minute:row.archive.minute});
+   seal:row.archive.seal,minute:row.archive.minute,
+   startMinute:row.archive.startMinute,endMinute:row.archive.endMinute});
  }
  if(!historyValid(row,b))throw Error('Recorded agreement outcome invalid');
  return ev;
@@ -148,9 +166,7 @@ function negotiate(s,p={}){
  const row=b.socialArrangements?.entries?.[p.id];
  if(!row||!verify(s,b)||row.status!=='proposed')
   throw Error('A current unchanged unnegotiated social proposal is required');
- if(s.world.minutes-row.source.minute>7*1440)
-  throw Error('A stale proposal needs renewed personally explained terms');
- const encounter=witnessed(s,b,row,p.witnessIndex);
+const encounter=witnessed(s,b,row,p.witnessIndex);
  if(row.events.some(x=>x.source.details.sourceHash===encounter.hash))
   throw Error('One original agreement conversation cannot be reused');
  let outcome='declined',detail={sourceHash:encounter.hash};
@@ -160,8 +176,7 @@ function negotiate(s,p={}){
   const record=s.table?.bondRecords?.[b.id];
   const evidence=Object.values(s.table?.bondEvidence||{}).find(x=>
    x.beastId===b.id&&x.origin==='resolved-bond-interaction'&&
-   x.check?.success===true&&x.worldMinute<=s.world.minutes&&
-   s.world.minutes-x.worldMinute<=7*1440);
+   x.check?.success===true&&x.worldMinute<=s.world.minutes);
   if(!record||!evidence)
    throw Error('An animal needs authentic successful original witnessed voluntary interaction');
   const yes=Agency.evaluate(s,b,record,'gentle');
@@ -170,8 +185,7 @@ function negotiate(s,p={}){
  }else{
   const life=b.sapientLife,contact=[...life.history].reverse().find(x=>
    x.type==='personally-witnessed-contact'&&x.willingness===true&&
-   x.location===s.world.location&&
-   x.minute<=s.world.minutes&&s.world.minutes-x.minute<=7*1440);
+   x.location===s.world.location&&x.minute<=s.world.minutes);
   if(!contact||!Person.verify(b))
    throw Error('A person must have freely engaged in a personally witnessed real encounter');
   // This is the autonomous individual's own persisted decision stream,
@@ -185,13 +199,6 @@ function negotiate(s,p={}){
   detail.proof='Independent choice from source-verified sapient personal life after witnessed comprehension';
  }
  append(s,b,row,outcome,detail);
- if(outcome==='accepted'){
-  row.startMinute=s.world.minutes;
-  row.endMinute=row.source.durationDays?
-   s.world.minutes+row.source.durationDays*1440:null;
- }else if(outcome==='contact-only'){
-  row.startMinute=s.world.minutes;row.endMinute=null;
- }
  C.event(s,'beast',
   outcome==='accepted'?'The sapient individual agrees to the specific revocable social terms.':
   outcome==='countered'?'The independent person proposes changes; the offered duties are not agreed.':
@@ -254,8 +261,7 @@ function sixday(s,days=[]){
     reviewed++;continue;
    }
    const needs=b.needs||{};
-   const unsafe=b.away===true||b.condition<45||
-    needs.hunger>=80||needs.fatigue>=85||
+   const unsafe=b.condition<45||needs.hunger>=80||needs.fatigue>=85||
     ['captured','coerced','imprisoned','forced'].includes(String(b.relationship).toLowerCase());
    if(unsafe&&row.status==='accepted'){
     append(s,b,row,'paused',{welfare:'Real condition or autonomous absence prevents a guaranteed service',effectiveDay:day});
@@ -281,7 +287,7 @@ function status(s,p={}){
   beastDuty:row.source.kindOfBeing==='sapient'?row.source.beastDuty:
    'No enforceable animal labour or legal obligation',
   protections:row.source.protections,termination:row.source.termination,
-  status:row.status,
+  status:row.status==='paused'?'performance-not-confirmed':row.status,
   note:row.status==='proposed'?'A proposal only; no assent':
    row.status==='contact-only'?'Voluntary animal contact is not a legal contract':
    row.status==='accepted'?'Individually accepted and revocable; no magical bond':
