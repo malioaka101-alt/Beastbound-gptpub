@@ -181,10 +181,10 @@ function earnNeuralCycle(s){
  A.equal(Phys.verify(s),true);
  const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
  A.equal(Phys.verify(saved),true);
- saved.table.bodyRefinement.cycles[7].transition.source.capacity.newMax+=20;
+ saved.table.bodyRefinement.living.cycles[7].transition.source.capacity.newMax+=20;
  A.equal(Phys.verify(saved),false);
  const forge=E.importGame(snapshot);
- forge.table.bodyRefinement.cycles[6].attempts[0].source.total=100;
+ forge.table.bodyRefinement.living.cycles[6].attempts[0].source.total=100;
  A.equal(Phys.verify(forge),false);
  const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-living-physique-'));
  try{
