@@ -56,6 +56,9 @@ function branch(s,p={}){
   minute:s.world.minutes,source:p.source.trim(),
   parameters:structuredClone({...q,formProfile:form}),
   ecology:structuredClone(eco),incompatibleWith:[...p.incompatibleWith]};
+ // Establish this real world ecology in the existing realm before we attach
+ // a future possibility; authoring never advances time or rolls for a beast.
+ require('../world/simulation').ensure(s);
  // Persist the pre-existing authoritative assessment, not an alternate
  // form registry, eligibility formula or world ecology.
  const existing=b.evolutionBranchAssessments||(b.evolutionBranchAssessments={});
@@ -123,6 +126,8 @@ function beforeEvent(s,r,b){
  const eco=s.table?.realm?.ecosystems?.[plan.ecology.regionId];
  const where=Atlas.LOCATION_REGION[s.world.location]||
   require('../world/lived-places').get(s,s.world.location)?.regionId;
+ if(b.location!==s.world.location)
+  throw Error('The evolving individual must genuinely occupy its witnessed present location');
  if(where!==plan.ecology.regionId||!eco)
   throw Error('Evolution must occur in its original documented compatible regional ecology');
  if(eco.forage<plan.ecology.minForage||
