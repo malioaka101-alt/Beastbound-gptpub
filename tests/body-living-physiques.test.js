@@ -274,8 +274,9 @@ function earnNeuralCycle(s){
   for(let j=0;j<howMany;j++){
    const id='individual_tissue_'+cycle+'_'+j;
    let w=witness(s,Phys.TISSUE,cycle,{
-    observedTissue:'A personally observed original tissue region in this individual living human has a distinct measurable physical pathway, site and failure response.',
-    independentCountertest:'An independently repeated physical strain measurement shows oxygen and nutrient limits instead of a free supernatural immunity.'
+    tissueId:id,
+    observedTissue:'A personally observed original '+id+' tissue region in this living human has a distinct measurable physical pathway, site and failure response.',
+    independentCountertest:'An independently repeated physical strain measurement for '+id+' shows oxygen and nutrient limits instead of a free supernatural immunity.'
    });
    const mapped=act(s,'physiqueTissueMap',{cycle,id,
     tissue:'Original separately identified human tissue '+id+' with an individually observed vascular, neural and skin interface.',
