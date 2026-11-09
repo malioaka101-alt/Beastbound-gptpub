@@ -74,6 +74,7 @@ function read(s){
      a.circles>=2?{matrix:Disc.matrixStatus(s)}:{}),
    ...(a.circles>=3?{dynamic:HigherArcane.status(s),
      formulas:Formulae.status(s)}:{}),
+   ...(a.circles>=4?{field:ArcaneField.status(s)}:{}),
    training:verifiedTrain('arcane'),
    note:'A legacy Mana reservoir does not itself prove an ignited Core or a completed Circle'},
   soul:{phase:soul.phase||0,phaseName:phase(SOUL,soul.phase||0),
