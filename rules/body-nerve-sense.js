@@ -110,7 +110,7 @@ function verify(s){
   }
   last=a.minute+a.minutes;
  }
- if(hash(net.progress)!==hash(progress)||net.strain!==strain||
+ if(hash(net.progress)!==hash(progress)||net.integrated!==integrated||net.strain!==strain||
   !!net.transition!==!!success||
   (success&&(net.transition.seal!==success.seal||
    hash(net.transition.source)!==hash(success.source))))return false;
