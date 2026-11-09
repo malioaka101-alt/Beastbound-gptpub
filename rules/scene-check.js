@@ -140,12 +140,20 @@ function perform(s,p={}){
      scene.details?.biome!==loc.biome)
    throw Error('Engine habitat survey is not consistent with its witnessed local environment');
  }
- const modifier=Math.floor((score-10)/2)+rank*2+a.extra;
+ const baseModifier=Math.floor((score-10)/2)+rank*2+a.extra;
+ // A separately witnessed original body specialisation can contribute only
+ // to the existing, prepared local footing task. It does not choose the DC,
+ // the skill, a new roll, or an arbitrary biological power.
+ const Body=require('./body-living-physiques');
+ const physiology=Body.sceneSupport(s,id);
+ const modifier=baseModifier+physiology.bonus;
  // All provenance and actor checks precede dice, time or evidence mutation.
  const check=C.check(s,{modifier,dc:a.dc,label:a.label,risky:a.risky});
  s.table.sceneCheckEventsUsed||={};
  s.table.sceneCheckEventsUsed[a.eventHash]=id;
  a.used=true;a.checkedAtMinute=s.world.minutes;
+ const tissueUse=physiology.bonus?
+  Body.recordSceneSupport(s,id,check,baseModifier):null;
  if(a.origin==='engine-habitat-survey'){
   // Retain an immutable identity for the ACTUAL resolved check. Research
   // fieldwork must reuse that roll rather than mint a second roll, choose a
@@ -179,6 +187,7 @@ function perform(s,p={}){
  W.finalizeTime(s,old);
  Health.sync(s,{source:'legacy'});
  return {...check,...practice,verifiedSceneCheck:id,elapsedMinutes:a.minutes,
+  ...(tissueUse?{actualPhysiologicalSupport:tissueUse}:{}),
   ...(a.origin==='engine-local-scene'?{scope:'visible-local-terrain-only',
    intent:a.intent,noAutomaticMovement:true,noUnknownDiscoveries:true,
    noAutomaticAgreement:true,noGrantedItems:true}: {})};
