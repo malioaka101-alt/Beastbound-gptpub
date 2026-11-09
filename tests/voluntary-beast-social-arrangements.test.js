@@ -144,22 +144,24 @@ function discoverSapient(seed=927801){
 {
  // A non-sapient wild individual may willingly engage without being treated
  // as a legally bound service provider or transferable property.
- const s=E.newGame({name:'Animal Friendship Source',seed:920022,path:'undecided'});
- s.player.attributes.cha=30;s.player.skills.beastcraft.rank=5;
- A.equal(E.dispatch(s,'travel forest').ok,true);
- let found=null;
- for(let i=0;i<150&&!found;i++){
-  A.equal(E.dispatch(s,'explore').ok,true);
-  const b=s.beasts[s.encounter.beastId],sp=E.SPECIES[b.species];
-  if(sp.intelligence!=='sapient'&&b.sapience<=1&&!s.encounter.threat&&
-   !/hostile|panicked|terrified|agitated|fleeing/i.test(b.mood)){
-   op(s,'register',{beastId:b.id,start:'unfamiliar'});
-   const contact=op(s,'interact',{beastId:b.id,approach:'gentle'});
-   if(contact.accepted)found=b;
-  }
-  if(s.encounter&&!found)A.equal(E.dispatch(s,'leave').ok,true);
+ let s=null,found=null;
+ // Actual first-contact species identification and original observed
+ // animal intelligence, never a hand-selected sapience, trust or acceptance.
+ for(let seed=51001;seed<51401&&!found;seed++){
+  const current=E.newGame({name:'Animal Friendship Source',seed,path:'undecided'});
+  current.player.attributes.cha=30;current.player.skills.beastcraft.rank=5;
+  A.equal(E.dispatch(current,'travel fen').ok,true);
+  A.equal(E.dispatch(current,'explore').ok,true);
+  const b=current.beasts[current.encounter.beastId];
+  if(b.species!=='fenfox'||current.encounter.threat||
+   /hostile|panicked|terrified|agitated|fleeing/i.test(b.mood))continue;
+  const observation=R.act(current,{system:'world',operation:'observe',params:{}});
+  if(!observation.identified)continue;
+  A.equal(op(current,'encounterRegister',{beastId:b.id}).provisionalSapience,1);
+  const contact=op(current,'interact',{beastId:b.id,approach:'gentle'});
+  if(contact.accepted){s=current;found=b;}
  }
- A.ok(found,'Real voluntary animal contact must actually succeed');
+ A.ok(found,'Real observed and independently accepted animal contact must actually succeed');
  const p=sample(found,'forest_welfare_01','care and friendly recognition');
  const d=op(s,'socialDraft',p),ix=evidence(s,found,d);
  const result=op(s,'socialNegotiate',{beastId:found.id,id:p.id,witnessIndex:ix});
