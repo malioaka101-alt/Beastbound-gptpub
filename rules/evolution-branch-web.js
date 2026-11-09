@@ -200,7 +200,7 @@ function sixday(s,days){
  let stressed=0;
  for(const b of Object.values(s.beasts||{})){
   const e=b?.evolutionEcology;if(!e)continue;
-  if(!ecoVerify(s,b))throw Error('An evolved individual's ecological adaptation receipt was changed');
+  if(!ecoVerify(s,b))throw Error("An evolved individual's ecological adaptation receipt was changed");
   const needs=e.origin.needs;
   for(const day of days){
    if(day<=e.lastDay)continue;
