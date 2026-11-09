@@ -154,7 +154,7 @@ function suitable(b,eco){const n=b.needs;
   eco.quality>=n.minQuality&&eco.pressure<=n.maxPressure;
 }
 function sixday(w,day){
- validate(w);
+ // Caller validates once per authentic world advance, not on every sixday.
  for(const [regionId,eco] of Object.entries(w.ecosystems)){
   const v=web(eco),delta={},snapshot={};
   for(const [id,p] of Object.entries(v.populations)){
@@ -185,7 +185,7 @@ function sixday(w,day){
  }
 }
 function month(w,day){
- validate(w);
+ // The original world dispatcher already validated this save at tick entry.
  // Migration transfers existing abundance only between ALREADY recorded
  // populations in genuinely adjacent, physiologically suitable regions.
  for(const region of Atlas.regions){
