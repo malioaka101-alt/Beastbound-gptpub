@@ -261,5 +261,92 @@ const mk=(s,id,kind,number,load=1)=>{
  const archived=after.table.powerPhysiology.meridian.advancedNetwork;
  archived.transitions[0].source.witnessHash='altered';
  A.equal(Net.verify(after),false);
+ // Stage VI extends this SAME earned and source-verified Stage V network.
+ // An observed technique-and-intent is physically practiced, not a mental
+ // power granted by naming it or waiting through a compulsory calendar.
+ const Intent=require('../rules/meridian-living-intent');
+ const routeId=circuits[0].id,intentId='reedcurrent_defensive_stillness';
+ const baseline=E.exportGame(s),oldRng=s.rngState;
+ A.deepEqual(op(s,'intentStatus').forms,[]);
+ A.equal(E.exportGame(s),baseline);A.equal(s.rngState,oldRng);
+ A.throws(()=>op(s,'intentMap',{
+  id:intentId,routeId,name:'Defensive Stillness',
+  movement:'A genuine measured flowing defensive return movement of the lower human channels',
+  principle:'Controlled intent steadies breath and forearm fascia under safe external pressure',
+  automaticSignal:'An autonomic tremorless return flow appears under mild observed movement resistance',
+  limit:'Does not create invulnerable armour or command another person or creature',
+  interference:'Strong unfamiliar pressure or injury may interrupt the pattern',
+  witnessIndex:0}),/original local witnessed|original witnessed|intent scene/);
+ A.equal(E.exportGame(s),baseline);
+ C.event(s,'story',
+  'Original Stage V circulation succeeds as an observed defensive intention in the same practitioner without inventing an offensive art.',{
+   origin:Intent.OBSERVE,location:s.world.location,intentId,routeId,
+   observedResponse:'A real low-pressure movement responds to a previously practised individual return channel.',
+   trainingOrigin:'Previously successful original Meridian route integrations and reflex adjustments of the same body.'});
+ const mapping=op(s,'intentMap',{
+  id:intentId,routeId,name:'Reedcurrent Stillness',
+  movement:'A real measured defensive return movement using a previously trained lower-body loop',
+  principle:'A deliberately trained intent aligns the original circulation pressure with breath and movement',
+  automaticSignal:'An observed low-pressure return reflex begins responding to mild resisted posture changes',
+  limit:'Cannot bypass armour, compel minds or manifest an attack without a separately earned technique',
+  interference:'Unexpected strain, serious tissue damage or disturbed breathing can break the intended return flow',
+  witnessIndex:s.log.length-1});
+ A.equal(mapping.mapped,true);
+ A.equal(mapping.learnedCombatArt,false);
+ A.equal(s.player.meridian.stage,5);
+ A.equal(Intent.verify(s),true);
+ let earned=false,practices=0;
+ for(let i=0;i<8&&!earned;i++){
+  C.event(s,'story',
+   'The original practitioner visibly repeats a small restrained circulation response while adjusting their own effort and posture.',{
+    origin:Intent.PRACTICE,location:s.world.location,intentId,routeId,
+    bodilyFeedback:'The same trained channel and breath return in a measurable, limited involuntary micro-response.',
+    voluntaryAction:'A separately initiated gentle posture practice is stopped immediately if pressure becomes unsafe.'});
+  const ix=s.log.length-1,start=s.world.minutes,qi=s.player.qi;
+  const result=op(s,'intentPractice',{id:intentId,witnessIndex:ix,minutes:30});
+  A.equal(s.world.minutes,start+30);
+  A.equal(s.player.qi,qi-result.qiSpent);
+  A.equal(result.stageUnchanged,true);
+  A.equal(Intent.verify(s),true);
+  practices++;
+  earned=result.points>=result.needed;
+  const after=E.exportGame(s);
+  A.throws(()=>op(s,'intentPractice',{id:intentId,witnessIndex:ix,minutes:30}),
+   /real practice scene|original local witnessed|only produce one original check|enough practice/);
+  A.equal(E.exportGame(s),after);
+ }
+ A.ok(earned,'Actual original physical repetition must develop a trained intent');
+ A.ok(practices>=2,'One instant label should not turn into fully embodied intent');
+ A.equal(s.player.meridian.stage,5);
+ C.event(s,'story',
+  'A controlled autonomic return current is witnessed under altered pressure, and the individual demonstrably stops it.',{
+   origin:Intent.EMBODY,location:s.world.location,intentId,routeId,
+   responseWithoutPrompt:'Actual earned defensive circulation briefly initiates under a familiar mild physical perturbation.',
+   controllableStop:'The practitioner deliberately relaxes the real meridian pressure and the response terminates without new harm.',
+   pressureCountertest:'Altered low-intensity physical resistance limits the response and demonstrates it is not universal domination.'});
+ const start=s.world.minutes,qi=s.player.qi,sta=s.player.stamina,
+  max=s.player.maxQi;
+ const emb=op(s,'intentEmbody',{id:intentId,witnessIndex:s.log.length-1,minutes:90});
+ A.equal(emb.formed,true);
+ A.equal(emb.stage,6);
+ A.equal(s.world.minutes,start+90);
+ A.equal(s.player.qi,qi-emb.qiSpent);
+ A.equal(s.player.stamina,sta-emb.staminaSpent);
+ A.ok(s.player.maxQi>=max);
+ A.equal(s.player.meridian.intentDepth,1);
+ A.equal(emb.noAutomaticMindAttackOrTechnique,true);
+ A.equal(op(s,'intentStatus').embodied,true);
+ A.equal(Intent.verify(s),true);A.equal(Net.verify(s),true);
+ A.equal(s.player.arcane.circles,0);
+ A.equal(s.player.humanEvolution.stage,0);
+ const original=E.exportGame(s),replayed=E.importGame(original);
+ A.equal(Intent.verify(replayed),true);
+ replayed.table.powerPhysiology.meridian.advancedNetwork.intentForms[intentId].points=99;
+ A.equal(Intent.verify(replayed),false);
+ const tampered=E.importGame(original);
+ tampered.table.powerPhysiology.meridian.advancedNetwork.intentTests[0].source.capacity.newQi+=100;
+ A.equal(Net.verify(tampered),false);
+ A.throws(()=>op(s,'intentEmbody',{id:intentId,witnessIndex:0}),
+  /source-verified Stage V|requires.*Stage V/);
 }
 console.log('Living Meridian route web: genuine Stage IV/108 Gate source, original 8/36/72 anatomy maps, actual engine Qi/time/pressure checks, persistent injuries and separately witnessed clinical recovery, no free Stage, tamper-safe integrity and read-only saved turn replay.');
