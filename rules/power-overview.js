@@ -2,7 +2,8 @@
 // Source-grounded, read-only distinction between discipline structure,
 // learned skill rank, anatomical progress and separate human evolution.
 // Never infer an awakening from a legacy resource pool or a technique name.
-const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading'),Anchors=require('./rift-anchors'),OriginFoundations=require('./beast-origin-foundations'),MeridianWeb=require('./meridian-living-anatomy');
+const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading'),Anchors=require('./rift-anchors'),OriginFoundations=require('./beast-origin-foundations'),MeridianWeb=require('./meridian-living-anatomy'),
+ HigherArcane=require('./arcane-higher-architecture'),Formulae=require('./arcane-source-formulas');
 const MERIDIAN=['Preparatory: Stage I not yet attained',
  'Stage I — Foundation Tempering','Stage II — Meridian Awakening',
  'Stage III — 108 Gate Opening','Stage IV — Dantian Sea Formation',
@@ -66,7 +67,12 @@ function read(s){
   arcane:{circles:a.circles||0,circleName:phase(ARCANE,a.circles||0),
    coreIgnited:a.coreIgnited===true,coreStability:a.coreStability,
    arcanaSkillRank:skill(p,'arcana'),manaCoreEstablished:a.coreIgnited===true,
-   ...(a.circles>=2?{matrix:Disc.matrixStatus(s)}:{}),
+   ...(a.circles>=4?{matrix:{verified:HigherArcane.verify(s),
+     stage:'Third Circle — Matrix Formation (inherited)',
+     inheritedMatrixIntegrity:a.matrixIntegrity}}:
+     a.circles>=2?{matrix:Disc.matrixStatus(s)}:{}),
+   ...(a.circles>=3?{dynamic:HigherArcane.status(s),
+     formulas:Formulae.status(s)}:{}),
    training:verifiedTrain('arcane'),
    note:'A legacy Mana reservoir does not itself prove an ignited Core or a completed Circle'},
   soul:{phase:soul.phase||0,phaseName:phase(SOUL,soul.phase||0),
