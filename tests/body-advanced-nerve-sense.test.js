@@ -64,6 +64,15 @@ function witness(s,origin,details){
   {id:'autonomic',tissue:'Actual previously observed autonomic cardiac and breathing control pathways in living tissue',
    actualFunction:'Heart and respiration regulation stay active under load without infinite endurance or invented organs'}
  ];
+ // The original three observed tissues are examples, not a fixed catalogue.
+ // Anatomically specific extra networks can be authored without a hard-coded
+ // two-to-eight count, and each remains independently verifiable.
+ for(let n=0;n<6;n++)systems.push({
+  id:'regional'+n,
+  tissue:'A distinct measured original regional afferent and efferent nerve branch '+n+' within the same living human anatomy',
+  actualFunction:'The personally observed nerve branch '+n+' has a finite signalling function bounded by fatigue and sensory countertests'
+ });
+ A.equal(systems.length,9);
  const mapped=act(s,'nerveMap',{
   name:'Individual Whole-Body Neural Adaptation',systems,
   metabolicLimit:'Ordinary food, rest, oxygen and heat balance still constrain nerve transmission and sustained exertion.',
@@ -71,6 +80,7 @@ function witness(s,origin,details){
   recovery:'Measured recovery and clinical rehabilitation are required when original neural overtraining causes disruption.',
   witnessIndex:wi});
  A.equal(mapped.mapped,true);
+ A.equal(mapped.systems.length,9);
  A.equal(s.player.body.cycles.length,3);
  A.equal(Nerve.verify(s),true);
  let ready=false;
@@ -85,7 +95,27 @@ function witness(s,origin,details){
   A.equal(s.player.stamina,beforeStamina-r.staminaSpent);
   A.equal(r.noAutomaticSensoryArt,true);
   A.equal(Nerve.verify(s),true);
-  ready=r.integrated&&Object.values(r.systems).every(x=>x===2);
+  if(i===0){
+   // Genuine later observation develops the SAME bodily map, retaining
+   // the first earned attempt and its original roll rather than rerolling.
+   const ex=witness(s,Nerve.MAP,{
+    clinicalObservation:'A new personally measured vestibular sensory loop is observed after earlier nerve practice and is anatomically distinct.',
+    independentCountertest:'The newly observed balance response is disrupted by controlled vestibular loading and remains limited by fatigue.'
+   });
+   const growth=act(s,'nerveExtend',{systems:[{
+    id:'vestibular',
+    tissue:'A genuine pre-existing vestibular hair-cell and cranial sensory pathway in this particular living body',
+    actualFunction:'Measured orientation and balance signals join proprioception while ordinary vestibular dizziness remains a limitation'
+   }],witnessIndex:ex});
+   A.equal(growth.extended,true);
+   A.equal(Object.keys(growth.systems).length,10);
+   A.equal(growth.systems.vestibular,0);
+   A.equal(Nerve.verify(s),true);
+   const tampered=E.importGame(E.exportGame(s));
+   tampered.table.bodyRefinement.neural.extensions[0].source.systems[0].tissue='Invented after the fact';
+   A.equal(Nerve.verify(tampered),false);
+  }
+  ready=r.integrated&&Object.values(act(s,'nerveStatus').systems).every(x=>x===2);
  }
  A.equal(ready,true);
  A.equal(s.player.body.cycles.length,3);
@@ -107,6 +137,13 @@ function witness(s,origin,details){
   'Muscle-Tendon Cycle','Bone-Marrow Cycle','Organ Cycle','Nerve-Sense Cycle']);
  A.equal(Disc.organEarned(s).cycle,3,'Earlier Organ Cycle proof must survive later bodily change');
  A.equal(act(s,'nerveStatus').completed,true);
+ const afterCompletion=E.exportGame(s);
+ A.throws(()=>act(s,'nerveExtend',{systems:[{
+  id:'extraevolution',
+  tissue:'A later examined additional nervous organ described without a genuinely earned new developmental cycle',
+  actualFunction:'An unsupported claim of further body effects cannot rewrite an already completed structural proof'
+ }],witnessIndex:wi}),/completed cycle/);
+ A.equal(E.exportGame(s),afterCompletion);
  A.equal(s.player.arcane.circles,0);A.equal(s.player.soul.phase,0);
  A.equal(s.player.humanEvolution.stage,0);
  A.deepEqual(s.player.origin.stableTraits,[]);
