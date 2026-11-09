@@ -217,6 +217,11 @@ function act(s,{system,operation,params={}}={}){
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
   case 'body.organStatus':return Disciplines.organStatus(s);
   case 'body.organWork':return Disciplines.organWork(s,params);
+  case 'body.nerveStatus':return require('./body-nerve-sense').status(s);
+  case 'body.nerveMap':return require('./body-nerve-sense').map(s,params);
+  case 'body.nervePractice':return require('./body-nerve-sense').practice(s,params);
+  case 'body.nerveRepair':return require('./body-nerve-sense').repair(s,params);
+  case 'body.nerveComplete':return require('./body-nerve-sense').finish(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);
