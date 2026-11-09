@@ -587,6 +587,10 @@ function act(s,{system,operation,params={}}={}){
    return {...result,evidenceId:params.evidenceId};
   }
   case 'bond.status':return BD.publicBond(BD.fromSave(s,params.beastId));
+  case 'bond.syncPractice':return require('./bond-synchronisation').train(s,params);
+  case 'bond.syncDesign':return require('./bond-synchronisation').design(s,params);
+  case 'bond.syncDemonstrate':return require('./bond-synchronisation').demonstration(s,params);
+  case 'bond.syncExperienceStatus':return require('./bond-synchronisation').status(s,params);
   case 'bond.syncReadiness':return BD.syncReadiness(BD.fromSave(s,params.beastId),params.stage);
   case 'bond.consent':{const b=s.beasts[params.beastId];return BD.consentGuard(b,params);}
   default:throw Error(`Unsupported rule operation: ${system}.${operation}`);
