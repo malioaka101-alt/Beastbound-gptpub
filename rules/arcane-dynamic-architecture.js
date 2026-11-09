@@ -173,6 +173,7 @@ function work(s,p={}){
   throw Error('Actual Mana and Stamina are insufficient to reconfigure this Circle');
  const before=s.world.minutes;
  s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const modifier=Math.floor((s.player.attributes.int-10)/2)+
   2*(s.player.skills.arcana?.rank||0)+
   Math.floor(a.coreStability/25)-2;
@@ -211,6 +212,7 @@ function repair(s,p={}){
   throw Error('Repair requires actual Mana and physical effort');
  const before=s.world.minutes;
  s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
   2*(s.player.skills.arcana?.rank||0),
   dc:14,label:'Repair actual observed Mana matrix backlash'});
@@ -246,6 +248,7 @@ function complete(s,p={}){
   throw Error('The intact three-channel core cannot sustain a real Fourth Circle without reserves');
  const before=s.world.minutes,oldMana=s.player.mana,oldMax=s.player.maxMana;
  s.player.mana-=mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
   2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/25)-2,
   dc:24,label:'Fourth Circle Dynamic Architecture independent live test'});
