@@ -81,6 +81,7 @@ function read(s){
    ...(soul.phase>=1?{threading:Thread.status(s)}:{}),
     ...(soul.phase>=2?{lattice:require('./soul-resonance-lattice').status(s)}:{}),
     ...(soul.phase>=3?{higherArchitecture:require('./soul-higher-architecture').status(s)}:{}),
+    ...(soul.phase>=4?{ethicalApplications:require('./soul-ethical-applications').status(s)}:{}),
    training:verifiedTrain('soul')},
   body:{cycles:[...completed],completedCycles:completed.length,
    totalNamedCycles:BODY.length,nextCycle:BODY[completed.length]||null,
