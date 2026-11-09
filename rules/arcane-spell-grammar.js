@@ -196,6 +196,7 @@ function learn(s,p={}){
   throw Error('Actual Mana and physical effort are needed to learn the designed spell');
  const before=s.world.minutes;
  s.player.mana-=spent;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
    2*(s.player.skills.arcana?.rank||0),
    dc:13+r.source.cost.complexity,label:'Learn source-authored Arcane spell grammar'});
@@ -247,6 +248,7 @@ function cast(s,p={}){
   throw Error('Real available Mana and Stamina do not support the prepared spell');
  const before=s.world.minutes;
  s.player.mana-=spell.mana;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
    2*(s.player.skills.arcana?.rank||0)-r.interference,
    dc:spell.castingDC,label:'Noncombat original learned spell structural demonstration'});
@@ -289,6 +291,7 @@ function repair(s,p={}){
   throw Error('Formula repair consumes actual Mana and Stamina');
  const before=s.world.minutes;
  s.player.mana-=spent;s.player.stamina-=stamina;
+ if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
   2*(s.player.skills.arcana?.rank||0),dc:15,
   label:'Original structural spell interference correction'});
