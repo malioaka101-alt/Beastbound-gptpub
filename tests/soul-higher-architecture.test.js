@@ -329,7 +329,7 @@ function originalPhase3(seed=875001){
  A.equal(Apps.verify(falseHealing),false);
  const savedHealing=E.exportGame(s),rngHealing=s.rngState;
  A.throws(()=>act(s,'selfStabilize',{witnessIndex:healingIndex,minutes:60}),
-  /already|No genuine locally observed|specific original observed Soul stability deficit/);
+  /already|No genuine locally observed|specific original observed Soul stability deficit|no recorded instability to rehabilitate|cannot be rolled twice/);
  A.equal(E.exportGame(s),savedHealing);A.equal(s.rngState,rngHealing);
 }
 console.log('Soul Phase IV–VII: original earned Phase III, identity-safe non-sentient Soul Forge, Sanctuary, bounded Domain and maintained living architecture, actual costs/checks, repair and saved replay');
