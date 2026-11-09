@@ -162,7 +162,7 @@ function earnedThird(seed){
  A.equal(Spells.verify(s),true);
  const snapshot=E.exportGame(s),rngPrior=s.rngState;
  A.throws(()=>op(s,'formulaCast',{id:fId,witnessIndex:wi}),
-  /already been|original local formula activity has not been witnessed/);
+  /cannot be rolled twice|already been|original local formula activity has not been witnessed/);
  A.equal(E.exportGame(s),snapshot);A.equal(s.rngState,rngPrior);
  const tampered=E.importGame(snapshot);
  tampered.table.arcaneArchitecture.formulae.records[fId].study[0].source.roll=20;
