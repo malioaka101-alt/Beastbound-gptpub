@@ -55,7 +55,7 @@ function sign(s,branchId){
   {beastId:b.id,kind:'biological-sign',source:'Directly witnessed anatomical signs in local habitat'});
  const eventIndex=s.log.length-1,ev=s.log[eventIndex];
  b.evolutionSignObservations||={};
- b.evolutionSignObservations[branchId]={branchId,
+ b.evolutionSignObservations[branchId]={beastId:b.id,branchId,
   species:b.species,evolutionStage:b.evolutionStage,
   worldMinute:s.world.minutes,source:'Independently witnessed particular emerging physiology of this beast',
   location:s.world.location,eventIndex,eventHash:hash(ev),
