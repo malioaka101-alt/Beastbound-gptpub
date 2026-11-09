@@ -3,7 +3,8 @@
 // learned skill rank, anatomical progress and separate human evolution.
 // Never infer an awakening from a legacy resource pool or a technique name.
 const E=require('../engine.js'),Disc=require('./disciplines'),Thread=require('./soul-threading'),Anchors=require('./rift-anchors'),OriginFoundations=require('./beast-origin-foundations'),MeridianWeb=require('./meridian-living-anatomy'),
- HigherArcane=require('./arcane-higher-architecture'),Formulae=require('./arcane-source-formulas');
+ HigherArcane=require('./arcane-higher-architecture'),Formulae=require('./arcane-source-formulas'),
+ ArcaneField=require('./arcane-field-projection');
 const MERIDIAN=['Preparatory: Stage I not yet attained',
  'Stage I — Foundation Tempering','Stage II — Meridian Awakening',
  'Stage III — 108 Gate Opening','Stage IV — Dantian Sea Formation',
