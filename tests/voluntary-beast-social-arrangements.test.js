@@ -61,6 +61,17 @@ function discoverSapient(seed=927801){
  return accepted;
 }
 {
+ const s=E.newGame({name:'Unknown Beast Privacy',seed:927700,path:'undecided'});
+ A.equal(E.dispatch(s,'travel fen').ok,true);
+ A.equal(E.dispatch(s,'explore').ok,true);
+ const seenId=s.encounter.beastId;
+ const before=E.exportGame(s),rng=s.rngState;
+ A.deepEqual(op(s,'socialStatus',{beastId:seenId}),
+  op(s,'socialStatus',{beastId:'unknown_foreign_beast'}),
+  'An unregistered beast must not become a locator just by guessing its ID');
+ A.equal(E.exportGame(s),before);A.equal(s.rngState,rng);
+}
+{
  const {s,b,p,history}=discoverSapient();
  A.ok(history.length>0);
  A.equal(s.player.partnerIds.includes(b.id),false);
