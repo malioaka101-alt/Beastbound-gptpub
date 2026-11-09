@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/earned-pair-synchronisation.test.js
             tests/voluntary-beast-social-arrangements.test.js
             tests/intelligent-beast-civilisations.test.js
             tests/branching-beast-evolution.test.js
