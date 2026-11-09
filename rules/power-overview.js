@@ -84,7 +84,11 @@ function read(s){
     ...(soul.phase>=4?{ethicalApplications:require('./soul-ethical-applications').status(s)}:{}),
    training:verifiedTrain('soul')},
   body:{cycles:[...completed],completedCycles:completed.length,
-   totalNamedCycles:BODY.length,nextCycle:BODY[completed.length]||null,
+   totalNamedCycles:BODY.length,
+   nextCycle:completed.every((name,i)=>BODY[i]===name)?
+    (BODY[completed.length]||null):null,
+   namedUndevelopedCycles:BODY.filter(name=>!completed.includes(name)),
+   cycleOrder:'Only source-earned individual anatomy determines viable order; a named remaining cycle is not an automatic available action',
    ...(completed.length>=2?{organCycle:Disc.organStatus(s)}:{}),
    ...(completed.length>=3||s.table?.bodyRefinement?.neural?{
     nerveSense:require('./body-nerve-sense').status(s)}:{}),
