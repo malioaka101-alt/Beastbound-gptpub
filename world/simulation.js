@@ -9,6 +9,7 @@ const EmergentHouseholds=require('./emergent-households');
 const OriginRelatives=require('./origin-relatives');
 const Cosmology=require('./cosmology-ledger');
 const CausalHistory=require('./causal-history');
+const EcologicalWebs=require('./ecological-webs');
 const Renown=require('./renown-and-practice');
 const MIN=0,MAX=100;
 const clamp=(x,a=MIN,b=MAX)=>Math.max(a,Math.min(b,x));
@@ -46,6 +47,7 @@ function initial(s,startingDay=0){
    indicators:Object.fromEntries(samples.map((family,i)=>[family,{population:45+B.hash(`${reg.id}:${family}`)%45,capacity:90+B.hash(`${reg.id}:cap:${family}`)%50}])),
    collapseWarnings:0,seasonalMovement:0,lastChangeDay:0};
  }
+ EcologicalWebs.seed(w);
   // The world owns physical habitat plants before any player survey occurs.
  gatheringSites(w,startingDay);
  // Seed limited provisioner stock from already established grain/feed ecology,
@@ -313,6 +315,8 @@ function tickSixday(w,day){
   if(e.quality<18&&day-e.lastChangeDay>180){e.collapseWarnings++;e.lastChangeDay=day;w.counters.ecosystemWarnings++;
    event(w,{day,region:r.id,subject:'habitat',text:`Naturalists warn of mounting habitat stress in ${r.name}; migration routes may change.`,channel:'field notice',releaseDay:day+4,severity:'warning'});}
  }
+  // Species webs use the SAME regional forage and populations, not another world clock.
+ EcologicalWebs.sixday(w,day);
   // Physically limited local plants replenish only as living ecology permits.
  regrowGatheringSites(w,day);
  // Existing local provisioner independently attempts resupply as the world
@@ -431,6 +435,8 @@ function tickMonth(w,day){
    }
   }
  }
+ // Species-specific movements conserve recorded abundance across real adjacent habitats.
+ EcologicalWebs.month(w,day);
  // Recognise seasonal migrations without creating millions of individual beasts.
  for(const r of A.regions){const e=w.ecosystems[r.id];e.seasonalMovement=Math.max(0,Math.round(e.seasonalMovement));
   if(e.quality<25&&day-e.lastChangeDay>180){e.lastChangeDay=day;event(w,{day,region:r.id,subject:'migration',text:`A local survey notes unusually few seasonal beast tracks across ${r.name}.`,channel:'field notice',releaseDay:day+6,severity:'warning'});}
@@ -464,6 +470,9 @@ function tick(s,weekDays=[],monthDays=[]){
  if(!weekDays.length&&!monthDays.length)return {sixdays:0,months:0,publicNotices:[]};
  const w=ensure(s,{startDay:Math.min(...weekDays,...monthDays)-1}),we=new Set(weekDays),mo=new Set(monthDays),times=[...new Set([...we,...mo])].sort((a,b)=>a-b);
  let nW=0,nM=0;
+ // Validate the saved ecological sources once per world advance; never rehash
+ // the entire multiyear history for each internal sixday/month transition.
+ EcologicalWebs.validate(w);
  for(const day of times){if(day<=w.lastTickDay)continue;
   if(we.has(day)){tickSixday(w,day);Houses.deliver(s,w,day,()=>random(w));Civic.review(s,w,day,()=>random(w),v=>event(w,v));PublicHearings.review(s,w,day,()=>random(w),v=>event(w,v));Mediation.review(s,w,day,()=>random(w),v=>event(w,v));ProfessionalPeers.tick(w,day,v=>event(w,v));
    // Per-individual wildlife acts against the ecology at THIS specific day,

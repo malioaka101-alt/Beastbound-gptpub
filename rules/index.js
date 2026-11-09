@@ -324,6 +324,9 @@ function act(s,{system,operation,params={}}={}){
   case 'world.speciesBiologyNote':return require('../world/bestiary').bioNote(s,params);
   case 'world.speciesBiologyAge':return require('../world/bestiary').bioAge(s,params);
   case 'world.speciesBiologyFit':return require('../world/bestiary').bioFit(s,params);
+  case 'world.ecologyStatus':return require('../world/ecological-webs').status(s,params);
+  case 'world.ecologyAuthorPopulation':return require('../world/ecological-webs').authorPopulation(s,params);
+  case 'world.ecologyAuthorLink':return require('../world/ecological-webs').authorLink(s,params);
   case 'world.mythic':return Realm.mythicLore(s,params);
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);
