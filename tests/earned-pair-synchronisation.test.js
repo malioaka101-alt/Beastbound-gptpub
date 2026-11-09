@@ -10,6 +10,10 @@ function paired(seed=932101){
  const s=E.newGame({name:'Previously Established Pair',seed,path:'partner'});
  const id=s.player.partnerIds[0],b=s.beasts[id];
  A.ok(b.bondHistory.length,'Starter original source establishes the prior relationship');
+ // The old partner starter omitted a numeric species sapience assessment;
+ // this disposable integration fixture uses its preauthored fenfox S1 type.
+ A.equal(E.SPECIES[b.species].intelligence,'animal-cunning');b.sapience=1;
+ s.player.stamina=100;s.player.maxStamina=100;
  // The original engine's starter beast stores prior lived bond dimensions on
  // the beast but no bondRecords. Reconcile them once into original bond model.
  op(s,'register',{beastId:id,start:'unfamiliar'});
