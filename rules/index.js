@@ -436,6 +436,11 @@ function act(s,{system,operation,params={}}={}){
   case 'research.mythLead':return ResearchGuard.mythLead(s,params);
   case 'evolution.status':return EvolutionDisclosure.view(s,params);
   case 'evolution.eligibility':return EvolutionDisclosure.view(s,params);
+  case 'bond.socialDraft':return require('./beast-social-arrangements').draft(s,params);
+  case 'bond.socialNegotiate':return require('./beast-social-arrangements').negotiate(s,params);
+  case 'bond.socialEnd':return require('./beast-social-arrangements').conclude(s,params);
+  case 'bond.socialDispute':return require('./beast-social-arrangements').dispute(s,params);
+  case 'bond.socialStatus':return require('./beast-social-arrangements').status(s,params);
   case 'bond.encounterRegister':return FirstContact.register(s,params);
   case 'bond.register':{
    const beast=s.beasts?.[params.beastId];

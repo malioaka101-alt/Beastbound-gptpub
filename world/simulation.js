@@ -491,6 +491,9 @@ function tick(s,weekDays=[],monthDays=[]){
    // Independence, concrete accomplishments and consent matter; time alone
    // never confers expertise or invents a population or beast society.
    SapientBeasts.sixday(s,day);
+   // Existing human–beast social promises have real welfare and expiry
+   // consequences, but no automatic labour, friendship or obedience.
+   require('../rules/beast-social-arrangements').sixday(s,[day]);
    // New individuals can arise from real ecological/economic work demand
    // anywhere in the known simulated geography, without player observation.
    // Their independent decisions are dated and source-bound.
