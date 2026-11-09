@@ -1,0 +1,19 @@
+# Foundation #13 — advanced Body Refinement and transformed physiques
+
+**Authority:** Master Prompt §§23, 28–30 and established human biological/health records. This is private foundation work, not character progression in an active campaign.
+
+## Current draft: original Nerve–Sense Cycle
+
+`rules/body-nerve-sense.js` adds an initial **original earned Organ Cycle III → individually mapped Nerve–Sense** route within the existing `s.player.body.cycles`, `s.table.bodyRefinement`, combat wound model and original stamina pool. This path is a **first tested example**, not a mandate that every body tradition follow the same order: the Master Prompt explicitly permits other physically compatible schools to refine cycles differently, repeat cycles and specialise their own tissues. Other verifiable anatomical orders will need matching real sources and eligibility/adapters rather than forged prior stage labels.
+
+The GM can author two to eight distinct **actually observed** neural tissues/regions: e.g. peripheral sensation, motor nerve response, autonomic integration, or a unique previously established nervous anatomy. Each needs real individual observed tissue and function, actual metabolic/fatigue boundary, injury risk, recovery method and independent test. Naming an adaptation grants no new beast sense, reflex technique, immunity, automatic combat action or human-evolution stage.
+
+`body.nerveMap` witnesses anatomy without awarding rank; `body.nervePractice` consumes real Stamina and time, resolves actual engine checks, earns independently logged tissue integration or physical injury/strain; `body.nerveRepair` requires a separately diagnosed event and a real independent check. A distinct witnessed whole-body proof in `body.nerveComplete` is required before the physical original `Nerve-Sense Cycle` is recorded. Success adds only a small, **actually earned +1 maximum Stamina** through original existing player/combatant resources, **without refilling current Stamina**, while making the source identity and formed anatomy available to later genuinely learned specialist techniques.
+
+The original `Disciplines.organEarned` accepts later compatible cycles without invalidating its source-confirmed original Cycle III history and physical benefits. The private turn route exposes read-only `body.nerveStatus` without advancing time or changing a checkpoint.
+
+## Remaining #13 work
+
+**Blood–Essence**, **Adaptive Physique** and unique **Evolved Physique** remain **unfinished**. They must use real blood/energy sources, compatible organism functions, metabolic load, tissue ecology, physical strain and independently earned expression. Stable distinctive human constitutions need reproducible safe maintenance and reversion where physiologically possible, without wiping wounds or inventing biological source/lineage. Source-grounded alternate refinement orders remain a high-priority openness requirement.
+
+The disposable `tests/body-advanced-nerve-sense.test.js` earns Organ III through the actual engine and checks independent Nerve–Sense mapping/practice/formation, real physical costs, earlier Cycle III proof survival, no free cross-system powers, source tamper detection and read-only private replay. It is first in the complete regression inventory. **#13 remains unchecked, draft and unmerged until the full foundation and exact-head full regression have been verified.** No campaign save has been edited.
