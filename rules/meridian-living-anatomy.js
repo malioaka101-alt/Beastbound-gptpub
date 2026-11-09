@@ -206,6 +206,8 @@ function verify(s){
    s.player.meridian.flow!==cap.flow||
    s.player.meridian.recoveryRate!==cap.recovery)return false;
  }
+ if((net.intentForms||net.intentTests||s.player.meridian.stage>=6)&&
+  !require('./meridian-living-intent').verifySource(s))return false;
  return true;
 }
 function ensure(s){
