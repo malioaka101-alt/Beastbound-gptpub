@@ -224,6 +224,96 @@ function three(seed=614001){
  const altered2=E.importGame(savedFormula);
  altered2.table.arcaneFormulas.items[formulaId].proven=false;
  A.equal(Formula.verify(altered2),false);
+ // The Arcane Fifth Circle must be earned *after* an independently
+ // verified Fourth Circle. A field is not control over nearby lives.
+ const Field=require('../rules/arcane-field-projection'),
+  fieldId='measured_mana_return_field',radius=3,
+  biome=require('../world/lived-places').location(s,s.world.location).biome;
+ const fieldPre=E.exportGame(s),fieldRng=s.rngState;
+ A.equal(op(s,'fieldStatus').available,true);
+ A.equal(E.exportGame(s),fieldPre);A.equal(s.rngState,fieldRng);
+ A.throws(()=>op(s,'fieldMap',{id:fieldId}),
+  /Original Arcane Field mapping/);
+ A.equal(E.exportGame(s),fieldPre);
+ C.event(s,'story',
+  'A trained dynamic mage witnesses a bounded ambient return field of mana around their own previously earned Circle matrix.',{
+   origin:Field.MAP,location:s.world.location,fieldId,
+   radiusMetres:radius,biome,
+   ambientMeasurement:'A grounded meter confirms this three-metre ambient mana return drops sharply outside the measured radius.',
+   counterPressure:'Independent grounded screens disrupt the return without affecting the free movement of nearby people.'});
+ const mappedField=op(s,'fieldMap',{id:fieldId,
+  name:'Measured Local Mana Return',
+  geometry:'An actual fourth-circle dynamic braid projects a small independently measured mana return through the existing core',
+  environment:'The observed academy laboratory ambient mana supports a three-metre return only under measured stable conditions',
+  resistance:'Real grounded screens and opposing ambient phase current prevent expansion beyond measured limits',
+  collapse:'The narrow return collapses when core pressure or local mana alignment fails under counterpressure',
+  limit:'This is personal magic architecture and cannot command people, damage targets or control a settlement',
+  radius,witnessIndex:s.log.length-1});
+ A.equal(mappedField.mapped,true);
+ A.equal(Field.verify(s),true);
+ A.equal(s.player.arcane.circles,4);
+ let fieldReady=false;
+ for(let i=0;i<8&&!fieldReady;i++){
+  restoreMana(s,12);
+  C.event(s,'story',
+   'The researcher performs a distinct controlled Arcane Field projection trial with measured ambient counterflow.',{
+    origin:Field.PRACTICE,location:s.world.location,fieldId,
+    observedResistance:'A grounded phase screen makes a measurable opposing ambient return without affecting NPC autonomy.',
+    observedCollapse:'The monitored small field safely loses coherence when the independent Mana-sink counter is engaged.'});
+  const before=s.world.minutes,manaBefore=s.player.mana;
+  const worked=op(s,'fieldWork',{id:fieldId,witnessIndex:s.log.length-1,minutes:30});
+  A.equal(s.world.minutes,before+30);
+  A.equal(s.player.mana,manaBefore-worked.manaSpent);
+  A.equal(worked.noAutomaticAreaSpell,true);
+  A.equal(Field.verify(s),true);
+  fieldReady=worked.progress>=worked.required;
+ }
+ A.equal(fieldReady,true);
+ A.equal(s.player.arcane.circles,4);
+ let fieldFormed=null;
+ for(let i=0;i<5&&!fieldFormed;i++){
+  restoreMana(s,17);
+  C.event(s,'story',
+   'A separate real laboratory countertest confirms that projected Mana returns to the original core within a fixed radius.',{
+    origin:Field.FORM,location:s.world.location,fieldId,
+    measuredReturn:'The measured three-metre return changes ambient mana routing while preserving the original fourth circuit.',
+    independentCounter:'A shielding counterphase interrupts the field without displacing or controlling other living persons.'});
+  fieldFormed=op(s,'fieldForm',{id:fieldId,witnessIndex:s.log.length-1,minutes:90}).formed;
+ }
+ A.equal(fieldFormed,true);
+ A.equal(s.player.arcane.circles,5);
+ A.equal(Field.verify(s),true);
+ A.equal(Higher.verify(s),true);
+ A.equal(Formula.verify(s),true);
+ A.equal(s.player.humanEvolution.stage,0);
+ A.equal(s.player.arcane.fieldIntegration,1);
+ A.equal(op(s,'fieldStatus').formed,true);
+ A.equal(R.act(s,{system:'power',operation:'status',params:{}}).arcane.field.formed,true);
+ restoreMana(s,12);
+ C.event(s,'story',
+  'The established personal Arcane Field undergoes a new independently observed short maintenance test with real local resistance.',{
+   origin:Field.PULSE,location:s.world.location,fieldId,
+   biome,radiusMetres:radius,
+   ambientSupport:'Actual observed academy ambient mana still supports a short bounded personally maintained return current.',
+   independentResistance:'A free-standing grounded counter screen interrupts the field and demonstrates independent environmental resistance.'});
+ const ixField=s.log.length-1,manaField=s.player.mana,
+  timeField=s.world.minutes;
+ const pulseField=op(s,'fieldPulse',{id:fieldId,witnessIndex:ixField,minutes:10});
+ A.equal(pulseField.attempted,true);
+ A.equal(s.world.minutes,timeField+10);
+ A.equal(s.player.mana,manaField-pulseField.manaSpent);
+ A.equal(pulseField.noAutomaticHarmOrNPCControl,true);
+ A.equal(Field.verify(s),true);
+ const used=E.exportGame(s),oldFieldRng=s.rngState;
+ A.throws(()=>op(s,'fieldPulse',{id:fieldId,witnessIndex:ixField,minutes:10}),
+  /cannot be pulsed twice|personally witnessed/);
+ A.equal(E.exportGame(s),used);A.equal(s.rngState,oldFieldRng);
+ const forgedField=E.importGame(used);
+ forgedField.table.arcaneArchitecture.field.tests[0].source.capacity.newMana+=20;
+ A.equal(Field.verify(forgedField),false);
+ const forgedPulse=E.importGame(used);
+ forgedPulse.table.arcaneArchitecture.field.pulses[0].source.radius=900;
+ A.equal(Field.verify(forgedPulse),false);
  const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-higher-arcane-'));
  try{
   const file=Path.join(dir,'save.json');
