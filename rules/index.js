@@ -228,6 +228,8 @@ function act(s,{system,operation,params={}}={}){
   case 'body.physiqueWork':return require('./body-living-physiques').work(s,params);
   case 'body.physiqueCare':return require('./body-living-physiques').care(s,params);
   case 'body.physiqueComplete':return require('./body-living-physiques').complete(s,params);
+  case 'body.physiqueAssume':return require('./body-living-physiques').assume(s,params);
+  case 'body.physiqueRelease':return require('./body-living-physiques').release(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);
