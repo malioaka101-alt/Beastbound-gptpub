@@ -167,6 +167,12 @@ function earnNeuralCycle(s){
   }
   A.equal(formed,true,'Cycle '+cycle+' should be achievable on its actual original body evidence');
   done.push(cycle);
+  if(cycle===6){
+   const view=Power.read(s).body;
+   A.equal(view.nextCycle,null,'A school which earned Adaptive VI first must not be told the canonical fifth cycle is mandatory');
+   A.ok(view.namedUndevelopedCycles.includes('Nerve-Sense Cycle'));
+   A.ok(view.namedUndevelopedCycles.includes('Blood-Essence Cycle'));
+  }
   A.equal(s.player.humanEvolution.stage,0);
   A.deepEqual(s.player.origin.stableTraits,[]);
   A.equal(s.player.arcane.circles,0);
