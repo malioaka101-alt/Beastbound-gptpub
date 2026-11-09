@@ -2,7 +2,7 @@
 
 **Canonical source:** Unified Master Prompt §20. The original body has 12 Primary Meridians, 8 Extraordinary Meridians, 36 Major Branch Meridians, 72 Minor Branch Networks, 108 Gates and three Dantian centres. Meridian stages are anatomical transformations and are **not** cultivation skill rank, Arcane Circle, beast Grade, human evolution stage or a free technique. The Master Prompt is authoritative where the prototype is incomplete.
 
-## Completed bridge on draft branch: preserve real Stage IV before proposing Stage V
+## Original Stage IV source and responsive living-web anatomy
 
 The existing `rules/disciplines.js` remains responsible for earned Foundation/Awakening, all 108 individually recorded Gates, three Lower/Middle/High milestone receipts and real Stage IV Dantian Sea formation. New `rules/meridian-living-anatomy.js` **only extends `s.table.powerPhysiology.meridian.advancedNetwork`**, not a separate cultivation engine. It requires the same source-backed prior Gate anatomy, completed Sea work, original source date and current Dantian presence.
 
@@ -14,17 +14,24 @@ The existing `rules/disciplines.js` remains responsible for earned Foundation/Aw
 
 `meridian.livingWebStatus` displays only the character's actual personally mapped routes and real coverage. In the current draft, independently integrated route segments count toward Stage V network coverage only if their injury is resolved. Full integration of all canonical 8+36+72 segments is an **anatomical verification goal**, not an auto-award of Stage V or 116 mandated sessions. The GM may map original connected subnetwork bundles, subject to physically credible load and risk; there is no compulsory teacher, paid school, calendar-gate or fixed medical style.
 
+## Earned Stage V, Living Intent VI and Physique–Meridian VII — draft implementation
+
+**Stage V — Meridian Web Integration** is now mechanically implemented: a separately witnessed, physically connected set of already integrated and uninjured Extraordinary, Major Branch and Minor Branch circuits can attempt a real network response check. It does **not** require 116 fixed classes or training sessions, nor can isolated branches automatically qualify. On an actual success the one original Meridian stage becomes 5, with existing `Build.meridianProfile(5)` determining Qi capacity, flow and recovery. Existing Qi and Stamina are spent and never refilled by a breakthrough; original source snapshots, route ancestry, check and exact capacity are independently verified.
+
+**Stage VI — Living Intent Embodiment** now extends the same `advancedNetwork` with real individual `intentForms` and `intentTests`. It starts from a healed, successfully worked original Stage V route and a personally witnessed movement principle, not a school fee or a technique title. Each distinct scene trains actual controllable response with engine rolls, separate Qi/Stamina expenditure, limited pressure setbacks, and stored physical feedback. Six earned source-checked practice points make an *independent witnessed* automatic-response test possible; no calendar delay is imposed. A real successful test applies the original Stage VI capacity vector with `intentDepth:1`, preserving current Qi. It establishes bounded voluntary bodily control, **not** a free combat art, guaranteed mental effect or armour bypass.
+
+**Stage VII — Physique–Meridian Integration** now extends the existing network with original `tissueInterfaces` and `tissueTests`. A genuinely earned Stage VI intent can be studied through ordinary physically observed tissues and anatomical variants; the GM may author the person's actual fascia, organ response and limitations without choosing from a finite list. Each repeatable integration requires genuine tissue and circulation source evidence, real checks, pressure/welfare limits, Stamina, Qi and elapsed time; its final whole-body connection is a separate witnessed pressure test. An original success uses `Build.meridianProfile(7)`, again conserving actual Qi. Describing a new exotic organ, animal trait or lineage does **not** make it real, and this procedure does not award independent human evolution.
+
+These are **draft implementations, not yet verified as a complete #10 foundation**. The original Stage IV→V baseline passed full CI run `42617195930` and the first Stage V completion run `42640019133`. The latest Stage VI/VII regression must independently pass on the current head before those changes are verified. The new disposable test performs real Stage IV, V, VI and VII progression and uses the established `health.sleep` recovery for adequate Qi after costly prior work; it never edits a live campaign.
+
 ## Remaining #10 work before checklist completion
 
-Stage V still needs an original integrated-network completion check and careful **capacity refresh** from the existing `rules/build.js` Meridian profile (Extraordinary circulation, web completion, Qi flow and actual recovery). Prior Qi and Stamina must be conserved; completing a route cannot refill the Dantian.
+- **VIII — Living Domain:** an independently evidenced, contestable short-range physical field, actual surroundings, formation and maintenance cost, duration, collapse and counters. Recording a named field may not seize control of a region, NPCs, beasts or magic.
+- **IX — Transcendent Constitution:** individually witnessed constitutional transformation building on real anatomy, energy limits, tissue/lineage evidence, maintenance and biological consequences, without an unconditional immortality, invulnerability or universal final form.
+- Verify high-stage effects using actual source-specific capability adapters rather than treating a stage label as an executable combat technique. Recheck all prior-stage save evidence after further original physiological development.
 
-Stages VI–IX require *further, distinct source-backed anatomical advancement* before becoming runnable:
-
-- **VI — Living Intent Embodiment:** actual practiced intention, stable circulation feedback and a bounded technique route; no unearned instant will attacks, mindreading or guaranteed intervention.
-- **VII — Physique-Meridian Integration:** real pre-existing organ, refined tissue or lineage provenance, compatibility and metabolic stress; no invented tissues or free beast-origin powers.
-- **VIII — Living Domain:** authored physical range, environmental support, flow cost, contestable bounds, collapse and counters; no automatic control over an entire region.
-- **IX — Transcendent Constitution:** an individual evidenced living physiology and irreversible integration consequences, healing/maintenance needs and true human evolution links; no universal final form, immortality or invulnerability.
+The checklist's **entire #10 criterion stays unchecked and PR #41 stays draft** until the remaining advanced foundations are coherent and a complete exact-head regression succeeds.
 
 All must remain within the **same human Meridian, health, anatomy, energy and evolution** systems. Existing Stage IV independent practice is not retroactively restricted, and no lower-stage character can use the new map to bypass 108 genuine Gates or the Dantian Sea.
 
-**Test:** `tests/meridian-living-anatomy.test.js` creates disposable source evidence (original engine opens final Gate and forms Stage IV), works anatomically valid original maps, rejects duplicate/forged routes, resolves original rolls and costs, checks persistent severe pressure injuries, separately treats them, validates snapshots/replay and confirms no automatically awarded stage. The draft cannot be marked verified or merged before complete exact-head regression, and **the checklist's entire #10 criterion remains unchecked until the advanced stage proof/capacity bridge is completed**.
+**Test:** `tests/meridian-living-anatomy.test.js` uses disposable genuine Stage IV source evidence, integrated Stage V responses, Stage VI original intent and Stage VII individually examined ordinary connective tissue. It tests real checks, source replay, genuine resource recovery, failure consequences and forged receipts without a campaign save. The draft cannot be marked verified or merged before complete exact-head regression, and **the checklist's entire #10 criterion remains unchecked until the advanced stage proof/capacity bridge is completed**.
