@@ -8,7 +8,8 @@ const Bestiary=require('../world/bestiary'),World=require('../world/simulation')
 const Generations=require('../world/wild-generations'),Turn=require('../scripts/chat-turn');
 const state=(seed=58321)=>New.create({seed,slug:'living_species_test_001',mode:'gm',age:19,
  gmOpening:{locationId:'fen',scene:'In the damp reed beds, migrating moths gather near pale flowers. Their presence is not proof that every stranger can catch one.',focus:'A wetland morning',weather:'quiet mist',hour:9,minute:15}}).state;
-const s=state(),coins=s.player.coins,rng=s.rngState,raw=E.exportGame(s);
+const s=state(),coins=s.player.coins,rng=s.rngState,raw=E.exportGame(s),
+ originalAnimals=structuredClone(s.beasts||{});
 const first=Rules.act(s,{system:'world',operation:'speciesBiologyStatus',params:{}});
 A.equal(first.species.length,2);
 A.ok(first.species.some(x=>x.id==='authored:fenfox'));
@@ -61,7 +62,9 @@ A.equal(Rules.act(s,{system:'world',operation:'speciesBiologyAuthor',params:crea
 A.equal(E.SPECIES.reedglass_pollenmoth,undefined);
 A.equal(s.player.coins,coins);
 A.equal(s.rngState,rng,'Writing a pre-established species is not a dice roll');
-A.equal(Object.keys(s.beasts||{}).length,0,'Creating a species does not create a tameable individual');
+A.deepEqual(s.beasts||{},originalAnimals,'Species documentation cannot create or alter a real beast');
+A.ok(!Object.values(s.beasts||{}).some(b=>b.species===creature.speciesId),
+ 'New taxon does not create a free individual encounter');
 const byId=Bestiary.lookup(creature.speciesId,{state:s});
 A.equal(byId.taxonomy.family,'Luminopteridae');
 A.equal(byId.knownEvolutionBranches.length,0);
