@@ -24,7 +24,7 @@ function seedFor(s){const n=(s.seed>>>0)||1355150487;return ((n^0x9e3779b9)>>>0)
 function initial(s,startingDay=0){
  const w={version:1,worldSeed:seedFor(s),rngState:seedFor(s),startedAt:startingDay,lastTickDay:startingDay,
   calendarAnchor:null,ticks:{sixdays:0,months:0},countries:{},institutions:{},routes:{},ecosystems:{},diplomacy:{},notables:N.seedNotables(),houses:Houses.seed(),governance:Gov.seed(),
-  market:{},mythic:Mythic.seed(),cosmology:Cosmology.seed(),causalHistory:CausalHistory.seed(),chronicle:[],sealedChronicle:[],knownSights:[],orders:[],counters:{wars:0,peaceTreaties:0,changesOfGovernment:0,closures:0,reopenings:0,ecosystemWarnings:0},
+  market:{},mythic:Mythic.seed(),speciesBiology:B.bioDefaultSeed(),cosmology:Cosmology.seed(),causalHistory:CausalHistory.seed(),chronicle:[],sealedChronicle:[],knownSights:[],orders:[],counters:{wars:0,peaceTreaties:0,changesOfGovernment:0,closures:0,reopenings:0,ecosystemWarnings:0},
   publicKnowledge:{notes:[]}};
  for(const p of A.polities){w.countries[p.id]={...p.initial,regime:p.government,rulerTenure:0,stressMonths:0,cycle:0,warExhaustion:0};
   w.market[p.id]={grain:1,feed:1,materials:1,medicine:1,vael:1};}
@@ -586,7 +586,10 @@ function observe(s,{minutes=30,source='Direct field observation'}={}){
   id:record.id,observationTimeMinutes:minutes,note:'Observation is not a tame, contract, level gain, identification of all powers or guaranteed combat encounter'};
 }
 function knownTaxon(s,{id}={}){const w=peek(s),found=w.knownSights.find(x=>x.id===id);if(!found)throw Error('Species has not been identified in this campaign');
- const v=B.lookup(id);return {id:v.id,name:v.name,biome:v.biome,role:v.role,diet:v.diet,taxonomy:v.taxonomy,
+ const v=B.lookup(id,{state:s});
+ const biology=B.bioStatus(s,{speciesId:id});
+ return {id:v.id,name:v.name,biome:v.biome,role:v.role,diet:v.diet,taxonomy:v.taxonomy,
+  ...(biology.known?{publicBiology:biology.species}:{}) ,
   conservation:v.conservation,mechanism:'Not fully characterised without specialist research',knownEvolutionBranches:[]};}
 function revealProfessional(s,params){return N.reveal(ensure(s),params);}
 function publicProfessionals(s){return {people:N.publicKnown(s,peek(s).notables)};}
