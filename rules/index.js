@@ -305,6 +305,11 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.perceptionStatus':return Senses.soulStatus(s,params);
   case 'soul.threadStatus':return SoulThreads.status(s);
   case 'soul.threadWork':return SoulThreads.work(s,params);
+  case 'soul.latticeStatus':return require('./soul-resonance-lattice').status(s);
+  case 'soul.latticeMap':return require('./soul-resonance-lattice').plan(s,params);
+  case 'soul.latticePractice':return require('./soul-resonance-lattice').practice(s,params);
+  case 'soul.latticeRepair':return require('./soul-resonance-lattice').repair(s,params);
+  case 'soul.latticeComplete':return require('./soul-resonance-lattice').complete(s,params);
   case 'soul.perceive':return Senses.perceive(s,params);
   case 'rift.senseStatus':return Senses.riftStatus(s,params);
   case 'rift.sense':return Senses.senseRift(s,params);
