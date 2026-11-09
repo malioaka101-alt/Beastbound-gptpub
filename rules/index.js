@@ -420,6 +420,8 @@ function act(s,{system,operation,params={}}={}){
   case 'research.proof':return ResearchGuard.proof(s,params);
   case 'research.replication':return ResearchGuard.replication(s,params);
   case 'research.status':return {project:R.publicCard(R.get(s,params.id))};
+  case 'evolution.authorBranch':return require('./evolution-branch-web').branch(s,params);
+  case 'evolution.branchWebStatus':return require('./evolution-branch-web').status(s,params);
   case 'evolution.register':return EvolutionGuard.record(s,params);
   case 'evolution.advance':return EvolutionGuard.advance(s,params);
   case 'evolution.ripening':return EvolutionBypasses.ripening(s,params);
