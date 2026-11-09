@@ -34,22 +34,27 @@ function foundation(s){
  if(a.circles===3)D.verifyThirdCircle(s);
  else if(a.circles===4&&!Dynamic.verify(s))
   throw Error('Existing Fourth Circle geometry was not genuinely source-earned');
- else if(a.circles>4)
-  throw Error('Higher Arcane Circle effects need separate source-specific stage verification');
+ else if(a.circles>4&&!require('./arcane-higher-circles').verify(s))
+  throw Error('Higher Arcane Circle structure lacks authentic advanced-stage physical proof');
  if(s.battle||s.encounter)throw Error('Unaudited arcane research cannot be conflated with a live combat exchange');
  return a;
 }
 function rawCost(form){
- if(!form||!only(form,PLAN_KEYS)||!GATE.includes(form.family)||
-  form.damage!==undefined||form.stunned===true||
-  form.extraTargets!==undefined&&form.extraTargets!==0||
-  form.analogueTier!==undefined||form.worldCircuit===true)
-  throw Error('A bounded noncombat formula needs an original physical spell family, not combat effects or external beast analogues');
+ if(!form||!only(form,PLAN_KEYS)||
+  typeof form.family!=='string'||
+  (form.damage!==undefined&&!int(form.damage,0,1000))||
+  (form.analogueTier!==undefined&&!int(form.analogueTier,1,9)))
+  throw Error('A spell design needs a real original spell family and bounded numeric grammar');
  const spell=Build.spellCost(form);
- if(!int(spell.complexity,1,30)||!int(spell.mana,1,100)||
-  !int(spell.load,1,30)||spell.minCircle===null)
+ if(!int(spell.complexity,0,100)||!int(spell.mana,1,10000)||
+  !int(spell.load,0,50)||spell.minCircle===null)
   throw Error('The original Arcane spell grammar exceeds supported known complexity');
  return spell;
+}
+function demonstrationOnly(form){
+ return NONCOMBAT.includes(form.family)&&form.damage===undefined&&
+  form.stunned!==true&&(form.extraTargets||0)===0&&
+  form.worldCircuit!==true&&form.analogueTier===undefined;
 }
 function sealValid(s){
  const l=s.table?.arcaneArchitecture?.formulae;
@@ -58,10 +63,13 @@ function sealValid(s){
   Array.isArray(l.records))return false;
  for(const [name,rec] of Object.entries(l.records)){
   const x=rec?.source;
-  if(!id(name)||rec.id!==name||rec.origin!==ORIGIN||
+  let calculated;
+  try{calculated=rawCost(x?.form)}catch{return false}
+  if(!id(name)||rec?.id!==name||rec.origin!==ORIGIN||
    rec.seal!==hash(x)||x?.origin!==ORIGIN||x.id!==name||
-   !x.form||x.cost?.mana!==rawCost(x.form).mana||
-   x.cost.complexity!==rawCost(x.form).complexity||
+   !x.form||hash(x.cost)!==hash(calculated)||
+   !int(x.circleAtMap,3,9)||x.circleAtMap<calculated.minCircle||
+   x.circleAtMap>s.player.arcane.circles||
    !prose(x.mechanism,20,900)||!prose(x.limit,20,900)||
    !prose(x.interferenceSource,20,900)||
    !Array.isArray(x.channels)||!x.channels.length||
@@ -136,6 +144,13 @@ function map(s,p={}){
   !Array.isArray(p.channels))
   throw Error('Original spell grammar requires identity, actual channels, principle and limits');
  const a=foundation(s),cost=rawCost(p.form),chs=p.channels;
+ if(p.form.worldCircuit===true&&
+   (a.circles!==9||!require('./arcane-higher-circles').verify(s)))
+  throw Error('A World Circuit formula requires genuine earned Circle IX architecture');
+ if(p.form.family==='analogue'&&
+  (!prose(s.log[p.witnessIndex]?.details?.observedAnalogue,24,900)||
+   !prose(s.log[p.witnessIndex]?.details?.sourceSpecies,3,180)))
+  throw Error('A designed beast functional analogue requires prior individual source observation, not a free borrowed organ');
  if(cost.minCircle>a.circles||cost.complexity>a.maxComplexity||
   cost.load>a.loadTolerance||chs.length<1||
   chs.length>a.channels||chs.some(n=>!int(n,1,a.channels))||
@@ -148,17 +163,21 @@ function map(s,p={}){
  if(s.table.arcaneArchitecture.formulae?.records[p.id])
   throw Error('One formula cannot be remapped to erase its previous study');
  const x={origin:ORIGIN,id:p.id,minute:s.world.minutes,
+  circleAtMap:a.circles,
   name:p.name.trim(),form:structuredClone(p.form),cost,
   channels:[...chs],mechanism:p.mechanism.trim(),
   limit:p.limit.trim(),interferenceSource:p.interferenceSource.trim(),
   witness:e,witnessHash:hash(e),
-  allowedEffect:'bounded noncombat geometry/sensing demonstration only'};
+  allowedEffect:demonstrationOnly(p.form)?
+   'bounded noncombat geometry/sensing demonstration only':
+   'original formula design/study; actual effect requires a distinct earned action adapter'};
  const r={origin:ORIGIN,id:p.id,source:x,seal:hash(x),
   points:0,learned:false,interference:0,study:[],casts:[],repairs:[]};
  ensure(s).records[p.id]=r;
  return {mapped:true,formulaId:p.id,minimumCircle:cost.minCircle,
   manaCost:cost.mana,complexity:cost.complexity,
-  learned:false,noAutomaticEffect:true};
+  learned:false,noAutomaticEffect:true,
+  effectAdapterAvailable:demonstrationOnly(p.form)};
 }
 function learn(s,p={}){
  if(!only(p,['id','witnessIndex','minutes'])||!id(p.id)||
@@ -220,6 +239,8 @@ function cast(s,p={}){
   throw Error('A bounded original spell demonstration and environmental counter must actually be witnessed');
  const w=hash(e);
  if(r.casts.some(x=>x.source.witnessHash===w))throw Error('One original spell demonstration cannot be rolled twice');
+ if(!demonstrationOnly(r.source.form))
+  throw Error('This original spell formula can be studied, but its real combat, medical, environmental or analogue effect requires a separately source-verified action adapter');
  const spell=r.source.cost,minutes=5,stamina=1;
  if(!int(s.player.mana,spell.mana,100000)||
   !int(s.player.stamina,stamina,100000))
