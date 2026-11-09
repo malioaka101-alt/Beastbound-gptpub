@@ -185,7 +185,7 @@ function breakthrough(s,b,r,target){
  if(target===7&&(!integer(s.player.soul?.stability,0,100)||
   s.player.soul.stability<65))
   return {ready:false,reason:'Human Soul Stability is insufficient for safe aspect feedback'};
- if(target===9&&!b.evolutionHistory?.length&&!(s.player.humanEvolution?.stage>0))
+ if(target===9&&(!b.evolutionHistory?.length||!(s.player.humanEvolution?.stage>0)))
   return {ready:false,reason:'No individually earned biological evolution supports the joint event'};
  if(target===10&&!Object.keys(r.syncPractice?.methods||{}).length)
   return {ready:false,reason:'An exceptional bond needs a genuinely designed unique shared method'};
@@ -242,6 +242,11 @@ function train(s,p={}){
   humanCost,fatigueCost,energyCost,roll:check.roll,
   checkHash,points,minutes});
  const readiness=Bonds.syncReadiness(r,target);
+ // Canonical Stage 9/10 have no numerical threshold: the original bond
+ // deliberately requires a personally witnessed exceptional milestone.
+ // They still spend actual earned experience from this pair's practice.
+ const exceptional=readiness.trainingPoints===null;
+ const promotionCost=exceptional?r.syncPoints:readiness.trainingPoints;
  let promoted=false,missingSource=null;
  if(focus==='refine'&&points){
   const previous=r.syncState||'novice',earned=r.syncMasteryPoints;
@@ -252,13 +257,14 @@ function train(s,p={}){
     toState:r.syncState,earned:points,sceneHash:proof.digest});
  }
  if(focus==='advance'&&check.success&&readiness.numericReady&&
-  r.syncPoints>=readiness.trainingPoints){
+  Number.isInteger(promotionCost)&&promotionCost>0&&
+  r.syncPoints>=promotionCost){
   const milestone=breakthrough(s,b,r,target);
   if(milestone.ready){
    r.syncStage=target;r.syncState='novice';r.syncMasteryPoints=0;
-   r.syncPoints-=readiness.trainingPoints;b.syncStage=target;
+   r.syncPoints-=promotionCost;b.syncStage=target;
    const evidence=milestone.proof||proof.event;
-   append(s,b,r,'stage',{stage:target,pointsSpent:readiness.trainingPoints,
+   append(s,b,r,'stage',{stage:target,pointsSpent:promotionCost,
     proof:structuredClone(evidence),proofHash:hash(evidence),
     sceneHash:proof.digest});
    promoted=true;
