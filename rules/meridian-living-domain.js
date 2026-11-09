@@ -74,7 +74,7 @@ function verifySource(s){
    !t||z.tissueHash!==t.seal||t.source.routeId!==z.routeId||
    !P(z.name,3,140)||!P(z.principle)||!P(z.environment)||
    !P(z.counter)||!P(z.collapse)||!P(z.limit)||
-   !I(z.radius,1,40)||!I(z.minute,0,s.world.minutes)||
+   !I(z.radius,1,1000000)||!I(z.minute,0,s.world.minutes)||
    !z.witness||H(z.witness)!==z.witnessHash||
    z.witness.details?.origin!==MAP||
    z.witness.details?.domainId!==id||
@@ -171,7 +171,7 @@ function map(s,p={}){
   'counter','collapse','limit','radius','witnessIndex'])||
   !ID(p.id)||!ID(p.tissueId)||!ID(p.routeId)||
   !P(p.name,3,140)||!P(p.principle)||!P(p.environment)||
-  !P(p.counter)||!P(p.collapse)||!P(p.limit)||!I(p.radius,1,40))
+  !P(p.counter)||!P(p.collapse)||!P(p.limit)||!I(p.radius,1,1000000))
   throw Error('Domain proposal needs measured range, actual environment, physical source, counters and collapse risks');
  const {net,m,place}=prerequisite(s),{r,t}=route(net,p.routeId,p.tissueId);
  const witness=scene(s,p.witnessIndex,MAP,p.id,r.id);
@@ -179,7 +179,7 @@ function map(s,p={}){
   !P(witness.details?.physicalMeasurement,24,800)||
   !P(witness.details?.environmentSupport,24,800)||
   witness.details?.biome!==place.biome||
-  p.radius>Math.max(2,Math.floor(m.stability/3)))
+  p.radius>Math.max(2,Math.floor(m.flow*m.stability/20)))
   throw Error('Range must come from physically measured and locally supported bounded Qi circulation');
  if(net.domainPlans?.[p.id])throw Error('That original bounded domain blueprint is already recorded');
  const source={origin:SOURCE,id:p.id,tissueId:t.id,tissueHash:t.seal,
