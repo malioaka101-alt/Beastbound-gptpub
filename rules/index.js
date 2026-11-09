@@ -196,6 +196,16 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.circleWork':return Disciplines.arcaneCircleWork(s,params);
   case 'arcane.matrixStatus':return Disciplines.matrixStatus(s);
   case 'arcane.matrixWork':return Disciplines.matrixWork(s,params);
+  case 'arcane.dynamicStatus':return require('./arcane-higher-architecture').status(s);
+  case 'arcane.dynamicMap':return require('./arcane-higher-architecture').map(s,params);
+  case 'arcane.dynamicWork':return require('./arcane-higher-architecture').work(s,params);
+  case 'arcane.dynamicForm':return require('./arcane-higher-architecture').form(s,params);
+  case 'arcane.dynamicRepair':return require('./arcane-higher-architecture').repair(s,params);
+  case 'arcane.formulaStatus':return require('./arcane-source-formulas').status(s);
+  case 'arcane.formulaMap':return require('./arcane-source-formulas').map(s,params);
+  case 'arcane.formulaWork':return require('./arcane-source-formulas').work(s,params);
+  case 'arcane.formulaProbe':return require('./arcane-source-formulas').probe(s,params);
+  case 'arcane.formulaRepair':return require('./arcane-source-formulas').repair(s,params);
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
