@@ -56,7 +56,7 @@ function verify(b){
   r.origin.lifeSourceHash!==life.sourceHash||
   !Array.isArray(r.entries)||r.entries.length>1200)return false;
  let prev=r.originHash;
- const methods=new Map(),seen=new Set();
+ const methods=new Map(),seen=new Set(),usedProofs=new Set();
  for(const item of r.entries){
   const e=item?.source;
   if(!e||e.source!==SOURCE||e.beastId!==b.id||
@@ -66,10 +66,15 @@ function verify(b){
    if(!id(e.category)||!good(e.description,12,1200)||!good(e.basis)||
     !['observed','gm-only'].includes(e.visibility)||!HASH.test(e.witnessHash))
     return false;
-   const evidence=kind==='wild'?
-    life.witnessed?.some(x=>hash(x)===e.witnessHash):
-    life.history?.some(x=>x.type==='personally-witnessed-contact'&&hash(x)===e.witnessHash);
-   if(!evidence||e.visibility==='observed'&&e.witnessedLocation!==e.currentLocation)
+   // Pin the exact witnessed event; original short-term witnessed histories
+   // legitimately rotate, but they must not erase established personal facts.
+   const evidence=e.witnessRecord;
+   if(!evidence||hash(evidence)!==e.witnessHash||
+    (kind==='wild'&&(evidence.type!=='witnessed-wildlife-routine'||
+      evidence.beastId!==b.id||evidence.location!==e.witnessedLocation))||
+    (kind==='sapient'&&(evidence.type!=='personally-witnessed-contact'||
+      evidence.location!==e.witnessedLocation))||
+    (e.visibility==='observed'&&e.witnessedLocation!==e.currentLocation))
     return false;
   }else if(e.type==='learn'){
    if(kind!=='wild'||!id(e.methodId)||methods.has(e.methodId)||
@@ -79,25 +84,30 @@ function verify(b){
     !['foraging','navigation'].includes(e.application)||
     !num(e.energyCost,1,25)||!num(e.cooldownDays,1,90)||
     !['observed','gm-only'].includes(e.visibility)||
-    !proofValid(b,e.proof,e.application)||
+    !proofValid(b,e.proof,e.application)||usedProofs.has(e.proof.hash)||
     (e.visibility==='observed'&&!life.witnessed?.some(x=>hash(x)===e.proof.source.actionWitnessHash)))
     return false;
-   methods.set(e.methodId,{skill:e.application,proofs:new Set([e.proof.hash]),usedDay:-100000});
+   usedProofs.add(e.proof.hash);
+   methods.set(e.methodId,{skill:e.application,proofs:new Set([e.proof.hash]),
+    energyCost:e.energyCost,cooldownDays:e.cooldownDays,usedDay:-100000});
   }else if(e.type==='develop'){
    const m=methods.get(e.methodId);
-   if(!m||!proofValid(b,e.proof,m.skill)||m.proofs.has(e.proof.hash)||
+   if(!m||!proofValid(b,e.proof,m.skill)||usedProofs.has(e.proof.hash)||
      !num(e.strengthening,1,3))return false;
-   m.proofs.add(e.proof.hash);
+   m.proofs.add(e.proof.hash);usedProofs.add(e.proof.hash);
   }else if(e.type==='express'){
    const m=methods.get(e.methodId);
-   if(!m||e.day<=m.usedDay||!num(e.day,0,10000000)||
+   if(!m||e.day-m.usedDay<m.cooldownDays||!num(e.day,0,10000000)||
     !['independently-foraged','roamed-through-existing-habitat-link',
       'relocated-to-adjacent-compatible-habitat'].includes(e.action)||
     (m.skill==='foraging')!==(e.action==='independently-foraged')||
     !num(e.beforeEnergy,0,100000)||!num(e.afterEnergy,0,100000)||
     e.beforeEnergy-e.afterEnergy!==e.energyCost||
-    !num(e.energyCost,1,25)||e.benefit!==2||
-    !HASH.test(e.witnessHash))return false;
+    e.energyCost!==m.energyCost||e.benefit!==2||
+    !e.witnessRecord||hash(e.witnessRecord)!==e.witnessHash||
+    e.witnessRecord.type!=='offscreen-sixday'||
+    e.witnessRecord.day!==e.day||e.witnessRecord.action!==e.action)
+    return false;
    m.usedDay=e.day;
   }else return false;
   if(seen.has(item.seal))return false;
@@ -139,6 +149,7 @@ function observation(s,p={}){
   throw Error('This exact observed trait has already been recorded');
  append(s,b,{type:'observation',category:p.category,description:p.description.trim(),
   basis:p.basis.trim(),visibility,witnessHash:digest,
+  witnessRecord:structuredClone(witness),
   witnessedLocation:location,currentLocation:s.world.location});
  return {recorded:true,beastId:b.id,category:p.category,noNewCreatureOrConsent:true};
 }
@@ -159,6 +170,9 @@ function technique(s,p={}){
  const reg=ensure(s,b);
  if(reg.entries.some(x=>x.source.type==='learn'&&x.source.methodId===p.methodId))
   throw Error('The individual already learned this unique method');
+ if(reg.entries.some(x=>['learn','develop'].includes(x.source.type)&&
+   x.source.proof?.hash===proof.hash))
+  throw Error('One actual successful action cannot create multiple learned methods');
  append(s,b,{type:'learn',methodId:p.methodId,name:p.name.trim(),
   principle:p.principle.trim(),activation:p.activation.trim(),limit:p.limit.trim(),
   counter:p.counter.trim(),environment:p.environment.trim(),application:skill,
@@ -172,7 +186,8 @@ function develop(s,{beastId,methodId,receiptHash}={}){
  const root=steps.find(x=>x.source.type==='learn');
  if(!root)throw Error('This particular beast has not learned that method');
  const proof=sourceProof(b,receiptHash,root.source.application);
- if(steps.some(x=>x.source.proof?.hash===proof.hash))
+ if(r.entries.some(x=>['learn','develop'].includes(x.source.type)&&
+   x.source.proof?.hash===proof.hash))
   throw Error('An individual action cannot strengthen the same technique twice');
  const strengthening=Math.min(3,1+steps.filter(x=>x.source.type==='develop').length);
  append(s,b,{type:'develop',methodId,proof:structuredClone(proof),strengthening});
@@ -203,7 +218,7 @@ function express(s,b,action,day){
   else b.needs.fatigue=Math.max(0,b.needs.fatigue-2);
   append(s,b,{type:'express',methodId:method.methodId,day,action,
    energyCost:method.energyCost,beforeEnergy,afterEnergy:b.energy,
-   witnessHash:hash(last),benefit:2});
+   witnessHash:hash(last),witnessRecord:structuredClone(last),benefit:2});
   return {methodId:method.methodId,energySpent:method.energyCost,
    private:true,noForcedTechnique:true};
  }
@@ -213,7 +228,9 @@ function status(s,{beastId}={}){
  if(typeof beastId!=='string')throw Error('Known beast identity required');
  const b=s.beasts?.[beastId];
  if(!b)return {known:false};
- const {life}=foundation(b),r=life.individuality;
+ const {life,kind}=foundation(b),r=life.individuality;
+ if(kind==='wild'&&!life.witnessed?.length)
+  return {known:false,note:'This animal has no personally witnessed identity'};
  if(!r)return {known:true,observations:[],techniques:[],
   note:'No personally witnessed distinct methods recorded'};
  if(!verify(b))throw Error('Individual beast memory failed source validation');
