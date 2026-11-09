@@ -48,7 +48,7 @@ const note={beastId:b.id,category:'visible-movement',
  basis:'A documented direct behavioural watch of this exact individual in the forest.',
  visibility:'gm-only'};
 A.equal(op(s,'beastIndividualObserve',note).recorded,true);
-A.throws(()=>op(s,'beastIndividualObserve',note),/already recorded/);
+A.throws(()=>op(s,'beastIndividualObserve',note),/already been recorded/);
 const hidden=op(s,'beastIndividualStatus',{beastId:b.id});
 A.equal(hidden.known,true);A.deepEqual(hidden.observations,[]);
 A.deepEqual(hidden.techniques,[]);
