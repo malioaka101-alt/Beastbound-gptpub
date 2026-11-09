@@ -205,6 +205,10 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);
+  case 'meridian.livingWebStatus':return require('./meridian-living-anatomy').status(s);
+  case 'meridian.livingWebMap':return require('./meridian-living-anatomy').mapRoute(s,params);
+  case 'meridian.livingWebWork':return require('./meridian-living-anatomy').work(s,params);
+  case 'meridian.livingWebTreat':return require('./meridian-living-anatomy').treat(s,params);
   case 'core.opposed':throw Error('Direct opposed rolls are not playable without independently witnessed participants, fixed skills and a precommitted contest');
   case 'core.contestForce':throw Error('Direct force contests are not playable without sourced combatants, established magnitudes and scene prerequisites');
   case 'combat.begin':return CombatProvenance.begin(s,params);
