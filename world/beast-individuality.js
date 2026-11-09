@@ -55,13 +55,13 @@ function verify(b){
   r.origin.species!==b.species||r.origin.lifeKind!==kind||
   r.origin.lifeSourceHash!==life.sourceHash||
   !Array.isArray(r.entries)||r.entries.length>1200)return false;
- let prev=r.originHash;
+ let prev=r.originHash,previousMinute=0;
  const methods=new Map(),seen=new Set(),usedProofs=new Set();
  for(const item of r.entries){
   const e=item?.source;
   if(!e||e.source!==SOURCE||e.beastId!==b.id||
    e.lifeSourceHash!==life.sourceHash||e.previous!==prev||
-   item.seal!==hash(e)||!num(e.minute,0,1000000000))return false;
+   item.seal!==hash(e)||!num(e.minute,previousMinute,1000000000))return false;
   if(e.type==='observation'){
    if(!id(e.category)||!good(e.description,12,1200)||!good(e.basis)||
     !['observed','gm-only'].includes(e.visibility)||!HASH.test(e.witnessHash))
@@ -106,12 +106,13 @@ function verify(b){
     e.energyCost!==m.energyCost||e.benefit!==2||
     !e.witnessRecord||hash(e.witnessRecord)!==e.witnessHash||
     e.witnessRecord.type!=='offscreen-sixday'||
-    e.witnessRecord.day!==e.day||e.witnessRecord.action!==e.action)
+    e.witnessRecord.day!==e.day||e.witnessRecord.action!==e.action||
+    e.minute!==e.day*1440)
     return false;
    m.usedDay=e.day;
   }else return false;
   if(seen.has(item.seal))return false;
-  seen.add(item.seal);prev=item.seal;
+  seen.add(item.seal);prev=item.seal;previousMinute=e.minute;
  }
  return prev===r.headHash;
 }
@@ -217,6 +218,7 @@ function express(s,b,action,day){
   if(current==='foraging')b.needs.hunger=Math.max(0,b.needs.hunger-2);
   else b.needs.fatigue=Math.max(0,b.needs.fatigue-2);
   append(s,b,{type:'express',methodId:method.methodId,day,action,
+   minute:day*1440,
    energyCost:method.energyCost,beforeEnergy,afterEnergy:b.energy,
    witnessHash:hash(last),witnessRecord:structuredClone(last),benefit:2});
   return {methodId:method.methodId,energySpent:method.energyCost,
