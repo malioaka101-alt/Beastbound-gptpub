@@ -1,0 +1,259 @@
+'use strict';
+// #10. One original Meridian circulation. Authored anatomical routes do not
+// open Gates, grant spells, generate Qi or override injury care.
+const Crypto=require('node:crypto'),E=require('../engine.js'),C=require('./core');
+const ORIGIN='meridian-living-web-original-route-v1',
+ MAP='personally-observed-meridian-route-mapping-v1',
+ TREAT='witnessed-meridian-clinical-repair-v1',
+ TRANSITION='personally-witnessed-integrated-meridian-web-v1';
+const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const prose=(v,min=12,max=950)=>typeof v==='string'&&v.trim().length>=min&&v.trim().length<=max;
+const integer=(v,min=0,max=1000000000)=>Number.isInteger(v)&&v>=min&&v<=max;
+const ident=v=>typeof v==='string'&&/^[a-z][a-z0-9_-]{2,75}$/.test(v);
+const segments={extraordinary:8,major:36,minor:72};
+const keep=(p,fields)=>p&&typeof p==='object'&&!Array.isArray(p)&&
+ Object.keys(p).every(x=>fields.includes(x));
+function prior(s){
+ const m=s.player?.meridian,phys=s.table?.powerPhysiology?.meridian,
+  sea=m?.dantianSea,work=s.table?.meridianSeaFormation,
+  gates=m?.gates,records=phys?.gateRecords,
+  h=s.table?.disciplineTraining?.meridian?.history||[];
+ if(!m||m.stage<4||!phys||phys.primaryMapped!==12||
+  !Array.isArray(gates)||gates.length!==108||
+  !Array.isArray(records)||records.length!==108||
+  !Array.isArray(phys.transitions)||!sea||sea.rings<1||
+  !integer(sea.formedAtMinute,0,s.world.minutes)||
+  !prose(sea.source,16,600)||
+  work?.formedAtMinute!==sea.formedAtMinute||work.points!==5||
+  !Array.isArray(work.attempts)||work.attempts.length<1||
+  !work.attempts.some(a=>a.formed===true&&
+   a.minute===work.formedAtMinute&&a.progress===5)||
+  !h.some(a=>a.target==='foundation'&&String(a.change).startsWith('Stage I Foundation Tempering;'))||
+  !h.some(a=>a.target==='awakening'&&String(a.change).startsWith('Stage II Meridian Awakening;')))
+  throw Error('Stage IV requires its actual original 108-Gate structure and Dantian Sea formation evidence');
+ for(let i=0;i<108;i++){
+  const p=gates[i],a=records[i],band=i<36?'Lower':i<72?'Middle':'High';
+  if(!p||!a||p.number!==i+1||a.number!==i+1||
+    p.band!==band||a.band!==band||p.quality!==a.quality||
+    !['Perfect','Sound','Flawed'].includes(a.quality)||
+    !integer(a.day,1,E.day(s)))
+   throw Error('Meridian source anatomy has a missing, altered or out-of-order Gate');
+ }
+ for(const n of [36,72,108]){
+  const t=phys.transitions.find(x=>x.gate===n);
+  if(!t||t.day!==records[n-1].day||t.quality!==records[n-1].quality||
+   !prose(t.source,16,700))throw Error('Original Gate band transition proof missing');
+ }
+ return {m,phys,sea};
+}
+function sourceEvent(s,index,origin){
+ if(!integer(index,0,s.log.length-1))throw Error('A prior original witnessed anatomy event is required');
+ const e=s.log[index];
+ if(e?.type!=='story'||e.details?.origin!==origin||
+   e.details?.location!==s.world.location||
+   !prose(e.text,12,900))
+  throw Error('The original local anatomical source cannot be inferred from a description alone');
+ return e;
+}
+function checkRoute(r){
+ const z=r?.source;
+ if(!z||r.origin!==ORIGIN||r.seal!==hash(z)||
+   z.origin!==ORIGIN||z.routeId!==r.id||
+   !ident(r.id)||!prose(z.name,3,160)||!prose(z.principle)||
+   !prose(z.interference)||!prose(z.pressureRisk)||!prose(z.treatmentPath)||
+   !integer(z.load,1,9)||!Array.isArray(z.segments)||
+   !z.segments.length||z.segments.length>12||
+   new Set(z.segments.map(x=>x.kind+':'+x.number)).size!==z.segments.length||
+   z.segments.some(x=>!x||!Object.hasOwn(segments,x.kind)||
+    !integer(x.number,1,segments[x.kind]))||
+   !Array.isArray(z.gates)||z.gates.length<1||z.gates.length>24||
+   new Set(z.gates).size!==z.gates.length||
+   z.gates.some(n=>!integer(n,1,108))||
+   !['lower','middle','upper'].includes(z.dantian)||
+   !z.witness||z.witnessHash!==hash(z.witness)||
+   z.witness.details?.origin!==MAP||
+   z.witness.details?.routeId!==r.id||
+   !integer(r.integrity,0,20)||!Array.isArray(r.attempts)||
+   !Array.isArray(r.injuries)||!integer(r.required,1,20))
+  return false;
+ const required=Math.max(2,Math.ceil(z.segments.length/3)+z.load-2);
+ if(r.required!==required||r.integrity>r.required)return false;
+ for(const a of r.attempts){
+  if(a.origin!==ORIGIN||a.routeId!==r.id||a.seal!==hash(a.source)||
+    a.source.origin!==ORIGIN||a.source.routeId!==r.id||
+    !integer(a.source.startedMinute)||!integer(a.source.roll,1,20)||
+    !integer(a.source.qiSpent,1,50)||!integer(a.source.staminaSpent,1,12)||
+    !integer(a.source.earned,0,3)||!a.source.check||
+    a.source.check.roll!==a.source.roll||
+    !integer(a.source.minutes,15,480))
+   return false;
+ }
+ for(const injury of r.injuries){
+  if(injury.origin!==ORIGIN||injury.seal!==hash(injury.source)||
+   injury.source.routeId!==r.id||
+   !integer(injury.source.stabilityLoss,1,10)||
+   !integer(injury.source.startedMinute))
+   return false;
+ }
+ return true;
+}
+function verify(s){
+ const net=s.table?.powerPhysiology?.meridian?.advancedNetwork;
+ if(!net)return true;
+ try{prior(s);}catch{return false;}
+ if(net.origin!==ORIGIN||!net.routes||typeof net.routes!=='object'||
+  Array.isArray(net.routes)||!Array.isArray(net.history)||
+  net.history.some(x=>x?.origin!==ORIGIN||x.seal!==hash(x.source)))
+  return false;
+ const registered=new Set();
+ for(const [id,r] of Object.entries(net.routes)){
+  if(id!==r.id||!checkRoute(r))return false;
+  for(const x of r.source.segments){
+   const key=x.kind+':'+x.number;
+   if(registered.has(key))return false;
+   registered.add(key);
+  }
+ }
+ return true;
+}
+function ensure(s){
+ const {phys}=prior(s);
+ if(!phys.advancedNetwork)phys.advancedNetwork={origin:ORIGIN,routes:{},history:[]};
+ if(!verify(s))throw Error('Previously mapped Meridian route source was altered');
+ return phys.advancedNetwork;
+}
+function available(s){
+ if(s.battle||s.encounter||
+  s.table?.combatants?.player?.status&&s.table.combatants.player.status!=='ok')
+  throw Error('Living meridian training requires actual safety, not combat or incapacity');
+ if(s.player.meridian.stability<35)
+  throw Error('Unstable meridians need clinical recovery before high-pressure practice');
+}
+function mapRoute(s,p={}){
+ if(!keep(p,['id','name','principle','interference','pressureRisk',
+   'treatmentPath','load','segments','gates','dantian','witnessIndex'])||
+  !ident(p.id)||!prose(p.name,3,160)||!prose(p.principle)||
+  !prose(p.interference)||!prose(p.pressureRisk)||
+  !prose(p.treatmentPath)||!integer(p.load,1,9)||
+  !Array.isArray(p.segments)||!p.segments.length||p.segments.length>12||
+  !Array.isArray(p.gates)||!p.gates.length||p.gates.length>24||
+  !['lower','middle','upper'].includes(p.dantian))
+  throw Error('An original circulation map needs real branch anatomy, Dantian, Gate route, physical risks and clinical source');
+ prior(s);
+ if(s.player.meridian.stage!==4)
+  throw Error('Stage V mapping must use an attained Stage IV Dantian Sea');
+ const event=sourceEvent(s,p.witnessIndex,MAP);
+ if(event.details?.routeId!==p.id||
+  event.details?.subject!=='original-individual-meridian-anatomy')
+  throw Error('An original route map needs a specific personally witnessed individual-anatomy scene');
+ const draft={origin:ORIGIN,routeId:p.id,name:p.name.trim(),
+  principle:p.principle.trim(),interference:p.interference.trim(),
+  pressureRisk:p.pressureRisk.trim(),treatmentPath:p.treatmentPath.trim(),
+  load:p.load,segments:structuredClone(p.segments),gates:[...p.gates],
+  dantian:p.dantian,witness:structuredClone(event),
+  witnessHash:hash(event),createdMinute:s.world.minutes};
+ const required=Math.max(2,Math.ceil(draft.segments.length/3)+draft.load-2);
+ const route={id:p.id,origin:ORIGIN,source:draft,seal:hash(draft),
+  integrity:0,required,attempts:[],injuries:[]};
+ if(!checkRoute(route))throw Error('Route references nonexistent or duplicate anatomical structures');
+ const net=ensure(s);
+ if(net.routes[p.id])throw Error('Already mapped this specific anatomical route');
+ const occupied=new Set(Object.values(net.routes).flatMap(x=>
+  x.source.segments.map(y=>y.kind+':'+y.number)));
+ if(draft.segments.some(x=>occupied.has(x.kind+':'+x.number)))
+  throw Error('One original channel segment cannot be allocated to mutually conflicting routes');
+ net.routes[p.id]=route;
+ return {mapped:true,id:p.id,segments:draft.segments.length,
+  pressureLoad:p.load,requiredIntegrity:required,
+  sourceBased:true,noGateOpenedOrStageAwarded:true};
+}
+function work(s,p={}){
+ if(!keep(p,['routeId','minutes','approach'])||!ident(p.routeId)||
+   !integer(p.minutes??120,15,480)||
+   (p.approach!==undefined&&!prose(p.approach,8,400)))
+  throw Error('Only a mapped original route, real time and optional descriptive technique are supported');
+ const net=s.table?.powerPhysiology?.meridian?.advancedNetwork;
+ const route=net?.routes?.[p.routeId];
+ if(!route||!verify(s)||s.player.meridian.stage!==4)
+  throw Error('Real source-mapped Stage V anatomy is required before web integration work');
+ available(s);
+ if(route.integrity>=route.required)
+  throw Error('This individually mapped circuit is already structurally integrated');
+ const qiCost=2+route.source.load,minutes=p.minutes??120,
+  staminaCost=Math.ceil(minutes/120)+Math.ceil(route.source.load/3);
+ if(!integer(s.player.qi,qiCost,100000)||
+    !integer(s.player.stamina,staminaCost,100000))
+  throw Error('Actual available Qi and Stamina cannot support the route pressure');
+ const previous=s.world.minutes;
+ s.player.qi-=qiCost;s.player.stamina-=staminaCost;
+ if(s.table?.combatants?.player)
+  s.table.combatants.player.stamina=s.player.stamina;
+ const n=route.source.segments.length,
+   flawed=route.source.gates.filter(x=>
+    s.player.meridian.gates[x-1].quality==='Flawed').length,
+   modifier=Math.floor((s.player.attributes.wis-10)/2)+
+    2*(s.player.skills?.cultivation?.rank||0)+
+    (s.player.meridian.dantianSea.purity>=5?1:0),
+   dc=13+route.source.load+Math.ceil(n/4)+2*flawed;
+ const check=C.check(s,{modifier,dc,label:'Stage V living circuit '+route.source.name});
+ const earned=check.success?C.progress(check.degree):0;
+ route.integrity=Math.min(route.required,route.integrity+earned);
+ let setback=null;
+ if(check.degree==='severe failure'){
+  const loss=1+Math.ceil(route.source.load/3);
+  s.player.meridian.stability=Math.max(1,s.player.meridian.stability-loss);
+  const injurySource={origin:ORIGIN,routeId:route.id,
+   startedMinute:previous,stabilityLoss:loss,
+   category:'route-pressure-deviation',
+   basis:'Actual severe Meridian pressure check, no invented permanent organ failure',
+   checkHash:hash(check)};
+  const injury={origin:ORIGIN,source:injurySource,seal:hash(injurySource)};
+  route.injuries.push(injury);
+  (s.table.powerPhysiology.meridian.deviationHistory||=[]).push({
+   source:'original-meridian-living-route-pressure-v1',
+   routeId:route.id,minute:previous,stabilityLoss:loss,
+   receiptHash:injury.seal});
+  setback={type:'route-pressure-deviation',stabilityLoss:loss,
+   needsGenuineClinicalRecovery:true};
+ }
+ const source={origin:ORIGIN,routeId:route.id,startedMinute:previous,
+  minutes,approach:p.approach?.trim()||null,qiSpent:qiCost,staminaSpent:staminaCost,
+  roll:check.roll,check:structuredClone(check),earned,
+  newIntegrity:route.integrity,setback,checkEventHash:hash(s.log.at(-1))};
+ const result={origin:ORIGIN,routeId:route.id,source,seal:hash(source)};
+ route.attempts.push(result);
+ E.advance(s,minutes);require('./world').finalizeTime(s,previous);
+ if(!verify(s))throw Error('Meridian work source cannot be reconciled after real-world time');
+ return {routeId:route.id,check,earned,
+  integrity:route.integrity,required:route.required,
+  completed:route.integrity>=route.required,
+  qiSpent:qiCost,staminaSpent:staminaCost,minutes,setback,
+  noAutomaticTechniqueOrEvolution:true};
+}
+function coverage(s){
+ const net=s.table?.powerPhysiology?.meridian?.advancedNetwork;
+ const done={extraordinary:new Set(),major:new Set(),minor:new Set()};
+ if(net&&!verify(s))throw Error('Meridian source history changed');
+ for(const r of Object.values(net?.routes||{})){
+  if(r.integrity<r.required||r.injuries.length)continue;
+  for(const x of r.source.segments)done[x.kind].add(x.number);
+ }
+ return {integrated:{extraordinary:done.extraordinary.size,major:done.major.size,
+  minor:done.minor.size},needed:{...segments},
+  complete:Object.keys(segments).every(k=>done[k].size===segments[k])};
+}
+function status(s){
+ const m=s.player?.meridian;
+ if(!m||m.stage<4)return {stage:m?.stage||0,
+  available:false,note:'A genuinely formed Stage IV Dantian Sea is needed'};
+ const evidence=coverage(s);
+ const net=s.table?.powerPhysiology?.meridian?.advancedNetwork;
+ return {stage:m.stage,available:true,
+  routes:Object.values(net?.routes||{}).map(r=>({
+   id:r.id,name:r.source.name,segments:r.source.segments.length,
+   integrity:r.integrity,required:r.required,
+   pressureLoad:r.source.load,unrecoveredDeviations:r.injuries.length})),
+  coverage:evidence,realIndividualAnatomy:true,
+  note:'Mapped channels and earned physical integration are distinct; a route name does not produce an ability, Dantian Sea ring, Stage or Qi. Later Stage VI–IX anatomy needs separate original evidence and mechanical adapters'};
+}
+module.exports={ORIGIN,MAP,TREAT,TRANSITION,prior,verify,mapRoute,work,coverage,status};
