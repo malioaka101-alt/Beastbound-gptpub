@@ -200,8 +200,10 @@ function train(s,p={}){
    focus==='advance'&&current===10)
   throw Error('Practise a real subsequent stage, or refine the already earned current stage');
  const target=focus==='refine'?current:current+1,
-  proof=witnessed(s,b,p.witnessIndex,target),life=ensure(s,b,r);
- if(life.history.some(x=>x.source.kind==='exercise'&&x.source.witnessHash===proof.digest))
+  proof=witnessed(s,b,p.witnessIndex,target),life=r.syncPractice;
+ if(life&&!verify(s,b,r))
+  throw Error('Previously earned pair evidence was altered');
+ if(life?.history.some(x=>x.source.kind==='exercise'&&x.source.witnessHash===proof.digest))
   throw Error('One witnessed attempt cannot be rolled again');
  const humanCost=2+target,fatigueCost=2+Math.ceil(target/2),
   energyCost=target>=3?Math.ceil(target/2):0;
@@ -278,8 +280,11 @@ function design(s,p={}){
   throw Error('Original pair design must include an earned real human technique and actual current beast anatomy');
  const {b,r}=pair(s,p.beastId,{here:true});
  if(r.syncStage<5)throw Error('Original shared method development requires truly earned sync Stage 5');
- const life=ensure(s,b,r);
- if(life.methods[p.methodId])throw Error('This pair already recorded that named original method');
+ const existing=r.syncPractice;
+ if(existing&&!verify(s,b,r))
+  throw Error('Original pair technique history was changed');
+ if(existing?.methods[p.methodId])
+  throw Error('This pair already recorded that named original method');
  const human=s.table?.meridianTechniques?.[p.humanTechniqueId]||
   s.table?.arcaneTechniques?.[p.humanTechniqueId];
  if(!human||human.techniqueId!==p.humanTechniqueId||!human.rollHash)
@@ -298,8 +303,9 @@ function design(s,p={}){
   !prose(String(ability.effect||''),3,300))
   throw Error('The current species has no verified corresponding innate ability');
  const witness=witnessed(s,b,p.witnessIndex,5);
- if(Object.values(life.methods).some(m=>m.source.witnessHash===witness.digest))
+ if(Object.values(existing?.methods||{}).some(m=>m.source.witnessHash===witness.digest))
   throw Error('One pairwork scene cannot invent multiple original methods');
+ const life=ensure(s,b,r);
  const source={source:METHOD,beastId:b.id,methodId:p.methodId,
   name:p.name.trim(),principle:p.principle.trim(),limits:p.limits.trim(),
   species:b.species,humanTechniqueId:p.humanTechniqueId,
