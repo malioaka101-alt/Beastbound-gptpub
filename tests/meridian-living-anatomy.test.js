@@ -536,6 +536,26 @@ const mk=(s,id,kind,number,load=1)=>{
  A.equal(Domain.verify(s),true);
  A.throws(()=>op(s,'domainPulse',{id:domainId,witnessIndex:j,minutes:10}),
   /already been resolved/);
+ // A personally earned small field travels with its owner; it must
+ // remeasure local physical support rather than act as land ownership.
+ A.equal(E.dispatch(s,'travel academy').ok,true);
+ A.equal(s.world.location,'academy');
+ if(s.player.qi<9)restForQi(s,Math.min(18,s.player.maxQi));
+ C.event(s,'story',
+  'The same earned narrow Qi field is independently measured again inside the academy under the different local building conditions.',{
+   origin:Domain.PULSE,location:s.world.location,
+   domainId,routeId:tissueRoute,
+   biome:require('../world/lived-places').location(s,s.world.location).biome,
+   radiusMetres:measured,
+   ambientSupport:'The actually observed sheltered laboratory air and solid floor support the same small three-metre field.',
+   environmentCounter:'Distinct local stone and air resistance test the same source-earned boundary before use.',
+   independentBoundary:'Academy staff and passing beasts remain fully independent of the individual bodily field.'});
+ const remote=op(s,'domainPulse',{id:domainId,witnessIndex:s.log.length-1,minutes:10});
+ A.equal(remote.attempted,true);
+ A.equal(remote.radiusMetres,measured);
+ A.equal(Domain.verify(s),true);
+ A.equal(E.dispatch(s,'travel crossing').ok,true);
+ A.equal(s.world.location,'crossing');
  const savedDomain=E.exportGame(s);
  const domainCorrupt=E.importGame(savedDomain);
  domainCorrupt.table.powerPhysiology.meridian.advancedNetwork
