@@ -248,6 +248,7 @@ function verify(s){
     q.witnessHash!==digest(q.witness)||
     q.witness.details?.origin!==TISSUE||
     q.witness.details?.cycle!==cycle||
+    q.witness.details?.tissueId!==q.id||
     !S(q.witness.details?.observedTissue,25,900)||
     !S(q.witness.details?.independentCountertest,25,900)||
     allWitnesses.has(q.witnessHash)||
@@ -571,7 +572,8 @@ function tissueMap(s,p={}){
  if((r.tissues||[]).some(x=>x.source.id===p.id))
   throw Error('A previously identified individual tissue may not be silently replaced');
  const witness=scene(s,p.witnessIndex,TISSUE,p.cycle);
- if(!S(witness.details?.observedTissue,25,900)||
+ if(witness.details?.tissueId!==p.id||
+  !S(witness.details?.observedTissue,25,900)||
   !S(witness.details?.independentCountertest,25,900))
   throw Error('Independent real anatomical observations and countertest must be witnessed');
  const hash=digest(witness);
