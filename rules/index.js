@@ -319,6 +319,11 @@ function act(s,{system,operation,params={}}={}){
   case 'world.seekKnownWildBeast':return WildLives.track(s,params);
   case 'world.sightingStatus':return Wildlife.status(s,params);
   case 'world.species':return Realm.knownTaxon(s,params);
+  case 'world.speciesBiologyStatus':return require('../world/bestiary').bioStatus(s,params);
+  case 'world.speciesBiologyAuthor':return require('../world/bestiary').bioAuthor(s,params);
+  case 'world.speciesBiologyNote':return require('../world/bestiary').bioNote(s,params);
+  case 'world.speciesBiologyAge':return require('../world/bestiary').bioAge(s,params);
+  case 'world.speciesBiologyFit':return require('../world/bestiary').bioFit(s,params);
   case 'world.mythic':return Realm.mythicLore(s,params);
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);
