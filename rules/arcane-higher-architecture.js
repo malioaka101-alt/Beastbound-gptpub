@@ -160,9 +160,21 @@ function source(s){
  return true;
 }
 function verify(s){
- try{third(s);return source(s)!==false&&
-  (s.player.arcane.circles===3||s.player.arcane.circles===4&&!!s.table?.arcaneArchitecture?.dynamic);}
- catch{return false;}
+ try{
+  const n=s.player.arcane.circles;
+  if(n>4){
+   const p=Build.arcaneProfile(4),
+    shadow={...s,player:{...s.player,arcane:{
+     ...s.player.arcane,circles:4,channels:p.channels,
+     structuredMana:p.mana,maxComplexity:p.maxComplexity,
+     intake:p.intake,loadTolerance:p.loadTolerance,
+     preparedCapacity:p.prepared
+    }}};
+   return verify(shadow)&&require('./arcane-field-projection').verifySource(s);
+  }
+  third(s);
+  return source(s)!==false&&(n===3||n===4&&!!s.table?.arcaneArchitecture?.dynamic);
+ }catch{return false;}
 }
 function ensure(s){
  third(s);
