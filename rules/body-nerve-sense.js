@@ -45,25 +45,49 @@ function verify(s){
   !phrase(z.name,3,140)||!phrase(z.metabolicLimit,25,900)||
   !phrase(z.injuryLimit,25,900)||!phrase(z.recovery,25,900)||
   !int(z.minute,0,s.world.minutes)||
-  !Array.isArray(z.systems)||z.systems.length<2||z.systems.length>8||
+  !Array.isArray(z.systems)||z.systems.length<2||
   z.systems.some(x=>!key(x.id)||!phrase(x.tissue,25,900)||
    !phrase(x.actualFunction,25,900))||
   new Set(z.systems.map(x=>x.id)).size!==z.systems.length||
   !z.witness||z.witnessHash!==hash(z.witness)||
   z.witness.details?.origin!==MAP||
-  !Array.isArray(net.attempts)||!Array.isArray(net.repairs)||
+  !Array.isArray(net.extensions)||!Array.isArray(net.attempts)||!Array.isArray(net.repairs)||
   !Array.isArray(net.tests)||
   !net.progress||typeof net.progress!=='object'||
   !int(net.strain,0,100))return false;
  const progress=Object.fromEntries(z.systems.map(x=>[x.id,0]));
  let integrated=false,strain=0,success=null,last=z.minute;
- const used=new Set(),history=[
+ const used=new Set([z.witnessHash]),history=[
+  ...net.extensions.map(x=>({kind:'extend',r:x})),
   ...net.attempts.map(x=>({kind:'practice',r:x})),
   ...net.repairs.map(x=>({kind:'repair',r:x})),
   ...net.tests.map(x=>({kind:'test',r:x}))
  ].sort((a,b)=>a.r.source.minute-b.r.source.minute);
  for(const {kind,r} of history){
   const a=r?.source;
+  // A later GM-witnessed anatomical discovery develops the same physiology,
+  // without replacing earlier earned evidence or inventing a new cycle.
+  if(kind==='extend'){
+   if(r?.origin!==SOURCE||r.seal!==hash(a)||
+    a?.origin!==SOURCE||a.kind!=='extend'||
+    !int(a.minute,last,s.world.minutes)||success||
+    !Array.isArray(a.systems)||a.systems.length<1||
+    a.systems.some(x=>!key(x.id)||!phrase(x.tissue,25,900)||
+     !phrase(x.actualFunction,25,900))||
+    !a.witness||a.witnessHash!==hash(a.witness)||
+    a.witness.details?.origin!==MAP||
+    a.witness.details?.location!==z.witness.details.location||
+    !phrase(a.witness.details?.clinicalObservation,25,900)||
+    !phrase(a.witness.details?.independentCountertest,25,900)||
+    used.has(a.witnessHash))return false;
+   const ids=a.systems.map(x=>x.id);
+   if(new Set(ids).size!==ids.length||
+    ids.some(id=>Object.hasOwn(progress,id)))return false;
+   for(const id of ids)progress[id]=0;
+   used.add(a.witnessHash);
+   last=a.minute;
+   continue;
+  }
   if(r?.origin!==SOURCE||r.seal!==hash(a)||
    a?.origin!==SOURCE||a.kind!==kind||
    !int(a.minute,last,s.world.minutes)||!int(a.minutes,15,480)||
@@ -127,7 +151,7 @@ function verify(s){
 function map(s,p={}){
  if(!only(p,['name','systems','metabolicLimit','injuryLimit','recovery','witnessIndex'])||
   !phrase(p.name,3,140)||!Array.isArray(p.systems)||p.systems.length<2||
-  p.systems.length>8||p.systems.some(x=>!only(x,['id','tissue','actualFunction'])||
+  p.systems.some(x=>!only(x,['id','tissue','actualFunction'])||
    !key(x.id)||!phrase(x.tissue,25,900)||!phrase(x.actualFunction,25,900))||
   new Set(p.systems.map(x=>x.id)).size!==p.systems.length||
   !phrase(p.metabolicLimit,25,900)||!phrase(p.injuryLimit,25,900)||
@@ -146,10 +170,44 @@ function map(s,p={}){
   recovery:p.recovery.trim(),witness:e,witnessHash:hash(e)};
  const rec={origin:SOURCE,source:z,seal:hash(z),
   progress:Object.fromEntries(z.systems.map(x=>[x.id,0])),
-  integrated:false,strain:0,attempts:[],repairs:[],tests:[],transition:null};
+  integrated:false,strain:0,extensions:[],attempts:[],repairs:[],tests:[],transition:null};
  s.table.bodyRefinement||={};s.table.bodyRefinement.neural=rec;
  return {mapped:true,systems:z.systems.map(x=>x.id),cycleCompleted:false,
   noAutomaticNewSensesOrBeastTraits:true};
+}
+function extend(s,p={}){
+ if(!only(p,['systems','witnessIndex'])||
+  !Array.isArray(p.systems)||p.systems.length<1||
+  p.systems.some(x=>!only(x,['id','tissue','actualFunction'])||
+   !key(x.id)||!phrase(x.tissue,25,900)||!phrase(x.actualFunction,25,900)))
+  throw Error('Newly discovered neural tissue needs individually observed original anatomy and functions');
+ context(s);
+ const r=s.table.bodyRefinement?.neural;
+ if(!r||!verify(s))throw Error('The original neural map and its prior physical receipts must verify');
+ if(r.transition)throw Error('A completed cycle cannot be rewritten by a later mapping; further refinement needs its own genuine evidence');
+ const seen=new Set([...r.source.systems,...r.extensions.flatMap(x=>x.source.systems)].map(x=>x.id));
+ const ids=p.systems.map(x=>x.id);
+ if(new Set(ids).size!==ids.length||ids.some(id=>seen.has(id)))
+  throw Error('The new neural region must have its own unique individual tissue identity');
+ const e=witness(s,p.witnessIndex,MAP);
+ if(!phrase(e.details?.clinicalObservation,25,900)||
+  !phrase(e.details?.independentCountertest,25,900)||
+  e.details.location!==r.source.witness.details.location)
+  throw Error('A distinct measured anatomical source and independent functional countertest are required');
+ const witnessHash=hash(e);
+ if(witnessHash===r.source.witnessHash||
+  r.extensions.some(x=>x.source.witnessHash===witnessHash))
+  throw Error('The same original observation cannot be reused to author more physical regions');
+ const systems=p.systems.map(x=>({
+  id:x.id,tissue:x.tissue.trim(),actualFunction:x.actualFunction.trim()}));
+ const source={origin:SOURCE,kind:'extend',minute:s.world.minutes,
+  systems,witness:e,witnessHash};
+ r.extensions.push({origin:SOURCE,source,seal:hash(source)});
+ for(const x of systems)r.progress[x.id]=0;
+ if(!verify(s))throw Error('The later individual tissue discovery could not be verified against original work');
+ return {extended:true,addedSystems:ids,
+  systems:structuredClone(r.progress),cycleCompleted:false,
+  noAutomaticAbilitiesOrRefinementRank:true};
 }
 function practice(s,p={}){
  if(!only(p,['focus','witnessIndex','minutes'])||!key(p.focus)||
@@ -297,4 +355,4 @@ function status(s){
   strain:rec.strain,staminaRecoveryRequired:true,
   noFreeBeastSensesOrMindreading:true};
 }
-module.exports={SOURCE,MAP,PRACTICE,FORM,REPAIR,map,practice,repair,finish,status,verify};
+module.exports={SOURCE,MAP,PRACTICE,FORM,REPAIR,map,extend,practice,repair,finish,status,verify};
