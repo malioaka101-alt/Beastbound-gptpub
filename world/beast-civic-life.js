@@ -85,6 +85,8 @@ function authorInstitution(s,p={}){
   !valid(p.medium,3,200)||!valid(p.rules)||!valid(p.source,24,1200)||
   !['public','gm-only'].includes(p.visibility||'gm-only'))
   throw Error('An institution needs original civic mandate, language or sensory medium, rules, physical jurisdiction and source');
+ if(!Atlas.P[p.polityId]||Atlas.P[p.polityId].government!=='beast polity')
+  throw Error('An actual autonomous recognised beast polity is required');
  const w=realm(s),c=polity(w,p.polityId),t=create(c,p.polityId);
  if(t.institutions[p.institutionId])throw Error('That civic institution is already established');
  const origin={origin:ROOT,id:p.institutionId,polityId:p.polityId,
