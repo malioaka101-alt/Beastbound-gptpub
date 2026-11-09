@@ -327,6 +327,10 @@ function act(s,{system,operation,params={}}={}){
   case 'world.ecologyStatus':return require('../world/ecological-webs').status(s,params);
   case 'world.ecologyAuthorPopulation':return require('../world/ecological-webs').authorPopulation(s,params);
   case 'world.ecologyAuthorLink':return require('../world/ecological-webs').authorLink(s,params);
+  case 'world.beastIndividualStatus':return require('../world/beast-individuality').status(s,params);
+  case 'world.beastIndividualObserve':return require('../world/beast-individuality').observation(s,params);
+  case 'world.beastTechniqueRecord':return require('../world/beast-individuality').technique(s,params);
+  case 'world.beastTechniqueDevelop':return require('../world/beast-individuality').develop(s,params);
   case 'world.mythic':return Realm.mythicLore(s,params);
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);

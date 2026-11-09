@@ -6,7 +6,8 @@
 const Crypto=require('node:crypto'),E=require('../engine.js'),
  Atlas=require('./atlas'),C=require('../rules/core'),
  Agency=require('../rules/beast-agency'),
- Learning=require('./beast-ecological-learning');
+ Learning=require('./beast-ecological-learning'),
+ Individuality=require('./beast-individuality');
 const SOURCE='engine-local-wildlife-encounter';
 const clamp=(x,lo=0,hi=100)=>Math.max(lo,Math.min(hi,x));
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -383,6 +384,8 @@ function sixday(s,days){
     action='independently-foraged';
    }else if(tired){
     b.needs.fatigue=clamp(b.needs.fatigue-25);
+    // Actual independent shelter and rest allow ordinary energy recovery.
+    b.energy=Math.min(b.maxEnergy,b.energy+2);
     action='sheltered-and-rested';
    }else if(exits.length&&p<.12){
     const dest=chooseKnownRoute(s,b,life,exits,w);
@@ -418,6 +421,9 @@ function sixday(s,days){
     'roamed-through-existing-habitat-link'].includes(action))
     Learning.learn(s,b,{kind:'navigate',action,day,
      before:originalLocation,after:b.location});
+   // A learned *individual* technique may be chosen only by the beast during
+   // its authentic independent action, paying its own energy and cooldown.
+   Individuality.express(s,b,action,day);
    updated++;
   }
  }
