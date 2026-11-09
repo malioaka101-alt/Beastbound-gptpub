@@ -217,6 +217,11 @@ function act(s,{system,operation,params={}}={}){
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
   case 'body.organStatus':return Disciplines.organStatus(s);
   case 'body.organWork':return Disciplines.organWork(s,params);
+  case 'body.physiqueStatus':return require('./body-living-refinement').status(s);
+  case 'body.physiqueMap':return require('./body-living-refinement').map(s,params);
+  case 'body.physiqueWork':return require('./body-living-refinement').work(s,params);
+  case 'body.physiqueCare':return require('./body-living-refinement').care(s,params);
+  case 'body.physiqueComplete':return require('./body-living-refinement').complete(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);
