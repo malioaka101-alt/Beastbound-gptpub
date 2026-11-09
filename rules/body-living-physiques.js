@@ -11,7 +11,8 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  FORM='witnessed-whole-body-refinement-countertest-v1',
  CARE='witnessed-physique-pressure-injury-recovery-v1',
  ASSUME='witnessed-living-adaptive-physique-environmental-assumption-v1',
- RELEASE='witnessed-living-adaptive-physique-safe-reversion-v1';
+ RELEASE='witnessed-living-adaptive-physique-safe-reversion-v1',
+ SUSTAIN='witnessed-unique-physique-metabolic-maintenance-v1';
 const SPEC=Object.freeze({
  5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
   sources:['circulationMeasurement','metabolicLimit'],
@@ -149,6 +150,38 @@ function verify(s){
     digest(rec.transition.source)!==digest(winning.source))))
    return false;
   if(winning)formed.add(cycle);
+  if(cycle===7){
+   if(rec.upkeep!==undefined&&!Array.isArray(rec.upkeep))return false;
+   let previous=z.minute;
+   const upkeep=rec.upkeep||[]; // early draft snapshots stay readable
+   for(const item of upkeep){
+    const a=item?.source;
+    if(item?.origin!==ORIGIN||item.seal!==digest(a)||
+     a?.origin!==ORIGIN||a.kind!=='sustain'||a.cycle!==7||
+     !winning||!I(a.minute,previous,s.world.minutes)||
+     !I(a.minutes,15,480)||a.staminaSpent!==2||
+     a.foodItem!=='clean_rations'||a.foodQuantity!==1||
+     !I(a.foodBefore,1,100000)||a.foodAfter!==a.foodBefore-1||
+     !I(a.roll,1,20)||a.check?.roll!==a.roll||
+     !a.checkEvent||a.checkEventHash!==digest(a.checkEvent)||
+     a.checkEvent.type!=='roll'||
+     digest(a.checkEvent.details)!==digest(a.check)||
+     !a.witness||a.witnessHash!==digest(a.witness)||
+     a.witness.details?.origin!==SUSTAIN||
+     a.witness.details?.cycle!==7||
+     !S(a.witness.details?.actualMetabolicDemand,25,900)||
+     !S(a.witness.details?.independentFailureLimit,25,900)||
+     !S(a.witness.details?.observedFoodCompatibility,25,900)||
+     !I(a.witness.details?.supportedMinutes,1,1000000)||
+     a.supportedMinutes!==a.witness.details.supportedMinutes||
+     a.maintainedUntil!==(a.check.success?
+      a.minute+a.minutes+a.supportedMinutes:null)||
+     a.factuallySupported!==a.check.success||
+     allWitnesses.has(a.witnessHash))return false;
+    allWitnesses.add(a.witnessHash);
+    previous=a.minute+a.minutes;
+   }
+  }
   if(cycle===6){
    if(!Array.isArray(rec.expressions))return false;
    let last=null;
@@ -266,7 +299,8 @@ function map(s,p={}){
   neuralAtMap:!!bodyRoot.neural?.transition};
  root.cycles[p.cycle]={origin:ORIGIN,source,seal:digest(source),
   points:0,strain:0,attempts:[],repairs:[],tests:[],transition:null,
-  ...(p.cycle===6?{expressions:[]}:{} )};
+  ...(p.cycle===6?{expressions:[]}:{}) ,
+  ...(p.cycle===7?{upkeep:[]}:{})};
  bodyRoot.living=root;s.table.bodyRefinement=bodyRoot;
  s.player.body.physiqueIntegration??=0;
  return {mapped:true,cycle:p.cycle,name:sp.name,
@@ -447,6 +481,72 @@ function release(s,p={}){
  return {released:true,elapsedMinutes:1,...adaptiveState(s),
   noStaminaRefundNoInstantWoundHealing:true};
 }
+function maintenanceState(s){
+ const rec=s.table?.bodyRefinement?.living?.cycles?.[7];
+ if(!rec?.transition)return {earned:false,currentlyObserved:false,
+  note:'No personally integrated evolved constitution has yet been earned'};
+ const successful=(rec.upkeep||[]).filter(x=>x.source?.factuallySupported);
+ const last=successful.at(-1)?.source;
+ const now=s.world.minutes;
+ return {earned:true,permanentConstitution:true,
+  currentlyObserved:!!last&&now<=last.maintainedUntil,
+  ...(last?{lastSupportedMinute:last.minute+last.minutes,
+   observedSupportUntil:last.maintainedUntil}:{}),
+  noAutoLossOfEarnedAnatomy:true,
+  note:last&&now>last.maintainedUntil?
+   'Current maintenance needs fresh individual physiological evidence; established anatomy is not erased by the calendar':
+   'Actual maintained condition requires witnessed bodily function, not a fixed automatic buff'};
+}
+// One example of actual nourishing maintenance. A verified living human can
+// replenish from source-confirmed ordinary provisions, but this is NOT a
+// universal ration gate for other possible metabolisms or biological schools.
+// Other diets require genuine matching existing material sources and adapters.
+function sustain(s,p={}){
+ if(!only(p,['witnessIndex','minutes'])||!I(p.minutes??60,15,480))
+  throw Error('Living constitutional care needs a genuine observed session and real elapsed time');
+ safe(s);originalOrgan(s);
+ if(!verify(s))throw Error('Existing unique living constitution evidence does not verify');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[7];
+ if(!r?.transition)throw Error('A genuinely earned unique Evolved Physique is required');
+ const witness=scene(s,p.witnessIndex,SUSTAIN,7);
+ if(!S(witness.details?.actualMetabolicDemand,25,900)||
+  !S(witness.details?.independentFailureLimit,25,900)||
+  !S(witness.details?.observedFoodCompatibility,25,900)||
+  !I(witness.details?.supportedMinutes,1,1000000))
+  throw Error('Observed original tissue demand, compatible nourishment, finite support and failure conditions must be witnessed');
+ const wHash=digest(witness);
+ if((r.upkeep||[]).some(x=>x.source.witnessHash===wHash))
+  throw Error('A prior genuine constitutional care episode cannot be rerolled');
+ const minutes=p.minutes??60,spent=2;
+ if(!I(s.player.stamina,spent,100000))
+  throw Error('The original body lacks stamina for this actual self-care');
+ // Physical stock is conserved through the SAME executor as gathering,
+ // trading, partner provisions, and clinical crafting. This does not grant food.
+ const foodBefore=s.player.inventory?.clean_rations||0;
+ const foodPlan=U.planItems(s,{clean_rations:-1});
+ const start=s.world.minutes;
+ U.applyItems(s,foodPlan);
+ s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
+ const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
+  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
+  dc:18,label:'Individually observed Evolved Physique metabolic maintenance'});
+ const rollEvent=structuredClone(s.log.at(-1));
+ const supportedMinutes=witness.details.supportedMinutes;
+ const src={origin:ORIGIN,kind:'sustain',cycle:7,minute:start,minutes,
+  staminaSpent:spent,foodItem:'clean_rations',foodQuantity:1,
+  foodBefore,foodAfter:foodBefore-1,
+  witness,witnessHash:wHash,check:structuredClone(check),
+  checkEvent:rollEvent,checkEventHash:digest(rollEvent),roll:check.roll,
+  supportedMinutes,factuallySupported:check.success,
+  maintainedUntil:check.success?start+minutes+supportedMinutes:null};
+ r.upkeep||=[];r.upkeep.push({origin:ORIGIN,source:src,seal:digest(src)});
+ E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ if(!verify(s))throw Error('Saved metabolic care or original body resources cannot be reconciled');
+ return {attempted:true,confirmed:check.success,check,
+  realFoodConsumed:{item:'clean_rations',quantity:1},
+  staminaSpent:spent,minutes,maintenance:maintenanceState(s),
+  noNewTraitsOrInstantWoundHealing:true};
+}
 function status(s){
  if(!s.player?.body?.cycles?.includes('Organ Cycle'))
   return {available:false,note:'Actual original organ anatomy is necessary'};
@@ -459,8 +559,9 @@ function status(s){
    strain:x.strain,formed:!!x.transition})),
   orderFreedom:'Blood V and Adaptive VI may form before or after independently earned Nerve IV',
   ...(r?.cycles?.[6]?.transition?{currentAdaptiveExpression:adaptiveState(s)}:{}),
+  ...(r?.cycles?.[7]?.transition?{constitutionMaintenance:maintenanceState(s)}:{}),
   noFreeBeastTraitOrAutomaticMedicine:true};
 }
-module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SPEC,
+module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SUSTAIN,SPEC,
  map,work:(s,p)=>attempt(s,p,'work'),care:(s,p)=>attempt(s,p,'care'),
- complete,assume,release,status,verify};
+ complete,assume,release,sustain,status,verify};
