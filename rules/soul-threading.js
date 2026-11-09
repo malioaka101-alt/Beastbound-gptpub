@@ -81,13 +81,17 @@ function earned(s){
     Number.isInteger(x.day)&&x.day>=1&&x.day<=finish.day))
   throw Error('Phase II requires the original earned Phase I perception history');
  const profile=Build.soulProfile(2,{will:0});
+ const advanced=so.phase>=3;
  if(!Number.isInteger(so.maxReserve)||so.maxReserve<profile.soulReserve||
-    so.maxReserve!==proof.maxReserve||
-    so.perceptionRange!==profile.perceptionRangeMetres||
-    so.perceptionRange!==proof.perceptionRange||
+    (!advanced&&(so.maxReserve!==proof.maxReserve||
+     so.perceptionRange!==profile.perceptionRangeMetres||
+     so.perceptionRange!==proof.perceptionRange))||
+    (advanced&&(so.maxReserve<proof.maxReserve||
+     so.perceptionRange<proof.perceptionRange||
+     !require('./soul-resonance-lattice').verify(s)))||
     !Number.isInteger(so.reserve)||so.reserve<0||
-    so.reserve>so.maxReserve) 
-  throw Error('Saved Phase II soul capacity does not match the actual earned structure');
+    so.reserve>so.maxReserve)
+  throw Error('Saved originally earned Phase II soul capacity or subsequent source-backed structure is inconsistent');
  return {phase:2,integrity:so.threadIntegrity,links:{...reconstructed},
   concentrationBonus:2,source:ORIGIN,noMindreading:true};
 }
