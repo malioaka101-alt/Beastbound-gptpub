@@ -63,6 +63,7 @@ function proof(s,b,stage,kind){
  while(attempts++<12&&!promoted){
   const index=scene(s,b,2,'Original source scene '+attempts);
   const stamp=s.world.minutes,startStamina=s.player.stamina;
+  const beastFatigue=b.needs.fatigue,beastEnergy=b.energy;
   const priorRng=s.rngState;
   const result=op(s,'syncPractice',{beastId:b.id,witnessIndex:index});
   A.equal(result.minutes,35);
@@ -71,6 +72,10 @@ function proof(s,b,stage,kind){
   A.equal(Sync.verify(s,b,r),true);
   if(result.beastDeclined){
    declined++;A.equal(result.noRoll,true);A.equal(s.rngState,priorRng);
+    A.equal(result.beastFatigueIncreased,0);
+    A.equal(result.beastEnergySpent,0);
+    A.equal(b.needs.fatigue,beastFatigue);
+    A.equal(b.energy,beastEnergy);
   }else{
    accepted++;A.ok(result.check.roll>=1&&result.check.roll<=20);
    A.ok(result.pointsEarned>=1);
