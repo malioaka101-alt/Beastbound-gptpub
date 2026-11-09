@@ -86,8 +86,9 @@ function verify(s,b,r){
   if(v.kind==='design'&&(!id(v.methodId)||!v.method||hash(v.method)!==v.methodHash))
    return false;
   if(v.kind==='demonstration'&&(!id(v.methodId)||!v.witness||
-    hash(v.witness)!==v.witnessHash||!integer(v.humanCost,1,30)||
-    !integer(v.beastEnergyCost,1,30)))return false;
+    hash(v.witness)!==v.witnessHash||!integer(v.humanCost,0,30)||
+    !integer(v.beastEnergyCost,0,30)||
+    (v.refused===true&&(v.humanCost!==0||v.beastEnergyCost!==0))))return false;
   previous=e.seal;minute=v.minute;
  }
  if(l.head!==previous)return false;
@@ -339,7 +340,15 @@ function demonstration(s,p={}){
   !integer(b.energy,3,100000)||b.needs.fatigue>90)
   throw Error('Separate human and beast resources are required for manifestation');
  const consent=choice(s,b,r,witness.digest);
- if(!consent.yes)return {demonstrated:false,beastDeclined:true,noRoll:true};
+ if(!consent.yes){
+  const before=s.world.minutes;
+  E.advance(s,10);require('./world').finalizeTime(s,before);
+  append(s,b,r,'demonstration',{methodId:m.id,
+   witness:structuredClone(witness.event),witnessHash:witness.digest,
+   humanCost:0,beastEnergyCost:0,refused:true,checkHash:null});
+  return {demonstrated:false,beastDeclined:true,noRoll:true,
+   minutes:10,noResourceOrPowerGrant:true};
+ }
  const before=s.world.minutes;
  s.player.stamina-=4;b.energy-=3;b.needs.fatigue+=2;
  E.advance(s,15);require('./world').finalizeTime(s,before);
