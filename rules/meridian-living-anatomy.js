@@ -145,11 +145,11 @@ function ensure(s){
  if(!verify(s))throw Error('Previously mapped Meridian route source was altered');
  return phys.advancedNetwork;
 }
-function available(s){
+function available(s,{forCare=false}={}){
  if(s.battle||s.encounter||
   s.table?.combatants?.player?.status&&s.table.combatants.player.status!=='ok')
   throw Error('Living meridian training requires actual safety, not combat or incapacity');
- if(s.player.meridian.stability<35)
+ if(!forCare&&s.player.meridian.stability<35)
   throw Error('Unstable meridians need clinical recovery before high-pressure practice');
 }
 function mapRoute(s,p={}){
@@ -261,7 +261,7 @@ function treat(s,p={}){
  const net=s.table?.powerPhysiology?.meridian?.advancedNetwork,
   route=net?.routes?.[p.routeId];
  if(!route||!verify(s))throw Error('No original damaged Meridian route or verified clinical history');
- available(s);
+ available(s,{forCare:true});
  const injury=pending(route)[0];
  if(!injury)throw Error('No unrecovered original pressure deviation remains here');
  const witness=sourceEvent(s,p.witnessIndex,TREAT);
