@@ -220,6 +220,52 @@ function earnNeuralCycle(s){
   A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.naturallyExpired,true);
   A.equal(Phys.verify(s),true);
  }
+ // Earned Evolved VII is permanent anatomy, NOT a time-expiring buff.
+ // Its CURRENT metabolic support is a witnessed, renewable and independently
+ // paid bodily condition. Use the same canonical material-transfer executor as
+ // ordinary trade and food, not a parallel body-specific inventory.
+ const initialCare=act(s,'physiqueStatus').constitutionMaintenance;
+ A.equal(initialCare.earned,true);
+ A.equal(initialCare.permanentConstitution,true);
+ A.equal(initialCare.currentlyObserved,false);
+ recovery(s,3);
+ const observedFood=s.player.inventory.clean_rations;
+ A.ok(observedFood>0,'The disposable practitioner genuinely owns provisions');
+ const n=witness(s,Phys.SUSTAIN,7,{
+  actualMetabolicDemand:'Original blood oxygen transport and whole-body organ workload require measured ordinary human food and sleep support.',
+  independentFailureLimit:'Separate observed fatigue, hunger and tissue pressure show the constitution is not self-feeding or invulnerable.',
+  observedFoodCompatibility:'Genuine carried clean rations are measured as digestible and sufficient for this particular original human food route.',
+  supportedMinutes:125});
+ const beforeCareStamina=s.player.stamina,beforeCareTime=s.world.minutes;
+ const care=act(s,'physiqueSustain',{witnessIndex:n,minutes:60});
+ A.equal(care.attempted,true);
+ A.equal(care.confirmed,care.check.success);
+ A.equal(care.realFoodConsumed.quantity,1);
+ A.equal(s.player.inventory.clean_rations,observedFood-1);
+ A.equal(s.world.minutes,beforeCareTime+60);
+ A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+  beforeCareStamina-care.staminaSpent+5*(
+   Math.floor(s.world.minutes/1440)-Math.floor(beforeCareTime/1440))));
+ A.equal(Phys.verify(s),true);
+ const afterCare=E.exportGame(s),afterCareRng=s.rngState;
+ A.throws(()=>act(s,'physiqueSustain',{witnessIndex:n,minutes:60}),
+  /already|rerolled/);
+ A.equal(E.exportGame(s),afterCare);
+ A.equal(s.rngState,afterCareRng);
+ if(care.confirmed){
+  A.equal(act(s,'physiqueStatus').constitutionMaintenance.currentlyObserved,true);
+  R.act(s,{system:'world',operation:'wait',params:{minutes:126}});
+  const expired=act(s,'physiqueStatus').constitutionMaintenance;
+  A.equal(expired.earned,true);
+  A.equal(expired.permanentConstitution,true);
+  A.equal(expired.currentlyObserved,false);
+  A.ok(s.player.body.cycles.includes('Evolved Physique Cycle'));
+  A.equal(Phys.verify(s),true);
+ }
+ // A signed care receipt cannot be silently revised after saving.
+ const tamperCare=E.importGame(E.exportGame(s));
+ tamperCare.table.bodyRefinement.living.cycles[7].upkeep[0].source.foodQuantity=0;
+ A.equal(Phys.verify(tamperCare),false);
  const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
  A.equal(Phys.verify(saved),true);
  saved.table.bodyRefinement.living.cycles[7].transition.source.capacity.newMax+=20;
