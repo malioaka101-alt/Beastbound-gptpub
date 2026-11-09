@@ -180,4 +180,86 @@ const mk=(s,id,kind,number,load=1)=>{
  A.equal(Net.verify(saved),false);
  A.equal(s.player.humanEvolution.stage,0);
 }
+{
+ // Stage V is a separately witnessed, *connected* 12-Primary +
+ // Extraordinary/Major/Minor functional response, not all 116 segments
+ // filled as compulsory fixed practice lessons.
+ const s=stage4(245512);
+ s.player.attributes.wis=30;s.player.skills.cultivation.rank=5;
+ s.player.stamina=75;
+ A.throws(()=>op(s,'livingWebComplete',{witnessIndex:0}),
+  /real individual route|physical Meridian network|witnessed/);
+ const circuits=[
+  mk(s,'original_extra_current','extraordinary',1,1),
+  mk(s,'original_major_current','major',1,1),
+  mk(s,'original_minor_current','minor',1,1)
+ ];
+ for(const route of circuits){
+  A.equal(op(s,'livingWebMap',route).mapped,true);
+  let completed=false;
+  for(let i=0;i<9&&!completed;i++)
+   completed=op(s,'livingWebWork',{routeId:route.id,minutes:15}).completed;
+  A.equal(completed,true,'Each genuinely tested branch must establish physical integrity');
+ }
+ A.equal(s.player.meridian.stage,4);
+ const ready=Net.spanning(s);
+ A.equal(ready.ready,true);
+ A.equal(ready.extraordinary,1);
+ A.deepEqual(ready.ids,circuits.map(x=>x.id).sort());
+ A.equal(Net.coverage(s).complete,false,
+  'Network integration must not require all 116 channels to be prescribed as mandatory lessons');
+ const ids=ready.ids,previous=s.world.minutes,oldQi=s.player.qi,
+  oldMax=s.player.maxQi,oldSta=s.player.stamina;
+ C.event(s,'story',
+  'The practitioner witnesses a responsive living Meridian return current linking personally mapped channels across three anatomically separate families.',{
+   origin:Net.TRANSITION,location:s.world.location,routeIds:ids,
+   returnFlow:'A verified independently responsive Qi return loop connects the actual Primary, Extraordinary and Branch channels.',
+   stressResponse:'The living circuit diverts mild pressure without unsupported healing and remains stable under measured controlled strain.',
+   physicalBasis:'The actual source-mapped open Gates carry compatible local Dantian pressure between integrated living anatomical corridors.'});
+ const witnessIndex=s.log.length-1;
+ const before=E.exportGame(s);
+ A.throws(()=>op(s,'livingWebComplete',{witnessIndex:0}),
+  /personally witnessed|integrated return flow|original local anatomical source/);
+ A.equal(E.exportGame(s),before);
+ const r=op(s,'livingWebComplete',{witnessIndex,minutes:90});
+ A.equal(r.attempted,true);
+ A.equal(r.formed,true);
+ A.equal(s.world.minutes,previous+90);
+ A.equal(s.player.meridian.stage,5);
+ A.equal(s.player.qi,oldQi-r.qiSpent,'Earned reservoir expansion cannot refill the current Dantian Sea');
+ A.equal(s.player.stamina,oldSta-r.staminaSpent);
+ A.ok(s.player.maxQi>=oldMax);
+ A.equal(r.capacity.newMax,s.player.maxQi);
+ const Build=require('../rules/build');
+ const grades=s.table.powerPhysiology.meridian.gateRecords,
+  profile=Build.meridianProfile(5,{meridians:12,
+   gatesP:grades.filter(x=>x.quality==='Perfect').length,
+   gatesS:grades.filter(x=>x.quality==='Sound').length,
+   gatesF:grades.filter(x=>x.quality==='Flawed').length,
+   seaRings:s.player.meridian.dantianSea.rings,
+   extraordinary:1,webComplete:true});
+ A.equal(s.player.meridian.flow,profile.flow);
+ A.equal(s.player.meridian.recoveryRate,profile.recovery);
+ A.equal(s.player.meridian.stableQiLimit,profile.qi);
+ A.equal(s.player.maxQi,Math.max(oldMax,profile.qi));
+ A.equal(s.player.arcane.circles,0);
+ A.equal(s.player.soul.phase,0);
+ A.equal(s.player.humanEvolution.stage,0);
+ A.equal(Net.verify(s),true);
+ A.equal(op(s,'livingWebStatus').stage,5);
+ A.equal(R.act(s,{system:'power',operation:'status',params:{}}).meridian.stage,5);
+ A.throws(()=>op(s,'livingWebComplete',{witnessIndex}),/Stage IV Dantian Sea must precede/);
+ const saved=E.exportGame(s),copy=E.importGame(saved);
+ A.equal(Net.verify(copy),true);
+ const net=copy.table.powerPhysiology.meridian.advancedNetwork;
+ net.integrationAttempts[0].source.capacity.newQi+=100;
+ A.equal(Net.verify(copy),false,'Forged Qi from a stage event is invalid');
+ const altered=E.importGame(saved);
+ altered.player.meridian.flow=999;
+ A.equal(Net.verify(altered),false,'Source-correct capacity must stay physically derived');
+ const after=E.importGame(saved);
+ const archived=after.table.powerPhysiology.meridian.advancedNetwork;
+ archived.transitions[0].source.witnessHash='altered';
+ A.equal(Net.verify(after),false);
+}
 console.log('Living Meridian route web: genuine Stage IV/108 Gate source, original 8/36/72 anatomy maps, actual engine Qi/time/pressure checks, persistent injuries and separately witnessed clinical recovery, no free Stage, tamper-safe integrity and read-only saved turn replay.');
