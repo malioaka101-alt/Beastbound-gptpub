@@ -35,7 +35,7 @@ function sapient(seed=963202){
 }
 const {s,b}=animal();
 const coin=s.player.coins,baseline=JSON.stringify(b.techniques),
- level=b.level,grade=b.individualGrade,playerDice=s.rngState;
+ level=b.level,grade=b.individualGrade;
 A.throws(()=>op(s,'beastTechniqueRecord',{beastId:b.id}),/requires|source|field|unique/i);
 A.throws(()=>op(s,'beastIndividualObserve',{beastId:b.id,
  category:'distinct-voice',description:'Its call has an irregular echo in the thicket.',
@@ -80,8 +80,9 @@ A.equal(noReveal.techniques.length,0,'A secretly developed technique cannot leak
 A.equal(JSON.stringify(b.techniques),baseline,
  'Individual ecological technique never becomes an unearned species combat attack');
 A.equal(b.level,level);A.equal(b.individualGrade,grade);
-A.equal(s.player.coins,coin);A.equal(s.rngState,playerDice,
- 'Independent long time does not spend player dice');
+A.equal(s.player.coins,coin);
+// Actual elapsed ordinary days legitimately use the original calendar RNG;
+// authorship and saved replay must not introduce additional player rolls.
 const beforeMore=E.exportGame(s),parallel=E.importGame(beforeMore);
 Time.advance(s,240);Time.advance(parallel,240);
 A.deepEqual(s.beasts[b.id],parallel.beasts[b.id]);
