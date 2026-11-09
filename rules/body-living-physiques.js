@@ -12,7 +12,10 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  CARE='witnessed-physique-pressure-injury-recovery-v1',
  ASSUME='witnessed-living-adaptive-physique-environmental-assumption-v1',
  RELEASE='witnessed-living-adaptive-physique-safe-reversion-v1',
- SUSTAIN='witnessed-unique-physique-metabolic-maintenance-v1';
+ SUSTAIN='witnessed-unique-physique-metabolic-maintenance-v1',
+ TISSUE='witnessed-individual-living-physique-tissue-discovery-v1',
+ TISSUE_WORK='witnessed-individual-living-physique-tissue-practice-v1',
+ TISSUE_CARE='witnessed-individual-living-physique-tissue-care-v1';
 const SPEC=Object.freeze({
  5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
   sources:['circulationMeasurement','metabolicLimit'],
@@ -88,6 +91,8 @@ function verify(s){
    !Array.isArray(rec.attempts)||!Array.isArray(rec.repairs)||
    !Array.isArray(rec.tests)||!I(rec.points,0,6)||!I(rec.strain,0,100))
    return false;
+  if(allWitnesses.has(z.witnessHash))return false;
+  allWitnesses.add(z.witnessHash);
   if(cycle===7&&(!z.supportingCycles?.every(i=>[4,5,6].includes(i))||
    z.supportingCycles?.length!==3||
    z.supportingProof?.nerve!==s.table?.bodyRefinement?.neural?.transition?.seal||
@@ -227,6 +232,68 @@ function verify(s){
     }
    }
   }
+  // Authored physical tissues are not an enumerated class list. Each
+  // discovery is individually sourced and each subsequent observation
+  // continues its own unbounded evidence history without a free bonus.
+  if(!Array.isArray(rec.tissues??[]))return false;
+  const tissueNames=new Set();
+  for(const t of rec.tissues||[]){
+   const q=t?.source;
+   if(t?.origin!==ORIGIN||!q||t.seal!==digest(q)||
+    q.origin!==ORIGIN||q.kind!=='tissue-map'||q.cycle!==cycle||
+    q.parentMapSeal!==rec.seal||!ID(q.id)||tissueNames.has(q.id)||
+    !S(q.tissue,25,900)||!S(q.realFunction,25,900)||
+    !S(q.metabolicTradeoff,25,900)||!S(q.failureLimit,25,900)||
+    !I(q.minute,z.minute,s.world.minutes)||!q.witness||
+    q.witnessHash!==digest(q.witness)||
+    q.witness.details?.origin!==TISSUE||
+    q.witness.details?.cycle!==cycle||
+    !S(q.witness.details?.observedTissue,25,900)||
+    !S(q.witness.details?.independentCountertest,25,900)||
+    allWitnesses.has(q.witnessHash)||
+    !Array.isArray(t.practice)||!I(t.points,0,100000000)||
+    !I(t.strain,0,100))return false;
+   tissueNames.add(q.id);allWitnesses.add(q.witnessHash);
+   let points=0,strain=0,last=q.minute;
+   for(const row of t.practice){
+    const a=row?.source;
+    if(row?.origin!==ORIGIN||!a||row.seal!==digest(a)||
+     a.origin!==ORIGIN||!['tissue-work','tissue-care'].includes(a.kind)||
+     a.cycle!==cycle||a.tissueId!==q.id||
+     a.parentTissueSeal!==t.seal||
+     !I(a.minute,last,s.world.minutes)||!I(a.minutes,15,480)||
+     a.staminaSpent!==(a.kind==='tissue-care'?2:sp.energy)||
+     !I(a.roll,1,20)||a.check?.roll!==a.roll||
+     !a.checkEvent||a.checkEventHash!==digest(a.checkEvent)||
+     a.checkEvent.type!=='roll'||
+     digest(a.checkEvent.details)!==digest(a.check)||
+     !a.witness||a.witnessHash!==digest(a.witness)||
+     a.witness.details?.origin!==
+      (a.kind==='tissue-work'?TISSUE_WORK:TISSUE_CARE)||
+     a.witness.details?.cycle!==cycle||
+     a.witness.details?.tissueId!==q.id||
+     !S(a.witness.details?.observedResponse,25,900)||
+     !S(a.witness.details?.physicalLimit,25,900)||
+     allWitnesses.has(a.witnessHash))return false;
+    allWitnesses.add(a.witnessHash);
+    if(a.kind==='tissue-work'){
+     const earned=a.check.success?a.check.progress:0;
+     const added=a.check.degree==='severe failure'?3:0;
+     if(a.beforeStrain!==strain||a.earned!==earned||
+      a.pointsAfter!==points+earned||a.strainAfter!==Math.min(100,strain+added)||
+      a.woundRiskRecorded!==(added>0))return false;
+     points=a.pointsAfter;strain=a.strainAfter;
+    }else{
+     const after=a.check.success?Math.max(0,strain-2):strain;
+     if(a.beforeStrain!==strain||a.earned!==0||
+      a.pointsAfter!==points||a.strainAfter!==after||
+      a.woundRiskRecorded!==false)return false;
+     strain=after;
+    }
+    last=a.minute+a.minutes;
+   }
+   if(t.points!==points||t.strain!==strain)return false;
+  }
  }
  const neural=s.table?.bodyRefinement?.neural;
  const neuralEarned=!!neural?.transition;
@@ -300,7 +367,8 @@ function map(s,p={}){
  root.cycles[p.cycle]={origin:ORIGIN,source,seal:digest(source),
   points:0,strain:0,attempts:[],repairs:[],tests:[],transition:null,
   ...(p.cycle===6?{expressions:[]}:{}) ,
-  ...(p.cycle===7?{upkeep:[]}:{})};
+  ...(p.cycle===7?{upkeep:[]}:{}) ,
+  tissues:[]};
  bodyRoot.living=root;s.table.bodyRefinement=bodyRoot;
  s.player.body.physiqueIntegration??=0;
  return {mapped:true,cycle:p.cycle,name:sp.name,
@@ -481,6 +549,98 @@ function release(s,p={}){
  return {released:true,elapsedMinutes:1,...adaptiveState(s),
   noStaminaRefundNoInstantWoundHealing:true};
 }
+function tissueKnownWitness(s,hash){
+ const cycles=s.table?.bodyRefinement?.living?.cycles||{};
+ return Object.values(cycles).some(r=>
+  r.source?.witnessHash===hash||
+  [...r.attempts,...r.repairs,...r.tests,...(r.upkeep||[]),
+   ...(r.expressions||[])].some(x=>x.source?.witnessHash===hash)||
+  (r.tissues||[]).some(t=>t.source.witnessHash===hash||
+   t.practice.some(x=>x.source?.witnessHash===hash)));
+}
+function tissueMap(s,p={}){
+ if(!only(p,['cycle','id','tissue','realFunction','metabolicTradeoff',
+  'failureLimit','witnessIndex'])||!I(p.cycle,5,7)||!ID(p.id)||
+  !S(p.tissue,25,900)||!S(p.realFunction,25,900)||
+  !S(p.metabolicTradeoff,25,900)||!S(p.failureLimit,25,900))
+  throw Error('An individual original tissue needs distinct anatomy, observed function, metabolism and failure limits');
+ safe(s);originalOrgan(s);
+ if(!verify(s))throw Error('Existing original whole-body tissue sources do not verify');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle];
+ if(!r)throw Error('First establish the existing whole-body cycle design before mapping individual variations');
+ if((r.tissues||[]).some(x=>x.source.id===p.id))
+  throw Error('A previously identified individual tissue may not be silently replaced');
+ const witness=scene(s,p.witnessIndex,TISSUE,p.cycle);
+ if(!S(witness.details?.observedTissue,25,900)||
+  !S(witness.details?.independentCountertest,25,900))
+  throw Error('Independent real anatomical observations and countertest must be witnessed');
+ const hash=digest(witness);
+ if(tissueKnownWitness(s,hash))throw Error('An original tissue witness was already used');
+ const source={origin:ORIGIN,kind:'tissue-map',cycle:p.cycle,id:p.id,
+  tissue:p.tissue.trim(),realFunction:p.realFunction.trim(),
+  metabolicTradeoff:p.metabolicTradeoff.trim(),
+  failureLimit:p.failureLimit.trim(),parentMapSeal:r.seal,
+  minute:s.world.minutes,witness,witnessHash:hash};
+ const t={origin:ORIGIN,source,seal:digest(source),
+  points:0,strain:0,practice:[]};
+ r.tissues||=[];r.tissues.push(t);
+ if(!verify(s))throw Error('Original individual anatomy did not pass the continuity check');
+ return {mapped:true,cycle:p.cycle,id:p.id,originalFunction:source.realFunction,
+  noAutomaticallyGrantedResistanceOrAbility:true};
+}
+function tissuePractice(s,p={},kind='tissue-work'){
+ if(!only(p,['cycle','id','witnessIndex','minutes'])||
+  !I(p.cycle,5,7)||!ID(p.id)||!I(p.minutes??60,15,480))
+  throw Error('A witnessed original tissue requires a valid focus and real physical work time');
+ safe(s);originalOrgan(s);
+ if(!verify(s))throw Error('Existing original physiological records failed verification');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle];
+ const t=r?.tissues?.find(t=>t.source.id===p.id);
+ if(!t)throw Error('That individually observed physical tissue has not been established');
+ if(kind==='tissue-work'&&t.strain>=5)
+  throw Error('Significant real tissue strain needs witnessed care before renewed exertion');
+ if(kind==='tissue-care'&&!t.strain)
+  throw Error('No original tissue strain exists requiring this observed care');
+ const witness=scene(s,p.witnessIndex,
+  kind==='tissue-work'?TISSUE_WORK:TISSUE_CARE,p.cycle);
+ if(witness.details?.tissueId!==p.id||
+  !S(witness.details?.observedResponse,25,900)||
+  !S(witness.details?.physicalLimit,25,900))
+  throw Error('Independent witnessed original tissue function and physical limit must match this individual anatomy');
+ const hash=digest(witness);
+ if(tissueKnownWitness(s,hash))throw Error('An individual tissue experiment cannot be rolled twice');
+ const spent=kind==='tissue-care'?2:SPEC[p.cycle].energy;
+ if(!I(s.player.stamina,spent,100000))
+  throw Error('The original body has insufficient real Stamina for this work');
+ const start=s.world.minutes,minutes=p.minutes??60,before=t.strain;
+ s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
+ const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
+  2*(s.player.skills?.survival?.rank||0)-Math.floor(t.strain/3),
+  dc:kind==='tissue-care'?15:SPEC[p.cycle].dc,
+  label:'Personally witnessed '+SPEC[p.cycle].name+' individual '+p.id+' '+kind});
+ const event=structuredClone(s.log.at(-1)),earned=
+  kind==='tissue-work'&&check.success?check.progress:0;
+ if(kind==='tissue-work'){
+  t.points+=earned;
+  if(check.degree==='severe failure'){
+   t.strain=Math.min(100,t.strain+3);
+   Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});
+  }
+ }else if(check.success)t.strain=Math.max(0,t.strain-2);
+ const source={origin:ORIGIN,kind,cycle:p.cycle,tissueId:p.id,
+  parentTissueSeal:t.seal,minute:start,minutes,staminaSpent:spent,
+  witness,witnessHash:hash,check:structuredClone(check),
+  checkEvent:event,checkEventHash:digest(event),roll:check.roll,
+  beforeStrain:before,earned,pointsAfter:t.points,strainAfter:t.strain,
+  woundRiskRecorded:kind==='tissue-work'&&check.degree==='severe failure'};
+ t.practice.push({origin:ORIGIN,source,seal:digest(source)});
+ E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ if(!verify(s))throw Error('Individual tissue evidence or physical cost failed integrity verification');
+ return {attempted:true,cycle:p.cycle,id:p.id,kind,check,
+  observedAccumulatedProgress:t.points,strain:t.strain,
+  staminaSpent:spent,minutes,
+  noFreeEvolutionStageOrAutomaticNewAbility:true};
+}
 function maintenanceState(s){
  const rec=s.table?.bodyRefinement?.living?.cycles?.[7];
  if(!rec?.transition)return {earned:false,currentlyObserved:false,
@@ -556,12 +716,21 @@ function status(s){
   specialisations:Object.values(r?.cycles||{}).map(x=>({
    cycle:x.source.cycle,name:SPEC[x.source.cycle].name,
    method:x.source.method,progress:x.points,needed:6,
-   strain:x.strain,formed:!!x.transition})),
+   strain:x.strain,formed:!!x.transition,
+   individuallyObservedTissues:(x.tissues||[]).map(t=>({
+    id:t.source.id,tissue:t.source.tissue,
+    observedFunction:t.source.realFunction,
+    cumulativeObservedPractice:t.points,
+    strain:t.strain,practicedSessions:t.practice.length
+   }))})),
   orderFreedom:'Blood V and Adaptive VI may form before or after independently earned Nerve IV',
   ...(r?.cycles?.[6]?.transition?{currentAdaptiveExpression:adaptiveState(s)}:{}),
   ...(r?.cycles?.[7]?.transition?{constitutionMaintenance:maintenanceState(s)}:{}),
   noFreeBeastTraitOrAutomaticMedicine:true};
 }
-module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SUSTAIN,SPEC,
+module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SUSTAIN,
+ TISSUE,TISSUE_WORK,TISSUE_CARE,SPEC,
  map,work:(s,p)=>attempt(s,p,'work'),care:(s,p)=>attempt(s,p,'care'),
- complete,assume,release,sustain,status,verify};
+ complete,assume,release,sustain,tissueMap,
+ tissueWork:(s,p)=>tissuePractice(s,p,'tissue-work'),
+ tissueCare:(s,p)=>tissuePractice(s,p,'tissue-care'),status,verify};
