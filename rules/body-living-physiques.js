@@ -15,7 +15,8 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  SUSTAIN='witnessed-unique-physique-metabolic-maintenance-v1',
  TISSUE='witnessed-individual-living-physique-tissue-discovery-v1',
  TISSUE_WORK='witnessed-individual-living-physique-tissue-practice-v1',
- TISSUE_CARE='witnessed-individual-living-physique-tissue-care-v1';
+ TISSUE_CARE='witnessed-individual-living-physique-tissue-care-v1',
+ TISSUE_FOOTING='witnessed-physique-tissue-ground-contact-v1';
 const SPEC=Object.freeze({
  5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
   sources:['circulationMeasurement','metabolicLimit'],
@@ -294,6 +295,49 @@ function verify(s){
     last=a.minute+a.minutes;
    }
    if(t.points!==points||t.strain!==strain)return false;
+   if(!Array.isArray(t.sceneSupports??[]))return false;
+   for(const receipt of t.sceneSupports||[]){
+    const a=receipt?.source,sc=s.table?.sceneChecks?.[a?.checkId];
+    if(receipt?.origin!==ORIGIN||!a||receipt.seal!==digest(a)||
+     a.origin!==ORIGIN||a.kind!=='footing-scene-support'||
+     a.cycle!==cycle||a.tissueId!==q.id||
+     a.parentTissueSeal!==t.seal||
+     a.method!=='footing'||a.bonus!==1||a.staminaCost!==1||
+     !I(a.minute,q.minute,s.world.minutes)||
+     !a.witness||a.witnessHash!==digest(a.witness)||
+     a.witness.details?.origin!==TISSUE_FOOTING||
+     a.witness.details?.cycle!==cycle||
+     a.witness.details?.tissueId!==q.id||
+     a.witness.details?.checkId!==a.checkId||
+     a.witness.details?.method!=='footing'||
+     !S(a.witness.details?.observedMechanicalRole,25,900)||
+     !S(a.witness.details?.failureCountertest,25,900)||
+     allWitnesses.has(a.witnessHash)||
+     !sc||sc.checkId!==a.checkId||
+     sc.origin!=='engine-local-scene'||
+     sc.method!=='footing'||sc.location!==a.location||
+     sc.eventHash!==a.sceneEventHash||
+     sc.worldMinute!==a.sceneMinute||
+     a.location!==a.witness.details?.location)
+     return false;
+    allWitnesses.add(a.witnessHash);
+    if(receipt.used===null){
+     if(sc.used)return false;
+    }else{
+     const u=receipt.used;
+     if(!sc.used||!u||u.staminaSpent!==1||
+      u.usedMinute!==sc.checkedAtMinute||
+      !I(u.usedMinute,a.minute,s.world.minutes)||
+      u.checkId!==a.checkId||
+      !u.check||!u.rollEvent||u.rollEvent.type!=='roll'||
+      u.rollEventHash!==digest(u.rollEvent)||
+      digest(u.rollEvent.details)!==digest(u.check)||
+      u.check.roll!==u.rollEvent.details.roll||
+      u.check.modifier!==u.baseModifier+1||
+      !I(u.baseModifier,-100,99))
+      return false;
+    }
+   }
   }
  }
  const neural=s.table?.bodyRefinement?.neural;
@@ -550,6 +594,101 @@ function release(s,p={}){
  return {released:true,elapsedMinutes:1,...adaptiveState(s),
   noStaminaRefundNoInstantWoundHealing:true};
 }
+// First bounded live effect adapter. GM-witnessed personally earned body
+// coordination can support an EXISTING local footing check; its DC, terrain,
+// skill, one-use identity and original d20 still belong to scene-check.
+// Other physical effects need their own real contextual adapter; the GM
+// description is not permission to choose a modifier, immunity or damage.
+function sceneSupport(s,checkId){
+ const ledger=s.table?.bodyRefinement?.living?.cycles;
+ if(!ledger)return {bonus:0};
+ if(!verify(s))throw Error('Existing body source and tissue receipts must verify before a supported scene check');
+ let found=null;
+ for(const rec of Object.values(ledger))for(const tissue of rec.tissues||[])
+  for(const support of tissue.sceneSupports||[]){
+   if(support.source.checkId!==checkId)continue;
+   if(found)throw Error('Multiple physiology sources cannot stack for one physical scene check');
+   found=support;
+  }
+ if(!found)return {bonus:0};
+ const a=found.source,sc=s.table?.sceneChecks?.[checkId];
+ if(found.used!==null||!sc||sc.used||
+  sc.method!=='footing'||sc.location!==s.world.location||
+  sc.worldMinute!==a.sceneMinute||
+  sc.eventHash!==a.sceneEventHash||
+  !I(s.player?.stamina,1,100000)||
+  !I(s.table?.combatants?.player?.stamina,1,100000))
+  throw Error('The already committed tissue-supported physical check is no longer valid');
+ return {bonus:1,staminaCost:1,tissueId:a.tissueId,cycle:a.cycle,
+  evidenceSeal:found.seal};
+}
+function recordSceneSupport(s,checkId,check,baseModifier){
+ const ledger=s.table?.bodyRefinement?.living?.cycles||{};
+ const entries=Object.values(ledger).flatMap(rec=>
+  (rec.tissues||[]).flatMap(t=>t.sceneSupports||[]));
+ const uses=entries.filter(x=>x.source.checkId===checkId);
+ if(uses.length!==1)throw Error('Exactly one original tissue source must be committed for this physical check');
+ const receipt=uses[0],a=receipt.source,sc=s.table?.sceneChecks?.[checkId];
+ if(receipt.used!==null||!sc?.used||
+  sc.checkedAtMinute!==s.world.minutes||
+  check.modifier!==baseModifier+1||
+  check.roll!==s.log.at(-1)?.details?.roll||
+  !I(s.player.stamina,1,100000))
+  throw Error('The original physical action was not resolved with its promised physiological support');
+ const rollEvent=structuredClone(s.log.at(-1));
+ receipt.used={checkId,usedMinute:s.world.minutes,staminaSpent:1,
+  baseModifier,check:structuredClone(check),rollEvent,
+  rollEventHash:digest(rollEvent)};
+ s.player.stamina-=1;s.table.combatants.player.stamina=s.player.stamina;
+ if(!verify(s))throw Error('The real physical check or physiology receipt failed saved integrity');
+ return {tissueId:a.tissueId,cycle:a.cycle,bonus:1,staminaSpent:1,
+  onlyThisVerifiedPhysicalAction:true};
+}
+function tissueFooting(s,p={}){
+ if(!only(p,['cycle','id','checkId','witnessIndex'])||
+  !I(p.cycle,5,7)||!ID(p.id)||
+  typeof p.checkId!=='string'||!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(p.checkId))
+  throw Error('The exact existing local check and individually practised original tissue are required');
+ safe(s);originalOrgan(s);
+ if(!verify(s))throw Error('Original tissue and body cycle evidence does not verify');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle],
+  t=r?.tissues?.find(t=>t.source.id===p.id),
+  sc=s.table?.sceneChecks?.[p.checkId];
+ if(!t||t.points<2||t.strain>=5||
+  !sc||sc.used||sc.origin!=='engine-local-scene'||
+  sc.method!=='footing'||sc.location!==s.world.location||
+  !I(sc.worldMinute,0,s.world.minutes)||
+  s.world.minutes-sc.worldMinute>1440)
+  throw Error('An actual independently practised healthy tissue and prepared local footing challenge are required');
+ const existing=Object.values(s.table.bodyRefinement.living.cycles).some(rec=>
+  (rec.tissues||[]).some(t=>(t.sceneSupports||[]).some(x=>
+   x.source.checkId===p.checkId)));
+ if(existing)throw Error('A pending original physical scene cannot be stacked with a second anatomical bonus');
+ const witness=scene(s,p.witnessIndex,TISSUE_FOOTING,p.cycle);
+ if(witness.details?.tissueId!==p.id||
+  witness.details?.checkId!==p.checkId||
+  witness.details?.method!=='footing'||
+  !S(witness.details?.observedMechanicalRole,25,900)||
+  !S(witness.details?.failureCountertest,25,900))
+  throw Error('The individual current tissue contribution and independent failure test must match the exact scene');
+ if(tissueKnownWitness(s,digest(witness)))
+  throw Error('A previously witnessed tissue experiment cannot be used for another advantage');
+ if(!I(s.player.stamina,1,100000)||
+  !I(s.table?.combatants?.player?.stamina,1,100000))
+  throw Error('Real available Stamina is required for the supported physical effort');
+ const source={origin:ORIGIN,kind:'footing-scene-support',
+  cycle:p.cycle,tissueId:p.id,parentTissueSeal:t.seal,
+  checkId:p.checkId,method:'footing',bonus:1,staminaCost:1,
+  minute:s.world.minutes,location:s.world.location,
+  sceneMinute:sc.worldMinute,sceneEventHash:sc.eventHash,
+  witness,witnessHash:digest(witness)};
+ t.sceneSupports||=[];t.sceneSupports.push({
+  origin:ORIGIN,source,seal:digest(source),used:null});
+ if(!verify(s))throw Error('The original physical tissue scene witness is inconsistent');
+ return {prepared:true,checkId:p.checkId,tissueId:p.id,
+  boundedBonus:1,staminaCostWhenResolved:1,noRollYet:true,
+  noBonusUnlessOriginalFootingCheckResolves:true};
+}
 function tissueKnownWitness(s,hash){
  const cycles=s.table?.bodyRefinement?.living?.cycles||{};
  return Object.values(cycles).some(r=>
@@ -557,7 +696,8 @@ function tissueKnownWitness(s,hash){
   [...r.attempts,...r.repairs,...r.tests,...(r.upkeep||[]),
    ...(r.expressions||[])].some(x=>x.source?.witnessHash===hash)||
   (r.tissues||[]).some(t=>t.source.witnessHash===hash||
-   t.practice.some(x=>x.source?.witnessHash===hash)));
+   t.practice.some(x=>x.source?.witnessHash===hash)||
+   (t.sceneSupports||[]).some(x=>x.source?.witnessHash===hash)));
 }
 function tissueMap(s,p={}){
  if(!only(p,['cycle','id','tissue','realFunction','metabolicTradeoff',
@@ -584,7 +724,7 @@ function tissueMap(s,p={}){
   failureLimit:p.failureLimit.trim(),parentMapSeal:r.seal,
   minute:s.world.minutes,witness,witnessHash:hash};
  const t={origin:ORIGIN,source,seal:digest(source),
-  points:0,strain:0,practice:[]};
+  points:0,strain:0,practice:[],sceneSupports:[]};
  r.tissues||=[];r.tissues.push(t);
  if(!verify(s))throw Error('Original individual anatomy did not pass the continuity check');
  return {mapped:true,cycle:p.cycle,id:p.id,originalFunction:source.realFunction,
@@ -731,8 +871,9 @@ function status(s){
   noFreeBeastTraitOrAutomaticMedicine:true};
 }
 module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SUSTAIN,
- TISSUE,TISSUE_WORK,TISSUE_CARE,SPEC,
+ TISSUE,TISSUE_WORK,TISSUE_CARE,TISSUE_FOOTING,SPEC,
  map,work:(s,p)=>attempt(s,p,'work'),care:(s,p)=>attempt(s,p,'care'),
- complete,assume,release,sustain,tissueMap,
+ complete,assume,release,sustain,tissueMap,tissueFooting,
+ sceneSupport,recordSceneSupport,
  tissueWork:(s,p)=>tissuePractice(s,p,'tissue-work'),
  tissueCare:(s,p)=>tissuePractice(s,p,'tissue-care'),status,verify};
