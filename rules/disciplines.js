@@ -1094,7 +1094,7 @@ function organEarned(s){
   final=h.find(x=>x?.target==='cycle3'&&
     x.change==='Completed Cycle III Organ refinement; integrated heart, lungs, liver and kidneys');
  if(!body||body.cycles?.[2]!=='Organ Cycle'||
-    body.cycles.length!==3||!work?.completed||!proof||!final||
+    body.cycles.length<3||!work?.completed||!proof||!final||
     final.witnessSource!==ORGAN_ORIGIN||
     !Array.isArray(work.attempts)||work.attempts.length<1||
     !Number.isInteger(final.day)||final.day<1||final.day>E.day(s)||
