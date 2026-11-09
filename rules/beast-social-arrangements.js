@@ -78,8 +78,7 @@ function verify(s,b){
  const records=b?.socialArrangements;
  if(!records)return true;
  if(records.origin!==ORIGIN||records.beastId!==b.id||
-  !records.entries||typeof records.entries!=='object'||Array.isArray(records.entries)||
-  Object.keys(records.entries).length>100)return false;
+  !records.entries||typeof records.entries!=='object'||Array.isArray(records.entries))return false;
  // The underlying original beast personhood/bond-life source must still
  // match the specific identity recorded when these terms were explained.
  let kind;
