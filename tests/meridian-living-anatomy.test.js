@@ -348,5 +348,80 @@ const mk=(s,id,kind,number,load=1)=>{
  A.equal(Net.verify(tampered),false);
  A.throws(()=>op(s,'intentEmbody',{id:intentId,witnessIndex:0}),
   /source-verified Stage V|requires.*Stage V/);
+ // Real Stage VII tissue integration is trained from existing fascia and
+ // the already earned Stage VI intent—not from a declared rare lineage.
+ const Phys=require('../rules/meridian-physique-integration');
+ const interfaceId='forearm_fascia_response',tissueRoute=routeId;
+ const beforePhysique=E.exportGame(s);
+ A.deepEqual(op(s,'physiqueStatus').interfaces,[]);
+ A.equal(E.exportGame(s),beforePhysique);
+ C.event(s,'story',
+  'The living practitioner has an ordinary forearm fascia network physically examined and its circulation response documented.',{
+   origin:Phys.OBSERVE,location:s.world.location,
+   interfaceId,routeId:tissueRoute,
+   examination:'The ordinary tendon and fascia structure is directly examined during original source-bound low-pressure movement.',
+   tissueResponse:'Fascia and blood flow respond measurably to gradual Qi pressure without creating a magical extra organ.',
+   evolvedPowerClaim:false});
+ const mapped=op(s,'physiqueMap',{
+  id:interfaceId,routeId:tissueRoute,intentId,
+  tissue:'Ordinary forearm fascia and tendon sheaths',
+  existingAnatomy:'An actual source-observed ordinary forearm tendon and fascia network within the individual human body',
+  organResponse:'The original observed pressure and tendon motion alter local Qi flow in a repeatable minor way',
+  adaptationMethod:'Controlled low-pressure tendon recruitment synchronises with the previously earned defensive intent',
+  metabolicCost:'Sustained physical work needs genuine Stamina, heat dissipation and existing Dantian Qi',
+  injuryRisk:'Too much local pressure causes measured strain and destabilises the existing Meridian network',
+  limit:'Normal tissue does not grant a beast organ, elemental resistance or an automatically learned combat power',
+  witnessIndex:s.log.length-1});
+ A.equal(mapped.registered,true);
+ A.equal(mapped.noCreatedOrganOrAbility,true);
+ A.equal(s.player.meridian.stage,6);
+ let bodyReady=false;
+ for(let i=0;i<8&&!bodyReady;i++){
+  C.event(s,'story',
+   'An actual controlled tendon-and-Qi training repetition shows physiologically limited integration in a voluntarily moving body.',{
+    origin:Phys.PRACTICE,location:s.world.location,
+    interfaceId,routeId:tissueRoute,
+    adaptation:'The same observed normal connective tissues respond slowly to measured Dantian flow under distinct resisted movement.',
+    welfareCountertest:'The subject stops the exercise if discomfort rises and uses normal rest and hydration rather than inventing new tissue.'});
+  const j=s.log.length-1;
+  const result=op(s,'physiqueWork',{id:interfaceId,witnessIndex:j,minutes:30});
+  A.equal(result.noInstantPhysiqueOrOriginTrait,true);
+  A.equal(Phys.verify(s),true);
+  bodyReady=result.points>=result.needed;
+ }
+ A.equal(bodyReady,true,'Actual source-tested ordinary tissue should physically adapt by earned checks');
+ A.equal(s.player.meridian.stage,6);
+ const beforeBody=s.world.minutes,qiBeforeBody=s.player.qi,
+  maxBeforeBody=s.player.maxQi;
+ C.event(s,'story',
+  'The real individual demonstrates restrained full-body load redistribution through their own formerly ordinary connective tissues.',{
+   origin:Phys.EMBODY,location:s.world.location,
+   interfaceId,routeId:tissueRoute,
+   crossBodyResponse:'An original trunk-to-periphery tendon and fascia response distributes small physical load through previously integrated circulation.',
+   materialCost:'Ordinary vascular and fascial tissues require real Qi, Stamina, nutrition and thermal recovery during sustained movement.',
+   failureBoundary:'Real tissue overload, unresolved Meridian injury or absent physical circulation would collapse the response.'});
+ const finished=op(s,'physiqueComplete',{id:interfaceId,witnessIndex:s.log.length-1,minutes:90});
+ A.equal(finished.formed,true);
+ A.equal(finished.noHumanEvolutionOrRareOrganGranted,true);
+ A.equal(s.player.meridian.stage,7);
+ A.equal(s.world.minutes,beforeBody+90);
+ A.equal(s.player.qi,qiBeforeBody-finished.qiSpent);
+ A.ok(s.player.maxQi>=maxBeforeBody);
+ A.equal(s.player.meridian.physiqueIntegration,1);
+ A.equal(s.player.humanEvolution.stage,0);
+ A.equal(s.player.origin.stableTraits.length,0);
+ A.equal(s.player.arcane.circles,0);
+ A.equal(Net.verify(s),true);
+ A.equal(Phys.verify(s),true);
+ A.equal(op(s,'physiqueStatus').integrated,true);
+ const bodySaved=E.exportGame(s),bodyCopy=E.importGame(bodySaved);
+ A.equal(Phys.verify(bodyCopy),true);
+ bodyCopy.table.powerPhysiology.meridian.advancedNetwork
+  .tissueInterfaces[interfaceId].points=99;
+ A.equal(Net.verify(bodyCopy),false);
+ const bodyTampered=E.importGame(bodySaved);
+ bodyTampered.table.powerPhysiology.meridian.advancedNetwork
+  .tissueTests[0].source.capacity.newMax+=100;
+ A.equal(Phys.verify(bodyTampered),false);
 }
 console.log('Living Meridian route web: genuine Stage IV/108 Gate source, original 8/36/72 anatomy maps, actual engine Qi/time/pressure checks, persistent injuries and separately witnessed clinical recovery, no free Stage, tamper-safe integrity and read-only saved turn replay.');
