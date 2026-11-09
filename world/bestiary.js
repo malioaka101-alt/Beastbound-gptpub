@@ -85,4 +85,271 @@ function sample(biome,seed){const candidates=localCandidates(biome);if(!candidat
  return lookup(gid([candidates[0].group,candidates[0].radiation,0,0,0]));
 }
 function verify(){if(GROUPS.some(g=>g.habitats.length!==4||g.morphs.length!==6||g.strategies.length!==8))throw Error('Taxonomic schema incomplete');return {groups:GROUPS.length,speciesSlots:SPECIES_COUNT,regionalFormSlots:FORM_COUNT};}
-module.exports={GROUPS,COUNTS,SPECIES_COUNT,FORM_COUNT,lookup,sample,localCandidates,verify,hash};
+
+// GM-authored species biology extends THIS bestiary instead of creating a
+// separate species catalogue. Source: Unified Master Prompt §§6-9 and 18.
+// Details survive in realm.speciesBiology; raw species slots remain stable.
+const BioCrypto=require('node:crypto'),BioAtlas=require('./atlas');
+const BIO_SOURCE='gm-established-species-biology-v1';
+const bioHash=x=>BioCrypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const bioId=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{3,79}$/.test(x);
+const bioText=(x,lo=4,hi=600)=>typeof x==='string'&&x.trim().length>=lo&&x.trim().length<=hi;
+const BIO_VIS=['public','gm-only'];
+const bioFields=(p,required,optional=[])=>{
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).some(k=>![...required,...optional].includes(k))||
+  required.some(k=>!Object.hasOwn(p,k)))
+  throw Error('Species biology requires concrete established biological facts, not free evolutionary powers or creature spawning');
+};
+const bioTaxonomyKeys=['kingdom','phylum','class','order','family','genus','species'];
+const bioInt=(n,a,b)=>Number.isInteger(n)&&n>=a&&n<=b;
+function bioReproduction(r){
+ return !!r&&bioText(r.mode,3,120)&&
+  (r.gestationDays===null||bioInt(r.gestationDays,1,25000))&&
+  (r.juvenileDays===null||bioInt(r.juvenileDays,1,300000))&&
+  (r.adultDays===null||bioInt(r.adultDays,2,300000))&&
+  (r.lifespanDays===null||bioInt(r.lifespanDays,3,500000))&&
+  (r.juvenileDays===null||r.adultDays===null||r.juvenileDays<r.adultDays)&&
+  (r.adultDays===null||r.lifespanDays===null||r.adultDays<r.lifespanDays);
+}
+function bioNeeds(n){
+ return n===null||!!n&&['minForage','minWater','minQuality','maxPressure']
+  .every(k=>bioInt(n[k],0,100));
+}
+function bioOrgans(a){
+ return Array.isArray(a)&&a.length<=12&&a.every(o=>o&&
+  typeof o==='object'&&!Array.isArray(o)&&
+  Object.keys(o).every(k=>['name','function','limit','energy'].includes(k))&&
+  bioText(o.name,3,100)&&bioText(o.function,10,480)&&
+  bioText(o.limit,10,480)&&bioText(o.energy,4,150));
+}
+function originBio(x,notes=[]){return {...x,originHash:bioHash(x),observations:notes};}
+function bioDefaultSeed(){
+ const generations=require('./wild-generations').Species;
+ const examples=[
+  {key:'fenfox',family:'Vulpiridae',genus:'Paludovulpes',
+   class:'Mammalia',order:'Carnivora',phylum:'Vertebrata',
+   bodyPlan:'Quadrupedal small mammalian carnivoran with a furred torso, tail and mist-adapted sensory organs.',
+   habitatRegions:['whisperfen','copperwood'],
+   originPattern:'A mammalian Marshlight lineage with inherited mist-affinity structures; potential is not guaranteed by species identity.',
+   organs:[{name:'Mist gland',function:'Supports the documented fog-related Glimmer Veil behaviour through the animal’s own energy reserve.',
+    limit:'Cannot prove a human can copy this anatomy or grant unconditional invisibility.',
+    energy:'Existing Glimmer Veil ability pays its original cost.'}]},
+  {key:'stonehare',family:'Leporidae',genus:'Siliculepus',
+   class:'Mammalia',order:'Lagomorpha',phylum:'Vertebrata',
+   bodyPlan:'Small quadrupedal grazing mammal with long hind limbs and mineral-responsive landing tendons.',
+   habitatRegions:['copperwood','ashwind'],
+   originPattern:'A Flintbone lineage whose earth-aligned tendons support species-specific movement, not hereditary player powers.',
+   organs:[{name:'Stone-responsive tendon',function:'Supports the existing Stonebound Leap by storing and releasing muscular elastic force.',
+    limit:'The animal must still respect terrain, fatigue and the ordinary energy cost.',
+    energy:'Existing Stonebound Leap ability pays its original cost.'}]}
+ ];
+ const species={};
+ for(const e of examples){
+  const def=E.SPECIES[e.key],g=generations[e.key];
+  if(!def||!g||def.family!==e.family||g.family!==e.family)
+   throw Error('Starting biology example contradicts actual authored beast or wild reproduction source');
+  const root={source:BIO_SOURCE,id:'authored:'+e.key,name:def.name,
+   taxonomy:{kingdom:'Beastkind',phylum:e.phylum,class:e.class,order:e.order,
+    family:e.family,genus:e.genus,species:e.key},
+   parentSpeciesId:null,variantDescription:null,
+   bodyPlan:e.bodyPlan,habitatRegions:e.habitatRegions,realmId:null,
+   ecologicalRole:def.role,diet:def.diet,
+   reproduction:{mode:g.mode,gestationDays:g.gestationDays,
+    juvenileDays:g.juvenileDays,adultDays:g.adultDays,lifespanDays:null},
+   needs:{minForage:g.minimumForage,minWater:g.minimumWater,
+    minQuality:g.minimumQuality,maxPressure:g.maxPressure},
+   organs:e.organs,originPattern:e.originPattern,affinity:def.affinity,
+   visibility:'public',basis:'Existing engine.SPECIES and world/wild-generations.Species; illustrative GM anatomy',
+   recordedMinute:0,provenance:'canonical-existing-wildlife'};
+  species[root.id]=originBio(root);
+ }
+ return {version:1,source:BIO_SOURCE,species};
+}
+function bioPeek(s){return s.table?.realm?.speciesBiology||null;}
+function bioView(s){return bioPeek(s)||bioDefaultSeed();}
+function bioValidate(reg){
+ if(!reg||reg.version!==1||reg.source!==BIO_SOURCE||
+  !reg.species||Array.isArray(reg.species))
+  throw Error('Invalid saved living-bestiary biology registry');
+ for(const [key,e] of Object.entries(reg.species)){
+  if(key!==e?.id||!bioText(e.name,3,150)||
+   !e.taxonomy||bioTaxonomyKeys.some(k=>!bioText(e.taxonomy[k],2,110))||
+   !bioText(e.bodyPlan,15,1100)||!bioText(e.ecologicalRole,8,600)||
+   !bioText(e.diet,3,300)||!bioText(e.originPattern,15,1200)||
+   !bioText(e.affinity,3,200)||!bioText(e.basis,12,600)||
+   !BIO_VIS.includes(e.visibility)||!Array.isArray(e.habitatRegions)||
+   e.habitatRegions.length>30||e.habitatRegions.some(x=>!BioAtlas.R[x])||
+   (e.realmId!==null&&!bioId(e.realmId))||
+   !bioReproduction(e.reproduction)||!bioNeeds(e.needs)||
+   !bioOrgans(e.organs)||!bioInt(e.recordedMinute,0,1000000000)||
+   !['canonical-existing-wildlife','gm-established'].includes(e.provenance)||
+   !Array.isArray(e.observations)||e.observations.length>200)
+   throw Error('Saved species profile contains unsupported anatomy or biological conditions');
+  const {originHash,observations,...root}=e;
+  if(root.source!==BIO_SOURCE||bioHash(root)!==originHash)
+   throw Error('The GM-established source biology was silently rewritten');
+  if(e.parentSpeciesId!==null){
+   const parent=reg.species[e.parentSpeciesId];
+   if(parent){
+    if(parent.id===e.id||parent.taxonomy.family!==e.taxonomy.family)
+     throw Error('Species variant has inconsistent founded family ancestry');
+   }else{
+    let prior;
+    try{prior=lookup(e.parentSpeciesId);}catch(_){throw Error('Species lineage refers to an unknown earlier taxon');}
+    if(prior.taxonomy?.family!==e.taxonomy.family)
+     throw Error('Species variant has no coherent parent family');
+   }
+  }
+  for(const o of observations){
+   if(o?.source!==BIO_SOURCE||o.speciesId!==e.id||
+    !bioText(o.category,4,80)||!bioText(o.observation,12,750)||
+    !bioText(o.basis,12,600)||!BIO_VIS.includes(o.visibility)||
+    !bioInt(o.recordedMinute,0,1000000000))
+    throw Error('Unverified biological observation');
+   const {seal,...body}=o;if(seal!==bioHash(body))
+    throw Error('Biology observation was rewritten rather than evidenced');
+  }
+ }
+ return true;
+}
+function bioEnsure(s){
+ const w=require('./simulation').ensure(s);
+ w.speciesBiology||=bioDefaultSeed();
+ bioValidate(w.speciesBiology);
+ return w.speciesBiology;
+}
+function bioParent(s,id){
+ const reg=bioView(s);
+ if(reg.species[id])return reg.species[id];
+ return lookup(id);
+}
+function bioAuthor(s,p={}){
+ bioFields(p,['speciesId','name','taxonomy','bodyPlan','habitatRegions','ecologicalRole',
+  'diet','reproduction','needs','organs','originPattern','affinity','basis'],
+  ['visibility','parentSpeciesId','variantDescription','realmId']);
+ if(typeof p.speciesId!=='string'||!(/^(gm:[a-z][a-z0-9_-]{3,79}|tx:[a-z0-9_-]+:[0-3]:\d{1,2}:\d{1,2}:[0-2]|authored:[a-z0-9_-]+)$/.test(p.speciesId))||
+  !bioText(p.name,3,150)||!p.taxonomy||bioTaxonomyKeys.some(k=>!bioText(p.taxonomy[k],2,110))||
+  !bioText(p.bodyPlan,15,1100)||!bioText(p.ecologicalRole,8,600)||
+  !bioText(p.diet,3,300)||!bioText(p.originPattern,15,1200)||
+  !bioText(p.affinity,3,200)||!bioText(p.basis,12,600)||
+  !Array.isArray(p.habitatRegions)||p.habitatRegions.length>30||
+  p.habitatRegions.some(x=>!BioAtlas.R[x])||!bioReproduction(p.reproduction)||
+  !bioNeeds(p.needs)||!bioOrgans(p.organs)||
+  !BIO_VIS.includes(p.visibility||'gm-only'))
+  throw Error('GM biology needs concrete taxonomic ancestry, ecology, developmental limits and sourced organs');
+ const r=bioEnsure(s);
+ if(r.species[p.speciesId])throw Error('Already established species cannot be silently replaced');
+ if(p.parentSpeciesId!==undefined){
+  if(typeof p.parentSpeciesId!=='string'||p.parentSpeciesId===p.speciesId||
+   !bioText(p.variantDescription,14,500))
+   throw Error('A related species needs a real parent and independently described inherited difference');
+  const parent=bioParent(s,p.parentSpeciesId);
+  if(parent.taxonomy.family!==p.taxonomy.family)
+   throw Error('New variant cannot silently change its established ancestral family');
+ }else if(p.variantDescription!==undefined){
+  throw Error('A variant description needs an actual parent species');
+ }
+ if(p.speciesId.startsWith('gm:')){
+  if(!p.habitatRegions.length&&p.realmId===undefined)
+   throw Error('A new species needs a real habitat or previously established supernatural realm');
+ }else{
+  const canonical=lookup(p.speciesId);
+  if(canonical.taxonomy?.family!==p.taxonomy.family)
+   throw Error('An authored biology profile cannot rewrite an existing species family');
+ }
+ if(p.realmId!==undefined){
+  const cosmos=require('./cosmology-ledger').peek(s)||
+   require('./cosmology-ledger').seed();
+  if(!cosmos.planes[p.realmId])throw Error('Species planar habitat needs an actual established cosmological realm');
+ }
+ const base={source:BIO_SOURCE,id:p.speciesId,name:p.name.trim(),
+  taxonomy:Object.fromEntries(bioTaxonomyKeys.map(k=>[k,p.taxonomy[k].trim()])),
+  parentSpeciesId:p.parentSpeciesId??null,
+  variantDescription:p.variantDescription?.trim()??null,
+  bodyPlan:p.bodyPlan.trim(),habitatRegions:[...p.habitatRegions],
+  realmId:p.realmId??null,ecologicalRole:p.ecologicalRole.trim(),
+  diet:p.diet.trim(),reproduction:structuredClone(p.reproduction),
+  needs:p.needs===null?null:structuredClone(p.needs),
+  organs:structuredClone(p.organs),originPattern:p.originPattern.trim(),
+  affinity:p.affinity.trim(),visibility:p.visibility||'gm-only',
+  basis:p.basis.trim(),recordedMinute:s.world.minutes,
+  provenance:'gm-established'};
+ r.species[base.id]=originBio(base);
+ return {recorded:true,speciesId:base.id,biologicalProfile:true,
+  noAnimalInstantiated:true,noAbilitiesGranted:true,noBreedingResult:true};
+}
+function bioNote(s,p={}){
+ bioFields(p,['speciesId','category','observation','basis'],['visibility']);
+ if(!bioText(p.category,4,80)||!bioText(p.observation,12,750)||
+  !bioText(p.basis,12,600)||!BIO_VIS.includes(p.visibility||'gm-only'))
+  throw Error('A species observation needs genuine biological context and evidence');
+ const r=bioEnsure(s),e=r.species[p.speciesId];
+ if(!e)throw Error('The GM must establish the actual species profile first');
+ if(e.visibility==='gm-only'&&p.visibility==='public')
+  throw Error('A hidden species cannot be revealed by unlinked public biological notes');
+ const note={source:BIO_SOURCE,speciesId:e.id,category:p.category,
+  observation:p.observation.trim(),basis:p.basis.trim(),
+  visibility:p.visibility||'gm-only',recordedMinute:s.world.minutes};
+ const seal=bioHash(note);
+ if(e.observations.some(x=>x.seal===seal))return {alreadyRecorded:true,applied:false};
+ e.observations.push({...note,seal});
+ return {recorded:true,speciesId:e.id,notAnAutomaticSpeciesEvolution:true};
+}
+function bioAge(s,{speciesId,ageDays}={}){
+ if(!bioInt(ageDays,0,500000))throw Error('A biological development calculation needs an actual measured age in days');
+ const reg=bioView(s);bioValidate(reg);
+ const e=reg.species[speciesId];if(!e)return {profileKnown:false};
+ const cycle=e.reproduction;
+ const lifeStage=cycle.juvenileDays===null||cycle.adultDays===null?'unresolved':
+  ageDays<cycle.juvenileDays?'dependent':
+  ageDays<cycle.adultDays?'juvenile':'adult-or-later';
+ return {speciesId,ageDays,lifeStage,reproductiveMode:cycle.mode,
+  ageAloneDoesNotGuaranteeBreeding:true,
+  noAutomaticEvolution:true};
+}
+function bioFit(s,{speciesId,regionId}={}){
+ const reg=bioView(s);bioValidate(reg);
+ const e=reg.species[speciesId];
+ if(!e||e.visibility==='gm-only')
+  return {known:false,habitatSuitability:'not-publicly-established'};
+ if(!BioAtlas.R[regionId])throw Error('A real Atlas region is required to evaluate biological habitat');
+ const establishedRegion=e.habitatRegions.includes(regionId);
+ const eco=require('./simulation').peek(s).ecosystems[regionId];
+ const needs=e.needs;
+ if(!needs||!eco)return {known:true,regionId,listedHabitat:establishedRegion,
+  suitability:'unknown',note:'No source-backed numeric physiology and local ecological state supports an assertion'};
+ const limits={forage:eco.forage>=needs.minForage,
+  water:eco.water>=needs.minWater,quality:eco.quality>=needs.minQuality,
+  pressure:eco.pressure<=needs.maxPressure};
+ return {known:true,regionId,listedHabitat:establishedRegion,
+  limits,suitability:establishedRegion&&Object.values(limits).every(Boolean)?
+   'compatible-with-recorded-basic-needs':'outside-some-established-conditions',
+  noGuaranteedPresence:true,noAutomaticConception:true};
+}
+function bioStatus(s,{speciesId}={}){
+ const reg=bioView(s);bioValidate(reg);
+ const publicProfile=e=>({id:e.id,name:e.name,taxonomy:structuredClone(e.taxonomy),
+  bodyPlan:e.bodyPlan,habitatRegions:[...e.habitatRegions],realmId:e.realmId,
+  diet:e.diet,ecologicalRole:e.ecologicalRole,
+  reproduction:structuredClone(e.reproduction),
+  organs:e.organs.map(o=>({...o})),affinity:e.affinity,
+  originPattern:e.originPattern,needs:e.needs?{...e.needs}:null,
+  parentSpeciesId:e.parentSpeciesId,
+  variantDescription:e.variantDescription,
+  observations:e.observations.filter(o=>o.visibility==='public').map(o=>({
+   category:o.category,observation:o.observation,basis:o.basis})),
+  noSpeciesCreationOrPresentEncounter:true});
+ if(speciesId!==undefined){
+  const e=reg.species[speciesId];
+  return e?.visibility==='public'?{known:true,species:publicProfile(e)}:
+   {known:false,note:'No player-known specialist biology is established for this species'};
+ }
+ return {species:Object.values(reg.species).filter(e=>e.visibility==='public')
+  .map(e=>({id:e.id,name:e.name,family:e.taxonomy.family,
+   knownHabitats:e.habitatRegions})),
+  note:'Existing public biology is not a sighting, a licence, a learned power or an encounter'};
+}
+
+module.exports={GROUPS,COUNTS,SPECIES_COUNT,FORM_COUNT,lookup,sample,localCandidates,verify,hash,
+ BIO_SOURCE,bioDefaultSeed,bioPeek,bioView,bioEnsure,bioValidate,bioAuthor,bioNote,bioAge,bioFit,bioStatus};
