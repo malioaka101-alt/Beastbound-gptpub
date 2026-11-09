@@ -213,6 +213,9 @@ function verify(s){
  if((net.domainPlans||net.domainTests||net.domainPulses||
      s.player.meridian.stage>=8)&&
   !require('./meridian-living-domain').verifySource(s))return false;
+ if((net.constitutions||net.constitutionTests||net.constitutionCare||
+     s.player.meridian.stage>=9)&&
+  !require('./meridian-transcendent-constitution').verifySource(s))return false;
  return true;
 }
 function ensure(s){
