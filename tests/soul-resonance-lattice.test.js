@@ -150,7 +150,7 @@ function rest(s,min){
  const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-soul-lattice-'));
  try{
   const file=Path.join(dir,'save.json');FS.writeFileSync(file,saved+'\n');
-  const query={id:'soul_III_lattice_status_874401',mode:'rule',
+  const query={id:'soul_iii_lattice_status_874401',mode:'rule',
    system:'soul',operation:'latticeStatus',params:{}};
   A.equal(Turn.execute(file,query).applied,false);
   A.equal(Turn.execute(file,query).applied,false);
