@@ -189,6 +189,34 @@ function proof(s,b,stage,kind){
  A.equal(E.exportGame(s),before);A.equal(s.rngState,rng);
 }
 {
+ // The disposable fixture mirrors the original evolution resolver's saved
+ // form receipt; neither old history nor changing resonance is erased.
+ const {s,b,r}=paired(932450);
+ const index=scene(s,b,2,'Original identity continuity examination');
+ op(s,'syncPractice',{beastId:b.id,witnessIndex:index});
+ A.equal(Sync.verify(s,b,r),true);
+ const earlier=E.exportGame(s),initial=b.species,form=b.evolutionStage;
+ r.resonance=9;r.compatibility=6;
+ A.equal(Sync.verify(s,b,r),true,
+  'Changing real resonance and compatibility must preserve earlier work');
+ b.species='reedshade';b.evolutionStage='Witnessed new reed physiology';
+ A.equal(Sync.verify(s,b,r),false,'An unsourced form change cannot inherit the original partnership');
+ const old={species:initial,evolutionStage:form};
+ b.evolutionHistory=[{branchId:'reed_stage',day:1,old,
+  form:b.evolutionStage,status:'fully documented form applied'}];
+ s.table.evolution||={};
+ s.table.evolution[b.id+'/reed_stage']={
+  beastId:b.id,branchId:'reed_stage',evolved:true,
+  lastEvent:{outcome:'evolved',day:1},
+  appliedFormSummary:{old,newForm:b.evolutionStage,newSpecies:b.species}};
+ A.equal(Sync.verify(s,b,r),true,
+  'A source-linked genuine evolution can continue the identical beast partnership');
+ const altered=E.importGame(E.exportGame(s));
+ altered.table.evolution[b.id+'/reed_stage'].appliedFormSummary.newSpecies='fictitious';
+ A.equal(Sync.verify(altered,altered.beasts[b.id],R.bonds.fromSave(altered,b.id)),false);
+ A.notEqual(E.exportGame(s),earlier);
+}
+{
  // A genuinely learned human First-Circle technique is source-verified by
  // the ORIGINAL Arcane skill resolver before pair design is accepted.
  const s=E.newGame({name:'Source-Earned Pair Technique',seed:932103,path:'arcane'});
