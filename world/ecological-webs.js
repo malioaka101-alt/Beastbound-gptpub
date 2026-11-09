@@ -31,6 +31,13 @@ function validate(w){
    if(!known||!known.habitatRegions.includes(regionId))
     throw Error('Regional species population contradicts established biology');
    let previous=p.origin.startIndex,seal=p.originHash,day=p.origin.foundedDay;
+   if(p.archive){
+    const a=p.archive,root={originHash:p.originHash,index:a.index,day:a.day,lastSeal:a.lastSeal};
+    if(!int(a.index,0,200)||!int(a.day,p.origin.foundedDay,10000000)||
+       typeof a.lastSeal!=='string'||a.checksum!==hash(root))
+     throw Error('Archived population history checkpoint was altered');
+    previous=a.index;seal=a.lastSeal;day=a.day;
+   }
    for(const h of p.history){
     if(!int(h.day,day,10000000)||h.before!==previous||
        !int(h.after,0,200)||typeof h.reason!=='string'||
@@ -132,10 +139,15 @@ function authorLink(s,p={}){
 function append(p,day,after,reason){
  if(after===p.index)return;
  const row={day,before:p.index,after,reason,previous:p.history.length?
-  p.history[p.history.length-1].seal:p.originHash};
+  p.history[p.history.length-1].seal:(p.archive?.lastSeal||p.originHash)};
  row.seal=hash(row);
  p.history.push(row);p.index=after;
- if(p.history.length>200)throw Error('Population history needs an explicit archive checkpoint');
+ if(p.history.length>180){
+  // Preserve recent facts and source-linked archive receipts through decades.
+  const retired=p.history.splice(0,60),last=retired[retired.length-1];
+  const root={originHash:p.originHash,index:last.after,day:last.day,lastSeal:last.seal};
+  p.archive={...root,checksum:hash(root)};
+ }
 }
 function suitable(b,eco){const n=b.needs;
  return !!n&&eco.forage>=n.minForage&&eco.water>=n.minWater&&
