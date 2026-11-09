@@ -85,7 +85,10 @@ function verify(b){
     !num(e.energyCost,1,25)||!num(e.cooldownDays,1,90)||
     !['observed','gm-only'].includes(e.visibility)||
     !proofValid(b,e.proof,e.application)||usedProofs.has(e.proof.hash)||
-    (e.visibility==='observed'&&!life.witnessed?.some(x=>hash(x)===e.proof.source.actionWitnessHash)))
+    (e.visibility==='observed'&&(!e.observedWitnessRecord||
+      hash(e.observedWitnessRecord)!==e.proof.source.actionWitnessHash||
+      e.observedWitnessRecord.type!=='witnessed-wildlife-routine'||
+      e.observedWitnessRecord.beastId!==b.id)))
     return false;
    usedProofs.add(e.proof.hash);
    methods.set(e.methodId,{skill:e.application,proofs:new Set([e.proof.hash]),
@@ -166,7 +169,9 @@ function technique(s,p={}){
   !num(p.cooldownDays,1,90)||!['observed','gm-only'].includes(p.visibility||'gm-only'))
   throw Error('A unique technique needs functional biology, limits, cost, counter and earned field application');
  const proof=sourceProof(b,p.receiptHash,skill),life=b.individualLife,vis=p.visibility||'gm-only';
- if(vis==='observed'&&!life.witnessed.some(x=>hash(x)===proof.source.actionWitnessHash))
+ const witnessed=vis==='observed'?life.witnessed?.find(x=>
+  hash(x)===proof.source.actionWitnessHash):null;
+ if(vis==='observed'&&!witnessed)
   throw Error('Only a personally witnessed original action can establish a player-known technique');
  const reg=ensure(s,b);
  if(reg.entries.some(x=>x.source.type==='learn'&&x.source.methodId===p.methodId))
@@ -177,7 +182,9 @@ function technique(s,p={}){
  append(s,b,{type:'learn',methodId:p.methodId,name:p.name.trim(),
   principle:p.principle.trim(),activation:p.activation.trim(),limit:p.limit.trim(),
   counter:p.counter.trim(),environment:p.environment.trim(),application:skill,
-  energyCost:p.energyCost,cooldownDays:p.cooldownDays,visibility:vis,proof:structuredClone(proof)});
+  energyCost:p.energyCost,cooldownDays:p.cooldownDays,visibility:vis,
+  observedWitnessRecord:witnessed?structuredClone(witnessed):null,
+  proof:structuredClone(proof)});
  return {recorded:true,beastId:b.id,methodId:p.methodId,
   actualCombatOrMagicNotGranted:true,noAutomaticTraining:true};
 }
@@ -196,7 +203,8 @@ function develop(s,{beastId,methodId,receiptHash}={}){
   noArtificialLevelGain:true};
 }
 function express(s,b,action,day){
- if(!b?.individualLife?.individuality||b.owner||
+ if(!b?.individualLife?.individuality||b.owner||b.sapientLife||
+  b.sapience>=3||E.SPECIES[b.species]?.intelligence==='sapient'||
   b.relationship!=='wild'||!num(day,0,10000000))return null;
  const reg=ensure(s,b),roots=reg.entries.filter(x=>x.source.type==='learn');
  const current=action==='independently-foraged'?'foraging':
