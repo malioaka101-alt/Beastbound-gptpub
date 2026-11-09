@@ -52,7 +52,8 @@ function verify(s,b,r){
   l.source.name!==x.name||l.source.human!==x.human||
   l.source.bondHash!==x.bondHash||l.source.sapience!==x.sapience||
   !Array.isArray(l.history)||!l.methods||typeof l.methods!=='object'||
-  !integer(r.syncStage,0,10)||!integer(r.syncPoints,0,1000000))
+  !integer(r.syncStage,0,10)||!integer(r.syncPoints,0,1000000)||
+  !integer(r.syncMasteryPoints??0,0,1000000))
   return false;
  let previous=l.archive?.head||l.sourceHash,
   minute=l.archive?.minute??l.source.created;
@@ -61,7 +62,7 @@ function verify(s,b,r){
   const v=e?.source;
   if(!v||v.source!==SOURCE||v.beastId!==b.id||
    v.previous!==previous||e.seal!==hash(v)||
-   !integer(v.minute,minute)||!['exercise','stage','design','demonstration'].includes(v.kind))
+   !integer(v.minute,minute)||!['exercise','stage','refinement','design','demonstration'].includes(v.kind))
    return false;
   if(v.kind==='exercise'){
    if(!integer(v.target,1,10)||!v.witness||
@@ -79,6 +80,9 @@ function verify(s,b,r){
   if(v.kind==='stage'&&(!integer(v.stage,1,10)||!v.proof||
    hash(v.proof)!==v.proofHash||!integer(v.pointsSpent,1,100)))
    return false;
+  if(v.kind==='refinement'&&(!integer(v.stage,1,10)||
+   !['novice','stable','mastered'].includes(v.toState)||
+   !integer(v.earned,1,3)))return false;
   if(v.kind==='design'&&(!id(v.methodId)||!v.method||hash(v.method)!==v.methodHash))
    return false;
   if(v.kind==='demonstration'&&(!id(v.methodId)||!v.witness||
@@ -187,10 +191,14 @@ function breakthrough(s,b,r,target){
  return {ready:true,proof:event};
 }
 function train(s,p={}){
- if(!fields(p,['beastId','witnessIndex'])||typeof p.beastId!=='string')
+ if(!fields(p,['beastId','witnessIndex','focus'])||typeof p.beastId!=='string')
   throw Error('Pair practice accepts only an existing partner and witnessed scene, never selected rolls or consent');
  const {b,r}=pair(s,p.beastId,{here:true});
- const current=r.syncStage||0,target=Math.min(10,current+1),
+ const current=r.syncStage||0,focus=p.focus||'advance';
+ if(!['advance','refine'].includes(focus)||focus==='refine'&&current===0||
+   focus==='advance'&&current===10)
+  throw Error('Practise a real subsequent stage, or refine the already earned current stage');
+ const target=focus==='refine'?current:current+1,
   proof=witnessed(s,b,p.witnessIndex,target),life=ensure(s,b,r);
  if(life.history.some(x=>x.source.kind==='exercise'&&x.source.witnessHash===proof.digest))
   throw Error('One witnessed attempt cannot be rolled again');
@@ -224,18 +232,27 @@ function train(s,p={}){
   label:'Independent pairwork '+NAMES[target-1]});
  const checkHash=hash(s.log.at(-1));
  const points=check.success?C.progress(check.degree):0;
- r.syncPoints=Math.min(1000000,r.syncPoints+points);
+ if(focus==='advance')r.syncPoints=Math.min(1000000,r.syncPoints+points);
+ else r.syncMasteryPoints=Math.min(1000000,(r.syncMasteryPoints||0)+points);
  append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
-  witnessHash:proof.digest,decision:'accepted',choiceBasis:decision.basis,
+  witnessHash:proof.digest,decision:'accepted',choiceBasis:decision.basis,focus,
   humanCost,fatigueCost,energyCost,roll:check.roll,
   checkHash,points,minutes});
  const readiness=Bonds.syncReadiness(r,target);
  let promoted=false,missingSource=null;
- if(check.success&&readiness.numericReady&&
+ if(focus==='refine'&&points){
+  const previous=r.syncState||'novice',earned=r.syncMasteryPoints;
+  if(earned>=14)r.syncState='mastered';
+  else if(earned>=6)r.syncState='stable';
+  if(previous!==r.syncState)
+   append(s,b,r,'refinement',{stage:current,fromState:previous,
+    toState:r.syncState,earned:points,sceneHash:proof.digest});
+ }
+ if(focus==='advance'&&check.success&&readiness.numericReady&&
   r.syncPoints>=readiness.trainingPoints){
   const milestone=breakthrough(s,b,r,target);
   if(milestone.ready){
-   r.syncStage=target;r.syncState='novice';
+   r.syncStage=target;r.syncState='novice';r.syncMasteryPoints=0;
    r.syncPoints-=readiness.trainingPoints;b.syncStage=target;
    const evidence=milestone.proof||proof.event;
    append(s,b,r,'stage',{stage:target,pointsSpent:readiness.trainingPoints,
@@ -244,7 +261,7 @@ function train(s,p={}){
    promoted=true;
   }else missingSource=milestone.reason;
  }
- return {practised:true,check,pointsEarned:points,promoted,
+ return {practised:true,check,focus,pointsEarned:points,promoted,
   currentSyncStage:r.syncStage,stageName:NAMES[r.syncStage-1]||null,
   ...(missingSource?{missingSource}:{}),
   humanStaminaSpent:humanCost,beastFatigueIncreased:fatigueCost,
@@ -347,7 +364,7 @@ function status(s,p={}){
  const current=r.syncStage||0,target=Math.min(10,current+1),
   ready=Bonds.syncReadiness(r,target);
  return {known:true,beast:b.name,stage:current,stageName:current?NAMES[current-1]:null,
-  state:r.syncState||null,targetStage:target,
+  state:r.syncState||null,earnedMasteryPoints:r.syncMasteryPoints||0,targetStage:target,
   targetName:NAMES[target-1],earnedPoints:r.syncPoints||0,
   requiredPoints:ready.trainingPoints,
   numericReady:ready.numericReady,missing:ready.missing,
