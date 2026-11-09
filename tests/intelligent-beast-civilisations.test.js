@@ -83,7 +83,7 @@ function enterAtoll(s){
   C.event(s,'story','The independent beast person travels to the open reef chamber for a public hearing.',
    {origin:'witnessed-independent-beast-journey-fixture',
     beastId:beast.id,arrivedAt:s.world.location});
-  beast.location=s.world.location;
+  beast.location=s.world.location;beast.away=false;
  }
  const view=op(s,'beastCivicStatus');
  A.equal(view.polity,'Reef Cantons');
@@ -139,6 +139,8 @@ function enterAtoll(s){
  A.equal(op(s,'beastCivicHousehold',{polityId:'reef_cantons',
   householdId:'reef_shaded_home',eventIndex:s.log.length-1}).recorded,true);
  A.equal(op(s,'beastCivicStatus').households[0].residents,2);
+ A.throws(()=>op(s,'beastCivicHousehold',{polityId:'reef_cantons',
+  householdId:'reef_shaded_home',eventIndex:s.log.length-1}),/already has a specific history/);
  A.equal(Object.keys(s.beasts).length,peopleBefore);
  A.deepEqual(ids.map(id=>s.beasts[id].level),individualOriginal);
  A.equal(s.player.partnerIds.length,0);
