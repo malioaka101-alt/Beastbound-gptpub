@@ -27,6 +27,9 @@ function finalizeTime(s,oldMinutes){
  t.calendar.sixdays.push(...weeks);t.calendar.months.push(...months);
  const agendas=Agendas.tick(s,weeks,months);
  const realm=Realm.tick(s,weeks,months);
+ // Evolved individuals respond to the SAME actual sixday environment,
+ // without inventing a second calendar or species population.
+ require('./evolution-branch-web').sixday(s,weeks);
  const lifeAge=require('../scripts/age-lived-history').sync(s);
  return {sixdayTicks:weeks,monthTicks:months,publicAgendas:agendas.visible,
   ...(lifeAge.changed?{birthday:lifeAge.to}:{}),

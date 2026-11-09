@@ -3,7 +3,7 @@
 // The underlying Progress formulae are reference math, not permission to
 // choose free Maturity years, recognition difficulty or Soul Sight bonuses.
 const Crypto=require('node:crypto'),E=require('../engine.js');
-const C=require('./core'),P=require('./progress'),W=require('./world');
+const C=require('./core'),P=require('./progress'),W=require('./world'),Branch=require('./evolution-branch-web');
 const digest=entry=>Crypto.createHash('sha256').update(JSON.stringify(entry)).digest('hex');
 function current(s,key){
  if(typeof key!=='string')throw Error('Known current evolution branch key is required');
@@ -85,6 +85,9 @@ function signs(s,p={}){
     (soulmate?1:0)+(stage>=6?2:0);
  const check=C.check(s,{modifier,dc:proof.dc,label:'Recognise witnessed evolution signs around '+b.name});
  const ready=P.status(r).ready;
+ // A real successful interpretation reveals an already authored possible
+ // branch; no new form, bonus or second roll is invented by the discovery.
+ if(check.success)Branch.observed(s,r,proof,hash);
  const result={recognised:check.success,degree:check.degree,
   partnerFeltWindow:stage>=3&&ready,
   reading:check.success?(stage>=6?

@@ -3,7 +3,7 @@
 // The pure event resolver is not an API for the caller to create assent, venue,
 // catalysts or ritual bonuses by passing booleans and prose.
 const C=require('./core'),P=require('./progress'),BD=require('./bonds'),Agency=require('./beast-agency');
-const E=require('../engine.js'),W=require('./world');
+const E=require('../engine.js'),W=require('./world'),Branch=require('./evolution-branch-web');
 const MAX_AGE=6*1440;
 function event(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -64,7 +64,9 @@ function event(s,p={}){
   facilitySource:proof.facilitySource||'',catalysts:[...proof.catalysts]};
  // This resolver still independently enforces all real conditions, wounds,
  // potential, payment of actual items, consent and the preauthored anatomy.
+ const branchContext=Branch.beforeEvent(s,r,b);
  const outcome=P.evolutionEvent(s,r,{source:proof.riteSource,...agreed,care});
+ Branch.afterEvent(s,r,b,outcome,branchContext);
  if(Array.isArray(outcome.rolls)&&outcome.rolls.length){
   if(b.sapience<=1)Agency.remember(s,b);
   proof.used=true;
