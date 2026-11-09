@@ -7,6 +7,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  Nerve=require('../rules/body-nerve-sense'),
  Power=require('../rules/power-overview'),Turn=require('../scripts/chat-turn');
 const act=(s,name,p={})=>R.act(s,{system:'body',operation:name,params:p});
+const coreAct=(s,name,p={})=>R.act(s,{system:'core',operation:name,params:p});
 function prior(seed=927101){
  const s=E.newGame({seed,name:'Disposable Independent Body Refinement',path:'undecided'});
  R.unified.ensurePlayer(s);s.world.location='academy';
@@ -354,7 +355,7 @@ function earnNeuralCycle(s){
    witnessIndex:w,minutes:15});
  }
  A.ok(bloodTissue.points>=2,'This physical benefit needs genuinely earned prior tissue work');
- const scene=act(s,'core.prepareSceneCheck',{
+ const scene=coreAct(s,'prepareSceneCheck',{
   method:'footing',intent:'Keep secure footing on the visible local ground using personally trained physical circulation'});
  A.equal(scene.prepared,true);
  const sc=s.table.sceneChecks[scene.checkId];
@@ -376,7 +377,7 @@ function earnNeuralCycle(s){
  const dex=s.player.attributes.dex,rank=s.player.skills.survival.rank;
  const originalModifier=Math.floor((dex-10)/2)+2*rank;
  const beforeSupport=s.player.stamina,ts=s.world.minutes;
- const used=act(s,'core.check',{checkId:scene.checkId});
+ const used=coreAct(s,'check',{checkId:scene.checkId});
  A.equal(used.modifier,originalModifier+1);
  A.equal(used.actualPhysiologicalSupport?.staminaSpent,1);
  A.equal(used.actualPhysiologicalSupport?.tissueId,bloodTissue.source.id);
@@ -386,14 +387,14 @@ function earnNeuralCycle(s){
  A.equal(s.world.minutes,ts+15);
  A.equal(Phys.verify(s),true);
  const afterUse=E.exportGame(s),afterUseRng=s.rngState;
- A.throws(()=>act(s,'core.check',{checkId:scene.checkId}),/source|check|used|one-use|witness/);
+ A.throws(()=>coreAct(s,'check',{checkId:scene.checkId}),/source|check|used|one-use|witness/);
  A.equal(E.exportGame(s),afterUse);A.equal(s.rngState,afterUseRng);
- const unsupported=act(s,'core.prepareSceneCheck',{
+ const unsupported=coreAct(s,'prepareSceneCheck',{
   method:'reading',intent:'Read the visible nearby ground without an unrelated physical circulation advantage'});
  A.throws(()=>act(s,'physiqueTissueFooting',{cycle:5,
   id:bloodTissue.source.id,checkId:unsupported.checkId,witnessIndex}),
   /footing challenge/);
- const read=act(s,'core.check',{checkId:unsupported.checkId});
+ const read=coreAct(s,'check',{checkId:unsupported.checkId});
  A.equal(read.actualPhysiologicalSupport,undefined);
  A.equal(read.modifier,Math.floor((s.player.attributes.wis-10)/2)+2*s.player.skills.survival.rank);
  A.equal(Phys.verify(s),true);
