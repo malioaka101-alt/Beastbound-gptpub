@@ -4,7 +4,7 @@
 // These are *preconditions* to a human skill check, not bonuses supplied by it.
 const crypto=require('node:crypto');
 const CHOICES=['affiliative','curious','reserved','independent'];
-const ACTIVITIES=['gentle','play','light_contract','grade_exam','daily_care','evolution_rite'];
+const ACTIVITIES=['gentle','play','light_contract','grade_exam','daily_care','evolution_rite','sync_practice'];
 function profile(s,b){
  const existing=b.agencyProfile;
  if(existing!==undefined){
@@ -68,7 +68,9 @@ function evaluate(s,b,bond,activity){
        (p.disposition==='reserved'&&respect<55)))||
     (activity==='grade_exam'&&p.disposition==='independent'&&trust<70)||
     (activity==='evolution_rite'&&((p.disposition==='independent'&&trust<85)||
-      (p.disposition==='reserved'&&trust<65))))
+      (p.disposition==='reserved'&&trust<65)))||
+    (activity==='sync_practice'&&((p.disposition==='independent'&&trust<65)||
+      (p.disposition==='reserved'&&respect<35))))
   return {possible:false,reason:'The beast declines this interaction on its own terms'};
  return {possible:true};
 }
