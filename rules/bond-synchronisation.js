@@ -73,8 +73,21 @@ function verify(s,b,r){
     !['accepted','declined'].includes(v.decision)||
     !integer(v.humanCost,1,20)||!integer(v.fatigueCost,1,20)||
     !integer(v.energyCost,0,20)||
-    (v.decision==='declined'&&v.roll!==null)||
-    (v.roll!==null&&!integer(v.roll,1,20)))
+    (v.decision==='declined'&&
+     (v.roll!==null||v.points!==0||v.energyCost!==0||
+      v.feedback!==null||v.checkEvent!==null))||
+    (v.decision==='accepted'&&
+     (!v.checkEvent||hash(v.checkEvent)!==v.checkHash||
+      v.checkEvent.type!=='roll'||v.checkEvent.details?.roll!==v.roll||
+      !integer(v.roll,1,20)||
+      v.checkEvent.details?.success!==(v.points>0)||
+      v.points!==(v.checkEvent.details.success?v.checkEvent.details.progress:0)||
+      (v.target<3&&v.feedback!==null)||
+      (v.target>=3&&v.checkEvent.details.success&&v.feedback!==null)||
+      (v.target>=3&&!v.checkEvent.details.success&&
+       (!v.feedback||v.feedback.origin!=='actual-bounded-pair-feedback-v1'||
+        !integer(v.feedback.humanStaminaLoss,0,2)||
+        !integer(v.feedback.beastFatigueIncrease,0,2))))))
     return false;
   }
   if(v.kind==='stage'&&(!integer(v.stage,1,10)||!v.proof||
@@ -222,7 +235,7 @@ function train(s,p={}){
   append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
    witnessHash:proof.digest,decision:'declined',choiceBasis:decision.basis,
    humanCost,fatigueCost,energyCost:0,roll:null,
-   points:0,minutes});
+   checkEvent:null,feedback:null,points:0,minutes});
   return {practised:false,beastDeclined:true,noRoll:true,
    humanStaminaSpent:humanCost,beastFatigueIncreased:fatigueCost,
    beastEnergySpent:0,minutes};
@@ -233,14 +246,28 @@ function train(s,p={}){
   Math.floor((r.coordination||0)/35);
  const check=C.check(s,{modifier,dc:11+2*target,
   label:'Independent pairwork '+NAMES[target-1]});
- const checkHash=hash(s.log.at(-1));
+ const checkEvent=structuredClone(s.log.at(-1));
+ const checkHash=hash(checkEvent);
  const points=check.success?C.progress(check.degree):0;
+ // Real failed shared energy work causes bounded physical strain.
+ // Do not invent wounds or permanent soul damage without medical proof.
+ let feedback=null;
+ if(!check.success&&target>=3){
+  const penalty=check.degree==='severe failure'?2:1;
+  const humanStaminaLoss=Math.min(penalty,s.player.stamina);
+  const beastFatigueIncrease=Math.min(penalty,100-b.needs.fatigue);
+  s.player.stamina-=humanStaminaLoss;
+  b.needs.fatigue+=beastFatigueIncrease;
+  feedback={origin:'actual-bounded-pair-feedback-v1',
+   humanStaminaLoss,beastFatigueIncrease,
+   reason:'Failed joint energy flow strains both bodies without inventing an injury'};
+ }
  if(focus==='advance')r.syncPoints=Math.min(1000000,r.syncPoints+points);
  else r.syncMasteryPoints=Math.min(1000000,(r.syncMasteryPoints||0)+points);
  append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
   witnessHash:proof.digest,decision:'accepted',choiceBasis:decision.basis,focus,
   humanCost,fatigueCost,energyCost,roll:check.roll,
-  checkHash,points,minutes});
+  checkEvent,checkHash,feedback,points,minutes});
  const readiness=Bonds.syncReadiness(r,target);
  // Canonical Stage 9/10 have no numerical threshold: the original bond
  // deliberately requires a personally witnessed exceptional milestone.
@@ -273,8 +300,9 @@ function train(s,p={}){
  return {practised:true,check,focus,pointsEarned:points,promoted,
   currentSyncStage:r.syncStage,stageName:NAMES[r.syncStage-1]||null,
   ...(missingSource?{missingSource}:{}),
-  humanStaminaSpent:humanCost,beastFatigueIncreased:fatigueCost,
-  beastEnergySpent:energyCost,minutes,
+  humanStaminaSpent:humanCost+(feedback?.humanStaminaLoss||0),
+  beastFatigueIncreased:fatigueCost+(feedback?.beastFatigueIncrease||0),
+  beastEnergySpent:energyCost,feedback,minutes,
   noHumanLevelOrAutomaticPower:true};
 }
 function design(s,p={}){
