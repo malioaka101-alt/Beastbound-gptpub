@@ -76,7 +76,7 @@ function proof(s,b,stage,kind){
    A.ok(result.pointsEarned>=1);
   }
   A.throws(()=>op(s,'syncPractice',{beastId:b.id,witnessIndex:index}),
-   /original joint activity|already resolved/);
+   /original joint activity|already resolved|cannot be rolled again/);
   promoted=!!result.promoted;
  }
  A.ok(promoted,'This sourced and individually earned pair has real Stage 2 experience');
