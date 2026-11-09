@@ -461,6 +461,9 @@ function tickMonth(w,day){
  AgentInitiatives.month(w,day,v=>event(w,v));
  EmergentGroups.syncWorkerFounders(w,day,v=>event(w,v));
  EmergentGroups.month(w,day,v=>event(w,v));
+ // Already established independent beast-country civic institutions respond
+ // to real political and habitat pressure without inventing new citizens.
+ require('./beast-civic-life').monthly(w,day);
  PersonPresence.plan(w,day);
  GroupMemberAgency.month(w,day,v=>event(w,v));
  KnowledgeDiffusion.month(w,day,v=>event(w,v));
