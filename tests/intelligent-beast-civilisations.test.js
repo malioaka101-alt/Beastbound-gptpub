@@ -109,8 +109,10 @@ function enterAtoll(s){
  const after=op(s,'beastCivicStatus');
  A.equal(after.known[0].publicProceedings.length,1);
  A.equal(after.known[0].publicProceedings[0].topic,'Safeguard the shared spawning corridors');
- A.equal(JSON.stringify(after).includes('Voluntary Tide Listener'),false,
-  'A known hearing does not reveal private office competence');
+ A.equal(after.known[0].publicOffices[0].title,'Voluntary Tide Listener');
+ A.equal(after.known[0].publicOffices[0].witnessedAcceptance,true);
+ A.equal(JSON.stringify(after).includes('privateCompetence'),false,
+  'A known office does not expose private aptitude or compel future duty');
  C.event(s,'story','A mutually acknowledged compact is heard in the reef civic chamber by the actual participating delegates.',{
   origin:Civ.SESSION,polityId:'reef_cantons',institutionId:charter.institutionId,
   location:s.world.location,topic:'Reef and island sanctuary passage',
