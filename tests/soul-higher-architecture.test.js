@@ -172,6 +172,66 @@ function originalPhase3(seed=875001){
   formed.push(phase);
  }
  A.deepEqual(formed,[4,5,6,7]);
+ const Apps=require('../rules/soul-ethical-applications');
+ A.equal(Apps.verify(s),true);
+ A.deepEqual(act(s,'ethicalStatus').personalImprints,[]);
+ A.equal(Power.read(s).soul.ethicalApplications.noOtherPersonsMemoryOrSoulAccess,true);
+ // Self-witnessed memory source + independently observed self consent:
+ // no consent of an NPC is invented and nobody else's memory is copied.
+ let imprinted=null;
+ for(let n=0;n<4&&!imprinted;n++){
+  recovered(s,2);
+  const memoryIndex=observed(s,'original-personally-witnessed-moment',{
+   personalObservation:'The practitioner personally remembers surviving an independently measured spiritual practice without accessing any other mind.'});
+  const memoryHash=require('node:crypto').createHash('sha256')
+   .update(JSON.stringify(s.log[memoryIndex])).digest('hex');
+  const ix=observed(s,Apps.MEMORY,{
+   memoryHash,personallyWitnessed:true,
+   selfConsent:'The same individual voluntarily authorises only their own bounded personal spiritual memory record.',
+   privacyBoundary:'This personal imprint preserves no nonconsenting person’s private thoughts, identity or unseen experiences.'});
+  const id='original_self_memory_'+n;
+  const receipt=act(s,'selfImprint',{id,
+   summary:'Personally remembered resilience during safe and independent Soul architecture practice.',
+   memoryIndex,witnessIndex:ix,minutes:15});
+  A.equal(receipt.noExternalMemoryCopiedOrSentientSoulCreated,true);
+  A.equal(Apps.verify(s),true);
+  if(receipt.formed)imprinted=id;
+ }
+ A.ok(imprinted,'A personally consented self-imprint must be possible by an actual check');
+ A.equal(act(s,'ethicalStatus').personalImprints.find(x=>x.id===imprinted).active,true);
+ const beforeRevocation=s.world.minutes;
+ const revoked=act(s,'selfImprintRevoke',{id:imprinted});
+ A.equal(revoked.revoked,true);
+ A.equal(revoked.noOtherConsentNeededForOwnRevocation,true);
+ A.equal(s.world.minutes,beforeRevocation+5);
+ A.equal(act(s,'ethicalStatus').personalImprints.find(x=>x.id===imprinted).active,false);
+ const afterRevoke=E.exportGame(s),rngRevoke=s.rngState;
+ A.throws(()=>act(s,'selfImprintRevoke',{id:imprinted}),/no active original self-owned imprint/);
+ A.equal(E.exportGame(s),afterRevoke);A.equal(s.rngState,rngRevoke);
+ // Actual bounded Soul Domain pulse; measured range comes from earned VI.
+ recovered(s,4);
+ const pi=observed(s,Apps.FIELD,{
+  radiusMetres:3,
+  independentCounter:'Independent ambient spiritual interference creates a real limit and may collapse the small personal field.',
+  personalBoundary:'The field is self-centred, noncoercive, and does not see into any other person’s memory or intent.'});
+ const oldDomainReserve=s.player.soul.reserve,oldDomainTime=s.world.minutes;
+ const pulse=act(s,'domainPulse',{witnessIndex:pi,radius:3,minutes:10});
+ A.equal(pulse.attempted,true);
+ A.equal(pulse.radiusMetres,3);
+ A.equal(pulse.noAutomaticMindReadingNpcControlOrTerritoryClaim,true);
+ A.equal(s.player.soul.reserve,oldDomainReserve-pulse.reserveSpent);
+ A.equal(s.world.minutes,oldDomainTime+10);
+ A.equal(Apps.verify(s),true);
+ const afterPulse=E.exportGame(s),rngPulse=s.rngState;
+ A.throws(()=>act(s,'domainPulse',{witnessIndex:pi,radius:3,minutes:10}),
+  /same original bounded Soul Domain check cannot be repeated/);
+ A.equal(E.exportGame(s),afterPulse);A.equal(s.rngState,rngPulse);
+ const forgery=E.importGame(E.exportGame(s));
+ forgery.table.soulArchitecture.ethicalApplications.imprints[imprinted].source.memoryHash='fabricated';
+ A.equal(Apps.verify(forgery),false);
+ const domainForgery=E.importGame(E.exportGame(s));
+ domainForgery.table.soulArchitecture.ethicalApplications.pulses[0].source.radius=300;
+ A.equal(Apps.verify(domainForgery),false);
  A.equal(act(s,'higherStatus').next,null);
  A.equal(act(s,'higherStatus').stages.length,4);
  const snapshot=E.exportGame(s),copy=E.importGame(snapshot);
@@ -229,5 +289,47 @@ function originalPhase3(seed=875001){
  const forged=E.importGame(E.exportGame(s));
  forged.table.soulArchitecture.higher.records[4].repairs[0].source.strainAfter=100;
  A.equal(High.verify(forged),false);
+ // This injury arose from actual original severe failure; a later Phase IV
+ // self-stabilisation is a real clinical check, not a fabricated Soul heal.
+ let complete=false;
+ for(let n=0;n<9&&!complete;n++){
+  const stage=act(s,'higherStatus').stages[0];
+  if(stage.points>=6)break;
+  recovered(s,spec.cost);
+  const observedIndex=observed(s,High.PRACTICE,{phase:4,
+   observedResponse:'The same repaired non-sentient matrix now shows gradual controlled and measurable personal resonance.',
+   independentBoundary:'The person can deliberately stop this work without transferring consciousness or claiming others.'});
+  act(s,'higherPractice',{phase:4,witnessIndex:observedIndex,minutes:15});
+ }
+ for(let n=0;n<8&&!complete;n++){
+  recovered(s,spec.cost+3);
+  const observedIndex=observed(s,High.TEST,{phase:4,
+   actualFunction:'The safely tested self-owned non-sentient Soul Forge matrix carries a limited stable original internal wave.',
+   failureLimit:'The observed frame loses stability under incompatible load instead of binding any living person.',
+   identityPreservation:'Original self-identity is preserved without taking an imprint or memories from any other being.'});
+  complete=act(s,'higherComplete',{phase:4,witnessIndex:observedIndex,minutes:90}).formed;
+ }
+ A.equal(complete,true);
+ const Apps=require('../rules/soul-ethical-applications');
+ A.ok(s.player.soul.stability<100);
+ recovered(s,2);
+ const beforeHealing=s.player.soul.stability,oldSoul=s.player.soul.reserve;
+ const healingIndex=observed(s,Apps.HEAL,{
+  injuryBefore:beforeHealing,
+  observedInjury:'A genuine previous severe Soul Forge pressure failure reduced the practitioner’s recorded spiritual stability.',
+  treatmentLimit:'This restrained self-therapy restores only a small Soul Stability deficit and cannot heal another person or resurrect.'});
+ const therapy=act(s,'selfStabilize',{witnessIndex:healingIndex,minutes:60});
+ A.equal(therapy.attempted,true);
+ A.equal(therapy.noResurrectionMemoryEditingOrOtherSoulChange,true);
+ A.equal(s.player.soul.stability,therapy.stabilityAfter);
+ A.equal(s.player.soul.reserve,oldSoul-therapy.reserveSpent);
+ A.equal(Apps.verify(s),true);
+ const falseHealing=E.importGame(E.exportGame(s));
+ falseHealing.table.soulArchitecture.ethicalApplications.healing[0].source.after=999;
+ A.equal(Apps.verify(falseHealing),false);
+ const savedHealing=E.exportGame(s),rngHealing=s.rngState;
+ A.throws(()=>act(s,'selfStabilize',{witnessIndex:healingIndex,minutes:60}),
+  /already|No genuine locally observed|specific original observed Soul stability deficit/);
+ A.equal(E.exportGame(s),savedHealing);A.equal(s.rngState,rngHealing);
 }
 console.log('Soul Phase IV–VII: original earned Phase III, identity-safe non-sentient Soul Forge, Sanctuary, bounded Domain and maintained living architecture, actual costs/checks, repair and saved replay');
