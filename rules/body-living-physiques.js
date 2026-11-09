@@ -9,7 +9,9 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  MAP='witnessed-original-whole-body-refinement-design-v1',
  WORK='witnessed-individual-tissue-adaptation-v1',
  FORM='witnessed-whole-body-refinement-countertest-v1',
- CARE='witnessed-physique-pressure-injury-recovery-v1';
+ CARE='witnessed-physique-pressure-injury-recovery-v1',
+ ASSUME='witnessed-living-adaptive-physique-environmental-assumption-v1',
+ RELEASE='witnessed-living-adaptive-physique-safe-reversion-v1';
 const SPEC=Object.freeze({
  5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
   sources:['circulationMeasurement','metabolicLimit'],
@@ -147,6 +149,51 @@ function verify(s){
     digest(rec.transition.source)!==digest(winning.source))))
    return false;
   if(winning)formed.add(cycle);
+  if(cycle===6){
+   if(!Array.isArray(rec.expressions))return false;
+   let last=null;
+   const releases=new Set();
+   for(const item of rec.expressions){
+    const a=item?.source;
+    if(item?.origin!==ORIGIN||item.seal!==digest(a)||
+     a?.origin!==ORIGIN||
+     !['assume','release'].includes(a.kind)||
+     !I(a.minute,z.minute,s.world.minutes)||
+     !a.witness||a.witnessHash!==digest(a.witness)||
+     a.witness.details?.location!==z.witness.details.location||
+     allWitnesses.has(a.witnessHash))return false;
+    allWitnesses.add(a.witnessHash);
+    if(a.kind==='assume'){
+     if(!winning||a.witness.details?.origin!==ASSUME||
+      !S(a.witness.details?.environmentObserved,25,900)||
+      !S(a.witness.details?.safeReversionCounter,25,900)||
+      !I(a.duration,1,1000000)||
+      a.witness.details?.safeMinutes!==a.duration||
+      !I(a.staminaSpent,1,100000)||
+      a.staminaSpent!==Math.ceil(a.duration/60)+1||
+      !I(a.roll,1,20)||a.check?.roll!==a.roll||
+      !a.checkEvent||a.checkEventHash!==digest(a.checkEvent)||
+      a.checkEvent.type!=='roll'||
+      digest(a.checkEvent.details)!==digest(a.check)||
+      a.formed!==a.check.success||
+      a.activeFrom!==a.minute+1||
+      a.activeUntil!==(a.formed?a.activeFrom+a.duration:null)||
+      last&&(last.activeUntil>a.minute&&!releases.has(last.seal)))
+      return false;
+     last=item;
+    }else{
+     if(!last||!last.source.formed||
+      releases.has(last.seal)||
+      a.witness.details?.origin!==RELEASE||
+      !S(a.witness.details?.observedReturn,25,900)||
+      !S(a.witness.details?.independentFailureLimit,25,900)||
+      a.activationSeal!==last.seal||
+      a.minute<last.source.activeFrom||
+      a.minute>=last.source.activeUntil)return false;
+     releases.add(last.seal);
+    }
+   }
+  }
  }
  const neural=s.table?.bodyRefinement?.neural;
  const neuralEarned=!!neural?.transition;
@@ -218,7 +265,8 @@ function map(s,p={}){
   initialMaxStamina:s.player.maxStamina,
   neuralAtMap:!!bodyRoot.neural?.transition};
  root.cycles[p.cycle]={origin:ORIGIN,source,seal:digest(source),
-  points:0,strain:0,attempts:[],repairs:[],tests:[],transition:null};
+  points:0,strain:0,attempts:[],repairs:[],tests:[],transition:null,
+  ...(p.cycle===6?{expressions:[]}:{} )};
  bodyRoot.living=root;s.table.bodyRefinement=bodyRoot;
  s.player.body.physiqueIntegration??=0;
  return {mapped:true,cycle:p.cycle,name:sp.name,
@@ -317,6 +365,88 @@ function complete(s,p={}){
   check,staminaSpent:spent,minutes,capacity:cap,
   noAutomaticSpeciesTraitOrImmunity:true};
 }
+function adaptiveState(s){
+ const rec=s.table?.bodyRefinement?.living?.cycles?.[6];
+ const states=rec?.expressions||[];
+ let last=null,released=false;
+ for(const event of states){
+  if(event.source.kind==='assume'){last=event;released=false;}
+  else if(last&&event.source.activationSeal===last.seal)released=true;
+ }
+ return {active:!!(last?.source.formed&&!released&&
+   s.world.minutes>=last.source.activeFrom&&
+   s.world.minutes<last.source.activeUntil),
+  ...(last?.source.formed?{expiresAtMinute:last.source.activeUntil,
+   naturallyExpired:s.world.minutes>=last.source.activeUntil}:{}),
+  noAutomaticResistanceOrImmunity:true};
+}
+// Temporary physiological expression is not a new trait or a new power tree.
+// Costs are paid up front for the independently observed safe duration.
+// Time expiration is derived from the original world clock, not a separate tick.
+function assume(s,p={}){
+ if(!only(p,['witnessIndex','minutes'])||
+  !I(p.minutes,1,1000000))
+  throw Error('A source-observed bounded adaptive duration and original environment are required');
+ safe(s);originalOrgan(s);
+ if(!verify(s))throw Error('Stored original body physiology is inconsistent');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[6];
+ if(!r?.transition)throw Error('A completed real Adaptive Physique Cycle is required');
+ if(adaptiveState(s).active)throw Error('An original bodily adaptation is already active');
+ const witness=scene(s,p.witnessIndex,ASSUME,6);
+ if(!S(witness.details?.environmentObserved,25,900)||
+  !S(witness.details?.safeReversionCounter,25,900)||
+  witness.details.safeMinutes!==p.minutes)
+  throw Error('A witnessed actual local environment, tested body limit and safe duration are required');
+ const wHash=digest(witness);
+ if(r.expressions.some(x=>x.source.witnessHash===wHash))
+  throw Error('The same original adaptive experiment may not be repeated as a new attempt');
+ const spent=Math.ceil(p.minutes/60)+1;
+ if(!I(s.player.stamina,spent,100000))
+  throw Error('The original stamina pool cannot support that measured adaptive duration');
+ const start=s.world.minutes;s.player.stamina-=spent;
+ s.table.combatants.player.stamina=s.player.stamina;
+ const check=C.check(s,{modifier:Math.floor(((s.player.attributes.con??10)-10)/2)+
+  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
+  dc:18,label:'Original verified living adaptive physiology under present conditions'});
+ const event=structuredClone(s.log.at(-1));
+ const src={origin:ORIGIN,kind:'assume',minute:start,
+  duration:p.minutes,staminaSpent:spent,
+  witness,witnessHash:wHash,check:structuredClone(check),
+  checkEvent:event,checkEventHash:digest(event),roll:check.roll,
+  formed:check.success,activeFrom:start+1,
+  activeUntil:check.success?start+1+p.minutes:null};
+ const receipt={origin:ORIGIN,source:src,seal:digest(src)};
+ r.expressions.push(receipt);
+ E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ if(!verify(s))throw Error('Original temporary adaptive expression failed source verification');
+ return {attempted:true,formed:check.success,check,
+  minutes:p.minutes,staminaSpent:spent,...adaptiveState(s),
+  noAutomaticElementalDefenceOrBeastTrait:true};
+}
+function release(s,p={}){
+ if(!only(p,['witnessIndex']))throw Error('Voluntary physical reversion needs its own observed return witness');
+ safe(s);
+ if(!verify(s))throw Error('Original adaptive physiologic record is not verified');
+ const r=s.table?.bodyRefinement?.living?.cycles?.[6];
+ const curr=adaptiveState(s);
+ if(!curr.active)throw Error('No currently active recorded adaptive physiological response to release');
+ const last=[...r.expressions].reverse().find(x=>x.source.kind==='assume');
+ const witness=scene(s,p.witnessIndex,RELEASE,6);
+ if(!S(witness.details?.observedReturn,25,900)||
+  !S(witness.details?.independentFailureLimit,25,900))
+  throw Error('The actual original baseline return and independent failure limit must be observed');
+ const wHash=digest(witness);
+ if(r.expressions.some(x=>x.source.witnessHash===wHash))
+  throw Error('This specific reversion witness has already been used');
+ const start=s.world.minutes;
+ const src={origin:ORIGIN,kind:'release',minute:start,
+  activationSeal:last.seal,witness,witnessHash:wHash};
+ r.expressions.push({origin:ORIGIN,source:src,seal:digest(src)});
+ E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ if(!verify(s))throw Error('Voluntary physical return or original evidence no longer verifies');
+ return {released:true,elapsedMinutes:1,...adaptiveState(s),
+  noStaminaRefundNoInstantWoundHealing:true};
+}
 function status(s){
  if(!s.player?.body?.cycles?.includes('Organ Cycle'))
   return {available:false,note:'Actual original organ anatomy is necessary'};
@@ -328,8 +458,9 @@ function status(s){
    method:x.source.method,progress:x.points,needed:6,
    strain:x.strain,formed:!!x.transition})),
   orderFreedom:'Blood V and Adaptive VI may form before or after independently earned Nerve IV',
+  ...(r?.cycles?.[6]?.transition?{currentAdaptiveExpression:adaptiveState(s)}:{}),
   noFreeBeastTraitOrAutomaticMedicine:true};
 }
-module.exports={ORIGIN,MAP,WORK,FORM,CARE,SPEC,
+module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SPEC,
  map,work:(s,p)=>attempt(s,p,'work'),care:(s,p)=>attempt(s,p,'care'),
- complete,status,verify};
+ complete,assume,release,status,verify};
