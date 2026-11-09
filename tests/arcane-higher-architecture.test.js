@@ -178,5 +178,125 @@ function earnedThird(seed){
   const repeat=Turn.execute(file,request);
   A.equal(repeat.applied,false);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
+ // Circles V-IX must build on the real Fourth, each with its own observed
+ // physical source. The built-in spell grammar remains separate from rank.
+ const High=require('../rules/arcane-higher-circles'),
+  Cosmos=require('../world/cosmology-ledger');
+ const fields={
+ 5:{measuredRadius:'Measured near-body Mana field decays within a finite observed radius, with the boundary marked and independently tested.',
+    ambientCounter:'Existing stone and air pressures interrupt unsupported projection and can collapse the small field.'},
+ 6:{existingTissue:'The existing human nerve pathways and ordinary forearm tissues are directly examined, not invented into a special organ.',
+    nerveResponse:'Observed mundane nerve timing responds to restricted Mana geometry with metabolic stress and no new senses.'},
+ 7:{layerMeasurement:'An original local astral interference pattern is measured at a physical Circle boundary without entering a spirit realm.',
+    identityProtection:'Independent feedback confirms that this experiment cannot read another person or take their identity.'},
+ 8:{lawManifestation:'The original source-confirmed Origin Pattern is observed through bounded energy response under a real local constraint.',
+    observedLawLimit:'A witness confirms that understanding a law does not rewrite it, transcend biology or produce a miracle.'},
+ 9:{physicalNetwork:'An actual measured local Mana exchange between distinct existing workshop conductors is investigated as a small network.',
+    feedbackIsolation:'Isolated individual links fail safely when the environmental network pressure exceeds supported bounds.',
+    networkIsolation:'Real prepared laboratory isolation physically separates the body from catastrophic feedback.'}
+ };
+ const plannedSpellKeys=Object.keys(s.table.arcaneTechniques||{}).sort();
+ const lawReg=Cosmos.peek(s)||Cosmos.seed();
+ const law=lawReg.planes.mortal.facts.find(x=>x.domain==='origin-pattern'&&x.kind==='law');
+ A.ok(law?.seal,'Circle VIII is anchored to an existing true cosmology law, not a fabricated claim');
+ A.equal(op(s,'higherStatus').circles,4);
+ for(let stage=5;stage<=9;stage++){
+  const spec=High.SPEC[stage],initial=s.player.arcane.circles;
+  A.equal(initial,stage-1);
+  const beforeBad=E.exportGame(s),rngBeforeBad=s.rngState;
+  A.throws(()=>op(s,'higherMap',{stage,design:'A named magic circle',
+   channelModel:'Unmeasured',interference:'None',safety:'None',
+   witnessIndex:0}),/plan needs|source|previous/);
+  A.equal(E.exportGame(s),beforeBad);A.equal(s.rngState,rngBeforeBad);
+  const extra={
+   ...fields[stage],kind:spec.kind,circle:stage,
+   existingChannels:s.player.arcane.channels,
+   countertest:'Original independent pressure and controlled collapse measurements limit the proposed new Circle geometry.',
+   ...(stage===8?{lawSeal:law.seal}:{})
+  };
+  const wi=witnessed(s,High.MAP,extra);
+  const details={
+   stage,
+   design:'An individually constructed '+spec.name+' Circle with original observed feedback across the existing channels and a reversible controlled geometry under distinct physical interference.',
+   channelModel:'Every already earned channel remains connected to the same genuine Mana Core while a new bounded structural layer is being developed.',
+   interference:'Real excess Mana flow, ambient opposition, individual tissue or geometric mismatch can collapse this architecture.',
+   safety:'The practitioner observes failure limits and avoids uncontrolled environmental, spiritual, personal or biological claims.',
+   witnessIndex:wi,
+   ...(stage===8?{lawRef:{planeId:'mortal',domain:'origin-pattern'}}:{})
+  };
+  A.equal(op(s,'higherMap',details).mapped,true);
+  A.equal(High.verify(s),true);
+  A.equal(s.player.arcane.circles,stage-1);
+  let ready=false;
+  for(let attempt=0;attempt<12&&!ready;attempt++){
+   rest(s,spec.minuteCost);
+   const practiceIndex=witnessed(s,High.PRACTICE,{
+    circle:stage,kind:spec.kind,
+    measuredResponse:'A separate real training attempt tests the correct original Mana structure against measured local pressure.',
+    resistance:'An actual independently witnessed environmental or biological limit prevents an invented unbounded magical response.'});
+   const priorMana=s.player.mana,start=s.world.minutes;
+   const training=op(s,'higherWork',{stage,witnessIndex:practiceIndex,minutes:15});
+   A.equal(s.world.minutes,start+15);
+   A.equal(s.player.mana,priorMana-training.manaSpent);
+   A.equal(training.noFreeSpell,true);
+   A.equal(High.verify(s),true);
+   ready=training.points>=training.required;
+  }
+  A.ok(ready,'Stage '+stage+' must be earned with original checks');
+  let passed=false;
+  for(let attempt=0;attempt<12&&!passed;attempt++){
+   rest(s,spec.minuteCost+4);
+   const challengeIndex=witnessed(s,High.TEST,{
+    circle:stage,kind:spec.kind,
+    independentCountertest:'A genuinely new physical opponent pressure, local ambient change or structural challenge tests this individual Circle.',
+    limitObserved:'The original witnessed result shows a bounded structural response rather than free magic or world law rewriting.'});
+   const mana=s.player.mana,max=s.player.maxMana,tick=s.world.minutes,
+    result=op(s,'higherComplete',{stage,witnessIndex:challengeIndex,minutes:90});
+   A.equal(result.attempted,true);
+   A.equal(s.player.mana,mana-result.manaSpent);
+   A.equal(s.world.minutes,tick+90);
+   A.equal(result.noAutomaticSpellOrOverriddenWorldLaw,true);
+   passed=result.formed;
+   if(passed){
+    A.equal(s.player.arcane.circles,stage);
+    const profile=R.build.arcaneProfile(stage);
+    A.equal(s.player.arcane.channels,profile.channels);
+    A.equal(s.player.maxMana,Math.max(max,profile.mana));
+   }
+   A.equal(High.verify(s),true);
+  }
+  A.equal(passed,true,'Actual original Stage '+stage+' structural work should become achievable');
+  A.deepEqual(Object.keys(s.table.arcaneTechniques||{}).sort(),plannedSpellKeys);
+  A.equal(s.player.humanEvolution.stage,0);
+  A.equal(s.player.meridian.stage,0);
+  A.equal(s.player.soul.phase,0);
+  A.equal(s.player.origin.stableTraits.length,0);
+  A.equal(High.verify(E.importGame(E.exportGame(s))),true);
+ }
+ A.equal(s.player.arcane.circles,9);
+ A.equal(op(s,'higherStatus').stages.length,5);
+ const fullSave=E.exportGame(s),derived=E.importGame(fullSave);
+ derived.table.arcaneArchitecture.higherCircles.circles[9].transition.source.capacity.newMana+=900;
+ A.equal(High.verify(derived),false);
+ // An original named attack or World Circuit idea can be mapped and studied
+ // within the real formula grammar but cannot manufacture a combat adapter.
+ const harmful='bounded_original_mana_strike';
+ const wAttack=witnessed(s,Spells.MAP,{
+  formulaId:harmful,
+  observedGeometry:'An original high-circle branch geometry is measured separately without claiming actual physical attack or damage.',
+  knownFailure:'The studied unexecuted combat concept lacks independently verified target harm and real defence contests.'});
+ const combatPlan=op(s,'formulaMap',{id:harmful,name:'Hypothetical Focused Mana Strike',
+  form:{family:'strike',damage:8,rng:'close',area:'single',duration:'instant',magnitude:0},
+  channels:[1,2,3],
+  mechanism:'A freely imagined and physically plausible designed spell combines three original channels to focus bounded Mana pressure.',
+  limit:'No damage is learned until a real separately witnessed source, casting target and combat contest are implemented.',
+  interferenceSource:'Independent resistance, unprepared targets and actual Mana pressure can disrupt the unfinished design.',
+  witnessIndex:wAttack});
+ A.equal(combatPlan.mapped,true);A.equal(combatPlan.effectAdapterAvailable,false);
+ const frozen=E.exportGame(s),freezeRng=s.rngState;
+ A.throws(()=>op(s,'formulaCast',{id:harmful,witnessIndex:wAttack}),
+  /not authentically recorded|originally learned|not authentically/);
+ A.equal(E.exportGame(s),frozen);A.equal(s.rngState,freezeRng);
+ A.equal(Spells.verify(s),true);
 }
 console.log('Higher Arcane: earned Third Matrix, genuine Fourth Dynamic Circle, original multi-channel grammar, real study/cast costs and saved-source provenance without invented effects');
