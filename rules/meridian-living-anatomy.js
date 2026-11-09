@@ -58,42 +58,65 @@ function sourceEvent(s,index,origin){
 function checkRoute(r){
  const z=r?.source;
  if(!z||r.origin!==ORIGIN||r.seal!==hash(z)||
-   z.origin!==ORIGIN||z.routeId!==r.id||
-   !ident(r.id)||!prose(z.name,3,160)||!prose(z.principle)||
-   !prose(z.interference)||!prose(z.pressureRisk)||!prose(z.treatmentPath)||
-   !integer(z.load,1,9)||!Array.isArray(z.segments)||
-   !z.segments.length||z.segments.length>12||
-   new Set(z.segments.map(x=>x.kind+':'+x.number)).size!==z.segments.length||
-   z.segments.some(x=>!x||!Object.hasOwn(segments,x.kind)||
+  z.origin!==ORIGIN||z.routeId!==r.id||!ident(r.id)||
+  !prose(z.name,3,160)||!prose(z.principle)||
+  !prose(z.interference)||!prose(z.pressureRisk)||!prose(z.treatmentPath)||
+  !integer(z.load,1,9)||!Array.isArray(z.segments)||
+  !z.segments.length||z.segments.length>12||
+  z.segments.some(x=>!x||!Object.hasOwn(segments,x.kind)||
     !integer(x.number,1,segments[x.kind]))||
-   !Array.isArray(z.gates)||z.gates.length<1||z.gates.length>24||
-   new Set(z.gates).size!==z.gates.length||
-   z.gates.some(n=>!integer(n,1,108))||
-   !['lower','middle','upper'].includes(z.dantian)||
-   !z.witness||z.witnessHash!==hash(z.witness)||
-   z.witness.details?.origin!==MAP||
-   z.witness.details?.routeId!==r.id||
-   !integer(r.integrity,0,20)||!Array.isArray(r.attempts)||
-   !Array.isArray(r.injuries)||!integer(r.required,1,20))
-  return false;
+  new Set(z.segments.map(x=>x.kind+':'+x.number)).size!==z.segments.length||
+  !Array.isArray(z.gates)||z.gates.length<1||z.gates.length>24||
+  new Set(z.gates).size!==z.gates.length||
+  z.gates.some(n=>!integer(n,1,108))||
+  !['lower','middle','upper'].includes(z.dantian)||
+  !z.witness||z.witnessHash!==hash(z.witness)||
+  z.witness.details?.origin!==MAP||
+  z.witness.details?.routeId!==r.id||
+  !integer(r.integrity,0,20)||!integer(r.required,1,20)||
+  !Array.isArray(r.attempts)||!Array.isArray(r.injuries)||
+  !Array.isArray(r.care))return false;
  const required=Math.max(2,Math.ceil(z.segments.length/3)+z.load-2);
  if(r.required!==required||r.integrity>r.required)return false;
- for(const a of r.attempts){
-  if(a.origin!==ORIGIN||a.routeId!==r.id||a.seal!==hash(a.source)||
-    a.source.origin!==ORIGIN||a.source.routeId!==r.id||
-    !integer(a.source.startedMinute)||!integer(a.source.roll,1,20)||
-    !integer(a.source.qiSpent,1,50)||!integer(a.source.staminaSpent,1,12)||
-    !integer(a.source.earned,0,3)||!a.source.check||
-    a.source.check.roll!==a.source.roll||
-    !integer(a.source.minutes,15,480))
+ let earnedIntegrity=0,lastMinute=z.createdMinute;
+ for(const attempt of r.attempts){
+  const a=attempt?.source;
+  if(!a||attempt.origin!==ORIGIN||attempt.seal!==hash(a)||
+   attempt.routeId!==r.id||a.origin!==ORIGIN||a.routeId!==r.id||
+   !integer(a.startedMinute,lastMinute)||!integer(a.minutes,15,480)||
+   !integer(a.roll,1,20)||!integer(a.qiSpent,1,50)||
+   !integer(a.staminaSpent,1,12)||!integer(a.earned,0,3)||
+   a.check?.roll!==a.roll||
+   a.earned!==(a.check.success?a.check.progress:0)||
+   a.newIntegrity!==Math.min(r.required,earnedIntegrity+a.earned))
    return false;
+  earnedIntegrity=a.newIntegrity;
+  lastMinute=a.startedMinute+a.minutes;
  }
+ if(r.integrity!==earnedIntegrity)return false;
  for(const injury of r.injuries){
-  if(injury.origin!==ORIGIN||injury.seal!==hash(injury.source)||
-   injury.source.routeId!==r.id||
-   !integer(injury.source.stabilityLoss,1,10)||
-   !integer(injury.source.startedMinute))
+  const a=injury?.source;
+  if(injury.origin!==ORIGIN||injury.seal!==hash(a)||
+   a?.routeId!==r.id||!integer(a.stabilityLoss,1,10)||
+   !integer(a.startedMinute))return false;
+ }
+ const caredFor=new Set(),sources=new Set();
+ for(const entry of r.care){
+  const a=entry?.source;
+  if(entry?.origin!==TREAT||entry.seal!==hash(a)||a?.origin!==TREAT||
+   a.routeId!==r.id||!r.injuries.some(x=>x.seal===a.injuryHash)||
+   a.witnessHash!==hash(a.witness)||a.witness?.details?.origin!==TREAT||
+   a.witness.details.routeId!==r.id||
+   !integer(a.startedMinute)||!integer(a.minutes,15,480)||
+   !integer(a.staminaSpent,1,12)||!integer(a.roll,1,20)||
+   a.check?.roll!==a.roll||
+   a.stabilityRecovered!==(a.check.success?Math.min(2,a.originalLoss):0)||
+   !integer(a.originalLoss,1,10)||
+   sources.has(a.witnessHash)||
+   (a.check.success&&caredFor.has(a.injuryHash)))
    return false;
+  sources.add(a.witnessHash);
+  if(a.check.success)caredFor.add(a.injuryHash);
  }
  return true;
 }
@@ -154,15 +177,16 @@ function mapRoute(s,p={}){
   witnessHash:hash(event),createdMinute:s.world.minutes};
  const required=Math.max(2,Math.ceil(draft.segments.length/3)+draft.load-2);
  const route={id:p.id,origin:ORIGIN,source:draft,seal:hash(draft),
-  integrity:0,required,attempts:[],injuries:[]};
+  integrity:0,required,attempts:[],injuries:[],care:[]};
  if(!checkRoute(route))throw Error('Route references nonexistent or duplicate anatomical structures');
- const net=ensure(s);
- if(net.routes[p.id])throw Error('Already mapped this specific anatomical route');
- const occupied=new Set(Object.values(net.routes).flatMap(x=>
+ const existing=s.table.powerPhysiology.meridian.advancedNetwork;
+ if(existing&&!verify(s))throw Error('Original Meridian route ledger was altered');
+ if(existing?.routes[p.id])throw Error('Already mapped this specific anatomical route');
+ const occupied=new Set(Object.values(existing?.routes||{}).flatMap(x=>
   x.source.segments.map(y=>y.kind+':'+y.number)));
  if(draft.segments.some(x=>occupied.has(x.kind+':'+x.number)))
-  throw Error('One original channel segment cannot be allocated to mutually conflicting routes');
- net.routes[p.id]=route;
+  throw Error('One real channel segment cannot be allocated to conflicting routes');
+ ensure(s).routes[p.id]=route;
  return {mapped:true,id:p.id,segments:draft.segments.length,
   pressureLoad:p.load,requiredIntegrity:required,
   sourceBased:true,noGateOpenedOrStageAwarded:true};
@@ -230,12 +254,62 @@ function work(s,p={}){
   qiSpent:qiCost,staminaSpent:staminaCost,minutes,setback,
   noAutomaticTechniqueOrEvolution:true};
 }
+function treat(s,p={}){
+ if(!keep(p,['routeId','witnessIndex','minutes'])||
+  !ident(p.routeId)||!integer(p.minutes??120,15,480))
+  throw Error('A specific mapped circulation injury, witnessed care scene and real treatment time are required');
+ const net=s.table?.powerPhysiology?.meridian?.advancedNetwork,
+  route=net?.routes?.[p.routeId];
+ if(!route||!verify(s))throw Error('No original damaged Meridian route or verified clinical history');
+ available(s);
+ const injury=pending(route)[0];
+ if(!injury)throw Error('No unrecovered original pressure deviation remains here');
+ const witness=sourceEvent(s,p.witnessIndex,TREAT);
+ if(witness.details.routeId!==route.id||
+  witness.details.injuryHash!==injury.seal||
+  !prose(witness.details.diagnosis,18,700)||
+  !prose(witness.details.treatment,18,700))
+  throw Error('The original specific injured route and clinical treatment plan must be personally witnessed');
+ const witnessHash=hash(witness);
+ if(route.care.some(x=>x.source.witnessHash===witnessHash))
+  throw Error('One treatment scene cannot create multiple separate healing checks');
+ const minutes=p.minutes??120,staminaCost=Math.ceil(minutes/120);
+ if(!integer(s.player.stamina,staminaCost,100000))
+  throw Error('Clinical pressure recovery needs actual available Stamina');
+ const before=s.world.minutes;
+ s.player.stamina-=staminaCost;
+ const modifier=Math.floor((s.player.attributes.wis-10)/2)+
+   2*(s.player.skills?.medicine?.rank||0);
+ const check=C.check(s,{modifier,dc:12+route.source.load+
+  injury.source.stabilityLoss,label:'Original Meridian pressure recovery'});
+ const restored=check.success?Math.min(2,injury.source.stabilityLoss):0;
+ if(restored)s.player.meridian.stability=Math.min(100,s.player.meridian.stability+restored);
+ const source={origin:TREAT,routeId:route.id,
+  injuryHash:injury.seal,originalLoss:injury.source.stabilityLoss,
+  startedMinute:before,minutes,staminaSpent:staminaCost,
+  witness:structuredClone(witness),witnessHash,
+  roll:check.roll,check:structuredClone(check),
+  stabilityRecovered:restored,originalCheckHash:hash(s.log.at(-1))};
+ route.care.push({origin:TREAT,source,seal:hash(source)});
+ E.advance(s,minutes);require('./world').finalizeTime(s,before);
+ if(!verify(s))throw Error('Meridian clinical injury or treatment receipt changed');
+ return {careAttempted:true,routeId:route.id,check,
+  clinicalRecovery:check.success,stabilityRecovered:restored,
+  unresolvedDeviations:pending(route).length,
+  staminaSpent:staminaCost,minutes,
+  noInstantRepairWithoutOriginalCheck:true};
+}
+function pending(route){
+ const recovered=new Set(route.care.filter(x=>x.source.check.success)
+  .map(x=>x.source.injuryHash));
+ return route.injuries.filter(x=>!recovered.has(x.seal));
+}
 function coverage(s){
  const net=s.table?.powerPhysiology?.meridian?.advancedNetwork;
  const done={extraordinary:new Set(),major:new Set(),minor:new Set()};
  if(net&&!verify(s))throw Error('Meridian source history changed');
  for(const r of Object.values(net?.routes||{})){
-  if(r.integrity<r.required||r.injuries.length)continue;
+  if(r.integrity<r.required||pending(r).length)continue;
   for(const x of r.source.segments)done[x.kind].add(x.number);
  }
  return {integrated:{extraordinary:done.extraordinary.size,major:done.major.size,
@@ -252,8 +326,8 @@ function status(s){
   routes:Object.values(net?.routes||{}).map(r=>({
    id:r.id,name:r.source.name,segments:r.source.segments.length,
    integrity:r.integrity,required:r.required,
-   pressureLoad:r.source.load,unrecoveredDeviations:r.injuries.length})),
+   pressureLoad:r.source.load,unrecoveredDeviations:pending(r).length})),
   coverage:evidence,realIndividualAnatomy:true,
   note:'Mapped channels and earned physical integration are distinct; a route name does not produce an ability, Dantian Sea ring, Stage or Qi. Later Stage VI–IX anatomy needs separate original evidence and mechanical adapters'};
 }
-module.exports={ORIGIN,MAP,TREAT,TRANSITION,prior,verify,mapRoute,work,coverage,status};
+module.exports={ORIGIN,MAP,TREAT,TRANSITION,prior,verify,mapRoute,work,treat,coverage,status};
