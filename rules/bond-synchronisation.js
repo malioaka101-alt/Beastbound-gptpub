@@ -27,7 +27,8 @@ function pair(s,id,{here=false}={}){
   !['mutual partner','reciprocal partner'].includes(b.relationship)||
   b.consent!==true||r.fractured||r.beast!==b.name||r.sapience!==b.sapience)
   throw Error('Synchronisation needs one existing willing reciprocal partner and real bond ledger');
- if(here&&(s.battle||b.away===true||b.location!==s.world.location||
+ if(here&&(s.battle||b.away===true||
+  (b.location&&b.location!==s.world.location)||
   /hostile|terrified|panicked|fleeing/i.test(String(b.mood))||
   !b.needs||!integer(b.needs.hunger,0,100)||!integer(b.needs.fatigue,0,100)||
   !integer(b.condition,0,100)||b.condition<60||
@@ -150,6 +151,22 @@ function choice(s,b,r,sceneHash){
   (disposition==='independent'?-.16:disposition==='reserved'?-.08:.10)));
  return {yes:n<threshold,basis:'individually-consistent-animal-choice'};
 }
+function validMedium(s,b){
+ const m=b.resonanceMediumAssessment;
+ if(!m)return false;
+ if(m.origin!=='verified-specific-compatible-pair-medium-v1'||
+  m.beastId!==b.id||m.species!==b.species||
+  m.location!==s.world.location||
+  !integer(m.minute,0,s.world.minutes)||
+  !prose(m.source,24,900)||!integer(m.witnessIndex,0,s.log.length-1))
+  throw Error('Alternate resonance medium has no original source-verified physical presence');
+ const ev=s.log[m.witnessIndex];
+ if(hash(ev)!==m.witnessHash||ev?.type!=='story'||
+  ev.details?.origin!=='original-source-verified-pair-medium-v1'||
+  ev.details?.beastId!==b.id||ev.details?.location!==m.location)
+  throw Error('Alternate resonance medium is not present in the original witnessed source');
+ return true;
+}
 function breakthrough(s,b,r,target){
  const tag=special[target];
  if(!tag)return {ready:true,proof:null};
@@ -158,7 +175,7 @@ function breakthrough(s,b,r,target){
   x.details.stage===target&&x.details.kind===tag&&
   x.details.location===s.world.location&&prose(x.details.basis,24,900));
  if(!event)return {ready:false,reason:'No witnessed '+tag+' in this original pair'};
- if(target===4&&!r.contract&&!b.resonanceMediumAssessment)
+ if(target===4&&!r.contract&&!validMedium(s,b))
   return {ready:false,reason:'No actual compatible bond or documented resonance medium'};
  if(target===7&&(!integer(s.player.soul?.stability,0,100)||
   s.player.soul.stability<65))
@@ -183,7 +200,7 @@ function train(s,p={}){
   b.needs.fatigue+fatigueCost>95||
   (energyCost&&(!integer(b.energy,energyCost,100000))))
   throw Error('Both individuals must have sufficient real exertion and energy for pairwork');
- if(target>=3&&!r.contract&&!b.resonanceMediumAssessment)
+ if(target>=3&&!r.contract&&!validMedium(s,b))
   throw Error('Energy synchronisation requires a real mutual contract or documented compatible medium');
  const decision=choice(s,b,r,proof.digest),started=s.world.minutes;
  s.player.stamina-=humanCost;b.needs.fatigue+=fatigueCost;
@@ -247,6 +264,13 @@ function design(s,p={}){
  if(life.methods[p.methodId])throw Error('This pair already recorded that named original method');
  const human=s.table?.meridianTechniques?.[p.humanTechniqueId]||
   s.table?.arcaneTechniques?.[p.humanTechniqueId];
+ if(human?.route==='independent')
+  require('./self-taught-basic-techniques').profile(s,p.humanTechniqueId);
+ else if(p.humanTechniqueId==='qi_strike')
+  require('./meridian-qi-strike').attackProfile(s,p.humanTechniqueId);
+ else if(p.humanTechniqueId==='arcane_spark')
+  require('./arcane-spark').attackProfile(s,p.humanTechniqueId);
+ else throw Error('No existing original earned-technique verifier can authenticate this shared design');
  if(!human||human.techniqueId!==p.humanTechniqueId||!human.rollHash)
   throw Error('The specific human source technique has not genuinely been learned');
  const ability=E.SPECIES[b.species]?.ability;
@@ -277,6 +301,13 @@ function demonstration(s,p={}){
  if(!m||r.syncStage<5)throw Error('No truly learned individual pair design exists');
  const human=s.table?.meridianTechniques?.[m.source.humanTechniqueId]||
   s.table?.arcaneTechniques?.[m.source.humanTechniqueId];
+ if(human?.route==='independent')
+  require('./self-taught-basic-techniques').profile(s,m.source.humanTechniqueId);
+ else if(m.source.humanTechniqueId==='qi_strike')
+  require('./meridian-qi-strike').attackProfile(s,m.source.humanTechniqueId);
+ else if(m.source.humanTechniqueId==='arcane_spark')
+  require('./arcane-spark').attackProfile(s,m.source.humanTechniqueId);
+ else throw Error('The designed original technique lacks a current earned source verifier');
  if(!human||hash(human)!==m.source.humanHash||
   hash(E.SPECIES[b.species]?.ability)!==m.source.abilityHash)
   throw Error('Original earned human or beast capability changed');
