@@ -210,6 +210,9 @@ function verify(s){
   !require('./meridian-living-intent').verifySource(s))return false;
  if((net.tissueInterfaces||net.tissueTests||s.player.meridian.stage>=7)&&
   !require('./meridian-physique-integration').verifySource(s))return false;
+ if((net.domainPlans||net.domainTests||net.domainPulses||
+     s.player.meridian.stage>=8)&&
+  !require('./meridian-living-domain').verifySource(s))return false;
  return true;
 }
 function ensure(s){
