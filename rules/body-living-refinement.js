@@ -142,7 +142,9 @@ function verify(s){
   }
   if(pts!==rec.points||strain!==rec.strain||
    !!rec.transition!==!!winning||
-   (rec.transition&&rec.transition.seal!==winning.seal))
+   (rec.transition&&(rec.transition.seal!==winning.seal||
+    rec.transition.seal!==digest(rec.transition.source)||
+    digest(rec.transition.source)!==digest(winning.source))))
    return false;
   if(winning)formed.add(cycle);
  }
