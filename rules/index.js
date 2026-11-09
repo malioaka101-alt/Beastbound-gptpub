@@ -234,6 +234,7 @@ function act(s,{system,operation,params={}}={}){
   case 'body.physiqueTissueMap':return require('./body-living-physiques').tissueMap(s,params);
   case 'body.physiqueTissueWork':return require('./body-living-physiques').tissueWork(s,params);
   case 'body.physiqueTissueCare':return require('./body-living-physiques').tissueCare(s,params);
+  case 'body.physiqueTissueFooting':return require('./body-living-physiques').tissueFooting(s,params);
   case 'meridian.gatePractice':return Disciplines.gatePractice(s,params);
   case 'meridian.seaStatus':return Disciplines.seaStatus(s);
   case 'meridian.seaWork':return Disciplines.seaWork(s,params);
