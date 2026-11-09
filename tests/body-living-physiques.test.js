@@ -339,6 +339,67 @@ function earnNeuralCycle(s){
  const falseResearch=E.importGame(E.exportGame(s));
  falseResearch.table.bodyRefinement.living.cycles[7].tissues[0].practice[0].source.pointsAfter+=99;
  A.equal(Phys.verify(falseResearch),false);
+ // First MECHANICAL use of an individual earned tissue is limited to
+ // the game's existing source-prepared local footing check. The GM cannot
+ // create its DC, invent terrain, stack bonuses, or mint a second die.
+ const bloodTissue=s.table.bodyRefinement.living.cycles[5].tissues[0];
+ for(let n=0;n<8&&bloodTissue.points<2;n++){
+  recovery(s,Phys.SPEC[5].energy);
+  const w=witness(s,Phys.TISSUE_WORK,5,{
+   tissueId:bloodTissue.source.id,
+   observedResponse:'Fresh independently measured blood-oxygen and muscle stability evidence under realistic physical footing loads.',
+   physicalLimit:'Observed fatigue, original movement and actual blood pressure still prevent unsupported supernatural balance or immunity.'
+  });
+  act(s,'physiqueTissueWork',{cycle:5,id:bloodTissue.source.id,
+   witnessIndex:w,minutes:15});
+ }
+ A.ok(bloodTissue.points>=2,'This physical benefit needs genuinely earned prior tissue work');
+ const scene=act(s,'core.prepareSceneCheck',{
+  method:'footing',intent:'Keep secure footing on the visible local ground using personally trained physical circulation'});
+ A.equal(scene.prepared,true);
+ const sc=s.table.sceneChecks[scene.checkId];
+ A.equal(sc.method,'footing');
+ const witnessIndex=witness(s,Phys.TISSUE_FOOTING,5,{
+  tissueId:bloodTissue.source.id,checkId:scene.checkId,method:'footing',
+  observedMechanicalRole:'This person has individually measured original blood-and-muscle stability in the currently present footing conditions.',
+  failureCountertest:'Separate current exertion tests show the measured response fails with fatigue, surface instability and bodily injury.'
+ });
+ const prepared=act(s,'physiqueTissueFooting',{cycle:5,
+  id:bloodTissue.source.id,checkId:scene.checkId,witnessIndex});
+ A.equal(prepared.prepared,true);A.equal(prepared.noRollYet,true);
+ A.equal(Phys.verify(s),true);
+ const prepped=E.exportGame(s),preparedRng=s.rngState;
+ A.throws(()=>act(s,'physiqueTissueFooting',{cycle:5,
+  id:bloodTissue.source.id,checkId:scene.checkId,witnessIndex}),
+  /stacked|second/);
+ A.equal(E.exportGame(s),prepped);A.equal(s.rngState,preparedRng);
+ const dex=s.player.attributes.dex,rank=s.player.skills.survival.rank;
+ const originalModifier=Math.floor((dex-10)/2)+2*rank;
+ const beforeSupport=s.player.stamina,ts=s.world.minutes;
+ const used=act(s,'core.check',{checkId:scene.checkId});
+ A.equal(used.modifier,originalModifier+1);
+ A.equal(used.actualPhysiologicalSupport?.staminaSpent,1);
+ A.equal(used.actualPhysiologicalSupport?.tissueId,bloodTissue.source.id);
+ const passedDays=Math.floor(s.world.minutes/1440)-Math.floor(ts/1440);
+ A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+  beforeSupport-1+5*passedDays));
+ A.equal(s.world.minutes,ts+15);
+ A.equal(Phys.verify(s),true);
+ const afterUse=E.exportGame(s),afterUseRng=s.rngState;
+ A.throws(()=>act(s,'core.check',{checkId:scene.checkId}),/source|check|used|one-use|witness/);
+ A.equal(E.exportGame(s),afterUse);A.equal(s.rngState,afterUseRng);
+ const unsupported=act(s,'core.prepareSceneCheck',{
+  method:'reading',intent:'Read the visible nearby ground without an unrelated physical circulation advantage'});
+ A.throws(()=>act(s,'physiqueTissueFooting',{cycle:5,
+  id:bloodTissue.source.id,checkId:unsupported.checkId,witnessIndex}),
+  /footing challenge/);
+ const read=act(s,'core.check',{checkId:unsupported.checkId});
+ A.equal(read.actualPhysiologicalSupport,undefined);
+ A.equal(read.modifier,Math.floor((s.player.attributes.wis-10)/2)+2*s.player.skills.survival.rank);
+ A.equal(Phys.verify(s),true);
+ const fakeSupport=E.importGame(E.exportGame(s));
+ fakeSupport.table.bodyRefinement.living.cycles[5].tissues[0].sceneSupports[0].used.staminaSpent=0;
+ A.equal(Phys.verify(fakeSupport),false);
  const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
  A.equal(Phys.verify(saved),true);
  saved.table.bodyRefinement.living.cycles[7].transition.source.capacity.newMax+=20;
