@@ -288,7 +288,9 @@ function status(s,p={}){
  if(!keys(p,['beastId'])||typeof p.beastId!=='string')
   throw Error('A social arrangements view needs only a known original beast');
  const b=s.beasts?.[p.beastId];
- if(!b)return {known:false};
+ // Unknown beast IDs and beasts without personally established social
+ // receipts are indistinguishable in a player-facing status request.
+ if(!b?.socialArrangements)return {known:false,arrangements:[]};
  if(!verify(s,b))throw Error('Saved social arrangement source has been altered');
  const entries=Object.values(b.socialArrangements?.entries||{}).map(row=>({
   id:row.id,kind:row.source.kind,purpose:row.source.purpose,
