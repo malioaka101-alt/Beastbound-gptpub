@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/species-biology.test.js
             tests/causal-history.test.js
             tests/cosmology-ledger.test.js
             tests/smoke.test.js
