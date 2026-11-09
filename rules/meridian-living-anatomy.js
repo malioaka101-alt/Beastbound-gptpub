@@ -208,6 +208,8 @@ function verify(s){
  }
  if((net.intentForms||net.intentTests||s.player.meridian.stage>=6)&&
   !require('./meridian-living-intent').verifySource(s))return false;
+ if((net.tissueInterfaces||net.tissueTests||s.player.meridian.stage>=7)&&
+  !require('./meridian-physique-integration').verifySource(s))return false;
  return true;
 }
 function ensure(s){
