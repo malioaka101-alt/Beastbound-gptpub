@@ -1,0 +1,151 @@
+'use strict';
+// Full-body Cycle III is earned via the original rules, not a forged stage.
+const A=require('node:assert/strict'),FS=require('node:fs'),
+ OS=require('node:os'),Path=require('node:path'),
+ E=require('../engine.js'),R=require('../rules'),C=require('../rules/core'),
+ D=require('../rules/disciplines'),Phys=require('../rules/body-living-refinement'),
+ Power=require('../rules/power-overview'),Turn=require('../scripts/chat-turn');
+const act=(s,name,p={})=>R.act(s,{system:'body',operation:name,params:p});
+function prior(seed=927101){
+ const s=E.newGame({seed,name:'Disposable Independent Body Refinement',path:'undecided'});
+ R.unified.ensurePlayer(s);s.world.location='academy';
+ s.player.attributes.con=30;s.player.skills.survival.rank=5;
+ s.player.body.cycles=['Muscle-Tendon Cycle','Bone-Marrow Cycle'];
+ s.table.disciplineTraining||={};
+ s.table.disciplineTraining.body={target:null,points:0,weeks:0,methods:{},
+  cooldownUntil:0,complications:[],history:[
+   {day:1,target:'cycle1',quality:'strong',
+    change:'Completed Cycle I Muscle-Tendon refinement; +2 stamina, Might +1, M1 natural force'},
+   {day:1,target:'cycle2',quality:'strong',
+    change:'Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box'}
+  ]};
+ let complete=false;
+ for(let n=0;n<8&&!complete;n++){
+  const result=act(s,'organWork',{focus:'integrated',minutes:15,
+   approach:'Physically coordinate original existing heart, lungs, liver and kidney tissues with a real whole-body exertion limit'});
+  complete=result.completed;
+ }
+ A.equal(complete,true,'Original genuine Organ III must be earned by a real check');
+ A.equal(D.organEarned(s).cycle,3);
+ A.equal(s.player.body.cycles.length,3);
+ return s;
+}
+function witness(s,origin,cycle,details={}){
+ C.event(s,'story','The individual practitioner is clinically examined during an original whole-body physical tissue integration trial with recorded limits.',{
+  origin,cycle,location:s.world.location,...details});
+ return s.log.length-1;
+}
+function recovery(s,min){
+ let nights=0;
+ while(s.player.stamina<min){
+  A.ok(nights++<12,'Normal physiological overnight recovery must support genuine tissue practice');
+  const before=s.world.minutes;
+  R.act(s,{system:'health',operation:'sleep',params:{hours:8}});
+  A.equal(s.world.minutes,before+480);
+  if(s.player.stamina<min)
+   R.act(s,{system:'world',operation:'wait',params:{minutes:960}});
+ }
+}
+{
+ const s=prior(),data=E.exportGame(s),rng=s.rngState;
+ const ready=act(s,'physiqueStatus');
+ A.equal(ready.available,true);
+ A.deepEqual(ready.completed,[]);
+ A.equal(Power.read(s).body.livingPhysique.available,true);
+ A.equal(E.exportGame(s),data);A.equal(s.rngState,rng);
+ A.throws(()=>act(s,'physiqueMap',{cycle:4,id:'nothing',method:'Declared new nerves'}),
+  /body-cycle design|original witnessed/);
+ A.equal(E.exportGame(s),data);
+ const sources={
+  4:{existingNerves:'Existing individual median and peripheral sensory nerve conduction and tissue heat are measured directly.',
+   sensoryCounter:'Deliberately interrupted signals reveal a finite reaction, pain and proprioception limit.'},
+  5:{circulationMeasurement:'Original ordinary human blood oxygenation and vessel pressure are measured during safe local exertion.',
+   metabolicLimit:'Breathing, nutrition, fatigue and actual heat loss restrict blood-essence energy transport.'},
+  6:{environmentalCondition:'A real local temperature and humidity change tests observable human skin and vascular adaptation.',
+   reversibleResponse:'The subject measurably returns to ordinary baseline physiology on stopping the temporary strain.'},
+  7:{individualConstitution:'Observed already integrated nerves, blood, organs and adaptive skin act together in one unique human body.',
+   lifespanBoundary:'The measured person remains vulnerable to injury, hunger, infection, fatigue and finite lifespan.'}
+ };
+ const originalMax=s.player.maxStamina;
+ const order=[6,4,5,7],done=[];
+ for(const cycle of order){
+  const sp=Phys.SPEC[cycle],details=sources[cycle];
+  const wi=witness(s,Phys.MAP,cycle,{
+   ...details,
+   independentCountertest:'An unrelated physical pressure and metabolic strain test breaks the response before any unearned immunity appears.'});
+  const map=act(s,'physiqueMap',{cycle,id:'original_body_cycle_'+cycle,
+   method:'An individual self-directed '+sp.name+' adaptation is learned through measured biological tissues and ordinary bounded recovery.',
+   actualTissues:'Observed existing human connective tissues, neurons, organs, blood circulation and skin remain physically interconnected.',
+   metabolicSupport:'Ordinary food, rest, oxygenation and physical energy are still essential to the new tissue response.',
+   failureLimit:'Documented injury, low stamina, infection, thermal stress or incompatible loading can undermine the specialised body.',
+   reversion:'Any temporary state must release back into the original protected human body; evolved tissues require clinical management.',
+   witnessIndex:wi});
+  A.equal(map.mapped,true);A.equal(map.noFreeTraitsOrSpeciesChange,true);
+  A.equal(Phys.verify(s),true);
+  let practiced=false;
+  for(let n=0;n<10&&!practiced;n++){
+   recovery(s,sp.energy+2);
+   const ix=witness(s,Phys.WORK,cycle,{
+    observedBodyResponse:'An original separately monitored tissue response changes only physically established local human structures.',
+    physicalLimit:'The subject shows independently measured fatigue or pressure limits preventing a universal species power.'});
+   const before=s.world.minutes,stamina=s.player.stamina;
+   const trained=act(s,'physiqueWork',{cycle,witnessIndex:ix,minutes:15});
+   A.equal(s.player.stamina,stamina-trained.staminaSpent);
+   A.equal(s.world.minutes,before+15);
+   A.equal(trained.noInstantStrengthOrOtherPower,true);
+   A.equal(Phys.verify(s),true);
+   practiced=trained.points>=trained.required;
+  }
+  A.equal(practiced,true,'Cycle '+cycle+' requires actually earned physiology');
+  let formed=false;
+  for(let n=0;n<10&&!formed;n++){
+   recovery(s,sp.energy+2);
+   const ix=witness(s,Phys.FORM,cycle,{
+    integratedFunction:'All known source-observed individual tissues work together in an independent sustained physiological load check.',
+    failureCounter:'A separate recorded pressure disruption demonstrates that the whole body can still be injured or exhausted.',
+    metabolicTradeoff:'The actual individual spends physical stamina, nutrition, temperature control and recovery to support new tissue.'});
+   const before=s.world.minutes,oldMax=s.player.maxStamina,oldSta=s.player.stamina;
+   const result=act(s,'physiqueComplete',{cycle,witnessIndex:ix,minutes:90});
+   A.equal(s.world.minutes,before+90);
+   A.equal(s.player.stamina,oldSta-result.staminaSpent);
+   A.equal(result.noAutomaticSpeciesTraitOrImmunity,true);
+   formed=result.formed;
+   if(formed){
+    A.equal(s.player.maxStamina,oldMax+sp.bonus);
+    A.equal(s.table.combatants.player.maxStamina,s.player.maxStamina);
+    A.equal(s.player.body.cycles.at(-1),sp.name);
+   }
+   A.equal(Phys.verify(s),true);
+  }
+  A.equal(formed,true,'Cycle '+cycle+' should be achievable on its actual original body evidence');
+  done.push(cycle);
+  A.equal(s.player.humanEvolution.stage,0);
+  A.deepEqual(s.player.origin.stableTraits,[]);
+  A.equal(s.player.arcane.circles,0);
+  A.equal(s.player.meridian.stage,0);
+  A.equal(s.player.soul.phase,0);
+ }
+ A.deepEqual(done,[6,4,5,7],'Compatible body schools may earn IV–VI in a distinct real order');
+ A.equal(s.player.body.cycles.length,7);
+ A.equal(s.player.maxStamina,originalMax+6);
+ A.equal(act(s,'physiqueStatus').completed.length,4);
+ A.equal(Power.read(s).body.livingPhysique.completed.length,4);
+ A.equal(Phys.verify(s),true);
+ const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
+ A.equal(Phys.verify(saved),true);
+ saved.table.bodyRefinement.cycles[7].transition.source.capacity.newMax+=20;
+ A.equal(Phys.verify(saved),false);
+ const forge=E.importGame(snapshot);
+ forge.table.bodyRefinement.cycles[6].attempts[0].source.total=100;
+ A.equal(Phys.verify(forge),false);
+ const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-living-physique-'));
+ try{
+  const file=Path.join(dir,'save.json');FS.writeFileSync(file,snapshot+'\n');
+  const request={id:'body_physique_status_927101',mode:'rule',
+   system:'body',operation:'physiqueStatus',params:{}};
+  A.equal(Turn.execute(file,request).applied,false);
+  A.equal(Turn.execute(file,request).applied,false);
+  A.equal(FS.readFileSync(file,'utf8'),snapshot+'\n');
+ }finally{FS.rmSync(dir,{recursive:true,force:true});}
+}
+console.log('Source-earned full Body III–VII original physiology; cycle order freedom, genuine metabolic costs, no copied beast traits, saved integrity and private replay');
