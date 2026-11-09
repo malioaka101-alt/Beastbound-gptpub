@@ -127,12 +127,19 @@ function source(s){
    !integer(a.staminaSpent,1,12)||
    !integer(a.roll,1,20)||a.check?.roll!==a.roll||
    a.coreRestored!==(a.check.success?3:0)||
+   a.stressRestored!==(a.check.success?Math.min(2,a.stressBefore):0)||
+   !integer(a.stressBefore,0,100000)||
    a.witnessHash!==H(a.witness)||a.witness?.details?.origin!==REPAIR||
    !a.rollEvent||a.rollEventHash!==H(a.rollEvent)||
    a.rollEvent.type!=='roll'||H(a.rollEvent.details)!==H(a.check)||
    seen.has(a.witnessHash))return false;
   seen.add(a.witnessHash);
  }
+ const recordedStress=Object.values(net.plans).reduce((n,p)=>
+  n+p.attempts.reduce((k,x)=>k+x.source.matrixStrain,0),0);
+ const healedStress=net.repairs.reduce((n,x)=>n+x.source.stressRestored,0);
+ if((s.player.arcane.dynamicStress||0)!==Math.max(0,recordedStress-healedStress))
+  return false;
  if(net.transitions.length!==(completed?1:0)||
   (completed&&(
    net.transitions[0].seal!==completed.seal||
@@ -227,7 +234,7 @@ function work(s,p={}){
   coreStrain=check.degree==='severe failure'?6:0,
   matrixStrain=check.degree==='severe failure'?2:0;
  a.coreStability=Math.max(0,a.coreStability-coreStrain);
- a.matrixIntegrity=Math.max(40,a.matrixIntegrity-matrixStrain);
+ a.dynamicStress=(a.dynamicStress||0)+matrixStrain;
  plan.points=Math.min(REQUIRED,plan.points+earned);
  const receipt={origin:ORIGIN,id:p.id,minute:before,
   minutes,manaSpent,staminaSpent,roll:check.roll,
@@ -322,9 +329,12 @@ function repair(s,p={}){
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
   2*(s.player.skills?.arcana?.rank||0),
   dc:14,label:'Source-witnessed Arcane core structural correction'});
- const rollEvent=structuredClone(s.log.at(-1)),restored=check.success?3:0;
+ const rollEvent=structuredClone(s.log.at(-1)),restored=check.success?3:0,
+  stressBefore=a.dynamicStress||0,stressRestored=check.success?Math.min(2,stressBefore):0;
  a.coreStability=Math.min(100,a.coreStability+restored);
+ a.dynamicStress=Math.max(0,stressBefore-stressRestored);
  const receipt={origin:REPAIR,minute:start,minutes,manaSpent,staminaSpent,
+  stressBefore,stressRestored,
   roll:check.roll,check:structuredClone(check),
   rollEvent,rollEventHash:H(rollEvent),
   witness:event,witnessHash:proof,coreRestored:restored};
