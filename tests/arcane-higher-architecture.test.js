@@ -215,7 +215,7 @@ function three(seed=614001){
  A.equal(Formula.verify(s),true);
  const once=E.exportGame(s),beforeOnce=s.rngState;
  A.throws(()=>op(s,'formulaProbe',{id:formulaId,witnessIndex:ix,minutes:30}),
-  /already.*witness|not demonstrated|countertested locally/);
+  /already.*witness|cannot reroll a previous original witness|not demonstrated|countertested locally/);
  A.equal(E.exportGame(s),once);A.equal(s.rngState,beforeOnce);
  const savedFormula=E.exportGame(s);
  const altered=E.importGame(savedFormula);
