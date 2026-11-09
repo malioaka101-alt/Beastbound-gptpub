@@ -12,7 +12,7 @@ function fixture(seed=962001){
  s.player.partnerIds=['fox'];
  s.player.attributes.wis=30;s.player.skills.beastlore={rank:5,xp:0};
  s.beasts.fox={id:'fox',name:'Moonleaf Fox',species:'fenfox',
-  evolutionStage:'Base',lineage:'Marshlight',sapience:1,consent:true,
+  evolutionStage:'Base',lineage:'Marshlight',speciesGrade:'Common',individualGrade:'Common',sapience:1,consent:true,
   condition:100,mood:'relaxed',needs:{hunger:10,fatigue:10},
   injuries:[],conditions:[],personalityTags:['affiliative'],
   location:'crossing',relationship:'mutual partner',trust:80,
