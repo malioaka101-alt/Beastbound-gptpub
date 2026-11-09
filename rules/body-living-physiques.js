@@ -76,7 +76,7 @@ function verify(s){
  try{organ=originalOrgan(s)}catch{return false}
  if(r.organHash!==organ.organHash||r.originalOrganWorkHash!==organ.workHash)
   return false;
- const formed=new Set(),allWitnesses=new Set();
+ const formed=new Set(),allWitnesses=new Set(),usedSceneChecks=new Set();
  for(const [key,rec] of Object.entries(r.cycles)){
   const cycle=Number(key),z=rec?.source,sp=SPEC[cycle];
   if(!sp||String(cycle)!==key||rec.origin!==ORIGIN||
@@ -318,8 +318,11 @@ function verify(s){
      sc.method!=='footing'||sc.location!==a.location||
      sc.eventHash!==a.sceneEventHash||
      sc.worldMinute!==a.sceneMinute||
-     a.location!==a.witness.details?.location)
+     a.minute<sc.worldMinute||
+     a.location!==a.witness.details?.location||
+     usedSceneChecks.has(a.checkId))
      return false;
+    usedSceneChecks.add(a.checkId);
     allWitnesses.add(a.witnessHash);
     if(receipt.used===null){
      if(sc.used)return false;
@@ -654,7 +657,7 @@ function tissueFooting(s,p={}){
  const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle],
   t=r?.tissues?.find(t=>t.source.id===p.id),
   sc=s.table?.sceneChecks?.[p.checkId];
- if(!t||t.points<2||t.strain>=5||
+ if(!t||t.points<1||t.strain>=5||
   !sc||sc.used||sc.origin!=='engine-local-scene'||
   sc.method!=='footing'||sc.location!==s.world.location||
   !I(sc.worldMinute,0,s.world.minutes)||
@@ -863,7 +866,9 @@ function status(s){
     id:t.source.id,tissue:t.source.tissue,
     observedFunction:t.source.realFunction,
     cumulativeObservedPractice:t.points,
-    strain:t.strain,practicedSessions:t.practice.length
+    strain:t.strain,practicedSessions:t.practice.length,
+    physicalFootingUses:(t.sceneSupports||[]).filter(x=>x.used!==null).length,
+    pendingPhysicalFootingChecks:(t.sceneSupports||[]).filter(x=>x.used===null).length
    }))})),
   orderFreedom:'Blood V and Adaptive VI may form before or after independently earned Nerve IV',
   ...(r?.cycles?.[6]?.transition?{currentAdaptiveExpression:adaptiveState(s)}:{}),
