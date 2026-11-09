@@ -545,5 +545,106 @@ const mk=(s,id,kind,number,load=1)=>{
  pulseCorrupt.table.powerPhysiology.meridian.advancedNetwork
   .domainPulses[0].source.radius=300;
  A.equal(Net.verify(pulseCorrupt),false);
+ // IX: an individual genuinely examined and practiced body constitution.
+ // It cannot create immortality, origin anatomy or unrelated human ranks.
+ const Constitution=require('../rules/meridian-transcendent-constitution'),
+  constitutionId='reedcurrent_individual_tendon_physiology';
+ s.player.attributes.con=30;
+ const beforeConstitution=E.exportGame(s);
+ A.equal(op(s,'constitutionStatus').formed,false);
+ A.equal(E.exportGame(s),beforeConstitution);
+ A.throws(()=>op(s,'constitutionMap',{
+  id:constitutionId,domainId,tissueId:interfaceId,
+  name:'Individual Tissue Physiology',
+  physicalTransformation:'Previously existing fascia changes its pressure response under sustained whole-body circulation',
+  metabolicLimit:'Actual tissue remains vulnerable to heat loss, hunger, fatigue and excessive Dantian load',
+  maintenance:'Ongoing resting, nutritional support and measured pressure care maintain its biological operation',
+  injuryBoundary:'Excess circulation or damaged routes still cause ordinary injury and reversible destabilisation',
+  individualConsequence:'The body carries a distinctive constrained metabolic profile and remains finite and vulnerable',
+  lifespanLimit:'No lifespan extension, guaranteed regeneration or supernatural immortality is demonstrated',
+  witnessIndex:0}),/original bodily source|witnessed examination|source-witnessed/);
+ A.equal(E.exportGame(s),beforeConstitution);
+ C.event(s,'story',
+  'The original practitioner has an independent bodily examination showing limited but unusual real tissue energy adaptations.',{
+   origin:Constitution.OBSERVE,location:s.world.location,constitutionId,
+   examinedAlteration:'Direct observation shows that previously trained ordinary connective tissues have developed a stable distinct pressure response.',
+   independentLimit:'A clinical countertest shows that fatigue and heat loss still prevent unlimited circulation or invulnerable tissue.',
+   metabolicBurden:'Actual maintenance needs measurable energy, rest and ordinary tissue nutrition after sustained activity.',
+   automaticImmortality:false});
+ const formMap=op(s,'constitutionMap',{
+  id:constitutionId,domainId,tissueId:interfaceId,
+  name:'Individually Tempered Reedcurrent Fascia',
+  physicalTransformation:'Observed original connective tissues acquire a stable conditioned pressure response linked to the earned living Qi network',
+  metabolicLimit:'Heat, strain and depleted energy still interrupt normal bodily function and limit the specialized response',
+  maintenance:'Sufficient nutrition, recovery and measured source-witnessed circulation care remain physically necessary',
+  injuryBoundary:'Even this trained connective tissue may tear or destabilise under high pressure and active injuries',
+  individualConsequence:'This particular person retains a finite body and a distinct constrained fascia response to tested Qi pressure',
+  lifespanLimit:'No change to maximum lifespan, invulnerability or supernatural immortality is established by this examination',
+  witnessIndex:s.log.length-1});
+ A.equal(formMap.mapped,true);
+ A.equal(formMap.noLongevityOrEvolutionAward,true);
+ A.equal(Constitution.verify(s),true);
+ let constitutionReady=false;
+ for(let i=0;i<12&&!constitutionReady;i++){
+  if(s.player.qi<12)restForQi(s,Math.min(24,s.player.maxQi));
+  C.event(s,'story',
+   'Actual original tissue and Qi are repeatedly examined while the individual performs physically restrained constitutional adaptation.',{
+    origin:Constitution.PRACTICE,location:s.world.location,constitutionId,
+    tissueChange:'A distinct measured return-current response occurs in the same observed fascia without creating another organ.',
+    metabolicCost:'Real Qi and Stamina are spent, heat accumulates and the subject pauses for normal recovery.'});
+  const ix=s.log.length-1;
+  const result=op(s,'constitutionPractice',{id:constitutionId,witnessIndex:ix,minutes:30});
+  A.equal(result.noInstantConstitutionOrImmortality,true);
+  A.equal(Constitution.verify(s),true);
+  constitutionReady=result.points>=result.needed;
+ }
+ A.equal(constitutionReady,true,'Genuinely practiced individual tissue physiology must be earned');
+ A.equal(s.player.meridian.stage,8);
+ restForQi(s,Math.min(25,s.player.maxQi));
+ C.event(s,'story',
+  'The subject physically demonstrates an original independent, sustained physiological response and its clear failure limit.',{
+   origin:Constitution.FORM,location:s.world.location,constitutionId,
+   sustainedPhysiology:'Personally tested and integrated fascia, breathing and Meridian flow remain coordinated through a controlled load.',
+   counterEvidence:'Loss of energy, external resistance and direct vascular fatigue demonstrate that this individual is not invulnerable.',
+   observedTradeoff:'The original body spends Qi and metabolic energy to sustain altered ordinary tissues and requires recovery afterwards.'});
+ const beforeNine=s.world.minutes,qiNine=s.player.qi,maxNine=s.player.maxQi;
+ const formedNine=op(s,'constitutionForm',{id:constitutionId,witnessIndex:s.log.length-1,minutes:90});
+ A.equal(formedNine.formed,true);
+ A.equal(s.player.meridian.stage,9);
+ A.equal(s.world.minutes,beforeNine+90);
+ A.equal(s.player.qi,qiNine-formedNine.qiSpent);
+ A.ok(s.player.maxQi>=maxNine);
+ A.equal(formedNine.noImmortalityOrUnlearnedPower,true);
+ A.equal(s.player.meridian.constitutionIntegration,1);
+ A.equal(s.player.humanEvolution.stage,0);
+ A.equal(s.player.origin.stableTraits.length,0);
+ A.equal(s.player.arcane.circles,0);
+ A.equal(Net.verify(s),true);
+ A.equal(Constitution.verify(s),true);
+ A.equal(op(s,'constitutionStatus').formed,true);
+ if(s.player.qi<5)restForQi(s,Math.min(16,s.player.maxQi));
+ C.event(s,'story',
+  'A source-observed maintenance examination checks genuine circulation, appetite, tissue strain and ordinary human bodily limits.',{
+   origin:Constitution.CARE,location:s.world.location,constitutionId,
+   physicalMaintenance:'Rest, controlled breathing and specific tendon therapy support the actual altered metabolic structure.',
+   observedLimit:'Measured fatigue and heat loss confirm that this constitution still requires normal care and real energy.'});
+ const careIndex=s.log.length-1,beforeCare=s.world.minutes,careQi=s.player.qi;
+ const maintained=op(s,'constitutionCare',{id:constitutionId,witnessIndex:careIndex,minutes:45});
+ A.equal(s.world.minutes,beforeCare+45);
+ A.equal(s.player.qi,careQi-maintained.qiSpent);
+ A.equal(maintained.note.includes('no free healing'),true);
+ A.equal(Constitution.verify(s),true);
+ A.throws(()=>op(s,'constitutionCare',{id:constitutionId,witnessIndex:careIndex}),
+  /already received one original check/);
+ const finalSave=E.exportGame(s),loaded=E.importGame(finalSave);
+ A.equal(Net.verify(loaded),true);
+ A.equal(Constitution.verify(loaded),true);
+ loaded.table.powerPhysiology.meridian.advancedNetwork
+  .constitutionTests[0].source.capacity.newQi+=50;
+ A.equal(Constitution.verify(loaded),false);
+ const corruptCare=E.importGame(finalSave);
+ corruptCare.table.powerPhysiology.meridian.advancedNetwork
+  .constitutionCare[0].source.burdenAfter=999;
+ A.equal(Net.verify(corruptCare),false);
 }
 console.log('Living Meridian route web: genuine Stage IV/108 Gate source, original 8/36/72 anatomy maps, actual engine Qi/time/pressure checks, persistent injuries and separately witnessed clinical recovery, no free Stage, tamper-safe integrity and read-only saved turn replay.');
