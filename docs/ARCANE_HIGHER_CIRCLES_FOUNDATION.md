@@ -20,9 +20,17 @@ The GM records an actually observed original formula principle, geometry, expect
 
 All new action and read-only status routes extend the existing `rules/index.js`, `scripts/chat-turn.js`, `rules/power-overview.js` and dual-channel system. They do not alter a live campaign.
 
-## Remaining foundation criterion
+## Fifth Circle — Field Projection (new draft)
 
-- **Circle V — Field Projection:** truly observed mana field, actual range, environmental resistance, prepared spell budget and independent collapse/counters.
+`rules/arcane-field-projection.js` extends the **same earned Fourth Circle geometry** with individual field plans, counterpressure practice, a separate formation test and optional brief maintenance. An original personally witnessed local environmental measurement establishes the current field, its radius, compatible ambient mana and counterpressure. Possible range scales with the existing Mana Core's actual intake and stability, not a universal radius cap or ownership of the training ground. A successful independent formation test uses `Build.arcaneProfile(5)` and conserves current Mana. `arcane.fieldPulse` tests local resistance again, with genuine duration, Mana, Stamina, collapse and a new witnessed compatible environment if the practitioner has travelled. A field creates **no automatic spell effect**, coercion, land ownership, NPC submission or damage. It can support independently learned techniques when actual effect adapters exist.
+
+The disposable end-to-end regression now exercises authentic Fourth Circle source continuity, personally earned Fifth Circle field formation, bounded projected Mana, maintenance and tamper/replay rejection. This remains **unverified at the latest code head** until full CI passes.
+
+## Remaining higher Circle criterion
+
+- **Circle V — Field Projection:** basic source-grounded physical projection and upkeep now drafted; later actual spell-field interaction needs separate effect adapters and independent spell learning.
+
+
 - **Circle VI — Living Lattice:** original compatible nerve/magical tissue source, overload injury, processing improvements and biological care; not a free specialised organ.
 - **Circle VII — Astral Architecture:** original cosmology/boundary source, astral feedback, identity and independent soul rights; no free soul or realm access.
 - **Circle VIII — Law Interpretation:** coherent independently verified local laws, specific bounded applications and resistance, not reality rewriting.
