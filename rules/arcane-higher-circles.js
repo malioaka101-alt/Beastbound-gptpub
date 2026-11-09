@@ -187,7 +187,7 @@ function prerequisite(s,stage,{care=false}={}){
  const spec=required(stage),prior=previous(s,stage);
  const a=s.player.arcane;
  if(a.coreStability<35&&!care)throw Error('Actual unstable Mana Core needs individual repair before advanced work');
- if(!care&&s.table?.combatants?.player?.status!=='ok')
+ if(!care&&s.table?.combatants?.player&&s.table.combatants.player.status!=='ok')
   throw Error('Incapacitated people cannot safely conduct independent Arcane architecture work');
  worldPlace(s);
  return {spec,prior,a};
