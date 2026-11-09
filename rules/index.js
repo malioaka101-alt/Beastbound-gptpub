@@ -315,6 +315,11 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.higherPractice':return require('./soul-higher-architecture').practice(s,params);
   case 'soul.higherRepair':return require('./soul-higher-architecture').repair(s,params);
   case 'soul.higherComplete':return require('./soul-higher-architecture').complete(s,params);
+  case 'soul.ethicalStatus':return require('./soul-ethical-applications').status(s);
+  case 'soul.selfStabilize':return require('./soul-ethical-applications').stabilize(s,params);
+  case 'soul.selfImprint':return require('./soul-ethical-applications').imprint(s,params);
+  case 'soul.selfImprintRevoke':return require('./soul-ethical-applications').revoke(s,params);
+  case 'soul.domainPulse':return require('./soul-ethical-applications').pulse(s,params);
   case 'soul.perceive':return Senses.perceive(s,params);
   case 'rift.senseStatus':return Senses.riftStatus(s,params);
   case 'rift.sense':return Senses.senseRift(s,params);
