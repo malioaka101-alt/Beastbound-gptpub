@@ -654,8 +654,11 @@ const mk=(s,id,kind,number,load=1)=>{
  A.equal(s.player.qi,careQi-maintained.qiSpent);
  A.equal(maintained.note.includes('no free healing'),true);
  A.equal(Constitution.verify(s),true);
+ const beforeDuplicateCare=E.exportGame(s),rngBeforeDuplicateCare=s.rngState;
  A.throws(()=>op(s,'constitutionCare',{id:constitutionId,witnessIndex:careIndex}),
-  /already received one original check/);
+  /already received one original check|source-witnessed examination of the same actual body is missing/);
+ A.equal(E.exportGame(s),beforeDuplicateCare,'Rejected repeated care must never mutate source or player resources');
+ A.equal(s.rngState,rngBeforeDuplicateCare,'A repeated care request must not reroll');
  const finalSave=E.exportGame(s),loaded=E.importGame(finalSave);
  A.equal(Net.verify(loaded),true);
  A.equal(Constitution.verify(loaded),true);
