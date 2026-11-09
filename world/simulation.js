@@ -470,6 +470,9 @@ function tick(s,weekDays=[],monthDays=[]){
  if(!weekDays.length&&!monthDays.length)return {sixdays:0,months:0,publicNotices:[]};
  const w=ensure(s,{startDay:Math.min(...weekDays,...monthDays)-1}),we=new Set(weekDays),mo=new Set(monthDays),times=[...new Set([...we,...mo])].sort((a,b)=>a-b);
  let nW=0,nM=0;
+ // Validate the saved ecological sources once per world advance; never rehash
+ // the entire multiyear history for each internal sixday/month transition.
+ EcologicalWebs.validate(w);
  for(const day of times){if(day<=w.lastTickDay)continue;
   if(we.has(day)){tickSixday(w,day);Houses.deliver(s,w,day,()=>random(w));Civic.review(s,w,day,()=>random(w),v=>event(w,v));PublicHearings.review(s,w,day,()=>random(w),v=>event(w,v));Mediation.review(s,w,day,()=>random(w),v=>event(w,v));ProfessionalPeers.tick(w,day,v=>event(w,v));
    // Per-individual wildlife acts against the ecology at THIS specific day,
