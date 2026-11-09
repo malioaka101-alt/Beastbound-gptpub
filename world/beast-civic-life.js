@@ -184,6 +184,10 @@ function household(s,p={}){
   !['public','gm-only'].includes(d.visibility))
   throw Error('A household is only real after independently witnessed consent from each actual sapient resident');
  const members=d.individualChoices.map(x=>sourcePerson(s,x.beastId));
+ const already=new Set(Object.values(t.households).flatMap(h=>
+  h.source.members.map(m=>m.id)));
+ if(members.some(b=>already.has(b.id)))
+  throw Error('A living sapient individual cannot belong to two active households without an independently recorded departure');
  const source={origin:HOME,polityId:p.polityId,householdId:p.householdId,
   name:d.name,visibility:d.visibility,eventHash:hash(ev),
   witness:structuredClone(ev),members:members.map(b=>({id:b.id,
