@@ -266,6 +266,60 @@ function earnNeuralCycle(s){
  const tamperCare=E.importGame(E.exportGame(s));
  tamperCare.table.bodyRefinement.living.cycles[7].upkeep[0].source.foodQuantity=0;
  A.equal(Phys.verify(tamperCare),false);
+ // New anatomy must remain GM-authored and mechanically maintainable in
+ // the SAME body cycle even after that whole-body cycle is completed.
+ // These are observations of individual cases, NOT a fixed global roster.
+ for(const cycle of [5,6,7]){
+  const howMany=cycle===7?11:1; // eleven are a stress example, not a ceiling.
+  for(let j=0;j<howMany;j++){
+   const id='individual_tissue_'+cycle+'_'+j;
+   let w=witness(s,Phys.TISSUE,cycle,{
+    observedTissue:'A personally observed original tissue region in this individual living human has a distinct measurable physical pathway, site and failure response.',
+    independentCountertest:'An independently repeated physical strain measurement shows oxygen and nutrient limits instead of a free supernatural immunity.'
+   });
+   const mapped=act(s,'physiqueTissueMap',{cycle,id,
+    tissue:'Original separately identified human tissue '+id+' with an individually observed vascular, neural and skin interface.',
+    realFunction:'An actual personally measured bodily response that changes within ordinary local physiological limits and organ support.',
+    metabolicTradeoff:'Continued normal respiration, nutrition, physical work and clinical recovery support the individual tissue.',
+    failureLimit:'Local injury, fatigue, starvation and excessive thermal strain can interrupt this observed biological response.',
+    witnessIndex:w});
+   A.equal(mapped.mapped,true);
+   A.equal(mapped.noAutomaticallyGrantedResistanceOrAbility,true);
+   A.equal(Phys.verify(s),true);
+   if(j!==0)continue;
+   recovery(s,Phys.SPEC[cycle].energy);
+   w=witness(s,Phys.TISSUE_WORK,cycle,{
+    tissueId:id,
+    observedResponse:'The same individual tissue shows independently measurable adaptation during real physically bounded exertion.',
+    physicalLimit:'Original clinical measurements show bodily fatigue and injury risk, not a universal elemental or beast technique.'
+   });
+   const beforeWork=s.world.minutes,sta=s.player.stamina;
+   const result=act(s,'physiqueTissueWork',{cycle,id,witnessIndex:w,minutes:15});
+   A.equal(result.attempted,true);
+   A.equal(result.observedAccumulatedProgress,
+    result.check.success?result.check.progress:0);
+   A.equal(result.staminaSpent,Phys.SPEC[cycle].energy);
+   A.equal(s.world.minutes,beforeWork+15);
+   const days=Math.floor((beforeWork+15)/1440)-Math.floor(beforeWork/1440);
+   A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+    sta-result.staminaSpent+5*days));
+   A.equal(Phys.verify(s),true);
+   const stored=E.exportGame(s),rng=s.rngState;
+   A.throws(()=>act(s,'physiqueTissueWork',{cycle,id,witnessIndex:w,minutes:15}),
+    /rolled twice/);
+   A.equal(E.exportGame(s),stored);
+   A.equal(s.rngState,rng);
+  }
+ }
+ const tissueStatus=act(s,'physiqueStatus').specialisations;
+ A.equal(tissueStatus.find(x=>x.cycle===7).individuallyObservedTissues.length,11);
+ A.equal(tissueStatus.find(x=>x.cycle===6).individuallyObservedTissues.length,1);
+ A.equal(tissueStatus.find(x=>x.cycle===5).individuallyObservedTissues.length,1);
+ A.equal(s.player.maxStamina,originalMax+6,
+  'Authored anatomical discoveries are not automatic resource rewards');
+ const falseResearch=E.importGame(E.exportGame(s));
+ falseResearch.table.bodyRefinement.living.cycles[7].tissues[0].practice[0].source.pointsAfter+=99;
+ A.equal(Phys.verify(falseResearch),false);
  const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
  A.equal(Phys.verify(saved),true);
  saved.table.bodyRefinement.living.cycles[7].transition.source.capacity.newMax+=20;
