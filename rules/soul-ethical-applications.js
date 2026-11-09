@@ -265,7 +265,8 @@ function status(s){
  const phase=s.player?.soul?.phase||0;
  if(phase<4)return {phase,available:false,
   note:'Genuinely earned Phase IV Soul Forge is needed for ethical applications'};
- if(!sourceVerified(s))throw Error('Original personally consented Soul applications have been altered');
+ if(!High.verify(s)||!sourceVerified(s))
+  throw Error('Original source-earned Soul Phase or personally consented applications have been altered');
  const root=s.table?.soulArchitecture?.ethicalApplications;
  return {phase,stability:s.player.soul.stability,
   personalImprints:Object.entries(root?.imprints||{}).map(([k,x])=>({
