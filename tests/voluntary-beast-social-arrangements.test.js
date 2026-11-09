@@ -15,7 +15,7 @@ const sample=(b,id,kind='voluntary shared research')=>({
  protections:'Both remain free persons or independently protected living beings with a continuing right to refuse.',
  termination:'Either participant may withdraw, and unresolved payments or harm require separate honest adjudication.',
  communication:'Direct previously witnessed gesture and explained local signs without presumed telepathy.',
- durationDays:6
+ durationDays:7
 });
 function evidence(s,b,draft){
  C.event(s,'story','The existing beast hears or sees a supported explanation of precisely these terms and replies as an autonomous individual.',{
@@ -72,7 +72,7 @@ function discoverSapient(seed=927801){
  A.equal(social.arrangements[0].humanDuty,p.humanDuty);
  A.equal(social.arrangements[0].beastDuty,p.beastDuty);
  A.equal(b.socialArrangements.entries[p.id].startMinute,s.world.minutes);
- A.equal(b.socialArrangements.entries[p.id].endMinute,s.world.minutes+6*1440);
+ A.equal(b.socialArrangements.entries[p.id].endMinute,s.world.minutes+7*1440);
  A.equal(Social.verify(s,b),true);
  A.equal(op(s,'socialDraft',{...p,id:'future_friendship_01',
   kind:'friendship without service'}).drafted,true);
