@@ -123,6 +123,59 @@ function proof(s,b,stage,kind){
  A.ok(declined>=0);
 }
 {
+ // Failed *actual* energy alignment causes bounded extra strain to each
+ // body, with the exact original check event sealed in the pair record.
+ let failed=null;
+ const digest=x=>require('node:crypto').createHash('sha256')
+  .update(JSON.stringify(x)).digest('hex');
+ for(let seed=932200;seed<932260&&!failed;seed++){
+  const {s,b,r}=paired(seed);
+  r.syncStage=2;b.syncStage=2;
+  s.player.attributes.dex=8;s.player.skills.beastcraft.rank=0;
+  r.coordination=0;
+  C.event(s,'story',
+   'The previously examined compatible living canal resonance medium is independently witnessed by both people.',{
+    origin:'original-source-verified-pair-medium-v1',
+    beastId:b.id,location:s.world.location,
+    basis:'A physically established compatible medium conducts only a small voluntary paired signal.'});
+  const i=s.log.length-1;
+  b.resonanceMediumAssessment={
+   origin:'verified-specific-compatible-pair-medium-v1',
+   beastId:b.id,species:b.species,location:s.world.location,
+   minute:s.world.minutes,
+   source:'Actual personally witnessed original compatible shallow resonance medium with a bounded body-safe route',
+   witnessIndex:i,witnessHash:digest(s.log[i])};
+  const witnessIndex=scene(s,b,3,'Independent trial of actual Stage 3 resonance');
+  const stamina=s.player.stamina,fatigue=b.needs.fatigue,energy=b.energy;
+  const result=op(s,'syncPractice',{beastId:b.id,witnessIndex});
+  if(!result.practised)continue;
+  if(result.check.success)continue;
+  failed={result,s,b,r};
+  A.equal(result.check.success,false);
+  A.equal(result.pointsEarned,0);
+  A.equal(r.syncStage,2);
+  A.equal(b.syncStage,2);
+  A.equal(s.player.stamina,stamina-result.humanStaminaSpent);
+  A.equal(b.needs.fatigue,fatigue+result.beastFatigueIncreased);
+  A.equal(b.energy,energy-result.beastEnergySpent);
+  A.equal(result.beastEnergySpent,2);
+  A.ok(result.feedback);
+  A.equal(result.feedback.origin,'actual-bounded-pair-feedback-v1');
+  A.ok(result.feedback.humanStaminaLoss>=1&&result.feedback.humanStaminaLoss<=2);
+  A.equal(result.feedback.beastFatigueIncrease,result.feedback.humanStaminaLoss);
+  const receipt=r.syncPractice.history.find(x=>x.source.kind==='exercise').source;
+  A.equal(receipt.roll,result.check.roll);
+  A.equal(receipt.checkEvent.details.success,false);
+  A.equal(receipt.checkEvent.details.roll,result.check.roll);
+  A.equal(digest(receipt.checkEvent),receipt.checkHash);
+  A.equal(Sync.verify(s,b,r),true);
+  const altered=E.importGame(E.exportGame(s)),ar=R.bonds.fromSave(altered,b.id);
+  ar.syncPractice.history[0].source.checkEvent.details.roll=20;
+  A.equal(Sync.verify(altered,altered.beasts[b.id],ar),false);
+ }
+ A.ok(failed,'Real unforced Stage 3 attempts include at least one check failure with separate-body strain');
+}
+{
  // Non-earned human skill / player-selected fantasy effects never get an
  // automatic working shared spell merely by assigning a resonant name.
  const {s,b,r}=paired(932102),witnessIndex=scene(s,b,5);
