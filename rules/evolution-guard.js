@@ -1,7 +1,7 @@
 'use strict';
 // No registration of arbitrary branches/potential/conditions by a live rule
 // caller. The GM-sealed branch assessment is authoritative at registration.
-const C=require('./core'),P=require('./progress'),W=require('./world');
+const C=require('./core'),P=require('./progress'),W=require('./world'),Branch=require('./evolution-branch-web');
 function record(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
     Object.keys(p).some(k=>!['beastId','branchId'].includes(k)))
@@ -23,6 +23,7 @@ function record(s,p={}){
   throw Error('Live evolution registration requires a pre-authored full biological form and physiological profile');
  const original=JSON.stringify(a.parameters);
  const params=JSON.parse(original);
+ Branch.preRegister(s,b,a);
  // A source-bounded authored profile is still checked by the actual
  // evolution rule implementation (conditions, genuine anatomy and Grade).
  const r=P.register(s,params);
@@ -30,6 +31,7 @@ function record(s,p={}){
  branch.originAssessment={
   source:a.source.trim().slice(0,180),worldMinute:a.worldMinute,
   species:a.species,evolutionStage:a.evolutionStage};
+ Branch.postRegister(s,b,a,r);
  a.used=true;
  return {...r,precommitted:true};
 }
