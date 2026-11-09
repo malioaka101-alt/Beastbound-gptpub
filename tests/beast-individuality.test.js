@@ -89,6 +89,8 @@ A.deepEqual(s.beasts[b.id],parallel.beasts[b.id]);
 A.equal(Individual.verify(b),true);
 const uses=b.individualLife.individuality.entries.filter(x=>x.source.type==='express');
 A.ok(uses.every(x=>x.source.beforeEnergy-x.source.afterEnergy===x.source.energyCost));
+A.ok(uses.every(x=>x.source.minute===x.source.day*1440),
+ 'Private independent technique uses must be dated at the original world tick, not jump end');
 A.ok(uses.every(x=>x.source.benefit===2));
 A.equal(JSON.stringify(b.techniques),baseline);
 A.equal(b.level,level);A.equal(b.individualGrade,grade);
