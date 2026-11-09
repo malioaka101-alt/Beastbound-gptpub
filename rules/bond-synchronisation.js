@@ -40,17 +40,40 @@ function pair(s,id,{here=false}={}){
 function foundation(s,b,r){
  return {source:SOURCE,beastId:b.id,species:b.species,
   name:b.name,human:s.player.name,sapience:b.sapience,
+  // Only stable personal identity belongs in the ancestry seal. Real
+  // compatibility/resonance improvement is not forgery or a new bond.
   bondHash:hash({human:r.human,beast:r.beast,sapience:r.sapience,
-   compatibility:r.compatibility,resonance:r.resonance,
-   personality:r.personality}),created:s.world.minutes};
+   personality:r.personality}),initialCompatibility:r.compatibility,
+  initialResonance:r.resonance,created:s.world.minutes};
+}
+function authenticEvolution(s,b,initialSpecies){
+ if(b.species===initialSpecies)return true;
+ const history=b.evolutionHistory,table=s.table?.evolution;
+ if(!Array.isArray(history)||!history.length||!table)return false;
+ let species=initialSpecies;
+ for(const entry of history){
+  const evolution=table[b.id+'/'+entry.branchId],applied=evolution?.appliedFormSummary;
+  if(!evolution?.evolved||evolution.beastId!==b.id||
+   evolution.branchId!==entry.branchId||
+   applied?.old?.species!==species||entry.old?.species!==species||
+   applied.old.evolutionStage!==entry.old.evolutionStage||
+   entry.form!==applied.newForm||
+   typeof applied.newSpecies!=='string'||!applied.newSpecies)
+   return false;
+  species=applied.newSpecies;
+ }
+ return species===b.species;
 }
 function verify(s,b,r){
  const l=r?.syncPractice;if(!l)return true;
  const x=foundation(s,b,r);
  if(l.sourceHash!==hash(l.source)||l.source.source!==SOURCE||
-  l.source.beastId!==x.beastId||l.source.species!==x.species||
+  l.source.beastId!==x.beastId||
+  !authenticEvolution(s,b,l.source.species)||
   l.source.name!==x.name||l.source.human!==x.human||
   l.source.bondHash!==x.bondHash||l.source.sapience!==x.sapience||
+  !integer(l.source.initialCompatibility,1,10)||
+  !integer(l.source.initialResonance,1,10)||
   !Array.isArray(l.history)||!l.methods||typeof l.methods!=='object'||
   !integer(r.syncStage,0,10)||!integer(r.syncPoints,0,1000000)||
   !integer(r.syncMasteryPoints??0,0,1000000))
