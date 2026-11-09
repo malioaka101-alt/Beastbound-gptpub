@@ -146,8 +146,8 @@ function proof(s,b,stage,kind){
  s.player.skills.beastcraft.rank=5;
  s.table||={};s.table.disciplineTraining||={};
  s.table.disciplineTraining.arcane={history:[
-  {day:1,target:'core',quality:'strong',change:'Mana Core independently ignited'},
-  {day:1,target:'circle1',quality:'strong',change:'First Circle genuinely assembled'}
+  {day:1,target:'core',quality:'strong',change:'Mana Core ignited through independent genuine source practice'},
+  {day:1,target:'circle1',quality:'strong',change:'First Circle constructed through genuine source-backed Arcane engineering'}
  ],methods:{},points:0,cooldownUntil:0};
  A.equal(E.dispatch(s,'travel academy').ok,true);
  const taught=R.act(s,{system:'arcane',operation:'sparkStudy',params:{}});
