@@ -80,8 +80,14 @@ function verify(s,b){
  if(records.origin!==ORIGIN||records.beastId!==b.id||
   !records.entries||typeof records.entries!=='object'||Array.isArray(records.entries)||
   Object.keys(records.entries).length>100)return false;
+ // The underlying original beast personhood/bond-life source must still
+ // match the specific identity recorded when these terms were explained.
+ let kind;
+ try{kind=personKind(s,b);}catch{return false;}
  return Object.entries(records.entries).every(([key,row])=>
-  key===row.id&&historyValid(row,b));
+  row&&key===row.id&&row.source?.kindOfBeing===kind.kind&&
+  row.source.personSourceHash===kind.proof&&
+  row.source.minute<=s.world.minutes&&historyValid(row,b));
 }
 function ensure(s,b){
  if(!b.socialArrangements)b.socialArrangements={origin:ORIGIN,beastId:b.id,entries:{}};
