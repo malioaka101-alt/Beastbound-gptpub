@@ -83,7 +83,7 @@ const mk=(s,id,kind,number,load=1)=>{
  A.equal(E.exportGame(s),initial);A.equal(s.rngState,rng);
  const p=mk(s,'branch_coil_low','extraordinary',1,1);
  const snapshot=E.exportGame(s);
- A.throws(()=>op(s,'livingWebMap',{...p,kind:'invented',
+ A.throws(()=>op(s,'livingWebMap',{...p,
   segments:[{kind:'minor',number:73}]}),/nonexistent or duplicate anatomical structures/);
  A.equal(E.exportGame(s),snapshot);
  A.equal(op(s,'livingWebMap',p).mapped,true);
