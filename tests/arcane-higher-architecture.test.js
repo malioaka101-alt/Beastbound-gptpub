@@ -196,6 +196,50 @@ function earnedThird(seed){
     networkIsolation:'Real prepared laboratory isolation physically separates the body from catastrophic feedback.'}
  };
  const plannedSpellKeys=Object.keys(s.table.arcaneTechniques||{}).sort();
+ // An independent less-confident practitioner can suffer real structural
+ // overload and must use the original repair check (not a free reset).
+ const injured=E.importGame(E.exportGame(s));
+ injured.player.attributes.int=12;injured.player.skills.arcana.rank=2;
+ injured.player.arcane.coreStability=45;
+ const im=witnessed(injured,High.MAP,{
+  kind:'field',circle:5,existingChannels:4,
+  measuredRadius:'A measured tiny self-contained Mana field reaches only a few observed local paces at low output.',
+  ambientCounter:'Ordinary ambient pressure can disrupt the incompletely prepared weak Core field.',
+  countertest:'Independent measured channel opposition makes the original incomplete field break under stress.'});
+ op(injured,'higherMap',{stage:5,
+  design:'A deliberately cautious individual fifth field design preserving three previous channels while measuring unstable fourth output.',
+  channelModel:'The previously earned fourth geometry is connected to a small new output branch with independently measured Mana load.',
+  interference:'Ambient pressure at the observed laboratory tests weak resonance and can overload the original Core.',
+  safety:'The subject stops all projection on actual strain and only seeks separate clinical Arcane matrix repair.',
+  witnessIndex:im});
+ let overloaded=false;
+ for(let i=0;i<8&&!overloaded;i++){
+  rest(injured,5);
+  const j=witnessed(injured,High.PRACTICE,{
+   circle:5,measuredResponse:'An original short-lived measured weak fifth field struggles to carry any additional Mana flux.',
+   resistance:'A separate physical interference condition from the room causes possible source-logged overload.'});
+  const r=op(injured,'higherWork',{stage:5,witnessIndex:j,minutes:15});
+  overloaded=r.check.degree==='severe failure';
+ }
+ A.equal(overloaded,true,'Original engine stress should sometimes produce severe physical Arcane overload');
+ A.ok(op(injured,'higherStatus').stages[0].strain>=3);
+ A.equal(High.verify(injured),true);
+ let recovered=false;
+ for(let i=0;i<10&&!recovered;i++){
+  rest(injured,2);
+  const j=witnessed(injured,High.REPAIR,{
+   circle:5,
+   examinedFailure:'The actual recorded Mana matrix strain is examined through physical channel response and measured feedback.',
+   restorativeGeometry:'An original small-scale recalibration and controlled energy flow are independently observed under safe load.'});
+  const x=op(injured,'higherRepair',{stage:5,witnessIndex:j,minutes:30});
+  A.equal(High.verify(injured),true);
+  recovered=x.repaired;
+ }
+ A.equal(recovered,true,'Original witnessed Arcane repair should be possible without an invented healer gate');
+ A.ok(op(injured,'higherStatus').stages[0].strain<=4);
+ const damaged=E.importGame(E.exportGame(injured));
+ damaged.table.arcaneArchitecture.higherCircles.circles[5].repairs.at(-1).source.strainAfter=999;
+ A.equal(High.verify(damaged),false,'Forged clinical recovery cannot delete recorded structural overload');
  const lawReg=Cosmos.peek(s)||Cosmos.seed();
  const law=lawReg.planes.mortal.facts.find(x=>x.domain==='origin-pattern'&&x.kind==='law');
  A.ok(law?.seal,'Circle VIII is anchored to an existing true cosmology law, not a fabricated claim');
