@@ -179,6 +179,41 @@ function earnNeuralCycle(s){
  A.equal(act(s,'physiqueStatus').completed.length,4);
  A.equal(Power.read(s).body.livingPhysique.completed.length,4);
  A.equal(Phys.verify(s),true);
+ // An original earned Adaptive Cycle can express only a personally observed
+ // bounded bodily state. It must spend real stamina, expire under the normal
+ // world clock, and physically return without conferring a new beast trait.
+ recovery(s,5);
+ let ix=witness(s,Phys.ASSUME,6,{
+  environmentObserved:'A real observed temperature and humidity shift produces a finite temporary vasomotor skin response in this individual.',
+  safeReversionCounter:'Independent clinical cooling and oxygenation tests demonstrate that the active response must return toward baseline.',
+  safeMinutes:30});
+ const before=s.player.stamina;
+ const assumed=act(s,'physiqueAssume',{witnessIndex:ix,minutes:30});
+ A.equal(assumed.attempted,true);
+ A.equal(s.player.stamina,before-assumed.staminaSpent);
+ A.equal(Phys.verify(s),true);
+ if(assumed.formed){
+  A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.active,true);
+  A.throws(()=>act(s,'physiqueAssume',{witnessIndex:ix,minutes:30}),/already active/);
+  ix=witness(s,Phys.RELEASE,6,{
+   observedReturn:'The recorded human skin and vascular state physically returns to its independently observed baseline under clinical control.',
+   independentFailureLimit:'The return remains vulnerable to ordinary fatigue, injury and inadequate oxygen; no healing has occurred.'});
+  A.equal(act(s,'physiqueRelease',{witnessIndex:ix}).released,true);
+  A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.active,false);
+ }
+ recovery(s,5);
+ ix=witness(s,Phys.ASSUME,6,{
+  environmentObserved:'A fresh measured ordinary dry heat gradient elicits a new reversible adaptive response from already refined original human tissues.',
+  safeReversionCounter:'An independent bounded heat load confirms a time-limited return before damaging native skin or blood circulation.',
+  safeMinutes:20});
+ const second=act(s,'physiqueAssume',{witnessIndex:ix,minutes:20});
+ A.equal(Phys.verify(s),true);
+ if(second.formed){
+  R.act(s,{system:'world',operation:'wait',params:{minutes:21}});
+  A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.active,false);
+  A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.naturallyExpired,true);
+  A.equal(Phys.verify(s),true);
+ }
  const snapshot=E.exportGame(s),saved=E.importGame(snapshot);
  A.equal(Phys.verify(saved),true);
  saved.table.bodyRefinement.living.cycles[7].transition.source.capacity.newMax+=20;
