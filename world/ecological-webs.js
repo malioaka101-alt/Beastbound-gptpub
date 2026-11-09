@@ -219,8 +219,8 @@ function status(s,{regionId}={}){
  const v=web(w.ecosystems[id]);
  const visible=Object.values(v.populations).filter(p=>p.origin.visibility==='public');
  const ids=new Set(visible.map(p=>p.origin.speciesId));
- return {known:true,regionId:id,habitat:{forage:w.ecosystems[id].forage,
-  water:w.ecosystems[id].water,quality:w.ecosystems[id].quality},
+ return {known:true,regionId:id,
+  note:'Only locally published ecological records; raw habitat measurements require actual field evidence',
   populations:visible.map(p=>({speciesId:p.origin.speciesId,
    speciesName:w.speciesBiology.species[p.origin.speciesId].name,
    abundanceIndex:p.index,capacityIndex:p.origin.capacity,
