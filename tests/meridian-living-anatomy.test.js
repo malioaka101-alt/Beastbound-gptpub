@@ -446,5 +446,104 @@ const mk=(s,id,kind,number,load=1)=>{
  bodyTampered.table.powerPhysiology.meridian.advancedNetwork
   .tissueTests[0].source.capacity.newMax+=100;
  A.equal(Phys.verify(bodyTampered),false);
+ // VIII: a physical short-range domain with measured actual boundaries,
+ // contestable environment, energy costs and no NPC/mind control.
+ const Domain=require('../rules/meridian-living-domain');
+ const domainId='reedcurrent_narrow_return_field';
+ const measured=3,biome=require('../world/lived-places').location(s,s.world.location).biome;
+ const preMap=E.exportGame(s);
+ A.deepEqual(op(s,'domainStatus').domains,[]);
+ A.equal(E.exportGame(s),preMap);
+ A.throws(()=>op(s,'domainMap',{
+  id:domainId,tissueId:interfaceId,routeId:tissueRoute,
+  name:'Measured Return Field',principle:'A small observed counterflow in previously integrated fascia',
+  environment:'Near the real stone crossing in known stable local air and ground',
+  counter:'Intervening harder pressure or disrupted breath collapses the field',
+  collapse:'Real reservoir strain and circulation conflict end the bounded response',
+  limit:'No control of people, wildlife, weather or distant territory is created',
+  radius:measured,witnessIndex:0}),/observed local domain|prior witnessed|physical local/);
+ A.equal(E.exportGame(s),preMap);
+ C.event(s,'story',
+  'The real practitioner measures a small pressure-responsive circulation region with a clearly observed local environmental limit.',{
+   origin:Domain.MAP,location:s.world.location,
+   domainId,routeId:tissueRoute,
+   radiusMetres:measured,biome,
+   physicalMeasurement:'Actual independent measurements show the near-body return current weakens completely beyond three metres.',
+   environmentSupport:'The observed sheltered crossing has ordinary air and ground conditions that allow the bounded current.'});
+ const mappedDomain=op(s,'domainMap',{
+  id:domainId,tissueId:interfaceId,routeId:tissueRoute,
+  name:'Measured Reedcurrent Return Field',
+  principle:'A genuine previously earned circulation can answer mild nearby air-pressure changes',
+  environment:'Only ordinary sheltered air and firm ground at this actually observed crossing',
+  counter:'Interrupting exhalation or stronger physical resistance collapses the finite return',
+  collapse:'Exhaustion, blocked tissue or unsupported environmental pressure ends all response',
+  limit:'A small self-centred field cannot make bystanders obey, grant perception or attack them',
+  radius:measured,witnessIndex:s.log.length-1});
+ A.equal(mappedDomain.mapped,true);
+ A.equal(mappedDomain.active,false);
+ A.equal(Domain.verify(s),true);
+ let fieldReady=false;
+ for(let i=0;i<8&&!fieldReady;i++){
+  if(s.player.qi<10)restForQi(s,Math.min(22,s.player.maxQi));
+  C.event(s,'story',
+   'The original practitioner attempts an independently observed bounded field and tests actual collapse under changed wind.',{
+    origin:Domain.PRACTICE,location:s.world.location,domainId,routeId:tissueRoute,
+    counterPressure:'A shifted breeze and a measured resistant obstacle interrupt the small local pressure response.',
+    observedCollapse:'The observed circulation ceases without the practitioner controlling the obstacle or environment.'});
+  const ix=s.log.length-1,oldQi=s.player.qi;
+  const trained=op(s,'domainPractice',{id:domainId,witnessIndex:ix,minutes:30});
+  A.equal(s.player.qi,oldQi-trained.qiSpent);
+  A.equal(trained.noPeopleOrCombatControl,true);
+  A.equal(Domain.verify(s),true);
+  fieldReady=trained.points>=trained.needed;
+ }
+ A.equal(fieldReady,true);
+ A.equal(s.player.meridian.stage,7);
+ restForQi(s,Math.min(22,s.player.maxQi));
+ C.event(s,'story',
+  'The individual demonstrates that the observed short-range field responds to counterpressure and stops at a measured boundary.',{
+   origin:Domain.FORM,location:s.world.location,domainId,routeId:tissueRoute,
+   radiusMetres:measured,
+   measuredBoundary:'The independently measured three-metre edge ends all supported circulation beyond the close ground.',
+   environmentCounter:'A physical resistance and changed air flow impose a real limit on this voluntary circulation field.'});
+ const beforeDomain=s.world.minutes,oldDomainQi=s.player.qi,
+  oldDomainMax=s.player.maxQi;
+ const formation=op(s,'domainForm',{id:domainId,witnessIndex:s.log.length-1,minutes:90});
+ A.equal(formation.formed,true);
+ A.equal(formation.stage,8);
+ A.equal(s.world.minutes,beforeDomain+90);
+ A.equal(s.player.qi,oldDomainQi-formation.qiSpent);
+ A.ok(s.player.maxQi>=oldDomainMax);
+ A.equal(s.player.meridian.domainIntegration,1);
+ A.equal(s.player.humanEvolution.stage,0);
+ A.equal(s.player.arcane.circles,0);
+ A.equal(Net.verify(s),true);
+ A.equal(Domain.verify(s),true);
+ A.equal(op(s,'domainStatus').formed,true);
+ if(s.player.qi<9)restForQi(s,Math.min(17,s.player.maxQi));
+ C.event(s,'story',
+  'The individual maintains only a brief, countertested personal pressure response and cannot extend it into control of others.',{
+   origin:Domain.PULSE,location:s.world.location,domainId,routeId:tissueRoute,
+   environmentCounter:'Changing ambient pressure independently checks the small field and can collapse it completely.',
+   independentBoundary:'Nearby people and animals stay independently acting, and the observed field has a hard measured edge.'});
+ const j=s.log.length-1,oldPulseQi=s.player.qi,oldPulseMinute=s.world.minutes;
+ const pulse=op(s,'domainPulse',{id:domainId,witnessIndex:j,minutes:10});
+ A.equal(pulse.attempted,true);
+ A.equal(pulse.radiusMetres,measured);
+ A.equal(s.player.qi,oldPulseQi-pulse.qiSpent);
+ A.equal(s.world.minutes,oldPulseMinute+10);
+ A.equal(pulse.limitedEffect.includes('not area ownership'),true);
+ A.equal(Domain.verify(s),true);
+ A.throws(()=>op(s,'domainPulse',{id:domainId,witnessIndex:j,minutes:10}),
+  /already been resolved/);
+ const savedDomain=E.exportGame(s);
+ const domainCorrupt=E.importGame(savedDomain);
+ domainCorrupt.table.powerPhysiology.meridian.advancedNetwork
+  .domainTests[0].source.capacity.newQi+=20;
+ A.equal(Domain.verify(domainCorrupt),false);
+ const pulseCorrupt=E.importGame(savedDomain);
+ pulseCorrupt.table.powerPhysiology.meridian.advancedNetwork
+  .domainPulses[0].source.radius=300;
+ A.equal(Net.verify(pulseCorrupt),false);
 }
 console.log('Living Meridian route web: genuine Stage IV/108 Gate source, original 8/36/72 anatomy maps, actual engine Qi/time/pressure checks, persistent injuries and separately witnessed clinical recovery, no free Stage, tamper-safe integrity and read-only saved turn replay.');
