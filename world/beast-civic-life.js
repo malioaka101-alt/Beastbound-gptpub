@@ -10,6 +10,8 @@ const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'
 const valid=(v,a=12,b=1000)=>typeof v==='string'&&v.trim().length>=a&&v.trim().length<=b;
 const ident=v=>typeof v==='string'&&/^[a-z][a-z0-9_-]{2,78}$/.test(v);
 const nonneg=v=>Number.isInteger(v)&&v>=0&&v<=10000000;
+const localRegion=s=>Atlas.LOCATION_REGION[s.world?.location]||
+ require('./lived-places').get(s,s.world?.location)?.regionId||null;
 function realm(s){return require('./simulation').ensure(s);}
 function polity(w,polityId){
  const p=Atlas.P[polityId],c=w.countries?.[polityId];
@@ -52,7 +54,8 @@ function append(entry,day,kind,detail){
 function sourcePerson(s,id){
  const b=s.beasts?.[id];
  if(!b||!b.sapientLife||!Sapient.verify(b)||b.owner||
-  s.player.partnerIds?.includes(id)||b.relationship!=='wild')
+  s.player.partnerIds?.includes(id)||b.relationship!=='wild'||
+  b.location!==s.world.location)
   throw Error('An independently documented sapient beast person is required, never an owned animal or invented official');
  return b;
 }
@@ -100,8 +103,9 @@ function witness(s,eventIndex,polityId,kind){
  const ev=s.log[eventIndex],d=ev?.details;
  if(ev.type!=='story'||d?.origin!==kind||d.polityId!==polityId||
   ev.day>Math.floor(s.world.minutes/1440)+1||
-  !Atlas.R[Atlas.LOCATION_REGION[s.world.location]]||
-  Atlas.R[Atlas.LOCATION_REGION[s.world.location]].polity!==polityId||
+  !Atlas.R[localRegion(s)]||
+  Atlas.R[localRegion(s)].polity!==polityId||
+  d.location!==s.world.location||
   !valid(ev.text,12,1000))
   throw Error('Civic decisions require a personally witnessed original source in the actual polity');
  return {ev,d};
@@ -217,18 +221,25 @@ function status(s,p={}){
  if(!p||Object.keys(p).some(x=>x!=='institutionId'))
   throw Error('Beast civic status is an unmodified local knowledge view');
  const w=s.table?.realm;if(!w)return {known:[],households:[],note:'No witnessed civic facts'};
- const region=Atlas.LOCATION_REGION[s.world.location],polityId=Atlas.R[region]?.polity;
+ const region=localRegion(s),polityId=Atlas.R[region]?.polity;
  if(!polityId||Atlas.P[polityId].government!=='beast polity')
   return {known:[],households:[],note:'Only the local known polity can be viewed'};
  const t=w.countries?.[polityId]?.beastCivic;
  if(!t)return {known:[],households:[],note:'No additional civic institutions witnessed'};
- const known=Object.values(t.institutions).filter(x=>
+ const known=Object.values(t.institutions).map(x=>verifyInstitution(w,polityId,x.id)).filter(x=>
   x.origin.visibility==='public'&&(!p.institutionId||p.institutionId===x.id))
   .map(x=>({id:x.id,name:x.origin.name,kind:x.origin.kind,
    mandate:x.origin.mandate,communication:x.origin.language,
    medium:x.origin.medium,publicProceedings:x.sessions.filter(e=>e.source.details.visibility==='public').map(e=>({
     topic:e.source.details.topic,result:e.source.details.result})).slice(-8)}));
- const households=Object.values(t.households).filter(x=>x.source.visibility==='public')
+ const households=Object.values(t.households).filter(x=>{
+  if(x?.origin!==HOME||x.seal!==hash(x.source)||
+     x.source?.origin!==HOME||x.source?.polityId!==polityId||
+     hash(x.source.witness)!==x.source.eventHash||
+     x.source.witness.details?.householdId!==x.source.householdId)
+   throw Error('Original beast household choice has been altered');
+  return x.source.visibility==='public';
+ })
   .map(x=>({name:x.source.name,residents:x.source.members.length}));
  return {polity:Atlas.P[polityId].name,known,households,
   note:'Local public charter and witnessed proceedings only; no private officeholders, undiscovered languages, hidden court decisions or automatic comprehension'};
