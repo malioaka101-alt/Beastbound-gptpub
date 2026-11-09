@@ -53,7 +53,9 @@ function authenticEvolution(s,b,initialSpecies){
  let species=initialSpecies;
  for(const entry of history){
   const evolution=table[b.id+'/'+entry.branchId],applied=evolution?.appliedFormSummary;
-  if(!evolution?.evolved||evolution.beastId!==b.id||
+  if(!evolution?.evolved||
+   !['evolved','evolved with bonus pending'].includes(evolution.lastEvent?.outcome)||
+   evolution.beastId!==b.id||
    evolution.branchId!==entry.branchId||
    applied?.old?.species!==species||entry.old?.species!==species||
    applied.old.evolutionStage!==entry.old.evolutionStage||
@@ -114,7 +116,7 @@ function verify(s,b,r){
     return false;
   }
   if(v.kind==='stage'&&(!integer(v.stage,1,10)||!v.proof||
-   hash(v.proof)!==v.proofHash||!integer(v.pointsSpent,1,100)))
+   hash(v.proof)!==v.proofHash||!integer(v.pointsSpent,1,1000000)))
    return false;
   if(v.kind==='refinement'&&(!integer(v.stage,1,10)||
    !['novice','stable','mastered'].includes(v.toState)||
