@@ -49,6 +49,7 @@ function historyValid(row,b){
  if(row.archive&&(
    !int(row.archive.minute,row.source.minute,1000000000)||
    row.archive.checksum!==hash({originHash:row.originHash,seal,minute,
+    status:row.archive.status,
     startMinute:row.archive.startMinute,endMinute:row.archive.endMinute})))return false;
  let lastStatus=row.archive?.status||'proposed',seen=new Set();
  const accepted=row.events.find(ev=>['accepted','contact-only'].includes(ev.source?.outcome));
@@ -58,7 +59,8 @@ function historyValid(row,b){
    null:(row.source.durationDays?start+row.source.durationDays*1440:null);
   if(row.startMinute!==start||
    (accepted&&row.endMinute!==expectedEnd)||
-   (row.archive&&row.archive.startMinute!==row.startMinute))
+   (row.archive&&(row.archive.startMinute!==row.startMinute||
+     row.archive.endMinute!==row.endMinute)))
    return false;
  }else if(row.startMinute!==undefined||row.endMinute!==undefined)return false;
  for(const ev of row.events){
@@ -107,6 +109,7 @@ function append(s,b,row,outcome,details={}){
    endMinute:row.endMinute};
   row.archive.checksum=hash({originHash:row.originHash,
    seal:row.archive.seal,minute:row.archive.minute,
+   status:row.archive.status,
    startMinute:row.archive.startMinute,endMinute:row.archive.endMinute});
  }
  if(!historyValid(row,b))throw Error('Recorded agreement outcome invalid');
@@ -256,12 +259,13 @@ function sixday(s,days=[]){
   for(const row of Object.values(entries)){
    if(!['accepted','paused'].includes(row.status))continue;
    const day=days.at(-1),end=row.endMinute;
-   if(end!==null&&end!==undefined&&day*1440>=end){
+   if(end!==null&&end!==undefined&&s.world.minutes>=end){
     append(s,b,row,'expired',{effectiveDay:day});
     reviewed++;continue;
    }
    const needs=b.needs||{};
-   const unsafe=b.condition<45||needs.hunger>=80||needs.fatigue>=85||
+   const unsafe=(Number.isFinite(b.condition)&&b.condition<45)||
+    needs.hunger>=80||needs.fatigue>=85||
     ['captured','coerced','imprisoned','forced'].includes(String(b.relationship).toLowerCase());
    if(unsafe&&row.status==='accepted'){
     append(s,b,row,'paused',{welfare:'Real condition or autonomous absence prevents a guaranteed service',effectiveDay:day});
