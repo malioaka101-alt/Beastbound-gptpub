@@ -16,6 +16,7 @@ const savedBefore=E.exportGame(s);
 const local=R.act(s,{system:'world',operation:'ecologyStatus',params:{}});
 A.equal(local.known,true);A.equal(local.populations.length,2);
 A.equal(local.links.length,2);A.equal(local.noGuaranteeOfSightingsBirthsOrIndividualHunts,true);
+A.ok(!Object.hasOwn(local,'habitat'),'Unwitnessed hidden raw habitat counters must not appear in published ecology');
 A.equal(E.exportGame(s),savedBefore,'Reading local published ecology must not mutate campaign');
 A.equal(R.act(s,{system:'world',operation:'ecologyStatus',params:{regionId:'whisperfen'}}).known,false,
  'Remote private or public census is not magically learned');
