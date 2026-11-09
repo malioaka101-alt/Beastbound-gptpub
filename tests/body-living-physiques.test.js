@@ -310,6 +310,24 @@ function earnNeuralCycle(s){
     /rolled twice/);
    A.equal(E.exportGame(s),stored);
    A.equal(s.rngState,rng);
+   if(cycle===5){
+    // The same personally observed tissue can continue changing with new
+    // original effort and evidence; it is not a once-unlocked item.
+    recovery(s,Phys.SPEC[cycle].energy);
+    const again=witness(s,Phys.TISSUE_WORK,cycle,{
+     tissueId:id,
+     observedResponse:'A subsequent independently recorded blood-tissue experiment measures this individual pathway under a genuinely new metabolic load.',
+     physicalLimit:'A different observed fatigue and oxygen countertest prevents an unearned inherited power claim.'
+    });
+    const renewed=act(s,'physiqueTissueWork',{cycle,id,
+     witnessIndex:again,minutes:15});
+    A.equal(renewed.observedAccumulatedProgress,
+     result.observedAccumulatedProgress+
+      (renewed.check.success?renewed.check.progress:0));
+    A.equal(Phys.verify(s),true);
+    A.equal(act(s,'physiqueStatus').specialisations.find(x=>x.cycle===5)
+     .individuallyObservedTissues[0].practicedSessions,2);
+   }
   }
  }
  const tissueStatus=act(s,'physiqueStatus').specialisations;
