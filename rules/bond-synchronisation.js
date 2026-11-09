@@ -96,11 +96,11 @@ function verify(s,b,r){
     v.witness.details?.beastId!==b.id||
     v.witness.details?.targetStage!==v.target||
     !['accepted','declined'].includes(v.decision)||
-    !integer(v.humanCost,1,20)||!integer(v.fatigueCost,1,20)||
+    !integer(v.humanCost,1,20)||!integer(v.fatigueCost,0,20)||
     !integer(v.energyCost,0,20)||
     (v.decision==='declined'&&
      (v.roll!==null||v.points!==0||v.energyCost!==0||
-      v.feedback!==null||v.checkEvent!==null))||
+      v.fatigueCost!==0||v.feedback!==null||v.checkEvent!==null))||
     (v.decision==='accepted'&&
      (!v.checkEvent||hash(v.checkEvent)!==v.checkHash||
       v.checkEvent.type!=='roll'||v.checkEvent.details?.roll!==v.roll||
@@ -252,17 +252,22 @@ function train(s,p={}){
  if(target>=3&&!r.contract&&!validMedium(s,b))
   throw Error('Energy synchronisation requires a real mutual contract or documented compatible medium');
  const decision=choice(s,b,r,proof.digest),started=s.world.minutes;
- s.player.stamina-=humanCost;b.needs.fatigue+=fatigueCost;
- if(decision.yes&&energyCost)b.energy-=energyCost;
+ s.player.stamina-=humanCost;
+ // An individual who refuses physical practice cannot be forced to spend
+ // their energy or suffer fatigue for a player's rejected proposal.
+ if(decision.yes){
+  b.needs.fatigue+=fatigueCost;
+  if(energyCost)b.energy-=energyCost;
+ }
  const minutes=25+5*target;
  E.advance(s,minutes);require('./world').finalizeTime(s,started);
  if(!decision.yes){
   append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
    witnessHash:proof.digest,decision:'declined',choiceBasis:decision.basis,
-   humanCost,fatigueCost,energyCost:0,roll:null,
+   humanCost,fatigueCost:0,energyCost:0,roll:null,
    checkEvent:null,feedback:null,points:0,minutes});
   return {practised:false,beastDeclined:true,noRoll:true,
-   humanStaminaSpent:humanCost,beastFatigueIncreased:fatigueCost,
+   humanStaminaSpent:humanCost,beastFatigueIncreased:0,
    beastEnergySpent:0,minutes};
  }
  const dex=C.int(s.player.attributes.dex,'Dexterity',1,30),
