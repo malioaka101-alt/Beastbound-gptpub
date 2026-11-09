@@ -218,6 +218,11 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.physiqueMap':return require('./meridian-physique-integration').register(s,params);
   case 'meridian.physiqueWork':return require('./meridian-physique-integration').work(s,params);
   case 'meridian.physiqueComplete':return require('./meridian-physique-integration').finish(s,params);
+  case 'meridian.domainStatus':return require('./meridian-living-domain').status(s);
+  case 'meridian.domainMap':return require('./meridian-living-domain').map(s,params);
+  case 'meridian.domainPractice':return require('./meridian-living-domain').practice(s,params);
+  case 'meridian.domainForm':return require('./meridian-living-domain').form(s,params);
+  case 'meridian.domainPulse':return require('./meridian-living-domain').pulse(s,params);
   case 'core.opposed':throw Error('Direct opposed rolls are not playable without independently witnessed participants, fixed skills and a precommitted contest');
   case 'core.contestForce':throw Error('Direct force contests are not playable without sourced combatants, established magnitudes and scene prerequisites');
   case 'combat.begin':return CombatProvenance.begin(s,params);
