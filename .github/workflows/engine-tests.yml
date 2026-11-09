@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/arcane-higher-architecture.test.js
             tests/earned-pair-synchronisation.test.js
             tests/voluntary-beast-social-arrangements.test.js
             tests/intelligent-beast-civilisations.test.js
@@ -40,7 +41,6 @@ jobs:
             tests/meridian-living-anatomy.test.js
             tests/meridian-stage-four-sea.test.js
             tests/arcane-second-circle.test.js
-            tests/arcane-higher-architecture.test.js
             tests/arcane-third-circle-matrix.test.js
             tests/contextual-theory-guidance.test.js
             tests/flexible-discipline-practice.test.js
