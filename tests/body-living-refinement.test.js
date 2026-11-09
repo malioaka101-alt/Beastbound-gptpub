@@ -90,7 +90,8 @@ function recovery(s,min){
     physicalLimit:'The subject shows independently measured fatigue or pressure limits preventing a universal species power.'});
    const before=s.world.minutes,stamina=s.player.stamina;
    const trained=act(s,'physiqueWork',{cycle,witnessIndex:ix,minutes:15});
-   A.equal(s.player.stamina,stamina-trained.staminaSpent);
+   const elapsedDays=Math.floor((before+15)/1440)-Math.floor(before/1440);
+   A.equal(s.player.stamina,Math.min(s.player.maxStamina,stamina-trained.staminaSpent+5*elapsedDays));
    A.equal(s.world.minutes,before+15);
    A.equal(trained.noInstantStrengthOrOtherPower,true);
    A.equal(Phys.verify(s),true);
@@ -107,7 +108,8 @@ function recovery(s,min){
    const before=s.world.minutes,oldMax=s.player.maxStamina,oldSta=s.player.stamina;
    const result=act(s,'physiqueComplete',{cycle,witnessIndex:ix,minutes:90});
    A.equal(s.world.minutes,before+90);
-   A.equal(s.player.stamina,oldSta-result.staminaSpent);
+   const elapsedDays=Math.floor((before+90)/1440)-Math.floor(before/1440);
+   A.equal(s.player.stamina,Math.min(s.player.maxStamina,oldSta-result.staminaSpent+5*elapsedDays));
    A.equal(result.noAutomaticSpeciesTraitOrImmunity,true);
    formed=result.formed;
    if(formed){
