@@ -160,7 +160,7 @@ function verify(s){
      !['assume','release'].includes(a.kind)||
      !I(a.minute,z.minute,s.world.minutes)||
      !a.witness||a.witnessHash!==digest(a.witness)||
-     a.witness.details?.location!==z.witness.details.location||
+     
      allWitnesses.has(a.witnessHash))return false;
     allWitnesses.add(a.witnessHash);
     if(a.kind==='assume'){
@@ -178,7 +178,7 @@ function verify(s){
       a.formed!==a.check.success||
       a.activeFrom!==a.minute+1||
       a.activeUntil!==(a.formed?a.activeFrom+a.duration:null)||
-      last&&(last.activeUntil>a.minute&&!releases.has(last.seal)))
+      last&&(last.source.activeUntil>a.minute&&!releases.has(last.seal)))
       return false;
      last=item;
     }else{
