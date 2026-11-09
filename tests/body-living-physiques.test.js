@@ -377,7 +377,7 @@ function earnNeuralCycle(s){
  const dex=s.player.attributes.dex,rank=s.player.skills.survival.rank;
  const originalModifier=Math.floor((dex-10)/2)+2*rank;
  const beforeSupport=s.player.stamina,ts=s.world.minutes;
- const used=coreAct(s,'check',{checkId:scene.checkId});
+ const used=coreAct(s,'check',{checkId:scene.checkId}).check;
  A.equal(used.modifier,originalModifier+1);
  A.equal(used.actualPhysiologicalSupport?.staminaSpent,1);
  A.equal(used.actualPhysiologicalSupport?.tissueId,bloodTissue.source.id);
@@ -394,7 +394,7 @@ function earnNeuralCycle(s){
  A.throws(()=>act(s,'physiqueTissueFooting',{cycle:5,
   id:bloodTissue.source.id,checkId:unsupported.checkId,witnessIndex}),
   /footing challenge/);
- const read=coreAct(s,'check',{checkId:unsupported.checkId});
+ const read=coreAct(s,'check',{checkId:unsupported.checkId}).check;
  A.equal(read.actualPhysiologicalSupport,undefined);
  A.equal(read.modifier,Math.floor((s.player.attributes.wis-10)/2)+2*s.player.skills.survival.rank);
  A.equal(Phys.verify(s),true);
