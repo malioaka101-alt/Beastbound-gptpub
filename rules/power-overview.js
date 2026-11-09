@@ -86,6 +86,8 @@ function read(s){
   body:{cycles:[...completed],completedCycles:completed.length,
    totalNamedCycles:BODY.length,nextCycle:BODY[completed.length]||null,
    ...(completed.length>=2?{organCycle:Disc.organStatus(s)}:{}),
+   ...(completed.length>=3||s.table?.bodyRefinement?.neural?{
+    nerveSense:require('./body-nerve-sense').status(s)}:{}),
    training:verifiedTrain('body')},
   rift:{step:rift.step||0,stepName:phase(RIFT,rift.step||0),
    ...(rift.step>=1?{anchors:Anchors.status(s)}:{}),
