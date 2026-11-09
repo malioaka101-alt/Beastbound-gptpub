@@ -1,5 +1,9 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Connected ecological webs — foundation #04 (9 November 2026)
+
+Following the verified species-biology #03 foundation, `docs/ECOLOGICAL_WEBS_FOUNDATION.md` records #04: any credible GM-authored species can enter the *existing* ecosystem's regional population ledger, and additional sourced food relationships can develop as the world changes. Copperwood's two canonical mammal examples are an illustration only. The world engine tracks non-exact local abundance, independently evolving habitat conditions, modest documented food interactions and existing neighbour migration, not a fixed global species list, animal encounters or compulsory evolutionary paths. Read-only local ecology must not reveal remote or GM-only populations. Keep #04 unchecked until complete PR-head CI passes. Natural encounters, beast decisions, actual breeding and world-scale narratives remain their existing distinct responsibilities.
+
 ## Sequential Master Prompt depth foundations (8 November 2026)
 
 The player has explicitly requested that the **25 remaining depth areas** be saved as a permanent checklist and developed **in number order**. Read `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md`: #01 cosmology and #02 historical causality are now verified on main; current work is **#03 living species biology** (`docs/LIVING_SPECIES_BIOLOGY_FOUNDATION.md`). Continue in numerical order, checking off only verified expandable foundations. This work is incremental, **not a ban on play before all 25 are complete**. A checked foundation means a coherent extensible GM-authored data-and-consequence mechanism, existing-system integration, save persistence and a successful source-backed test, **not** an encyclopaedia of prebuilt species, places or NPCs.
