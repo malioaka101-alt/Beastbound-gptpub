@@ -1,3 +1,7 @@
+## Verified Meridian #10 and draft Arcane higher Circle #11 (9 November 2026)
+
+Foundation #10 Meridian IV–IX passed exact-head full regression run `42661974680`, merged in private PR #41 (`5640c94587191ef0e523f3fb511d9a3cc6202327`), and was checked off: 10/25. The active **foundation work** is #11 (`docs/ARCANE_HIGHER_CIRCLES_FOUNDATION.md`) on branch `foundation/arcane-higher-circles-spell-grammar-20261109`: source-proven original Mana Core/Arcane Circles I–III are retained; draft Circle IV requires witnessed adaptive channel proof, real Mana/Stamina/time/checks, recoverable core strain, and original profile capacity; separately authored spells use `Build.spellCost` and independent witnessed formula learning/testing, not automatically castable effects. Circles V–IX and source-specific spell effect adapters are not implemented. #11 stays unchecked until completed and full exact-head CI passes; no campaign saves were touched.
+
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 ## Connected ecological webs — foundation #04 (9 November 2026)
