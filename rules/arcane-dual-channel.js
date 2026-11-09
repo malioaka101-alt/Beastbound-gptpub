@@ -9,6 +9,13 @@ function verify(s){
  // Third Circle retains the Second's actually learned dual-channel function.
  // Validate the *whole* later matrix chain first. Do not treat an edited
  // circles:3 counter as proof of an independently earned Second Circle.
+ if(s.player?.arcane?.circles>=4){
+  if(!require('./arcane-higher-architecture').verify(s))
+   throw Error('Higher Circles must extend authentic source-verified three-Circle architecture');
+  return {circles:s.player.arcane.circles,channels:2,
+   stage:'Second Circle — Dual Channeling',provenThirdMatrix:true,
+   provenHigherArchitecture:true};
+ }
  if(s.player?.arcane?.circles===3){
   Disciplines.verifyThirdCircle(s);
   return {circles:3,channels:2,stage:'Second Circle — Dual Channeling',
