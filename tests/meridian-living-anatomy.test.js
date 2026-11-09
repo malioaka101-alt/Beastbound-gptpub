@@ -6,6 +6,24 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  E=require('../engine.js'),R=require('../rules'),C=require('../rules/core'),
  Net=require('../rules/meridian-living-anatomy'),Turn=require('../scripts/chat-turn');
 const op=(s,k,p={})=>R.act(s,{system:'meridian',operation:k,params:p});
+// Stage VI and VII are genuine Qi-intensive work. The test cannot gift Qi
+// or bypass clinical resource checks: use the existing safe local sleep
+// recovery, with normal intervening waking time and independent world ticks.
+function restForQi(s,needed){
+ let nights=0;
+ while(s.player.qi<needed){
+  A.ok(nights++<12,'Normal overnight Qi recovery should suffice for a disposable advanced practice');
+  const before=s.world.minutes,oldQi=s.player.qi;
+  const slept=R.act(s,{system:'health',operation:'sleep',params:{hours:8}});
+  A.equal(slept.sleptHours,8);
+  A.equal(s.world.minutes,before+480);
+  A.equal(s.player.qi,Math.min(s.player.maxQi,oldQi+10));
+  if(s.player.qi<needed){
+   const daytime=R.act(s,{system:'world',operation:'wait',params:{minutes:960}});
+   A.ok(daytime);
+  }
+ }
+}
 function stage4(seed=245101){
  const s=E.newGame({seed,name:'Stage IV Real Living Anatomy Fixture',path:'meridian'});
  R.unified.ensurePlayer(s);
@@ -352,6 +370,9 @@ const mk=(s,id,kind,number,load=1)=>{
  // the already earned Stage VI intent—not from a declared rare lineage.
  const Phys=require('../rules/meridian-physique-integration');
  const interfaceId='forearm_fascia_response',tissueRoute=routeId;
+ // No unearned current-Qi refill. Existing world recovery must restore
+ // enough actual energy after earlier 108-Gate, Stage V and Stage VI work.
+ restForQi(s,Math.min(30,s.player.maxQi));
  const beforePhysique=E.exportGame(s);
  A.deepEqual(op(s,'physiqueStatus').interfaces,[]);
  A.equal(E.exportGame(s),beforePhysique);
@@ -384,6 +405,7 @@ const mk=(s,id,kind,number,load=1)=>{
     adaptation:'The same observed normal connective tissues respond slowly to measured Dantian flow under distinct resisted movement.',
     welfareCountertest:'The subject stops the exercise if discomfort rises and uses normal rest and hydration rather than inventing new tissue.'});
   const j=s.log.length-1;
+  if(s.player.qi<5)restForQi(s,Math.min(20,s.player.maxQi));
   const result=op(s,'physiqueWork',{id:interfaceId,witnessIndex:j,minutes:30});
   A.equal(result.noInstantPhysiqueOrOriginTrait,true);
   A.equal(Phys.verify(s),true);
@@ -400,6 +422,7 @@ const mk=(s,id,kind,number,load=1)=>{
    crossBodyResponse:'An original trunk-to-periphery tendon and fascia response distributes small physical load through previously integrated circulation.',
    materialCost:'Ordinary vascular and fascial tissues require real Qi, Stamina, nutrition and thermal recovery during sustained movement.',
    failureBoundary:'Real tissue overload, unresolved Meridian injury or absent physical circulation would collapse the response.'});
+ if(s.player.qi<9)restForQi(s,Math.min(20,s.player.maxQi));
  const finished=op(s,'physiqueComplete',{id:interfaceId,witnessIndex:s.log.length-1,minutes:90});
  A.equal(finished.formed,true);
  A.equal(finished.noHumanEvolutionOrRareOrganGranted,true);
