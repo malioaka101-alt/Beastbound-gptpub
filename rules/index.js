@@ -205,6 +205,8 @@ function act(s,{system,operation,params={}}={}){
   case 'specialist.alchemyStatus':return require('./specialist-alchemy-bioassay').status(s);
   case 'specialist.alchemyAssay':return require('./specialist-alchemy-bioassay').assay(s,params);
   case 'specialist.alchemyRefine':return require('./specialist-alchemy-bioassay').refine(s,params);
+  case 'specialist.weaponStatus':return require('./specialist-weapon-intent').status(s);
+  case 'specialist.weaponPractice':return require('./specialist-weapon-intent').practice(s,params);
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
