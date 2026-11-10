@@ -136,6 +136,9 @@ function verify(s){
    if(latest?.result!==rec.results?.[axis])return false;
   }
   if(!rec.complete&&Object.values(rec.screens).some(a=>a.length))return false;
+  if(rec.integration&&
+   !require('./beast-origin-integration').verifyRecord(s,rec,z.q,z.z.seal))
+   return false;
  }
  return true;
 }
@@ -202,7 +205,8 @@ function screen(s,p={}){
  if(p.axis==='trait-conflict'&&o.stableTraits.length&&
     !seen.details?.measuredExistingTraitInteractions)
   risk.push('Existing integrated trait interactions have not been independently examined');
- if(p.axis==='energetic'&&!pchar.arcane?.coreIgnited&&!pchar.meridian?.stage)
+ if(p.axis==='energetic'&&q.energyMode!=='metabolic'&&
+   !pchar.arcane?.coreIgnited&&!pchar.meridian?.stage)
   risk.push('No established external magical or meridian energy throughput');
  // That last finding is a contextual caution, never a blanket requirement
  // that ordinary inherited biological traits have a Mana Core or a teacher.
@@ -237,8 +241,13 @@ function status(s){
    mappingProgress:r.progress,compatibility:AXES.map(axis=>({
     axis,result:r.results[axis]||'unassessed'})),
    rightsDocumented:q.rights.verified,sourceKnown:true,
-   seedingApproved:false,expressed:false};
+   seedingApproved:false,expressed:!!r.integration?.attempts?.some(x=>
+   x.source.step===6&&x.source.success),
+   integrated:!!r.integration?.complete,
+   humanAdaptedLoad:r.integration?.reservedLoad||0};
  }),notProvisionalEcology:'Exact biological, magical and spiritual source required',
   noAutomaticOriginTraitOrHumanEvolution:true};
 }
-module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,map,screen,status,verify};
+module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,
+ hash,gmSource,witness,records,checkIntegrity,
+ map,screen,status,verify};
