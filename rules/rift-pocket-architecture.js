@@ -288,7 +288,7 @@ function transfer(s,p={}){
   !Object.hasOwn(E.RESOURCES,p.item)||!int(p.units,1,8))
   throw Error('An original named owned physical item and an existing local pocket are required');
  requirements(s);
- if(!verify(s))throw Error('The physical pocket's material accounting failed verification');
+ if(!verify(s))throw Error('The physical pocket material accounting failed verification');
  const r=ledger(s),space=r?.spaces[p.pocketId],now=s.world.minutes;
  if(!space||now<space.opened||now+5>space.expiresAt)
   throw Error('The personally constructed temporary pocket must still be physically accessible; expired contents remain inaccessible');
