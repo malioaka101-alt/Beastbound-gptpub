@@ -188,6 +188,9 @@ function act(s,{system,operation,params={}}={}){
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
+  case 'origin.lineageMap':return require('./beast-origin-lineage').map(s,params);
+  case 'origin.lineageScreen':return require('./beast-origin-lineage').screen(s,params);
+  case 'origin.lineageStatus':return require('./beast-origin-lineage').status(s);
   case 'arcane.sparkStudy':return Spark.learn(s,params);
   case 'arcane.sparkStatus':return Spark.status(s,params);
   case 'arcane.wardStudy':return ArcaneWard.study(s,params);
