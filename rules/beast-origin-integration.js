@@ -8,6 +8,7 @@ const E=require('../engine.js'),C=require('./core'),W=require('./world'),
 const ORIGIN='source-earned-human-origin-integration-v1',
  AUTH='gm-attested-origin-material-rights-v1',
  STAGE='witnessed-human-origin-integration-stage-v1',
+ CARE='witnessed-human-origin-rejection-care-v1',
  USE='witnessed-human-origin-footing-expression-v1';
 const STEPS=Object.freeze({
  3:'Trait Seeding',4:'Rejection Window',5:'Stabilisation',
@@ -119,15 +120,35 @@ function verifyRecord(s,r,q,seal){
   !Array.isArray(t.attempts)||t.attempts.length===0||
   !integer(t.next,3,9)||t.complete!==(t.next===9)||
   !integer(t.strain,0,100)||
-  !integer(t.reservedLoad,0,q.integrationLoad))
+  !integer(t.reservedLoad,0,q.integrationLoad)||
+  !Array.isArray(t.uses??[]))
   return false;
  try{authorisation(s,r.sourceId,seal,q)}catch{return false}
  let next=3,last=q.minute,strain=0,reserved=0;
  const witnesses=new Set();
  for(const item of t.attempts){
   const a=item?.source,rule=RULES[next];
-  if(!rule||!a||item.origin!==ORIGIN||
-   item.seal!==hash(a)||a.origin!==ORIGIN||
+  if(!a||item.origin!==ORIGIN||item.seal!==hash(a))return false;
+  if(a.kind==='care'){
+   if(a.origin!==ORIGIN||a.sourceId!==r.sourceId||
+    !integer(a.minute,last,s.world.minutes)||
+    !integer(a.minutes,45,480)||a.minute+a.minutes>s.world.minutes||
+    a.staminaSpent!==2||a.strainBefore!==strain||strain<=0||
+    !verifiedRoll(a,{dc:15},{integrationLoad:0})||
+    a.strainAfter!==(a.check.success?Math.max(0,strain-2):strain)||
+    !a.witness||a.witnessHash!==hash(a.witness)||
+    a.witness.details?.origin!==CARE||
+    a.witness.details?.sourceId!==r.sourceId||
+    !prose(a.witness.details?.measuredIndividualResponse)||
+    !prose(a.witness.details?.independentFailureLimit)||
+    !prose(a.witness.details?.observedHumanMechanism)||
+    !prose(a.witness.details?.observedMetabolicCost)||
+    witnesses.has(a.witnessHash))return false;
+   witnesses.add(a.witnessHash);
+   strain=a.strainAfter;last=a.minute+a.minutes;
+   continue;
+  }
+  if(!rule||a.origin!==ORIGIN||
    a.kind!=='stage'||a.step!==next||a.sourceId!==r.sourceId||
    !integer(a.minute,last,s.world.minutes)||
    !integer(a.minutes,rule.minimum,480)||
@@ -177,6 +198,43 @@ function verifyRecord(s,r,q,seal){
   t.strain!==strain||t.reservedLoad!==reserved||
   (t.complete&&!s.player.origin.stableTraits.includes('human_origin_'+r.sourceId)))
   return false;
+ const seenChecks=new Set();
+ for(const receipt of t.uses||[]){
+  const a=receipt?.source,sc=s.table?.sceneChecks?.[a?.checkId];
+  if(receipt?.origin!==ORIGIN||!a||receipt.seal!==hash(a)||
+   a.origin!==ORIGIN||a.kind!=='human-footing-expression'||
+   a.sourceId!==r.sourceId||q.effectAdapter!=='local-footing'||
+   !integer(a.minute,q.minute,s.world.minutes)||
+   a.minute<a.sceneMinute||a.location!==a.witness?.details?.location||
+   !a.witness||a.witnessHash!==hash(a.witness)||
+   a.witness.details?.origin!==USE||
+   a.witness.details?.sourceId!==r.sourceId||
+   a.witness.details?.checkId!==a.checkId||
+   !prose(a.witness.details?.observedFunction)||
+   !prose(a.witness.details?.independentFailureLimit)||
+   !sc||sc.checkId!==a.checkId||
+   sc.origin!=='engine-local-scene'||
+   sc.method!=='footing'||sc.location!==a.location||
+   sc.worldMinute!==a.sceneMinute||
+   sc.eventHash!==a.sceneEventHash||
+   witnesses.has(a.witnessHash)||seenChecks.has(a.checkId))
+   return false;
+  witnesses.add(a.witnessHash);seenChecks.add(a.checkId);
+  if(receipt.used===null){
+   if(sc.used)return false;
+  }else{
+   const u=receipt.used;
+   if(!u||!sc.used||u.checkId!==a.checkId||
+    u.minute!==sc.checkedAtMinute||u.staminaSpent!==1||
+    !integer(u.minute,a.minute,s.world.minutes)||
+    u.rollEvent?.type!=='roll'||
+    u.rollEventHash!==hash(u.rollEvent)||
+    hash(u.rollEvent.details)!==hash(u.check)||
+    u.check.modifier!==u.baseModifier+1||
+    !integer(u.baseModifier,-100,100))
+    return false;
+  }
+ }
  // The Origin resource is shared; other source-earned traits may also use
  // capacity. At a minimum, all still retained receipts must fit it.
  const total=Object.values(Lineage.records(s)).reduce((n,v)=>
@@ -282,7 +340,7 @@ function stage(s,p={}){
   material};
  const integ=t||{origin:ORIGIN,sourceSeal:z.seal,
   authorisationSeal:auth.seal,attempts:[],next:3,complete:false,
-  strain:0,reservedLoad:0};
+  strain:0,reservedLoad:0,uses:[]};
  integ.attempts.push({origin:ORIGIN,source:src,seal:hash(src)});
  integ.strain=src.strainAfter;integ.reservedLoad+=loadAdded;
  if(success)integ.next++;
@@ -298,5 +356,120 @@ function stage(s,p={}){
   nextStage:integ.next,personallyHumanEvolved:integ.complete,
   grantedBeastAbility:false,automaticEvolutionStage:false};
 }
-module.exports={ORIGIN,AUTH,STAGE,USE,STEPS,RULES,
- authorisation,context,verifyRecord,status,stage};
+// The rejection ledger retains strain until ordinary clinically witnessed
+// care succeeds. This never heals an existing combat wound automatically.
+function care(s,p={}){
+ if(!own(p,['sourceId','witnessIndex','minutes'])||
+  !validId(p.sourceId)||!integer(p.minutes??60,45,480))
+  throw Error('Actual individual Origin strain needs clinical observation and time');
+ const {r,integr}=context(s,p.sourceId,{allowCompleted:true});
+ if(!integr?.strain)throw Error('There is no recorded current lineage rejection strain to treat');
+ const w=stageWitness(s,p.witnessIndex,p.sourceId,'care'),h=hash(w);
+ if(integr.attempts.some(x=>x.source.witnessHash===h))
+  throw Error('A biological clinical treatment cannot reroll the same observed source');
+ const minutes=p.minutes??60,staminaSpent=2,pchar=s.player;
+ if(!integer(pchar.stamina,2,100000)||!integer(s.table.combatants.player.stamina,2,100000))
+  throw Error('Current original Stamina cannot support this clinical treatment');
+ const minute=s.world.minutes,attributeScore=C.int(pchar.attributes?.wis,'earned Wis',1,30),
+  skillRank=C.int(pchar.skills?.medicine?.rank??0,'earned Medicine',0,5),
+  attributeModifier=Math.floor((attributeScore-10)/2);
+ const check=C.check(s,{modifier:attributeModifier+2*skillRank,dc:15,
+  label:'Observed original lineage pressure care'});
+ const event=structuredClone(s.log.at(-1)),before=integr.strain;
+ integr.strain=check.success?Math.max(0,integr.strain-2):integr.strain;
+ const src={origin:ORIGIN,kind:'care',sourceId:p.sourceId,
+  minute,minutes,staminaSpent,witness:w,witnessHash:h,
+  attributeScore,attributeModifier,skillRank,
+  check:structuredClone(check),rollEvent:event,
+  rollEventHash:hash(event),roll:check.roll,
+  strainBefore:before,strainAfter:integr.strain};
+ integr.attempts.push({origin:ORIGIN,source:src,seal:hash(src)});
+ pchar.stamina-=staminaSpent;s.table.combatants.player.stamina=pchar.stamina;
+ E.advance(s,minutes);W.finalizeTime(s,minute);U.sync(s,{source:'legacy'});
+ if(!Lineage.verify(s))throw Error('Actual clinical source or retained Origin strain receipts failed verification');
+ return {attempted:true,treated:check.success,check,
+  strain:integr.strain,staminaSpent,minutes,
+  existingWoundsStillRequireTheirRealMedicalTreatment:true};
+}
+function useWitness(s,index,sourceId,checkId){
+ if(!integer(index,0,s.log.length-1))
+  throw Error('The existing local task requires a previous original human expression witness');
+ const w=s.log[index],d=w?.details;
+ if(w?.type!=='story'||!prose(w.text,16)||
+  d?.origin!==USE||d.sourceId!==sourceId||
+  d.location!==s.world.location||d.checkId!==checkId||
+  !prose(d.observedFunction)||!prose(d.independentFailureLimit))
+  throw Error('The original trained human Origin trait must show individual footing functionality and a physical limit in the real scene');
+ return structuredClone(w);
+}
+function prepareFooting(s,p={}){
+ if(!own(p,['sourceId','checkId','witnessIndex'])||
+  !validId(p.sourceId)||typeof p.checkId!=='string')
+  throw Error('An earned personal human Origin trait and real prepared footing task are required');
+ const {r,q}=context(s,p.sourceId,{allowCompleted:true}),
+  integ=r.integration,sc=s.table?.sceneChecks?.[p.checkId];
+ if(!integ||integ.next<=6||q.effectAdapter!=='local-footing'||
+  integ.strain>=5||
+  !sc||sc.used||sc.origin!=='engine-local-scene'||
+  sc.method!=='footing'||sc.location!==s.world.location||
+  !integer(sc.worldMinute,0,s.world.minutes)||
+  s.world.minutes-sc.worldMinute>1440)
+  throw Error('A personally expressed and healthy human Origin trait needs an original prepared footing check');
+ if(Object.values(Lineage.records(s)).some(x=>
+  (x.integration?.uses||[]).some(a=>a.source.checkId===p.checkId)))
+  throw Error('Two Origin expressions cannot stack on an original footing check');
+ if(require('./body-living-physiques').sceneSupport(s,p.checkId).bonus)
+  throw Error('Original body and human Origin footing sources cannot stack on one physical check');
+ const w=useWitness(s,p.witnessIndex,p.sourceId,p.checkId),h=hash(w);
+ if(integ.uses?.some(a=>a.source.witnessHash===h)||
+  integ.attempts.some(a=>a.source.witnessHash===h))
+  throw Error('This individual human physical action witness was already spent');
+ if(!integer(s.player.stamina,1,100000)||
+  !integer(s.table.combatants.player.stamina,1,100000))
+  throw Error('The real bodily action requires one original Stamina');
+ const a={origin:ORIGIN,kind:'human-footing-expression',sourceId:p.sourceId,
+  checkId:p.checkId,minute:s.world.minutes,sceneMinute:sc.worldMinute,
+  sceneEventHash:sc.eventHash,location:s.world.location,
+  witness:w,witnessHash:h};
+ integ.uses||=[];integ.uses.push({origin:ORIGIN,source:a,seal:hash(a),used:null});
+ if(!Lineage.verify(s))throw Error('Human Origin physical action proof failed verification');
+ return {prepared:true,checkId:p.checkId,sourceId:p.sourceId,
+  noRollYet:true,physicalSupport:1,staminaOnUse:1,noAutomaticBeastSense:true};
+}
+function sceneSupport(s,checkId){
+ if(!Lineage.verify(s))throw Error('Source-earned human Origin physiology is inconsistent');
+ const uses=Object.values(Lineage.records(s)).flatMap(r=>r.integration?.uses||[]),
+ found=uses.filter(x=>x.source.checkId===checkId);
+ if(found.length>1)throw Error('Different Origin trait sources cannot stack on a terrain action');
+ if(!found.length)return {bonus:0};
+ const a=found[0],sc=s.table?.sceneChecks?.[checkId];
+ if(a.used!==null||!sc||sc.used||sc.method!=='footing'||
+  sc.location!==s.world.location||
+  !integer(s.player.stamina,1,100000)||
+  !integer(s.table?.combatants?.player?.stamina,1,100000))
+  throw Error('This source-bound human Origin action cannot be resolved again');
+ return {bonus:1,sourceId:a.source.sourceId};
+}
+function recordUse(s,checkId,check,baseModifier){
+ const uses=Object.values(Lineage.records(s)).flatMap(r=>r.integration?.uses||[]),
+ found=uses.filter(x=>x.source.checkId===checkId);
+ if(found.length!==1||found[0].used!==null)
+  throw Error('One currently committed individual original human Origin source is required');
+ const a=found[0],sc=s.table?.sceneChecks?.[checkId],
+  rollEvent=structuredClone(s.log.at(-1));
+ if(!sc?.used||sc.checkedAtMinute!==s.world.minutes||
+  check.modifier!==baseModifier+1||
+  rollEvent.type!=='roll'||rollEvent.details?.roll!==check.roll||
+  !integer(s.player.stamina,1,100000))
+  throw Error('The original one-use physical roll does not match the personal Origin cost and proof');
+ a.used={checkId,minute:s.world.minutes,staminaSpent:1,
+  baseModifier,check:structuredClone(check),rollEvent,
+  rollEventHash:hash(rollEvent)};
+ s.player.stamina-=1;s.table.combatants.player.stamina=s.player.stamina;
+ if(!Lineage.verify(s))throw Error('Individual human Origin use receipt does not verify');
+ return {sourceId:a.source.sourceId,staminaSpent:1,
+  physicalModifier:1,fromOriginalEarnedHumanLineage:true};
+}
+module.exports={ORIGIN,AUTH,STAGE,CARE,USE,STEPS,RULES,
+ authorisation,context,verifyRecord,status,stage,care,
+ prepareFooting,sceneSupport,recordUse};
