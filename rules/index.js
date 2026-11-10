@@ -373,6 +373,8 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.realmPrepare':return require('./rift-realm-walking').prepare(s,params);
   case 'rift.realmEnter':return require('./rift-realm-walking').enter(s,params);
   case 'rift.realmReturn':return require('./rift-realm-walking').returnToAnchor(s,params);
+  case 'rift.domainStatus':return require('./rift-boundary-domain').status(s);
+  case 'rift.domainForm':return require('./rift-boundary-domain').form(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
