@@ -118,6 +118,10 @@ A.ok(selected,'Independent high-skilled disposable human wound trials can resolv
  const dice=E.importGame(E.exportGame(s));
  dice.table.specialistHealingIntent.attempts[0].source.check.roll=20;
  A.equal(Healing.verify(dice),false);
+ const forgedAnatomy=E.importGame(E.exportGame(s));
+ forgedAnatomy.table.powerPhysiology.meridian.gateRecords[0].quality='Flawed';
+ A.equal(Healing.verify(forgedAnatomy),false,
+  'The method cannot survive a forged first Gate or missing original meridian source');
  for(let n=0;n<110;n++)C.event(s,'story',
   'Independent physicians continue unrelated ordinary ward rounds without rewriting the earlier physically witnessed tissue repair.',{episode:n});
  A.equal(s.log.length,90);
