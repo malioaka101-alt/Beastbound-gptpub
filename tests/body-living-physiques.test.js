@@ -197,6 +197,8 @@ function earnNeuralCycle(s){
  const before=s.player.stamina;
  const assumed=act(s,'physiqueAssume',{witnessIndex:ix,minutes:30});
  A.equal(assumed.attempted,true);
+ A.equal(assumed.mentalEffects,'identity and agency unchanged');
+ A.ok(assumed.cooldownRemaining>0);
  A.equal(s.player.stamina,before-assumed.staminaSpent);
  A.equal(Phys.verify(s),true);
  if(assumed.formed){
@@ -207,7 +209,16 @@ function earnNeuralCycle(s){
    independentFailureLimit:'The return remains vulnerable to ordinary fatigue, injury and inadequate oxygen; no healing has occurred.'});
   A.equal(act(s,'physiqueRelease',{witnessIndex:ix}).released,true);
   A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.active,false);
+  A.ok(act(s,'physiqueStatus').currentAdaptiveExpression.cooldownRemaining>0);
+  A.throws(()=>act(s,'physiqueAssume',{witnessIndex:ix,minutes:30}),
+   /cooldown/);
+ }else{
+  A.ok(act(s,'physiqueStatus').currentAdaptiveExpression.cooldownRemaining>0);
  }
+ // Original world time, not a user-selected body timer, clears the
+ // mandatory clinical cooling period even after a failed release.
+ R.act(s,{system:'world',operation:'wait',params:{minutes:9}});
+ A.equal(act(s,'physiqueStatus').currentAdaptiveExpression.cooldownRemaining,0);
  recovery(s,5);
  ix=witness(s,Phys.ASSUME,6,{
   environmentObserved:'A fresh measured ordinary dry heat gradient elicits a new reversible adaptive response from already refined original human tissues.',
@@ -340,6 +351,49 @@ function earnNeuralCycle(s){
  const falseResearch=E.importGame(E.exportGame(s));
  falseResearch.table.bodyRefinement.living.cycles[7].tissues[0].practice[0].source.pointsAfter+=99;
  A.equal(Phys.verify(falseResearch),false);
+ // Genuine repeated whole-body refinement after earned V and VII uses
+ // the same cycle and injury physiology. A second pass must never give a
+ // duplicate cycle label, another stamina capacity bonus or an Origin trait.
+ for(const cycle of [5,7]){
+  const sp=Phys.SPEC[cycle],maxBefore=s.player.maxStamina,
+   cyclesBefore=s.player.body.cycles.length,originBefore=
+    E.exportGame(s.player.origin);
+  let repeated=false,attempts=0;
+  while(!repeated&&attempts<8){
+   recovery(s,sp.energy+2);attempts++;
+   const ix=witness(s,Phys.REPEAT,cycle,{
+    observedWholeBodyResponse:'The same already completed human full-body refinement is newly examined under a whole-body physical strain response.',
+    independentFailureLimit:'Independently observed original fatigue, superficial wounds and oxygen restriction can interrupt this physical effort.',
+    metabolicDemand:'A real individual repeat experiment requires original tissue perfusion, ordinary nourishment and physiological recovery.',
+    targetedTissues:'All previously integrated original human organs, blood, skin, neurons and their personally developed tissues remain coordinated.'
+   });
+   const priorMinute=s.world.minutes,priorSta=s.player.stamina;
+   const result=act(s,'physiqueRepeat',{cycle,witnessIndex:ix,minutes:60});
+   repeated=result.repeated;
+   A.equal(repeated,result.check.success);
+   A.equal(result.noSecondRankOrFreeCapacity,true);
+   A.equal(s.world.minutes,priorMinute+60);
+   const days=Math.floor(s.world.minutes/1440)-Math.floor(priorMinute/1440);
+   A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+    priorSta-result.staminaSpent+5*days));
+   A.equal(s.player.maxStamina,maxBefore);
+   A.equal(s.player.body.cycles.length,cyclesBefore);
+   A.equal(E.exportGame(s.player.origin),originBefore);
+   A.equal(Phys.verify(s),true);
+   const savedRepeat=E.exportGame(s),rng=s.rngState;
+   A.throws(()=>act(s,'physiqueRepeat',{cycle,witnessIndex:ix,minutes:60}),
+    /original|witness|already|resolved/);
+   A.equal(E.exportGame(s),savedRepeat);
+   A.equal(s.rngState,rng);
+  }
+  A.equal(repeated,true,'A real fully observed completed cycle must be repeatable without stacking a new rank');
+  const rep=act(s,'physiqueStatus').specialisations.find(x=>x.cycle===cycle);
+  A.ok(rep.repeatedWholeBodyAttempts>=1);
+  A.ok(rep.verifiedRepeatedPasses>=1);
+ }
+ const repeatForged=E.importGame(E.exportGame(s));
+ repeatForged.table.bodyRefinement.living.cycles[7].repetitions[0].source.noAdditionalCapacity=false;
+ A.equal(Phys.verify(repeatForged),false);
  // First MECHANICAL use of an individual earned tissue is limited to
  // the game's existing source-prepared local footing check. The GM cannot
  // create its DC, invent terrain, stack bonuses, or mint a second die.
