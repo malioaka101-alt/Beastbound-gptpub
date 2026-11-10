@@ -1,0 +1,21 @@
+# Original Rift Practice §§3 and 25 — foundation #15 (draft)
+
+**Authority:** original Unified Master Prompt §25: Rift Sense → Anchor Marking → Fold Step → Boundary Weaving → Pocket Architecture → Rift Adaptation → Realm Walking → Boundary Domain. Rift phenomena have real dimensional physics, independent world pressure, coordinate preparation and possible displacement, shearing, desynchronisation, contamination and loss. Merely noticing a seam never confers travel.
+
+## First executable link: original Fold Step III
+
+The existing earned Rift Sense I and Anchor Marking II are the *only* path into this first documented, actual local Fold Step. This does **not** re-award spatial affinity or infer a discovered portal from the skill rank.
+
+`rules/rift-fold-step.js` accepts one original GM-witnessed real-world geometrical measurement at the **already earned Riftglass exterior anchor** and uses existing `world/cosmology-ledger.js` with real `world/simulation.js` pressure. It requires a safe real scene, the existing original Anchor II proof, independent measured from/to positions **within the same location**, a directly observed unobstructed line-of-effect, source-specific safe measured span and a countertest against physical obstruction and shear. It refuses declared inaccessible vault entry, crossing the known ward line, cross-location movement, arbitrary player-selected DC/coordinates or an unwitnessed guaranteed destination.
+
+The first bounded local adapter supports a measured **1–12 metre** displacement. This is a deliberately modest physical example of *short* folding, **not a universal metaphysical maximum** for all possible species, Rift schools or later independently earned spatial arts. Later original techniques can demonstrate their own safe range with their own proof, world laws and actual resource limits. The GM can author the individual's observed positions freely; there is no finite move list or mandated paid teacher.
+
+The action `rift.foldStep` uses **exactly one original d20**, whose difficulty derives from the observed span, actual Riftglass world pressure and recorded personal spatial strain. It consumes 2 genuine original human Stamina, advances the real world 5 minutes and records a causal, source-hashed original receipt. A severe failure causes actual original wound-system shear injury and lasting spatial disorientation. Success physically changes the **recorded local position** in the existing scene and independently proves Rift Step III (Fold Step), but does not touch global `world.location`, rewrite the realm, create a pocket dimension, grant portal control or automatically cross a protected site. The original witness is stored inside its immutable work receipt so ordinary bounded narrative log rotation cannot erase earned spatial work.
+
+After earning Fold Step III, the character can attempt another locally observed and source-specific movement. A new attempt must start at the last genuinely recorded position in that scene; a falsified location or a previously consumed witness is refused **before a new roll**. The read-only `rift.foldStatus` reports only earned capability, observed local position, attempts and publicly describable strain, not hidden portal coordinates.
+
+## Expansion path — still unchecked
+
+The remaining #15 foundation must ground original **Boundary Weaving, Pocket Architecture, Rift Adaptation, Realm Walking and bounded Boundary Domain** in the same cosmology, protected world and energy records rather than granting teleportation on a stage name. Cross-realm action particularly needs independently witnessed physical access rights, preparation, real coordinates and protection, transfer/return integrity and independent realm laws. No new implementation should silently override the existing ledger's `noProvenPassage`, open a sealed mythic location or turn a GM tradition into a universal law.
+
+`tests/rift-fold-step.test.js` is the disposable initial regression for source-verified local movement, original Anchor II attainment, no double roll or remote transit, real time/Stamina, saved source integrity, future local attempts and log rollover. This is an **initial working slice**, not verified #15 completion. No active campaign save was changed.
