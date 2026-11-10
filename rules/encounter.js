@@ -66,7 +66,7 @@ function exchange(s,p={}){
  if(p.nonlethal!==undefined&&typeof p.nonlethal!=='boolean')
   throw Error('Nonlethal player intent must be Boolean');
  if(p.intent!=='attack'&&(p.attackId!==undefined||p.nonlethal!==undefined||p.weaponFocusId!==undefined))
-  throw Error('Weapon action, prepared physical focus and nonlethal strike apply only to an actual attack intent');
+  throw Error('Weapon action and nonlethal strike, including prepared physical focus, apply only to an actual attack intent');
  if(!['cast','ward','technique'].includes(p.intent)&&p.techniqueId!==undefined)
   throw Error('Only a real attack spell, defensive Ward or Meridian technique may name a previously learned technique');
  if(p.personalDesignId!==undefined&&!['cast','technique','aspect'].includes(p.intent))
