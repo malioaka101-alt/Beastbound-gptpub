@@ -40,7 +40,9 @@ function authorisation(s,id,seal,q){
   !integer(a.minute,q.minute,s.world.minutes)||
   w?.type!=='story'||a.witnessHash!==hash(w)||
   d?.origin!==AUTH||d.sourceId!==id||d.mode!==a.mode||
-  d?.location!==a.location||!prose(d?.verifiedSourceRights)||
+  d?.location!==a.location||
+  !s.log?.some(event=>hash(event)===a.witnessHash)||
+  !prose(d?.verifiedSourceRights)||
   !prose(d?.observedOriginalMaterialIdentity)||
   (a.mode==='informed-donation'&&
    (d?.donorConsent!==true||!prose(d?.individualDonorConsent)))||
@@ -139,6 +141,7 @@ function verifyRecord(s,r,q,seal){
     !a.witness||a.witnessHash!==hash(a.witness)||
     a.witness.details?.origin!==CARE||
     a.witness.details?.sourceId!==r.sourceId||
+    !s.log?.some(event=>hash(event)===a.witnessHash)||
     !prose(a.witness.details?.measuredIndividualResponse)||
     !prose(a.witness.details?.independentFailureLimit)||
     !prose(a.witness.details?.observedHumanMechanism)||
@@ -160,6 +163,7 @@ function verifyRecord(s,r,q,seal){
    a.witness.details?.origin!==STAGE||
    a.witness.details?.sourceId!==r.sourceId||
    a.witness.details?.step!==next||
+   !s.log?.some(event=>hash(event)===a.witnessHash)||
    !prose(a.witness.details?.measuredIndividualResponse)||
    !prose(a.witness.details?.independentFailureLimit)||
    !prose(a.witness.details?.observedHumanMechanism)||
@@ -211,6 +215,7 @@ function verifyRecord(s,r,q,seal){
    a.witness.details?.origin!==USE||
    a.witness.details?.sourceId!==r.sourceId||
    a.witness.details?.checkId!==a.checkId||
+   !s.log?.some(event=>hash(event)===a.witnessHash)||
    !prose(a.witness.details?.observedFunction)||
    !prose(a.witness.details?.independentFailureLimit)||
    !sc||sc.checkId!==a.checkId||
