@@ -42,6 +42,11 @@ for(const seed of [974171,974172,974173,974174,974175,974176]){
    chosenConsent:true}),/cannot choose mentor consent/);
   A.equal(mentor.rngState,teacherRng);
   A.equal(E.exportGame(s),before);
+  A.throws(()=>Career.observePeerGuidance(w,learner,mentor,{
+   id:signature,method,day,witness:'Fabricated excessive disclosure.'.repeat(25)}),
+   /genuinely present|teachable method/);
+  A.equal(mentor.rngState,teacherRng);
+  A.equal(E.exportGame(s),before);
   const response=Career.observePeerGuidance(w,learner,mentor,{
    id:signature,method,day,
    witness:'The two personally present workers witnessed a specific professional technique and requested optional guidance during the shared work shift.'});
