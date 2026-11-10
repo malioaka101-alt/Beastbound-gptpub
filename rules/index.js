@@ -228,6 +228,7 @@ function act(s,{system,operation,params={}}={}){
   case 'body.physiqueWork':return require('./body-living-physiques').work(s,params);
   case 'body.physiqueCare':return require('./body-living-physiques').care(s,params);
   case 'body.physiqueComplete':return require('./body-living-physiques').complete(s,params);
+  case 'body.physiqueRepeat':return require('./body-living-physiques').repeat(s,params);
   case 'body.physiqueAssume':return require('./body-living-physiques').assume(s,params);
   case 'body.physiqueRelease':return require('./body-living-physiques').release(s,params);
   case 'body.physiqueSustain':return require('./body-living-physiques').sustain(s,params);
