@@ -23,6 +23,8 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/body-advanced-nerve-sense.test.js
+            tests/body-living-physiques.test.js
             tests/soul-resonance-lattice.test.js
             tests/soul-higher-architecture.test.js
             tests/arcane-higher-architecture.test.js
