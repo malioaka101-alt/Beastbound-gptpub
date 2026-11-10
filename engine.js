@@ -453,6 +453,11 @@
   function help(s){return success(s,'Commands: branches, ripening, pattern echo, research, research start Title | kind | Grade | novelty, research survey <id>, research week <id>, research fieldwork <id>, research hypothesis <id> | claim, research proof <id>, research validate <id>, knows <NPC>, hud, recap; plus look, travel <place>, explore, observe, approach, offer food, invite, leave, forage, talk <person>, guild, quest accept <id>, quest submit <id>, train meridian|arcane|soul|body|rift|origin|beast, buy <item>, craft field_poultice, competitions, compete <id>, rest, heal, evolve, evolve human, attack, defend, soothe, retreat, qi strike, arcane spark, status, inventory, help.');}
   function dispatch(s,phrase){
     if(!s||s.schemaVersion!==1)throw Error('Invalid or unsupported save state.');
+    // Foreign-plane physical presence is separate from the retained mortal
+    // anchor coordinate. Never let legacy commands act at that old site.
+    if(s.table?.realm?.riftWalk?.active||
+      s.world?.planeId&&s.world.planeId!=='mortal')
+      throw Error('Actually inside a selected foreign plane: use verified realm status or genuine return before ordinary mortal-world commands');
     const raw=String(phrase||'').trim();const x=raw.toLowerCase();
     if(!x)return fail(s,'Enter an action. Type help for example commands.');
     if(s.table?.healthModel==='wounds-v1' && ['fight','start combat','confront','attack','defend','soothe','retreat','qi strike','arcane spark','rest','sleep','heal','use balm','invite','propose partnership','form bond','evolve','evolve partner'].includes(x))
