@@ -51,7 +51,7 @@ function observe(s,id='serious_tissue_repair_trial_01'){
  const old=E.exportGame(s),rng=s.rngState;
  A.equal(act(s,'healingIntentStatus').trials,0);
  A.throws(()=>act(s,'healingIntentTreat',{witnessIndex:0}),
-  /clean known clinic|conscious|Serious|witnessed/i);
+  /clean known clinic|conscious|Serious|witnessed|genuine first Lower Meridian Gate/i);
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
 }
 let selected=null,result=null;
