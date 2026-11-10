@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],peerGuidance:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],peerGuidance:[],tradePayments:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -104,6 +104,14 @@ function verify(p){
     c.peerGuidance.some(e=>!verifyPeerGuidance(p,e))||
     new Set(c.peerGuidance.map(e=>e.id)).size!==c.peerGuidance.length))
   return false;
+ if(c.tradePayments!==undefined&&
+   (!Array.isArray(c.tradePayments)||
+    c.tradePayments.some(x=>!verifyTradePayment(p,x))||
+    new Set(c.tradePayments.map(x=>x.id)).size!==c.tradePayments.length||
+    new Set(c.tradePayments.map(x=>x.source.workHash)).size!==c.tradePayments.length))
+  return false;
+ const received=(c.tradePayments||[]).reduce((n,x)=>n+x.amountScales,0);
+ if(!Number.isSafeInteger(received)||received!==(p.cashScales??0))return false;
  return true;
 }
 function ensure(p){
@@ -570,6 +578,141 @@ function peerGuidanceStatus(p,{day}={}){
  }));
 }
 
+
+/*
+ * A first real same-unit compensation bridge, not a fictional payroll.
+ * A real named stock-owning provisioner may pay a present worker once for
+ * an actually successful trade service. The seller's existing finite Scales
+ * float decreases by exactly the worker's new Scales holding. Both durable
+ * sources point to one authentic ORIGINAL personal work receipt.
+ * This is source-witnessed merchant remuneration, NOT a salary or conversion
+ * from guild budget points, personal abstract livelihood, or player Talons.
+ */
+const TRADE_PAYMENT='actual-provisioner-trade-work-payment-v1';
+function verifyTradePayment(p,e){
+ const q=e?.source,work=q?.work;
+ return !!e&&e.origin===TRADE_PAYMENT&&e.sourceHash===hash(q)&&
+  q?.origin===TRADE_PAYMENT&&e.id===q.id&&
+  e.amountScales===q.amountScales&&e.workerId===p.id&&
+  q.workerId===p.id&&q.workerOriginHash===p.originHash&&
+  q.sellerId==='otto'&&q.sellerLocation==='crossing'&&
+  q.sourceCurrency==='Scales'&&
+  q.regionId==='morrowfen_basin'&&
+  typeof q.sellerName==='string'&&q.sellerName.length>5&&
+  typeof q.witness==='string'&&q.witness.trim().length>=45&&
+  q.witness.length<=600&&q.witness.includes(q.sellerName)&&
+  Number.isInteger(q.day)&&q.day>=p.birthSource.day&&
+  Number.isInteger(q.amountScales)&&q.amountScales>=1&&
+  q.amountScales<=100000000&&
+  Number.isInteger(q.sellerBeforeScales)&&q.sellerBeforeScales>=q.amountScales&&
+  q.sellerAfterScales===q.sellerBeforeScales-q.amountScales&&
+  Number.isInteger(q.workerBeforeScales)&&q.workerBeforeScales>=0&&
+  q.workerAfterScales===q.workerBeforeScales+q.amountScales&&
+  typeof q.workHash==='string'&&q.workHash===hash(work)&&
+  work?.origin===WORK&&work.personId===p.id&&
+  work.personOriginHash===p.originHash&&
+  work.regionId===q.regionId&&work.task?.domain==='trade'&&
+  work.outcome?.success===true&&Number.isInteger(work.day)&&
+  work.day<=q.day&&
+  e.workHash===q.workHash;
+}
+function payVerifiedTradeWork(w,p,{workHash,amountScales,day,witness}={}){
+ const c=ensure(p),vendor=w?.localProvisioner,
+  seller=require('../engine.js').NPCS.otto;
+ if(!vendor||vendor.origin!=='established-reedmarch-provisions-v1'||
+  vendor.sellerNpcId!=='otto'||vendor.seller!==seller?.name||
+  vendor.location!=='crossing'||vendor.regionId!=='morrowfen_basin'||
+  seller.location!=='crossing'||seller.profession!=='Beast provisioner'||
+  p.status!=='active'||p.regionId!==vendor.regionId||
+  !Number.isInteger(day)||day!==w.lastTickDay||
+  !Number.isInteger(amountScales)||amountScales<1||
+  !Number.isInteger(vendor.fundsScales)||
+  amountScales>vendor.fundsScales||
+  !Number.isInteger(p.cashScales??0)||
+  !Array.isArray(vendor.laborPayments??[])||
+  typeof witness!=='string'||witness.trim().length<45||
+  witness.length>600||!witness.includes(vendor.seller))
+  throw Error('A genuinely witnessed seller-funded local work transfer in existing Scales is required');
+ const People=require('./emergent-people');
+ if(!People.presence(w,p.actorId,vendor.location,day))
+  throw Error('The real worker must actually attend the living market shift');
+ const completed=c.workReceipts.find(r=>r.sourceHash===workHash);
+ if(!completed||completed.source?.outcome?.success!==true||
+  completed.source?.task?.domain!=='trade'||
+  completed.source?.regionId!==vendor.regionId||
+  completed.source?.day>day||
+  (c.tradePayments||[]).some(e=>e.workHash===workHash)||
+  (vendor.laborPayments||[]).some(e=>e.workHash===workHash))
+  throw Error('Pay only one real source-confirmed successful local service, never a fictional or double-paid job');
+ const workerBeforeScales=p.cashScales??0;
+ const q={origin:TRADE_PAYMENT,
+  id:'service-payment-'+workHash.slice(0,48),day,
+  sellerId:vendor.sellerNpcId,sellerName:vendor.seller,
+  sellerLocation:vendor.location,regionId:vendor.regionId,
+  sourceCurrency:'Scales',workerId:p.id,workerOriginHash:p.originHash,
+  workHash,work:structuredClone(completed.source),
+  amountScales,witness,
+  sellerBeforeScales:vendor.fundsScales,
+  sellerAfterScales:vendor.fundsScales-amountScales,
+  workerBeforeScales,workerAfterScales:workerBeforeScales+amountScales};
+ const row={id:q.id,origin:TRADE_PAYMENT,workerId:p.id,workHash,
+  amountScales,source:q,sourceHash:hash(q)};
+ if(!verifyTradePayment(p,row)||
+  q.workerAfterScales>1000000000)
+  throw Error('The original signed compensation proof is invalid');
+ // Preflight personal career and merchant history BEFORE writing the transfer.
+ const preview=structuredClone(p);
+ preview.cashScales=q.workerAfterScales;
+ preview.career.tradePayments||=[];
+ preview.career.tradePayments.push(structuredClone(row));
+ if(!verify(preview))throw Error('This real payment would not survive character verification');
+ p.cashScales=q.workerAfterScales;
+ c.tradePayments||=[];
+ c.tradePayments.push(row);
+ vendor.fundsScales=q.sellerAfterScales;
+ vendor.laborPayments||=[];
+ vendor.laborPayments.push(structuredClone(row));
+ vendor.history.push({day,kind:'actual-verified-work-remuneration',
+  workerId:p.id,workHash,paidScales:amountScales,
+  remainingScales:vendor.fundsScales,sourceHash:row.sourceHash});
+ if(vendor.history.length>80)vendor.history.shift();
+ return {id:row.id,workerId:p.id,payerId:'otto',
+  paidScales:amountScales,originalWorkHash:workHash,
+  sellerRemainingScales:vendor.fundsScales,
+  workerBalanceScales:p.cashScales,
+  abstractLivelihoodUnchanged:true,noNewMoneyCreated:true,
+  noUniversalWageOrGuildSalary:true};
+}
+function verifyLocalTradePayments(w){
+ const vendor=w?.localProvisioner;
+ const rows=vendor?.laborPayments||[];
+ if(!Array.isArray(rows))return false;
+ const people=w?.emergentPeople?.people||{};
+ const seen=new Set();
+ for(const e of rows){
+  const p=people[e?.workerId];
+  if(!p||!verify(p)||!verifyTradePayment(p,e)||
+   seen.has(e.workHash)||
+   !p.career?.tradePayments?.some(x=>x.sourceHash===e.sourceHash&&
+     x.id===e.id&&x.workHash===e.workHash&&
+     JSON.stringify(x)===JSON.stringify(e)))return false;
+  seen.add(e.workHash);
+ }
+ for(const p of Object.values(people)){
+  if((p.career?.tradePayments||[]).some(x=>
+   !rows.some(y=>y.id===x.id&&y.sourceHash===x.sourceHash&&
+     y.workerId===p.id)))return false;
+ }
+ return true;
+}
+function tradePaymentStatus(p){
+ if(!verify(p))throw Error('An unverified worker cannot claim salary history');
+ return (p.career?.tradePayments||[]).map(x=>({
+  id:x.id,day:x.source.day,payerId:x.source.sellerId,
+  amountScales:x.amountScales,sourceWorkHash:x.workHash,
+  historicNotRecurringSalary:true}));
+}
+
 function task(w,p,day=w.lastTickDay){
  const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
   region=Atlas.R[p.regionId];
@@ -756,4 +899,5 @@ function publicWitness(x){
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
 module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,observePeerGuidance,peerGuidanceStatus,
+ payVerifiedTradeWork,verifyLocalTradePayments,tradePaymentStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};

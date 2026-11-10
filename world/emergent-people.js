@@ -84,6 +84,8 @@ function verify(w,p){
   !Atlas.R[p.regionId]||!Array.isArray(p.history)||
   p.history.length>24||
   !Number.isFinite(p.funds)||p.funds<0||p.funds>100||
+  !Number.isInteger(p.cashScales??0)||p.cashScales<0||
+  p.cashScales>1000000000||
   !Number.isFinite(p.fatigue)||p.fatigue<0||p.fatigue>100||
   !Number.isInteger(p.rngState)||p.rngState<1||
   !Careers.verify(p)||
@@ -108,7 +110,8 @@ function make(w,t,day,d){
   status:'active',ageBand:'adult, exact birthday not established',
   family:null,ancestry:null,inheritance:null,
   practicedDisciplines:[],knownTechniques:[],
-  funds:10+Math.floor(draw(t)*23),fatigue:Math.floor(draw(t)*16),
+  funds:10+Math.floor(draw(t)*23),cashScales:0,
+  fatigue:Math.floor(draw(t)*16),
   competence:1,personality:['reserved','curious','steady','independent'][
    Math.floor(draw(t)*4)],
   rngState:personalSeed,lastTickDay:day,shift:null,
