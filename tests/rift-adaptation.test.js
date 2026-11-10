@@ -127,7 +127,9 @@ function trained(seed=25156051){
   const out=act(s,'rift','adaptExposure',{witnessIndex:wi,minutes:60});
   A.equal(out.attempted,true);A.equal(out.success,out.check.success);
   A.equal(s.world.minutes,clock+60);
-  A.equal(s.player.stamina,sta-4);
+  A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+   sta-4+5*(Math.floor(s.world.minutes/1440)-Math.floor(clock/1440))),
+   'Original Stamina cost remains real while the existing world day may independently restore it');
   A.equal(out.noOtherRealmImmunity,true);
   A.equal(out.noPortalTravel,true);
   A.equal(Adapt.verify(s),true);
