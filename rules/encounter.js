@@ -1,7 +1,7 @@
 'use strict';
 // One text-RPG combat exchange: a player intent and an independently committed
 // NPC/beast plan are resolved together, never after the GM sees a favourable die.
-const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design'),Aspect=require('./personal-aspect');
+const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), WeaponIntent=require('./specialist-weapon-intent'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design'),Aspect=require('./personal-aspect');
 const COVER=Object.freeze({
  forest:{kind:'copperwood trunks',source:'Engine-established copperwood trunks in Copperwood Verge'},
  ruins:{kind:'ward-stone masonry',source:'Engine-established ward-stone masonry at Riftglass Outpost'}
@@ -58,15 +58,15 @@ function begin(s,p={}){
 function exchange(s,p={}){
  const fight=s.battle;if(!fight||fight.mode!=='wounds-v1')throw Error('No canonical wound-model combat scene is active');
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).some(k=>!
-   ['intent','attackId','techniqueId','nonlethal','playerBrace','personalDesignId'].includes(k)))
+   ['intent','attackId','techniqueId','nonlethal','playerBrace','personalDesignId','weaponFocusId'].includes(k)))
   throw Error('Player attack bonuses, damage, Qi spending, enemy plans and encounter DCs cannot be caller-selected');
  if(!['attack','cast','ward','dual_cast','technique','defend','recover','withdraw','parley','yield_space','take_cover','aspect','revert'].includes(p.intent))throw Error('Player intent required: attack, cast, ward, dual_cast, technique, defend, recover, withdraw, parley, yield_space or take_cover');
  if(p.playerBrace!==undefined&&![true,false,'auto'].includes(p.playerBrace))
   throw Error('Player bracing must be a real reaction choice');
  if(p.nonlethal!==undefined&&typeof p.nonlethal!=='boolean')
   throw Error('Nonlethal player intent must be Boolean');
- if(p.intent!=='attack'&&(p.attackId!==undefined||p.nonlethal!==undefined))
-  throw Error('Weapon action and nonlethal strike apply only to an actual attack intent');
+ if(p.intent!=='attack'&&(p.attackId!==undefined||p.nonlethal!==undefined||p.weaponFocusId!==undefined))
+  throw Error('Weapon action, prepared physical focus and nonlethal strike apply only to an actual attack intent');
  if(!['cast','ward','technique'].includes(p.intent)&&p.techniqueId!==undefined)
   throw Error('Only a real attack spell, defensive Ward or Meridian technique may name a previously learned technique');
  if(p.personalDesignId!==undefined&&!['cast','technique','aspect'].includes(p.intent))
@@ -86,6 +86,8 @@ function exchange(s,p={}){
  // Verify equipment, recorded damage and learned mundane ability before
  // initialising combat or touching the game's random stream.
  const action=p.intent==='attack'?PlayerAttack.profile(s,p.attackId):null;
+ const weaponFocus=p.weaponFocusId===undefined?null:
+  WeaponIntent.preflight(s,p.weaponFocusId,p.attackId);
  // Validate actual learned spell and Mana BEFORE independent enemy decisions
  // and all dice. A First Circle alone does not grant spells.
  const dual=p.intent==='dual_cast'?DualArcane.verify(s):null;
@@ -138,8 +140,19 @@ function exchange(s,p={}){
   ownResult=Aspect.revert(s,{combat:true});
   ownResult.action='voluntary aspect reversion';
  }else if(p.intent==='attack'){
-  ownResult=Combat.attack(s,{...atkOpts,modifier:action.modifier,damage:action.damage,
+  ownResult=Combat.attack(s,{...atkOpts,
+   modifier:action.modifier+(weaponFocus?.bonus||0),damage:action.damage,
    offM:action.offM,brace:false,nonlethal:isNonlethal});
+  if(weaponFocus){
+   const earned=WeaponIntent.spend(s,weaponFocus,action.modifier,ownResult);
+   ownResult.weaponIntent=earned;
+   C.event(s,'combat',
+    'The personally trained and equipped weapon form changes the existing single strike through real body effort.',{
+     origin:WeaponIntent.SOURCE,formId:earned.formId,
+     attackId:action.actionId,physicalModifier:earned.singlePhysicalAttackBonus,
+     staminaSpent:earned.staminaSpent,noSecondAttackRoll:true,
+     noExtraWeaponDamage:true});
+  }
   ownResult.verifiedActionId=action.actionId;
   if(action.bodyRefinementM){
    ownResult.earnedBodyRefinementM=action.bodyRefinementM;
