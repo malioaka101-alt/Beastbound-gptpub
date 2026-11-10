@@ -102,7 +102,8 @@ A.ok(selected,'Independent high-skilled disposable human wound trials can resolv
  const ordinary=R.act(s,{system:'health',operation:'balm',params:{}});
  A.equal(ordinary.treated,'Light wound');
  A.equal(c.wounds[0],0);
- A.equal(s.player.inventory.healing_balm,regularBalm-1);
+ A.equal(s.player.inventory.healing_balm||0,regularBalm-1,
+  'The canonical inventory removes an exhausted balm item instead of keeping a zero-count key');
  A.equal(s.player.qi,healthyQi);
  A.equal(Healing.verify(s),true,
   'Canonical ordinary care after individual Meridian repair does not rewrite original clinical source');
