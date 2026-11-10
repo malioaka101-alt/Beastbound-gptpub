@@ -148,6 +148,13 @@ function trained(seed=25156051){
  A.equal(s.player.origin.load,original.originLoad);
  A.equal(s.player.humanEvolution.stage,original.humanStage);
  A.deepEqual(s.player.body.cycles,original.bodyCycles);
+ // Recover actual original human exertion through real physical travel and
+ // a full settlement night's sleep, never a unit-test stamina gift.
+ if(s.player.stamina<4){
+  A.equal(E.dispatch(s,'travel fen').ok,true);
+  A.equal(act(s,'health','sleep',{hours:8}).sleptHours,8);
+  A.equal(E.dispatch(s,'travel ruins').ok,true);
+ }
  const wi=observe(s),before=s.world.minutes;
  const after=act(s,'rift','adaptExposure',{witnessIndex:wi,minutes:60});
  A.equal(s.world.minutes,before+60);
