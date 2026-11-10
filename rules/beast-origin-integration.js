@@ -66,7 +66,7 @@ function context(s,id,{allowCompleted=false}={}){
  if(!r?.complete||!r.mapping.length)
   throw Error('The actual individual trait must first be personally mapped');
  if(!['metabolic','arcane','meridian','soul','hybrid'].includes(q.energyMode)||
-  !['local-footing'].includes(q.effectAdapter)||
+  (q.effectAdapter!=null&&q.effectAdapter!=='local-footing')||
   !prose(q.humanExpression)||!prose(q.independentAdaptationLimit))
   throw Error('This individual trait lacks a verifiable supported human biological effect and energy route');
  if(!Lineage.AXES.every(x=>r.results[x]==='promising'||
@@ -195,6 +195,7 @@ function verifyRecord(s,r,q,seal){
   if(a.success)next++;
  }
  if(t.next!==next||t.complete!==(next===9)||
+  (next<=6&&(t.uses||[]).length>0)||
   t.strain!==strain||t.reservedLoad!==reserved||
   (t.complete&&!s.player.origin.stableTraits.includes('human_origin_'+r.sourceId)))
   return false;
