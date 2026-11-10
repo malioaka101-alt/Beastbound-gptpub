@@ -200,6 +200,8 @@ function act(s,{system,operation,params={}}={}){
   case 'specialist.sigilStatus':return require('./specialist-rune-sigils').status(s);
   case 'specialist.sigilInscribe':return require('./specialist-rune-sigils').inscribe(s,params);
   case 'specialist.sigilActivate':return require('./specialist-rune-sigils').activate(s,params);
+  case 'specialist.formationStatus':return require('./specialist-formation-mastery').status(s);
+  case 'specialist.formationBuild':return require('./specialist-formation-mastery').form(s,params);
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
