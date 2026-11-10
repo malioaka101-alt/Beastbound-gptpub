@@ -130,6 +130,13 @@ function ensure(p){
 // personal skill, employer consent, or pre-decided dice result.
 const DUTY='gm-source-authored-person-work-v1';
 const METHOD=/^[a-z][a-z-]{3,39}$/;
+// A profession's GM-authored domain is an OPEN identifier, not a catalogue.
+// Only the original three proven effect bridges are allowed to change world
+// ecology, polity stability or ordinary traded goods. Other sourced work
+// performs the SAME genuine check, earns ordinary professional practice and
+// livelihood, and explicitly has no invented clinical/beast/magic outcome.
+// New specialised physical effects require a separately verified original
+// world adapter, never permission from an unrestricted domain string.
 function verifyDuty(p,d){
  const q=d?.source;
  if(!d||d.origin!==DUTY||d.sourceHash!==hash(q)||
@@ -142,7 +149,7 @@ function verifyDuty(p,d){
    Atlas.R[d.regionId]?.polity!==q.originalPolity||
    !/^[a-z][a-z0-9_-]{3,60}$/.test(d.id)||
    !METHOD.test(d.method)||
-   !['ecology','civic','trade'].includes(d.domain)||
+   typeof d.domain!=='string'||!METHOD.test(d.domain)||
    typeof d.role!=='string'||d.role.trim().length<6||d.role.length>130||
    typeof d.goal!=='string'||d.goal.trim().length<12||d.goal.length>250||
    typeof q.witness!=='string'||q.witness.length<24||q.witness.length>500||
