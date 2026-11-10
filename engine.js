@@ -186,6 +186,11 @@
     if(!target||!here.exits.includes(target))return fail(s,`Travel must follow a linked route. From here: ${here.exits.map(x=>LOCATIONS[x].name).join(', ')}.`);
     const old=s.world.location;s.world.location=target;s.flags.visited[target]=true;advance(s, target==='ruins'?145:75);
     s.player.stamina=clamp(s.player.stamina-4,0,s.player.maxStamina);
+    // Once the canonical wound model is active, legacy route exertion must
+    // update the SAME living human combat stamina. Never invent recovery or
+    // let travel silently strand the two stamina ledgers out of sync.
+    if(s.table?.healthModel==='wounds-v1'&&s.table?.combatants?.player)
+      require('./rules/unified').sync(s,{source:'legacy'});
     log(s,'travel',`You travel from ${LOCATIONS[old].name} to ${LOCATIONS[target].name}. ${LOCATIONS[target].description}`);
     for(const q of Object.values(s.quests))if(q.status==='active'&&q.metric==='visit_ruins'&&target==='ruins'){q.progress=1;log(s,'quest','Riftglass Watch: field observations recorded, ready for guild submission.');}
     return success(s);
