@@ -1,6 +1,20 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## #17 current acceptance checkpoint — confirmed payout, safety and open jobs (10 November 2026)
+
+The ordered foundation checklist currently verifies **#01–#16/25**; #17 remains **unchecked pending the latest exact-head safety and domain acceptance**, not because all later law/economy/medicine depth must be prebuilt. Source-driven authored duties, actual practical attestations, independently optional work offers, voluntary original-work peer guidance and real source-funded pay are now already **five verified merged #17 subfoundations**, PRs #50–#54.
+
+**Newest accepted:** [PR #54](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/54) verified **172/172 complete exact-head tests** [run #42899943785](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42899943785) on `1503f241182f09da4755ede804bab3522738a05f`, then squash-merged to `main` as `7809b418aa42f638109fbd9962b3b1bac8e75350`. One actual successful independent source-backed trade-work receipt can be paid from the finite authentic original provisioner owner's `fundsScales` and matched worker `cashScales`. Seller and worker have matched tamper-protected original evidence; ordinary abstract livelihood and institution budgets cannot be exchanged for money. This is one personally witnessed seller-funded payment, **not** an automatic standing salary, tax system, or universal payroll.
+
+[PR #55](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/55) source-backed actual occupational-risk/worker-fatigue recovery is now **cleanly based on merged current main**, branch `foundation/living-career-source-workplace-safety-20261110` at `b729746c6ee8b3c59a87cc65cf43ec765be8c446`; the earlier nested head already passed full 173/173 [#42901139047](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42901139047), but it must still pass the **replacement exact-head 173-group run [#42905495666](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42905495666)**, currently running. Do not merge on an earlier commit's green result.
+
+[PR #56](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/56) open-ended GM-authored professional domains, branch `foundation/extend-original-career-domains-20261110` at `957880daef09cdc92ac5d13d66041bed7c148938`, is **still stacked on #55's pre-rebase branch**. Its original stacked-head full 174/174 [#42902159026](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42902159026) passed. **After #55 merges**, construct a single clean main-based PR #56 change, preserving the originally verified domain mechanics and no unsourced clinical/beast/magic effects; rerun exact-head full 174 groups before merge.
+
+**Foundation-check interpretation:** Checklist #17 requires a connected, expandable, persistent, test-verified *foundation* supporting jobs, qualification evidence, real paid service, occupational safety duties, voluntary learning, and actual work opportunities. When #55/#56 pass and merge, evaluate #17 against this target and only then mark complete with explicit limitations, and move to #18 organisations. Do not pretend formal government licences or all payer/property systems are done: jurisdiction-specific enforceable laws belong substantially to #20, genuine property/payroll to #19, full clinical recovery and tools to #24. Career domains should be open to GM invention without arbitrary job ceilings or global teachers. No campaign saves changed. Older notes below historical.
+
+
+
 ## Foundation #17 — real service pay, safety, and open professions (10 November 2026)
 
 **Current authoritative checklist count:** #01–#16 verified; #17 unchecked until a genuinely expandable connected professional system passes. Four partial bridges PRs #50–#53 are already merged. The latest #53 confirmed 171/171 exact-head regression and squash-merged `dccecfd99897522b21ffc3b5bad334a948f78163`.
