@@ -5,6 +5,8 @@
 const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  E=require('../engine.js'),R=require('../rules'),C=require('../rules/core'),
  Realm=require('../world/simulation'),
+ Fold=require('../rules/rift-fold-step'),
+ Anchor=require('../rules/rift-anchors'),
  Walk=require('../rules/rift-realm-walking');
 const {freshSourceEarnedAdaptedGame}=
  require('./rift-adaptation.test.js');
@@ -126,6 +128,26 @@ function establish(s,routeId){
  A.equal(s.player.origin.load,original.evolution);
  A.equal(s.player.humanEvolution.stage,original.humanStage);
  A.equal(act(s,'realmStatus').inside,false);
+ // At earned Step VII the original short Fold Step is still an independent
+ // usable physical movement, not invalidated by raising the Rift stage.
+ const originalFoldPosition=s.table.riftFoldSteps.currentPosition;
+ C.event(s,'story','Original public exterior surveyors measure a new open nearby stone path after the authentic foreign-plane return.',{
+  origin:Fold.WITNESS,anchorId:Anchor.SITE,location:s.world.location,
+  fromObservedPosition:originalFoldPosition,
+  toObservedPosition:'At a further independently measured public exterior standing stone on the same unobstructed wardline approach',
+  measuredDistanceMetres:3,safeRangeMetres:5,
+  lineOfEffectClear:true,crossesSealedBoundary:false,
+  crossesWorldLocation:false,
+  lineOfEffectMeasurement:'A real three-metre unobstructed visible outer stone approach is measured from the practitioner current original position.',
+  independentObstructionTest:'The surveyed solid Riftglass wall remains untraversable and the route does not cross a sealed boundary.',
+  energyAndPhysicalLimit:'Living stamina and actual shear limitations still constrain this advanced original human practitioner.',
+  measuredPressureCountertest:'Independent observers verify that changing physical Riftglass pressure can still defeat a short fold.'});
+ const foldResult=R.act(s,{system:'rift',operation:'foldStep',
+  params:{witnessIndex:s.log.length-1}});
+ A.equal(foldResult.step,7,'Reusing earned Fold III cannot erase later verified Rift VII');
+ A.equal(s.player.rift.step,7);
+ A.equal(Fold.verify(s),true);
+ A.equal(Walk.verify(s),true);
  const after=E.exportGame(s),afterRng=s.rngState;
  A.throws(()=>act(s,'realmReturn',{routeId:id}),/actually entered/i);
  A.equal(E.exportGame(s),after);A.equal(s.rngState,afterRng);
