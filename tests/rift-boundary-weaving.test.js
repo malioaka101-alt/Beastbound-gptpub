@@ -4,6 +4,7 @@
 // unverified global realm-state changes.
 const A=require('node:assert/strict'),E=require('../engine.js'),
  R=require('../rules'),C=require('../rules/core'),W=require('../rules/world'),
+ Cosmos=require('../world/cosmology-ledger'),
  Fold=require('../rules/rift-fold-step'),Weave=require('../rules/rift-boundary-weaving'),
  Anchor=require('../rules/rift-anchors');
 const act=(s,system,operation,params={})=>R.act(s,{system,operation,params});
@@ -98,7 +99,7 @@ function witness(s,mode='reinforce',segmentId=SEGMENT){
  A.equal(formed.mode,'reinforce');A.equal(formed.segmentId,SEGMENT);
  A.equal(Weave.support(s,SEGMENT).mitigation,1);
  A.equal(act(s,'rift','weaveStatus').localLayers.length,1);
- A.equal(s.table.realm.cosmology.boundaries.riftglass_wardline.noProvenPassage,true);
+ A.equal((Cosmos.peek(s)||Cosmos.seed()).boundaries.riftglass_wardline.noProvenPassage,true);
  A.equal(s.table.realm.mythic.riftglass_vault.seal>=0,true);
  const usedWitness=witness(s),before=E.exportGame(s),rng=s.rngState;
  A.throws(()=>act(s,'rift','weaveBoundary',{witnessIndex:usedWitness,mode:'open-portal',result:true}),
