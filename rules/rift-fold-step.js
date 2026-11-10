@@ -85,7 +85,10 @@ function higherStageEarnedAt(s,stage,minute){
  if(stage>=7&&(!p.realmWalkingProof||
   !integer(p.realmWalkingProof.earnedMinute,0,minute)||
   !require('./rift-realm-walking').verify(s)))return false;
- return stage>=4&&stage<=7;
+ if(stage>=8&&(!p.domainProof||
+  !integer(p.domainProof.earnedMinute,0,minute)||
+  !require('./rift-boundary-domain').verify(s)))return false;
+ return stage>=4&&stage<=8;
 }
 function verify(s){
  const r=s.table?.riftFoldSteps;
@@ -115,13 +118,20 @@ function verify(s){
    a.wounded!==(a.strainAdded>0)||
    !integer(a.dc,16,35)||
    a.dc!==16+Math.ceil(a.distance/4)+a.riskAdjustment+
-    Math.floor(a.strainBefore/12)-(a.weaveMitigation||0)||
+    Math.floor(a.strainBefore/12)-
+     Math.max(a.weaveMitigation||0,a.domainMitigation||0)||
    ![0,1].includes(a.weaveMitigation||0)||
    (a.weaveMitigation===1&&(
     !a.segmentId||!a.weaveReceiptSeal||
     !require('./rift-boundary-weaving').supportProof(
      s,a.weaveReceiptSeal,a.segmentId,a.minute)))||
    (a.weaveMitigation===0&&a.weaveReceiptSeal!==null)||
+   ![0,2].includes(a.domainMitigation||0)||
+   (a.domainMitigation===2&&(
+    !a.segmentId||!a.domainReceiptSeal||
+    !require('./rift-boundary-domain').supportProof(
+     s,a.domainReceiptSeal,a.segmentId,a.minute)))||
+   (a.domainMitigation===0&&a.domainReceiptSeal!==null)||
    ![0,3,6].includes(a.riskAdjustment)||
    !integer(a.sourceInt,1,30)||
    !integer(a.sourceArcana,0,5)||
@@ -226,8 +236,12 @@ function fold(s,p={}){
  const weave=segmentId?
   require('./rift-boundary-weaving').support(s,segmentId):
   {mitigation:0,sourceSeal:null};
+ const domain=segmentId?
+  require('./rift-boundary-domain').support(s,segmentId):
+  {mitigation:0,sourceSeal:null};
+ // Domain and local weave share the SAME physical frame; never add both.
  const dc=16+Math.ceil(d.measuredDistanceMetres/4)+risk.dcRisk+
-   Math.floor(strain/12)-weave.mitigation;
+   Math.floor(strain/12)-Math.max(weave.mitigation,domain.mitigation);
  const start=s.world.minutes;
  const check=C.check(s,{modifier,dc,
   label:'Original measured short Rift Fold Step'});
@@ -247,6 +261,7 @@ function fold(s,p={}){
   staminaSpent:cost,dc,riskAdjustment:risk.dcRisk,
   riskSourceHash:risk.identity,segmentId,
   weaveMitigation:weave.mitigation,weaveReceiptSeal:weave.sourceSeal,
+  domainMitigation:domain.mitigation,domainReceiptSeal:domain.sourceSeal,
   sourceInt,sourceArcana,modifier,
   stepBefore:prev,stepAfter:s.player.rift.step,
   strainBefore:strain,strainAdded:added,
@@ -273,7 +288,8 @@ function fold(s,p={}){
   from:src.from,observedPosition:src.positionAfter,
   step:s.player.rift.step,staminaSpent:cost,elapsedMinutes:5,
   backlash:added>0?'real spatial shear wound':null,
-  localBoundarySupport:weave.mitigation,
+  localBoundarySupport:Math.max(weave.mitigation,domain.mitigation),
+  actuallyEarnedDomainSupport:domain.mitigation,
   noVaultAccess:true,noRealmTransit:true,noInventedDestination:true};
 }
 module.exports={SOURCE,WITNESS,status,fold,verify};
