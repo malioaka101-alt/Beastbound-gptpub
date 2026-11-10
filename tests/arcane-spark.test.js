@@ -133,7 +133,7 @@ function taught(){
   {intent:'cast',techniqueId:'arcane_spark',nonlethal:false},
   {intent:'attack',techniqueId:'arcane_spark'}
  ]){
-  A.throws(()=>fight(s,p),/genuinely studied Arcane Spark|learned Arcane Spark|Player attack bonuses|Weapon action and nonlethal|Only a real spellcasting|Only an actual spell or Meridian technique|Only a real attack spell, defensive Ward/);
+  A.throws(()=>fight(s,p),/genuinely studied Arcane Spark|learned Arcane Spark|Player attack bonuses|Weapon action and nonlethal|Only a real spellcasting|Only an actual spell or Meridian technique|Only a real attack spell, defensive Ward|prepared physical focus and nonlethal strike apply only to an actual attack intent/);
   A.equal(E.exportGame(s),opened);
   A.equal(s.rngState,prior);
  }
