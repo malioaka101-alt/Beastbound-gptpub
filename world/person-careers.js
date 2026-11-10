@@ -511,7 +511,6 @@ function observePeerGuidance(w,learner,teacher,params={}){
   throw Error('Instruction cannot choose mentor consent, skill gain or a successful check');
  const {id,method,day,witness}=params;
  const c=ensure(learner),tc=ensure(teacher);
- if(c.peerGuidance===undefined)c.peerGuidance=[];
  const People=require('./emergent-people');
  const location=learner?.shift?.location;
  const lp=People.presence(w,learner.actorId,location,day),
@@ -523,9 +522,9 @@ function observePeerGuidance(w,learner,teacher,params={}){
   !Number.isInteger(day)||day<0||day>w.lastTickDay||
   !teacherWork||!tc.demonstratedMethods[method]||
   learner.fatigue>85||teacher.fatigue>85||
-  typeof witness!=='string'||witness.trim().length<30||
+  typeof witness!=='string'||witness.trim().length<30||witness.length>480||
   !/^[a-z][a-z0-9_-]{5,69}$/.test(id)||
-  c.peerGuidance.some(x=>x.id===id||
+  (c.peerGuidance||[]).some(x=>x.id===id||
    x.teacherId===teacher.id&&x.method===method&&x.day===day))
   throw Error('Two genuinely present autonomous workers and a source-proven teachable method are required');
  const teacherRngBefore=teacher.rngState,
@@ -552,6 +551,7 @@ function observePeerGuidance(w,learner,teacher,params={}){
   teacherOriginHash:teacher.originHash,day,accepted,
   status:accepted?'accepted':'declined',used:null,source:q,
   sourceHash:hash(q)};
+ if(c.peerGuidance===undefined)c.peerGuidance=[];
  c.peerGuidance.push(e);
  if(!verify(learner)||!verify(teacher))
   throw Error('An individual teaching decision must remain original and independently witnessed');
