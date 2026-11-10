@@ -86,6 +86,13 @@ function verify(s){
     2*Math.min(a.craftingRank,a.arcanaRank)||
    !rollValid(a)||a.success!==a.check.success||
    a.wounded!==(a.check.degree==='severe failure')||
+   !a.workbench||a.workbenchHash!==hash(a.workbench)||
+   a.workbench.type!=='research'||
+   a.workbench.details?.origin!==SOURCE||
+   a.workbench.details?.sigilId!==a.sigilId||
+   a.workbench.details?.location!==a.location||
+   a.workbench.details?.observedSourceHash!==a.witnessHash||
+   hash(a.workbench.details?.materials)!==hash(MATERIALS)||
    !a.materialBefore||!a.materialAfter||
    Object.entries(MATERIALS).some(([k,v])=>
     !int(a.materialBefore[k],v,1000000)||
@@ -112,17 +119,19 @@ function verify(s){
   if(a.success){
    objects[a.sigilId]={origin:SOURCE,id:a.sigilId,
     location:a.location,seal:row.seal,
+    formedMinute:a.minute+BUILD_MINUTES,
     effect:'short_local_visible_light',usedActivations:0,
     lastEmissionUntil:null,material:'moss_crystal_ironbloom'};
   }
   previous=a.minute+BUILD_MINUTES;
  }
+ previous=-1;
  for(const row of l.activations){
   const a=row?.source,obj=objects[a?.sigilId];
   if(row?.origin!==SOURCE||!a||row.seal!==hash(a)||
    a.origin!==SOURCE||a.kind!=='physical-sigil-light-activation'||
    !obj||a.location!==obj.location||
-   !int(a.minute,previous,s.world.minutes)||
+   !int(a.minute,Math.max(previous,obj.formedMinute),s.world.minutes)||
    a.minutes!==ACTIVATE_MINUTES||
    a.minute+ACTIVATE_MINUTES>s.world.minutes||
    a.staminaSpent!==ACTIVATE_STAMINA||
@@ -212,6 +221,7 @@ function inscribe(s,p={}){
  if(a.success){
   record.objects[a.sigilId]={
    origin:SOURCE,id:a.sigilId,location:a.location,seal:receipt.seal,
+   formedMinute:a.minute+BUILD_MINUTES,
    effect:'short_local_visible_light',usedActivations:0,
    lastEmissionUntil:null,material:'moss_crystal_ironbloom'};
  }
