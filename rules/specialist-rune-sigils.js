@@ -136,7 +136,13 @@ function verify(s){
    a.minute+ACTIVATE_MINUTES>s.world.minutes||
    a.staminaSpent!==ACTIVATE_STAMINA||
    a.manaSpent!==ACTIVATE_MANA||
-   a.dc!==ACTIVATE_DC||
+   a.dc!==ACTIVATE_DC-(a.formationMitigation||0)||
+   ![0,1].includes(a.formationMitigation||0)||
+   (a.formationMitigation===1&&(
+    !a.formationSeal||
+    !require('./specialist-formation-mastery').supportProof(
+     s,a.formationSeal,a.location,a.minute)))||
+   (a.formationMitigation!==1&&a.formationSeal!=null)||
    !int(a.intScore,1,30)||!int(a.arcanaRank,0,5)||
    a.modifier!==Math.floor((a.intScore-10)/2)+2*a.arcanaRank||
    a.activationBefore!==obj.usedActivations||
@@ -247,10 +253,14 @@ function activate(s,p={}){
   s.player.stamina<ACTIVATE_STAMINA||
   s.table.combatants.player.stamina<ACTIVATE_STAMINA)
   throw Error('Actual current Mana and living Stamina are required for this physically observed sigil activation');
+ // Genuine historical formation aid adjusts THIS original activation only.
+ // A measured array never makes another spell, charge, Mana or free roll.
+ const field=require('./specialist-formation-mastery').support(s,object);
+ const dc=ACTIVATE_DC-field.mitigation;
  const intScore=C.int(s.player.attributes.int,'actual original Intelligence',1,30),
   rank=C.int(s.player.skills.arcana.rank,'earned Arcana energy control',0,5),
   modifier=Math.floor((intScore-10)/2)+2*rank,
-  check=C.check(s,{modifier,dc:ACTIVATE_DC,
+  check=C.check(s,{modifier,dc,
    label:'Activate an original visible-light layered mineral sigil'}),
   rollEvent=structuredClone(s.log.at(-1));
  s.player.mana-=ACTIVATE_MANA;
@@ -260,7 +270,8 @@ function activate(s,p={}){
   sigilId:object.id,location:object.location,
   minute:now,minutes:ACTIVATE_MINUTES,
   staminaSpent:ACTIVATE_STAMINA,manaSpent:ACTIVATE_MANA,
-  intScore,arcanaRank:rank,modifier,dc:ACTIVATE_DC,
+  intScore,arcanaRank:rank,modifier,dc,
+  formationMitigation:field.mitigation,formationSeal:field.sourceSeal,
   roll:check.roll,check:structuredClone(check),
   rollEvent,rollHash:hash(rollEvent),success:check.success,
   activationBefore:object.usedActivations,
@@ -270,6 +281,9 @@ function activate(s,p={}){
  object.usedActivations++;
  if(a.success)object.lastEmissionUntil=a.emissionUntil;
  ledger(s).activations.push(receipt);
+ if(field.sourceSeal)require('./specialist-formation-mastery').consume(s,{
+  formationSeal:field.sourceSeal,sigilActivationSeal:receipt.seal,
+  sigilId:object.id,minute:now});
  E.advance(s,ACTIVATE_MINUTES);W.finalizeTime(s,now);
  U.sync(s,{source:'legacy'});
  if(!verify(s))throw Error('An original light-emitting sigil must preserve its consumed Mana, symbol proof and material identity');
@@ -279,6 +293,8 @@ function activate(s,p={}){
   activationsRemaining:MAX_ACTIVATIONS-object.usedActivations,
   manaSpent:ACTIVATE_MANA,staminaSpent:ACTIVATE_STAMINA,
   minutes:ACTIVATE_MINUTES,
+  originalPhysicalFormationSupport:field.mitigation,
+  consumedFormationSeal:field.sourceSeal,
   physicalLocalSignal:true,noRemoteInformation:true,
   noAdditionalSpellLearned:true};
 }
