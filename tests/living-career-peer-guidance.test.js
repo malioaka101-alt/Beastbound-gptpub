@@ -60,7 +60,9 @@ for(const seed of [974171,974172,974173,974174,974175,974176]){
 }
 A.ok(accepted,'At least one real present professional must freely agree across independent worlds');
 const {s,w,learner,mentor,method,day,response}=accepted;
-A.equal(Career.peerGuidanceStatus(learner,{day})[0].status,'accepted');
+const entry=()=>learner.career.peerGuidance.find(x=>x.id===response.id);
+const state=()=>Career.peerGuidanceStatus(learner,{day}).find(x=>x.id===response.id);
+A.equal(state().status,'accepted');
 const startSkill=learner.career.skillPoints,
  originalWork=learner.career.workCount,
  originalPlayerRng=s.rngState;
@@ -75,11 +77,11 @@ A.equal(s.rngState,originalPlayerRng,'No free second player roll from advice');
 A.ok(learner.career.workCount>originalWork);
 A.ok(learner.career.skillPoints>=startSkill,
  'Only original genuine work can earn practice');
-A.equal(Career.peerGuidanceStatus(learner,{day})[0].status,'used');
-A.equal(learner.career.peerGuidance[0].used.hash,used.receiptHash);
+A.equal(state().status,'used');
+A.equal(entry().used.hash,used.receiptHash);
 A.equal(Career.verify(learner),true);
 for(let i=0;i<40;i++)Career.work(w,learner,day);
-A.equal(Career.peerGuidanceStatus(learner,{day})[0].status,'used');
+A.equal(state().status,'used');
 A.equal(Career.verify(learner),true,
  'Original peer evidence survives original finite work-journal rotation');
 A.equal(learner.career.recognizedLicence,null);
@@ -89,8 +91,8 @@ const snap=E.exportGame(s),copy=E.importGame(snap),
 A.equal(Career.verify(p2),true);
 A.deepEqual(Career.peerGuidanceStatus(p2,{day}),Career.peerGuidanceStatus(learner,{day}));
 A.equal(E.exportGame(copy),snap);
-const beforeHash=learner.career.peerGuidance[0].sourceHash;
-learner.career.peerGuidance[0].source.teacherWork.outcome.success=false;
+const beforeHash=entry().sourceHash;
+entry().source.teacherWork.outcome.success=false;
 A.equal(Career.verify(learner),false,'Claimed prior achievement cannot be falsified');
-A.equal(learner.career.peerGuidance[0].sourceHash,beforeHash);
+A.equal(entry().sourceHash,beforeHash);
 console.log('Open-ended original career peer teaching: actually co-present competent mentor, own consent, honest work and one bounded non-stacking later check, no power/contract, replay-safe, refusals='+refused);
