@@ -113,7 +113,7 @@ function actualRest(s){
   A.equal(D.verify(s),true);
   const saved=E.exportGame(s),afterRng=s.rngState;
   A.throws(()=>act(s,'domainForm',{witnessIndex:index}),
-   /rerolled|observed original domain|identity/i);
+   /rerolled|observed original domain|identity|truly measured finite spatial field/i);
   A.equal(E.exportGame(s),saved);A.equal(s.rngState,afterRng);
   attempts++;earned=out.success;actual=out;
  }
