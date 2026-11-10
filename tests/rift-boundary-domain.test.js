@@ -33,7 +33,7 @@ function foldWitness(s){
  C.event(s,'story',
   'Independent local surveyors witness a new genuine short unobstructed exterior Fold Step through the already measured protected framework.',{
   origin:Fold.WITNESS,location:s.world.location,
-  anchorId:'riftglass_exterior',segmentId:SEG,
+  anchorId:require('../rules/rift-anchors').SITE,segmentId:SEG,
   fromObservedPosition:current,toObservedPosition:NEXT,
   measuredDistanceMetres:3,safeRangeMetres:5,
   lineOfEffectClear:true,crossesSealedBoundary:false,
