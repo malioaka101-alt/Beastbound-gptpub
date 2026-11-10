@@ -42,6 +42,7 @@ function gmSource(s,sourceId){
   q.observationHash!==hash(q.observation)||
   q.observation.details?.origin!==SOURCE||
   q.observation.details?.sourceId!==sourceId||
+  !s.log?.some(event=>hash(event)===q.observationHash)||
   !integer(q.minute,0,s.world.minutes)||
   q.observation.details?.location!==q.location||
   q.location!==q.observation.details.location)
@@ -104,6 +105,7 @@ function verify(s){
     !b.witness||b.witnessHash!==hash(b.witness)||
     b.witness.details?.origin!==MAP||
     b.witness.details?.sourceId!==sourceId||
+    !s.log?.some(event=>hash(event)===b.witnessHash)||
     used.has(b.witnessHash)||
     b.earned!==(b.check.success?b.check.progress:0)||
     b.progressAfter!==Math.min(3,pts+b.earned))return false;
@@ -125,6 +127,7 @@ function verify(s){
      b.witness.details?.origin!==SCREEN||
      b.witness.details?.sourceId!==sourceId||
      b.witness.details?.axis!==axis||
+     !s.log?.some(event=>hash(event)===b.witnessHash)||
      !Array.isArray(b.risks)||b.risks.some(x=>!phrase(x,8))||
      !['promising','caution','inconclusive'].includes(b.result)||
      b.result!==(b.check.success?
