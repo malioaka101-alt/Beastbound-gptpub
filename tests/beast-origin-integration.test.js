@@ -176,18 +176,37 @@ function prepare(s,id){
  A.equal(act(s,'lineageStatus').individualSources[0].integrated,true);
  const saved=E.importGame(E.exportGame(s));
  A.equal(L.verify(saved),true);
+ // Engine rotates the ordinary narrative log after 90 events. The
+ // action-time captured original remains independently verifiable.
  const missingRightsWitness=E.importGame(E.exportGame(s));
  const originalRightsHash=missingRightsWitness.table.originLineageAuthorisations[id].source.witnessHash;
+ A.ok(missingRightsWitness.table.originWitnessArchive[originalRightsHash],
+  'Authorisation was captured only while its original event was present');
  const originalRightsIndex=missingRightsWitness.log.findIndex(e=>hash(e)===originalRightsHash);
- A.ok(originalRightsIndex>=0,'GM donor/endogenous authorisation must originate from an actual campaign event');
- missingRightsWitness.log.splice(originalRightsIndex,1);
- A.equal(L.verify(missingRightsWitness),false,'A sealed but absent rights witness cannot authorise a human Origin integration');
+ if(originalRightsIndex>=0)missingRightsWitness.log.splice(originalRightsIndex,1);
+ A.equal(L.verify(missingRightsWitness),true,
+  'Evicted narrative events must not erase an actually captured original consent record');
+ delete missingRightsWitness.table.originWitnessArchive[originalRightsHash];
+ A.equal(L.verify(missingRightsWitness),false,
+  'A source with neither recorded witness nor archived original is unauthorised');
  const missingClinicalWitness=E.importGame(E.exportGame(s));
  const clinicalHash=missingClinicalWitness.table.originLineageStudies[id].integration.attempts[0].source.witnessHash;
+ A.ok(missingClinicalWitness.table.originWitnessArchive[clinicalHash],
+  'The actual clinical stage witness was captured at original action time');
  const clinicalIndex=missingClinicalWitness.log.findIndex(e=>hash(e)===clinicalHash);
- A.ok(clinicalIndex>=0,'An independent stage witness must actually exist in the source log');
- missingClinicalWitness.log.splice(clinicalIndex,1);
- A.equal(L.verify(missingClinicalWitness),false,'A stage receipt cannot survive the removal of its original observed event');
+ if(clinicalIndex>=0)missingClinicalWitness.log.splice(clinicalIndex,1);
+ A.equal(L.verify(missingClinicalWitness),true,
+  'Ordinary log truncation cannot destroy an earned clinical developmental stage');
+ delete missingClinicalWitness.table.originWitnessArchive[clinicalHash];
+ A.equal(L.verify(missingClinicalWitness),false,
+  'Clinical claims without a logged or previously archived actual witness are refused');
+ const historical=E.importGame(E.exportGame(s));
+ for(let n=0;n<110;n++)C.event(historical,'story',
+  'The world and its independent people continue to change through unrelated events.',{
+  unrelated:true,observed:n});
+ A.equal(historical.log.length,90);
+ A.equal(L.verify(historical),true,'Long campaigns must retain original Origin sources across narrative log rollover');
+ A.equal(L.verify(E.importGame(E.exportGame(historical))),true);
  saved.table.originLineageStudies[id].integration.attempts[0].source.loadAfter+=4;
  A.equal(L.verify(saved),false,'Forged original human capacity load must fail');
  const forged=E.importGame(E.exportGame(s));
