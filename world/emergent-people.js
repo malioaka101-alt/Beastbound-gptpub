@@ -163,10 +163,17 @@ function live(w,p,day){
  const eco=w.ecosystems[p.regionId],host=w.countries[p.polity],
   region=Atlas.R[p.regionId];
  if(!eco||!host)throw Error('Living people require actual home ecology and polity');
- const x=draw(p),pressure=eco.pressure>74||eco.quality<28||
+ const x=p.status==='recovering'?null:draw(p),pressure=eco.pressure>74||eco.quality<28||
   host.stability<28;
  let choice,jobOutcome=null;
- if(p.fatigue>73){
+ if(p.status==='recovering'){
+  // The original real-work strain uses the SAME fatigue and presence state.
+  // It heals with actual elapsed sixday world time, not an invented clinic,
+  // second injury pool, mandatory fixed course or automatic employment.
+  p.fatigue=clamp(p.fatigue-22);
+  if(p.fatigue<=55)p.status='active';
+  choice='physical-recovery-from-work';
+ }else if(p.fatigue>73){
   p.fatigue=clamp(p.fatigue-20);choice='rest-and-recover';
  }else if(pressure&&x<.40){
   const neighbors=(region.neighbors||[]).filter(n=>

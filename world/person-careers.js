@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],peerGuidance:[],tradePayments:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],peerGuidance:[],tradePayments:[],safetyIncidents:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -112,6 +112,11 @@ function verify(p){
   return false;
  const received=(c.tradePayments||[]).reduce((n,x)=>n+x.amountScales,0);
  if(!Number.isSafeInteger(received)||received!==(p.cashScales??0))return false;
+ if(c.safetyIncidents!==undefined&&
+  (!Array.isArray(c.safetyIncidents)||
+   c.safetyIncidents.some(e=>!verifySafetyIncident(p,e))||
+   new Set(c.safetyIncidents.map(e=>e.workHash)).size!==c.safetyIncidents.length))
+  return false;
  return true;
 }
 function ensure(p){
@@ -713,6 +718,123 @@ function tradePaymentStatus(p){
   historicNotRecurringSalary:true}));
 }
 
+
+/*
+ * Real occupational safety is a sourced AFTERMATH of one existing work roll.
+ * It does NOT reroll the same job, automatically wound someone who accepted
+ * a risky job, grant a free clinical cure, or make everyone join an employer.
+ * Workplace observations and fatigue are in the original worker's career.
+ */
+const SAFETY='original-workplace-hazard-followup-v1';
+function safetyEffect(work){
+ const fail=!work.outcome.success,
+  difficult=work.margin<=-6;
+ return fail&&difficult?8:fail?0:0;
+}
+function safetyClass(work){
+ return work.outcome.success?'controlled-exposure':
+  work.margin<=-6?'work-related-strain':'near-miss';
+}
+function verifySafetyIncident(p,e){
+ const q=e?.source,job=q?.work;
+ if(!e||e.origin!==SAFETY||e.sourceHash!==hash(q)||
+  q?.origin!==SAFETY||q.id!==e.id||q.personId!==p.id||
+  q.personOriginHash!==p.originHash||
+  q.workHash!==e.workHash||q.hazard!==e.hazard||
+  q.regionId!==e.regionId||q.day!==e.day||
+  !/^[a-z][a-z0-9_-]{5,79}$/.test(e.id)||
+  !Number.isInteger(e.day)||e.day<p.birthSource.day||
+  !Atlas.R[e.regionId]||
+  !Atlas.R[e.regionId].dangers.includes(e.hazard)||
+  typeof q.witness!=='string'||q.witness.trim().length<35||
+  q.witness.length>520||
+  typeof q.actualSite!=='string'||q.actualSite.length<2||
+  typeof q.shiftHash!=='string'||q.shiftHash.length!==64||
+  !job||job.origin!==WORK||hash(job)!==q.workHash||
+  job.personId!==p.id||job.personOriginHash!==p.originHash||
+  job.regionId!==e.regionId||job.day!==e.day||
+  !Number.isInteger(job.margin)||!Number.isInteger(job.roll)||
+  !Number.isInteger(job.after?.fatigue)||
+  !Number.isInteger(q.fatigueBefore)||q.fatigueBefore<0||
+  q.fatigueBefore>100||
+  q.fatigueBefore!==job.after.fatigue||
+  q.impact!==safetyEffect(job)||
+  q.incidentType!==safetyClass(job)||
+  e.incidentType!==q.incidentType||
+  q.fatigueAfter!==clamp(q.fatigueBefore+q.impact)||
+  q.statusBefore!=='active'||
+  q.statusAfter!==(q.impact>0&&q.fatigueAfter>=80?'recovering':'active')||
+  q.acceptedOfferHash!==null&&
+   !(p.career?.workOffers||[]).some(o=>
+     o.sourceHash===q.acceptedOfferHash&&
+     o.accepted&&o.dutyId===job.task?.authoredDutyId&&
+     o.id===job.task?.activeOfferId&&o.risk===e.hazard&&
+     o.attemptedWork.some(a=>a.hash===q.workHash))||
+  q.acceptedOfferHash===null&&job.task?.activeOfferId!==undefined)
+  return false;
+ return true;
+}
+function observeWorkplaceSafety(w,p,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>
+   !['id','workHash','hazard','witness','day'].includes(k)))
+  throw Error('A risk event cannot be ordered with a chosen injury, medical result or worker penalty');
+ const {id,workHash,hazard,witness,day}=params;
+ const c=ensure(p),r=c.workReceipts.find(x=>x.sourceHash===workHash),
+  job=r?.source,reg=Atlas.R[p.regionId];
+ const presence=require('./emergent-people').presence;
+ const sh=presence(w,p.actorId,p.shift?.location,day);
+ const o=job?.task?.activeOfferId&&c.workOffers?.find(x=>x.id===job.task.activeOfferId);
+ if(!sh||!reg||p.status!=='active'||reg.id!==job?.regionId||
+  !Number.isInteger(day)||day!==w?.lastTickDay||job.day!==day||
+  !r||r.sourceHash!==hash(r.source)||
+  !Array.isArray(reg.dangers)||!reg.dangers.includes(hazard)||
+  (o&&(!o.accepted||o.status!=='accepted'||o.risk!==hazard||
+    !o.attemptedWork.some(a=>a.hash===workHash)))||
+  (job.task?.activeOfferId&&!o)||
+  p.fatigue!==job.after?.fatigue||
+  (c.safetyIncidents||[]).some(x=>x.workHash===workHash)||
+  typeof witness!=='string'||witness.trim().length<35||
+  witness.length>520)
+  throw Error('A real present worker, original work outcome, independently witnessed regional hazard and current fatigue are required');
+ const before=p.fatigue,impact=safetyEffect(job),
+  after=clamp(before+impact),
+  kind=safetyClass(job),
+  next=impact>0&&after>=80?'recovering':'active';
+ const source={origin:SAFETY,id,personId:p.id,
+  personOriginHash:p.originHash,workHash,
+  work:structuredClone(job),regionId:reg.id,day,hazard,
+  witness,actualSite:sh.location,shiftHash:sh.hash,
+  acceptedOfferHash:o?.sourceHash||null,
+  fatigueBefore:before,fatigueAfter:after,impact,
+  incidentType:kind,statusBefore:p.status,statusAfter:next};
+ const e={id,origin:SAFETY,workHash,hazard,regionId:reg.id,day,
+  incidentType:kind,source,sourceHash:hash(source)};
+ if(!verifySafetyIncident(p,e))
+  throw Error('A recorded workplace aftermath must have a genuine physical source');
+ const preview=structuredClone(p);
+ preview.status=next;preview.fatigue=after;
+ preview.career.safetyIncidents||=[];
+ preview.career.safetyIncidents.push(structuredClone(e));
+ if(!verify(preview))
+  throw Error('The source-confirmed work safety consequence cannot be safely committed');
+ p.status=next;p.fatigue=after;
+ c.safetyIncidents||=[];
+ c.safetyIncidents.push(e);
+ if(next==='recovering')p.shift=null; // A person requiring rest cannot keep a work shift.
+ return {id,incidentType:kind,originalWorkHash:workHash,
+  changedFatigue:impact,currentFatigue:after,recovering:next==='recovering',
+  noExtraWorkRoll:true,noArbitraryWound:true,noAutomaticClinicBill:true};
+}
+function workplaceSafetyStatus(p){
+ if(!verify(p))throw Error('A corrupted worker cannot report historical work safety');
+ return (p.career?.safetyIncidents||[]).map(x=>({
+  id:x.id,day:x.day,hazard:x.hazard,regionId:x.regionId,
+  observedType:x.incidentType,originalWorkHash:x.workHash,
+  recordedFatigueImpact:x.source.impact,noInferredClinicalDiagnosis:true
+ }));
+}
+
 function task(w,p,day=w.lastTickDay){
  const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
   region=Atlas.R[p.regionId];
@@ -769,6 +891,7 @@ function task(w,p,day=w.lastTickDay){
   difficulty:12+pressure+scarcity+instability};
 }
 function work(w,p,day,context='independent-duty',assistance=null){
+ if(p.status==='recovering')throw Error('A recovering worker cannot be compelled into another work check');
  if(!Number.isInteger(day)||day<0||
    !['independent-duty','locally-witnessed-duty','locally-assisted-duty'].includes(context))
   throw Error('Independent real work requires an actual witnessed or world source');
@@ -900,4 +1023,5 @@ function publicWitness(x){
 }
 module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,observePeerGuidance,peerGuidanceStatus,
  payVerifiedTradeWork,verifyLocalTradePayments,tradePaymentStatus,
+ SAFETY,observeWorkplaceSafety,workplaceSafetyStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
