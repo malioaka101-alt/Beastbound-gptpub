@@ -359,6 +359,8 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.pocketStatus':return require('./rift-pocket-architecture').status(s);
   case 'rift.pocketBuild':return require('./rift-pocket-architecture').build(s,params);
   case 'rift.pocketTransfer':return require('./rift-pocket-architecture').transfer(s,params);
+  case 'rift.adaptationStatus':return require('./rift-adaptation').status(s);
+  case 'rift.adaptExposure':return require('./rift-adaptation').expose(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
