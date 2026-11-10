@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/specialist-rune-sigils.test.js
             tests/cross-ward-interface.test.js
             tests/cross-discipline-qi-mana-coherence.test.js
             tests/rift-boundary-domain.test.js
