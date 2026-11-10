@@ -197,6 +197,9 @@ function act(s,{system,operation,params={}}={}){
   case 'cross.qiManaExperiment':return require('./cross-discipline-coherence').experiment(s,params);
   case 'cross.wardInterfaceStatus':return require('./cross-ward-interface').status(s);
   case 'cross.wardCalibrate':return require('./cross-ward-interface').calibrate(s,params);
+  case 'specialist.sigilStatus':return require('./specialist-rune-sigils').status(s);
+  case 'specialist.sigilInscribe':return require('./specialist-rune-sigils').inscribe(s,params);
+  case 'specialist.sigilActivate':return require('./specialist-rune-sigils').activate(s,params);
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
