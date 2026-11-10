@@ -69,6 +69,8 @@ function witness(s,exposureId){
   A.equal(r.noAutomaticEvolution,true);
   A.equal(r.noUniversalElementalImmunity,true);
   A.equal(Element.verify(s),true);
+  A.equal(s.table.combatants.player.stamina,s.player.stamina,
+   'The elemental exposure must finish with the original canonical and legacy Stamina ledgers in agreement');
   success+=r.success?1:0;attempts++;
   if(success===1)A.equal(act(s,'wetlandStatus').earnedSpecificWetlandAcclimation,false,
    'One personally observed exposure is not an instant new elemental body');
@@ -89,6 +91,8 @@ function witness(s,exposureId){
  const penalty=/storm|gale|flood|downpour|blizzard|whiteout/i.test(weather)?3:
   /rain|mist|fog|sleet/i.test(weather)?1:0;
  const prev=s.world.minutes,previousStamina=s.player.stamina;
+ A.equal(s.table.combatants.player.stamina,s.player.stamina,
+  'Read-only elemental status must not change original wound-model Stamina');
  const camp=Camp.find(s);
  A.equal(camp.searched,true);
  A.equal(camp.dc,13+penalty,
