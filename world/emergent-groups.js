@@ -53,6 +53,11 @@ function validate(e){
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
   !Number.isInteger(e.foundedDay)||e.foundedDay<0)return false;
+ if(e.internalPriorities!==undefined&&
+   (!Array.isArray(e.internalPriorities)||
+    e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
+    new Set(e.internalPriorities.map(x=>x.id)).size!==e.internalPriorities.length))
+  return false;
  if(e.origin==='player-declaration'){
   const d=e.witness.details;
   if(e.witness.type!=='story'||d?.origin!=='informal-player-group-founding'||
@@ -142,7 +147,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],
+  additionalMembers:[],internalPriorities:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -375,6 +380,157 @@ function month(w,day,emit){
  }
  return r;
 }
+
+/*
+ * First #18 bridge: internally witnessed organisational priorities and
+ * independent member assent/dissent, recorded INSIDE an existing group.
+ * This is an advisory operational review, not a government election,
+ * a compulsory vote, a legal office, a treasury payment or completed work.
+ */
+const INTERNAL_PRIORITY='source-witnessed-group-internal-priority-v1';
+function reviewChance(q){
+ return clamp(.42+(q.completedEfforts>q.failedEfforts?.10:0)+
+   (q.worldSnapshot.pressure>60?.05:0)-
+   (q.budgetRequested>q.groupFundsAtReview/2?.08:0),.15,.78);
+}
+function verifyInternalPriority(e,entry){
+ const q=entry?.source;
+ if(!q||e.origin!=='player-declaration'||
+   entry.origin!==INTERNAL_PRIORITY||
+   entry.sourceHash!==hash(q)||q.origin!==INTERNAL_PRIORITY||
+   q.id!==entry.id||q.groupId!==e.id||
+   q.groupOriginHash!==e.originHash||
+   q.memberActorId!==entry.memberActorId||
+   q.memberConsentHash!==entry.memberConsentHash||
+   q.regionId!==entry.regionId||
+   q.proposal!==entry.proposal||
+   q.day!==entry.day||
+   entry.supported!==q.supported||
+   !/^[a-z][a-z0-9_-]{5,80}$/.test(entry.id)||
+   !Number.isInteger(entry.day)||entry.day<e.foundedDay||
+   !Atlas.R[entry.regionId]||
+   Atlas.R[entry.regionId].polity!==e.polity||
+   typeof entry.proposal!=='string'||
+   entry.proposal.trim().length<30||entry.proposal.length>450||
+   typeof q.meetingWitness!=='string'||
+   q.meetingWitness.trim().length<35||
+   q.meetingWitness.length>540||
+   typeof q.place!=='string'||q.place.length<2||
+   Atlas.LOCATION_REGION[q.place]!==entry.regionId||
+   typeof q.memberName!=='string'||q.memberName.length<3||
+   q.fundingUnit!=='group-operating-capacity-not-Scales'||
+   !Number.isInteger(q.groupFundsAtReview)||q.groupFundsAtReview<0||
+   !Number.isInteger(q.budgetRequested)||q.budgetRequested<0||
+   q.budgetRequested>q.groupFundsAtReview||
+   !Number.isInteger(q.completedEfforts)||q.completedEfforts<0||
+   !Number.isInteger(q.failedEfforts)||q.failedEfforts<0||
+   !q.worldSnapshot||!['pressure','quality','stability','prosperity'].every(k=>
+    Number.isFinite(q.worldSnapshot[k])&&
+     q.worldSnapshot[k]>=0&&q.worldSnapshot[k]<=100)||
+   !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+   !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+   !Number.isFinite(q.individualDraw)||q.individualDraw<0||
+   q.individualDraw>=1||
+   q.reviewChance!==reviewChance(q)||
+   typeof entry.supported!=='boolean'||
+   entry.supported!==(q.individualDraw<q.reviewChance)||
+   entry.outcome!==(entry.supported?'supported':'dissented')||
+   q.outcome!==entry.outcome||
+   typeof q.memberPresenceHash!=='string'&&q.memberPresenceHash!==null)
+  return false;
+ const m=e.additionalMembers?.find(x=>x.actorId===entry.memberActorId&&
+   x.hash===entry.memberConsentHash&&x.name===q.memberName&&
+   Number.isInteger(x.witness?.details?.day)&&
+   x.witness.details.day<=entry.day&&
+   (x.active!==false||x.departure?.day>entry.day));
+ if(!m)return false;
+ const agency=require('./group-member-agency'),proof={rngState:q.agencyBefore};
+ const x=agency.draw(proof);
+ return x===q.individualDraw&&proof.rngState===q.agencyAfter;
+}
+function deliberateInternalPriority(w,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>!['id','groupId','memberActorId',
+   'regionId','place','proposal','budgetRequested','day',
+   'meetingWitness'].includes(k)))
+  throw Error('An internal consultation cannot be ordered with a chosen member vote, legal office or payout');
+ const {id,groupId,memberActorId,regionId,place,proposal,
+  budgetRequested,day,meetingWitness}=params;
+ const e=lookup(w,groupId),reg=Atlas.R[regionId],
+  eco=w?.ecosystems?.[regionId],host=w?.countries?.[e?.polity];
+ const m=e?.origin==='player-declaration'?
+  e.additionalMembers.find(x=>x.actorId===memberActorId&&x.active!==false):null;
+ const Agency=require('./group-member-agency'),
+  Presence=require('./person-presence');
+ const npcId=m?.witness?.details?.npcId,
+  person=typeof npcId==='string'?Presence.resolve(w,npcId,place,day):null;
+ if(!e||!m||!person||person.actorId!==memberActorId||
+  person.name!==m.name||!reg||reg.polity!==e.polity||
+  Atlas.LOCATION_REGION[place]!==regionId||
+  !eco||!host||
+  !Number.isInteger(day)||day<e.foundedDay||day>w.lastTickDay||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(id)||
+  typeof proposal!=='string'||proposal.trim().length<30||
+  proposal.length>450||
+  typeof meetingWitness!=='string'||meetingWitness.trim().length<35||
+  meetingWitness.length>540||
+  !Number.isInteger(budgetRequested)||budgetRequested<0||
+  !Number.isInteger(e.funds)||budgetRequested>e.funds||
+  ![eco.pressure,eco.quality,host.stability,host.prosperity]
+   .every(x=>Number.isFinite(x)&&x>=0&&x<=100)||
+  (e.internalPriorities||[]).some(x=>x.id===id||
+    x.memberActorId===memberActorId&&x.day===day&&
+    x.proposal===proposal))
+  throw Error('A witnessed real local member, actual existing group budget and distinct truthful issue are required');
+ // All preflight is complete before the real existing association member
+ // agency consumes exactly one independent, persistent decision draw.
+ const t=Agency.ensure(w),agencyBefore=t.rngState;
+ const partial={id,origin:INTERNAL_PRIORITY,groupId:e.id,
+  groupOriginHash:e.originHash,memberActorId,
+  memberConsentHash:m.hash,memberName:m.name,
+  regionId,place,proposal,budgetRequested,day,meetingWitness,
+  fundingUnit:'group-operating-capacity-not-Scales',
+  groupFundsAtReview:e.funds,completedEfforts:e.completedEfforts,
+  failedEfforts:e.failedEfforts,
+  worldSnapshot:{pressure:eco.pressure,quality:eco.quality,
+   stability:host.stability,prosperity:host.prosperity},
+  memberPresenceHash:person.presence?hash(person.presence):null};
+ const probability=reviewChance(partial),
+  individualDraw=Agency.draw(t),supported=individualDraw<probability,
+  outcome=supported?'supported':'dissented';
+ const q={...partial,agencyBefore,agencyAfter:t.rngState,
+  individualDraw,reviewChance:probability,supported,outcome};
+ const entry={id,origin:INTERNAL_PRIORITY,memberActorId,
+  memberConsentHash:m.hash,regionId,proposal,day,supported,outcome,
+  source:q,sourceHash:hash(q)};
+ if(!verifyInternalPriority(e,entry))
+  throw Error('An independent internal consultation failed its original source proof');
+ e.internalPriorities||=[];
+ e.internalPriorities.push(entry);
+ if(!validate(e))throw Error('The group cannot create an invalid historical internal choice');
+ record(ensure(w),e,day,'source-backed-internal-priority-review',
+  {priorityId:id,reviewerActorId:memberActorId,
+   sourceHash:entry.sourceHash,outcome,
+   budgetProposedNotSpent:budgetRequested,
+   noCompulsoryOtherMembers:true,noPublicOfficeGranted:true},null);
+ return {id,groupId,reviewerActorId:memberActorId,outcome,
+  budgetProposed:budgetRequested,budgetActuallySpent:0,
+  noCompulsoryMemberAction:true,noLegalRankOrOffice:true,
+  noExternalProjectCompletion:true};
+}
+function internalPriorityStatus(w,groupId){
+ const e=lookup(w,groupId);
+ if(!e)throw Error('An existing independently sourced association is required');
+ return (e.internalPriorities||[]).map(x=>({
+  id:x.id,day:x.day,proposal:x.proposal,regionId:x.regionId,
+  independentMemberResponse:x.outcome,
+  reviewerActorId:x.memberActorId,
+  budgetConsidered:x.source.budgetRequested,
+  budgetActuallySpent:0,
+  doesNotBindOtherMembers:true,noPublicOfficeGranted:true
+ }));
+}
+
 function visible(s,w){
  const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
@@ -395,4 +551,5 @@ function visible(s,w){
 module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,lookup,
  registerOriginAdapter,registerFromEvidence,registerMemberConsentAdapter,
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
- reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record};
+ reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
+ INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus};
