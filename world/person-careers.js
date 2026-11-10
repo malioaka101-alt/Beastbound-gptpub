@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -82,6 +82,13 @@ function verify(p){
     !credibleAssistance(r.source.assistance):
     r.source?.assistance!==undefined||
      !['independent-duty','locally-witnessed-duty'].includes(r.source?.context))))return false;
+ // GM-authored work is part of this *same* independently earned career, not
+ // an extra salary engine or permission to fabricate institutional authority.
+ if(c.authoredDuties!==undefined&&
+   (!Array.isArray(c.authoredDuties)||
+    c.authoredDuties.some(d=>!verifyDuty(p,d))||
+    new Set(c.authoredDuties.map(d=>d.id)).size!==c.authoredDuties.length))
+  return false;
  return true;
 }
 function ensure(p){
@@ -89,6 +96,99 @@ function ensure(p){
  if(!verify(p))throw Error('Unverified citizen profession, promotion or fake magical rank');
  return p.career;
 }
+
+// An open-ended assignment of real local work, authored by the GM after a
+// scene/world source. An offered duty is not a forced career, wage, licence,
+// personal skill, employer consent, or pre-decided dice result.
+const DUTY='gm-source-authored-person-work-v1';
+const METHOD=/^[a-z][a-z-]{3,39}$/;
+function verifyDuty(p,d){
+ const q=d?.source;
+ if(!d||d.origin!==DUTY||d.sourceHash!==hash(q)||
+   q?.origin!==DUTY||q.personId!==p.id||q.actorId!==p.actorId||
+   q.personOriginHash!==p.originHash||q.id!==d.id||
+   q.role!==d.role||q.method!==d.method||q.goal!==d.goal||
+   q.domain!==d.domain||q.effect!==d.effect||
+   q.institutionId!==d.institutionId||
+   q.regionId!==d.regionId||q.day!==d.openedDay||
+   q.originalPolity!==p.birthSource.polity&&
+    q.originalPolity!==p.polity||
+   !/^[a-z][a-z0-9_-]{3,60}$/.test(d.id)||
+   !METHOD.test(d.method)||
+   !['ecology','civic','trade'].includes(d.domain)||
+   typeof d.role!=='string'||d.role.trim().length<6||d.role.length>130||
+   typeof d.goal!=='string'||d.goal.trim().length<12||d.goal.length>250||
+   typeof q.witness!=='string'||q.witness.length<24||q.witness.length>500||
+   !Atlas.R[d.regionId]||!Atlas.P[q.originalPolity]||
+   !Number.isInteger(d.openedDay)||d.openedDay<p.birthSource.day||
+   d.openedDay>10000000||
+   (d.institutionId!==null&&(!Atlas.I[d.institutionId]||
+    Atlas.I[d.institutionId].polity!==q.originalPolity))||
+   ![null,'habitat-repair','water-management'].includes(d.effect)||
+   (d.effect!==null&&d.domain!=='ecology')||
+   !['available','retired'].includes(d.status)||
+   !Array.isArray(d.workProofHashes)||
+   d.workProofHashes.some(h=>typeof h!=='string'||!/^[a-f0-9]{64}$/.test(h)))
+  return false;
+ if(d.status==='retired'){
+  const e=d.ending;
+  if(!e||e.hash!==hash(e.source)||e.source.origin!=='gm-recorded-duty-retirement-v1'||
+    e.source.id!==d.id||e.source.personId!==p.id||
+    e.source.priorDutySourceHash!==d.sourceHash||
+    !Number.isInteger(e.source.day)||e.source.day<d.openedDay||
+    typeof e.source.reason!=='string'||e.source.reason.length<20)
+   return false;
+ }else if(d.ending!==null)return false;
+ return true;
+}
+function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
+ institutionId=null,day,witness}={}){
+ const c=ensure(p);
+ if(!w||!w.ecosystems?.[p.regionId]||!w.countries?.[p.polity]||
+   !Number.isInteger(day)||day<p.birthSource.day||day>w.lastTickDay||
+   !Array.isArray(c.authoredDuties)||c.authoredDuties.some(d=>d.id===id)||
+   typeof witness!=='string'||witness.trim().length<24||
+   (institutionId!==null&&(!Atlas.I[institutionId]||
+     Atlas.I[institutionId].polity!==p.polity||
+     w.institutions?.[institutionId]?.status!=='active')))
+  throw Error('An original local worker, established source and real existing employer are required');
+ const source={origin:DUTY,personId:p.id,actorId:p.actorId,
+  personOriginHash:p.originHash,id,role,method,goal,domain,effect,
+  regionId:p.regionId,originalPolity:p.polity,institutionId,day,witness};
+ const duty={id,origin:DUTY,role,method,goal,domain,effect,institutionId,
+  regionId:p.regionId,openedDay:day,status:'available',ending:null,
+  workProofHashes:[],source,sourceHash:hash(source)};
+ if(!verifyDuty(p,duty))throw Error('Invalid authored work or unsupported effect; cannot create a free power or job');
+ c.authoredDuties.push(duty);
+ if(!verify(p))throw Error('Authored work would break original living-career integrity');
+ return {id,role,method,goal,domain,available:true,
+  independentlyChosenWorkStillRequired:true,
+  noLicenceOrGuaranteedWage:true,noAutomaticSkill:true};
+}
+function retireDuty(w,p,{id,day,reason}={}){
+ const c=ensure(p),d=c.authoredDuties?.find(x=>x.id===id);
+ if(!d||d.status!=='available'||!Number.isInteger(day)||
+   day<d.openedDay||day>w?.lastTickDay||
+   typeof reason!=='string'||reason.trim().length<20)
+  throw Error('An existing job and real sourced change are needed to retire a duty');
+ const source={origin:'gm-recorded-duty-retirement-v1',
+  id,personId:p.id,priorDutySourceHash:d.sourceHash,day,reason};
+ d.ending={source,hash:hash(source)};
+ d.status='retired';
+ if(!verify(p))throw Error('Work history cannot be erased or silently reassigned');
+ return {id,retired:true,priorWorkRetained:d.workProofHashes.length,
+  noInventedDismissalPayout:true};
+}
+function authoredDutyStatus(p){
+ if(!verify(p))throw Error('Cannot inspect forged career history');
+ return (p.career?.authoredDuties||[]).map(d=>({
+  id:d.id,role:d.role,method:d.method,goal:d.goal,domain:d.domain,
+  institutionId:d.institutionId,regionId:d.regionId,status:d.status,
+  verifiedCompletedWork:d.workProofHashes.length,
+  noAutoWageOrQualification:true
+ }));
+}
+
 function task(w,p){
  const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
   region=Atlas.R[p.regionId];
@@ -116,6 +216,17 @@ function task(w,p){
    {method:'tool-repair',domain:'trade',goal:'maintain working equipment'},
    {method:'market-service',domain:'trade',goal:'serve local trade fairly'}
   ];
+ // The same independently chosen real work engine can develop any number
+ // of locally established duties. A role's founding never forces the worker
+ // to take it; existing work and rest remain available.
+ const c=ensure(p);
+ for(const duty of c.authoredDuties||[]){
+  if(duty.status==='available'&&duty.regionId===p.regionId&&
+    (duty.institutionId===null||
+      w.institutions?.[duty.institutionId]?.status==='active'))
+   available.push({method:duty.method,goal:duty.goal,
+    domain:duty.domain,effect:duty.effect,authoredDutyId:duty.id});
+ }
  const work=available[Math.floor(draw(p)*available.length)];
  const pressure=eco.pressure>69?3:eco.quality<38?2:0,
   scarcity=eco.water<40||eco.forage<40?2:0,
@@ -166,9 +277,9 @@ function work(w,p,day,context='independent-duty',assistance=null){
  if(success){
   p.funds=clamp(p.funds+(job.domain==='trade'?2:1));
   if(job.domain==='ecology'){
-   if(job.method==='habitat-repair')
+   if((job.effect||job.method)==='habitat-repair')
     local.pressure=clamp(local.pressure-1);
-   else if(job.method==='water-management')
+   else if((job.effect||job.method)==='water-management')
     local.quality=clamp(local.quality+1);
   }else if(job.domain==='civic')
    polity.stability=clamp(polity.stability+1);
@@ -196,6 +307,12 @@ function work(w,p,day,context='independent-duty',assistance=null){
    stability:polity.stability,funds:p.funds,fatigue:p.fatigue}};
  const receipt={origin:WORK,source:receiptSource,sourceHash:hash(receiptSource)};
  c.workReceipts.push(receipt);
+ if(job.authoredDutyId){
+  const selected=c.authoredDuties.find(d=>d.id===job.authoredDutyId);
+  if(!selected||!verifyDuty(p,selected))
+   throw Error('Source-authored work must still belong to the real worker');
+  selected.workProofHashes.push(receipt.sourceHash);
+ }
  if(c.workReceipts.length>24)c.workReceipts.shift();
  const methods=Object.keys(c.demonstratedMethods).length;
  while(c.competenceRank<5&&c.skillPoints>=THRESHOLDS[c.competenceRank+1]){
@@ -232,5 +349,5 @@ function publicWitness(x){
   reportedEffects:x.observedChange,
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
-module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,ensure,verify,work,
+module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
