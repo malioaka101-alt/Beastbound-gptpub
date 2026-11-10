@@ -1,0 +1,28 @@
+# Foundation #17 — Living careers, authored work, and independently earned qualifications (draft)
+
+Authority: original Unified Master Prompt §§32–33, 47–48; the original Table Rules and established histories take priority. **This is not a profession roster, mandatory career ladder or requirement for paid instruction.**
+
+## Reuse first
+
+Existing `world/emergent-people.js` creates autonomous individual workers, chooses actual work/rest/relocation, tracks local presence and preserves their original living biography. Existing `world/person-careers.js` already resolves genuine personal d20 work, local ecology/civic/trade effects, fatigue, independently earned practice and broad demonstrated competence; `world/simulation.js` already ticks their world and stores real institutions and conditions. Source-backed worker agreements, groups, research, provisioner stock, player economic resources, teaching and knowledge already have their own ledgers. **No new economy, career XP, third-party workforce simulator or job-level currency is introduced here.**
+
+## First expandable slice: an authored local duty belongs to an existing person's career
+
+This initial extension adds `career.authoredDuties` **inside the same verified career record**. A GM can describe an independently established, source-witnessed local task with arbitrary natural-language role and goal, a machine-addressable unique method, an existing person, a real originating region/day and optionally a **genuinely existing active institution in that person's polity**. This is compatible with an independent vocation: institution membership is never inferred from a job opportunity. The mechanical adapter references one of the original **ecology, civic or trade** work contexts. For limited physical outcomes it can explicitly point to already implemented habitat-repair or water-management; other invented effects are not silently granted. The engine, not the GM's adjective, calculates difficulty from genuine conditions and resolves the actual actor's existing individual rolls.
+
+Authored descriptions do **not** confer skill, a formal licence, a master title, employment membership, an agreed wage, a supernatural power or a guaranteed outcome. The work remains among that individual's ordinary options, and the **existing independently chosen livelihood decision** determines if and when they actually undertake it. If the person changes region, an earlier local assignment cannot be used remotely. When a referenced institution stops being active, its local task cannot continue as if the employer still operates. Genuine attempts produce the same original career work receipts, income/fatigue rules and existing environmental effects, while durable assignment-specific proof hashes retain the entire sequence after the normal 24-receipt career window rotates.
+
+A later observed change can retire a particular duty through a separately source-noted retirement, preserving its historical source and every accomplished receipt. Changes to authored titles, location, source, mechanics and completed work are checked by the same existing per-person verification; reopening or reshaping is a newly sourced role, not a stealth edit of the old one. Existing saved people lacking the new optional field can migrate upon first legitimate authored job without erasing their earlier career.
+
+## Two intentionally non-exhaustive examples
+
+* **Wetland culvert care:** a regionally established individual may undertake newly noticed drainage repair and demonstrate a specific practical method. Its narrow effect uses the existing habitat-pressure repair operation. The role alone does not heal the landscape; only genuinely successful source-resolved work can do that.
+* **Storehouse provision auditing:** an individual may investigate real storage records and supplies as a distinct trade practice. It produces observed professional work and normal livelihood consequences; it does not create stock, conjure goods, open a guild, sign a contract or grant unseen economic facts.
+
+The engine recognises these not by a pre-approved name list, but by the **same `authorDuty` and original work/verification machinery** that would hold other locally credible services. Future true medical occupations, school work, transport, beast-related duties, craft specialisations and politically changing public jobs can be added with proper domain-specific actual-world effects. A useful example is neither a universal cost/limit nor a compulsory starting profession.
+
+## Outstanding pieces before marking #17 complete
+
+This is **only the first part of #17**. The next stages must attach independently accepted/rejected offers, actual labour terms, contract expiry, apprenticeship and knowledge transfer where genuinely agreed, verifiable historical/earned credentials issued by real bodies, pay only from a real payer or existing economic balance, safety obligations, disputes, changing employers and more general real-world job domains. They must **extend** the existing worker, institution, group membership, consent, local market and work executors. Employment must never imply friendship, licensing, rank, teaching competence, magic ability or immutable allegiance. Cross-region employment requires genuine travel/provenance; a failed job is not a disguised free reroll.
+
+**Acceptance status:** DRAFT / #17 UNCHECKED. Test `tests/living-career-authored-duties.test.js` is a disposable first-in-full-suite scenario; exact-head GitHub CI acceptance is required before claiming this slice verified. No active campaign saves are changed.
