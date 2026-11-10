@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -93,6 +93,11 @@ function verify(p){
    (!Array.isArray(c.attestations) ||
     c.attestations.some(a=>!verifyAttestation(p,a)) ||
     new Set(c.attestations.map(a=>a.id)).size!==c.attestations.length))
+  return false;
+ if(c.workOffers!==undefined &&
+   (!Array.isArray(c.workOffers) ||
+    c.workOffers.some(x=>!verifyWorkOffer(p,x)) ||
+    new Set(c.workOffers.map(x=>x.id)).size!==c.workOffers.length))
   return false;
  return true;
 }
@@ -292,7 +297,147 @@ function attestationStatus(p,{day}={}){
  }));
 }
 
-function task(w,p){
+
+/*
+ * Real, voluntary local assignments: issue a source-grounded institution
+ * opportunity to ONE actual person; that person uses their own RNG to choose
+ * independently. Only an actual original work action may fulfill the offer.
+ * All numbers are local physical/livelihood evidence, not a wage conversion.
+ */
+const WORK_OFFER='individual-source-work-offer-v1';
+const OFFER_END='individual-work-offer-ending-v1';
+const workerChance=(aptitude,fatigue,pressure)=>
+ Math.min(.85,Math.max(.18,.55+(aptitude-5)*.025-
+ (fatigue>60?.15:0)-(pressure>70?.08:0)));
+function verifyWorkOffer(p,o){
+ const q=o?.source, c=p.career;
+ if(!o||o.origin!==WORK_OFFER||o.sourceHash!==hash(q)||
+  q?.origin!==WORK_OFFER||q.id!==o.id||q.personId!==p.id||
+  q.personOriginHash!==p.originHash||
+  q.dutyId!==o.dutyId||q.dutyHash!==o.dutyHash||
+  q.issuerId!==o.issuerId||q.issuerWitnessId!==o.issuerWitnessId||
+  q.dutyRegion!==o.regionId||q.startDay!==o.startDay||
+  q.endDay!==o.endDay||q.risk!==o.risk||
+  q.safetyPlan!==o.safetyPlan||q.agreedScope!==o.agreedScope||
+  !/^[a-z][a-z0-9_-]{5,69}$/.test(o.id)||
+  !Number.isInteger(o.startDay)||o.startDay<p.birthSource.day||
+  !Number.isInteger(o.endDay)||o.endDay<o.startDay||
+  !Atlas.I[o.issuerId]||Atlas.I[o.issuerId].polity!==Atlas.R[o.regionId]?.polity||
+  typeof o.issuerWitnessId!=='string'||o.issuerWitnessId.length<3||
+  !Atlas.R[o.regionId]||
+  !Atlas.R[o.regionId].dangers.includes(o.risk)||
+  typeof o.safetyPlan!=='string'||o.safetyPlan.trim().length<25||
+  o.safetyPlan.length>350||
+  typeof o.agreedScope!=='string'||o.agreedScope.trim().length<20||
+  o.agreedScope.length>350||
+  typeof q.issuerOfferWitness!=='string'||
+  q.issuerOfferWitness.trim().length<32||
+  q.issuerOfferWitness.length>550||
+  !Number.isInteger(q.fatigueAtDecision)||q.fatigueAtDecision<0||
+  q.fatigueAtDecision>100||
+  !Number.isInteger(q.pressureAtDecision)||q.pressureAtDecision<0||
+  q.pressureAtDecision>100||
+  typeof q.workerDraw!=='number'||q.workerDraw<0||q.workerDraw>=1||
+  q.willingness!==workerChance(c.aptitude,q.fatigueAtDecision,q.pressureAtDecision)||
+  o.accepted!==(q.workerDraw<q.willingness)||
+  !c.authoredDuties?.some(d=>d.id===o.dutyId&&d.sourceHash===o.dutyHash&&
+    d.regionId===o.regionId&&d.institutionId===o.issuerId)||
+  !Array.isArray(o.attemptedWork)||
+  o.attemptedWork.some(e=>e?.hash!==hash(e.source)||
+   e.source?.personId!==p.id||e.source?.personOriginHash!==p.originHash||
+   e.source?.task?.authoredDutyId!==o.dutyId||
+   e.source?.task?.activeOfferId!==o.id||
+   !Number.isInteger(e.source?.day)||e.source.day<o.startDay||
+   e.source.day>o.endDay)||
+  !['accepted','declined','ended'].includes(o.status))
+  return false;
+ if(!o.accepted)
+  return o.status==='declined'&&o.ending===null&&o.attemptedWork.length===0;
+ if(o.status==='ended'){
+  const v=o.ending?.source;
+  return !!v && o.ending.hash===hash(v) &&
+   v.origin===OFFER_END&&v.id===o.id&&v.personId===p.id&&
+   v.priorSourceHash===o.sourceHash&&
+   v.issuerId===o.issuerId&&
+   Number.isInteger(v.day)&&v.day>=o.startDay&&
+   ['worker','issuer'].includes(v.initiatedBy)&&
+   typeof v.reason==='string'&&v.reason.trim().length>=25;
+ }
+ return o.status==='accepted'&&o.ending===null;
+}
+function offerDuty(w,p,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+   Object.keys(params).some(k=>!['id','dutyId','issuerId','witnessId',
+    'startDay','endDay','risk','safetyPlan','agreedScope',
+    'issuerOfferWitness'].includes(k)))
+  throw Error('A worker cannot be assigned a chosen acceptance, salary, rank or decision');
+ const {id,dutyId,issuerId,witnessId,startDay,endDay,risk,safetyPlan,
+  agreedScope,issuerOfferWitness}=params;
+ const c=ensure(p),d=c.authoredDuties?.find(x=>x.id===dutyId);
+ if(c.workOffers===undefined)c.workOffers=[];
+ const officer=w?.notables?.[witnessId],issuer=w?.institutions?.[issuerId],
+  ecology=w?.ecosystems?.[p.regionId];
+ if(!d||d.status!=='available'||d.regionId!==p.regionId||
+  d.institutionId!==issuerId||
+  !officer||officer.institution!==issuerId||
+  issuer?.status!=='active'||!ecology||!Number.isInteger(startDay)||
+  startDay<p.birthSource.day||startDay>w.lastTickDay||
+  !Number.isInteger(endDay)||endDay<startDay||
+  c.workOffers.some(x=>x.id===id ||
+    (x.dutyId===dutyId&&x.issuerId===issuerId&&x.startDay===startDay)))
+  throw Error('An actual institution offer, distinct day and autonomous locally eligible worker are required');
+ const fatigueAtDecision=p.fatigue,pressureAtDecision=ecology.pressure;
+ const willingness=workerChance(c.aptitude,fatigueAtDecision,pressureAtDecision);
+ // Validate the authored offer *before* consuming the worker's one decision.
+ const provisional={id,origin:WORK_OFFER,dutyId,dutyHash:d.sourceHash,
+  issuerId,issuerWitnessId:witnessId,regionId:d.regionId,
+  startDay,endDay,risk,safetyPlan,agreedScope,accepted:false,
+  status:'declined',ending:null,attemptedWork:[]};
+ const prelim={origin:WORK_OFFER,id,personId:p.id,
+  personOriginHash:p.originHash,dutyId,dutyHash:d.sourceHash,
+  issuerId,issuerWitnessId:witnessId,dutyRegion:d.regionId,
+  startDay,endDay,risk,safetyPlan,agreedScope,
+  issuerOfferWitness,fatigueAtDecision,pressureAtDecision,willingness};
+ const pretend={...provisional,source:{...prelim,workerDraw:0.99},sourceHash:hash({...prelim,workerDraw:0.99})};
+ if(!verifyWorkOffer(p,pretend))
+  throw Error('A real risk, written safety measure and witnessed offer are required before worker consent');
+ const workerDraw=draw(p),accepted=workerDraw<willingness;
+ const q={...prelim,workerDraw},o={...provisional,accepted,
+  status:accepted?'accepted':'declined',source:q,sourceHash:hash(q)};
+ c.workOffers.push(o);
+ if(!verify(p))throw Error('The independent decision failed original career verification');
+ return {id,accepted,decision:accepted?'accepted':'declined',
+  risk,documentedSafetyPlan:true,scope:agreedScope,
+  noCompulsoryEmployment:true,noPromisedWage:true,noForcedCooperation:true};
+}
+function endWorkOffer(w,p,{id,day,initiatedBy,reason}={}){
+ const c=ensure(p),o=c.workOffers?.find(a=>a.id===id);
+ if(!o||o.status!=='accepted'||
+  !Number.isInteger(day)||day<o.startDay||day>w?.lastTickDay||
+  !['worker','issuer'].includes(initiatedBy)||
+  typeof reason!=='string'||reason.trim().length<25)
+  throw Error('An existing active voluntary offer and witnessed ending are required');
+ const q={origin:OFFER_END,id,personId:p.id,
+  priorSourceHash:o.sourceHash,issuerId:o.issuerId,day,
+  initiatedBy,reason};
+ o.ending={source:q,hash:hash(q)};o.status='ended';
+ if(!verify(p))throw Error('An ending must not delete genuine earlier work');
+ return {id,ended:true,attemptedWorkRetained:o.attemptedWork.length,
+  noAutomaticWageOrPunishment:true};
+}
+function workOfferStatus(p,{day}={}){
+ if(!verify(p)||!Number.isInteger(day)||day<0)
+  throw Error('Work offer inspection requires a valid career and world date');
+ return (p.career?.workOffers||[]).map(o=>({
+  id:o.id,dutyId:o.dutyId,issuerId:o.issuerId,
+  scope:o.agreedScope,risk:o.risk,safetyPlan:o.safetyPlan,
+  status:o.status==='accepted'&&day>o.endDay?'expired':o.status,
+  actualWorkAttempts:o.attemptedWork.length,
+  noPromisedWage:true,noLicenceGranted:true
+ }));
+}
+
+function task(w,p,day=w.lastTickDay){
  const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
   region=Atlas.R[p.regionId];
  if(!eco||!host||!region||region.polity!==p.polity||
@@ -327,8 +472,14 @@ function task(w,p){
   if(duty.status==='available'&&duty.regionId===p.regionId&&
     (duty.institutionId===null||
       w.institutions?.[duty.institutionId]?.status==='active'))
-   available.push({method:duty.method,goal:duty.goal,
-    domain:duty.domain,effect:duty.effect,authoredDutyId:duty.id});
+   {
+    const valid=c.workOffers?.filter(a=>a.dutyId===duty.id&&
+      a.status==='accepted'&&a.startDay<=day&&a.endDay>=day);
+    const active=valid?.at(-1);
+    available.push({method:duty.method,goal:duty.goal,
+      domain:duty.domain,effect:duty.effect,authoredDutyId:duty.id,
+      ...(active?{activeOfferId:active.id}:{})});
+   }
  }
  const work=available[Math.floor(draw(p)*available.length)];
  const pressure=eco.pressure>69?3:eco.quality<38?2:0,
@@ -355,7 +506,7 @@ function work(w,p,day,context='independent-duty',assistance=null){
   throw Error('Cooperative work needs an actual separately resolved and witnessed player skill check');
  const support=assisted&&assistance.success?
    (['strong','exceptional'].includes(assistance.degree)?2:1):0;
- const c=ensure(p),job=task(w,p),
+ const c=ensure(p),job=task(w,p,day),
   innovation=require('./independent-innovations').workBonus(w,p,job.method),
   local=w.ecosystems[p.regionId],
   polity=w.countries[p.polity],
@@ -415,6 +566,14 @@ function work(w,p,day,context='independent-duty',assistance=null){
   if(!selected||!verifyDuty(p,selected))
    throw Error('Source-authored work must still belong to the real worker');
   selected.workProofHashes.push(receipt.sourceHash);
+  if(job.activeOfferId){
+   const accepted=c.workOffers?.find(a=>a.id===job.activeOfferId&&
+    a.dutyId===job.authoredDutyId&&a.status==='accepted'&&
+    a.startDay<=day&&a.endDay>=day);
+   if(!accepted)throw Error('An ended or invalid offer cannot claim contracted work');
+   accepted.attemptedWork.push({hash:receipt.sourceHash,
+    source:structuredClone(receipt.source)});
+  }
  }
  if(c.workReceipts.length>24)c.workReceipts.shift();
  const methods=Object.keys(c.demonstratedMethods).length;
@@ -452,5 +611,5 @@ function publicWitness(x){
   reportedEffects:x.observedChange,
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
-module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,
+module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
