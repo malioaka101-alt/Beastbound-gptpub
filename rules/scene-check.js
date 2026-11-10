@@ -146,7 +146,11 @@ function perform(s,p={}){
  // the skill, a new roll, or an arbitrary biological power.
  const Body=require('./body-living-physiques');
  const physiology=Body.sceneSupport(s,id);
- const modifier=baseModifier+physiology.bonus;
+ const Origin=require('./beast-origin-integration');
+ const humanOrigin=Origin.sceneSupport(s,id);
+ if(physiology.bonus&&humanOrigin.bonus)
+  throw Error('Two different physiological Origin/Body sources cannot stack on one original terrain challenge');
+ const modifier=baseModifier+physiology.bonus+humanOrigin.bonus;
  // All provenance and actor checks precede dice, time or evidence mutation.
  const check=C.check(s,{modifier,dc:a.dc,label:a.label,risky:a.risky});
  s.table.sceneCheckEventsUsed||={};
@@ -154,6 +158,8 @@ function perform(s,p={}){
  a.used=true;a.checkedAtMinute=s.world.minutes;
  const tissueUse=physiology.bonus?
   Body.recordSceneSupport(s,id,check,baseModifier):null;
+ const humanOriginUse=humanOrigin.bonus?
+  Origin.recordUse(s,id,check,baseModifier):null;
  if(a.origin==='engine-habitat-survey'){
   // Retain an immutable identity for the ACTUAL resolved check. Research
   // fieldwork must reuse that roll rather than mint a second roll, choose a
@@ -188,6 +194,7 @@ function perform(s,p={}){
  Health.sync(s,{source:'legacy'});
  return {...check,...practice,verifiedSceneCheck:id,elapsedMinutes:a.minutes,
   ...(tissueUse?{actualPhysiologicalSupport:tissueUse}:{}),
+  ...(humanOriginUse?{actualOriginLineageSupport:humanOriginUse}:{}),
   ...(a.origin==='engine-local-scene'?{scope:'visible-local-terrain-only',
    intent:a.intent,noAutomaticMovement:true,noUnknownDiscoveries:true,
    noAutomaticAgreement:true,noGrantedItems:true}: {})};
