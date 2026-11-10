@@ -177,6 +177,14 @@ function knownPersonContext(s,p={}){
 }
 function act(s,{system,operation,params={}}={}){
  if(!params||typeof params!=='object'||Array.isArray(params))throw Error('Invalid rule parameters');
+ // In a truly entered foreign plane the mortal world.location is only the
+ // retained return anchor. It is NOT permission to trade, travel, sleep,
+ // study wildlife or interact with people who are still at that anchor.
+ if((s.table?.realm?.riftWalk?.active||
+   s.world?.planeId&&s.world.planeId!=='mortal')&&
+   !['rift.realmStatus','rift.realmReturn','character.status',
+     'power.status','discipline.status'].includes(`${system}.${operation}`))
+  throw Error('Actually inside a selected foreign plane: ordinary mortal-world actions require a genuine return first');
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
   case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
@@ -361,6 +369,10 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.pocketTransfer':return require('./rift-pocket-architecture').transfer(s,params);
   case 'rift.adaptationStatus':return require('./rift-adaptation').status(s);
   case 'rift.adaptExposure':return require('./rift-adaptation').expose(s,params);
+  case 'rift.realmStatus':return require('./rift-realm-walking').status(s);
+  case 'rift.realmPrepare':return require('./rift-realm-walking').prepare(s,params);
+  case 'rift.realmEnter':return require('./rift-realm-walking').enter(s,params);
+  case 'rift.realmReturn':return require('./rift-realm-walking').returnToAnchor(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
