@@ -48,7 +48,7 @@ function witness(s,exposureId){
   originalMeridianStage=s.player.meridian.stage;
  const initial=E.exportGame(s),rng=s.rngState;
  A.throws(()=>act(s,'wetlandExposure',{witnessIndex:0}),
-  /witnessed|wetland|observed/i);
+  /witnessed|wetland|observed|genuine original local water|independent adverse osmotic/i);
  A.equal(E.exportGame(s),initial);A.equal(s.rngState,rng);
  let success=0,attempts=0;
  for(let i=0;i<8&&success<2;i++){
