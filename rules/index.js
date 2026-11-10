@@ -177,6 +177,14 @@ function knownPersonContext(s,p={}){
 }
 function act(s,{system,operation,params={}}={}){
  if(!params||typeof params!=='object'||Array.isArray(params))throw Error('Invalid rule parameters');
+ // In a truly entered foreign plane the mortal world.location is only the
+ // retained return anchor. It is NOT permission to trade, travel, sleep,
+ // study wildlife or interact with people who are still at that anchor.
+ if((s.table?.realm?.riftWalk?.active||
+   s.world?.planeId&&s.world.planeId!=='mortal')&&
+   !['rift.realmStatus','rift.realmReturn','character.status',
+     'power.status','discipline.status'].includes(`${system}.${operation}`))
+  throw Error('Actually inside a selected foreign plane: ordinary mortal-world actions require a genuine return first');
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
   case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
@@ -352,6 +360,21 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.anchorStatus':return RiftAnchors.status(s);
   case 'rift.anchorWork':return RiftAnchors.mark(s,params);
   case 'rift.orient':return RiftAnchors.orient(s,params);
+  case 'rift.foldStatus':return require('./rift-fold-step').status(s);
+  case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
+  case 'rift.weaveStatus':return require('./rift-boundary-weaving').status(s);
+  case 'rift.weaveBoundary':return require('./rift-boundary-weaving').weave(s,params);
+  case 'rift.pocketStatus':return require('./rift-pocket-architecture').status(s);
+  case 'rift.pocketBuild':return require('./rift-pocket-architecture').build(s,params);
+  case 'rift.pocketTransfer':return require('./rift-pocket-architecture').transfer(s,params);
+  case 'rift.adaptationStatus':return require('./rift-adaptation').status(s);
+  case 'rift.adaptExposure':return require('./rift-adaptation').expose(s,params);
+  case 'rift.realmStatus':return require('./rift-realm-walking').status(s);
+  case 'rift.realmPrepare':return require('./rift-realm-walking').prepare(s,params);
+  case 'rift.realmEnter':return require('./rift-realm-walking').enter(s,params);
+  case 'rift.realmReturn':return require('./rift-realm-walking').returnToAnchor(s,params);
+  case 'rift.domainStatus':return require('./rift-boundary-domain').status(s);
+  case 'rift.domainForm':return require('./rift-boundary-domain').form(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
