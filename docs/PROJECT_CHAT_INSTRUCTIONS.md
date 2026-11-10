@@ -1,5 +1,11 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Verified #14 and next Rift foundation #15 (10 November 2026)
+
+The persistent `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md` verifies **foundations #01–#14**. Foundation #13 original Body Refinement was merged as [PR #45](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/45); Foundation #14 original ethical and source-specific Beast-Origin lineage stages I–VIII, including witnessed rights/material, human-specific adaptation, genuine rejection/clinical recovery and no automatic beast ability, was verified with **all 153 required test groups**, [CI #42753405688](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42753405688), and [merged PR #47](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/47) at `67a7914194efd150831423de0a6147cd6df54adc`. The original living-world log rotates, so the personally witnessed source archive keeps original human Origin evidence over long campaigns. No campaign saves changed.
+
+**Next sequential development foundation: #15 Rift higher practice and realm transit (original §§3, 25).** Extend the *existing* realm and boundary ledger, observed Rift Sense/Anchor Marking and prior Rift world geometry. Allow GM-authored methods, independent discoveries and biological/realm costs; do not pregrant teleportation, arbitrary pocket realms, forced magic schools or inferred cross-realm travel. Foundation #15 is **not yet verified**. Older below historical development notes reflect their own dates and are superseded for progress status.
+
 ## Verified #12 and current Body Refinement foundation #13 (9 November 2026)
 
 The persistent `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md` now verifies **#01–#12**. Foundation #12 completed original Soul Phases III–VII, ethical self-care, voluntary own-memory imprints/revocation and limited Soul Domain with [full exact-head CI #42686388488](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/42686388488), and [merged PR #44](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/44) commit `951c5e2900379727ff7282f65794eb2cc991b134`. Prior Soul I–II source protection, personhood and consent are preserved; Phase is never automatic mindreading, coerced soul binding or resurrection.
