@@ -352,6 +352,8 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.anchorStatus':return RiftAnchors.status(s);
   case 'rift.anchorWork':return RiftAnchors.mark(s,params);
   case 'rift.orient':return RiftAnchors.orient(s,params);
+  case 'rift.foldStatus':return require('./rift-fold-step').status(s);
+  case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
