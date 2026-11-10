@@ -176,6 +176,18 @@ function prepare(s,id){
  A.equal(act(s,'lineageStatus').individualSources[0].integrated,true);
  const saved=E.importGame(E.exportGame(s));
  A.equal(L.verify(saved),true);
+ const missingRightsWitness=E.importGame(E.exportGame(s));
+ const originalRightsHash=missingRightsWitness.table.originLineageAuthorisations[id].source.witnessHash;
+ const originalRightsIndex=missingRightsWitness.log.findIndex(e=>hash(e)===originalRightsHash);
+ A.ok(originalRightsIndex>=0,'GM donor/endogenous authorisation must originate from an actual campaign event');
+ missingRightsWitness.log.splice(originalRightsIndex,1);
+ A.equal(L.verify(missingRightsWitness),false,'A sealed but absent rights witness cannot authorise a human Origin integration');
+ const missingClinicalWitness=E.importGame(E.exportGame(s));
+ const clinicalHash=missingClinicalWitness.table.originLineageStudies[id].integration.attempts[0].source.witnessHash;
+ const clinicalIndex=missingClinicalWitness.log.findIndex(e=>hash(e)===clinicalHash);
+ A.ok(clinicalIndex>=0,'An independent stage witness must actually exist in the source log');
+ missingClinicalWitness.log.splice(clinicalIndex,1);
+ A.equal(L.verify(missingClinicalWitness),false,'A stage receipt cannot survive the removal of its original observed event');
  saved.table.originLineageStudies[id].integration.attempts[0].source.loadAfter+=4;
  A.equal(L.verify(saved),false,'Forged original human capacity load must fail');
  const forged=E.importGame(E.exportGame(s));
