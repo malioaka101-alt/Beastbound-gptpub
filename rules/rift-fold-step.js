@@ -69,6 +69,24 @@ function verifyCheck(a){
   c.degree===C.degree(c.margin,true)&&
   c.progress===C.progress(c.degree));
 }
+// Previously earned spatial methods stay usable at later real stages.
+// The witness minute must follow the ACTUAL source-proven breakthrough;
+// a forged step number, or a future-earned skill used in the past, fails.
+function higherStageEarnedAt(s,stage,minute){
+ const p=s.player?.rift;
+ if(!p||!integer(minute,0,s.world.minutes))return false;
+ if(stage===4)return require('./rift-boundary-weaving').earnedAt(s,minute);
+ if(stage>=5&&(!p.pocketProof||
+  !integer(p.pocketProof.earnedMinute,0,minute)||
+  !require('./rift-pocket-architecture').verify(s)))return false;
+ if(stage>=6&&(!p.adaptationProof||
+  !integer(p.adaptationProof.earnedMinute,0,minute)||
+  !require('./rift-adaptation').verify(s)))return false;
+ if(stage>=7&&(!p.realmWalkingProof||
+  !integer(p.realmWalkingProof.earnedMinute,0,minute)||
+  !require('./rift-realm-walking').verify(s)))return false;
+ return stage>=4&&stage<=7;
+}
 function verify(s){
  const r=s.table?.riftFoldSteps;
  if(!r)return !s.player?.rift?.foldProof;
@@ -111,8 +129,8 @@ function verify(s){
    !verifyCheck(a)||
    a.success!==a.check.success||
    (a.stepBefore!==step&&!(
-    step===3&&a.stepBefore===4&&
-    require('./rift-boundary-weaving').earnedAt(s,a.minute)))||
+    step>=3&&a.stepBefore>step&&
+    higherStageEarnedAt(s,a.stepBefore,a.minute)))||
    a.stepAfter!==(a.success?Math.max(3,a.stepBefore):a.stepBefore)||
    !e||a.witnessHash!==digest(e)||e.type!=='story'||
    d?.origin!==WITNESS||d.location!==a.location||
