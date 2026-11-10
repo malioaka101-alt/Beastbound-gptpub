@@ -41,7 +41,7 @@ function authorisation(s,id,seal,q){
   w?.type!=='story'||a.witnessHash!==hash(w)||
   d?.origin!==AUTH||d.sourceId!==id||d.mode!==a.mode||
   d?.location!==a.location||
-  !s.log?.some(event=>hash(event)===a.witnessHash)||
+  !Lineage.witnessed(s,w)||
   !prose(d?.verifiedSourceRights)||
   !prose(d?.observedOriginalMaterialIdentity)||
   (a.mode==='informed-donation'&&
@@ -141,7 +141,7 @@ function verifyRecord(s,r,q,seal){
     !a.witness||a.witnessHash!==hash(a.witness)||
     a.witness.details?.origin!==CARE||
     a.witness.details?.sourceId!==r.sourceId||
-    !s.log?.some(event=>hash(event)===a.witnessHash)||
+    !Lineage.witnessed(s,a.witness)||
     !prose(a.witness.details?.measuredIndividualResponse)||
     !prose(a.witness.details?.independentFailureLimit)||
     !prose(a.witness.details?.observedHumanMechanism)||
@@ -163,7 +163,7 @@ function verifyRecord(s,r,q,seal){
    a.witness.details?.origin!==STAGE||
    a.witness.details?.sourceId!==r.sourceId||
    a.witness.details?.step!==next||
-   !s.log?.some(event=>hash(event)===a.witnessHash)||
+   !Lineage.witnessed(s,a.witness)||
    !prose(a.witness.details?.measuredIndividualResponse)||
    !prose(a.witness.details?.independentFailureLimit)||
    !prose(a.witness.details?.observedHumanMechanism)||
@@ -215,7 +215,7 @@ function verifyRecord(s,r,q,seal){
    a.witness.details?.origin!==USE||
    a.witness.details?.sourceId!==r.sourceId||
    a.witness.details?.checkId!==a.checkId||
-   !s.log?.some(event=>hash(event)===a.witnessHash)||
+   !Lineage.witnessed(s,a.witness)||
    !prose(a.witness.details?.observedFunction)||
    !prose(a.witness.details?.independentFailureLimit)||
    !sc||sc.checkId!==a.checkId||
@@ -307,6 +307,8 @@ function stage(s,p={}){
  rank=C.int(ruleResource.skills?.[rule.skill]?.rank??0,
   'original '+rule.skill,0,5),mod=Math.floor((attr-10)/2);
  const loadBefore=o.load,rejectionBefore=o.rejectionRisk||0,strainBefore=t?.strain||0;
+ Lineage.archive(s,auth.source.witness);
+ Lineage.archive(s,observed);
  const check=C.check(s,{modifier:mod+2*rank,
   dc:rule.dc+Math.min(4,q.integrationLoad),
   label:'Human Origin '+STEPS[step]+' — '+q.traitName.slice(0,24)});
@@ -379,6 +381,7 @@ function care(s,p={}){
  const minute=s.world.minutes,attributeScore=C.int(pchar.attributes?.wis,'earned Wis',1,30),
   skillRank=C.int(pchar.skills?.medicine?.rank??0,'earned Medicine',0,5),
   attributeModifier=Math.floor((attributeScore-10)/2);
+ Lineage.archive(s,w);
  const check=C.check(s,{modifier:attributeModifier+2*skillRank,dc:15,
   label:'Observed original lineage pressure care'});
  const event=structuredClone(s.log.at(-1)),before=integr.strain;
@@ -437,6 +440,7 @@ function prepareFooting(s,p={}){
   checkId:p.checkId,minute:s.world.minutes,sceneMinute:sc.worldMinute,
   sceneEventHash:sc.eventHash,location:s.world.location,
   witness:w,witnessHash:h};
+ Lineage.archive(s,w);
  integ.uses||=[];integ.uses.push({origin:ORIGIN,source:a,seal:hash(a),used:null});
  if(!Lineage.verify(s))throw Error('Human Origin physical action proof failed verification');
  return {prepared:true,checkId:p.checkId,sourceId:p.sourceId,
