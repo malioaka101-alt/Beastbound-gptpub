@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/specialist-formation-mastery.test.js
             tests/specialist-rune-sigils.test.js
             tests/cross-ward-interface.test.js
             tests/cross-discipline-qi-mana-coherence.test.js
