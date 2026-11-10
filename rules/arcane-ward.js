@@ -145,7 +145,13 @@ function cast(s,combatant,verified){
  if(combatant.status!=='ok')throw Error('An incapacitated caster cannot raise a Ward');
  if(combatant.ward?.steps>0)
   throw Error('An active Ward already protects this caster; neither stacking nor replenishment is supported');
- const check=C.check(s,{modifier:verified.modifier,dc:verified.castingDC,
+ // An independently calibrated Meridian–Arcane interface can stabilise the
+ // ALREADY learned Ward's single actual casting check. The source is
+ // checked here, not provided as a caller-selected bonus or extra spell.
+ const hybrid=require('./cross-ward-interface'),
+  support=hybrid.support(s);
+ const check=C.check(s,{modifier:verified.modifier+support.bonus,
+  dc:verified.castingDC,
   label:'First-Circle Ward: one honest Arcane non-attack casting roll'});
  const manaSpent=check.success?verified.manaCost:
   check.degree==='setback'?Math.floor(verified.manaCost/2):verified.manaCost;
@@ -167,12 +173,18 @@ function cast(s,combatant,verified){
   'The defensive Ward fails to form; the genuine Mana cost is still paid.',{
     origin:'verified-one-minute-arcane-ward',source:verified.source,
     techniqueId:ID,check,success:check.success,
-    manaSpent,backlash,wardSteps:check.success?STEPS:0
+    manaSpent,backlash,wardSteps:check.success?STEPS:0,
+    ...(support.bonus?{hybridWardSupport:{
+     source:hybrid.SOURCE,calibrationSeal:support.sourceSeal,
+     bonus:support.bonus}}:{})
   });
+ if(support.bonus)hybrid.consume(s,support.sourceSeal,check);
  return {verifiedTechniqueId:ID,cast:check.success,check,
   manaSpent,backlash,wardSteps:check.success?STEPS:0,
   duration:'one combat exchange',learnedTechniqueSource:verified.source,
-  noExtraRoll:true};
+  noExtraRoll:true,
+  sourceVerifiedQiManaWardBonus:support.bonus,
+  consumedCalibrationSeal:support.sourceSeal};
 }
 function expire(s,c,castResult){
  if(castResult?.verifiedTechniqueId!==ID)return null;
