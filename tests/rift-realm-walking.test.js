@@ -69,7 +69,9 @@ function establish(s,routeId){
   A.equal(out.noPassageYet,true);
   A.equal(out.prepared,out.check.success);
   A.equal(s.world.minutes,prior+90);
-  A.equal(s.player.stamina,sta-4);
+  A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+   sta-4+5*(Math.floor(s.world.minutes/1440)-Math.floor(prior/1440))),
+   'Original real route exertion and independent world-day stamina recovery both apply');
   A.equal(Walk.verify(s),true);
   prepared=out.prepared;
  }
@@ -82,7 +84,9 @@ function establish(s,routeId){
   const out=act(s,'realmEnter',{routeId:id});
   A.equal(out.crossed,out.check.success);
   A.equal(s.world.minutes,prev+10);
-  A.equal(s.player.stamina,sta-5);
+  A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+   sta-5+5*(Math.floor(s.world.minutes/1440)-Math.floor(prev/1440))),
+   'Original actual realm crossing and world-day stamina changes both apply');
   A.equal(Walk.verify(s),true);
   inside=out.crossed;
  }
@@ -109,7 +113,9 @@ function establish(s,routeId){
   const out=act(s,'realmReturn',{routeId:id});
   A.equal(out.returned,out.check.success);
   A.equal(s.world.minutes,before+10);
-  A.equal(s.player.stamina,sta-4);
+  A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+   sta-4+5*(Math.floor(s.world.minutes/1440)-Math.floor(before/1440))),
+   'Original return exertion and independent world-day stamina recovery both apply');
   A.equal(Walk.verify(s),true);
   returned=out.returned;
  }
