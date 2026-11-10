@@ -123,4 +123,5 @@ function observe(s,interfaceId='first_gate_first_circle_coupling_01',
  A.equal(out.manaSpent,3);
  A.equal(Link.verify(s),true);
 }
+module.exports={previouslyEarned,observe};
 console.log('Cross #16 first slice: genuine previously earned Gate/Circle, separate Qi/Mana/Stamina cost, witnessed individual interference, one original d20, no free spell or stage');
