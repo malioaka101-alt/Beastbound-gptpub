@@ -172,8 +172,9 @@ function fold(s,p={}){
  if(s.world?.location!==a.location||s.battle||s.encounter||
   s.table?.combatants?.player?.status!=='ok')
   throw Error('The already earned spatial anchor and real stable scene must support this attempt');
- if(!Cosmos.registry(s)?.boundaries?.riftglass_wardline||
-  !Cosmos.validate(Cosmos.registry(s),s))
+ const cosmology=Cosmos.peek(s)||Cosmos.seed();
+ if(!cosmology.boundaries?.riftglass_wardline||
+  !Cosmos.validate(cosmology,s))
   throw Error('The original real Riftglass realm boundary is not documented');
  if(!verify(s))throw Error('An earlier original Fold Step or local position has lost source integrity');
  const witness=evidence(s,p.witnessIndex),d=witness.details,
