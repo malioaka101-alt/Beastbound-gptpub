@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/cross-discipline-qi-mana-coherence.test.js
             tests/rift-boundary-domain.test.js
             tests/rift-realm-walking.test.js
             tests/rift-adaptation.test.js
