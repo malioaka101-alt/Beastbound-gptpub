@@ -135,26 +135,7 @@ function actualRest(s){
  const source=act(s,'domainStatus').activeDomains[0];
  A.equal(source.noPortal,true);
  const wi=foldWitness(s),foldMinute=s.world.minutes;
- let result;
- try{result=act(s,'foldStep',{witnessIndex:wi});}
- catch(err){
-  const a=s.table?.riftFoldSteps?.attempts.at(-1)?.source;
-  console.error('DOMAIN VIII FOLD RECEIPT DIAGNOSTIC',
-   JSON.stringify({domainVerify:D.verify(s),
-    originalFoldVerified:Fold.verify(s),
-    domainSupportAt:D.supportProof(s,a?.domainReceiptSeal,a?.segmentId,a?.minute),
-    stage:s.player.rift.step,foldStepBefore:a?.stepBefore,
-    foldStepAfter:a?.stepAfter,domainEarnedMinute:s.player.rift.domainProof?.earnedMinute,
-    foldMinute:a?.minute,weaveMitigation:a?.weaveMitigation,
-    domainMitigation:a?.domainMitigation,
-    domainSeal:a?.domainReceiptSeal,
-    computedDc:16+Math.ceil((a?.distance||0)/4)+(a?.riskAdjustment||0)+
-     Math.floor((a?.strainBefore||0)/12)-Math.max(a?.weaveMitigation||0,a?.domainMitigation||0),
-    savedDc:a?.dc,roll:a?.check?.roll,
-    originalWitness:a?.witness?.details,position:a?.positionAfter,
-    previous:s.table?.riftFoldSteps?.attempts.at(-2)?.source?.stepBefore}));
-  throw err;
- }
+ const result=act(s,'foldStep',{witnessIndex:wi});
  A.equal(result.step,8,'A lower real Rift art cannot erase earned Boundary Domain VIII');
  A.equal(result.actuallyEarnedDomainSupport,2);
  A.equal(result.localBoundarySupport,2);
