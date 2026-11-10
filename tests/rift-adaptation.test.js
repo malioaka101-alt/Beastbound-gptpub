@@ -152,7 +152,9 @@ function trained(seed=25156051){
  // a full settlement night's sleep, never a unit-test stamina gift.
  if(s.player.stamina<4){
   A.equal(E.dispatch(s,'travel fen').ok,true);
+  A.equal(E.dispatch(s,'travel crossing').ok,true);
   A.equal(act(s,'health','sleep',{hours:8}).sleptHours,8);
+  A.equal(E.dispatch(s,'travel fen').ok,true);
   A.equal(E.dispatch(s,'travel ruins').ok,true);
  }
  const wi=observe(s),before=s.world.minutes;
