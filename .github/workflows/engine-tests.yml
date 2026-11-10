@@ -23,6 +23,8 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/specialist-elemental-wetland.test.js
+            tests/specialist-healing-intent.test.js
             tests/specialist-weapon-intent.test.js
             tests/specialist-alchemy-bioassay.test.js
             tests/specialist-formation-mastery.test.js

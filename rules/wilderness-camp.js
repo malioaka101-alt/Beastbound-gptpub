@@ -36,14 +36,16 @@ function preflight(s,p={}){
   throw Error('An existing witnessed campsite cannot be overwritten');
  if(s.table?.combatants?.player&&s.table.combatants.player.stamina!==stamina)
   throw Error('The character stamina must match the actual wound model before scouting');
+ const elemental=require('./specialist-elemental-wetland').support(s);
  const weather=String(s.world.weather||'Fair').slice(0,120);
  const hard=/storm|gale|flood|downpour|blizzard|whiteout/i.test(weather);
  const penalty=hard?3:/rain|mist|fog|sleet/i.test(weather)?1:0;
- return {loc,cfg,weather,stamina,modifier:Math.floor((score-10)/2)+2*rank,
-  dc:cfg.dc+penalty};
+ return {loc,cfg,weather,stamina,elemental,
+  modifier:Math.floor((score-10)/2)+2*rank,
+  dc:cfg.dc+penalty-elemental.mitigation};
 }
 function find(s,p={}){
- const {loc,cfg,weather,modifier,dc}=preflight(s,p);
+ const {loc,cfg,weather,modifier,dc,elemental}=preflight(s,p);
  const old=s.world.minutes,location=s.world.location;
  const check=C.check(s,{modifier,dc,label:'Find safe overnight ground at '+loc.name,risky:true});
  const rollEvent=structuredClone(s.log.at(-1)),rollHash=hash(rollEvent);
@@ -56,7 +58,9 @@ function find(s,p={}){
   shelterId='fieldcamp_'+location+'_'+s.world.minutes;
   const witness={origin:ORIGIN,shelterId,location,biome:loc.biome,
    checkedAtMinute:s.world.minutes,weather,terrain:cfg.description,
-   dc,rollHash,roll:check.roll,degree:check.degree};
+   dc,rollHash,roll:check.roll,degree:check.degree,
+   elementalMitigation:elemental.mitigation,
+   elementalSeal:elemental.sourceSeal};
   C.event(s,'world','A workable resting place is identified at '+loc.name+
    ': '+cfg.description+'.',witness);
   const event=structuredClone(s.log.at(-1));
@@ -72,6 +76,8 @@ function find(s,p={}){
     ' using one honestly resolved Survival check',
    origin:ORIGIN,biome:loc.biome,terrain:cfg.description,
    weather,dc,checkedRoll:check.roll,degree:check.degree,
+   elementalMitigation:elemental.mitigation,
+   elementalSeal:elemental.sourceSeal,
    rollEvent,rollHash,sourceEvent:event,sourceEventHash:hash(event)};
  }else{
   C.event(s,'world','The search at '+loc.name+
@@ -80,6 +86,7 @@ function find(s,p={}){
     attemptMinute:s.world.minutes,rollHash,degree:check.degree});
  }
  return {searched:true,found:check.success,shelterId,
+  personallyEarnedElementalWetlandSupport:elemental.mitigation,
   description:check.success?cfg.description:null,
   roll:check.roll,dc,degree:check.degree,margin:check.margin,
   elapsedMinutes:MINUTES,staminaSpent:STAMINA,
@@ -112,6 +119,14 @@ function valid(s,site){
     site.sourceEvent.details.roll!==site.checkedRoll||
     site.sourceEvent.details.dc!==site.dc||
     site.sourceEvent.details.degree!==site.degree||
+    (site.elementalMitigation!==undefined&&(
+      ![0,1].includes(site.elementalMitigation)||
+      site.sourceEvent.details.elementalMitigation!==site.elementalMitigation||
+      site.sourceEvent.details.elementalSeal!==site.elementalSeal||
+      (site.elementalMitigation===0&&site.elementalSeal!=null)||
+      (site.elementalMitigation===1&&
+       !require('./specialist-elemental-wetland').supportProof(
+        s,site.elementalSeal,site.worldMinute-MINUTES))))||
     site.rollEvent?.type!=='roll'||
     site.rollEvent.details?.roll!==site.checkedRoll||
     site.rollEvent.details?.dc!==site.dc||

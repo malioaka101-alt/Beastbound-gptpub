@@ -207,6 +207,10 @@ function act(s,{system,operation,params={}}={}){
   case 'specialist.alchemyRefine':return require('./specialist-alchemy-bioassay').refine(s,params);
   case 'specialist.weaponStatus':return require('./specialist-weapon-intent').status(s);
   case 'specialist.weaponPractice':return require('./specialist-weapon-intent').practice(s,params);
+  case 'specialist.healingIntentStatus':return require('./specialist-healing-intent').status(s);
+  case 'specialist.healingIntentTreat':return require('./specialist-healing-intent').treat(s,params);
+  case 'specialist.wetlandStatus':return require('./specialist-elemental-wetland').status(s);
+  case 'specialist.wetlandExposure':return require('./specialist-elemental-wetland').exposure(s,params);
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
