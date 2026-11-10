@@ -50,7 +50,9 @@ function evidence(s,index){
   !integer(d.safeRangeMetres,d.measuredDistanceMetres,12)||
   d.lineOfEffectClear!==true||
   d.crossesSealedBoundary!==false||
-  d.crossesWorldLocation!==false)
+  d.crossesWorldLocation!==false||
+  (d.segmentId!==undefined&&
+   (typeof d.segmentId!=='string'||!/^[a-z][a-z0-9_-]{3,65}$/.test(d.segmentId))))
   throw Error('A physically measured short local displacement, unobstructed path and independent spatial limit are required');
  return structuredClone(e);
 }
@@ -93,9 +95,15 @@ function verify(s){
    a.strainAdded!==(a.check?.degree==='severe failure'?6:0)||
    a.strainAfter!==Math.min(100,strain+a.strainAdded)||
    a.wounded!==(a.strainAdded>0)||
-   !integer(a.dc,17,35)||
+   !integer(a.dc,16,35)||
    a.dc!==16+Math.ceil(a.distance/4)+a.riskAdjustment+
-    Math.floor(a.strainBefore/12)||
+    Math.floor(a.strainBefore/12)-(a.weaveMitigation||0)||
+   ![0,1].includes(a.weaveMitigation||0)||
+   (a.weaveMitigation===1&&(
+    !a.segmentId||!a.weaveReceiptSeal||
+    !require('./rift-boundary-weaving').supportProof(
+     s,a.weaveReceiptSeal,a.segmentId,a.minute)))||
+   (a.weaveMitigation===0&&a.weaveReceiptSeal!==null)||
    ![0,3,6].includes(a.riskAdjustment)||
    !integer(a.sourceInt,1,30)||
    !integer(a.sourceArcana,0,5)||
@@ -115,6 +123,7 @@ function verify(s){
    !phrase(d.measuredPressureCountertest)||
    d.measuredDistanceMetres!==a.distance||
    d.safeRangeMetres!==a.range||
+   (d.segmentId||null)!==(a.segmentId||null)||
    d.lineOfEffectClear!==true||
    d.crossesSealedBoundary!==false||
    d.crossesWorldLocation!==false||
@@ -192,9 +201,13 @@ function fold(s,p={}){
   throw Error('An actual human Stamina pool must support the measured local displacement');
  const sourceInt=C.int(s.player.attributes.int,'earned Int',1,30),
   sourceArcana=C.int(s.player.skills.arcana.rank,'earned Arcana skill',0,5),
-  modifier=Math.floor((sourceInt-10)/2)+2*sourceArcana,
-  dc=16+Math.ceil(d.measuredDistanceMetres/4)+risk.dcRisk+
-   Math.floor(strain/12);
+  modifier=Math.floor((sourceInt-10)/2)+2*sourceArcana;
+ const segmentId=d.segmentId||null;
+ const weave=segmentId?
+  require('./rift-boundary-weaving').support(s,segmentId):
+  {mitigation:0,sourceSeal:null};
+ const dc=16+Math.ceil(d.measuredDistanceMetres/4)+risk.dcRisk+
+   Math.floor(strain/12)-weave.mitigation;
  const start=s.world.minutes;
  const check=C.check(s,{modifier,dc,
   label:'Original measured short Rift Fold Step'});
@@ -212,7 +225,8 @@ function fold(s,p={}){
   from:d.fromObservedPosition,to:d.toObservedPosition,
   positionAfter:check.success?d.toObservedPosition:d.fromObservedPosition,
   staminaSpent:cost,dc,riskAdjustment:risk.dcRisk,
-  riskSourceHash:risk.identity,
+  riskSourceHash:risk.identity,segmentId,
+  weaveMitigation:weave.mitigation,weaveReceiptSeal:weave.sourceSeal,
   sourceInt,sourceArcana,modifier,
   stepBefore:prev,stepAfter:s.player.rift.step,
   strainBefore:strain,strainAdded:added,
@@ -239,6 +253,7 @@ function fold(s,p={}){
   from:src.from,observedPosition:src.positionAfter,
   step:s.player.rift.step,staminaSpent:cost,elapsedMinutes:5,
   backlash:added>0?'real spatial shear wound':null,
+  localBoundarySupport:weave.mitigation,
   noVaultAccess:true,noRealmTransit:true,noInventedDestination:true};
 }
 module.exports={SOURCE,WITNESS,status,fold,verify};
