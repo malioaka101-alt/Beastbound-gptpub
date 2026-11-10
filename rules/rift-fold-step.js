@@ -116,7 +116,7 @@ function verify(s){
    a.strainAdded!==(a.check?.degree==='severe failure'?6:0)||
    a.strainAfter!==Math.min(100,strain+a.strainAdded)||
    a.wounded!==(a.strainAdded>0)||
-   !integer(a.dc,16,35)||
+   !integer(a.dc,15,35)||
    a.dc!==16+Math.ceil(a.distance/4)+a.riskAdjustment+
     Math.floor(a.strainBefore/12)-
      Math.max(a.weaveMitigation||0,a.domainMitigation||0)||
