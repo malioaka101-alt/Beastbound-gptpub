@@ -63,12 +63,6 @@ function observed(s,index){
   throw Error('A source-measured small original boundary segment, physical response and independent countertest are required');
  return structuredClone(e);
 }
-function checkProof(a){
- const c=a.check;
- return !!(a.rollEvent?.type==='roll'&&
-  a.rollEventHash===hash(a.rollEvent)||
-  false);
-}
 function validCheck(a){
  const c=a.check;
  return a.rollEvent?.type==='roll'&&
@@ -238,7 +232,7 @@ function weave(s,p={}){
   anchorHash:hash(s.player.rift.anchorProof),
   foldHash:hash(s.player.rift.foldProof),strain:0,attempts:[]};
  ledger.attempts.push(receipt);ledger.strain=src.strainAfter;
- s.table.realm.boundaryWeaves=ledger;
+ Realm.ensure(s).boundaryWeaves=ledger;
  if(c.success&&!s.player.rift.weaveProof)s.player.rift.weaveProof={
   source:SOURCE,firstSuccessSeal:receipt.seal,formedMinute:now+time,
   noPortalTravel:true};
