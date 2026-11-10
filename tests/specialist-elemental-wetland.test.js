@@ -70,6 +70,8 @@ function witness(s,exposureId){
   A.equal(r.noUniversalElementalImmunity,true);
   A.equal(Element.verify(s),true);
   success+=r.success?1:0;attempts++;
+  if(success===1)A.equal(act(s,'wetlandStatus').earnedSpecificWetlandAcclimation,false,
+   'One personally observed exposure is not an instant new elemental body');
   const saved=E.exportGame(s),rngAfter=s.rngState;
   A.throws(()=>act(s,'wetlandExposure',{witnessIndex:w}),
    /cannot be rerolled|water|observed/i);
@@ -102,6 +104,11 @@ function witness(s,exposureId){
   A.equal(shelter.elementalMitigation,1);
   A.equal(shelter.elementalSeal,Element.support(s).sourceSeal);
   A.equal(Camp.valid(s,shelter),shelter);
+  const wrongSource=E.importGame(E.exportGame(s));
+  wrongSource.table.sleepShelters[camp.shelterId].elementalMitigation=9;
+  A.throws(()=>Camp.valid(wrongSource,wrongSource.table.sleepShelters[camp.shelterId]),
+   /authentic|source|original/i,
+   'A fabricated massive elemental bonus may not pass original campsite-source authentication');
  }
  A.equal(E.dispatch(s,'travel forest').ok,true);
  A.equal(Element.support(s).mitigation,0);
