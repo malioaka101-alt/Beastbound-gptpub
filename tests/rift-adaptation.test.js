@@ -9,6 +9,7 @@ const A=require('node:assert/strict'),E=require('../engine.js'),
  Pocket=require('../rules/rift-pocket-architecture'),
  Adapt=require('../rules/rift-adaptation');
 const act=(s,system,op,p={})=>R.act(s,{system,operation:op,params:p});
+let independentlyEarnedAdaptedSnapshot=null;
 const FROM='At an actual previously measured original open outer Riftglass wardstone';
 const TO='At a separately measured nearby public exterior path stone on the same side of the wards';
 const SEG='adaptation_ward_span_01',POCKET_ID='adaptation_pocket_one';
@@ -178,5 +179,8 @@ function trained(seed=25156051){
   'Other observers continue ordinary independent public stonework and surveying over a long later history.',{unrelated:j});
  A.equal(s.log.length,90);
  A.equal(Adapt.verify(E.importGame(E.exportGame(s))),true);
+ independentlyEarnedAdaptedSnapshot=E.exportGame(s);
 }
+module.exports={freshSourceEarnedAdaptedGame:()=>
+ E.importGame(independentlyEarnedAdaptedSnapshot)};
 console.log('Rift VI: genuinely witnessed individual human biological/energetic pressure adaptation after earned V, real time/stamina/d20/injury and narrow one-point tolerance');
