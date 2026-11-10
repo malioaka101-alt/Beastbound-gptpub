@@ -33,7 +33,7 @@ function pressure(s){
 function route(s,routeId,fresh=false){
  if(!id(routeId))throw Error('A specific independently recorded real route is required');
  const rec=s.table?.realm?.riftRouteSources?.[routeId],q=rec?.source,
-  w=q?.witness,d=w?.details,v=Cosmos.registry(s);
+  w=q?.witness,d=w?.details,v=Cosmos.peek(s)||Cosmos.seed();
  Cosmos.validate(v,s);
  const b=v.boundaries?.[q?.boundaryId];
  if(!rec||rec.origin!==ROUTE||rec.seal!==hash(q)||
