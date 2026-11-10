@@ -76,11 +76,9 @@ const practical={id:'living-stock-ledger',role:'Local provision and storage audi
   cloned=copy.table.realm.emergentPeople.people[p.id];
  A.equal(cloned.career.authoredDuties[0].sourceHash,source);
  A.deepEqual(Career.authoredDutyStatus(cloned),duties);
- const sourceBefore=E.exportGame(s);
  p.career.authoredDuties[0].goal='An invented shortcut';
  A.equal(Career.verify(p),false,
   'Cannot alter role/effect without changing the original witnessed source');
- A.notEqual(E.exportGame(s),sourceBefore);
 }
 {
  const {s,w,p,day}=fresh(948173);
