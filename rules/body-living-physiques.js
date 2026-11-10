@@ -16,7 +16,10 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  TISSUE='witnessed-individual-living-physique-tissue-discovery-v1',
  TISSUE_WORK='witnessed-individual-living-physique-tissue-practice-v1',
  TISSUE_CARE='witnessed-individual-living-physique-tissue-care-v1',
- TISSUE_FOOTING='witnessed-physique-tissue-ground-contact-v1';
+ TISSUE_FOOTING='witnessed-physique-tissue-ground-contact-v1',
+ REPEAT='witnessed-original-whole-body-refinement-repetition-v1',
+ ADAPTIVE_COOLDOWN=8,
+ ADAPTIVE_MENTAL='identity and agency unchanged';
 const SPEC=Object.freeze({
  5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
   sources:['circulationMeasurement','metabolicLimit'],
@@ -90,7 +93,8 @@ function verify(s){
    z.witness.details?.cycle!==cycle||
    !sp.sources.every(f=>S(z.witness.details?.[f],25,900))||
    !Array.isArray(rec.attempts)||!Array.isArray(rec.repairs)||
-   !Array.isArray(rec.tests)||!I(rec.points,0,6)||!I(rec.strain,0,100))
+   !Array.isArray(rec.tests)||!Array.isArray(rec.repetitions??[])||
+   !I(rec.points,0,6)||!I(rec.strain,0,100))
    return false;
   if(allWitnesses.has(z.witnessHash))return false;
   allWitnesses.add(z.witnessHash);
@@ -102,7 +106,8 @@ function verify(s){
    return false;
   const ordered=[...rec.attempts.map(t=>({kind:'work',t})),
    ...rec.repairs.map(t=>({kind:'care',t})),
-   ...rec.tests.map(t=>({kind:'form',t}))]
+   ...rec.tests.map(t=>({kind:'form',t})),
+   ...(rec.repetitions||[]).map(t=>({kind:'repeat',t}))]
    .sort((a,b)=>a.t?.source?.minute-b.t?.source?.minute);
   let pts=0,strain=0,winning=null,last=z.minute;
   for(const {kind,t} of ordered){
@@ -117,7 +122,7 @@ function verify(s){
     digest(a.checkEvent.details)!==digest(a.check)||
     !a.witness||a.witnessHash!==digest(a.witness)||
     a.witness.details?.origin!==
-     (kind==='work'?WORK:kind==='care'?CARE:FORM)||
+     (kind==='work'?WORK:kind==='care'?CARE:kind==='form'?FORM:REPEAT)||
     a.witness.details?.cycle!==cycle||allWitnesses.has(a.witnessHash))
     return false;
    allWitnesses.add(a.witnessHash);
@@ -133,6 +138,21 @@ function verify(s){
      a.after!==(a.check.success?Math.max(0,strain-2):strain))
      return false;
     strain=a.after;
+   }else if(kind==='repeat'){
+    const added=a.check.degree==='severe failure'?3:0;
+    if(!winning||a.staminaSpent!==sp.energy+2||
+     a.witness.details?.cycle!==cycle||
+     !S(a.witness.details?.observedWholeBodyResponse,25,900)||
+     !S(a.witness.details?.independentFailureLimit,25,900)||
+     !S(a.witness.details?.metabolicDemand,25,900)||
+     !S(a.witness.details?.targetedTissues,25,900)||
+     a.originalTransitionSeal!==winning.seal||
+     a.beforeStrain!==strain||
+     a.strainAdded!==added||a.afterStrain!==Math.min(100,strain+added)||
+     a.repeated!==a.check.success||
+     a.noAdditionalCapacity!==true)
+     return false;
+    strain=a.afterStrain;
    }else{
     if(a.staminaSpent!==sp.energy+2||a.pointsAtAttempt!==6||
      a.strainAtAttempt>2||a.formed!==a.check.success)
@@ -190,7 +210,7 @@ function verify(s){
   }
   if(cycle===6){
    if(!Array.isArray(rec.expressions))return false;
-   let last=null;
+   let last=null,lastReleaseMinute=null;
    const releases=new Set();
    for(const item of rec.expressions){
     const a=item?.source;
@@ -217,9 +237,17 @@ function verify(s){
       a.formed!==a.check.success||
       a.activeFrom!==a.minute+1||
       a.activeUntil!==(a.formed?a.activeFrom+a.duration:null)||
-      last&&(last.source.activeUntil>a.minute&&!releases.has(last.seal)))
+      a.cooldownMinutes!==ADAPTIVE_COOLDOWN||
+      a.cooldownUntil!==(a.formed?a.activeUntil+ADAPTIVE_COOLDOWN:
+       a.activeFrom+ADAPTIVE_COOLDOWN)||
+      a.mentalEffects!==ADAPTIVE_MENTAL||
+      a.woundRiskRecorded!==(a.check.degree==='severe failure')||
+      last&&a.minute<(
+       releases.has(last.seal)?
+        lastReleaseMinute+1+ADAPTIVE_COOLDOWN:
+        last.source.cooldownUntil))
       return false;
-     last=item;
+     last=item;lastReleaseMinute=null;
     }else{
      if(!last||!last.source.formed||
       releases.has(last.seal)||
@@ -228,8 +256,10 @@ function verify(s){
       !S(a.witness.details?.independentFailureLimit,25,900)||
       a.activationSeal!==last.seal||
       a.minute<last.source.activeFrom||
-      a.minute>=last.source.activeUntil)return false;
-     releases.add(last.seal);
+      a.minute>=last.source.activeUntil||
+      a.cooldownUntil!==a.minute+1+ADAPTIVE_COOLDOWN||
+      a.mentalEffects!==ADAPTIVE_MENTAL)return false;
+     releases.add(last.seal);lastReleaseMinute=a.minute;
     }
    }
   }
@@ -369,10 +399,11 @@ function verify(s){
   return false;
  return true;
 }
-function prerequisite(s,cycle){
+function prerequisite(s,cycle,{allowFormed=false}={}){
  const sp=spec(cycle),org=originalOrgan(s),p=safe(s);
  const b=s.player.body;
- if(b.cycles.includes(sp.name))throw Error('That genuine whole-body Cycle has already been earned');
+ if(!allowFormed&&b.cycles.includes(sp.name))
+  throw Error('That genuine whole-body Cycle has already been earned');
  if(cycle===7&&(!s.table?.bodyRefinement?.neural?.transition||
   !require('./body-nerve-sense').verify(s)||
   ![5,6].every(c=>b.cycles.includes(SPEC[c].name))))
@@ -413,7 +444,8 @@ function map(s,p={}){
   initialMaxStamina:s.player.maxStamina,
   neuralAtMap:!!bodyRoot.neural?.transition};
  root.cycles[p.cycle]={origin:ORIGIN,source,seal:digest(source),
-  points:0,strain:0,attempts:[],repairs:[],tests:[],transition:null,
+  points:0,strain:0,attempts:[],repairs:[],tests:[],
+  repetitions:[],transition:null,
   ...(p.cycle===6?{expressions:[]}:{}) ,
   ...(p.cycle===7?{upkeep:[]}:{}) ,
   tissues:[]};
@@ -426,7 +458,7 @@ function attempt(s,p={},kind='work'){
  if(!only(p,['cycle','witnessIndex','minutes'])||
   !I(p.cycle,5,7)||!I(p.minutes??60,15,480))
   throw Error('Original physical body work needs an existing cycle, witness and exertion time');
- const {sp}=prerequisite(s,p.cycle);
+ const {sp}=prerequisite(s,p.cycle,{allowFormed:kind==='care'});
  const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle];
  if(!r||!verify(s))throw Error('No source-confirmed physical tissue design exists');
  if(kind==='work'&&r.points>=6)
@@ -515,19 +547,76 @@ function complete(s,p={}){
   check,staminaSpent:spent,minutes,capacity:cap,
   noAutomaticSpeciesTraitOrImmunity:true};
 }
+// Repetition of a completed cycle is genuine new whole-body work, not a
+// second level or stamina-capacity loop. Earlier tissues and other disciplines
+// remain present; the original biology, health, clock and d20 arbitrate.
+function repeat(s,p={}){
+ if(!only(p,['cycle','witnessIndex','minutes'])||
+  !I(p.cycle,5,7)||!I(p.minutes??90,30,480))
+  throw Error('Repeated original whole-body refinement needs a real witnessed session and time');
+ const {sp}=prerequisite(s,p.cycle,{allowFormed:true});
+ const rec=s.table?.bodyRefinement?.living?.cycles?.[p.cycle];
+ if(!rec?.transition||!verify(s))
+  throw Error('A genuinely completed original whole-body Cycle is required before repeating it');
+ if(rec.strain>2)
+  throw Error('Whole-body pressure and any injured tissues require genuine recovery before a new pass');
+ const witness=scene(s,p.witnessIndex,REPEAT,p.cycle);
+ if(!S(witness.details?.observedWholeBodyResponse,25,900)||
+  !S(witness.details?.independentFailureLimit,25,900)||
+  !S(witness.details?.metabolicDemand,25,900)||
+  !S(witness.details?.targetedTissues,25,900))
+  throw Error('Repeated integrated whole-body work needs distinct measured tissues, independent limits and metabolic demand');
+ const wHash=digest(witness);
+ if(tissueKnownWitness(s,wHash))
+  throw Error('The original repeated body experiment has already been resolved');
+ const minutes=p.minutes??90,spent=sp.energy+2;
+ if(!I(s.player.stamina,spent,100000))
+  throw Error('Insufficient actual original physical stamina for repeat whole-body effort');
+ const start=s.world.minutes,before=rec.strain;
+ s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
+ const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
+  2*(s.player.skills?.survival?.rank||0)-Math.floor(rec.strain/3),
+  dc:sp.dc+1,label:sp.name+' original repeated whole-body physical test'});
+ const event=structuredClone(s.log.at(-1));
+ const strainAdded=check.degree==='severe failure'?3:0;
+ rec.strain=Math.min(100,rec.strain+strainAdded);
+ if(strainAdded){
+  Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});
+ }
+ const source={origin:ORIGIN,kind:'repeat',cycle:p.cycle,
+  minute:start,minutes,staminaSpent:spent,
+  witness,witnessHash:wHash,check:structuredClone(check),
+  checkEvent:event,checkEventHash:digest(event),roll:check.roll,
+  originalTransitionSeal:rec.transition.seal,
+  beforeStrain:before,strainAdded,afterStrain:rec.strain,
+  repeated:check.success,noAdditionalCapacity:true};
+ rec.repetitions||=[];
+ rec.repetitions.push({origin:ORIGIN,source,seal:digest(source)});
+ E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
+ if(!verify(s))throw Error('Original repeated body cycle record or physical consequences failed verification');
+ return {attempted:true,cycle:p.cycle,repeated:check.success,check,
+  staminaSpent:spent,minutes,recordedBodyStrain:rec.strain,
+  noSecondRankOrFreeCapacity:true,noAutomaticSupernaturalTrait:true};
+}
 function adaptiveState(s){
  const rec=s.table?.bodyRefinement?.living?.cycles?.[6];
  const states=rec?.expressions||[];
- let last=null,released=false;
+ let last=null,release=null;
  for(const event of states){
-  if(event.source.kind==='assume'){last=event;released=false;}
-  else if(last&&event.source.activationSeal===last.seal)released=true;
+  if(event.source.kind==='assume'){last=event;release=null;}
+  else if(last&&event.source.activationSeal===last.seal)release=event;
  }
- return {active:!!(last?.source.formed&&!released&&
+ const ready=release?.source.cooldownUntil||last?.source.cooldownUntil||0;
+ return {active:!!(last?.source.formed&&!release&&
    s.world.minutes>=last.source.activeFrom&&
    s.world.minutes<last.source.activeUntil),
+  cooldownRemaining:Math.max(0,ready-s.world.minutes),
+  nextAvailableAtMinute:ready,
+  mentalEffects:ADAPTIVE_MENTAL,
+  physicalInjuryOnSevereFailure:true,
+  voluntaryReversal:!!last?.source.formed,
   ...(last?.source.formed?{expiresAtMinute:last.source.activeUntil,
-   naturallyExpired:s.world.minutes>=last.source.activeUntil}:{}),
+   naturallyExpired:!release&&s.world.minutes>=last.source.activeUntil}:{}),
   noAutomaticResistanceOrImmunity:true};
 }
 // Temporary physiological expression is not a new trait or a new power tree.
@@ -541,7 +630,10 @@ function assume(s,p={}){
  if(!verify(s))throw Error('Stored original body physiology is inconsistent');
  const r=s.table?.bodyRefinement?.living?.cycles?.[6];
  if(!r?.transition)throw Error('A completed real Adaptive Physique Cycle is required');
- if(adaptiveState(s).active)throw Error('An original bodily adaptation is already active');
+ const condition=adaptiveState(s);
+ if(condition.active)throw Error('An original bodily adaptation is already active');
+ if(condition.cooldownRemaining>0)
+  throw Error('The originally measured physical adaptation has not recovered through its cooldown');
  const witness=scene(s,p.witnessIndex,ASSUME,6);
  if(!S(witness.details?.environmentObserved,25,900)||
   !S(witness.details?.safeReversionCounter,25,900)||
@@ -559,12 +651,19 @@ function assume(s,p={}){
   2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
   dc:18,label:'Original verified living adaptive physiology under present conditions'});
  const event=structuredClone(s.log.at(-1));
+ const woundRiskRecorded=check.degree==='severe failure';
+ if(woundRiskRecorded){
+  Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});
+ }
  const src={origin:ORIGIN,kind:'assume',minute:start,
   duration:p.minutes,staminaSpent:spent,
   witness,witnessHash:wHash,check:structuredClone(check),
   checkEvent:event,checkEventHash:digest(event),roll:check.roll,
   formed:check.success,activeFrom:start+1,
-  activeUntil:check.success?start+1+p.minutes:null};
+  activeUntil:check.success?start+1+p.minutes:null,
+  cooldownMinutes:ADAPTIVE_COOLDOWN,
+  cooldownUntil:start+1+(check.success?p.minutes:0)+ADAPTIVE_COOLDOWN,
+  mentalEffects:ADAPTIVE_MENTAL,woundRiskRecorded};
  const receipt={origin:ORIGIN,source:src,seal:digest(src)};
  r.expressions.push(receipt);
  E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
@@ -590,7 +689,9 @@ function release(s,p={}){
   throw Error('This specific reversion witness has already been used');
  const start=s.world.minutes;
  const src={origin:ORIGIN,kind:'release',minute:start,
-  activationSeal:last.seal,witness,witnessHash:wHash};
+  activationSeal:last.seal,witness,witnessHash:wHash,
+  cooldownUntil:start+1+ADAPTIVE_COOLDOWN,
+  mentalEffects:ADAPTIVE_MENTAL};
  r.expressions.push({origin:ORIGIN,source:src,seal:digest(src)});
  E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
  if(!verify(s))throw Error('Voluntary physical return or original evidence no longer verifies');
@@ -698,6 +799,7 @@ function tissueKnownWitness(s,hash){
   r.source?.witnessHash===hash||
   [...r.attempts,...r.repairs,...r.tests,...(r.upkeep||[]),
    ...(r.expressions||[])].some(x=>x.source?.witnessHash===hash)||
+  (r.repetitions||[]).some(x=>x.source?.witnessHash===hash)||
   (r.tissues||[]).some(t=>t.source.witnessHash===hash||
    t.practice.some(x=>x.source?.witnessHash===hash)||
    (t.sceneSupports||[]).some(x=>x.source?.witnessHash===hash)));
@@ -862,6 +964,8 @@ function status(s){
    cycle:x.source.cycle,name:SPEC[x.source.cycle].name,
    method:x.source.method,progress:x.points,needed:6,
    strain:x.strain,formed:!!x.transition,
+   repeatedWholeBodyAttempts:(x.repetitions||[]).length,
+   verifiedRepeatedPasses:(x.repetitions||[]).filter(t=>t.source.repeated).length,
    individuallyObservedTissues:(x.tissues||[]).map(t=>({
     id:t.source.id,tissue:t.source.tissue,
     observedFunction:t.source.realFunction,
@@ -876,9 +980,9 @@ function status(s){
   noFreeBeastTraitOrAutomaticMedicine:true};
 }
 module.exports={ORIGIN,MAP,WORK,FORM,CARE,ASSUME,RELEASE,SUSTAIN,
- TISSUE,TISSUE_WORK,TISSUE_CARE,TISSUE_FOOTING,SPEC,
+ TISSUE,TISSUE_WORK,TISSUE_CARE,TISSUE_FOOTING,REPEAT,SPEC,
  map,work:(s,p)=>attempt(s,p,'work'),care:(s,p)=>attempt(s,p,'care'),
- complete,assume,release,sustain,tissueMap,tissueFooting,
+ complete,repeat,assume,release,sustain,tissueMap,tissueFooting,
  sceneSupport,recordSceneSupport,
  tissueWork:(s,p)=>tissuePractice(s,p,'tissue-work'),
  tissueCare:(s,p)=>tissuePractice(s,p,'tissue-care'),status,verify};
