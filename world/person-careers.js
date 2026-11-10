@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],authoredDuties:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -88,6 +88,11 @@ function verify(p){
    (!Array.isArray(c.authoredDuties)||
     c.authoredDuties.some(d=>!verifyDuty(p,d))||
     new Set(c.authoredDuties.map(d=>d.id)).size!==c.authoredDuties.length))
+  return false;
+ if(c.attestations!==undefined &&
+   (!Array.isArray(c.attestations) ||
+    c.attestations.some(a=>!verifyAttestation(p,a)) ||
+    new Set(c.attestations.map(a=>a.id)).size!==c.attestations.length))
   return false;
  return true;
 }
@@ -186,6 +191,104 @@ function authoredDutyStatus(p){
   institutionId:d.institutionId,regionId:d.regionId,status:d.status,
   verifiedCompletedWork:d.workProofHashes.length,
   noAutoWageOrQualification:true
+ }));
+}
+
+
+const ATTEST='verified-person-practical-attestation-v1';
+const REVOKE_ATTEST='verified-person-practical-revocation-v1';
+function verifyAttestation(p,a){
+ const q=a?.source,r=q?.work;
+ if(!a || a.origin!==ATTEST || a.sourceHash!==hash(q) ||
+  q?.origin!==ATTEST || q.id!==a.id || q.personId!==p.id ||
+  q.personOriginHash!==p.originHash ||
+  q.issuerId!==a.issuerId || q.witnessId!==a.witnessId ||
+  q.witnessName!==a.witnessName || q.method!==a.method ||
+  q.scope!==a.scope || q.issuedDay!==a.issuedDay ||
+  q.expiresDay!==a.expiresDay ||
+  !/^[a-z][a-z0-9_-]{5,69}$/.test(a.id) ||
+  !Atlas.I[a.issuerId] ||
+  typeof a.witnessId!=='string' ||
+  typeof a.witnessName!=='string' || a.witnessName.length<4 ||
+  !METHOD.test(a.method) ||
+  typeof a.scope!=='string' || a.scope.trim().length<12 ||
+  a.scope.length>240 ||
+  typeof q.witness!=='string' || q.witness.trim().length<30 ||
+  q.witness.length>500 ||
+  !Number.isInteger(a.issuedDay) || a.issuedDay<p.birthSource.day ||
+  (a.expiresDay!==null &&
+   (!Number.isInteger(a.expiresDay) || a.expiresDay<a.issuedDay)) ||
+  q.issuerPolity!==Atlas.I[a.issuerId].polity ||
+  !r || q.workHash!==hash(r) ||
+  r.origin!==WORK || r.personId!==p.id ||
+  r.personOriginHash!==p.originHash ||
+  r.task?.method!==a.method || r.outcome?.success!==true ||
+  !Number.isInteger(r.day) || r.day>a.issuedDay ||
+  !p.career?.demonstratedMethods?.[a.method] ||
+  !['issued','revoked'].includes(a.status))return false;
+ if(a.status==='issued')return a.revocation===null;
+ const z=a.revocation?.source;
+ return !!z && a.revocation.hash===hash(z) &&
+  z.origin===REVOKE_ATTEST && z.id===a.id &&
+  z.priorSourceHash===a.sourceHash &&
+  z.personId===p.id && z.issuerId===a.issuerId &&
+  Number.isInteger(z.day) && z.day>=a.issuedDay &&
+  typeof z.reason==='string' && z.reason.trim().length>=20;
+}
+function issueAttestation(w,p,{id,issuerId,witnessId,method,scope,
+ day,witness,expiresDay=null}={}){
+ const c=ensure(p);
+ if(c.attestations===undefined)c.attestations=[];
+ const issuer=Atlas.I[issuerId],officer=w?.notables?.[witnessId];
+ if(!issuer || !officer || officer.institution!==issuerId ||
+  issuer.polity!==p.polity ||
+  w.institutions?.[issuerId]?.status!=='active' ||
+  !w.countries?.[p.polity] ||
+  !Number.isInteger(day) || day<p.birthSource.day || day>w.lastTickDay ||
+  c.attestations.some(a=>a.id===id))
+  throw Error('A real active institution, affiliated witness and original worker are required');
+ const receipt=c.workReceipts.slice().reverse().find(x=>
+  x.source?.task?.method===method &&
+  x.source?.outcome?.success===true && x.source?.day<=day);
+ if(!receipt || !c.demonstratedMethods[method])
+  throw Error('A genuinely successful previously recorded work check is required');
+ const q={origin:ATTEST,id,personId:p.id,personOriginHash:p.originHash,
+  issuerId,issuerPolity:issuer.polity,witnessId,witnessName:officer.name,
+  method,scope,issuedDay:day,expiresDay,witness,
+  workHash:receipt.sourceHash,work:structuredClone(receipt.source)};
+ const a={origin:ATTEST,id,issuerId,witnessId,witnessName:officer.name,
+  method,scope,issuedDay:day,expiresDay,status:'issued',revocation:null,
+  source:q,sourceHash:hash(q)};
+ if(!verifyAttestation(p,a))
+  throw Error('An earned attestation must have its original observed decision and genuine scope');
+ c.attestations.push(a);
+ if(!verify(p))throw Error('Original personal career cannot accept this attestation');
+ return {id,issuerId,method,earnedWorkHash:receipt.sourceHash,
+  noFormalLicenceImplied:true,noMagicOrEmploymentGranted:true};
+}
+function revokeAttestation(w,p,{id,day,reason}={}){
+ const c=ensure(p),a=c.attestations?.find(x=>x.id===id);
+ if(!a || a.status!=='issued' || !Number.isInteger(day) ||
+  day<a.issuedDay || day>w?.lastTickDay ||
+  typeof reason!=='string' || reason.trim().length<20)
+  throw Error('A real earlier attestation and recorded withdrawal are required');
+ const q={origin:REVOKE_ATTEST,id,priorSourceHash:a.sourceHash,
+  personId:p.id,issuerId:a.issuerId,day,reason};
+ a.revocation={source:q,hash:hash(q)};
+ a.status='revoked';
+ if(!verify(p))throw Error('Withdrawal cannot rewrite the earlier earned work');
+ return {id,revoked:true,originalWorkRetained:true,noSkillRankLost:true};
+}
+function attestationStatus(p,{day}={}){
+ if(!verify(p) || !Number.isInteger(day) || day<0)
+  throw Error('Valid personal career and actual world day are required');
+ return (p.career?.attestations||[]).map(a=>({
+  id:a.id,issuerId:a.issuerId,method:a.method,scope:a.scope,
+  issuedDay:a.issuedDay,expiresDay:a.expiresDay,
+  status:a.status==='revoked'?'revoked':
+   a.expiresDay!==null&&day>a.expiresDay?'expired':'issued',
+  verifiedWorkHash:a.source.workHash,
+  noGlobalLicenceOrMagicUnlock:true
  }));
 }
 
@@ -349,5 +452,5 @@ function publicWitness(x){
   reportedEffects:x.observedChange,
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
-module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,
+module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
