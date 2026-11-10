@@ -29,7 +29,7 @@ function initial(p){
  return {version:VERSION,origin:ORIGIN,source,sourceHash:hash(source),
   aptitude:innate(p),skillPoints:0,competenceRank:0,
   demonstratedMethods:{},qualityPoints:0,workCount:0,successes:0,
-  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],recognizedLicence:null,
+  promotions:[],workReceipts:[],authoredDuties:[],attestations:[],workOffers:[],peerGuidance:[],recognizedLicence:null,
   supernaturalSystemRanks:{},knownTechniques:[]};
 }
 function credibleAssistance(a){
@@ -98,6 +98,11 @@ function verify(p){
    (!Array.isArray(c.workOffers) ||
     c.workOffers.some(x=>!verifyWorkOffer(p,x)) ||
     new Set(c.workOffers.map(x=>x.id)).size!==c.workOffers.length))
+  return false;
+ if(c.peerGuidance!==undefined&&
+   (!Array.isArray(c.peerGuidance)||
+    c.peerGuidance.some(e=>!verifyPeerGuidance(p,e))||
+    new Set(c.peerGuidance.map(e=>e.id)).size!==c.peerGuidance.length))
   return false;
  return true;
 }
@@ -437,6 +442,134 @@ function workOfferStatus(p,{day}={}){
  }));
 }
 
+
+/* Optional individually witnessed peer instruction. Not a paid teacher,
+   automatic skill, qualification, apprenticeship contract or power system.
+   The previously known task remains the learner's OWN genuine d20 work. */
+const PEER='independently-witnessed-peer-guidance-v1';
+const peerChance=fatigue=>Math.min(.75,Math.max(.20,.62-(fatigue>65?.20:fatigue>40?.10:0)));
+function peerStep(seed){
+ let x=seed>>>0;
+ x^=x<<13;x^=x>>>17;x^=x<<5;
+ const rngState=(x>>>0)||0x91e10da5;
+ return {rngState,draw:rngState/4294967296};
+}
+function verifyPeerGuidance(p,e){
+ const q=e?.source,pr=q?.teacherWork;
+ if(!e||e.origin!==PEER||e.sourceHash!==hash(q)||
+  q?.origin!==PEER||e.id!==q.id||
+  q.learnerId!==p.id||q.learnerOriginHash!==p.originHash||
+  q.teacherId!==e.teacherId||q.teacherOriginHash!==e.teacherOriginHash||
+  q.method!==e.method||q.day!==e.day||
+  !/^[a-z][a-z0-9_-]{5,69}$/.test(e.id)||
+  !METHOD.test(e.method)||
+  e.teacherId===p.id||
+  typeof q.place!=='string'||q.place.length<2||
+  typeof q.teacherShiftHash!=='string'||q.teacherShiftHash.length!==64||
+  typeof q.learnerShiftHash!=='string'||q.learnerShiftHash.length!==64||
+  !Number.isInteger(q.validThroughDay)||q.validThroughDay<q.day||
+  !Number.isInteger(e.day)||e.day<p.birthSource.day||
+  typeof q.witness!=='string'||q.witness.trim().length<30||
+  q.witness.length>480||
+  !pr||q.teacherWorkHash!==hash(pr)||
+  pr.origin!==WORK||pr.personId!==e.teacherId||
+  pr.personOriginHash!==e.teacherOriginHash||
+  pr.task?.method!==e.method||pr.outcome?.success!==true||
+  !Number.isInteger(pr.day)||pr.day>e.day||
+  !Number.isInteger(q.teacherRngBefore)||q.teacherRngBefore<1||
+  !Number.isInteger(q.teacherRngAfter)||q.teacherRngAfter<1||
+  peerStep(q.teacherRngBefore).rngState!==q.teacherRngAfter||
+  q.teacherChoice!==peerStep(q.teacherRngBefore).draw||
+  !Number.isInteger(q.teacherFatigueBefore)||q.teacherFatigueBefore<0||
+  q.teacherFatigueBefore>100||
+  !Number.isInteger(q.learnerFatigueBefore)||q.learnerFatigueBefore<0||
+  q.learnerFatigueBefore>100||
+  q.willingness!==peerChance(q.teacherFatigueBefore)||
+  e.accepted!==(q.teacherChoice<q.willingness)||
+  !['declined','accepted','used'].includes(e.status))return false;
+ if(!e.accepted)return e.status==='declined'&&e.used===null&&
+  q.teacherFatigueAfter===q.teacherFatigueBefore&&
+  q.learnerFatigueAfter===q.learnerFatigueBefore;
+ if(q.teacherFatigueAfter!==clamp(q.teacherFatigueBefore+2)||
+  q.learnerFatigueAfter!==clamp(q.learnerFatigueBefore+2))
+  return false;
+ if(e.status==='accepted')return e.used===null;
+ const receipt=e.used?.source;
+ return e.status==='used'&&!!receipt&&
+  e.used.hash===hash(receipt)&&
+  receipt.origin===WORK&&receipt.personId===p.id&&
+  receipt.personOriginHash===p.originHash&&
+  receipt.task?.method===e.method&&
+  receipt.peerGuidanceHash===e.sourceHash&&
+  receipt.peerGuidanceBonus===1&&
+  Number.isInteger(receipt.day)&&receipt.day>=e.day&&
+  receipt.day<=q.validThroughDay;
+}
+function observePeerGuidance(w,learner,teacher,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>!['id','method','day','witness'].includes(k)))
+  throw Error('Instruction cannot choose mentor consent, skill gain or a successful check');
+ const {id,method,day,witness}=params;
+ const c=ensure(learner),tc=ensure(teacher);
+ const People=require('./emergent-people');
+ const location=learner?.shift?.location;
+ const lp=People.presence(w,learner.actorId,location,day),
+  tp=People.presence(w,teacher.actorId,location,day);
+ const teacherWork=tc.workReceipts.slice().reverse().find(r=>
+  r.source?.task?.method===method&&r.source?.outcome?.success===true&&
+  r.source.day<=day);
+ if(!lp||!tp||teacher.id===learner.id||
+  !Number.isInteger(day)||day<0||day>w.lastTickDay||
+  !teacherWork||!tc.demonstratedMethods[method]||
+  learner.fatigue>85||teacher.fatigue>85||
+  typeof witness!=='string'||witness.trim().length<30||witness.length>480||
+  !/^[a-z][a-z0-9_-]{5,69}$/.test(id)||
+  (c.peerGuidance||[]).some(x=>x.id===id||
+   x.teacherId===teacher.id&&x.method===method&&x.day===day))
+  throw Error('Two genuinely present autonomous workers and a source-proven teachable method are required');
+ const teacherRngBefore=teacher.rngState,
+  teacherFatigueBefore=teacher.fatigue,
+  learnerFatigueBefore=learner.fatigue,
+  willingness=peerChance(teacherFatigueBefore);
+ // All original validity checks precede the teacher's single decision.
+ const teacherChoice=draw(teacher),accepted=teacherChoice<willingness;
+ if(accepted){
+  teacher.fatigue=clamp(teacher.fatigue+2);
+  learner.fatigue=clamp(learner.fatigue+2);
+ }
+ const q={origin:PEER,id,learnerId:learner.id,
+  learnerOriginHash:learner.originHash,teacherId:teacher.id,
+  teacherOriginHash:teacher.originHash,
+  method,day,place:location,learnerShiftHash:lp.hash,
+  teacherShiftHash:tp.hash,validThroughDay:Math.min(lp.throughDay,tp.throughDay),
+  witness,teacherWorkHash:teacherWork.sourceHash,
+  teacherWork:structuredClone(teacherWork.source),
+  teacherRngBefore,teacherRngAfter:teacher.rngState,teacherChoice,
+  teacherFatigueBefore,teacherFatigueAfter:teacher.fatigue,
+  learnerFatigueBefore,learnerFatigueAfter:learner.fatigue,willingness};
+ const e={id,origin:PEER,method,teacherId:teacher.id,
+  teacherOriginHash:teacher.originHash,day,accepted,
+  status:accepted?'accepted':'declined',used:null,source:q,
+  sourceHash:hash(q)};
+ if(c.peerGuidance===undefined)c.peerGuidance=[];
+ c.peerGuidance.push(e);
+ if(!verify(learner)||!verify(teacher))
+  throw Error('An individual teaching decision must remain original and independently witnessed');
+ return {id,accepted,status:e.status,method,
+  noGuaranteedLearning:true,noCompulsoryTeacher:true,
+  noRankOrSpellGranted:true,noWageOrContract:true};
+}
+function peerGuidanceStatus(p,{day}={}){
+ if(!verify(p)||!Number.isInteger(day)||day<0)
+  throw Error('A valid living worker and current day are needed');
+ return (p.career?.peerGuidance||[]).map(e=>({
+  id:e.id,method:e.method,teacherId:e.teacherId,
+  status:e.status==='accepted'&&day>e.source.validThroughDay?'expired':e.status,
+  appliedTo:e.used?.hash||null,
+  noSkillAwarded:true
+ }));
+}
+
 function task(w,p,day=w.lastTickDay){
  const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
   region=Atlas.R[p.regionId];
@@ -511,9 +644,13 @@ function work(w,p,day,context='independent-duty',assistance=null){
   local=w.ecosystems[p.regionId],
   polity=w.countries[p.polity],
   originalSkill=c.competenceRank,
+  supportFromPeer=(c.peerGuidance||[]).slice().reverse().find(e=>
+   e.accepted&&e.status==='accepted'&&
+   e.method===job.method&&e.day<=day&&day<=e.source.validThroughDay),
+  peerBonus=supportFromPeer?1:0,
   dc=job.difficulty+Math.floor(originalSkill/2),
   modifier=originalSkill*2+Math.floor((c.aptitude-5)/2)-
-   (p.fatigue>70?3:p.fatigue>45?1:0)+support+innovation.bonus,
+   (p.fatigue>70?3:p.fatigue>45?1:0)+support+innovation.bonus+peerBonus,
   roll=1+Math.floor(draw(p)*20),
   total=roll+modifier+(roll===20?5:roll===1?-5:0),
   margin=total-dc,
@@ -553,6 +690,8 @@ function work(w,p,day,context='independent-duty',assistance=null){
   day,context,regionId:p.regionId,profession:p.profession,task:job,
   ...(innovation.methodId?{appliedLimitedMethodId:innovation.methodId,
    independentlyTestedMethodBonus:innovation.bonus}:{}),
+  ...(supportFromPeer?{peerGuidanceHash:supportFromPeer.sourceHash,
+   peerGuidanceBonus:peerBonus}:{}),
   ...(assisted?{assistance:{skill:assistance.skill,checkEventHash:assistance.rollEventHash,
    success:assistance.success,degree:assistance.degree,support}}:{}),
   before:original,roll,modifier,dc,total,margin,
@@ -560,6 +699,10 @@ function work(w,p,day,context='independent-duty',assistance=null){
   after:{quality:local.quality,pressure:local.pressure,
    stability:polity.stability,funds:p.funds,fatigue:p.fatigue}};
  const receipt={origin:WORK,source:receiptSource,sourceHash:hash(receiptSource)};
+ if(supportFromPeer){
+  supportFromPeer.status='used';
+  supportFromPeer.used={source:structuredClone(receiptSource),hash:receipt.sourceHash};
+ }
  c.workReceipts.push(receipt);
  if(job.authoredDutyId){
   const selected=c.authoredDuties.find(d=>d.id===job.authoredDutyId);
@@ -602,6 +745,7 @@ function work(w,p,day,context='independent-duty',assistance=null){
    trade:original.funds!==p.funds},
   privateCompetenceRank:c.competenceRank,
   ...(assisted?{assistanceBonus:support}:{}),
+  ...(supportFromPeer?{oneOriginalWorkCheckPeerSupport:peerBonus}:{}),
   noTechniqueOrSpellLearned:true,noContractOrGuildRank:true};
 }
 function publicWitness(x){
@@ -611,5 +755,5 @@ function publicWitness(x){
   reportedEffects:x.observedChange,
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
-module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,
+module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,observePeerGuidance,peerGuidanceStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
