@@ -111,8 +111,7 @@ function verifyDuty(p,d){
    q.domain!==d.domain||q.effect!==d.effect||
    q.institutionId!==d.institutionId||
    q.regionId!==d.regionId||q.day!==d.openedDay||
-   q.originalPolity!==p.birthSource.polity&&
-    q.originalPolity!==p.polity||
+   Atlas.R[d.regionId]?.polity!==q.originalPolity||
    !/^[a-z][a-z0-9_-]{3,60}$/.test(d.id)||
    !METHOD.test(d.method)||
    !['ecology','civic','trade'].includes(d.domain)||
@@ -144,6 +143,7 @@ function verifyDuty(p,d){
 function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
  institutionId=null,day,witness}={}){
  const c=ensure(p);
+ if(c.authoredDuties===undefined)c.authoredDuties=[]; // Backfill prior valid lives.
  if(!w||!w.ecosystems?.[p.regionId]||!w.countries?.[p.polity]||
    !Number.isInteger(day)||day<p.birthSource.day||day>w.lastTickDay||
    !Array.isArray(c.authoredDuties)||c.authoredDuties.some(d=>d.id===id)||
