@@ -357,7 +357,7 @@ function earnNeuralCycle(s){
  for(const cycle of [5,7]){
   const sp=Phys.SPEC[cycle],maxBefore=s.player.maxStamina,
    cyclesBefore=s.player.body.cycles.length,originBefore=
-    E.exportGame(s.player.origin);
+    JSON.stringify(s.player.origin);
   let repeated=false,attempts=0;
   while(!repeated&&attempts<8){
    recovery(s,sp.energy+2);attempts++;
@@ -378,7 +378,7 @@ function earnNeuralCycle(s){
     priorSta-result.staminaSpent+5*days));
    A.equal(s.player.maxStamina,maxBefore);
    A.equal(s.player.body.cycles.length,cyclesBefore);
-   A.equal(E.exportGame(s.player.origin),originBefore);
+   A.equal(JSON.stringify(s.player.origin),originBefore);
    A.equal(Phys.verify(s),true);
    const savedRepeat=E.exportGame(s),rng=s.rngState;
    A.throws(()=>act(s,'physiqueRepeat',{cycle,witnessIndex:ix,minutes:60}),
