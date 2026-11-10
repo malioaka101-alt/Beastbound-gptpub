@@ -80,6 +80,10 @@ function verify(s){
  if(!l)return true;
  if(l.origin!==SOURCE||!Array.isArray(l.attempts)||
   !l.attempts.length)return false;
+ // The earlier anatomical first Gate must remain genuinely source-earned;
+ // stage numbers or a forged extra tissue pathway cannot replace its ledger.
+ let trueGate;
+ try{trueGate=Gate.gate(s)}catch{return false}
  let last=-1;const ids=new Set(),witnesses=new Set();
  for(const row of l.attempts){
   const a=row?.source,d=a?.witness?.details;
@@ -95,7 +99,9 @@ function verify(s){
    !integer(a.medicineRank,0,5)||!integer(a.cultivationRank,0,5)||
    a.modifier!==Math.floor((a.wisScore-10)/2)+
     2*Math.min(a.medicineRank,a.cultivationRank)||
-   a.gateNumber!==1||
+   a.gateNumber!==1||a.gateNumber!==trueGate.opened.number||
+   a.gateQuality!==trueGate.opened.quality||
+   a.gateSourceHash!==hash(trueGate.record)||
    !['Sound','Perfect','Flawed'].includes(a.gateQuality)||
    !check(a)||a.success!==a.check.success||
    !Array.isArray(a.woundsBefore)||a.woundsBefore.length!==3||
@@ -178,7 +184,7 @@ function treat(s,p={}){
   treatmentId:details.treatmentId,location:s.world.location,
   minute,minutes:MINUTES,qiSpent:QI,staminaSpent:STAMINA,
   balmSpent:1,gateNumber:gate.opened.number,
-  gateQuality:gate.opened.quality,
+  gateQuality:gate.opened.quality,gateSourceHash:hash(gate.record),
   medicineRank:medicine,cultivationRank:cultivation,
   wisScore:wisdom,modifier,dc:DC,
   roll:outcome.roll,check:structuredClone(outcome),
