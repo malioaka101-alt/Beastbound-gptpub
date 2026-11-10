@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/rift-adaptation.test.js
             tests/rift-pocket-architecture.test.js
             tests/rift-boundary-weaving.test.js
             tests/rift-fold-step.test.js
