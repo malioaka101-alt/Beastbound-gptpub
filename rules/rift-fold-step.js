@@ -110,8 +110,10 @@ function verify(s){
    a.modifier!==Math.floor((a.sourceInt-10)/2)+2*a.sourceArcana||
    !verifyCheck(a)||
    a.success!==a.check.success||
-   a.stepBefore!==step||
-   a.stepAfter!==(a.success?3:step)||
+   (a.stepBefore!==step&&!(
+    step===3&&a.stepBefore===4&&
+    require('./rift-boundary-weaving').earnedAt(s,a.minute)))||
+   a.stepAfter!==(a.success?Math.max(3,a.stepBefore):a.stepBefore)||
    !e||a.witnessHash!==digest(e)||e.type!=='story'||
    d?.origin!==WITNESS||d.location!==a.location||
    d.anchorId!==Anchor.SITE||
@@ -134,7 +136,7 @@ function verify(s){
    a.positionAfter!==(a.success?a.to:a.from))
    return false;
   witnesses.add(a.witnessHash);
-  if(a.success){prior=a.to;step=3;}
+  if(a.success){prior=a.to;step=Math.max(3,a.stepBefore);}
   else if(prior===null)prior=a.from;
   strain=a.strainAfter;
  }
