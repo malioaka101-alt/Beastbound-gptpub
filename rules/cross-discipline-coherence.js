@@ -99,8 +99,8 @@ function verify(s){
    !int(a.wisdomScore,1,30)||!int(a.intelligenceScore,1,30)||
    a.modifier!==Math.floor((Math.min(a.wisdomScore,a.intelligenceScore)-10)/2)+
     2*Math.min(a.cultivationSkill,a.arcanaSkill)||
-   a.riskAdjustment!==(a.gateQuality==='Flawed'?3:0)-
-    0+(a.coreStabilityAtTrial<60?3:0)+
+   a.riskAdjustment!==(a.gateQuality==='Flawed'?3:0)+
+    (a.coreStabilityAtTrial<60?3:0)+
     (a.observedMode==='interfering'?2:
      a.observedMode==='unsafe'?4:0)||
    a.dc!==15+a.riskAdjustment+Math.floor(strain/8)||
