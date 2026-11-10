@@ -12,6 +12,7 @@ const {freshSourceEarnedAdaptedGame}=
  require('./rift-adaptation.test.js');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const act=(s,op,p={})=>R.act(s,{system:'rift',operation:op,params:p});
+let verifiedReturnedRealmSnapshot=null;
 function establish(s,routeId){
  C.event(s,'story','Independent Rift surveyors witness a real momentarily traversable selected outer opening, its actual local access rights and physically measured safe return coordinates.',{
   origin:Walk.ROUTE,routeId,location:s.world.location,
@@ -162,5 +163,8 @@ function establish(s,routeId){
  A.equal(s.log.length,90);
  A.equal(Walk.verify(E.importGame(E.exportGame(s))),true,
   'Original source-witnessed route and return receipts survive normal 90-event journal rollover');
+ verifiedReturnedRealmSnapshot=E.exportGame(s);
 }
+module.exports={freshEarnedReturnedRiftVII:()=>
+ E.importGame(verifiedReturnedRealmSnapshot)};
 console.log('Rift VII: actual selected GM-witnessed temporary route, measured arrival/return, one original d20 each, physical other-plane presence, mortal action lock and genuine return');
