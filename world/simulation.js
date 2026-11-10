@@ -77,7 +77,7 @@ function localProvisioner(w,day=w.lastTickDay){
    fundsScales:2500,lastRestockDay:day,
    founding:{day,regionGoods:['grain','feed'],regionalForage:eco.forage,
     polityProsperity:host.prosperity,initialStock},
-   history:[]};
+   history:[],laborPayments:[]};
  }
  const v=w.localProvisioner;
  if(v.origin!=='established-reedmarch-provisions-v1'||
@@ -85,8 +85,10 @@ function localProvisioner(w,day=w.lastTickDay){
     v.location!=='crossing'||v.regionId!=='morrowfen_basin'||
     v.item!=='clean_rations'||!Number.isInteger(v.stock)||v.stock<0||v.stock>8||
     !Number.isInteger(v.fundsScales)||v.fundsScales<0||v.fundsScales>100000000||
-    !Number.isInteger(v.lastRestockDay)||!Array.isArray(v.history))
-  throw Error('Existing local provisioner stock, owner or funds need reconciliation');
+    !Number.isInteger(v.lastRestockDay)||!Array.isArray(v.history)||
+    !Array.isArray(v.laborPayments??[])||
+    !require('./person-careers').verifyLocalTradePayments(w))
+  throw Error('Existing provisioner stock, source-paid labour, owner or funds need reconciliation');
  return v;
 }
 function restockLocalProvisioner(w,day){
