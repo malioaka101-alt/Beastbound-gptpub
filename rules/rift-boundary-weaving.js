@@ -157,6 +157,11 @@ function status(s){
     noPassage:true})),
   note:'Temporary independently witnessed boundary microstructures; no sealed-site entry, global pressure override or realm transit'};
 }
+function earnedAt(s,minute){
+ const r=current(s);
+ return !!(r&&verify(s)&&r.attempts.some(x=>
+  x.source.success&&x.source.activeFrom<=minute));
+}
 function supportProof(s,seal,segmentId,minute){
  const r=current(s);
  if(!r||!verify(s))return false;
@@ -244,4 +249,4 @@ function weave(s,p={}){
   staminaSpent:cost,minutes:time,wounded:strainAdded>0,
   currentStep:s.player.rift.step,noPortalOpened:true,noGlobalWorldSealChanged:true};
 }
-module.exports={SOURCE,WITNESS,status,weave,verify,support,supportProof};
+module.exports={SOURCE,WITNESS,status,weave,verify,support,supportProof,earnedAt};
