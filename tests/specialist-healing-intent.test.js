@@ -70,7 +70,9 @@ for(let seed=26167001;seed<26167009&&!selected;seed++){
  A.equal(out.usedExistingHealingBalm,1);A.equal(out.qiSpent,3);
  A.equal(out.staminaSpent,4);A.equal(out.elapsedMinutes,90);
  A.equal(s.player.qi,qi-3);
- A.equal(s.player.stamina,sta-4);
+ A.equal(s.player.stamina,Math.min(s.player.maxStamina,
+   sta-4+5*(Math.floor(s.world.minutes/1440)-Math.floor(minute/1440))),
+   'Genuine treatment exertion and existing independent world-day recovery both apply');
  A.equal(s.player.inventory.healing_balm,balm-1);
  A.equal(s.world.minutes,minute+90);
  A.equal(Healing.verify(s),true);
