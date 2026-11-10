@@ -30,13 +30,16 @@ function witnessed(s,event){
 }
 function archive(s,event){
  const h=hash(event);
- if(!s.log?.some(e=>hash(e)===h))
-  throw Error('Only the actual still-present original scene witness can be archived');
  const old=s.table?.originWitnessArchive?.[h];
- if(old&&(old.origin!==ARCHIVE||old.seal!==h||hash(old.event)!==h))
-  throw Error('Original human Origin evidence archive must not be rewritten');
+ if(old){
+  if(old.origin!==ARCHIVE||old.seal!==h||hash(old.event)!==h)
+   throw Error('Original human Origin evidence archive must not be rewritten');
+  return; // Historical original was verified when first consumed.
+ }
+ if(!s.log?.some(e=>hash(e)===h))
+  throw Error('Only a genuinely present original scene witness may first enter the archive');
  s.table.originWitnessArchive||={};
- s.table.originWitnessArchive[h]||={origin:ARCHIVE,seal:h,
+ s.table.originWitnessArchive[h]={origin:ARCHIVE,seal:h,
   event:structuredClone(event)};
 }
 function safe(s){
