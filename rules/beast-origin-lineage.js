@@ -7,7 +7,8 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
 const ORIGIN='earned-individual-lineage-evidence-v1',
  SOURCE='gm-attested-specific-origin-pattern-source-v1',
  MAP='witnessed-specific-origin-trait-mapping-v1',
- SCREEN='witnessed-specific-origin-compatibility-v1';
+ SCREEN='witnessed-specific-origin-compatibility-v1',
+ ARCHIVE='engine-captured-original-origin-witness-v1';
 const ROUTES=Object.freeze(['ancestral','lineage-transfer','pattern-imprint',
  'origin-cultivation','relic-inheritance','synthetic-trait']);
 const AXES=Object.freeze(['physical','energetic','spiritual','trait-conflict']);
@@ -17,7 +18,27 @@ const phrase=(x,n=25)=>typeof x==='string'&&x.trim().length>=n&&x.length<=900;
 const integer=(x,min=0,max=1000000000)=>Number.isInteger(x)&&x>=min&&x<=max;
 const only=(x,keys)=>x&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).every(k=>keys.includes(k));
-const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+// Core intentionally rotates its recent log. Only an event present at
+// the moment of an original action can enter the persistent source archive.
+function witnessed(s,event){
+ if(!event||typeof event!=='object')return false;
+ const h=hash(event);
+ if(s.log?.some(e=>hash(e)===h))return true;
+ const row=s.table?.originWitnessArchive?.[h];
+ return !!(row?.origin===ARCHIVE&&row.seal===h&&
+  row.event?.type==='story'&&hash(row.event)===h);
+}
+function archive(s,event){
+ const h=hash(event);
+ if(!s.log?.some(e=>hash(e)===h))
+  throw Error('Only the actual still-present original scene witness can be archived');
+ const old=s.table?.originWitnessArchive?.[h];
+ if(old&&(old.origin!==ARCHIVE||old.seal!==h||hash(old.event)!==h))
+  throw Error('Original human Origin evidence archive must not be rewritten');
+ s.table.originWitnessArchive||={};
+ s.table.originWitnessArchive[h]||={origin:ARCHIVE,seal:h,
+  event:structuredClone(event)};
+}
 function safe(s){
  const c=s.table?.combatants?.player;
  if(!E.LOCATIONS[s.world?.location]||s.battle||s.encounter||
@@ -42,7 +63,7 @@ function gmSource(s,sourceId){
   q.observationHash!==hash(q.observation)||
   q.observation.details?.origin!==SOURCE||
   q.observation.details?.sourceId!==sourceId||
-  !s.log?.some(event=>hash(event)===q.observationHash)||
+  !witnessed(s,q.observation)||
   !integer(q.minute,0,s.world.minutes)||
   q.observation.details?.location!==q.location||
   q.location!==q.observation.details.location)
@@ -105,7 +126,7 @@ function verify(s){
     !b.witness||b.witnessHash!==hash(b.witness)||
     b.witness.details?.origin!==MAP||
     b.witness.details?.sourceId!==sourceId||
-    !s.log?.some(event=>hash(event)===b.witnessHash)||
+    !witnessed(s,b.witness)||
     used.has(b.witnessHash)||
     b.earned!==(b.check.success?b.check.progress:0)||
     b.progressAfter!==Math.min(3,pts+b.earned))return false;
@@ -127,7 +148,7 @@ function verify(s){
      b.witness.details?.origin!==SCREEN||
      b.witness.details?.sourceId!==sourceId||
      b.witness.details?.axis!==axis||
-     !s.log?.some(event=>hash(event)===b.witnessHash)||
+     !witnessed(s,b.witness)||
      !Array.isArray(b.risks)||b.risks.some(x=>!phrase(x,8))||
      !['promising','caution','inconclusive'].includes(b.result)||
      b.result!==(b.check.success?
@@ -158,6 +179,7 @@ function map(s,p={}){
  const minutes=p.minutes??90,staminaSpent=Math.ceil(minutes/120);
  if(!integer(s.player.stamina,staminaSpent,100000))
   throw Error('Actual physical stamina is needed to study this lineage');
+ archive(s,q.observation);archive(s,seen);
  const start=s.world.minutes,check=C.check(s,{modifier:modifier(s,'int','research'),
   dc:15+Math.min(4,q.integrationLoad),
   label:'Individual Origin Pattern mapping: '+q.traitName.slice(0,40)});
@@ -216,6 +238,7 @@ function screen(s,p={}){
  const minutes=p.minutes??90,staminaSpent=Math.ceil(minutes/120);
  if(!integer(pchar.stamina,staminaSpent,100000))
   throw Error('Actual stamina is needed for lineage compatibility measurement');
+ archive(s,q.observation);archive(s,seen);
  const method=METHODS[p.axis],start=s.world.minutes;
  const check=C.check(s,{modifier:modifier(s,method[0],method[1]),
   dc:15+Math.min(4,q.integrationLoad)+Math.min(3,risk.length),
@@ -252,5 +275,5 @@ function status(s){
   noAutomaticOriginTraitOrHumanEvolution:true};
 }
 module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,
- hash,gmSource,witness,records,checkIntegrity,
+ hash,gmSource,witness,records,checkIntegrity,witnessed,archive,
  map,screen,status,verify};
