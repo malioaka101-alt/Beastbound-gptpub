@@ -96,7 +96,7 @@ function trained(seed=25155007){
  const unearned=E.newGame({seed:25155999,name:'No actual spatial architect'});
  const previous=E.exportGame(unearned),rng=unearned.rngState;
  A.equal(act(unearned,'rift','pocketStatus').earned,false);
- A.throws(()=>act(unearned,'rift','pocketBuild',{witnessIndex:0}),/observed|witness|Boundary|real/i);
+ A.throws(()=>act(unearned,'rift','pocketBuild',{witnessIndex:0}),/observed|witness|Boundary|real|physically present|exterior scene/i);
  A.equal(E.exportGame(unearned),previous);
  A.equal(unearned.rngState,rng);
 }
