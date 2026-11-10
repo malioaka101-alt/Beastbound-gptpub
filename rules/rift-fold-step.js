@@ -147,8 +147,8 @@ function verify(s){
  if(digest(formed)!==digest(r.formedPositions)||
   r.currentPosition!==prior||
   r.strain!==strain||
-  (step===3)!==!!s.player.rift.foldProof||
-  (step===3&&(
+  (step>=3)!==!!s.player.rift.foldProof||
+  (step>=3&&(
    s.player.rift.step<3||
    s.player.rift.foldProof?.source!==SOURCE||
    s.player.rift.foldProof?.firstSuccessSeal!==r.attempts.find(x=>x.source.success)?.seal)))
