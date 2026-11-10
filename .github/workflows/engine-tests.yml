@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/rift-fold-step.test.js
             tests/beast-origin-lineage-source-mapping.test.js
             tests/beast-origin-integration.test.js
             tests/body-advanced-nerve-sense.test.js
