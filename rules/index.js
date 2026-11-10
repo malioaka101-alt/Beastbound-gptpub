@@ -193,6 +193,8 @@ function act(s,{system,operation,params={}}={}){
   case 'character.assessPotential':return Character.assess(s,params);
   case 'discipline.status':return Disciplines.status(s);
   case 'power.status':return PowerOverview.read(s);
+  case 'cross.qiManaStatus':return require('./cross-discipline-coherence').status(s);
+  case 'cross.qiManaExperiment':return require('./cross-discipline-coherence').experiment(s,params);
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
