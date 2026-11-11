@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/group-original-operating-custody.test.js
             tests/civic-original-jurisdiction-provenance.test.js
             tests/group-original-published-work-agency.test.js
             tests/living-career-open-domains.test.js
