@@ -1640,7 +1640,7 @@ function reconsiderCoordinatorOnOriginalFailure(w,{
  if(!e||!role||!original||
   !verifiedOriginalFailedWork(e,original)||
   !role.agreed||incumbent.mandateId!==role.id||
-  !Number.isInteger(day)||day!==w.lastTickDay||
+  !Number.isInteger(day)||day<=w.lastTickDay||
   e.failedEfforts<=0||
   (e.coordinationReviews||[]).some(x=>
    x.mandateId===role.id&&
