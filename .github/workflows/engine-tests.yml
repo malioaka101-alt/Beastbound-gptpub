@@ -124,6 +124,7 @@ jobs:
             tests/family-mandates.test.js
             tests/emergent-groups.test.js
             tests/group-voluntary-coordination.test.js
+          tests/public-office-mandate-provenance.test.js
           tests/group-priority-real-work-costs.test.js
           tests/group-voluntary-roles.test.js
           tests/group-internal-priorities.test.js

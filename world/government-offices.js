@@ -3,7 +3,9 @@
 // New regional authoring grounded in atlas governments, NOT names copied from
 // the Master Prompt. A surname, hereditary court or wealthy clan is never
 // an automatic entitlement to the sovereignty of its home country.
-const A=require('./atlas'),Houses=require('./social-houses');
+const Crypto=require('node:crypto'),A=require('./atlas'),Houses=require('./social-houses');
+const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const MANDATE_SOURCE='original-public-office-independent-mandate-v1';
 const RAW=[
  // polity, public office, incumbent, independent non-family challenger
  ['reedmarch','March Council Speaker','Iria Highwater','Nessa Towbank'],
@@ -97,7 +99,11 @@ function seed(){
  for(const c of CHARTERS)offices[c.id]={
   holder:c.first,office:c.title,status:'in_office',
   lastChangeDay:null,mandateNumber:0,courtReviews:0,
-  recentPublic:[],source:c.basis
+  recentPublic:[],source:c.basis,
+  auditVersion:1,
+  auditAnchor:{holder:c.first,mandateNumber:0,
+   note:'Actual newly seeded original civic office; no invented previous officeholders'},
+  mandateHistory:[]
  };
  return offices;
 }
@@ -111,17 +117,97 @@ function ensure(w){
  }
  if(!w.governance||typeof w.governance!=='object'||Array.isArray(w.governance))
   throw Error('Government registers must be real objects, not invented claimant arrays');
- for(const c of CHARTERS)if(!w.governance[c.id])
-  w.governance[c.id]=seed()[c.id];
+ for(const c of CHARTERS){
+  if(!w.governance[c.id])w.governance[c.id]=seed()[c.id];
+  const v=w.governance[c.id];
+  if(v.auditVersion===undefined){
+   // Old files only know the CURRENT incumbent/mandate counter. Never
+   // manufacture previous elections or unknown predecessor identities.
+   v.auditVersion=1;
+   v.auditAnchor={holder:v.holder,mandateNumber:v.mandateNumber,
+    note:'Auditing begins from an earlier original save; historic names and decisions were not recorded'};
+   v.mandateHistory=[];
+  }
+  if(!verifyMandateAudit(v,c))
+   throw Error('Civic mandate evidence or office continuity is inconsistent');
+ }
  return w.governance;
 }
+
+function verifyMandateAudit(v,c){
+ if(!v||v.auditVersion!==1||!v.auditAnchor||
+   !Number.isInteger(v.auditAnchor.mandateNumber)||
+   v.auditAnchor.mandateNumber<0||
+   typeof v.auditAnchor.holder!=='string'||
+   v.auditAnchor.holder.length<5||
+   typeof v.auditAnchor.note!=='string'||
+   !Array.isArray(v.mandateHistory))
+  return false;
+ let holder=v.auditAnchor.holder,num=v.auditAnchor.mandateNumber,lastDay=-1;
+ for(const row of v.mandateHistory){
+  const q=row?.source;
+  if(!q||row.hash!==hash(q)||q.origin!==MANDATE_SOURCE||
+    q.polity!==c.id||q.office!==c.title||
+    q.government!==c.government||
+    q.governingBody!==c.governingBody||
+    q.previous!==holder||q.mandateBefore!==num||
+    q.mandateAfter!==num+1||row.number!==q.mandateAfter||
+    row.previous!==q.previous||row.next!==q.next||
+    row.day!==q.day||row.changed!==q.changed||
+    !Number.isInteger(q.day)||q.day<0||q.day<lastDay||
+    typeof q.crisis!=='boolean'||
+    !Number.isFinite(q.stability)||q.stability<0||q.stability>100||
+    !Number.isFinite(q.legitimacy)||q.legitimacy<0||q.legitimacy>100||
+    !Number.isFinite(q.householdInfluence)||
+    q.householdInfluence<0||q.householdInfluence>100||
+    typeof q.firstDraw!=='number'||q.firstDraw<0||q.firstDraw>=1)
+   return false;
+  const retain=q.crisis?0:
+    q.stability>=55&&q.legitimacy>=55?.65:.28;
+  const weight=Math.max(.15,Math.min(.65,q.householdInfluence/120));
+  const contested=q.firstDraw>=retain;
+  if(q.retainChance!==retain||
+    q.houseWeight!==weight||
+    (contested?
+     typeof q.secondDraw!=='number'||q.secondDraw<0||q.secondDraw>=1:
+     q.secondDraw!==null))
+   return false;
+  const winner=contested?
+    q.secondDraw<weight?c.relativeCandidate:c.independent:holder;
+  const reason=contested?
+    q.crisis?'temporary public caretaker selected under political stress':
+     'new officeholder publicly selected under its '+c.style:
+    'renewed by its '+c.style;
+  if(q.next!==winner||q.reason!==reason||
+    q.changed!==(winner!==holder))
+   return false;
+  holder=winner;num++;lastDay=q.day;
+ }
+ return v.mandateNumber===num&&v.holder===holder;
+}
+function historicMandates(w,id){
+ ensure(w);
+ const {c,v}=valid(w,id);
+ return {polity:c.id,office:c.title,
+  originalAuditAnchor:structuredClone(v.auditAnchor),
+  actualMandates:v.mandateHistory.map(row=>({
+   number:row.number,day:row.day,
+   previous:row.previous,next:row.next,
+   changed:row.changed,sourceHash:row.hash,
+   constitutionalProcess:c.style,
+   governingBody:c.governingBody,
+   noInferredHeirOrRoyalInheritance:true
+  }))};
+}
+
 function valid(w,id){
  const c=C[id],v=w.governance?.[id];
  if(!c||!v||!['in_office','interim','court_review'].includes(v.status)||
     typeof v.holder!=='string'||v.holder.length<5||
     !Array.isArray(v.recentPublic)||
-    !Number.isInteger(v.mandateNumber)||v.mandateNumber<0)
-  throw Error('Existing civic leadership record is not internally consistent');
+    !Number.isInteger(v.mandateNumber)||v.mandateNumber<0||
+    (v.auditVersion!==undefined&&!verifyMandateAudit(v,c)))
+  throw Error('Existing civic leadership record or original mandate history is not internally consistent');
  return {c,v};
 }
 const note=(v,item)=>{v.recentPublic.push(item);if(v.recentPublic.length>12)v.recentPublic.shift();};
@@ -133,6 +219,7 @@ function report(w,id){
   legalProcess:c.style,termMonths:c.termMonths,
   status:v.status,publicMandates:v.mandateNumber,
   lastOfficeChangeDay:v.lastChangeDay,
+  sourcedMandateHistoryCount:v.mandateHistory?.length||0,
   knownAnnouncements:v.recentPublic.map(n=>({day:n.day,text:n.text})).slice(-5),
   limitation:'Public office does not imply automatic inherited techniques, permission to bind beasts, marriage, or allegiance from residents'};
 }
@@ -175,18 +262,35 @@ function transition(w,id,day,{crisis=false,random,emit}={}){
  const retainChance=crisis?0:(host.stability>=55&&host.legitimacy>=55?0.65:0.28);
  const first=random();
  if(!(first>=0&&first<1))throw Error('Independent government process must return a bounded random choice');
- let next=source,reason='renewed by its '+c.style;
+ let next=source,reason='renewed by its '+c.style,secondDraw=null;
  if(first>=retainChance){
   const houseWeight=Math.max(0.15,Math.min(0.65,householdInfluence/120));
   const vote=random();
   if(!(vote>=0&&vote<1))throw Error('Independent public office selection must be a real bounded choice');
+  secondDraw=vote;
   next=vote<houseWeight?c.relativeCandidate:c.independent;
   reason=crisis?'temporary public caretaker selected under political stress':
    'new officeholder publicly selected under its '+c.style;
  }
  const changed=next!==source;
+ const beforeNumber=v.mandateNumber,
+  sourceRecord={
+   origin:MANDATE_SOURCE,polity:id,office:c.title,
+   government:c.government,governingBody:c.governingBody,
+   previous:source,next,changed,day,crisis:!!crisis,
+   stability:host.stability,legitimacy:host.legitimacy,
+   householdInfluence,retainChance,houseWeight:Math.max(.15,Math.min(.65,householdInfluence/120)),
+   firstDraw:first,secondDraw,
+   mandateBefore:beforeNumber,mandateAfter:beforeNumber+1,
+   reason
+  };
+ const row={number:sourceRecord.mandateAfter,day,previous:source,
+  next,changed,source:sourceRecord,hash:hash(sourceRecord)};
  v.holder=next;
  v.mandateNumber++;
+ v.mandateHistory.push(row);
+ if(!verifyMandateAudit(v,c))
+  throw Error('The actual original independent public-office mandate lacks authentic continuity');
  v.status=crisis?'interim':'in_office';
  if(changed){
   v.lastChangeDay=day;
@@ -217,4 +321,5 @@ function recover(w,id,day,emit){
   ' remains sovereign; no unrecorded succession has occurred.',emit,'review');
  return true;
 }
-module.exports={charters:CHARTERS,byId:C,seed,ensure,report,local,review,transition,crisisReview,recover,royalID,terms};
+module.exports={charters:CHARTERS,byId:C,seed,ensure,report,local,review,transition,crisisReview,recover,royalID,terms,
+ MANDATE_SOURCE,historicMandates,verifyMandateAudit};
