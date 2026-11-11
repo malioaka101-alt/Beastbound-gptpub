@@ -218,6 +218,147 @@ function diplomaticTransitionHistory(w,key){
   }))};
 }
 
+
+/*
+ * #18 — original supply corridors have consequences from actual existing
+ * diplomacy and weather. The original monthly trade route draw and public
+ * merchant notice already exist; we only SOURCE-SEAL a changed corridor's
+ * ORIGINAL 3 random inputs, before/after risk/flow, dated diplomatic state,
+ * and that same published notice. No added route, sanction, goods, RNG,
+ * merchant profit, sovereign consent, treaty or law.
+ *
+ * Interstate statuses changed later on the SAME tick do not reach the
+ * earlier original route calculation until its next monthly world tick.
+ */
+const ROUTE_CHANGE_SOURCE='original-existing-trade-corridor-change-v1';
+function originalHistoricTradeRelation(w,r,day){
+ const key=[r.a,r.b].sort().join('|'),d=w.diplomacy[key];
+ if(!d)return {key:null,status:'not-tracked',hash:null};
+ ensureDiplomaticAudit(d,key,day);
+ const audit=d.diplomaticAudit;
+ if(audit.anchor.day>day)
+  throw Error('An original trade review predates the first real known diplomatic status');
+ const last=audit.transitions.filter(x=>x.day<day).at(-1);
+ return {key,status:last?.to||audit.anchor.status,hash:last?.hash||null};
+}
+function routeChangeNotice(r,day,disrupted){
+ return {day,region:r.a,subject:r.id,
+  text:r.mode+' between '+A.P[r.a].name+' and '+A.P[r.b].name+
+   (disrupted?' faces a serious disruption.':' reopens for ordinary trade.'),
+  channel:'merchant bulletin',releaseDay:day+6,severity:'important'};
+}
+function verifyOriginalRouteChange(w,r,row){
+ const q=row?.source,notice=q?.originalNotice;
+ if(!q||!r||!notice||row.origin!==ROUTE_CHANGE_SOURCE||
+  q.origin!==ROUTE_CHANGE_SOURCE||
+  row.sourceHash!==diplomaticHash(q)||
+  row.id!=='tradechange_'+r.id+'_'+q.day||
+  row.day!==q.day||row.id!==q.id||
+  row.disrupted!==q.disruptedAfter||
+  q.routeId!==r.id||q.routeA!==r.a||q.routeB!==r.b||
+  q.originalCapacity!==r.capacity||
+  !Number.isInteger(q.day)||q.day<0||
+  !Number.isInteger(q.monthNumber)||q.monthNumber<1||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  !Number.isInteger(q.weatherRoll)||q.weatherRoll<0||q.weatherRoll>10||
+  !Number.isInteger(q.riskRoll)||q.riskRoll< -5||q.riskRoll>5||
+  !Number.isInteger(q.flowRoll)||q.flowRoll< -9||q.flowRoll>9||
+  !Number.isInteger(q.riskBefore)||q.riskBefore<0||q.riskBefore>100||
+  !Number.isInteger(q.riskAfter)||q.riskAfter<0||q.riskAfter>100||
+  !Number.isInteger(q.flowAfter)||q.flowAfter<0||q.flowAfter>100||
+  typeof q.disruptedBefore!=='boolean'||
+  typeof q.disruptedAfter!=='boolean'||
+  q.disruptedBefore===q.disruptedAfter||
+  q.noNewRouteGoodsOrMoney!==true||
+  q.noForeignOfficerConsentOrTreaty!==true)
+  return false;
+ const relation=originalHistoricTradeRelation(w,r,q.day);
+ if(q.diplomaticKey!==relation.key||
+  q.originalDiplomaticStatus!==relation.status||
+  q.originalDiplomaticSourceHash!==relation.hash||
+  q.warAtReview!==(relation.status==='war')||
+  q.strainedAtReview!==(relation.status==='strained'))
+  return false;
+ const randomCopy={rngState:q.rngBefore};
+ const weather=Math.floor(random(randomCopy)*11),
+  risk=Math.floor(random(randomCopy)*11)-5,
+  flow=Math.floor(random(randomCopy)*19)-9;
+ if(q.weatherRoll!==weather||q.riskRoll!==risk||
+  q.flowRoll!==flow||randomCopy.rngState!==q.rngAfter)
+  return false;
+ const computedRisk=clamp(q.riskBefore+risk+
+    (q.warAtReview?8:q.strainedAtReview?2:0),0,100),
+  computedDisrupted=q.warAtReview||
+   (computedRisk>80&&weather>7),
+  computedFlow=clamp(r.capacity+flow-
+   (q.strainedAtReview?8:0)-(computedDisrupted?50:0),0,100);
+ if(q.riskAfter!==computedRisk||
+  q.disruptedAfter!==computedDisrupted||
+  q.flowAfter!==computedFlow)
+  return false;
+ return JSON.stringify(notice)===JSON.stringify(
+  routeChangeNotice(r,q.day,q.disruptedAfter));
+}
+function verifyOriginalRouteHistory(w,r){
+ const v=w?.routes?.[r.id];
+ if(!v)return false;
+ if(v.originalChanges===undefined)return true;
+ if(!Array.isArray(v.originalChanges))return false;
+ let date=-1,last=null;
+ for(const row of v.originalChanges){
+  if(!verifyOriginalRouteChange(w,r,row)||
+   row.day<=date||
+   (last!==null&&row.source.disruptedBefore!==last))
+   return false;
+  date=row.day;last=row.disrupted;
+ }
+ return last===null||v.disrupted===last;
+}
+function retainOriginalRouteChange(w,r,q){
+ const v=w.routes[r.id],source={origin:ROUTE_CHANGE_SOURCE,
+  id:'tradechange_'+r.id+'_'+q.day,
+  routeId:r.id,routeA:r.a,routeB:r.b,
+  originalCapacity:r.capacity,...q,
+  originalNotice:routeChangeNotice(r,q.day,q.disruptedAfter),
+  noNewRouteGoodsOrMoney:true,
+  noForeignOfficerConsentOrTreaty:true},
+  row={id:source.id,origin:ROUTE_CHANGE_SOURCE,
+   day:q.day,disrupted:q.disruptedAfter,
+   source,sourceHash:diplomaticHash(source)};
+ if(!verifyOriginalRouteChange(w,r,row))
+  throw Error('Original route risk, real diplomatic state and existing trade draw did not support its change');
+ v.originalChanges||=[];
+ if(v.originalChanges.some(x=>x.id===row.id))
+  throw Error('A real trade corridor cannot change disruption twice on one world month');
+ v.originalChanges.push(row);
+ if(!verifyOriginalRouteHistory(w,r))
+  throw Error('Original trade route changed without continuous historical source proof');
+ return row;
+}
+function publicTradeRouteHistory(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(x=>x!=='routeId'))
+  throw Error('Only a real original local corridor ID may be inspected; private risks, chosen news and hidden routes cannot be requested');
+ const {routeId}=params;
+ if(typeof routeId!=='string'||routeId.length<3)
+  throw Error('A particular existing known trade corridor is required');
+ const r=A.tradeRoutes.find(x=>x.id===routeId),
+  local=polityOf(s),now=worldDay(s),w=peek(s);
+ if(!r||!(r.a===local||r.b===local))
+  throw Error('Only a genuinely local inter-polity public corridor can be inspected, not a distant private shipping record');
+ if(!verifyOriginalRouteHistory(w,r))
+  throw Error('Saved public route notices contradict original world trade evidence');
+ return {routeId:r.id,mode:r.mode,
+  locallyKnownPublishedChanges:(w.routes[r.id].originalChanges||[])
+   .filter(x=>x.source.originalNotice.releaseDay<=now)
+   .map(x=>({day:x.day,releaseDay:x.source.originalNotice.releaseDay,
+    report:x.source.originalNotice.text,disrupted:x.disrupted,
+    sourceHash:x.sourceHash,
+    noTreatyConcluded:true,noUnknownMerchantFinancesRevealed:true})),
+  note:'Only actual released local original merchant notices are shown; privately changing foreign statuses, hidden risk and stock levels are not revealed.'};
+}
+
 function initial(s,startingDay=0){
  const w={version:1,worldSeed:seedFor(s),rngState:seedFor(s),startedAt:startingDay,lastTickDay:startingDay,
   calendarAnchor:null,ticks:{sixdays:0,months:0},countries:{},institutions:{},routes:{},ecosystems:{},diplomacy:{},notables:N.seedNotables(),houses:Houses.seed(),governance:Gov.seed(),
@@ -540,13 +681,40 @@ function tickMonth(w,day){
  w.ticks.months++;
  N.update(w,day,()=>random(w),v=>event(w,v));
  Gov.ensure(w);
- for(const route of A.tradeRoutes){const v=w.routes[route.id],d=Object.values(w.diplomacy).find(x=>(x.a===route.a&&x.b===route.b)||(x.a===route.b&&x.b===route.a));
-  const war=d?.status==='war';const strain=d?.status==='strained';
-  const badWeather=noise(w,0,10)>7;const prior=v.disrupted;
-  v.risk=clamp(v.risk+noise(w,-5,5)+(war?8:strain?2:0),0,100);
+ for(const route of A.tradeRoutes){
+  const v=w.routes[route.id],d=Object.values(w.diplomacy).find(x=>
+   (x.a===route.a&&x.b===route.b)||(x.a===route.b&&x.b===route.a));
+  if(!verifyOriginalRouteHistory(w,route))
+   throw Error('Previously original source-linked trade corridor history has changed');
+  const relation=originalHistoricTradeRelation(w,route,day),
+   war=d?.status==='war',strain=d?.status==='strained';
+  if(war!==(relation.status==='war')||
+   strain!==(relation.status==='strained'))
+   throw Error('Original trade route pressure does not match real historical interstate relations');
+  const rngBefore=w.rngState,
+   weatherRoll=noise(w,0,10),badWeather=weatherRoll>7,
+   prior=v.disrupted,riskBefore=v.risk,
+   riskRoll=noise(w,-5,5);
+  v.risk=clamp(v.risk+riskRoll+(war?8:strain?2:0),0,100);
   v.disrupted=war||(v.risk>80&&badWeather);
-  v.flow=clamp(route.capacity+noise(w,-9,9)-(strain?8:0)-(v.disrupted?50:0),0,100);
-  if(prior!==v.disrupted)event(w,{day,region:route.a,subject:route.id,text:`${route.mode} between ${A.P[route.a].name} and ${A.P[route.b].name} ${v.disrupted?'faces a serious disruption':'reopens for ordinary trade'}.`,channel:'merchant bulletin',releaseDay:day+6,severity:'important'});
+  const flowRoll=noise(w,-9,9);
+  v.flow=clamp(route.capacity+flowRoll-(strain?8:0)-(v.disrupted?50:0),0,100);
+  if(prior!==v.disrupted){
+   const notice=routeChangeNotice(route,day,v.disrupted);
+   // The same original regional news, original six-day release and same
+   // actual three random draws as before this archival change.
+   event(w,notice);
+   retainOriginalRouteChange(w,route,{
+    day,monthNumber:w.ticks.months,
+    rngBefore,rngAfter:w.rngState,
+    weatherRoll,riskRoll,flowRoll,
+    riskBefore,riskAfter:v.risk,flowAfter:v.flow,
+    disruptedBefore:prior,disruptedAfter:v.disrupted,
+    diplomaticKey:relation.key,
+    originalDiplomaticStatus:relation.status,
+    originalDiplomaticSourceHash:relation.hash,
+    warAtReview:war,strainedAtReview:strain});
+  }
  }
  for(const p of A.polities){const c=w.countries[p.id],ix=w.market[p.id];
   const routes=A.tradeRoutes.filter(r=>r.a===p.id||r.b===p.id);const supply=routes.reduce((n,r)=>n+w.routes[r.id].flow,0)/(routes.length||1);
@@ -859,6 +1027,7 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
   note:'These are configured systems and catalogue capacity; not a claim of personally authored species or full individual-citizen simulation'};}
 module.exports={initial,ensure,peek,
  DIPLOMATIC_SOURCE,verifyDiplomaticAudit,diplomaticTransitionHistory,
+ ROUTE_CHANGE_SOURCE,verifyOriginalRouteHistory,publicTradeRouteHistory,
  BILATERAL_OFFICE_CONTEXT,verifyDiplomaticOfficeContexts,
  localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
  // testing/GM diagnostics only; never pass hidden state to player-facing panels.

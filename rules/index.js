@@ -458,6 +458,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.mythic':return Realm.mythicLore(s,params);
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);
+  case 'world.tradeRouteHistory':return Realm.publicTradeRouteHistory(s,params);
   case 'world.diffusionStatus':return Realm.publicDiffusion(s,params);
   case 'world.localResearchStatus':{
    if(Object.keys(params).length)throw Error('Local world research status is read-only');
