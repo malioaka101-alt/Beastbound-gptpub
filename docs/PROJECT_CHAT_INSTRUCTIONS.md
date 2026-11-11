@@ -1,5 +1,17 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Foundation #18 — diplomatic history accepted; evolving individual institutional disagreement draft (11 November 2026)
+
+**Verified ordered foundation count remains 17/25; #18 Organisational and Political Depth is still OPEN.** The original Unified Master Prompt, campaign facts and current Table Rules prevail; the GM authors all open-ended world cultures, actors, issues and scenes while the actual engine verifies independent evidence, resource movement and continuity. No active campaign `saves/` records changed.
+
+**New completed milestone:** [PR #62](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/62) passed all **180 complete exact-head test groups** at `7f3ad72a092f430327baa8adb363c5db75b68f67` in [CI #43009964892](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43009964892), with a confirmed green job and GitHub mergeability. It was squash-merged as `93fe9650985689fa185051d1a32df1dabfdce07f`. The original world diplomacy pair now keeps actual existing state-change proof, not invented ministers, international agreements, or additional player/combat RNG. All formerly draft PR #62 notes below are superseded.
+
+**Next development draft:** `foundation/open-institution-positions-20261111`, with `world/emergent-groups.js` extending the SAME existing real member source, existing open-ended internal priority, real personal attendance and independent group-member agency RNG. Each distinct real member may oppose/support/be uncertain, later change position after actual world time and a new witnessed meeting; unbroken original source hashes and old saved views persist. No compulsory group vote, sect roster, new faction engine, invented rights, shared consent, coin transfer or double work roll. This includes `tests/group-evolving-independent-positions.test.js` and `docs/ORIGINAL_GROUP_EVOLVING_POSITIONS.md`; **complete 181-group exact-head CI and merge are NOT YET VERIFIED**. After exact-head green, confirm mergeable and merge, then update acceptance notes. Do not check #18. The GM may create any number of different proposals and world-appropriate organisations; the small sample in the regression is disposable, not canon population or menu.
+
+**Still-open #18 gaps:** named independently consenting cross-polity negotiators and juridically valid binding agreements, local real laws and lawful appointment/office constraints, real individually authorised conserved currency/property custody, organically competing associations beyond one player-founded group, ongoing independent agent accountability and lawful command. Build connections to original `world/government-offices.js`, `world/simulation.js`, `world/emergent-groups.js`, person-presence, professions, independent agents, material/economy and civic processes, not parallel models or arbitrary fees/gates. Do not assume Jory's past facts apply to Aerin or other campaigns.
+
+---
+
 
 ## Foundation #18 — civic mandate merged; diplomacy exact-head verification pending (11 November 2026)
 
