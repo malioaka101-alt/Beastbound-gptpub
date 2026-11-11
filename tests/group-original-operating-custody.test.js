@@ -38,11 +38,20 @@ function setup(seed){
  A.equal(donationSource.source.playerTalonsAfter,s.player.coins);
  A.equal(donationSource.source.originalAction.details.groupId,e.id);
  A.equal(G.verifyOperatingAccount(e),true);
+ const honestBalance=e.funds;
+ e.funds+=3;
+ A.equal(G.validate(e),false,
+  'Invented operating capacity cannot exist outside the original source receipts');
+ e.funds=honestBalance;
+ A.equal(G.validate(e),true);
  A.ok(E.exportGame(s)!==opening);
  const groupRng=w.emergentGroups.rngState,snapshot=E.exportGame(s);
  A.throws(()=>R.act(s,{system:'social',operation:'groupContribute',
   params:{groupId:e.id,activity,coins:s.player.coins+1}}),
   /does not own the proposed real funds/);
+ A.throws(()=>R.act(s,{system:'social',operation:'groupContribute',
+  params:{groupId:e.id,activity,coins:1,withdrawTo:'private purse'}}),
+  /accepts only the real founder/);
  A.equal(E.exportGame(s),snapshot);
  A.equal(w.emergentGroups.rngState,groupRng);
  R.act(s,{system:'social',operation:'groupContribute',
