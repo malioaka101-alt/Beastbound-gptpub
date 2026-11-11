@@ -404,6 +404,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.calendar':return Realm.calendar(s);
   case 'world.setCalendar':return CivilCalendar.anchor(s,params);
   case 'world.news':return Realm.publicNews(s,params);
+  case 'world.foreignCourierHistory':return Realm.foreignCourierHistory(s,params);
   case 'world.market':return Realm.publicEconomy(s,params);
   case 'world.harvestReeds':return ReedHarvest.harvest(s,params);
   case 'world.gatherMaterial':return ReedHarvest.gather(s,params);

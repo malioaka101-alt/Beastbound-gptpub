@@ -93,6 +93,44 @@ function validateDiplomaticSource(key,q){
  return status===q.newStatus&&q.conflictAfter===conflict&&
   q.afterTension===tension;
 }
+/*
+ * Preserve only the ACTUAL original public foreign-courier notice after
+ * an independently resolved original diplomatic status change. The short
+ * global news journal rotates; released historical news must not vanish,
+ * nor disclose private state before its original courier delay.
+ */
+const ORIGINAL_FOREIGN_COURIER='original-independent-interpolity-publication-copy-v1';
+function originalForeignCourierText(a,b,status){
+ const names=A.P[a].name+' and '+A.P[b].name;
+ return status==='war'?names+' enter an armed border conflict after escalating territorial disputes.':
+  status==='truce'?'Fighting between '+names+' subsides into an exhausted truce; tensions remain.':
+  status==='cooperation'?'Practical cooperation between '+names+' grows closer.':
+  status==='strained'?'Relations between '+names+' become strained as passage grows more difficult.':
+  names+' move into an uneasy peacetime relationship.';
+}
+function verifyOriginalForeignCourier(row,key){
+ if(row?.publicCourier===undefined)return true; // earlier records unknown
+ const receipt=row?.publicCourier,source=receipt?.source,
+  notice=source?.originalNotice,q=row?.source;
+ if(!source||!q||!notice||
+  source.origin!==ORIGINAL_FOREIGN_COURIER||
+  receipt.hash!==diplomaticHash(source)||
+  source.originalTransitionHash!==row.hash||
+  source.originalNoticeHash!==diplomaticHash(notice)||
+  source.noNewWorldEventOrRandomDraw!==true||
+  source.noTreatyOrEnvoyConsent!==true||
+  notice.day!==row.day||
+  notice.region!=='international'||
+  notice.subject!==key||
+  notice.channel!=='foreign courier'||
+  notice.publiclyKnown!==true||
+  notice.releaseDay!==row.day+14||
+  notice.severity!==(row.to==='war'?'warning':'important')||
+  notice.text!==originalForeignCourierText(q.a,q.b,row.to))
+  return false;
+ return true;
+}
+
 function ensureDiplomaticAudit(d,key,day){
  if(d.diplomaticAudit===undefined){
   // Older saves have the saved CURRENT relationship only; never invent
@@ -124,7 +162,8 @@ function verifyDiplomaticAudit(d,key){
    q.oldStatus!==prev||q.day<when||
    q.monthNumber<=lastMonth||
    row.day!==q.day||row.from!==q.oldStatus||
-   row.to!==q.newStatus||row.afterTension!==q.afterTension)
+   row.to!==q.newStatus||row.afterTension!==q.afterTension||
+   !verifyOriginalForeignCourier(row,key))
    return false;
   prev=q.newStatus;when=q.day;lastMonth=q.monthNumber;
  }
@@ -988,16 +1027,23 @@ function tickMonth(w,day){
     afterTension:d.tension,source,hash:diplomaticHash(source)});
    if(!verifyDiplomaticOfficeContexts(w,key))
     throw Error('The two actual historical civic offices cannot be replaced with fictitious diplomatic signatories');
-   const names=`${A.P[d.a].name} and ${A.P[d.b].name}`;
-   // The world relationship has changed; there is NO sourced signed treaty,
-   // named consenting envoy, formal legal term or negotiated accord here.
-   // A GM may later author those in their original world records with proof.
-   const txt=d.status==='war'?`${names} enter an armed border conflict after escalating territorial disputes.`:
-    d.status==='truce'?`Fighting between ${names} subsides into an exhausted truce; tensions remain.`:
-    d.status==='cooperation'?`Practical cooperation between ${names} grows closer.`:
-    d.status==='strained'?`Relations between ${names} become strained as passage grows more difficult.`:
-    `${names} move into an uneasy peacetime relationship.`;
-   event(w,{day,region:'international',subject:key,text:txt,channel:'foreign courier',releaseDay:day+14,severity:d.status==='war'?'warning':'important'});
+   // A status shift is NOT proof of a signed agreement, authorised envoy,
+   // or consent by either current or historic sovereign officeholder.
+   const originalNotice=event(w,{day,region:'international',
+    subject:key,text:originalForeignCourierText(d.a,d.b,d.status),
+    channel:'foreign courier',releaseDay:day+14,
+    severity:d.status==='war'?'warning':'important'});
+   const originalTransition=d.diplomaticAudit.transitions.at(-1),
+    courierSource={origin:ORIGINAL_FOREIGN_COURIER,
+     originalTransitionHash:originalTransition.hash,
+     originalNotice:structuredClone(originalNotice),
+     originalNoticeHash:diplomaticHash(originalNotice),
+     noNewWorldEventOrRandomDraw:true,noTreatyOrEnvoyConsent:true};
+   originalTransition.publicCourier={
+    source:courierSource,hash:diplomaticHash(courierSource)};
+   if(!verifyOriginalForeignCourier(originalTransition,key)||
+    !verifyDiplomaticAudit(d,key))
+    throw Error('An original foreign courier publication cannot contradict the actual independent diplomatic result');
   }
  }
  // Two state-level choices use a separate audited political agency stream.
@@ -1104,6 +1150,32 @@ function publiclyAccessible(s,e,channel='local'){
  if(channel==='courier'||channel==='public bulletin')return e.channel!=='field notice'&&e.channel!=='public notice';
  return false;
 }
+function foreignCourierHistory(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(x=>x!=='limit'))
+  throw Error('Only the original public courier history limit may be requested; no secret diplomacy or chosen report');
+ const limit=params.limit===undefined?10:params.limit;
+ num(limit,'public foreign courier history limit',1,20);
+ const w=peek(s),day=worldDay(s),items=[];
+ for(const [key,d] of Object.entries(w.diplomacy)){
+  if(!verifyDiplomaticAudit(d,key)||!verifyDiplomaticOfficeContexts(w,key))
+   throw Error('Foreign political news cannot be based on unverified interstate or government evidence');
+  for(const row of d.diplomaticAudit.transitions){
+   const copy=row.publicCourier?.source?.originalNotice;
+   if(!copy||copy.releaseDay>day)continue;
+   items.push({day:copy.day,releaseDay:copy.releaseDay,
+    text:copy.text,channel:copy.channel,
+    originalPublicationHash:row.publicCourier.source.originalNoticeHash,
+    noSignedTreatyOrEnvoyInferred:true});
+  }
+ }
+ items.sort((a,b)=>a.releaseDay-b.releaseDay||
+  a.originalPublicationHash.localeCompare(b.originalPublicationHash));
+ return {channel:'foreign courier',day,
+  knownOriginalReports:items.slice(-limit),
+  limitation:'Only already released original courier notices from actual interstate events are known; old pruned reports cannot be reconstructed without recorded source, and a changed relation does not imply a signed agreement.'};
+}
+
 function publicNews(s,{channel='local',limit=6}={}){
  if(!['local','courier','public bulletin'].includes(channel))throw Error('Unknown in-world news channel');
  num(limit,'news limit',1,20);
@@ -1217,6 +1289,7 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
   note:'These are configured systems and catalogue capacity; not a claim of personally authored species or full individual-citizen simulation'};}
 module.exports={initial,ensure,peek,
  DIPLOMATIC_SOURCE,verifyDiplomaticAudit,diplomaticTransitionHistory,
+ ORIGINAL_FOREIGN_COURIER,verifyOriginalForeignCourier,foreignCourierHistory,
  ROUTE_CHANGE_SOURCE,verifyOriginalRouteHistory,publicTradeRouteHistory,
  BILATERAL_CONTACT,verifyBilateralContacts,publicBilateralContactHistory,
  BILATERAL_OFFICE_CONTEXT,verifyDiplomaticOfficeContexts,
