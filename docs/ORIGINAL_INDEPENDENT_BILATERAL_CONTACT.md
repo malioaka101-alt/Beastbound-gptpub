@@ -18,6 +18,8 @@ Willingness by two governments means only **institutional willingness to explore
 
 Only actual **mutual willingness** may generate an original international courier bulletin, using the existing **14-day** foreign-release delay. A unilateral refusal stays private to the underlying world: players must not be given an omniscient list of which foreign government declined. A future real direct conversation might provide other facts, but this code does not invent or perform that conversation.
 
+The privacy gate requires a truly resolved existing visited atlas/lived-place region; an unsupported location cannot silently default to Reedmarch. This same guard also corrects the already existing read-only original merchant-route history when an invalid unrecognised location was supplied. No campaign is moved and no actual legal jurisdiction is invented.
+
 The existing read-only chat-turn contract gains `world.bilateralContactHistory({pairKey})`, restricted to the actual local polity of one original pair. It shows only already released public mutual-contact bulletins, not prior concealed refusals, private rolls, government stability, signed terms, actual meeting claims, hidden foreign routes or any new resources. Its published original source survives rotation of shorter news buffers. Older saves without contact history return an honestly empty published history.
 
 ## Source acceptance and next gaps
