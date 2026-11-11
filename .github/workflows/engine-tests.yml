@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/agent-initiatives.test.js
             tests/group-original-coordinator-setback-reconsideration.test.js
             tests/group-consensual-operational-task-provenance.test.js
             tests/group-original-treasury-custody.test.js
@@ -119,7 +120,7 @@ jobs:
             tests/body-organ-cycle-three.test.js
             tests/fresh-campaign-power-accuracy.test.js
             tests/living-world.test.js
-            tests/agent-initiatives.test.js
+
             tests/knowledge-diffusion.test.js
             tests/adaptive-ambitions.test.js
             tests/professional-peers.test.js
