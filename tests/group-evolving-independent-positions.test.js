@@ -81,7 +81,7 @@ A.throws(()=>G.considerInternalPosition(w,
  /later, witnessed local conversation/);
 A.equal(E.exportGame(s),snapshot);
 A.equal(agency.rngState,afterDraw);
-W.advance(s,1); // The real clock changes; positions never change automatically.
+W.advance(s,6); // Original sixday tick progresses the recorded realm day; no automatic NPC vote.
 const next=w.lastTickDay;
 A.ok(next>day);
 agency.rngState=seedFor(x=>x>.999);
