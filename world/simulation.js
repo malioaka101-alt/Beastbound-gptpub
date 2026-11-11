@@ -344,7 +344,9 @@ function publicTradeRouteHistory(s,params={}){
  if(typeof routeId!=='string'||routeId.length<3)
   throw Error('A particular existing known trade corridor is required');
  const r=A.tradeRoutes.find(x=>x.id===routeId),
-  local=polityOf(s),now=worldDay(s),w=peek(s);
+  regionId=A.LOCATION_REGION[s.world?.location]||
+   require('./lived-places').get(s,s.world?.location)?.regionId,
+  local=A.R[regionId]?.polity,now=worldDay(s),w=peek(s);
  if(!r||!(r.a===local||r.b===local))
   throw Error('Only a genuinely local inter-polity public corridor can be inspected, not a distant private shipping record');
  if(!verifyOriginalRouteHistory(w,r))
@@ -524,7 +526,10 @@ function publicBilateralContactHistory(s,params={}){
   Object.keys(params).some(k=>k!=='pairKey')||
   typeof params.pairKey!=='string')
   throw Error('Only a genuine local diplomatic pair is readable, never injected choices or refusals');
- const w=peek(s),d=w.diplomacy?.[params.pairKey],local=polityOf(s);
+ const w=peek(s),d=w.diplomacy?.[params.pairKey],
+  regionId=A.LOCATION_REGION[s.world?.location]||
+   require('./lived-places').get(s,s.world?.location)?.regionId,
+  local=A.R[regionId]?.polity;
  if(!d||![d.a,d.b].includes(local))
   throw Error('A foreign hidden government contact cannot be inspected from outside its polity');
  if(!verifyBilateralContacts(w,params.pairKey))
