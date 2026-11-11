@@ -1,5 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Foundation #18 — independent member positions accepted; published-work world reappraisal DRAFT (11 November 2026)
+
+**Ordered verified foundation count 17/25, #18 remains in progress.** [PR #63](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/63) **passed all 181/181 full regression groups** on exact head `25920fdff4398199634e24f3a3837888b26a694b` in [CI #43021284210](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43021284210) (confirmed full job and focused test). GitHub confirmed squash merge into `main` as `02f9e3215bb6cc7566ab08e10550253f2fd84ac3`. Individual members of a real voluntarily founded group can independently agree/dissent/reconsider an original sourced priority during later genuine meetings; original separate consent, views, founding, history, money and legal limits are preserved. Earlier PR #62 diplomacy merge is also verified as stated in prior note.
+
+**NEW draft:** `foundation/source-work-member-reassessment-20261111` uses that SAME existing group/member/priority position history. The original independently resolved `priorityWork` real group-work source can later be published through the existing delayed group notice, and an active same-polity member may independently reconsider it during an original monthly world tick through the original `groupMemberAgency` RNG. No claimed direct meeting, unpublished failed work, remote universal knowledge, automatic follower, mandatory group vote, new work success, new original world random draw, coin creation, legal title or new faction registry. The new `tests/group-original-published-work-agency.test.js` is **group 182** in complete regression, with disposable successful/failing work, original notice delay, save/replay/forgery and duplicate decision checks. `docs/ORIGINAL_GROUP_PUBLISHED_WORK_REASSESSMENT.md` details provenance. **Full 182-group exact-head CI and merge are NOT VERIFIED YET. Do not accept before GitHub evidence.**
+
+**Continue open-ended world-first foundations, not catalogues.** GM decides actual cultural/individual motives and prose, engine conserves original sources and grounded outcomes. #18 still needs real lawful jurisdiction/civic mandates, independently consenting real negotiators and legal instruments, actual source-conserved association treasury/property, independent competing institution futures and limited accountable commands. Never import Jory's prior campaign facts into Aerin's story or touch campaign `saves/` for foundation work. Original Unified Master Prompt and Table Rules remain authoritative.
+
+---
+
 ## Foundation #18 — diplomatic history accepted; evolving individual institutional disagreement draft (11 November 2026)
 
 **Verified ordered foundation count remains 17/25; #18 Organisational and Political Depth is still OPEN.** The original Unified Master Prompt, campaign facts and current Table Rules prevail; the GM authors all open-ended world cultures, actors, issues and scenes while the actual engine verifies independent evidence, resource movement and continuity. No active campaign `saves/` records changed.
