@@ -126,6 +126,18 @@ function founded(seed){
  A.equal(G.validate(e),true);
 }
 {
+ const {s,w,e,t}=founded(997115);
+ t.rngState=pickDraw(x=>x<.001);
+ act(s,'groupTaskRequest',{groupId:e.id,npcId:'elira',
+  task,untilDay:Math.floor(s.world.minutes/1440)+35});
+ A.equal(E.dispatch(s,'travel academy').ok,true);
+ const before=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>act(s,'groupTasksStatus',{groupId:e.id}),
+  /Only the actual local founder/);
+ A.equal(E.exportGame(s),before);
+ A.equal(s.rngState,rng);
+}
+{
  const {s,w,e,t}=founded(997111);
  t.rngState=pickDraw(x=>x>.96);
  const day=Math.floor(s.world.minutes/1440);
