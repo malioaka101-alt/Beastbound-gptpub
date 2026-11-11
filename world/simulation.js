@@ -130,14 +130,90 @@ function verifyDiplomaticAudit(d,key){
  }
  return prev===d.status;
 }
+
+/*
+ * #18: attribute an ALREADY INDEPENDENT interstate relationship change to
+ * the two ACTUAL historic civic offices of its date. This is evidence
+ * of who held government office during that existing world event, NOT
+ * evidence that either official negotiated, voted, signed or consented.
+ * No additional diplomatic roll, country action, office appointment,
+ * treaty, money or public announcement is created.
+ *
+ * Earlier save transitions lacking this record remain honest unknowns,
+ * not reconstructed office signatories.
+ */
+const BILATERAL_OFFICE_CONTEXT='existing-sovereign-offices-during-original-interpolity-change-v1';
+function originalOfficeContext(w,id,day){
+ const history=Gov.historicMandates(w,id),v=w.governance[id],
+  charter=Gov.byId[id],last=history.actualMandates.at(-1);
+ if(!v||!charter||!Number.isInteger(day)||day<0||
+  !w.countries?.[id]||
+  (last&&last.day>day))
+  throw Error('Only an actually verified sovereign office at an original diplomatic event is admissible');
+ return {polity:id,office:history.office,governingBody:charter.governingBody,
+  governingForm:charter.government,
+  incumbent:v.holder,mandateNumber:v.mandateNumber,
+  originalAnchorHash:diplomaticHash(history.originalAuditAnchor),
+  lastOriginalMandateHash:last?.sourceHash||null,
+  noRepresentativeConsentAsserted:true,noForeignSovereigntyGranted:true};
+}
+function officeContextMatches(w,id,day,ctx){
+ if(!ctx||ctx.polity!==id||
+  !Number.isInteger(day)||day<0||
+  !Number.isInteger(ctx.mandateNumber)||
+  ctx.mandateNumber<0||
+  ctx.noRepresentativeConsentAsserted!==true||
+  ctx.noForeignSovereigntyGranted!==true||
+  !w.countries?.[id])return false;
+ const charter=Gov.byId[id],history=Gov.historicMandates(w,id);
+ if(!charter||
+  ctx.office!==charter.title||
+  ctx.governingBody!==charter.governingBody||
+  ctx.governingForm!==charter.government||
+  ctx.originalAnchorHash!==diplomaticHash(history.originalAuditAnchor))
+  return false;
+ let n=history.originalAuditAnchor.mandateNumber,
+  holder=history.originalAuditAnchor.holder,
+  lastHash=null;
+ if(ctx.mandateNumber<n)return false;
+ for(const m of history.actualMandates){
+  if(m.number>ctx.mandateNumber)break;
+  if(m.day>day)return false;
+  n=m.number;holder=m.next;lastHash=m.sourceHash;
+ }
+ return n===ctx.mandateNumber&&
+  holder===ctx.incumbent&&
+  lastHash===ctx.lastOriginalMandateHash;
+}
+function verifyDiplomaticOfficeContexts(w,key){
+ const pair=w?.diplomacy?.[key];
+ if(!pair||!verifyDiplomaticAudit(pair,key))return false;
+ for(const row of pair.diplomaticAudit.transitions){
+  const q=row.source,c=q.officesAtChange;
+  if(c===undefined)continue; // no fictional old-save representatives
+  if(q.officeContextOrigin!==BILATERAL_OFFICE_CONTEXT||
+   q.noSignedBilateralTreaty!==true||
+   q.noEnvoyConsentInferred!==true||
+   !Array.isArray(c)||c.length!==2||
+   !officeContextMatches(w,q.a,q.day,c[0])||
+   !officeContextMatches(w,q.b,q.day,c[1]))
+   return false;
+ }
+ return true;
+}
+
 function diplomaticTransitionHistory(w,key){
  const d=w?.diplomacy?.[key];
  if(!d)throw Error('Only an existing original-world diplomatic pair has history');
  ensureDiplomaticAudit(d,key,w.lastTickDay);
+ if(!verifyDiplomaticOfficeContexts(w,key))
+  throw Error('A diplomatic history cannot invent or rewrite either actual historical civic office');
  return {pair:key,anchor:structuredClone(d.diplomaticAudit.anchor),
   transitions:d.diplomaticAudit.transitions.map(row=>({
    day:row.day,from:row.from,to:row.to,
    afterTension:row.afterTension,sourceHash:row.hash,
+   originalOfficesAtChange:row.source.officesAtChange?
+    structuredClone(row.source.officesAtChange):null,
    noInventedSignedTreaty:true,noNamedMinisterConsentInferred:true
   }))};
 }
@@ -545,13 +621,18 @@ function tickMonth(w,day){
     rivals,warfare,prosperityA,prosperityB,
     cooldownBefore:beforeCooldown,cooldownAfter:d.cooldown,
     conflictBefore:beforeConflictMonths,conflictAfter:d.conflictMonths,
-    warExhaustionA:a.warExhaustion,warExhaustionB:b.warExhaustion};
+    warExhaustionA:a.warExhaustion,warExhaustionB:b.warExhaustion,
+    officeContextOrigin:BILATERAL_OFFICE_CONTEXT,
+    officesAtChange:[
+     originalOfficeContext(w,d.a,day),
+     originalOfficeContext(w,d.b,day)],
+    noSignedBilateralTreaty:true,noEnvoyConsentInferred:true};
    if(!validateDiplomaticSource(key,source))
     throw Error('An original diplomatic relationship changed without valid prior world evidence');
    d.diplomaticAudit.transitions.push({day,from:old,to:d.status,
     afterTension:d.tension,source,hash:diplomaticHash(source)});
-   if(!verifyDiplomaticAudit(d,key))
-    throw Error('The original diplomatic state transition cannot survive saved evidence verification');
+   if(!verifyDiplomaticOfficeContexts(w,key))
+    throw Error('The two actual historical civic offices cannot be replaced with fictitious diplomatic signatories');
    const names=`${A.P[d.a].name} and ${A.P[d.b].name}`;
    // The world relationship has changed; there is NO sourced signed treaty,
    // named consenting envoy, formal legal term or negotiated accord here.
@@ -778,6 +859,7 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
   note:'These are configured systems and catalogue capacity; not a claim of personally authored species or full individual-citizen simulation'};}
 module.exports={initial,ensure,peek,
  DIPLOMATIC_SOURCE,verifyDiplomaticAudit,diplomaticTransitionHistory,
+ BILATERAL_OFFICE_CONTEXT,verifyDiplomaticOfficeContexts,
  localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
  // testing/GM diagnostics only; never pass hidden state to player-facing panels.
  _debug:{tickMonth,tickSixday,noise,quickContext}};
