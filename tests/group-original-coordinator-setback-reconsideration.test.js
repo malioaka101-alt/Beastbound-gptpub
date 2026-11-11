@@ -60,9 +60,9 @@ function originalWork(s,e,w,success){
  const {s,w,e,t,day,mandate}=setup(997701);
  const coins=s.player.coins,bank=e.funds,playerRng=s.rngState;
  const prior=E.exportGame(s);
- A.throws(()=>G.reconsiderCoordinatorOnOriginalFailure(w,{
-  groupId:e.id,mandateId:mandate.id,originalReviewId:'forged',day}),
- /(?:no new|false)/i);
+ A.equal(G.reconsiderCoordinatorOnOriginalFailure(w,{
+  groupId:e.id,mandateId:mandate.id,
+  originalReviewId:'forged',day}).reconsidered,false);
  A.equal(E.exportGame(s),prior);
  A.equal(s.rngState,playerRng);
  A.equal(G.coordinationReviewStatus(w,e.id).length,0);
