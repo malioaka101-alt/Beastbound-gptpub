@@ -65,6 +65,7 @@ function review(s,w,day,random,emit){
     channel:'public notice',releaseDay:day+2,severity:'routine'
    });
   }
+  Gov.attestOriginalCivicProcedure(s,w,{kind:'citizen_petition',witnessId:r.petitionId});
   processed++;
  }
  return processed;

@@ -103,7 +103,7 @@ function seed(){
   auditVersion:1,
   auditAnchor:{holder:c.first,mandateNumber:0,
    note:'Actual newly seeded original civic office; no invented previous officeholders'},
-  mandateHistory:[]
+  mandateHistory:[],civicProcedures:[]
  };
  return offices;
 }
@@ -128,8 +128,8 @@ function ensure(w){
     note:'Auditing begins from an earlier original save; historic names and decisions were not recorded'};
    v.mandateHistory=[];
   }
-  if(!verifyMandateAudit(v,c))
-   throw Error('Civic mandate evidence or office continuity is inconsistent');
+  if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c))
+   throw Error('Civic mandate evidence or witnessed jurisdictional procedure is inconsistent');
  }
  return w.governance;
 }
@@ -185,6 +185,178 @@ function verifyMandateAudit(v,c){
  }
  return v.mandateNumber===num&&v.holder===holder;
 }
+
+/*
+ * Real constitutional jurisdiction: a public decision is tied to an
+ * actual place, original civic office/mandate, original independently
+ * resolved procedural source, and historical holder AT THE TIME.
+ * This does not grant powers to enact laws, punish, confiscate, appoint,
+ * compel residents, or govern another polity. Future independently
+ * proven procedural providers may be connected without a law catalogue.
+ */
+const CIVIC_PROCEDURE='original-lawful-jurisdictional-procedure-v1';
+function incumbentAtMandate(v,number,day){
+ let holder=v.auditAnchor?.holder,n=v.auditAnchor?.mandateNumber;
+ if(!Number.isInteger(number)||!Number.isInteger(day)||day<0||
+  !Number.isInteger(n)||number<n)return null;
+ for(const transition of v.mandateHistory||[]){
+  if(transition.number>number)break;
+  if(transition.day>day)return null;
+  holder=transition.next;n=transition.number;
+ }
+ return number===n?holder:null;
+}
+function verifyCivicProcedure(v,c,row){
+ const q=row?.source,review=q?.originalReview;
+ if(!q||row.origin!==CIVIC_PROCEDURE||
+  row.hash!==hash(q)||q.origin!==CIVIC_PROCEDURE||
+  row.procedureId!==q.procedureId||
+  q.polity!==c.id||q.office!==c.title||
+  q.governingBody!==c.governingBody||
+  !A.R[q.regionId]||A.R[q.regionId].polity!==c.id||
+  !Number.isInteger(q.day)||q.day<0||
+  !Number.isInteger(q.mandateNumber)||q.mandateNumber<0||
+  q.incumbent!==incumbentAtMandate(v,q.mandateNumber,q.day)||
+  !['in_office','interim'].includes(q.officeStatus)||
+  !['public_hearing','citizen_petition'].includes(q.kind)||
+  typeof q.witnessId!=='string'||q.witnessId.length<8||
+  q.procedureId!==q.kind+':'+q.witnessId||
+  typeof q.originalSourceHash!=='string'||
+  !/^[a-f0-9]{64}$/.test(q.originalSourceHash)||
+  !review||q.originalReviewHash!==hash(review)||
+  q.reviewSource!==review.source||
+  typeof q.reviewSource!=='string'||q.reviewSource.length<15||
+  q.noNewLawEnacted!==true||q.noFindingOfGuilt!==true||
+  q.noNewRightToCompel!==true||
+  q.decision!==row.decision||row.day!==q.day||
+  q.originalReviewDay!==review.day||
+  review.day!==q.day)return false;
+ if(q.kind==='public_hearing'){
+  if(review.hearingId!==q.witnessId||
+   review.sourceEventHash!==q.originalSourceHash||
+   review.issueId!==q.issueId||
+   review.disposition!==q.decision||
+   !['records_review','mediation_invite','defer'].includes(q.decision)||
+   review.releaseDay!==q.day+2||
+   q.publicReleaseDay!==review.releaseDay||
+   !Array.isArray(review.familyResponses))
+   return false;
+ }else{
+  if(review.petitionId!==q.witnessId||
+   review.petitionEventHash!==q.originalSourceHash||
+   !['docketed','deferred','declined'].includes(q.decision)||
+   review.decision!==q.decision||
+   q.issueId!==null||
+   q.publicReleaseDay!==(q.decision==='docketed'?q.day+2:null))
+   return false;
+ }
+ return true;
+}
+function verifyCivicProcedures(v,c){
+ if(v?.civicProcedures===undefined)return true;
+ if(!Array.isArray(v.civicProcedures))return false;
+ const ids=new Set();let previousDay=-1;
+ for(const row of v.civicProcedures){
+  if(!verifyCivicProcedure(v,c,row)||
+   ids.has(row.procedureId)||row.day<previousDay)return false;
+  ids.add(row.procedureId);previousDay=row.day;
+ }
+ return true;
+}
+function jurisdictionSnapshot(w,polity,regionId,day){
+ ensure(w);
+ const {c,v}=valid(w,polity);
+ if(!A.R[regionId]||A.R[regionId].polity!==polity||
+  !w.countries?.[polity]||
+  !Number.isInteger(day)||day<0||
+  !['in_office','interim'].includes(v.status)||
+  incumbentAtMandate(v,v.mandateNumber,day)!==v.holder)
+  throw Error('A real present civic jurisdiction and competent original governing office are required');
+ return {polity:c.id,regionId,office:c.title,
+  governingBody:c.governingBody,
+  incumbent:v.holder,mandateNumber:v.mandateNumber,day,
+  noAutomaticEnforcement:true,noForeignJurisdiction:true};
+}
+function attestOriginalCivicProcedure(s,w,{kind,witnessId}={}){
+ // A PLAYER cannot pass an official verdict or new powers: every value is
+ // reconstructed from the existing actual world review + original log.
+ const hearing=kind==='public_hearing',
+  petition=kind==='citizen_petition';
+ if(!hearing&&!petition||typeof witnessId!=='string')
+  throw Error('A real independently decided original civic review is required');
+ const scope=jurisdictionSnapshot(w,'reedmarch','morrowfen_basin',
+  (w.publicHearingReviews||[]).find(x=>hearing&&x.hearingId===witnessId)?.day??
+  (w.civicPetitionReviews||[]).find(x=>petition&&x.petitionId===witnessId)?.day);
+ const rec=hearing?
+  s.table?.publicHearings?.records?.find(x=>x.hearingId===witnessId):
+  s.table?.civicPetitions?.records?.find(x=>x.petitionId===witnessId);
+ const review=hearing?
+  w.publicHearingReviews?.find(x=>x.hearingId===witnessId):
+  w.civicPetitionReviews?.find(x=>x.petitionId===witnessId);
+ const original=hearing?require('./public-hearings'):require('./civic-petitions'),
+  docket=hearing?
+   w.governance.reedmarch.publicHearingDockets?.find(x=>x.hearingId===witnessId):
+   w.governance.reedmarch.publicDockets?.find(x=>x.petitionId===witnessId);
+ const decision=hearing?review?.disposition:review?.decision;
+ if(!rec||!review||!original.sourceCheck(s,rec)||
+  review.source!==original.REVIEW||
+  (hearing?
+   rec.state!=='reviewed'||rec.disposition!==decision||
+   rec.reviewDay!==review.day||rec.releaseDay!==review.releaseDay||
+   review.sourceEventHash!==rec.eventHash||
+   docket?.sourceEventHash!==rec.eventHash||
+   docket?.disposition!==decision||docket?.releaseDay!==review.releaseDay:
+   rec.state!=='at_counter'||rec.decision!==decision||
+   rec.responseDay!==review.day||review.petitionEventHash!==rec.eventHash||
+   (decision==='docketed'?
+    !docket||docket.petitionEventHash!==rec.eventHash:
+    !!docket)))
+  throw Error('A real independently verified local council decision and its original witness are required');
+ const office=w.governance.reedmarch,id=kind+':'+witnessId;
+ if((office.civicProcedures||[]).some(x=>x.procedureId===id))
+  throw Error('The original civic procedure is already recorded; no duplicate mandate');
+ const q={origin:CIVIC_PROCEDURE,kind,procedureId:id,
+  polity:scope.polity,regionId:scope.regionId,
+  office:scope.office,governingBody:scope.governingBody,
+  incumbent:scope.incumbent,mandateNumber:scope.mandateNumber,
+  officeStatus:office.status,day:review.day,originalReviewDay:review.day,
+  witnessId,issueId:hearing?review.issueId:null,
+  originalSourceHash:rec.eventHash,
+  originalReview:structuredClone(review),originalReviewHash:hash(review),
+  reviewSource:review.source,decision,
+  publicReleaseDay:hearing?review.releaseDay:
+   decision==='docketed'?review.day+2:null,
+  noNewLawEnacted:true,noFindingOfGuilt:true,noNewRightToCompel:true};
+ const row={origin:CIVIC_PROCEDURE,procedureId:id,
+  day:q.day,decision,source:q,hash:hash(q)};
+ if(!verifyCivicProcedure(office,C.reedmarch,row))
+  throw Error('Civic office jurisdiction or real public review provenance is inconsistent');
+ office.civicProcedures||=[];office.civicProcedures.push(row);
+ if(!verifyCivicProcedures(office,C.reedmarch))
+  throw Error('Civic history cannot accept an inconsistent official source');
+ return {procedureId:id,polity:scope.polity,regionId:scope.regionId,
+  reviewSourceHash:row.hash,incumbentAtDecision:scope.incumbent,
+  independentDecision:decision,
+  noNewLawEnacted:true,noCompulsoryOrder:true};
+}
+function historicalCivicProcedures(w,polity){
+ ensure(w);
+ const {c,v}=valid(w,polity);
+ return {polity:c.id,
+  constitutionalBody:c.governingBody,
+  originalAttestedReviews:(v.civicProcedures||[]).map(row=>({
+   procedureId:row.procedureId,day:row.day,
+   officeholderAtReview:row.source.incumbent,
+   mandateNumberAtReview:row.source.mandateNumber,
+   regionId:row.source.regionId,
+   originalDecision:row.decision,
+   originalSourceHash:row.source.originalSourceHash,
+   reviewEvidenceHash:row.hash,
+   publicReleaseDay:row.source.publicReleaseDay,
+   noEnactedLaw:true,noFindingOfGuilt:true
+  }))};
+}
+
 function historicMandates(w,id){
  ensure(w);
  const {c,v}=valid(w,id);
@@ -206,7 +378,8 @@ function valid(w,id){
     typeof v.holder!=='string'||v.holder.length<5||
     !Array.isArray(v.recentPublic)||
     !Number.isInteger(v.mandateNumber)||v.mandateNumber<0||
-    (v.auditVersion!==undefined&&!verifyMandateAudit(v,c)))
+    (v.auditVersion!==undefined&&!verifyMandateAudit(v,c))||
+    !verifyCivicProcedures(v,c))
   throw Error('Existing civic leadership record or original mandate history is not internally consistent');
  return {c,v};
 }
@@ -322,4 +495,6 @@ function recover(w,id,day,emit){
  return true;
 }
 module.exports={charters:CHARTERS,byId:C,seed,ensure,report,local,review,transition,crisisReview,recover,royalID,terms,
- MANDATE_SOURCE,historicMandates,verifyMandateAudit};
+ MANDATE_SOURCE,historicMandates,verifyMandateAudit,
+ CIVIC_PROCEDURE,verifyCivicProcedures,jurisdictionSnapshot,
+ attestOriginalCivicProcedure,historicalCivicProcedures};
