@@ -58,6 +58,14 @@ A.equal(view.transitions[1].from,'war');
 A.equal(view.transitions[1].to,'truce');
 A.equal(view.transitions[1].noInventedSignedTreaty,true);
 A.equal(view.transitions[1].noNamedMinisterConsentInferred,true);
+// Existing source-backed courier news may report an actual relationship
+// shift, but may not invent signed legal instruments or consenting envoys.
+const notices=w.chronicle.filter(e=>e.subject===key&&
+ (e.text.includes('armed border conflict')||e.text.includes('exhausted truce')));
+A.equal(notices.length,2,'Only two actually resolved original diplomatic changes are described');
+A.ok(notices.every(e=>e.releaseDay===e.day+14));
+A.ok(notices.every(e=>!/sign|signed|agreement|accord|minister|envoy|negotiat/i.test(e.text)),
+ 'Status-driven world news must never fabricate diplomatic agreement or named consent');
 A.equal(view.transitions[1].sourceHash,
  d.diplomaticAudit.transitions[1].hash);
 const snapshot=E.exportGame(s),copy=E.importGame(snapshot),
