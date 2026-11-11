@@ -42,6 +42,64 @@ G.registerMemberConsentAdapter(ORIGIN,(e,m,ev)=>{
   typeof d?.proposal==='string'&&d.proposal.trim().length>=10&&
   d?.inheritedPowerGranted===false&&d?.formalOfficeGranted===false;
 });
+
+/*
+ * #18: Members form their own opinions on existing freely authored
+ * issues. Sustained independently recorded dissent MAY become a reason
+ * to decide whether to leave. This neither invents factions nor lets
+ * founders declare a dissenting NPC expelled. Two actual distinct open
+ * priorities and their last SOURCE-SEALED personal opinions are required.
+ */
+const DISSENT_PRESSURE='sustained independently documented disagreement with group priorities';
+function independentDissentEvidence(e,actorId,day){
+ if(!e||e.origin!=='player-declaration'||!Number.isInteger(day)||day<0)
+  return [];
+ return (e.internalPriorities||[]).flatMap(priority=>{
+  const positions=(e.internalPositions||[]).filter(x=>
+   x.priorityId===priority.id&&x.memberActorId===actorId&&
+   Number.isInteger(x.day)&&x.day<=day);
+  const last=positions.at(-1);
+  if(!last||last.stance!=='dissented'||
+   day-last.day<6||day-last.day>180||
+   priority.sourceHash!==G.hash(priority.source)||
+   last.sourceHash!==G.hash(last.source)||
+   last.source?.prioritySourceHash!==priority.sourceHash||
+   last.source?.memberActorId!==actorId||
+   last.source?.memberConsentHash!==
+    e.additionalMembers.find(m=>m.actorId===actorId)?.hash)
+   return [];
+  return [{priorityId:priority.id,
+   prioritySourceHash:priority.sourceHash,
+   personalPositionId:last.id,
+   personalPositionHash:last.sourceHash,
+   independentlyDissentedOnDay:last.day}];
+ }).sort((a,b)=>a.priorityId.localeCompare(b.priorityId));
+}
+function verifyIndependentDissentWithdrawal(e,m,d){
+ if(d?.actualPressure!==DISSENT_PRESSURE)return true;
+ const evidence=independentDissentEvidence(e,m.actorId,d.day);
+ if(evidence.length<2||
+  !Array.isArray(d.disagreementEvidence)||
+  JSON.stringify(d.disagreementEvidence)!==JSON.stringify(evidence)||
+  !Number.isInteger(d.unfundedMonthsAtDecision)||
+  d.unfundedMonthsAtDecision<0||
+  !Number.isFinite(d.localStabilityAtDecision)||
+  d.localStabilityAtDecision<0||d.localStabilityAtDecision>100||
+  !Number.isInteger(d.agencyBefore)||d.agencyBefore<1||
+  !Number.isInteger(d.agencyAfter)||d.agencyAfter<1||
+  d.optionalPersonalDecision!==true||
+  d.notEnforcedFactionExpulsion!==true||
+  d.noAutomaticOfficeOrFundingTransfer!==true)
+  return false;
+ const chance=clamp(.18+
+  (d.unfundedMonthsAtDecision>=6?.16:0)+
+  (d.localStabilityAtDecision<25?.14:0)+.07,.12,.55),
+  rng={rngState:d.agencyBefore},actual=draw(rng);
+ return d.withdrawalChance===chance&&
+  d.choiceDraw===actual&&actual<chance&&
+  d.agencyAfter===rng.rngState;
+}
+
 G.registerMemberDepartureAdapter(DEPART,(e,m,ev)=>{
  const d=ev?.details,npc=E.NPCS[d?.npcId];
  return ev?.type==='world-member-decision'&&
@@ -55,7 +113,8 @@ G.registerMemberDepartureAdapter(DEPART,(e,m,ev)=>{
   d?.npcName===m.name&&m.actorId===m.witness?.details?.actorId&&
   Number.isInteger(d?.day)&&d.day>=m.witness?.details?.day&&
   typeof d?.actualPressure==='string'&&d.actualPressure.length>8&&
-  typeof d?.choiceDraw==='number'&&d.choiceDraw>=0&&d.choiceDraw<1;
+  typeof d?.choiceDraw==='number'&&d.choiceDraw>=0&&d.choiceDraw<1&&
+  verifyIndependentDissentWithdrawal(e,m,d);
 });
 function ensure(w){
  if(w.groupMemberAgency===undefined)w.groupMemberAgency={
@@ -172,23 +231,37 @@ function month(w,day,emit){
    }
    // A review is prompted by genuinely adverse, continuing circumstances.
    // Successful groups do not lose members merely because time passes.
+   const politicalEvidence=localPolity===e.polity?
+    independentDissentEvidence(e,m.actorId,day):[];
+   const isPoliticalDissent=politicalEvidence.length>=2;
    const hardship=e.status==='inactive'&&e.unfundedMonths>=3?
     'sustained inactivity with little practical support':
     e.failedEfforts>=e.completedEfforts+3?
      'repeated genuinely failed group efforts':
-    host.stability<25?'severe observed regional instability':null;
+    host.stability<25?'severe observed regional instability':
+    isPoliticalDissent?DISSENT_PRESSURE:null;
    if(hardship&&day-m.witness.details.day>=30&&
       (!m.lastReviewDay||day-m.lastReviewDay>=60)){
+    const dissentReason=hardship===DISSENT_PRESSURE;
     const chance=clamp(.18+(e.unfundedMonths>=6?.16:0)+
-      (host.stability<25?.14:0),.12,.55);
-    const pick=draw(t);
+      (host.stability<25?.14:0)+(dissentReason?.07:0),.12,.55);
+    const agencyBefore=t.rngState,pick=draw(t);
     m.lastReviewDay=day;
     if(pick<chance){
      const witness={type:'world-member-decision',details:{
       origin:DEPART,groupId:e.id,npcId,actorId:m.actorId,
       npcName:npc.name,priorAcceptanceHash:m.hash,day,
       actualPressure:hardship,choiceDraw:pick,voluntaryWithdrawal:true,
-      founderCannotCompelStay:true,legalKinshipChanged:false
+      founderCannotCompelStay:true,legalKinshipChanged:false,
+      ...(dissentReason?{
+       disagreementEvidence:structuredClone(politicalEvidence),
+       unfundedMonthsAtDecision:e.unfundedMonths,
+       localStabilityAtDecision:host.stability,
+       agencyBefore,agencyAfter:t.rngState,
+       withdrawalChance:chance,optionalPersonalDecision:true,
+       notEnforcedFactionExpulsion:true,
+       noAutomaticOfficeOrFundingTransfer:true
+      }:{})
      }};
      const result=G.departMemberFromEvidence(w,e.id,{
       actorId:m.actorId,origin:DEPART,witness,day,emit});
@@ -257,4 +330,5 @@ function privateStatus(s,w,groupId){
   note:'Invitations are personally witnessed. Independent later departure can become known after a local notice; distant events are not instantly shared. Membership is not marriage, lineage, employment or automatic power.'};
 }
 module.exports={ORIGIN,DEPART,SOURCE,ensure,draw,evaluate,month,privateStatus,
+ DISSENT_PRESSURE,independentDissentEvidence,
  _debug:{common,logDecision}};
