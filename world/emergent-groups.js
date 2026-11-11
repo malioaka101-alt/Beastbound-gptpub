@@ -53,6 +53,7 @@ function validate(e){
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
   !Number.isInteger(e.foundedDay)||e.foundedDay<0)return false;
+ if(e.operatingAccount!==undefined&&!verifyOperatingAccount(e))return false;
  if(e.internalPriorities!==undefined&&
    (!Array.isArray(e.internalPriorities)||
     e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
@@ -166,7 +167,10 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
   additionalMembers:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
-  funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
+  funds:0,operatingAccount:{
+   version:1,groupId:id,
+   anchor:{day,amount:0,reason:'original source-attested informal founder begins without group operating funds'},
+   movements:[]},activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
  if(!validate(e))throw Error('This founding lacks an original witnessed declaration');
@@ -337,6 +341,158 @@ function syncWorkerFounders(w,day,emit){
  }
  return added;
 }
+
+/*
+ * Existing e.funds is scarce GROUP OPERATING CAPACITY, not a withdrawable
+ * balance of Talons and not all of the association's property. The original
+ * work rule already makes one real player Talon debit before raising it.
+ * This journal only audits that existing capacity; it neither mints coins
+ * nor allows withdrawal/claiming private property or retroactive expenses.
+ */
+const OPERATING_ACCOUNT='source-attested-original-group-operating-capacity-v1';
+function ensureOperatingAccount(e,day){
+ if(e?.origin!=='player-declaration'||
+  !Number.isInteger(e.funds)||e.funds<0||
+  !Number.isInteger(day)||day<e.foundedDay)
+  throw Error('Only an actual voluntary association can retain a truthful operating balance');
+ if(e.operatingAccount===undefined){
+  // A legacy save knows only its current balance, not earlier deposits.
+  // Never counterfeit its older transaction list or claim a cash reserve.
+  e.operatingAccount={version:1,groupId:e.id,
+   anchor:{day,amount:e.funds,
+    reason:'Previously saved operating balance; past transaction provenance was not recorded'},
+   movements:[]};
+ }
+ if(!verifyOperatingAccount(e))
+  throw Error('Association operating custody is inconsistent with its original sources');
+ return e.operatingAccount;
+}
+function verifyOperatingAccount(e){
+ const a=e?.operatingAccount;
+ if(e?.origin!=='player-declaration'||!a||a.version!==1||
+  a.groupId!==e.id||!a.anchor||
+  !Number.isInteger(a.anchor.day)||a.anchor.day<e.foundedDay||
+  !Number.isInteger(a.anchor.amount)||a.anchor.amount<0||
+  typeof a.anchor.reason!=='string'||a.anchor.reason.length<20||
+  !Array.isArray(a.movements))return false;
+ let balance=a.anchor.amount,lastDay=a.anchor.day;
+ const receipts=new Set();
+ for(const m of a.movements){
+  const q=m?.source;
+  if(!m||!q||m.version!==OPERATING_ACCOUNT||
+   m.hash!==hash(q)||
+   !Number.isInteger(m.day)||m.day<lastDay||
+   q.day!==m.day||q.groupId!==e.id||
+   q.originHash!==e.originHash||
+   m.kind!==q.kind||m.before!==balance||
+   !Number.isInteger(m.delta)||
+   !Number.isInteger(m.after)||m.after<0||
+   m.after!==m.before+m.delta||
+   receipts.has(m.id)||m.id!==q.id)return false;
+  receipts.add(m.id);lastDay=m.day;
+  if(m.kind==='original-voluntary-contribution'){
+   const ev=q.originalAction;
+   if(!ev||ev.type!=='story'||
+    ev.details?.origin!=='actually-attempted-voluntary-group-work'||
+    ev.details?.groupId!==e.id||
+    ev.details?.actor!==e.founder.name||
+    ev.details?.minutes!==45||
+    ev.details?.coins!==m.delta||
+    !Number.isInteger(m.delta)||m.delta<0||
+    !Number.isInteger(q.playerTalonsBefore)||q.playerTalonsBefore<0||
+    q.playerTalonsAfter!==q.playerTalonsBefore-m.delta||
+    !Number.isInteger(q.playerTalonsAfter)||q.playerTalonsAfter<0||
+    !Number.isInteger(q.originalMinute)||q.originalMinute<0||
+    Math.floor(q.originalMinute/1440)!==m.day||
+    q.originalActionHash!==hash(ev)||
+    q.noWithdrawableTalonsOrTitleGranted!==true)
+    return false;
+  }else if(m.kind==='original-independent-work-cost'){
+   const review=q.originalReview;
+   if(!review||review.groupId!==e.id||
+    review.originHash!==e.originHash||
+    review.day!==m.day||
+    !['verified-limited-community-work','unverified-community-effort'].includes(review.kind)||
+    !Number.isInteger(review.details?.actualFundsSpent)||
+    review.details.actualFundsSpent!==-m.delta||
+    m.delta>0||
+    !Number.isInteger(q.originalReviewCost)||q.originalReviewCost!==-m.delta||
+    q.originalReviewHash!==review.hash||
+    !Array.isArray(review.details.originalActionHashes)||
+    !Number.isInteger(review.details.actualEffortMinutes)||
+    review.details.actualEffortMinutes<45||
+    q.noSecondWorkOrRandomDraw!==true)return false;
+   const {hash:originalSeal,notice,releaseDay,...originalBody}=review;
+   if(originalSeal!==hash(originalBody))return false;
+  }else if(m.kind==='original-monthly-upkeep'){
+   if(m.delta>=0||
+    !Number.isInteger(q.memberCountAtUpkeep)||q.memberCountAtUpkeep<1||
+    -m.delta!==Math.max(1,Math.ceil(q.memberCountAtUpkeep/8))||
+    q.fundedUpkeep===true&&m.before<-m.delta||
+    q.fundedUpkeep!==true||
+    q.noMemberWageOrNewPropertyGranted!==true)return false;
+  }else return false;
+  balance=m.after;
+ }
+ return balance===e.funds;
+}
+function recordOperatingMovement(e,{kind,day,before,after,source}){
+ if(e?.origin!=='player-declaration'||!e.operatingAccount||
+  !Number.isInteger(before)||!Number.isInteger(after)||
+  !Number.isInteger(day)||day<e.foundedDay||
+  !['original-voluntary-contribution','original-independent-work-cost',
+   'original-monthly-upkeep'].includes(kind))
+  throw Error('A real existing association and original fund movement are necessary');
+ const a=e.operatingAccount,index=a.movements.length+1,
+  delta=after-before,
+  id='operating_'+index;
+ const q={version:OPERATING_ACCOUNT,id,kind,day,
+  groupId:e.id,originHash:e.originHash,...structuredClone(source)};
+ const row={id,version:OPERATING_ACCOUNT,kind,day,delta,before,after,
+  source:q,hash:hash(q)};
+ a.movements.push(row);
+ if(!verifyOperatingAccount(e)){
+  a.movements.pop();
+  throw Error('The original-world account cannot record imaginary or inconsistent operating funds');
+ }
+ return row;
+}
+function attestOriginalContribution(e,{day,before,after,playerBefore,playerAfter,
+ originalMinute,witness}={}){
+ const delta=after-before;
+ if(!e?.operatingAccount||
+  !witness||!Number.isInteger(delta)||delta<0||
+  !Number.isInteger(playerBefore)||playerBefore<delta||
+  playerAfter!==playerBefore-delta||
+  witness.details?.coins!==delta||
+  witness.details?.groupId!==e.id||
+  witness.details?.actor!==e.founder.name)
+  throw Error('Only a real original player debit can become association operating capacity');
+ return recordOperatingMovement(e,{
+  kind:'original-voluntary-contribution',day,before,after,
+  source:{originalAction:structuredClone(witness),
+   originalActionHash:hash(witness),
+   originalMinute,playerTalonsBefore:playerBefore,
+   playerTalonsAfter:playerAfter,
+   noWithdrawableTalonsOrTitleGranted:true}});
+}
+function originalOperatingHistory(w,groupId){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('A real originally witnessed voluntary group is necessary');
+ const a=e.operatingAccount;
+ return a?{groupId,openingBalance:a.anchor.amount,
+  openingDay:a.anchor.day,openingProvenance:a.anchor.reason,
+  currentOperatingCapacity:e.funds,
+  movements:a.movements.map(m=>({id:m.id,day:m.day,kind:m.kind,
+   delta:m.delta,remaining:m.after,sourceHash:m.hash})),
+  notWithdrawableTalons:true,noInventedMaterialProperty:true}:
+  {groupId,openingBalance:e.funds,
+   openingDay:null,openingProvenance:'Older saved balance only; no audited historic movements',
+   currentOperatingCapacity:e.funds,movements:[],
+   notWithdrawableTalons:true,noInventedMaterialProperty:true};
+}
+
 function month(w,day,emit){
  const r=ensure(w);
  for(const e of all(w)){
@@ -371,6 +527,7 @@ function month(w,day,emit){
         p.id===a.priorityId&&p.supported&&
         p.day<=a.day))))
     throw Error('Unverified group work or unsupported priority link cannot create historical progress');
+   ensureOperatingAccount(e,day);
    const attempts=e.activity.splice(0);
    const available=e.funds,effort=attempts.reduce((v,a)=>v+a.minutes,0),
     cost=Math.min(available,Math.max(1,Math.ceil(effort/90)));
@@ -393,6 +550,12 @@ function month(w,day,emit){
     emit,success?
      e.charter.name+' reports a limited, independently checked contribution toward '+e.charter.duty+
       '. No family rank, inherited power or legal office follows.':null);
+   recordOperatingMovement(e,{
+    kind:'original-independent-work-cost',day,
+    before:available,after:e.funds,
+    source:{originalReview:structuredClone(independentReview),
+     originalReviewHash:independentReview.hash,
+     originalReviewCost:cost,noSecondWorkOrRandomDraw:true}});
    for(const work of attempts){
     if(work.priorityId===undefined)continue;
     const priority=e.internalPriorities.find(p=>p.id===work.priorityId);
@@ -419,9 +582,17 @@ function month(w,day,emit){
    }
   }
   const upkeep=e.members>0?Math.max(1,Math.ceil(e.members/8)):0;
-  if(e.funds>=upkeep&&upkeep){e.funds-=upkeep;e.unfundedMonths=0;
-   e.status='organising';}
-  else{e.unfundedMonths++;e.status='inactive';}
+  if(e.funds>=upkeep&&upkeep){
+   ensureOperatingAccount(e,day);
+   const previousOperating=e.funds;
+   e.funds-=upkeep;e.unfundedMonths=0;
+   e.status='organising';
+   recordOperatingMovement(e,{
+    kind:'original-monthly-upkeep',day,
+    before:previousOperating,after:e.funds,
+    source:{memberCountAtUpkeep:e.members,fundedUpkeep:true,
+     noMemberWageOrNewPropertyGranted:true}});
+  }else{e.unfundedMonths++;e.status='inactive';}
   // Inactivity means no sustained operations, NOT forced loss of a surname,
   // kinship, accumulated history or legal dissolution.
   standing.lastUpdated=day;
@@ -1288,4 +1459,6 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INDEPENDENT_WORK_POSITION,reassessPublishedWork,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
- COORDINATION,offerCoordination,coordinatorStatus};
+ COORDINATION,offerCoordination,coordinatorStatus,
+ OPERATING_ACCOUNT,ensureOperatingAccount,verifyOperatingAccount,
+ attestOriginalContribution,originalOperatingHistory};
