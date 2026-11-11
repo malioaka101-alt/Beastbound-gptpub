@@ -106,6 +106,26 @@ function founded(seed){
  A.equal(e.taskServices[0].sourceHash,evidenceHash);
 }
 {
+ const {s,w,e,t}=founded(997114);
+ t.rngState=pickDraw(x=>x<.001);
+ const expected=act(s,'groupTaskRequest',{groupId:e.id,npcId:'elira',
+  task,untilDay:Math.floor(s.world.minutes/1440)+60});
+ A.equal(expected.decision,'accepted');
+ const beforeWork=e.memberServiceMinutes||0,
+  coins=s.player.coins,bank=e.funds;
+ // A real independent member can still decline to volunteer this month,
+ // despite accepting a prior request. NO fictional duty or completion.
+ t.rngState=pickDraw(x=>x>.99);
+ W.advance(s,30);
+ A.equal(e.memberServiceMinutes||0,beforeWork);
+ A.equal(e.taskServices.length,0);
+ A.equal(act(s,'groupTasksStatus',{groupId:e.id}).tasks[0].status,
+  'freely-accepted-not-guaranteed');
+ A.equal(e.funds,bank);
+ A.equal(s.player.coins,coins);
+ A.equal(G.validate(e),true);
+}
+{
  const {s,w,e,t}=founded(997111);
  t.rngState=pickDraw(x=>x>.96);
  const day=Math.floor(s.world.minutes/1440);
