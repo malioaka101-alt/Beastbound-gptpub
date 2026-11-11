@@ -58,6 +58,9 @@ function validate(e){
     e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
     new Set(e.internalPriorities.map(x=>x.id)).size!==e.internalPriorities.length))
   return false;
+ if(e.internalPositions!==undefined&&
+  (!Array.isArray(e.internalPositions)||
+   !verifyInternalPositionHistory(e)))return false;
  if(e.internalRoles!==undefined&&
    (!Array.isArray(e.internalRoles)||
     e.internalRoles.some(x=>!verifyInternalRole(e,x))||
@@ -162,7 +165,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],internalPriorities:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
+  additionalMembers:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -578,6 +581,200 @@ function internalPriorityStatus(w,groupId){
 
 
 /*
+ * #18 — changing personal positions on existing, open-ended priorities.
+ *
+ * This is NOT a fixed roster of factions or a second voting system. The
+ * proposal already lives in this group's own internalPriorities; any real
+ * consenting local member can independently express, change or withhold a
+ * personal view after an actually witnessed discussion. All earlier views
+ * are immutable history. No position grants authority, work, budget or veto.
+ */
+const INTERNAL_POSITION='existing-association-independent-member-position-v1';
+function positionBefore(e,priority,actorId,rows){
+ const previous=[...rows].reverse().find(x=>
+  x.priorityId===priority.id&&x.memberActorId===actorId);
+ return previous?
+  {stance:previous.stance,hash:previous.sourceHash,day:previous.day}:
+  priority.memberActorId===actorId?
+   {stance:priority.outcome,hash:priority.sourceHash,day:priority.day}:
+   {stance:'unrecorded',hash:null,day:priority.day};
+}
+function positionChances(q){
+ const old=q.previousStance;
+ const support=clamp(.39+
+  (old==='supported'?.13:old==='dissented'?-.10:0)+
+  (q.groupCompletedEfforts>q.groupFailedEfforts?.08:-.04)-
+  (q.worldSnapshot.pressure>65?.07:0),.11,.72);
+ const dissent=clamp(.25+
+  (old==='dissented'?.12:old==='supported'?-.06:0)+
+  (q.worldSnapshot.pressure>65?.10:0)+
+  (q.groupFailedEfforts>q.groupCompletedEfforts?.06:0),.10,.62);
+ return {support,dissent};
+}
+function verifyInternalPosition(e,row){
+ const q=row?.source,p=e.internalPriorities?.find(x=>x.id===row?.priorityId);
+ if(!p||!q||e.origin!=='player-declaration'||
+  row.origin!==INTERNAL_POSITION||
+  row.sourceHash!==hash(q)||q.origin!==INTERNAL_POSITION||
+  q.id!==row.id||q.groupId!==e.id||
+  q.groupOriginHash!==e.originHash||
+  q.priorityId!==p.id||q.prioritySourceHash!==p.sourceHash||
+  q.memberActorId!==row.memberActorId||
+  q.memberConsentHash!==row.memberConsentHash||
+  q.day!==row.day||q.stance!==row.stance||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  !Number.isInteger(row.day)||row.day<p.day||
+  !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
+  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  typeof q.memberName!=='string'||q.memberName.length<3||
+  typeof q.reason!=='string'||q.reason.trim().length<35||
+  q.reason.length>540||
+  typeof q.meetingWitness!=='string'||q.meetingWitness.trim().length<45||
+  q.meetingWitness.length>610||
+  (typeof q.presenceHash!=='string'&&q.presenceHash!==null)||
+  !['supported','dissented','undecided','unrecorded'].includes(q.previousStance)||
+  (typeof q.previousPositionHash!=='string'&&q.previousPositionHash!==null)||
+  !Number.isInteger(q.previousPositionDay)||q.previousPositionDay>q.day||
+  !Number.isInteger(q.groupCompletedEfforts)||q.groupCompletedEfforts<0||
+  !Number.isInteger(q.groupFailedEfforts)||q.groupFailedEfforts<0||
+  !q.worldSnapshot||
+  !['pressure','quality','stability','prosperity'].every(k=>
+   Number.isFinite(q.worldSnapshot[k])&&
+   q.worldSnapshot[k]>=0&&q.worldSnapshot[k]<=100)||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.draw!=='number'||q.draw<0||q.draw>=1||
+  !['supported','dissented','undecided'].includes(row.stance))
+  return false;
+ const member=e.additionalMembers?.find(x=>
+  x.actorId===row.memberActorId&&x.hash===row.memberConsentHash&&
+  x.name===q.memberName&&
+  Number.isInteger(x.witness?.details?.day)&&
+  x.witness.details.day<=row.day&&
+  (x.active!==false||x.departure?.day>row.day));
+ if(!member)return false;
+ const chances=positionChances(q),
+  verdict=q.draw<chances.support?'supported':
+   q.draw<chances.support+chances.dissent?'dissented':'undecided';
+ if(q.supportChance!==chances.support||
+  q.dissentChance!==chances.dissent||
+  verdict!==row.stance)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ return Agency.draw(rng)===q.draw&&rng.rngState===q.agencyAfter;
+}
+function verifyInternalPositionHistory(e){
+ const seen=[],ids=new Set();
+ for(const row of e.internalPositions){
+  if(ids.has(row?.id)||!verifyInternalPosition(e,row))return false;
+  const p=e.internalPriorities.find(x=>x.id===row.priorityId),
+   before=positionBefore(e,p,row.memberActorId,seen),q=row.source;
+  if(row.day<=before.day||
+   q.previousStance!==before.stance||
+   q.previousPositionHash!==before.hash||
+   q.previousPositionDay!==before.day)return false;
+  seen.push(row);ids.add(row.id);
+ }
+ return true;
+}
+function considerInternalPosition(w,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>!['id','groupId','priorityId',
+   'memberActorId','day','regionId','place','reason',
+   'meetingWitness'].includes(k)))
+  throw Error('A member position cannot be dictated, fabricated or made into a binding faction order');
+ const {id,groupId,priorityId,memberActorId,day,regionId,place,
+  reason,meetingWitness}=params;
+ const e=lookup(w,groupId),
+  priority=e?.internalPriorities?.find(x=>x.id===priorityId),
+  member=e?.origin==='player-declaration'?
+   e.additionalMembers.find(x=>x.actorId===memberActorId&&x.active!==false):null,
+  reg=Atlas.R[regionId],eco=w?.ecosystems?.[regionId],
+  host=w?.countries?.[e?.polity];
+ const People=require('./person-presence'),
+  Agency=require('./group-member-agency');
+ const npcId=member?.witness?.details?.npcId,
+  person=typeof npcId==='string'?People.resolve(w,npcId,place,day):null;
+ const entries=e?.internalPositions||[],
+  previous=priority&&member?
+   positionBefore(e,priority,memberActorId,entries):null;
+ if(!e||!priority||!member||!person||
+  person.actorId!==memberActorId||person.name!==member.name||
+  !reg||reg.polity!==e.polity||
+  Atlas.LOCATION_REGION[place]!==regionId||
+  !eco||!host||!Number.isInteger(day)||day>w.lastTickDay||
+  !previous||day<=previous.day||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(id)||
+  typeof reason!=='string'||reason.trim().length<35||reason.length>540||
+  typeof meetingWitness!=='string'||
+  meetingWitness.trim().length<45||meetingWitness.length>610||
+  entries.some(x=>x.id===id||
+   x.priorityId===priorityId&&x.memberActorId===memberActorId&&
+   x.day===day)||
+  ![eco.pressure,eco.quality,host.stability,host.prosperity]
+   .every(v=>Number.isFinite(v)&&v>=0&&v<=100))
+  throw Error('Only a later, witnessed local conversation with a real consenting member can produce their independent evolving position');
+ const agency=Agency.ensure(w),agencyBefore=agency.rngState;
+ const partial={origin:INTERNAL_POSITION,id,groupId:e.id,
+  groupOriginHash:e.originHash,priorityId:priority.id,
+  prioritySourceHash:priority.sourceHash,
+  memberActorId,memberConsentHash:member.hash,memberName:member.name,
+  day,regionId,place,reason,meetingWitness,
+  presenceHash:person.presence?hash(person.presence):null,
+  previousStance:previous.stance,
+  previousPositionHash:previous.hash,previousPositionDay:previous.day,
+  groupCompletedEfforts:e.completedEfforts,
+  groupFailedEfforts:e.failedEfforts,
+  worldSnapshot:{pressure:eco.pressure,quality:eco.quality,
+   stability:host.stability,prosperity:host.prosperity}};
+ const chances=positionChances(partial),draw=Agency.draw(agency),
+  stance=draw<chances.support?'supported':
+   draw<chances.support+chances.dissent?'dissented':'undecided';
+ const source={...partial,agencyBefore,agencyAfter:agency.rngState,
+  supportChance:chances.support,dissentChance:chances.dissent,
+  draw,stance};
+ const row={id,origin:INTERNAL_POSITION,priorityId:priority.id,
+  memberActorId,memberConsentHash:member.hash,day,stance,
+  source,sourceHash:hash(source)};
+ if(!verifyInternalPosition(e,row))
+  throw Error('An independently sourced association position failed verification');
+ e.internalPositions||=[];e.internalPositions.push(row);
+ if(!validate(e))throw Error('Saved group positions must form an unbroken historical chain');
+ record(ensure(w),e,day,'independent-existing-priority-position',{
+  priorityId:priority.id,memberActorId,stance,
+  positionSourceHash:row.sourceHash,
+  noBindingGroupVote:true,noForcedLabour:true,
+  noGroupFundsTransferred:true,noCivicOffice:true},null);
+ return {id,groupId:e.id,priorityId:priority.id,
+  memberActorId,stance,
+  previousStance:previous.stance,
+  noGroupMandate:true,noAutomaticFundsOrWork:true,
+  noBindingOtherMembers:true};
+}
+function internalPositionStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId);
+ if(!e)throw Error('Original association and source-valid positions required');
+ const asOf=day===undefined?w.lastTickDay:day;
+ if(!Number.isInteger(asOf)||asOf<e.foundedDay||
+  asOf>w.lastTickDay)throw Error('Only real elapsed world days have group positions');
+ return (e.internalPriorities||[]).filter(p=>p.day<=asOf).map(p=>{
+  const memberIds=new Set([p.memberActorId,
+   ...(e.internalPositions||[]).filter(x=>
+    x.priorityId===p.id&&x.day<=asOf).map(x=>x.memberActorId)]);
+  return {priorityId:p.id,proposal:p.proposal,
+   positions:[...memberIds].map(actorId=>{
+    const rows=(e.internalPositions||[]).filter(x=>
+     x.priorityId===p.id&&x.memberActorId===actorId&&x.day<=asOf);
+    const last=positionBefore(e,p,actorId,rows);
+    return {memberActorId:actorId,stance:last.stance,
+     lastEvidenceHash:last.hash,day:last.day,
+     historyCount:rows.length};
+   }),
+   noMajorityOrCompulsoryMandateInferred:true};
+ });
+}
+
+
+/*
  * Existing volunteer members can choose real, deliberately limited work
  * responsibilities. This records the member's independent willingness, not
  * an invented government appointment, hereditary title, salary, achievement,
@@ -944,6 +1141,7 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
  INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus,
+ INTERNAL_POSITION,considerInternalPosition,internalPositionStatus,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus};
