@@ -487,6 +487,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupTreasuryStatus':return EmergentGroups.treasuryStatus(s,params);
   case 'social.groupMembersStatus':return GroupInvitations.status(s,params);
+  case 'social.groupTasksStatus':return GroupInvitations.taskStatus(s,params);
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
   case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);
@@ -511,6 +512,7 @@ function act(s,{system,operation,params={}}={}){
    return EmergentPeople.heardStatus(s,Realm.peek(s));
   }
   case 'social.inviteGroupMember':return GroupInvitations.invitation(s,params);
+  case 'social.groupTaskRequest':return GroupInvitations.taskRequest(s,params);
   case 'social.formGroup':return EmergentGroups.form(s,params);
   case 'social.groupContribute':return EmergentGroups.contribute(s,params);
   case 'social.inquire':return SocialFabric.inquire(s,params);
