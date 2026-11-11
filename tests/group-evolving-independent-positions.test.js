@@ -101,6 +101,8 @@ const people=Object.fromEntries(evolving[0].positions.map(x=>[x.memberActorId,x]
 A.equal(people['npc:elira'].stance,'undecided');
 A.equal(people['npc:otto'].stance,'supported');
 A.equal(people['npc:otto'].historyCount,2);
+A.equal(people['npc:otto'].memberStillParticipating,true);
+A.equal(people['npc:otto'].historicalOpinionDoesNotConferMembership,true);
 A.equal(evolving[0].noMajorityOrCompulsoryMandateInferred,true);
 A.equal(G.internalPositionStatus(w,e.id,{day})[0].positions.find(x=>
  x.memberActorId==='npc:otto').stance,'dissented');
