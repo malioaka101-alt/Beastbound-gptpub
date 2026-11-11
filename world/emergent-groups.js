@@ -68,6 +68,11 @@ function validate(e){
     e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
     new Set(e.priorityWork.map(x=>x.originalActionHash)).size!==e.priorityWork.length))
   return false;
+ if(e.coordinationMandates!==undefined&&
+  (!Array.isArray(e.coordinationMandates)||
+   e.coordinationMandates.some(x=>!verifyCoordinationMandate(e,x))||
+   new Set(e.coordinationMandates.map(x=>x.id)).size!==e.coordinationMandates.length))
+  return false;
  if(e.origin==='player-declaration'){
   const d=e.witness.details;
   if(e.witness.type!=='story'||d?.origin!=='informal-player-group-founding'||
@@ -157,7 +162,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],internalPriorities:[],internalRoles:[],priorityWork:[],
+  additionalMembers:[],internalPriorities:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -774,6 +779,149 @@ function priorityWorkStatus(w,groupId){
  }));
 }
 
+
+/*
+ * Voluntary operational coordination is not transfer of sovereign office,
+ * founding authorship, access to somebody else's money, or power over peers.
+ * The group can name a time-limited coordinator without changing its
+ * immutable original founder or implied voting rights for other people.
+ */
+const COORDINATION='independently-agreed-group-operational-coordinator-v1';
+function coordinationChance(q){
+ return clamp(.52+
+  (q.originalGroupCompletedEfforts>q.originalGroupFailedEfforts?.07:0)-
+  (q.groupStatusAtOffer==='inactive'?.15:0),.18,.76);
+}
+function verifyCoordinationMandate(e,row){
+ const q=row?.source;
+ if(!q||e.origin!=='player-declaration'||
+  row.origin!==COORDINATION||row.sourceHash!==hash(q)||
+  q.origin!==COORDINATION||q.id!==row.id||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.memberActorId!==row.memberActorId||
+  q.originalMembershipHash!==row.originalMembershipHash||
+  q.memberName!==row.memberName||
+  q.startDay!==row.startDay||q.untilDay!==row.untilDay||
+  q.scope!==row.scope||q.agreed!==row.agreed||
+  row.status!==(row.agreed?'accepted':'declined')||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  !Number.isInteger(row.startDay)||row.startDay<e.foundedDay||
+  !Number.isInteger(row.untilDay)||row.untilDay<row.startDay||
+  row.untilDay>10000000||
+  typeof row.scope!=='string'||row.scope.trim().length<38||
+  row.scope.length>520||
+  q.originalFounder!==e.founder.name||
+  !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
+  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  typeof q.meetingWitness!=='string'||q.meetingWitness.trim().length<45||
+  q.meetingWitness.length>600||
+  typeof q.presenceHash!=='string'&&q.presenceHash!==null||
+  !['organising','inactive','active','operating'].includes(q.groupStatusAtOffer)||
+  !Number.isInteger(q.originalGroupCompletedEfforts)||q.originalGroupCompletedEfforts<0||
+  !Number.isInteger(q.originalGroupFailedEfforts)||q.originalGroupFailedEfforts<0||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.decisionDraw!=='number'||q.decisionDraw<0||
+  q.decisionDraw>=1||q.independentChance!==coordinationChance(q)||
+  q.agreed!==(q.decisionDraw<q.independentChance)||
+  typeof q.previousCoordinator!=='string'||
+  !['founder','member'].includes(q.previousCoordinatorKind))
+  return false;
+ const person=e.additionalMembers?.find(x=>
+  x.actorId===row.memberActorId&&x.hash===row.originalMembershipHash&&
+  x.name===row.memberName&&
+  Number.isInteger(x.witness?.details?.day)&&
+  x.witness.details.day<=row.startDay&&
+  (x.active!==false||x.departure?.day>row.startDay));
+ if(!person)return false;
+ const agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ const choice=agency.draw(rng);
+ return choice===q.decisionDraw&&rng.rngState===q.agencyAfter;
+}
+function coordinatorStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId);
+ if(!e)throw Error('A real valid association must exist before coordination can be inspected');
+ const d=day===undefined?w.lastTickDay:day;
+ if(!Number.isInteger(d)||d<e.foundedDay)
+  throw Error('A real current or historical day is necessary');
+ const live=(e.coordinationMandates||[]).filter(row=>{
+  const member=e.additionalMembers?.find(x=>
+    x.actorId===row.memberActorId&&x.hash===row.originalMembershipHash);
+  const departed=member?.active===false&&member.departure?.day<=d;
+  return row.agreed&&d>=row.startDay&&d<=row.untilDay&&!departed;
+ }).slice(-1)[0];
+ return live?
+  {groupId:e.id,actorId:live.memberActorId,name:live.memberName,
+   role:'voluntary limited operational coordinator',
+   foundingCharterUnchanged:true,mandateId:live.id,expiresDay:live.untilDay,
+   noGovernmentOffice:true,noTreasuryPower:true,noCommandOverMembers:true}:
+  {groupId:e.id,actorId:e.founder.actorId,name:e.founder.name,
+   role:'original founder, no current delegated coordinator',
+   foundingCharterUnchanged:true,mandateId:null,expiresDay:null,
+   noGovernmentOffice:true,noTreasuryPower:true,noCommandOverMembers:true};
+}
+function offerCoordination(w,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+   Object.keys(params).some(k=>!['id','groupId','memberActorId','regionId',
+    'place','startDay','untilDay','scope','meetingWitness'].includes(k)))
+  throw Error('The coordinator cannot be appointed by claimed consent, title, payroll, law or compulsory order');
+ const {id,groupId,memberActorId,regionId,place,
+  startDay,untilDay,scope,meetingWitness}=params;
+ const e=lookup(w,groupId),reg=Atlas.R[regionId],
+  member=e?.origin==='player-declaration'?
+   e.additionalMembers.find(x=>x.actorId===memberActorId&&x.active!==false):null;
+ const Presence=require('./person-presence'),Agency=require('./group-member-agency');
+ const local=typeof member?.witness?.details?.npcId==='string'?
+  Presence.resolve(w,member.witness.details.npcId,place,startDay):null;
+ if(!e||!member||!local||local.actorId!==memberActorId||
+  local.name!==member.name||!reg||reg.polity!==e.polity||
+  Atlas.LOCATION_REGION[place]!==regionId||
+  !Number.isInteger(startDay)||startDay<e.foundedDay||
+  startDay>w.lastTickDay||
+  !Number.isInteger(untilDay)||untilDay<startDay||untilDay>10000000||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(id)||
+  typeof scope!=='string'||scope.trim().length<38||scope.length>520||
+  typeof meetingWitness!=='string'||meetingWitness.trim().length<45||
+  meetingWitness.length>600||
+  (e.coordinationMandates||[]).some(x=>x.id===id||
+   x.memberActorId===memberActorId&&x.startDay===startDay)||
+  coordinatorStatus(w,e.id,{day:startDay}).mandateId!==null)
+  throw Error('A real independently present voluntary member and unoccupied limited coordination term are required');
+ const agency=Agency.ensure(w),agencyBefore=agency.rngState,
+  prior=coordinatorStatus(w,e.id,{day:startDay});
+ const partially={
+  origin:COORDINATION,id,groupId:e.id,groupOriginHash:e.originHash,
+  memberActorId,originalMembershipHash:member.hash,memberName:member.name,
+  originalFounder:e.founder.name,regionId,place,startDay,untilDay,scope,
+  meetingWitness,presenceHash:local.presence?hash(local.presence):null,
+  groupStatusAtOffer:e.status,
+  originalGroupCompletedEfforts:e.completedEfforts,
+  originalGroupFailedEfforts:e.failedEfforts,
+  previousCoordinator:prior.name,
+  previousCoordinatorKind:prior.mandateId?'member':'founder'};
+ const independentChance=coordinationChance(partially),
+  decisionDraw=Agency.draw(agency),agreed=decisionDraw<independentChance;
+ const source={...partially,agencyBefore,agencyAfter:agency.rngState,
+  independentChance,decisionDraw,agreed};
+ const row={id,origin:COORDINATION,memberActorId,memberName:member.name,
+  originalMembershipHash:member.hash,startDay,untilDay,scope,
+  agreed,status:agreed?'accepted':'declined',
+  source,sourceHash:hash(source)};
+ if(!verifyCoordinationMandate(e,row))
+  throw Error('Only the original independently consenting member may agree to a bounded role');
+ e.coordinationMandates||=[];
+ e.coordinationMandates.push(row);
+ if(!validate(e))throw Error('An invalid internal coordination cannot rewrite the founding');
+ record(ensure(w),e,startDay,'voluntary-operational-coordination-response',
+  {sourceHash:row.sourceHash,candidate:memberActorId,agreed,
+   firstFounderRemainsHistorical:true,noLegalOffice:true,
+   noGroupTreasuryTransfer:true,noBoundPeers:true},null);
+ return {groupId,id,candidate:memberActorId,agreed,
+  limitedCoordinationAccepted:agreed,termEndDay:untilDay,
+  originalFounderPreserved:true,noOfficeOrSalaryGranted:true,
+  noRightToCompelOtherMembers:true,noTreasuryAccess:true};
+}
+
 function visible(s,w){
  const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
@@ -797,4 +945,5 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
  INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
- PRIORITY_WORK,priorityWorkStatus};
+ PRIORITY_WORK,priorityWorkStatus,
+ COORDINATION,offerCoordination,coordinatorStatus};
