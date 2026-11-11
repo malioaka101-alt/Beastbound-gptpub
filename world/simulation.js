@@ -553,11 +553,14 @@ function tickMonth(w,day){
    if(!verifyDiplomaticAudit(d,key))
     throw Error('The original diplomatic state transition cannot survive saved evidence verification');
    const names=`${A.P[d.a].name} and ${A.P[d.b].name}`;
+   // The world relationship has changed; there is NO sourced signed treaty,
+   // named consenting envoy, formal legal term or negotiated accord here.
+   // A GM may later author those in their original world records with proof.
    const txt=d.status==='war'?`${names} enter an armed border conflict after escalating territorial disputes.`:
-    d.status==='truce'?`${names} sign an exhausted ceasefire, with trade still restricted.`:
-    d.status==='cooperation'?`${names} broaden a trade and mutual-aid accord.`:
-    d.status==='strained'?`${names} suspend some joint passage arrangements amid rising tensions.`:
-    `${names} return to uneasy peacetime negotiations.`;
+    d.status==='truce'?`Fighting between ${names} subsides into an exhausted truce; tensions remain.`:
+    d.status==='cooperation'?`Practical cooperation between ${names} grows closer.`:
+    d.status==='strained'?`Relations between ${names} become strained as passage grows more difficult.`:
+    `${names} move into an uneasy peacetime relationship.`;
    event(w,{day,region:'international',subject:key,text:txt,channel:'foreign courier',releaseDay:day+14,severity:d.status==='war'?'warning':'important'});
   }
  }
