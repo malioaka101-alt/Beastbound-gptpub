@@ -132,14 +132,17 @@ function founded(seed){
   task,untilDay:Math.floor(s.world.minutes/1440)+35});
  // A fabricated remote location is NOT a real local social witness.
  // The read-only private member task view must not leak its contents.
- const actualPlace=s.world.location;
+ const actualPlace=s.world.location,validSave=E.exportGame(s),
+  rng=s.rngState;
  s.world.location='unsupported_remote_mandate';
- const before=E.exportGame(s),rng=s.rngState;
+ const fixture=JSON.stringify(s);
  A.throws(()=>act(s,'groupTasksStatus',{groupId:e.id}),
   /Only the actual local founder/);
- A.equal(E.exportGame(s),before);
+ A.equal(JSON.stringify(s),fixture,
+  'A denied view cannot alter even a deliberately invalid-location test fixture');
  A.equal(s.rngState,rng);
  s.world.location=actualPlace;
+ A.equal(E.exportGame(s),validSave);
  A.equal(act(s,'groupTasksStatus',{groupId:e.id}).tasks.length,1);
 }
 {
