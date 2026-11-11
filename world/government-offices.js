@@ -269,7 +269,8 @@ function jurisdictionSnapshot(w,polity,regionId,day){
  if(!A.R[regionId]||A.R[regionId].polity!==polity||
   !w.countries?.[polity]||
   !Number.isInteger(day)||day<0||
-  !['in_office','interim'].includes(v.status))
+  !['in_office','interim'].includes(v.status)||
+  incumbentAtMandate(v,v.mandateNumber,day)!==v.holder)
   throw Error('A real present civic jurisdiction and competent original governing office are required');
  return {polity:c.id,regionId,office:c.title,
   governingBody:c.governingBody,
