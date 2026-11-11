@@ -193,14 +193,21 @@ function month(w,day,emit){
     standing.influence=clamp(standing.influence+1,0,100);
     standing.publicPressure=clamp(standing.publicPressure-1,0,100);
    }else e.memberServiceFailures=(e.memberServiceFailures||0)+1;
-   G.record(r,e,day,success?'verified-volunteer-work':'unsuccessful-volunteer-work',{
+   // A previous independently accepted optional task only ATTRIBUTES
+   // this ORIGINAL volunteer result. No extra roll, wages, time,
+   // financial expense, command authority or service obligation.
+   const task=G.eligibleVoluntaryTask(e,m.actorId,day);
+   const actual=G.record(r,e,day,success?'verified-volunteer-work':'unsuccessful-volunteer-work',{
     npcId,memberId:m.actorId,priorAcceptanceHash:m.hash,
     actualWorkMinutes:90,roll,modifier,dc,success,
     localInstitutionalPermissionNotImplied:true,
-    changedInfluence:success?1:0
+    changedInfluence:success?1:0,
+    ...(task?{voluntaryTaskId:task.id,
+     voluntaryTaskWitnessHash:task.witnessHash}:{})
    },emit,success?
     npc.name+' independently contributes documented practical voluntary work to '+
      e.charter.name+'. This does not establish any familial inheritance or grant a special technique.':null);
+   if(task)G.retainOriginalTaskService(e,task.id,actual);
   }
  }
  return t;

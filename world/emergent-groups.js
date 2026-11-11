@@ -54,6 +54,16 @@ function validate(e){
   !e.witness||hash(e.witness)!==e.originHash||
   !Number.isInteger(e.foundedDay)||e.foundedDay<0)return false;
  if(e.treasuryAudit!==undefined&&!verifyTreasuryAudit(e))return false;
+ if(e.voluntaryTasks!==undefined&&
+  (!Array.isArray(e.voluntaryTasks)||
+   e.voluntaryTasks.some(row=>!verifyVoluntaryTask(e,row))||
+   new Set(e.voluntaryTasks.map(row=>row.id)).size!==e.voluntaryTasks.length))
+  return false;
+ if(e.taskServices!==undefined&&
+  (!Array.isArray(e.taskServices)||
+   e.taskServices.some(row=>!verifyTaskService(e,row))||
+   new Set(e.taskServices.map(row=>row.taskId)).size!==e.taskServices.length))
+  return false;
  if(e.internalPriorities!==undefined&&
    (!Array.isArray(e.internalPriorities)||
     e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
@@ -295,6 +305,187 @@ function treasuryAuditStatus(w,groupId){
   note:'Original association operating funds, not another treasury account, different currency, free revenue or grant of legal title.'};
 }
 
+
+/*
+ * Original organisational command has human limits: a witnessed member
+ * may independently accept or decline an open-ended work invitation.
+ * This is not a legal appointment, binding order, fee, payroll, work
+ * accomplishment or any compulsory use of another person's time.
+ *
+ * A later actual ordinary member service, if it happens independently,
+ * may reference the accepted task without creating one extra work check.
+ */
+const VOLUNTARY_TASK='original-witnessed-voluntary-member-task-request-v1';
+const TASK_SERVICE='original-monthly-member-work-task-link-v1';
+const taskClamp=x=>Math.max(.15,Math.min(.78,x));
+function voluntaryTaskChance(q){
+ return taskClamp(.42+(q.groupStatusAtOffer==='inactive'?-.12:.07)+
+  (q.groupCompletedEfforts>q.groupFailedEfforts?.07:0));
+}
+function verifyVoluntaryTask(e,row){
+ const ev=row?.witness,q=ev?.details;
+ if(!q||e.origin!=='player-declaration'||
+  row.origin!==VOLUNTARY_TASK||
+  row.witnessHash!==hash(ev)||
+  ev.type!=='story'||q.origin!==VOLUNTARY_TASK||
+  q.id!==row.id||q.groupId!==e.id||
+  q.groupOriginHash!==e.originHash||
+  q.founder!==e.founder.name||
+  q.memberActorId!==row.memberActorId||
+  q.memberConsentHash!==row.memberConsentHash||
+  q.decision!==row.decision||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  !Number.isInteger(q.day)||q.day<e.foundedDay||
+  q.day!==row.day||q.untilDay!==row.untilDay||
+  !Number.isInteger(q.untilDay)||q.untilDay<q.day||q.untilDay>10000000||
+  typeof q.task!=='string'||q.task.trim().length<30||
+  q.task.length>750||q.task!==row.task||
+  q.minutes!==18||q.issuerActorId!=='player'||
+  q.issuerWasPresent!==true||
+  q.noCompulsoryWork!==true||q.noAutomaticPayOrStatus!==true||
+  q.noNewWorkResult!==true||q.noNewGroupFundsSpent!==true||
+  !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
+  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  q.npcId!==row.npcId||
+  typeof q.memberName!=='string'||q.memberName.length<3||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.draw!=='number'||q.draw<0||q.draw>=1||
+  !['accepted','declined','considering'].includes(row.decision)||
+  !['organising','inactive','active','operating'].includes(q.groupStatusAtOffer)||
+  !Number.isInteger(q.groupCompletedEfforts)||q.groupCompletedEfforts<0||
+  !Number.isInteger(q.groupFailedEfforts)||q.groupFailedEfforts<0||
+  q.acceptChance!==voluntaryTaskChance(q))
+  return false;
+ const member=e.additionalMembers?.find(m=>
+  m.actorId===row.memberActorId&&
+  m.hash===row.memberConsentHash&&m.name===q.memberName&&
+  m.witness?.details?.npcId===q.npcId&&
+  m.witness.details.day<=q.day&&
+  (m.active!==false||m.departure?.day>q.day));
+ if(!member)return false;
+ const Agency=require('./group-member-agency'),test={rngState:q.agencyBefore},
+  x=Agency.draw(test),answer=x<q.acceptChance?'accepted':
+   x<Math.min(.92,q.acceptChance+.25)?'considering':'declined';
+ return x===q.draw&&test.rngState===q.agencyAfter&&
+  answer===row.decision;
+}
+function recordVoluntaryTask(w,groupId,event){
+ const e=lookup(w,groupId),q=event?.details;
+ if(!e||!q||q.groupId!==groupId)
+  throw Error('Only a real witnessed task request inside an original association can be registered');
+ const row={id:q.id,origin:VOLUNTARY_TASK,memberActorId:q.memberActorId,
+  memberConsentHash:q.memberConsentHash,npcId:q.npcId,
+  day:q.day,untilDay:q.untilDay,task:q.task,
+  decision:q.decision,witness:structuredClone(event),
+  witnessHash:hash(event)};
+ if(!verifyVoluntaryTask(e,row)||
+  (e.voluntaryTasks||[]).some(x=>x.id===row.id||
+   x.memberActorId===row.memberActorId&&x.day===row.day))
+  throw Error('The real member has already responded today or this proposed work lacks personal independent consent');
+ e.voluntaryTasks||=[];e.voluntaryTasks.push(row);
+ if(!validate(e))throw Error('An unsourced volunteer task must not change real group activity');
+ record(ensure(w),e,row.day,'personally-offered-voluntary-group-task',
+  {taskId:row.id,memberActorId:row.memberActorId,
+   independentlyAnswered:row.decision,
+   witnessHash:row.witnessHash,
+   noAutomaticWorkOrFee:true},null);
+ return {taskId:row.id,decision:row.decision,
+  accepted:row.decision==='accepted',
+  noGuaranteedWork:true,noGroupFundsSpent:true,
+  noBindingCommand:true};
+}
+function eligibleVoluntaryTask(e,memberActorId,day){
+ if(!Number.isInteger(day))return null;
+ return (e.voluntaryTasks||[]).find(row=>
+  row.decision==='accepted'&&
+  row.memberActorId===memberActorId&&
+  day>row.day&&day<=row.untilDay&&
+  !(e.taskServices||[]).some(x=>x.taskId===row.id))||null;
+}
+function verifyTaskService(e,row){
+ const q=row?.source,task=e.voluntaryTasks?.find(t=>t.id===row?.taskId),
+  work=q?.originalWork;
+ if(!q||!task||task.decision!=='accepted'||
+  row.origin!==TASK_SERVICE||
+  row.sourceHash!==hash(q)||q.origin!==TASK_SERVICE||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  row.taskId!==q.taskId||q.taskId!==task.id||
+  row.memberActorId!==task.memberActorId||
+  q.memberConsentHash!==task.memberConsentHash||
+  q.taskWitnessHash!==task.witnessHash||
+  !work||work.groupId!==e.id||
+  !['verified-volunteer-work','unsuccessful-volunteer-work'].includes(work.kind)||
+  work.day<=task.day||work.day>task.untilDay||
+  work.details?.memberId!==task.memberActorId||
+  work.details?.priorAcceptanceHash!==task.memberConsentHash||
+  work.details?.voluntaryTaskId!==task.id||
+  work.details?.voluntaryTaskWitnessHash!==task.witnessHash||
+  work.details?.actualWorkMinutes!==90||
+  work.details?.dc!==14||
+  !Number.isInteger(work.details?.roll)||work.details.roll<1||
+  work.details.roll>20||
+  typeof work.details?.success!=='boolean'||
+  work.details?.success!==(work.kind==='verified-volunteer-work')||
+  q.actualWorkHash!==work.hash||
+  q.noSecondWorkOrPay!==true||
+  q.taskSpecificCompletionNotEstablished!==true)
+  return false;
+ const {hash:sourceHash,notice,releaseDay,...body}=work;
+ return hash(body)===sourceHash;
+}
+function retainOriginalTaskService(e,taskId,actualGroupEvent){
+ const task=e.voluntaryTasks?.find(x=>x.id===taskId);
+ if(!task||!verifyVoluntaryTask(e,task)||
+  task.decision!=='accepted'||!actualGroupEvent||
+  (e.taskServices||[]).some(x=>x.taskId===taskId))
+  throw Error('Only the original independently completed volunteer service may be linked once');
+ const q={origin:TASK_SERVICE,groupId:e.id,groupOriginHash:e.originHash,
+  taskId,memberConsentHash:task.memberConsentHash,
+  taskWitnessHash:task.witnessHash,
+  actualWorkHash:actualGroupEvent.hash,
+  originalWork:structuredClone(actualGroupEvent),
+  noSecondWorkOrPay:true,
+  taskSpecificCompletionNotEstablished:true};
+ const row={origin:TASK_SERVICE,taskId,
+  memberActorId:task.memberActorId,source:q,sourceHash:hash(q)};
+ if(!verifyTaskService(e,row))
+  throw Error('Only a source-corroborated original world service can be linked to a group invitation');
+ e.taskServices||=[];e.taskServices.push(row);
+ if(!validate(e))throw Error('Group task linked to non-original member work');
+ return row;
+}
+function voluntaryTaskStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('Original witnessed private group tasks are required');
+ const today=day===undefined?w.lastTickDay:day;
+ if(!Number.isInteger(today)||today<e.foundedDay||today>w.lastTickDay)
+  throw Error('Original elapsed world day required for task history');
+ return (e.voluntaryTasks||[]).filter(x=>x.day<=today).map(x=>{
+  const result=(e.taskServices||[]).find(z=>z.taskId===x.id&&
+   z.source.originalWork.day<=today);
+  const m=e.additionalMembers?.find(z=>z.actorId===x.memberActorId&&
+   z.hash===x.memberConsentHash);
+  const departed=m?.active===false&&m.departure?.day<=today;
+  return {taskId:x.id,memberActorId:x.memberActorId,
+   task:x.task,individualDecision:x.decision,
+   untilDay:x.untilDay,
+   status:result?
+    result.source.originalWork.details.success?
+     'original-member-work-recorded-task-not-verified':
+     'original-member-work-failed-task-not-verified':
+    x.decision!=='accepted'?x.decision:
+    departed?'ended-after-member-departure':
+    today>x.untilDay?'expired-without-recorded-work':
+    'freely-accepted-not-guaranteed',
+   originalServiceHash:result?.source.actualWorkHash||null,
+   originalMinutes:result?.source.originalWork.details.actualWorkMinutes||0,
+   specificTaskCompletionVerified:false,
+   noCompulsoryService:true,noNewWorkOrMoney:true};
+ });
+}
+
 function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
  const r=ensure(w),polity=Atlas.R[Atlas.LOCATION_REGION[place]||
   (Atlas.R[place]?place:w.livedPlaces?.places?.[place]?.regionId)]?.polity;
@@ -311,7 +502,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
+  additionalMembers:[],voluntaryTasks:[],taskServices:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -1450,5 +1641,8 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus,
+ VOLUNTARY_TASK,TASK_SERVICE,voluntaryTaskChance,verifyVoluntaryTask,
+ recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
+ voluntaryTaskStatus,
  TREASURY_AUDIT,verifyTreasuryAudit,openTreasuryAudit,addTreasuryReceipt,
  treasuryAuditStatus};
