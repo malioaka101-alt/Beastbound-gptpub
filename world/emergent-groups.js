@@ -768,10 +768,16 @@ function internalPositionStatus(w,groupId,{day}={}){
    positions:[...memberIds].map(actorId=>{
     const rows=(e.internalPositions||[]).filter(x=>
      x.priorityId===p.id&&x.memberActorId===actorId&&x.day<=asOf);
-    const last=positionBefore(e,p,actorId,rows);
+    const last=positionBefore(e,p,actorId,rows),
+     membership=e.additionalMembers.filter(x=>
+      x.actorId===actorId&&x.witness?.details?.day<=asOf).at(-1),
+     stillParticipating=!!membership&&
+      (membership.active!==false||membership.departure?.day>asOf);
     return {memberActorId:actorId,stance:last.stance,
      lastEvidenceHash:last.hash,day:last.day,
-     historyCount:rows.length};
+     historyCount:rows.length,
+     memberStillParticipating:stillParticipating,
+     historicalOpinionDoesNotConferMembership:true};
    }),
    noMajorityOrCompulsoryMandateInferred:true};
  });
