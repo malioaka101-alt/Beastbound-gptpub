@@ -78,7 +78,15 @@ function seedFor(lo,hi){
   const R=require('../rules');
   const form=R.act(s,{system:'social',operation:'formGroup',params:names});
   const g=G.lookup(s.table.realm,form.id);
-  g.funds=80;
+  // Fund the original long-term fixture with a genuinely owned personal
+  // contribution, not an unearned direct treasury overwrite.
+  const funded=R.act(s,{system:'social',operation:'groupContribute',
+   params:{groupId:form.id,
+    activity:'I voluntarily devote a genuine work session and eighty owned Talons to sustain the public wetland refuge circle for later independent members.',
+    coins:80}});
+  A.equal(funded.spentCoins,80);
+  A.equal(g.funds,80);
+  A.equal(G.verifyOperatingAccount(g),true);
   const agent=Agency.ensure(s.table.realm);
   agent.rngState=seedFor(0,.003);
   const yes=R.act(s,{system:'social',operation:'inviteGroupMember',
