@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/diplomacy-original-bilateral-office-context.test.js
             tests/group-member-persistent-dissent-agency.test.js
             tests/agent-initiatives.test.js
             tests/group-original-coordinator-setback-reconsideration.test.js
