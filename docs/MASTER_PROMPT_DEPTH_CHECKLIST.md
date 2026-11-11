@@ -38,6 +38,11 @@ Each item is checked only when an **expandable, connected, persisted, engine-ver
 
 ## Progress and acceptance
 
+### #18 continued — member perspectives merged; ongoing world-driven follow-up drafted (11 November 2026)
+
+[PR #63](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/63) passed [full exact-head 181-group CI #43021284210](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43021284210) on `25920fdff4398199634e24f3a3837888b26a694b`, then merged to main as `02f9e3215bb6cc7566ab08e10550253f2fd84ac3`. The **same** original association record now keeps evolving independent voluntary member perspectives and original history. Current next draft `foundation/source-work-member-reassessment-20261111` reuses real already-reviewed source-attested group work, public notice delays and the existing member agency so people can organically reassess its original open-ended priority after actual independent world progress. New 182nd test is unverified pending full exact-head CI; neither a fixed faction catalogue nor a new political simulation is introduced. The checklist remains **17/25**, #18 unchecked while authority, real financial custody, treaties and genuinely independent institution futures are still incomplete.
+
+
 ### #18 current verified and draft progress — 11 November 2026
 
 The checked foundation count is **17/25**. Six separately accepted connected #18 slices (PR #57–#62) preserve individual voluntary priorities and dissent, optional practical roles, original funded work, bounded coordination, original constitutional mandate evidence and original independent diplomacy state-change provenance. The latest, [PR #62](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/62), passed 180/180 full exact-head test groups ([CI #43009964892](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43009964892)) and squash-merged as `93fe9650985689fa185051d1a32df1dabfdce07f`.
