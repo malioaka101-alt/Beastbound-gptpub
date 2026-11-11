@@ -57,7 +57,8 @@ const statement='Please consider public records access and wetland ferry passage
  A.equal(first.officeholderAtReview,'Iria Highwater');
  A.equal(first.noEnactedLaw,true);
  A.equal(first.noFindingOfGuilt,true);
- A.equal(stored.source.originalReviewHash,Gov.byId?require('../world/emergent-groups').hash(official):'');
+ A.equal(stored.source.originalReviewHash,
+  require('../world/emergent-groups').hash(official));
  A.equal(stored.source.noNewRightToCompel,true);
  A.equal(first.publicReleaseDay,person.decision==='docketed'?official.day+2:null);
  A.equal(Gov.verifyCivicProcedures(w.governance.reedmarch,Gov.byId.reedmarch),true);
