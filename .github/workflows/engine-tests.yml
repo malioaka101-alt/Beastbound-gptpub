@@ -128,6 +128,7 @@ jobs:
           tests/public-office-mandate-provenance.test.js
           tests/group-priority-real-work-costs.test.js
           tests/group-voluntary-roles.test.js
+          tests/group-evolving-independent-positions.test.js
           tests/group-internal-priorities.test.js
           tests/group-membership.test.js
             tests/group-membership-runner.test.js

@@ -1,0 +1,23 @@
+# Foundation #18 — changing personal positions within living associations
+
+**Authority:** Original Unified Master Prompt §§33–34, 42; `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md`; existing original `world/emergent-groups.js` source-backed founding, individual membership, internal priorities and physical person presence. **Draft slice, not completion of #18.** No active campaign `saves/` records changed.
+
+## Open-ended GM creation and original mechanical continuity
+
+The GM can introduce a genuinely local freeform proposal in an already established voluntary association, whatever its purpose, culture or future form. The proposal is retained in the **existing** `internalPriorities`, never copied into a new "political faction" engine. The small original independent personal decision from `world/group-member-agency.js` continues to govern actual eligible member responses. We have a few disposable test examples, **not a catalogue or ceiling** on political organisations, issues, allegiances, disputes or possible social developments.
+
+A personally consenting existing member who is actually present may later respond to that same source-attested proposal. Their opinion can be `supported`, `dissented` or `undecided` based on one original distinct member-agency draw and real group work record, local habitat pressure, regional prosperity and political stability. Those three flags are narrow engine measurements of a personal response, **not a restriction on the GM's natural dialogue, ideology, complex motives, or the creation of future kinds of institutions**. The member can return to discuss the same subject later, but cannot be rerolled on the same day simply by changing the record ID. A different member may respond immediately on the day a proposal first arises.
+
+The **same original group record** now preserves `internalPositions`: each dated member identity, original accepted membership proof, independently witnessed existing-person attendance, original proposal source hash, open-ended reason and meeting witness, old position and its source hash, real group and world circumstances at the time, and the **one separate group-member RNG** transition. `verifyInternalPositionHistory` checks the unbroken actor-and-proposal chain, including old anchor decisions; `internalPositionStatus` inspects each actual person's current recorded view and history as of a real elapsed day. Older saves with no such entries correctly have no invented reconsideration history. Earlier opinions are never overwritten by current disagreement.
+
+This is **individual agency, not government**: a personal position is not a binding majority vote, permission to spend a budget, a ministerial act, an international agreement, compelled labour, automatic membership, or a source of wealth or magical power. The original creator's charter and previous `priorityWork` receipts stay unchanged, so later changed opinions do not erase work already done or fabricate further progress. The original `month` still controls costs and actual work, and original polity/civic authority remains separate. There is no scheduled universal ideological poll: reconsideration needs a real later interaction or an independently proved world event capable of representing it.
+
+## Disposable starting example / test
+
+`tests/group-evolving-independent-positions.test.js` creates an entirely disposable original-world river-crossing neighbours association, personally invites two actually available independent members, confirms one genuinely supported original source-backed priority, and lets another individual dissent on the same day. After a real original sixday tick both people may reconsider, including genuine uncertainty and a changed position. It tests forged outcomes, wrong physical presence, duplicate-day non-reroll, intact original charter/member/funds/coins, unchanged group work RNG, original source hashes, save/export/import, historical snapshots and tamper rejection.
+
+The test is included in the complete `.github/workflows/engine-tests.yml` inventory as **the 181st test group**. **Run full exact-head CI; do not mark #18 checked or merge while results are unverified.**
+
+## Further connected work
+
+Independent political positions are groundwork, **not yet a complete faction lifecycle**. Next #18 requirements include actual source-supported organisational affiliation and real world-world disputes beyond members of player-founded circles, jurisdiction-specific lawful office and lawful consent, real independently authorised conserved property/treasury custody, and accountable commands. Build those in the existing person, profession, civic, group, diplomacy and inventory systems rather than duplicating them or imposing universal teacher/fee/rank gates.
