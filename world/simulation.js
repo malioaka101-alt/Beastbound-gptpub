@@ -336,7 +336,11 @@ function retainOriginalRouteChange(w,r,q){
   throw Error('Original trade route changed without continuous historical source proof');
  return row;
 }
-function publicTradeRouteHistory(s,{routeId}={}){
+function publicTradeRouteHistory(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(x=>x!=='routeId'))
+  throw Error('Only a real original local corridor ID may be inspected; private risks, chosen news and hidden routes cannot be requested');
+ const {routeId}=params;
  if(typeof routeId!=='string'||routeId.length<3)
   throw Error('A particular existing known trade corridor is required');
  const r=A.tradeRoutes.find(x=>x.id===routeId),
