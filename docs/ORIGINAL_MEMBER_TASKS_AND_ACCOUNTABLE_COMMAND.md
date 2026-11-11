@@ -12,7 +12,7 @@ A later original `world/group-member-agency.js::month` might organically decide 
 
 No new funds, extra skill advancement, political status, group influence, job income, law, legal office, disciplinary power, arbitrary sign-off or power over nonmembers is awarded. Other real independent member service can still happen naturally without a task: it has not been converted into a forced guild-work system. This explicitly conserves the same group member-work counters, service minutes, existing world RNG and original group `e.funds` account accepted in verified PR #67.
 
-The original player founder alone can read personally witnessed responses and any actual source-matched later work through `social.groupTasksStatus({groupId})`, a **read-only chat-turn action**. It does not reveal secret unknown distant people, fabricate commitment for undecided members, or write a save.
+Only the original player founder while locally present in the group's actual founding polity can read personally witnessed responses and any actual source-matched later work through `social.groupTasksStatus({groupId})`, a **read-only chat-turn action**. It does not reveal secret unknown distant people, fabricate commitment for undecided members, or write a save.
 
 ## Tests and acceptance
 
