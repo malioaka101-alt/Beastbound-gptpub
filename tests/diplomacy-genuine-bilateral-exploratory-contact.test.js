@@ -143,10 +143,13 @@ function scenario(wantMutual){
 }
 // The public history has a genuine local jurisdiction boundary.
 {
- const {s,key}=scenario(true),actual=s.world.location;
+ const {s,key,row}=scenario(true),actual=s.world.location;
  s.world.location='unverified_remote_jurisdiction';
  const fixture=JSON.stringify(s);
  A.throws(()=>action(s,key),/foreign hidden government/);
+ A.throws(()=>Rules.act(s,{system:'world',operation:'tradeRouteHistory',
+  params:{routeId:row.source.routeId}}),/genuinely local/,
+  'Unknown locations must not default to Reedmarch for earlier trade history either');
  A.equal(JSON.stringify(s),fixture);
  s.world.location=actual;
 }
