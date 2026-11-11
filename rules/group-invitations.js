@@ -195,10 +195,13 @@ function taskStatus(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')
   throw Error('A real founded group ID is required for historical member tasks');
- const w=Realm.peek(s),e=G.lookup(w,p.groupId);
+ const w=Realm.peek(s),e=G.lookup(w,p.groupId),
+  regionId=require('../world/atlas').LOCATION_REGION[s.world?.location],
+  here=require('../world/atlas').R[regionId]?.polity;
  if(!e||e.origin!=='player-declaration'||
-  e.founder.name!==s.player?.name)
-  throw Error('Only the actual founder can see the group members’ privately witnessed work answers');
+  e.founder.name!==s.player?.name||
+  here!==e.polity)
+  throw Error('Only the actual local founder can see the group members’ privately witnessed work answers');
  return {groupId:e.id,
   tasks:G.voluntaryTaskStatus(w,e.id,{day:Math.floor(s.world.minutes/1440)}),
   note:'Independent member responses are real; a request cannot force labor, funds, a task outcome, an office or a contract.'};
