@@ -129,7 +129,7 @@ function ensure(w){
    v.mandateHistory=[];
   }
   if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c))
-   throw Error('Civic mandate or witnessed jurisdictional procedure is inconsistent');
+   throw Error('Civic mandate evidence or witnessed jurisdictional procedure is inconsistent');
  }
  return w.governance;
 }
