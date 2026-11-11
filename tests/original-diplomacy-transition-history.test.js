@@ -18,7 +18,10 @@ A.equal(initial.transitions.length,0);
 A.equal(initial.anchor.status,'strained');
 A.equal(initial.anchor.a,d.a);
 A.equal(initial.anchor.b,d.b);
-const originalPlayer=s.rngState,originalCoins=s.player.coins;
+const ordinaryClock=structuredClone(s),originalCoins=s.player.coins;
+// Engine.advance runs the existing two daily local-world draws per day.
+// Sovereign diplomacy must never borrow EXTRA player/encounter dice.
+E.advance(ordinaryClock,30*1440);
 const startWars=w.counters.wars,startPeace=w.counters.peaceTreaties;
 d.tension=100; // Disposable pressure fixture, never a GM-forced diplomatic vote.
 W.advance(s,30); // Original actual independent world months and actual government/economy.
@@ -35,13 +38,16 @@ A.ok(entry.source.rivals);
 A.equal(entry.source.warfare,false);
 A.ok(Number.isInteger(entry.source.noise));
 A.equal(d.diplomaticAudit.anchor.status,'strained');
-A.equal(s.rngState,originalPlayer,
- 'The original sovereign world month must not consume player combat dice');
+A.equal(s.rngState,ordinaryClock.rngState,
+ 'Independent world diplomacy must not consume extra player/encounter dice beyond the original daily clock');
 A.equal(s.player.coins,originalCoins,
  'Foreign politics must not mint or confiscate unrelated player money');
 const beforeTruce=w.counters.peaceTreaties;
 d.tension=0; // Disposable exhaustion fixture, original monthly logic still adjudicates.
 W.advance(s,30);
+E.advance(ordinaryClock,30*1440);
+A.equal(s.rngState,ordinaryClock.rngState,
+ 'A second independent political month still must not consume extra player/encounter dice');
 A.equal(d.status,'truce');
 A.equal(d.cooldown,48);
 A.equal(w.counters.peaceTreaties,beforeTruce+1);
