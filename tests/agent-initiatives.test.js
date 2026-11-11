@@ -18,6 +18,7 @@ function actual(seed,days=1200){
  const s=fresh(193201),old=E.exportGame(s),rng=s.rngState;
  const v=S.publicInitiatives(s,{});
  A.deepEqual(v.knownWork,[]);
+ A.deepEqual(v.knownInstitutionalMilestones,[]);
  A.equal(v.polity,'Reedmarch Compact');
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
  A.throws(()=>S.publicInitiatives(s,{chosenWinner:'ME'}),/accepts no hidden plans/);
@@ -55,6 +56,13 @@ function actual(seed,days=1200){
   if(r.publicText)A.equal(r.releaseDay,r.day+8);
  }
  for(const p of Object.values(t.projects)){
+  A.equal(I.verifyMilestones(p),true,
+   'Original organisational founding, suspension and rivalry events must form a source-authentic historical record');
+  for(const row of p.organisationMilestones||[]){
+   A.equal(row.source.originalRecordHash,row.source.originalEvent.hash);
+   A.equal(row.source.releaseDay,row.day+8);
+   A.equal(row.source.noNewRollOrParticipation,true);
+  }
   A.ok(p.successes+p.failures>0,'real independent practitioner actually tests a method');
   A.equal(p.attempts,p.successes+p.failures);
   A.ok(p.invested>=8*(p.successes+p.failures));
@@ -71,6 +79,12 @@ function actual(seed,days=1200){
  A.ok(initialPublic.knownWork.every(x=>x.region==='Reedmarch Compact'));
  A.ok(initialPublic.knownWork.every(x=>x.type!=='unwitnessed-private-plan'));
  A.equal(E.exportGame(a),copy);
+ const restored=E.importGame(copy);
+ A.equal(E.exportGame(restored),copy);
+ for(const [id,p] of Object.entries(t.projects))
+  A.deepEqual(restored.table.realm.agentInitiatives.projects[id].
+   organisationMilestones||[],p.organisationMilestones||[],
+   'Original professional organisational milestones must survive checkpoint save and restoration');
  A.throws(()=>S.publicInitiatives(a,{privateSecrets:'reveal all rivals'}),
   /accepts no hidden plans/);
 }
@@ -149,11 +163,38 @@ function actual(seed,days=1200){
  for(let i=0;i<4;i++)I._debug.groupMonth(w,t,p,2191+i,()=>{});
  A.equal(e.currentlyLeading,true);
  A.ok(t.records.some(r=>r.kind==='local-competition-changed'&&r.actorId===p.actorId));
+ const changed=p.organisationMilestones.find(r=>r.kind==='local-competition-changed');
+ A.ok(changed,'The original real group lead change needs durable evidence even if short journals later prune it');
+ A.equal(changed.source.originalEvent.context.sustainedMonths>=3,true);
+ A.equal(I.verifiedOriginalMilestone(p,changed),true);
  A.equal(e.members+parent.members,groupMembers);
  e.members=14;parent.members=55;e.reputation=20;parent.reputation=88;
  I._debug.groupMonth(w,t,p,2198,()=>{});
  A.equal(e.currentlyLeading,false);
  A.ok(t.records.some(r=>r.kind==='local-competition-reversed'&&r.actorId===p.actorId));
+ const reversed=p.organisationMilestones.find(r=>r.kind==='local-competition-reversed');
+ A.ok(reversed);
+ A.equal(I.verifiedOriginalMilestone(p,reversed),true);
+ A.equal(I.verifyMilestones(p),true);
+ A.notEqual(changed.sourceHash,reversed.sourceHash);
+ A.equal(changed.source.originalEvent.context.sustainedMonths>=3,true);
+ const realMilestones=p.organisationMilestones.length,
+  previousPlayerRng=seeded.rngState;
+ A.ok(realMilestones>=2);
+ A.equal(seeded.rngState,previousPlayerRng,
+  'Pure provenance must not generate a new independent or player die roll');
+ // Simulate pruning only the old SHORT news buffer in this disposable
+ // fixture. This must not erase the true source-authentic historical event.
+ t.records=t.records.filter(r=>r.id!==changed.source.originalRecordId&&
+  r.id!==reversed.source.originalRecordId);
+ A.equal(I.verifyMilestones(p),true);
+ A.ok(p.organisationMilestones.some(r=>r.sourceHash===changed.sourceHash));
+ const seal=changed.sourceHash;
+ changed.source.originalEvent.context.newGroupMembers=999999;
+ A.equal(I.verifyMilestones(p),false,
+  'A fabricated historical rivalry victory must not rewrite actual membership');
+ A.equal(changed.sourceHash,seal);
+ A.throws(()=>I.ensure(w),/original project evidence/);
  A.ok(w.governance.asterwyn.holder.length>5);
  A.equal(seeded.player.family,null);
  A.equal(seeded.player.arcane.circles,0);
