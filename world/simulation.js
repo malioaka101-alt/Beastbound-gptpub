@@ -22,6 +22,126 @@ const polityOf=s=>A.R[locationRegion(s)]?.polity||'reedmarch';
 function random(w){let x=w.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;w.rngState=x>>>0||0x593f56bc;return w.rngState/4294967296;}
 function noise(w,lo=-2,hi=2){return lo+Math.floor(random(w)*(hi-lo+1));}
 function seedFor(s){const n=(s.seed>>>0)||1355150487;return ((n^0x9e3779b9)>>>0)||0x3199fbbb;}
+
+/*
+ * #18 original diplomatic change archive. These are ONLY political status
+ * transitions already independently decided by the actual world-month model.
+ * An exhausted ceasefire or rising trade cooperation is not, by itself,
+ * evidence of a signed bilateral legal instrument or named minister's consent.
+ * The original diplomacy pair owns its historic evidence and original dice.
+ */
+const DIPLOMATIC_SOURCE='original-independent-interpolity-status-change-v1';
+const diplomaticHash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const DIPLOMATIC_STATUS=new Set(['cooperation','strained','peace','war','truce']);
+function validateDiplomaticSource(key,q){
+ if(!q||q.origin!==DIPLOMATIC_SOURCE||
+  q.key!==key||
+  !A.P[q.a]||!A.P[q.b]||q.a===q.b||
+  [q.a,q.b].sort().join('|')!==key||
+  !DIPLOMATIC_STATUS.has(q.oldStatus)||
+  !DIPLOMATIC_STATUS.has(q.newStatus)||
+  q.oldStatus===q.newStatus||
+  !Number.isInteger(q.day)||q.day<0||
+  !Number.isInteger(q.monthNumber)||q.monthNumber<1||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  !Number.isInteger(q.noise)||q.noise< -4||q.noise>4||
+  !Number.isInteger(q.beforeTension)||q.beforeTension<0||q.beforeTension>100||
+  !Number.isInteger(q.afterNoiseTension)||q.afterNoiseTension<0||q.afterNoiseTension>100||
+  !Number.isInteger(q.afterTension)||q.afterTension<0||q.afterTension>100||
+  !Number.isInteger(q.cooldownBefore)||q.cooldownBefore<0||
+  !Number.isInteger(q.cooldownAfter)||q.cooldownAfter<0||
+  !Number.isInteger(q.conflictBefore)||q.conflictBefore<0||
+  !Number.isInteger(q.conflictAfter)||q.conflictAfter<0||
+  !Number.isInteger(q.warExhaustionA)||q.warExhaustionA<0||
+  !Number.isInteger(q.warExhaustionB)||q.warExhaustionB<0||
+  typeof q.rivals!=='boolean'||
+  typeof q.warfare!=='boolean'||
+  q.warfare!==(q.oldStatus==='war')||
+  !Number.isInteger(q.prosperityA)||q.prosperityA<0||q.prosperityA>100||
+  !Number.isInteger(q.prosperityB)||q.prosperityB<0||q.prosperityB>100)
+  return false;
+ const roll={rngState:q.rngBefore},used=-4+Math.floor(random(roll)*9);
+ if(used!==q.noise||roll.rngState!==q.rngAfter)return false;
+ const economic=q.prosperityA<30||q.prosperityB<30?1:0,
+  friendly=!q.rivals&&q.prosperityA>40&&q.prosperityB>40?-2:0;
+ const noiseShift=clamp(q.beforeTension+q.noise+
+  (q.rivals&&q.monthNumber%3===0?1:0)+economic+friendly-
+  (q.warfare?2:0));
+ if(noiseShift!==q.afterNoiseTension)return false;
+ const cooldown=q.cooldownBefore?Math.max(0,q.cooldownBefore-1):0;
+ if(q.cooldownAfter!== (q.warfare&&
+  (q.afterNoiseTension<53||q.conflictBefore+1>=24||
+   q.warExhaustionA>35||q.warExhaustionB>35)?48:cooldown))
+  return false;
+ let status=q.oldStatus,afterNoise=q.afterNoiseTension;
+ let tension=afterNoise,conflict=q.conflictBefore;
+ if(q.warfare){
+  conflict++;
+  if(afterNoise<53||conflict>=24||
+   q.warExhaustionA>35||q.warExhaustionB>35){
+   status='truce';conflict=0;tension=Math.min(afterNoise,37);
+  }
+ }else if(!cooldown){
+  if(afterNoise>93&&q.rivals&&q.oldStatus!=='truce'){
+   status='war';conflict=0;
+  }else if(afterNoise>68)status='strained';
+  else if(afterNoise<29)status='cooperation';
+  else if(q.oldStatus==='truce'&&afterNoise<62)status='peace';
+  else if(q.oldStatus==='cooperation'&&afterNoise>45)status='peace';
+ }
+ return status===q.newStatus&&q.conflictAfter===conflict&&
+  q.afterTension===tension;
+}
+function ensureDiplomaticAudit(d,key,day){
+ if(d.diplomaticAudit===undefined){
+  // Older saves have the saved CURRENT relationship only; never invent
+  // previous treaties, rulers, diplomatic votes, wars or proclamations.
+  d.diplomaticAudit={
+   version:1,anchor:{
+    key,a:d.a,b:d.b,status:d.status,day,
+    note:'Audit starts from actually known saved relationship; prior individual decisions are not evidenced'
+   },transitions:[]};
+ }
+ if(!verifyDiplomaticAudit(d,key))
+  throw Error('Original diplomatic relation history is invalid or has been rewritten');
+ return d.diplomaticAudit;
+}
+function verifyDiplomaticAudit(d,key){
+ const audit=d?.diplomaticAudit,a=audit?.anchor;
+ if(!audit||audit.version!==1||!a||
+  a.key!==key||a.a!==d.a||a.b!==d.b||
+  [d.a,d.b].sort().join('|')!==key||
+  !Number.isInteger(a.day)||a.day<0||
+  !DIPLOMATIC_STATUS.has(a.status)||
+  typeof a.note!=='string'||!Array.isArray(audit.transitions))
+  return false;
+ let prev=a.status,when=a.day,lastMonth=-1;
+ for(const row of audit.transitions){
+  const q=row?.source;
+  if(!q||row.hash!==diplomaticHash(q)||
+   !validateDiplomaticSource(key,q)||
+   q.oldStatus!==prev||q.day<when||
+   q.monthNumber<=lastMonth||
+   row.day!==q.day||row.from!==q.oldStatus||
+   row.to!==q.newStatus||row.afterTension!==q.afterTension)
+   return false;
+  prev=q.newStatus;when=q.day;lastMonth=q.monthNumber;
+ }
+ return prev===d.status;
+}
+function diplomaticTransitionHistory(w,key){
+ const d=w?.diplomacy?.[key];
+ if(!d)throw Error('Only an existing original-world diplomatic pair has history');
+ ensureDiplomaticAudit(d,key,w.lastTickDay);
+ return {pair:key,anchor:structuredClone(d.diplomaticAudit.anchor),
+  transitions:d.diplomaticAudit.transitions.map(row=>({
+   day:row.day,from:row.from,to:row.to,
+   afterTension:row.afterTension,sourceHash:row.hash,
+   noInventedSignedTreaty:true,noNamedMinisterConsentInferred:true
+  }))};
+}
+
 function initial(s,startingDay=0){
  const w={version:1,worldSeed:seedFor(s),rngState:seedFor(s),startedAt:startingDay,lastTickDay:startingDay,
   calendarAnchor:null,ticks:{sixdays:0,months:0},countries:{},institutions:{},routes:{},ecosystems:{},diplomacy:{},notables:N.seedNotables(),houses:Houses.seed(),governance:Gov.seed(),
@@ -37,6 +157,8 @@ function initial(s,startingDay=0){
    const areAllies=other===p.ally||neighbour.ally===p.id;
    w.diplomacy[key]={a:p.id,b:other,tension:areAllies?23:65,status:areAllies?'cooperation':'strained',conflictMonths:0,cooldown:0,treatyYears:0,tradeSanctions:false};
  }}
+ for(const [key,d] of Object.entries(w.diplomacy))
+  ensureDiplomaticAudit(d,key,startingDay);
  for(const reg of A.regions){const options=B.localCandidates(reg.biome),samples=[];
   const observed=new Set();for(let i=0;i<Math.min(4,options.length);i++){
    const fam=options[B.hash(`${reg.id}:${i}`)%options.length].group;
@@ -390,12 +512,18 @@ function tickMonth(w,day){
   }
  }
  for(const [key,d] of Object.entries(w.diplomacy)){
+  ensureDiplomaticAudit(d,key,day);
   const a=w.countries[d.a],b=w.countries[d.b],rivals=A.P[d.a].rival===d.b||A.P[d.b].rival===d.a;
-  const old=d.status;
+  const old=d.status,oldTension=d.tension,
+   beforeCooldown=d.cooldown,beforeConflictMonths=d.conflictMonths,
+   prosperityA=a.prosperity,prosperityB=b.prosperity;
   const economic=(a.prosperity<30||b.prosperity<30)?1:0;
   const warfare=d.status==='war';
   const friendly=!rivals&&a.prosperity>40&&b.prosperity>40?-2:0;
-  d.tension=clamp(d.tension+noise(w,-4,4)+(rivals&&w.ticks.months%3===0?1:0)+economic+friendly-(warfare?2:0));
+  const rngBefore=w.rngState;
+  const noiseShift=noise(w,-4,4),rngAfter=w.rngState;
+  d.tension=clamp(d.tension+noiseShift+(rivals&&w.ticks.months%3===0?1:0)+economic+friendly-(warfare?2:0));
+  const afterNoiseTension=d.tension;
   if(d.cooldown)d.cooldown--;
   if(!warfare){a.warExhaustion=Math.max(0,a.warExhaustion-1);b.warExhaustion=Math.max(0,b.warExhaustion-1);}
   if(warfare){d.conflictMonths++;a.warExhaustion++;b.warExhaustion++;
@@ -409,12 +537,30 @@ function tickMonth(w,day){
    else if(d.status==='truce'&&d.tension<62)d.status='peace';
    else if(d.status==='cooperation'&&d.tension>45)d.status='peace';
   }
-  if(old!==d.status){const names=`${A.P[d.a].name} and ${A.P[d.b].name}`;
+  if(old!==d.status){
+   const source={origin:DIPLOMATIC_SOURCE,key,a:d.a,b:d.b,
+    oldStatus:old,newStatus:d.status,day,monthNumber:w.ticks.months,
+    beforeTension:oldTension,afterNoiseTension,
+    afterTension:d.tension,noise:noiseShift,rngBefore,rngAfter,
+    rivals,warfare,prosperityA,prosperityB,
+    cooldownBefore:beforeCooldown,cooldownAfter:d.cooldown,
+    conflictBefore:beforeConflictMonths,conflictAfter:d.conflictMonths,
+    warExhaustionA:a.warExhaustion,warExhaustionB:b.warExhaustion};
+   if(!validateDiplomaticSource(key,source))
+    throw Error('An original diplomatic relationship changed without valid prior world evidence');
+   d.diplomaticAudit.transitions.push({day,from:old,to:d.status,
+    afterTension:d.tension,source,hash:diplomaticHash(source)});
+   if(!verifyDiplomaticAudit(d,key))
+    throw Error('The original diplomatic state transition cannot survive saved evidence verification');
+   const names=`${A.P[d.a].name} and ${A.P[d.b].name}`;
+   // The world relationship has changed; there is NO sourced signed treaty,
+   // named consenting envoy, formal legal term or negotiated accord here.
+   // A GM may later author those in their original world records with proof.
    const txt=d.status==='war'?`${names} enter an armed border conflict after escalating territorial disputes.`:
-    d.status==='truce'?`${names} sign an exhausted ceasefire, with trade still restricted.`:
-    d.status==='cooperation'?`${names} broaden a trade and mutual-aid accord.`:
-    d.status==='strained'?`${names} suspend some joint passage arrangements amid rising tensions.`:
-    `${names} return to uneasy peacetime negotiations.`;
+    d.status==='truce'?`Fighting between ${names} subsides into an exhausted truce; tensions remain.`:
+    d.status==='cooperation'?`Practical cooperation between ${names} grows closer.`:
+    d.status==='strained'?`Relations between ${names} become strained as passage grows more difficult.`:
+    `${names} move into an uneasy peacetime relationship.`;
    event(w,{day,region:'international',subject:key,text:txt,channel:'foreign courier',releaseDay:day+14,severity:d.status==='war'?'warning':'important'});
   }
  }
@@ -630,6 +776,8 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
   civilianProfessionalApplications:Renown.CIVIC_APPLICATIONS.length,
   generatedSpeciesCapacity:B.SPECIES_COUNT,regionalFormCapacity:B.FORM_COUNT,mythicSites:Mythic.SITES.length,mythicTraditions:Mythic.TRADITIONS.length,realmTraditions:Mythic.REALMS.length,backgroundProfessionals:Object.keys(w.notables||{}).length,elapsedSixdayTicks:w.ticks.sixdays,elapsedMonthTicks:w.ticks.months,
   note:'These are configured systems and catalogue capacity; not a claim of personally authored species or full individual-citizen simulation'};}
-module.exports={initial,ensure,peek,localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
+module.exports={initial,ensure,peek,
+ DIPLOMATIC_SOURCE,verifyDiplomaticAudit,diplomaticTransitionHistory,
+ localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
  // testing/GM diagnostics only; never pass hidden state to player-facing panels.
  _debug:{tickMonth,tickSixday,noise,quickContext}};
