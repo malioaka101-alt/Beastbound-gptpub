@@ -121,6 +121,30 @@ function month(w,day,emit){
    const npcId=m.witness?.details?.npcId,
     npc=People.identity(w,npcId);
    if(!npc)continue;
+   // A real independent member in the same polity may hear a PUBLISHED
+   // original success after its normal notice delay. This is a new
+   // personal view, not an imagined meeting, vote, contract or project.
+   // No notice, no local source or no new actual work means no new draw.
+   const localPolity=npc.polity||
+    A.R[A.LOCATION_REGION[npc.location]]?.polity;
+   if(localPolity===e.polity){
+    for(const work of e.priorityWork||[]){
+     const review=work.source?.independentReview;
+     if(review?.kind!=='verified-limited-community-work'||
+      !Number.isInteger(review.releaseDay)||
+      review.releaseDay>day||day-review.releaseDay>40)continue;
+     const considered=G.reassessPublishedWork(w,{
+      groupId:e.id,memberActorId:m.actorId,
+      workActionHash:work.originalActionHash,day});
+     if(considered.reassessed)
+      logDecision(w,t,e,day,npcId,'reconsidered-published-work',{
+       priorityId:considered.priorityId,
+       previousStance:considered.previousStance,
+       stance:considered.stance,
+       actualReviewHash:considered.groundedInPublishedOriginalReview,
+       noCompulsoryPoliticalAffiliation:true});
+    }
+   }
    // A review is prompted by genuinely adverse, continuing circumstances.
    // Successful groups do not lose members merely because time passes.
    const hardship=e.status==='inactive'&&e.unfundedMonths>=3?
