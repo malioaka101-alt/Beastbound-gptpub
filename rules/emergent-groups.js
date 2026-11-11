@@ -87,6 +87,9 @@ function contribute(s,p={}){
   throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
  const old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
+ const originalDay=Math.floor(s.world.minutes/1440),
+  personalBefore=s.player.coins,operatingBefore=e.funds;
+ Groups.ensureOperatingAccount(e,originalDay);
  s.player.coins-=money;e.funds+=money;
  C.event(s,'story',s.player.name+' devotes actual time'+(money?' and personal funds':'')+
   ' to a self-directed association task. The outcome remains unverified.',{
@@ -97,6 +100,10 @@ function contribute(s,p={}){
   successClaimAccepted:false,noAutomaticFollowers:true
  });
  const ev=structuredClone(s.log[s.log.length-1]);
+ Groups.attestOriginalContribution(e,{
+  day:originalDay,before:operatingBefore,after:e.funds,
+  playerBefore:personalBefore,playerAfter:s.player.coins,
+  originalMinute:s.world.minutes,witness:ev});
  e.activity.push({day:Math.floor(s.world.minutes/1440),
   minutes:WORKTIME,amount:money,activity,hash:Groups.hash(ev),witness:ev,
   ...(priorityId!==undefined?{priorityId}:{})});
