@@ -75,10 +75,11 @@ A.deepEqual(d.diplomaticAudit.transitions[0].source.officesAtChange,firstSnapsho
 const oldSource=structuredClone(row.source),oldHash=row.hash;
 row.source.officesAtChange[0].incumbent='Imagined diplomatic signatory';
 row.hash=seal(row.source);
-A.equal(Realm.verifyDiplomaticAudit(d,key),true);
+A.equal(Realm.verifyDiplomaticAudit(d,key),false,
+ 'The newly source-linked original public courier copy now independently rejects a forged government transition hash');
 A.equal(Realm.verifyDiplomaticOfficeContexts(w,key),false);
 A.throws(()=>Realm.diplomaticTransitionHistory(w,key),
- /actual historical civic office/);
+ /original diplomatic relation history|actual historical civic office/i);
 row.source=oldSource;row.hash=oldHash;
 A.equal(Realm.verifyDiplomaticOfficeContexts(w,key),true);
 // Older originally recorded transitions lack representative details;
@@ -89,6 +90,10 @@ for(const item of relation.diplomaticAudit.transitions){
  delete item.source.officeContextOrigin;
  delete item.source.noSignedBilateralTreaty;
  delete item.source.noEnvoyConsentInferred;
+ // This disposable older checkpoint predates BOTH the newer historical
+ // office-context and durable courier-copy evidence. Neither must be
+ // reconstructed from a current incumbent or imagined publication.
+ delete item.publicCourier;
  item.hash=seal(item.source);
 }
 A.equal(Realm.verifyDiplomaticAudit(relation,key),true);
