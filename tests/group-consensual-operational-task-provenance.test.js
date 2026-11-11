@@ -87,7 +87,11 @@ function founded(seed){
  A.equal(s.player.coins,coins);
  A.equal(G.validate(e),true);
  status=act(s,'groupTasksStatus',{groupId:e.id});
- A.ok(['completed-original-work','original-work-attempt-failed'].includes(status.tasks[0].status));
+ A.ok(['original-member-work-recorded-task-not-verified',
+  'original-member-work-failed-task-not-verified'].includes(status.tasks[0].status));
+ A.equal(status.tasks[0].specificTaskCompletionVerified,false,
+  'A real general volunteer-work result does not prove completion of the exact proposed task');
+ A.equal(e.taskServices[0].source.taskSpecificCompletionNotEstablished,true);
  A.equal(status.tasks[0].originalMinutes,90);
  A.equal(G.eligibleVoluntaryTask(e,e.additionalMembers[0].actorId,w.lastTickDay),null);
  const before=E.exportGame(s),clone=E.importGame(before);
@@ -151,4 +155,4 @@ function founded(seed){
   A.equal(FS.readFileSync(file,'utf8'),original);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
-console.log('Open original-world member tasks: witnessed founder request, independently consenting/refusing real members, actual existing natural monthly volunteer results, expiry, no double-roll or money, durable save evidence and read-only status');
+console.log('Open original-world member tasks: witnessed founder request, independently consenting/refusing real members, genuine natural monthly general volunteer work WITHOUT invented specific task completion, expiry, no double-roll or money, durable save evidence and read-only status');
