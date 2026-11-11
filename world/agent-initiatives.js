@@ -25,6 +25,104 @@ const SOURCE='Previously established named Beastbound professional and real inst
 const NOTICE='Independently completed local vocational pilot, member transfer, or institution recovery';
 const clamp=(x,lo=0,hi=100)=>Math.max(lo,Math.min(hi,x));
 const sha=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+/*
+ * #18: Keep significant organisational fortunes from ORIGINAL autonomous
+ * professional world decisions after the short public activity journal
+ * rotates. These are copies of original source-sealed existing records,
+ * not a new institution, membership transfer, diplomacy or result roll.
+ */
+const ORIGINAL_INSTITUTIONAL_MILESTONE='existing-independent-professional-organisational-milestone-v1';
+const MILESTONE_KINDS=new Set([
+ 'new-organisation','group-suspended','group-reopened',
+ 'local-competition-changed','local-competition-reversed'
+]);
+function verifiedOriginalMilestone(p,row){
+ const q=row?.source,ev=q?.originalEvent,ctx=ev?.context;
+ if(!p||!q||!ev||!ctx||
+  row.origin!==ORIGINAL_INSTITUTIONAL_MILESTONE||
+  row.sourceHash!==sha(q)||q.origin!==ORIGINAL_INSTITUTIONAL_MILESTONE||
+  row.id!=='orgmilestone_'+ev.id||q.id!==row.id||
+  q.groupId!==p.groupId||q.actorId!==p.actorId||
+  q.sponsorInstitutionId!==p.sponsorInstitutionId||
+  q.polity!==p.polity||q.method!==p.method||
+  q.originalRecordHash!==ev.hash||
+  q.originalRecordId!==ev.id||
+  q.releaseDay!==ev.releaseDay||
+  row.day!==ev.day||row.kind!==ev.kind||
+  !MILESTONE_KINDS.has(ev.kind)||
+  ev.actorId!==p.actorId||ev.polity!==p.polity||
+  ev.method!==p.method||ev.source!==SOURCE||
+  ev.month<1||!Number.isInteger(ev.month)||
+  !Number.isInteger(ev.day)||ev.day<1||
+  ev.hash!==sha({
+   id:ev.id,day:ev.day,month:ev.month,actorId:ev.actorId,
+   actorName:ev.actorName,polity:ev.polity,kind:ev.kind,
+   source:ev.source,method:ev.method,context:ev.context
+  })||
+  typeof ev.publicText!=='string'||ev.publicText.length<30||
+  ev.releaseDay!==ev.day+8||
+  q.noNewRollOrParticipation!==true||
+  q.noPublicOfficeOrOwnershipGranted!==true)
+  return false;
+ const positive=n=>Number.isInteger(n)&&n>=0;
+ if(ev.kind==='new-organisation')
+  return ctx.to===p.groupId&&ctx.from===p.sponsorInstitutionId&&
+   positive(ctx.workerTransfers)&&ctx.workerTransfers>0&&
+   ctx.initialMembers===ctx.workerTransfers&&
+   ctx.initialFunds===ctx.duesRaised&&positive(ctx.initialFunds)&&
+   positive(ctx.priorTests)&&ctx.priorTests>=2&&
+   positive(ctx.genuinePledges)&&ctx.genuinePledges>=12;
+ if(ev.kind==='group-suspended')
+  return positive(ctx.fundsBefore)&&positive(ctx.fundsAfter)&&
+   positive(ctx.members)&&
+   positive(ctx.upkeep)&&positive(ctx.dues)&&
+   Number.isInteger(ctx.localShock)&&ctx.localShock>=-2&&ctx.localShock<=2;
+ if(ev.kind==='group-reopened')
+  return positive(ctx.funds)&&ctx.funds>=13&&positive(ctx.members)&&
+   positive(ctx.previousSuspensionDay)&&ctx.previousSuspensionDay<ev.day;
+ if(![ctx.incumbentMembers,ctx.newGroupMembers,
+  ctx.incumbentReputation,ctx.newGroupReputation].every(positive))
+  return false;
+ const leading=ctx.newGroupMembers>ctx.incumbentMembers&&
+  ctx.newGroupReputation>ctx.incumbentReputation;
+ if(ev.kind==='local-competition-changed')
+  return leading&&positive(ctx.sustainedMonths)&&ctx.sustainedMonths>=3;
+ return !leading;
+}
+function verifyMilestones(p){
+ if(p.organisationMilestones===undefined)return true;
+ if(!Array.isArray(p.organisationMilestones))return false;
+ const ids=new Set();let lastDay=-1;
+ for(const row of p.organisationMilestones){
+  if(!verifiedOriginalMilestone(p,row)||ids.has(row.id)||
+   row.day<lastDay)return false;
+  ids.add(row.id);lastDay=row.day;
+ }
+ return true;
+}
+function retainOriginalMilestone(p,event){
+ if(!MILESTONE_KINDS.has(event?.kind))return null;
+ const q={origin:ORIGINAL_INSTITUTIONAL_MILESTONE,
+  id:'orgmilestone_'+event.id,groupId:p.groupId,
+  actorId:p.actorId,sponsorInstitutionId:p.sponsorInstitutionId,
+  polity:p.polity,method:p.method,
+  originalRecordId:event.id,originalRecordHash:event.hash,
+  releaseDay:event.releaseDay,originalEvent:structuredClone(event),
+  noNewRollOrParticipation:true,
+  noPublicOfficeOrOwnershipGranted:true};
+ const row={id:q.id,origin:ORIGINAL_INSTITUTIONAL_MILESTONE,
+  day:event.day,kind:event.kind,source:q,sourceHash:sha(q)};
+ if(!verifiedOriginalMilestone(p,row))
+  throw Error('No original independent organisational event supports this historic milestone');
+ p.organisationMilestones||=[];
+ if(p.organisationMilestones.some(x=>x.id===row.id))
+  throw Error('An independent original milestone may not be recorded twice');
+ p.organisationMilestones.push(row);
+ if(!verifyMilestones(p))
+  throw Error('The original organisation milestone archive cannot rewrite its historical order');
+ return row;
+}
+
 function seed(w){
  const projects={};
  for(const [id,spec] of Object.entries(SOURCES)){
@@ -47,8 +145,9 @@ function seed(w){
 function ensure(w){
  if(w.agentInitiatives===undefined)w.agentInitiatives=seed(w);
  const t=w.agentInitiatives;
- if(t.version!==1||!t.projects||!t.entrants||!Array.isArray(t.records))
-  throw Error('Actual long-term professional work needs a valid persistent project ledger');
+ if(t.version!==1||!t.projects||!t.entrants||!Array.isArray(t.records)||
+   Object.values(t.projects).some(p=>!verifyMilestones(p)))
+  throw Error('Actual long-term professional work needs valid persistent original project evidence');
  return t;
 }
 function rng(t){
@@ -67,6 +166,7 @@ function record(w,t,p,day,kind,text,context,emit,{publicNotice=true}={}){
   publicText:publicNotice?text:null,releaseDay:publicNotice?day+8:null};
  t.records.push(row);
  if(t.records.length>200)t.records.splice(0,t.records.length-200);
+ if(MILESTONE_KINDS.has(kind))retainOriginalMilestone(p,row);
  p.history.push({id,day,kind,hash:row.hash});
  if(p.history.length>20)p.history.splice(0,p.history.length-20);
  if(publicNotice&&typeof emit==='function')
@@ -259,6 +359,7 @@ function visible(s,w){
  const t=w.agentInitiatives,local=A.R[A.LOCATION_REGION[s.world.location]]?.polity,
   now=Math.floor(s.world.minutes/1440);
  if(!t||!local)return {polity:A.P[local]?.name||null,knownWork:[],
+  knownInstitutionalMilestones:[],
   note:'Only actually released local professional reports are visible; private ambitions and trials are not disclosed.'};
  const records=t.records.filter(r=>r.polity===local&&
   r.publicText&&r.releaseDay<=now&&
@@ -272,7 +373,23 @@ function visible(s,w){
    day:r.day,person:r.actorName,development:r.publicText,
    type:r.kind,region:A.P[r.polity].name
   }));
+ const milestones=Object.values(t.projects).flatMap(p=>
+  (p.organisationMilestones||[]).map(row=>({p,row}))).filter(({p,row})=>{
+   if(!verifiedOriginalMilestone(p,row))
+    throw Error('Unverified original institutional history cannot be disclosed');
+   return p.polity===local&&row.source.releaseDay<=now;
+  }).sort((a,b)=>a.row.day-b.row.day||
+   a.row.id.localeCompare(b.row.id)).map(({row})=>({
+    day:row.day,type:row.kind,
+    originalSourceHash:row.source.originalRecordHash,
+    independentProfessional:row.source.originalEvent.actorName,
+    publishedDevelopment:row.source.originalEvent.publicText,
+    noAdditionalWorkOrPoliticalOffice:true
+   }));
  return {polity:A.P[local].name,knownWork:records,
-  note:'Only published local achievements, setbacks and membership changes; not NPC private plans, invented breakthroughs or current hidden budgets.'};
+  knownInstitutionalMilestones:milestones,
+  note:'Only published local achievements and original independently changed organisational fortunes, not private plans, unannounced finances, hidden membership rolls or diplomatic authority.'};
 }
-module.exports={SOURCES,SOURCE,NOTICE,seed,ensure,month,visible,_debug:{rng,d20,pilot,found,groupMonth,record}};
+module.exports={SOURCES,SOURCE,NOTICE,seed,ensure,month,visible,
+ ORIGINAL_INSTITUTIONAL_MILESTONE,verifyMilestones,verifiedOriginalMilestone,
+ _debug:{rng,d20,pilot,found,groupMonth,record}};
