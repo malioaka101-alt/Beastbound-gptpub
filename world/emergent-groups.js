@@ -63,6 +63,11 @@ function validate(e){
     e.internalRoles.some(x=>!verifyInternalRole(e,x))||
     new Set(e.internalRoles.map(x=>x.id)).size!==e.internalRoles.length))
   return false;
+ if(e.priorityWork!==undefined&&
+   (!Array.isArray(e.priorityWork)||
+    e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
+    new Set(e.priorityWork.map(x=>x.originalActionHash)).size!==e.priorityWork.length))
+  return false;
  if(e.origin==='player-declaration'){
   const d=e.witness.details;
   if(e.witness.type!=='story'||d?.origin!=='informal-player-group-founding'||
@@ -152,7 +157,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],internalPriorities:[],internalRoles:[],
+  additionalMembers:[],internalPriorities:[],internalRoles:[],priorityWork:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -351,8 +356,13 @@ function month(w,day,emit){
     a.witness.details?.coins===a.amount&&
     a.witness.details?.activity===a.activity&&
     a.minutes===45&&a.amount>=0&&
-    hash(a.witness)===a.hash))
-    throw Error('Unverified group work cannot create historical progress');
+    hash(a.witness)===a.hash&&
+    (a.priorityId===undefined||
+      a.witness.details?.priorityId===a.priorityId&&
+      e.internalPriorities?.some(p=>
+        p.id===a.priorityId&&p.supported&&
+        p.day<=a.day))))
+    throw Error('Unverified group work or unsupported priority link cannot create historical progress');
    const attempts=e.activity.splice(0);
    const available=e.funds,effort=attempts.reduce((v,a)=>v+a.minutes,0),
     cost=Math.min(available,Math.max(1,Math.ceil(effort/90)));
@@ -366,7 +376,8 @@ function month(w,day,emit){
     standing.influence=clamp(standing.influence+1);
     standing.publicPressure=clamp(standing.publicPressure-2);
    }else e.failedEfforts++;
-   record(r,e,day,success?'verified-limited-community-work':'unverified-community-effort',
+   const independentReview=record(r,e,day,
+    success?'verified-limited-community-work':'unverified-community-effort',
     {actualEffortMinutes:effort,actualFundsSpent:cost,
      result:success?'limited shared work, not the truth of every proposal':'no independently verified result',
      decisionDraw:x,chance,
@@ -374,6 +385,30 @@ function month(w,day,emit){
     emit,success?
      e.charter.name+' reports a limited, independently checked contribution toward '+e.charter.duty+
       '. No family rank, inherited power or legal office follows.':null);
+   for(const work of attempts){
+    if(work.priorityId===undefined)continue;
+    const priority=e.internalPriorities.find(p=>p.id===work.priorityId);
+    if(!priority?.supported)throw Error('A dissenting member cannot be made to sponsor a priority');
+    const witness={
+     origin:PRIORITY_WORK,groupId:e.id,
+     groupOriginHash:e.originHash,
+     priorityId:priority.id,prioritySourceHash:priority.sourceHash,
+     independentMemberActorId:priority.memberActorId,
+     originalActionHash:work.hash,originalAction:structuredClone(work),
+     independentReviewHash:independentReview.hash,
+     independentReview:structuredClone(independentReview),
+     day,groupReviewCost:cost,
+     originalGroupBalanceBeforeReview:available,
+     noExtraCostOrFreeProgress:true,
+     noCompulsoryMemberParticipation:true};
+    const row={priorityId:priority.id,origin:PRIORITY_WORK,
+     originalActionHash:work.hash,
+     independentReviewHash:independentReview.hash,
+     source:witness,sourceHash:hash(witness)};
+    e.priorityWork||=[];
+    if(!verifyPriorityWork(e,row))throw Error('The new work evidence does not match the original independent result');
+    e.priorityWork.push(row);
+   }
   }
   const upkeep=e.members>0?Math.max(1,Math.ceil(e.members/8)):0;
   if(e.funds>=upkeep&&upkeep){e.funds-=upkeep;e.unfundedMonths=0;
@@ -675,6 +710,70 @@ function voluntaryRoleStatus(w,groupId,{day}={}){
  });
 }
 
+
+/*
+ * #18: optional advisory-priority attribution to ACTUAL original group work.
+ * This does not award extra money, bind dissenters or resolve a second roll.
+ * The original independent month work and its existing funds cost are the
+ * ONLY mechanical output; a separately copied source keeps the causal link
+ * readable even when the short group-history journal prunes old entries.
+ */
+const PRIORITY_WORK='original-reviewed-association-priority-work-v1';
+function verifyPriorityWork(e,row){
+ const q=row?.source,p=e.internalPriorities?.find(x=>x.id===row?.priorityId);
+ const a=q?.originalAction,rev=q?.independentReview;
+ if(!p?.supported||!q||row.origin!==PRIORITY_WORK||
+  row.sourceHash!==hash(q)||q.origin!==PRIORITY_WORK||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.priorityId!==p.id||q.prioritySourceHash!==p.sourceHash||
+  q.independentMemberActorId!==p.memberActorId||
+  row.originalActionHash!==q.originalActionHash||
+  row.independentReviewHash!==q.independentReviewHash||
+  !Number.isInteger(q.day)||q.day<p.day||
+  !a||a.priorityId!==p.id||
+  q.originalActionHash!==hash(a.witness)||
+  q.originalActionHash!==a.hash||
+  a.witness?.type!=='story'||
+  a.witness.details?.origin!=='actually-attempted-voluntary-group-work'||
+  a.witness.details?.groupId!==e.id||
+  a.witness.details?.priorityId!==p.id||
+  a.witness.details?.actor!==e.founder.name||
+  a.witness.details?.coins!==a.amount||
+  a.witness.details?.activity!==a.activity||
+  a.witness.details?.minutes!==a.minutes||
+  !Number.isInteger(a.day)||a.day<p.day||a.day>q.day||
+  !Number.isInteger(a.amount)||a.amount<0||
+  !rev||rev.hash!==q.independentReviewHash||
+  rev.groupId!==e.id||rev.originHash!==e.originHash||
+  rev.day!==q.day||
+  !['verified-limited-community-work','unverified-community-effort'].includes(rev.kind)||
+  !Array.isArray(rev.details?.originalActionHashes)||
+  !rev.details.originalActionHashes.includes(a.hash)||
+  !Number.isInteger(rev.details.actualFundsSpent)||
+  q.groupReviewCost!==rev.details.actualFundsSpent||
+  !Number.isInteger(q.originalGroupBalanceBeforeReview)||
+  q.originalGroupBalanceBeforeReview<q.groupReviewCost||
+  q.noExtraCostOrFreeProgress!==true||
+  q.noCompulsoryMemberParticipation!==true)
+  return false;
+ const {hash:seal,notice,releaseDay,...body}=rev;
+ return hash(body)===seal;
+}
+function priorityWorkStatus(w,groupId){
+ const e=lookup(w,groupId);
+ if(!e)throw Error('An original valid association with known source is required');
+ return (e.priorityWork||[]).map(row=>({
+  priorityId:row.priorityId,
+  originalActionHash:row.originalActionHash,
+  dayOfActualIndependentReview:row.source.day,
+  originalResult:row.source.independentReview.kind,
+  groupWideOriginalReviewCost:row.source.groupReviewCost,
+  additionalCostForLink:0,
+  noInferredSharedMemberConsent:true,
+  noNewWorkResultOrMoney:true
+ }));
+}
+
 function visible(s,w){
  const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
@@ -697,4 +796,5 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
  INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus,
- INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus};
+ INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
+ PRIORITY_WORK,priorityWorkStatus};
