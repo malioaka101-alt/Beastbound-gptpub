@@ -130,12 +130,17 @@ function founded(seed){
  t.rngState=pickDraw(x=>x<.001);
  act(s,'groupTaskRequest',{groupId:e.id,npcId:'elira',
   task,untilDay:Math.floor(s.world.minutes/1440)+35});
- A.equal(E.dispatch(s,'travel academy').ok,true);
+ // A fabricated remote location is NOT a real local social witness.
+ // The read-only private member task view must not leak its contents.
+ const actualPlace=s.world.location;
+ s.world.location='unsupported_remote_mandate';
  const before=E.exportGame(s),rng=s.rngState;
  A.throws(()=>act(s,'groupTasksStatus',{groupId:e.id}),
   /Only the actual local founder/);
  A.equal(E.exportGame(s),before);
  A.equal(s.rngState,rng);
+ s.world.location=actualPlace;
+ A.equal(act(s,'groupTasksStatus',{groupId:e.id}).tasks.length,1);
 }
 {
  const {s,w,e,t}=founded(997111);
