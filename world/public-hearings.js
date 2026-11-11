@@ -94,6 +94,7 @@ function review(s,w,day,random,emit){
   gov.publicHearingDockets.push({hearingId:r.hearingId,issueId:r.issueId,
    day,releaseDay:day+2,disposition,sourceEventHash:r.eventHash});
   if(gov.publicHearingDockets.length>60)gov.publicHearingDockets.shift();
+  Gov.attestOriginalCivicProcedure(s,w,{kind:'public_hearing',witnessId:r.hearingId});
   if(typeof emit==='function')emit({
    day,region:'reedmarch',subject:'hearing:'+r.hearingId,
    text:'The March Council records a public procedural disposition on '+i.label+
