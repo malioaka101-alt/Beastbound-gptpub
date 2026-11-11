@@ -69,7 +69,7 @@ function form(s,p={}){
   noRequiredTutorOrRegistrationFee:true};
 }
 function contribute(s,p={}){
- fields(p,['groupId','activity','coins'],['groupId','activity']);
+ fields(p,['groupId','activity','coins','priorityId'],['groupId','activity']);
  if(typeof p.groupId!=='string')throw Error('An actual previously formed group ID is required');
  const activity=words(p.activity,10,700,'Own freely described practical activity');
  const money=p.coins===undefined?0:C.int(p.coins,'optional real contributed Talons',0,1000000);
@@ -79,6 +79,12 @@ function contribute(s,p={}){
   throw Error('Only a genuinely founded, consented group that this character leads can accept their contribution');
  if(!Number.isInteger(s.player.coins)||s.player.coins<money)
   throw Error('The character does not own the proposed real funds');
+ const priorityId=p.priorityId;
+ if(priorityId!==undefined&&
+   (typeof priorityId!=='string'||
+    !e.internalPriorities?.some(x=>x.id===priorityId&&x.supported&&
+      x.day<=Math.floor(s.world.minutes/1440))))
+  throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
  const old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
  s.player.coins-=money;e.funds+=money;
@@ -87,14 +93,17 @@ function contribute(s,p={}){
   origin:'actually-attempted-voluntary-group-work',
   groupId:e.id,activity,coins:money,minutes:WORKTIME,
   actor:s.player.name,location:s.world.location,
+  ...(priorityId!==undefined?{priorityId}:{}),
   successClaimAccepted:false,noAutomaticFollowers:true
  });
  const ev=structuredClone(s.log[s.log.length-1]);
  e.activity.push({day:Math.floor(s.world.minutes/1440),
-  minutes:WORKTIME,amount:money,activity,hash:Groups.hash(ev),witness:ev});
+  minutes:WORKTIME,amount:money,activity,hash:Groups.hash(ev),witness:ev,
+  ...(priorityId!==undefined?{priorityId}:{})});
  return {workRecorded:true,groupId:e.id,actualMinutes:WORKTIME,
   spentCoins:money,treasury:e.funds,
   verifiedResult:false,nextIndependentWorldReview:true,
+  ...(priorityId!==undefined?{originalPriorityLink:priorityId}:{}),
   noAutomaticNewMembers:true,noPowerOrStatusGranted:true};
 }
 function status(s,p={}){
