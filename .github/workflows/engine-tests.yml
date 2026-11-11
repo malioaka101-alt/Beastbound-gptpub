@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/group-original-coordinator-setback-reconsideration.test.js
             tests/group-consensual-operational-task-provenance.test.js
             tests/group-original-treasury-custody.test.js
             tests/civic-original-jurisdiction-provenance.test.js
