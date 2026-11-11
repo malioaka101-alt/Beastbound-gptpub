@@ -145,6 +145,31 @@ function month(w,day,emit){
        noCompulsoryPoliticalAffiliation:true});
     }
    }
+   // Independently accepted, still-serving group coordinators may
+   // privately reconsider ONLY after an ORIGINAL failed group work review
+   // recorded on THIS actual month tick. This is their own choice, not
+   // the founder's command, a forced election or a repeat of the work roll.
+   if(localPolity===e.polity){
+    const coordinator=G.coordinatorStatus(w,e.id,{day});
+    if(coordinator.mandateId&&coordinator.actorId===m.actorId){
+     const failed=r.history.find(x=>x.groupId===e.id&&x.day===day&&
+      x.kind==='unverified-community-effort');
+     if(failed){
+      const decision=G.reconsiderCoordinatorOnOriginalFailure(w,{
+       groupId:e.id,mandateId:coordinator.mandateId,
+       originalReviewId:failed.id,day});
+      if(decision.reconsidered)
+       logDecision(w,t,e,day,npcId,
+        decision.independentlyResigned?
+         'independent-coordinator-stepped-down':
+         'independent-coordinator-continued',{
+         mandateId:coordinator.mandateId,
+         originalFailedWorkHash:decision.originalFailedWorkHash,
+         noNewProjectOrMoney:true,
+         noOtherMemberCompelled:true});
+     }
+    }
+   }
    // A review is prompted by genuinely adverse, continuing circumstances.
    // Successful groups do not lose members merely because time passes.
    const hardship=e.status==='inactive'&&e.unfundedMonths>=3?
