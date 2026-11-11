@@ -590,6 +590,7 @@ function internalPriorityStatus(w,groupId){
  * are immutable history. No position grants authority, work, budget or veto.
  */
 const INTERNAL_POSITION='existing-association-independent-member-position-v1';
+const INDEPENDENT_WORK_POSITION='original-published-work-independent-member-reappraisal-v1';
 function positionBefore(e,priority,actorId,rows){
  const previous=[...rows].reverse().find(x=>
   x.priorityId===priority.id&&x.memberActorId===actorId);
@@ -612,6 +613,8 @@ function positionChances(q){
  return {support,dissent};
 }
 function verifyInternalPosition(e,row){
+ if(row?.origin===INDEPENDENT_WORK_POSITION)
+  return verifyPublishedWorkPosition(e,row);
  const q=row?.source,p=e.internalPriorities?.find(x=>x.id===row?.priorityId);
  if(!p||!q||e.origin!=='player-declaration'||
   row.origin!==INTERNAL_POSITION||
@@ -662,6 +665,136 @@ function verifyInternalPosition(e,row){
  const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
  return Agency.draw(rng)===q.draw&&rng.rngState===q.agencyAfter;
 }
+
+/*
+ * One original, locally published work outcome can give an active,
+ * genuinely consenting member a reason to reassess the same open issue.
+ * No invisible committee vote, remote knowledge, fabricated meeting,
+ * second group work or forced member attendance is created.
+ */
+function publishedWorkChances(q){
+ const support=clamp(.43+
+  (q.previousStance==='supported'?.13:q.previousStance==='dissented'?-.10:0)+
+  (q.completedEfforts>q.failedEfforts?.08:0),.15,.71);
+ const dissent=clamp(.20+
+  (q.previousStance==='dissented'?.12:0)+
+  (q.stability<35?.07:0),.10,.42);
+ return {support,dissent};
+}
+function verifyPublishedWorkPosition(e,row){
+ const q=row?.source,priority=e.internalPriorities?.find(p=>p.id===row?.priorityId),
+  work=e.priorityWork?.find(x=>
+   x.priorityId===row?.priorityId&&x.originalActionHash===q?.workActionHash&&
+   x.independentReviewHash===q?.reviewHash),
+  review=work?.source?.independentReview;
+ if(!q||!priority||!work||!review||
+  e.origin!=='player-declaration'||
+  row.origin!==INDEPENDENT_WORK_POSITION||
+  row.sourceHash!==hash(q)||q.origin!==INDEPENDENT_WORK_POSITION||
+  q.id!==row.id||q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.priorityId!==priority.id||q.prioritySourceHash!==priority.sourceHash||
+  q.memberActorId!==row.memberActorId||
+  q.memberConsentHash!==row.memberConsentHash||
+  q.day!==row.day||q.stance!==row.stance||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  !Number.isInteger(row.day)||row.day<priority.day||
+  !verifyPriorityWork(e,work)||
+  q.workActionHash!==work.originalActionHash||
+  q.reviewHash!==work.independentReviewHash||
+  review.kind!=='verified-limited-community-work'||
+  review.day!==work.source.day||
+  review.releaseDay!==review.day+6||
+  typeof review.notice!=='string'||review.notice.length<15||
+  q.publishedOn!==review.releaseDay||
+  q.day<q.publishedOn||q.day-q.publishedOn>40||
+  q.day<=review.day||
+  typeof q.memberName!=='string'||q.memberName.length<3||
+  !['supported','dissented','undecided','unrecorded'].includes(q.previousStance)||
+  (typeof q.previousPositionHash!=='string'&&q.previousPositionHash!==null)||
+  !Number.isInteger(q.previousPositionDay)||q.previousPositionDay>q.day||
+  !Number.isInteger(q.completedEfforts)||q.completedEfforts<0||
+  !Number.isInteger(q.failedEfforts)||q.failedEfforts<0||
+  !Number.isInteger(q.stability)||q.stability<0||q.stability>100||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.draw!=='number'||q.draw<0||q.draw>=1||
+  !['supported','dissented','undecided'].includes(row.stance)||
+  q.noMandateOrAdditionalWork!==true)return false;
+ const member=e.additionalMembers?.find(x=>
+  x.actorId===row.memberActorId&&x.hash===row.memberConsentHash&&
+  x.name===q.memberName&&
+  x.witness?.details?.day<=row.day&&
+  (x.active!==false||x.departure?.day>row.day));
+ if(!member)return false;
+ const chances=publishedWorkChances(q),
+  stance=q.draw<chances.support?'supported':
+   q.draw<chances.support+chances.dissent?'dissented':'undecided';
+ if(q.supportChance!==chances.support||
+  q.dissentChance!==chances.dissent||stance!==row.stance)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ return Agency.draw(rng)===q.draw&&rng.rngState===q.agencyAfter;
+}
+function reassessPublishedWork(w,{groupId,memberActorId,workActionHash,day}={}){
+ // World-owned method, called only after the ORIGINAL sixday/month clock
+ // makes a source-valid local notice available; accepts no desired stance.
+ const e=lookup(w,groupId),
+  member=e?.origin==='player-declaration'?
+   e.additionalMembers.find(x=>x.actorId===memberActorId&&x.active!==false):null,
+  work=e?.priorityWork?.find(x=>x.originalActionHash===workActionHash),
+  priority=e?.internalPriorities?.find(x=>x.id===work?.priorityId),
+  rev=work?.source?.independentReview;
+ const before=member&&priority?positionBefore(e,priority,memberActorId,
+  e.internalPositions||[]):null;
+ if(!e||!member||!work||!priority||!rev||
+  !verifyPriorityWork(e,work)||
+  rev.kind!=='verified-limited-community-work'||
+  rev.releaseDay!==rev.day+6||
+  typeof rev.notice!=='string'||rev.notice.length<15||
+  !Number.isInteger(day)||day<rev.releaseDay||day-rev.releaseDay>40||
+  !before||day<=before.day||
+  (e.internalPositions||[]).some(x=>
+   x.origin===INDEPENDENT_WORK_POSITION&&
+   x.memberActorId===memberActorId&&
+   x.source.workActionHash===workActionHash))
+  return {reassessed:false,reason:'no new individually accessible original published work'};
+ const host=w.countries?.[e.polity],Agency=require('./group-member-agency');
+ if(!host||!Number.isInteger(host.stability)||host.stability<0||host.stability>100)
+  throw Error('A sourced original polity is required for a member to reconsider its work');
+ const t=Agency.ensure(w),agencyBefore=t.rngState;
+ const id='group_work_view_'+hash({groupId,memberActorId,workActionHash}).slice(0,24);
+ const partial={origin:INDEPENDENT_WORK_POSITION,id,
+  groupId:e.id,groupOriginHash:e.originHash,
+  priorityId:priority.id,prioritySourceHash:priority.sourceHash,
+  memberActorId,memberConsentHash:member.hash,memberName:member.name,
+  workActionHash,reviewHash:work.independentReviewHash,
+  publishedOn:rev.releaseDay,day,
+  previousStance:before.stance,
+  previousPositionHash:before.hash,previousPositionDay:before.day,
+  completedEfforts:e.completedEfforts,failedEfforts:e.failedEfforts,
+  stability:host.stability,noMandateOrAdditionalWork:true};
+ const chances=publishedWorkChances(partial),draw=Agency.draw(t),
+  stance=draw<chances.support?'supported':
+   draw<chances.support+chances.dissent?'dissented':'undecided';
+ const source={...partial,agencyBefore,agencyAfter:t.rngState,
+  supportChance:chances.support,dissentChance:chances.dissent,draw,stance};
+ const row={id,origin:INDEPENDENT_WORK_POSITION,
+  priorityId:priority.id,memberActorId,memberConsentHash:member.hash,
+  day,stance,source,sourceHash:hash(source)};
+ if(!verifyPublishedWorkPosition(e,row))
+  throw Error('A member opinion without its original locally published work source is invalid');
+ e.internalPositions||=[];e.internalPositions.push(row);
+ if(!validate(e))
+  throw Error('Original member position history cannot accept a repeated or unsourced reassessment');
+ record(ensure(w),e,day,'independent-response-to-published-real-work',
+  {priorityId:priority.id,memberActorId,
+   originalWorkHash:workActionHash,viewHash:row.sourceHash,
+   noNewWorkOrVote:true},null);
+ return {reassessed:true,memberActorId,priorityId:priority.id,
+  previousStance:before.stance,stance,
+  groundedInPublishedOriginalReview:work.independentReviewHash,
+  noGroupMandate:true,noNewWorkOrSpending:true};
+}
+
 function verifyInternalPositionHistory(e){
  const seen=[],ids=new Set();
  for(const row of e.internalPositions){
@@ -1152,6 +1285,7 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
  INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus,
  INTERNAL_POSITION,considerInternalPosition,internalPositionStatus,
+ INDEPENDENT_WORK_POSITION,reassessPublishedWork,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus};
