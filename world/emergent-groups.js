@@ -376,7 +376,7 @@ function verifyOperatingAccount(e){
   typeof a.anchor.reason!=='string'||a.anchor.reason.length<20||
   !Array.isArray(a.movements))return false;
  let balance=a.anchor.amount,lastDay=a.anchor.day;
- const receipts=new Set();
+ const receipts=new Set(),originalSources=new Set();
  for(const m of a.movements){
   const q=m?.source;
   if(!m||!q||m.version!==OPERATING_ACCOUNT||
@@ -407,6 +407,9 @@ function verifyOperatingAccount(e){
     q.originalActionHash!==hash(ev)||
     q.noWithdrawableTalonsOrTitleGranted!==true)
     return false;
+   const provenance='deposit:'+q.originalActionHash;
+   if(originalSources.has(provenance))return false;
+   originalSources.add(provenance);
   }else if(m.kind==='original-independent-work-cost'){
    const review=q.originalReview;
    if(!review||review.groupId!==e.id||
@@ -424,6 +427,9 @@ function verifyOperatingAccount(e){
     q.noSecondWorkOrRandomDraw!==true)return false;
    const {hash:originalSeal,notice,releaseDay,...originalBody}=review;
    if(originalSeal!==hash(originalBody))return false;
+   const provenance='work:'+q.originalReviewHash;
+   if(originalSources.has(provenance))return false;
+   originalSources.add(provenance);
   }else if(m.kind==='original-monthly-upkeep'){
    if(m.delta>=0||
     !Number.isInteger(q.memberCountAtUpkeep)||q.memberCountAtUpkeep<1||
@@ -431,6 +437,9 @@ function verifyOperatingAccount(e){
     q.fundedUpkeep===true&&m.before<-m.delta||
     q.fundedUpkeep!==true||
     q.noMemberWageOrNewPropertyGranted!==true)return false;
+   const provenance='upkeep:'+m.day;
+   if(originalSources.has(provenance))return false;
+   originalSources.add(provenance);
   }else return false;
   balance=m.after;
  }
