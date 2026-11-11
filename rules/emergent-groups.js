@@ -87,6 +87,9 @@ function contribute(s,p={}){
   throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
  const old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
+ const priorPlayerCoins=s.player.coins,priorGroupFunds=e.funds,
+  fundingDay=Math.floor(s.world.minutes/1440);
+ if(money>0)Groups.openTreasuryAudit(e,fundingDay);
  s.player.coins-=money;e.funds+=money;
  C.event(s,'story',s.player.name+' devotes actual time'+(money?' and personal funds':'')+
   ' to a self-directed association task. The outcome remains unverified.',{
@@ -97,6 +100,13 @@ function contribute(s,p={}){
   successClaimAccepted:false,noAutomaticFollowers:true
  });
  const ev=structuredClone(s.log[s.log.length-1]);
+ if(money>0)Groups.addTreasuryReceipt(e,{
+  kind:'personal-original-contribution',day:fundingDay,
+  amount:money,before:priorGroupFunds,
+  proof:{originalEvent:structuredClone(ev),
+   originalEventHash:Groups.hash(ev),
+   playerCoinsBefore:priorPlayerCoins,
+   playerCoinsAfter:s.player.coins}});
  e.activity.push({day:Math.floor(s.world.minutes/1440),
   minutes:WORKTIME,amount:money,activity,hash:Groups.hash(ev),witness:ev,
   ...(priorityId!==undefined?{priorityId}:{})});
@@ -106,8 +116,19 @@ function contribute(s,p={}){
   ...(priorityId!==undefined?{originalPriorityLink:priorityId}:{}),
   noAutomaticNewMembers:true,noPowerOrStatusGranted:true};
 }
+function treasuryStatus(s,p={}){
+ fields(p,['groupId']);
+ if(typeof p.groupId!=='string')
+  throw Error('An existing voluntarily founded group ID is required for real fund records');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
+  local=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||e.polity!==local)
+  throw Error('Original association treasury records are private to its actual local founder');
+ return Groups.treasuryAuditStatus(w,e.id);
+}
 function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,status};
+module.exports={form,contribute,status,treasuryStatus};

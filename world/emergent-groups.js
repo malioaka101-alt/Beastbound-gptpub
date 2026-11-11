@@ -53,6 +53,7 @@ function validate(e){
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
   !Number.isInteger(e.foundedDay)||e.foundedDay<0)return false;
+ if(e.treasuryAudit!==undefined&&!verifyTreasuryAudit(e))return false;
  if(e.internalPriorities!==undefined&&
    (!Array.isArray(e.internalPriorities)||
     e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
@@ -149,6 +150,151 @@ function record(r,e,day,kind,details,emit,notice=null){
   releaseDay:row.releaseDay,severity:'routine'});
  return row;
 }
+
+/*
+ * #18: existing original association operating funds have ONE balance.
+ * Record only real incoming PERSONAL Talons (the original rule debits the
+ * actual player's purse), the original independent group-work expense and
+ * the real original monthly upkeep. The audit is not another wallet,
+ * additional income, tax, voting power or authority over anyone's property.
+ *
+ * Old saves without these receipts receive a truthful opening balance at
+ * the next genuine transaction, NOT a fictional reconstructed history.
+ */
+const TREASURY_AUDIT='original-association-actual-balance-evidence-v1';
+function treasuryReference(q){
+ const p=q?.proof;
+ if(q.kind==='personal-original-contribution')
+  return p?.originalEventHash||null;
+ if(q.kind==='original-independent-work-cost')
+  return p?.originalReviewHash||null;
+ if(q.kind==='original-monthly-upkeep')
+  return Number.isInteger(p?.month)?'original-month-'+p.month:null;
+ return null;
+}
+function verifyTreasuryProof(e,q){
+ const p=q.proof;
+ if(q.kind==='personal-original-contribution'){
+  const ev=p?.originalEvent,details=ev?.details;
+  return !!ev&&ev.type==='story'&&
+   hash(ev)===p.originalEventHash&&
+   details?.origin==='actually-attempted-voluntary-group-work'&&
+   details.groupId===e.id&&details.actor===e.founder.name&&
+   details.coins===q.amount&&details.minutes===45&&
+   Number.isFinite(p.playerCoinsBefore)&&
+   Number.isFinite(p.playerCoinsAfter)&&
+   Math.round((p.playerCoinsBefore-p.playerCoinsAfter)*100)===q.amount*100;
+ }
+ if(q.kind==='original-independent-work-cost'){
+  const rev=p?.originalReview;
+  if(!rev||rev.hash!==p.originalReviewHash||
+   !['verified-limited-community-work','unverified-community-effort'].includes(rev.kind)||
+   rev.groupId!==e.id||rev.originHash!==e.originHash||
+   rev.day!==q.day||rev.details?.actualFundsSpent!==q.amount)
+   return false;
+  const {hash:seal,notice,releaseDay,...body}=rev;
+  return hash(body)===seal;
+ }
+ if(q.kind==='original-monthly-upkeep'){
+  return !!p&&Number.isInteger(p.month)&&p.month>=0&&
+   Number.isInteger(p.membersAtTick)&&p.membersAtTick>0&&
+   p.worldSource==='original-emergent-group-monthly-upkeep'&&
+   q.amount===Math.max(1,Math.ceil(p.membersAtTick/8));
+ }
+ return false;
+}
+function verifyTreasuryAudit(e,expectedFunds=e.funds){
+ const ledger=e?.treasuryAudit;
+ if(ledger===undefined)return true;
+ const a=ledger?.anchor?.source;
+ if(!ledger||ledger.version!==1||
+  !a||ledger.anchor.hash!==hash(a)||
+  a.origin!==TREASURY_AUDIT||a.groupId!==e.id||
+  a.originalGroupHash!==e.originHash||
+  a.originalFounder!==e.founder?.name||
+  !Number.isInteger(a.day)||a.day<e.foundedDay||
+  !Number.isSafeInteger(a.balance)||a.balance<0||
+  a.noImaginedEarlierTransactions!==true||
+  !Array.isArray(ledger.receipts))return false;
+ let balance=a.balance,lastDay=a.day;
+ const keys=new Set();
+ for(const row of ledger.receipts){
+  const q=row?.source,reference=treasuryReference(q);
+  if(!q||row.sourceHash!==hash(q)||q.origin!==TREASURY_AUDIT||
+   q.groupId!==e.id||q.originalGroupHash!==e.originHash||
+   q.day<lastDay||!Number.isInteger(q.day)||
+   !Number.isSafeInteger(q.amount)||q.amount<=0||
+   q.reference!==reference||typeof reference!=='string'||
+   q.id!=='groupfund_'+hash({groupId:e.id,kind:q.kind,reference}).slice(0,22)||
+   row.id!==q.id||row.kind!==q.kind||
+   keys.has(q.kind+':'+reference)||
+   q.before!==balance||
+   q.after!==(q.kind==='personal-original-contribution'?
+    balance+q.amount:balance-q.amount)||
+   !Number.isSafeInteger(q.after)||q.after<0||
+   !verifyTreasuryProof(e,q))return false;
+  keys.add(q.kind+':'+reference);
+  balance=q.after;lastDay=q.day;
+ }
+ return Number.isSafeInteger(expectedFunds)&&expectedFunds===balance;
+}
+function openTreasuryAudit(e,day){
+ if(e.origin!=='player-declaration'||!Number.isInteger(day)||
+  day<e.foundedDay||!Number.isSafeInteger(e.funds)||e.funds<0)
+  throw Error('Only original real voluntary association funds can be reconciled');
+ if(e.treasuryAudit===undefined){
+  const q={origin:TREASURY_AUDIT,groupId:e.id,
+   originalGroupHash:e.originHash,originalFounder:e.founder.name,
+   day,balance:e.funds,noImaginedEarlierTransactions:true,
+   note:'Exact existing opening balance; earlier movements not reconstructed if this is a migrated save'};
+  e.treasuryAudit={version:1,anchor:{source:q,hash:hash(q)},receipts:[]};
+ }
+ if(!verifyTreasuryAudit(e))
+  throw Error('Original association treasury does not reconcile with actual recorded funds');
+ return e.treasuryAudit;
+}
+function addTreasuryReceipt(e,{kind,day,amount,before,proof}={}){
+ // Called by original rule/world modules AFTER the real balance changes.
+ // The caller cannot provide desired outcome, new funds or member assent.
+ if(!e?.treasuryAudit||!verifyTreasuryAudit(e,before)||
+  !Number.isInteger(day)||day<e.treasuryAudit.anchor.source.day||
+  !Number.isSafeInteger(amount)||amount<=0||
+  !Number.isSafeInteger(before)||before<0||
+  !proof||typeof proof!=='object')
+  throw Error('A matching original cash movement and prior verified balance are required');
+ const reference=treasuryReference({kind,proof}),
+  q={origin:TREASURY_AUDIT,groupId:e.id,
+   originalGroupHash:e.originHash,kind,day,amount,before,
+   after:e.funds,reference,proof:structuredClone(proof)};
+ q.id='groupfund_'+hash({groupId:e.id,kind,reference}).slice(0,22);
+ const row={id:q.id,kind,source:q,sourceHash:hash(q)};
+ if(e.treasuryAudit.receipts.some(x=>x.id===q.id))
+  throw Error('An original source cannot be spent or received twice');
+ e.treasuryAudit.receipts.push(row);
+ if(!verifyTreasuryAudit(e)){
+  e.treasuryAudit.receipts.pop();
+  throw Error('Original treasury source does not match real payer or world expenditure');
+ }
+ return row;
+}
+function treasuryAuditStatus(w,groupId){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('Only real player-founded association funds have this original wallet receipt');
+ const journal=e.treasuryAudit;
+ return {groupId:e.id,originalFounder:e.founder.name,
+  currentOperatingFunds:e.funds,
+  noIndependentNewMoney:true,noAutomaticMemberSpendingPermission:true,
+  auditedSinceDay:journal?.anchor.source.day??null,
+  openingBalance:journal?.anchor.source.balance??e.funds,
+  earlierMovementsUnreconstructed:!journal||journal.anchor.source.balance>0,
+  knownMovements:(journal?.receipts||[]).map(x=>({
+   id:x.id,day:x.source.day,kind:x.kind,
+   amount:x.source.amount,balanceAfter:x.source.after,
+   sourceHash:x.sourceHash})),
+  note:'Original association operating funds, not another treasury account, different currency, free revenue or grant of legal title.'};
+}
+
 function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
  const r=ensure(w),polity=Atlas.R[Atlas.LOCATION_REGION[place]||
   (Atlas.R[place]?place:w.livedPlaces?.places?.[place]?.regionId)]?.polity;
@@ -374,6 +520,7 @@ function month(w,day,emit){
    const attempts=e.activity.splice(0);
    const available=e.funds,effort=attempts.reduce((v,a)=>v+a.minutes,0),
     cost=Math.min(available,Math.max(1,Math.ceil(effort/90)));
+   if(cost>0)openTreasuryAudit(e,day);
    e.funds-=cost;
    const chance=clamp(.21+effort/240+(host.stability>=55?.08:0)+
       Math.min(available,12)*.012,.12,.76);
@@ -393,6 +540,11 @@ function month(w,day,emit){
     emit,success?
      e.charter.name+' reports a limited, independently checked contribution toward '+e.charter.duty+
       '. No family rank, inherited power or legal office follows.':null);
+   if(cost>0)addTreasuryReceipt(e,{
+    kind:'original-independent-work-cost',day,amount:cost,
+    before:available,
+    proof:{originalReview:structuredClone(independentReview),
+     originalReviewHash:independentReview.hash}});
    for(const work of attempts){
     if(work.priorityId===undefined)continue;
     const priority=e.internalPriorities.find(p=>p.id===work.priorityId);
@@ -419,8 +571,17 @@ function month(w,day,emit){
    }
   }
   const upkeep=e.members>0?Math.max(1,Math.ceil(e.members/8)):0;
-  if(e.funds>=upkeep&&upkeep){e.funds-=upkeep;e.unfundedMonths=0;
-   e.status='organising';}
+  if(e.funds>=upkeep&&upkeep){
+   openTreasuryAudit(e,day);
+   const balanceBeforeUpkeep=e.funds;
+   e.funds-=upkeep;
+   addTreasuryReceipt(e,{
+    kind:'original-monthly-upkeep',day,amount:upkeep,
+    before:balanceBeforeUpkeep,
+    proof:{month:w.ticks.months,membersAtTick:e.members,
+     worldSource:'original-emergent-group-monthly-upkeep'}});
+   e.unfundedMonths=0;e.status='organising';
+  }
   else{e.unfundedMonths++;e.status='inactive';}
   // Inactivity means no sustained operations, NOT forced loss of a surname,
   // kinship, accumulated history or legal dissolution.
@@ -1288,4 +1449,6 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INDEPENDENT_WORK_POSITION,reassessPublishedWork,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
- COORDINATION,offerCoordination,coordinatorStatus};
+ COORDINATION,offerCoordination,coordinatorStatus,
+ TREASURY_AUDIT,verifyTreasuryAudit,openTreasuryAudit,addTreasuryReceipt,
+ treasuryAuditStatus};

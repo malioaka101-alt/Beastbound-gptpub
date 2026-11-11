@@ -485,6 +485,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.materialHandoffsStatus':return MaterialHandoffs.status(s,params);
   case 'social.status':return SocialFabric.status(s,params);
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
+  case 'social.groupTreasuryStatus':return EmergentGroups.treasuryStatus(s,params);
   case 'social.groupMembersStatus':return GroupInvitations.status(s,params);
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
