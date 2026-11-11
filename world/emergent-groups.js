@@ -82,6 +82,8 @@ function validate(e){
     e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
     new Set(e.priorityWork.map(x=>x.originalActionHash)).size!==e.priorityWork.length))
   return false;
+ if(e.coordinationReviews!==undefined&&!verifyCoordinationReviewHistory(e))
+  return false;
  if(e.coordinationMandates!==undefined&&
   (!Array.isArray(e.coordinationMandates)||
    e.coordinationMandates.some(x=>!verifyCoordinationMandate(e,x))||
@@ -502,7 +504,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],voluntaryTasks:[],taskServices:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],
+  additionalMembers:[],voluntaryTasks:[],taskServices:[],internalPriorities:[],internalPositions:[],internalRoles:[],priorityWork:[],coordinationMandates:[],coordinationReviews:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -1530,6 +1532,174 @@ function verifyCoordinationMandate(e,row){
  const choice=agency.draw(rng);
  return choice===q.decisionDraw&&rng.rngState===q.agencyAfter;
 }
+
+/*
+ * #18: only an actual originally agreed limited coordinator can choose
+ * independently whether to continue that role after a GENUINE original
+ * failed group-work review. An earlier answer and a real setback are
+ * evidence; neither creates an automatic removal, an election, a successor,
+ * a salary, a second project roll, or command authority over members.
+ */
+const COORDINATION_REVIEW='original-member-coordinator-independent-setback-reconsideration-v1';
+function coordinationReviewChance(q){
+ return clamp(.27+
+  (q.failedEffortsAtDecision>q.completedEffortsAtDecision?.08:0)+
+  (q.groupStatus==='inactive'?.09:0),.13,.55);
+}
+function verifiedOriginalFailedWork(e,rev){
+ if(!rev||rev.groupId!==e.id||rev.polity!==e.polity||
+  rev.originHash!==e.originHash||
+  rev.kind!=='unverified-community-effort'||
+  !Number.isInteger(rev.day)||rev.day<e.foundedDay||
+  !rev.details||rev.details.result!=='no independently verified result'||
+  !Number.isInteger(rev.details.actualEffortMinutes)||
+  rev.details.actualEffortMinutes<=0||
+  !Number.isInteger(rev.details.actualFundsSpent)||
+  rev.details.actualFundsSpent<0||
+  !Number.isFinite(rev.details.decisionDraw)||
+  rev.details.decisionDraw<0||rev.details.decisionDraw>=1||
+  !Number.isFinite(rev.details.chance)||
+  rev.details.chance<.12||rev.details.chance>.76||
+  rev.details.decisionDraw<rev.details.chance||
+  !Array.isArray(rev.details.originalActionHashes)||
+  rev.details.originalActionHashes.length<1||
+  !rev.details.originalActionHashes.every(h=>
+   typeof h==='string'&&/^[0-9a-f]{64}$/.test(h))||
+  rev.notice!==null||rev.releaseDay!==null||
+  typeof rev.hash!=='string')return false;
+ const {hash:seal,notice,releaseDay,...body}=rev;
+ return hash(body)===seal;
+}
+function verifyCoordinationReview(e,row){
+ const q=row?.source,role=e?.coordinationMandates?.find(x=>x.id===row?.mandateId),
+  rev=q?.originalReview;
+ if(!role||!role.agreed||!q||e.origin!=='player-declaration'||
+  row.origin!==COORDINATION_REVIEW||
+  row.sourceHash!==hash(q)||q.origin!==COORDINATION_REVIEW||
+  row.id!==q.id||
+  q.id!=='coord_review_'+hash({groupId:e.id,mandateId:role.id,
+   originalReviewHash:q.originalReviewHash}).slice(0,24)||
+  row.mandateId!==q.mandateId||q.mandateId!==role.id||
+  q.originalMandateHash!==role.sourceHash||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  row.memberActorId!==q.memberActorId||
+  q.memberActorId!==role.memberActorId||
+  q.originalMembershipHash!==role.originalMembershipHash||
+  row.day!==q.day||q.day!==rev?.day||
+  row.day<role.startDay||row.day>role.untilDay||
+  !verifiedOriginalFailedWork(e,rev)||
+  rev.hash!==q.originalReviewHash||
+  !['organising','inactive','active','operating'].includes(q.groupStatus)||
+  !Number.isInteger(q.failedEffortsAtDecision)||
+  q.failedEffortsAtDecision<1||
+  !Number.isInteger(q.completedEffortsAtDecision)||
+  q.completedEffortsAtDecision<0||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  !Number.isFinite(q.decisionDraw)||q.decisionDraw<0||
+  q.decisionDraw>=1||
+  q.resignChance!==coordinationReviewChance(q)||
+  row.resigned!==q.resigned||
+  row.resigned!==(q.decisionDraw<q.resignChance)||
+  q.noNewWorkOrInfluence!==true||
+  q.noOtherMemberBound!==true||
+  q.noCashOrLegalOffice!==true)
+  return false;
+ const member=e.additionalMembers?.find(m=>
+  m.actorId===role.memberActorId&&
+  m.hash===role.originalMembershipHash&&
+  m.witness?.details?.day<=row.day&&
+  (m.active!==false||m.departure?.day>row.day));
+ if(!member)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ return Agency.draw(rng)===q.decisionDraw&&
+  rng.rngState===q.agencyAfter;
+}
+function verifyCoordinationReviewHistory(e){
+ if(!Array.isArray(e.coordinationReviews))return false;
+ const ids=new Set(),reviewed=new Set(),resigned=new Set();
+ let day=-1;
+ for(const row of e.coordinationReviews){
+  if(ids.has(row?.id)||!verifyCoordinationReview(e,row)||
+   row.day<day||
+   resigned.has(row.mandateId)||
+   reviewed.has(row.mandateId+':'+row.source.originalReviewHash))
+   return false;
+  ids.add(row.id);reviewed.add(row.mandateId+':'+row.source.originalReviewHash);
+  if(row.resigned)resigned.add(row.mandateId);
+  day=row.day;
+ }
+ return true;
+}
+function reconsiderCoordinatorOnOriginalFailure(w,{
+ groupId,mandateId,originalReviewId,day}={}){
+ const e=lookup(w,groupId),original=peek(w)?.history?.find(x=>
+  x.id===originalReviewId&&x.groupId===groupId&&x.day===day),
+  incumbent=e&&coordinatorStatus(w,e.id,{day}),
+  role=e?.coordinationMandates?.find(x=>x.id===mandateId);
+ if(!e||!role||!original||
+  !verifiedOriginalFailedWork(e,original)||
+  !role.agreed||incumbent.mandateId!==role.id||
+  !Number.isInteger(day)||day!==w.lastTickDay||
+  e.failedEfforts<=0||
+  (e.coordinationReviews||[]).some(x=>
+   x.mandateId===role.id&&
+   (x.resigned||x.source.originalReviewHash===original.hash)))
+  return {reconsidered:false,
+   reason:'no new genuine original failed work while personally serving'};
+ const Agency=require('./group-member-agency'),
+  t=Agency.ensure(w),agencyBefore=t.rngState,
+  q0={origin:COORDINATION_REVIEW,
+   id:'coord_review_'+hash({groupId:e.id,mandateId:role.id,
+    originalReviewHash:original.hash}).slice(0,24),
+   groupId:e.id,groupOriginHash:e.originHash,
+   mandateId:role.id,originalMandateHash:role.sourceHash,
+   memberActorId:role.memberActorId,
+   originalMembershipHash:role.originalMembershipHash,
+   originalReview:structuredClone(original),
+   originalReviewHash:original.hash,
+   day,groupStatus:e.status,
+   completedEffortsAtDecision:e.completedEfforts,
+   failedEffortsAtDecision:e.failedEfforts,
+   noNewWorkOrInfluence:true,noOtherMemberBound:true,
+   noCashOrLegalOffice:true};
+ const resignChance=coordinationReviewChance(q0),
+  decisionDraw=Agency.draw(t),resigned=decisionDraw<resignChance,
+  q={...q0,agencyBefore,agencyAfter:t.rngState,
+   resignChance,decisionDraw,resigned},
+  row={id:q.id,origin:COORDINATION_REVIEW,
+   mandateId:role.id,memberActorId:role.memberActorId,
+   day,resigned,source:q,sourceHash:hash(q)};
+ if(!verifyCoordinationReview(e,row))
+  throw Error('Original group setback and independently considered coordinator mandate must match');
+ e.coordinationReviews||=[];e.coordinationReviews.push(row);
+ if(!validate(e))
+  throw Error('Historical independent coordinator decision is not source-valid');
+ record(ensure(w),e,day,
+  resigned?'independent-coordinator-step-down':'coordinator-independent-continuation',
+  {mandateId:role.id,memberActorId:role.memberActorId,
+   originalFailedWorkHash:original.hash,reviewSourceHash:row.sourceHash,
+   voluntary:resigned,noFundsOrWorkAdded:true,
+   noReplacementAppointed:true},null);
+ return {reconsidered:true,mandateId:role.id,
+  originalFailedWorkHash:original.hash,
+  independentlyResigned:resigned,
+  status:resigned?'voluntarily-stepped-down':'voluntarily-continued',
+  noNewWorkOrTreasuryAuthority:true,noChosenSuccessor:true};
+}
+function coordinationReviewStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId),today=day===undefined?w.lastTickDay:day;
+ if(!e||!Number.isInteger(today)||today<e.foundedDay||
+  today>w.lastTickDay)
+  throw Error('Only real local original association leader history can be read');
+ return (e.coordinationReviews||[]).filter(x=>x.day<=today).map(x=>({
+  id:x.id,mandateId:x.mandateId,
+  memberActorId:x.memberActorId,day:x.day,
+  independentlyResigned:x.resigned,
+  originalFailedWorkHash:x.source.originalReviewHash,
+  noOtherMembersBound:true,noNewWorkOrMoney:true}));
+}
+
 function coordinatorStatus(w,groupId,{day}={}){
  const e=lookup(w,groupId);
  if(!e)throw Error('A real valid association must exist before coordination can be inspected');
@@ -1540,7 +1710,10 @@ function coordinatorStatus(w,groupId,{day}={}){
   const member=e.additionalMembers?.find(x=>
     x.actorId===row.memberActorId&&x.hash===row.originalMembershipHash);
   const departed=member?.active===false&&member.departure?.day<=d;
-  return row.agreed&&d>=row.startDay&&d<=row.untilDay&&!departed;
+  const resignation=(e.coordinationReviews||[]).some(x=>
+   x.mandateId===row.id&&x.resigned&&x.day<=d);
+  return row.agreed&&d>=row.startDay&&d<=row.untilDay&&
+   !departed&&!resignation;
  }).slice(-1)[0];
  return live?
   {groupId:e.id,actorId:live.memberActorId,name:live.memberName,
@@ -1641,6 +1814,8 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus,
+ COORDINATION_REVIEW,verifyCoordinationReview,
+ reconsiderCoordinatorOnOriginalFailure,coordinationReviewStatus,
  VOLUNTARY_TASK,TASK_SERVICE,voluntaryTaskChance,verifyVoluntaryTask,
  recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
  voluntaryTaskStatus,
