@@ -58,6 +58,11 @@ function validate(e){
     e.internalPriorities.some(x=>!verifyInternalPriority(e,x))||
     new Set(e.internalPriorities.map(x=>x.id)).size!==e.internalPriorities.length))
   return false;
+ if(e.internalRoles!==undefined&&
+   (!Array.isArray(e.internalRoles)||
+    e.internalRoles.some(x=>!verifyInternalRole(e,x))||
+    new Set(e.internalRoles.map(x=>x.id)).size!==e.internalRoles.length))
+  return false;
  if(e.origin==='player-declaration'){
   const d=e.witness.details;
   if(e.witness.type!=='story'||d?.origin!=='informal-player-group-founding'||
@@ -147,7 +152,7 @@ function createPlayer(w,{id,name,kind,purpose,founder,place,day,event}){
   source:SOURCE_PLAYER};
  const e={id,polity,origin:'player-declaration',charter,
   founder:{actorId:'player',name:founder},members:1,verifiedMembers:1,
-  additionalMembers:[],internalPriorities:[],
+  additionalMembers:[],internalPriorities:[],internalRoles:[],
   funds:0,activity:[],workSessions:0,completedEfforts:0,failedEfforts:0,
   status:'organising',unfundedMonths:0,foundedDay:day,
   releaseDay:day+2,originHash:hash(event),witness:structuredClone(event)};
@@ -531,6 +536,145 @@ function internalPriorityStatus(w,groupId){
  }));
 }
 
+
+/*
+ * Existing volunteer members can choose real, deliberately limited work
+ * responsibilities. This records the member's independent willingness, not
+ * an invented government appointment, hereditary title, salary, achievement,
+ * or an exclusive command over other members or beasts.
+ */
+const INTERNAL_ROLE='group-member-voluntary-practical-responsibility-v1';
+function responsibilityChance(q){
+ return clamp(.50+(q.groupSuccesses>q.groupFailures?.09:0)-
+   (q.groupStatus==='inactive'?.16:0),.18,.76);
+}
+function verifyInternalRole(e,entry){
+ const q=entry?.source;
+ if(!q||entry.origin!==INTERNAL_ROLE||
+  entry.sourceHash!==hash(q)||q.origin!==INTERNAL_ROLE||
+  q.id!==entry.id||q.groupId!==e.id||
+  q.groupOriginHash!==e.originHash||
+  q.memberActorId!==entry.memberActorId||
+  q.memberConsentHash!==entry.memberConsentHash||
+  q.title!==entry.title||q.scope!==entry.scope||
+  q.startDay!==entry.startDay||q.untilDay!==entry.untilDay||
+  q.agreed!==entry.agreed||
+  entry.status!==(q.agreed?'agreed':'declined')||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(entry.id)||
+  typeof entry.title!=='string'||entry.title.trim().length<7||
+  entry.title.length>110||
+  typeof entry.scope!=='string'||entry.scope.trim().length<35||
+  entry.scope.length>530||
+  !Number.isInteger(entry.startDay)||entry.startDay<e.foundedDay||
+  !Number.isInteger(entry.untilDay)||entry.untilDay<entry.startDay||
+  entry.untilDay>10000000||
+  !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
+  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  typeof q.witness!=='string'||q.witness.trim().length<40||
+  q.witness.length>590||
+  q.requestingFounder!==e.founder.name||
+  typeof q.memberName!=='string'||q.memberName.length<3||
+  typeof q.presentProof!=='string'&&q.presentProof!==null||
+  !Number.isInteger(q.groupSuccesses)||q.groupSuccesses<0||
+  !Number.isInteger(q.groupFailures)||q.groupFailures<0||
+  !['organising','inactive','active','operating'].includes(q.groupStatus)||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.draw!=='number'||q.draw<0||q.draw>=1||
+  q.agreeChance!==responsibilityChance(q)||
+  q.agreed!==(q.draw<q.agreeChance))
+  return false;
+ const member=e.additionalMembers?.find(m=>
+  m.actorId===entry.memberActorId&&m.hash===entry.memberConsentHash&&
+  m.name===q.memberName&&
+  Number.isInteger(m.witness?.details?.day)&&
+  m.witness.details.day<=entry.startDay&&
+  (m.active!==false||m.departure?.day>entry.startDay));
+ if(!member)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ const next=Agency.draw(rng);
+ return next===q.draw&&rng.rngState===q.agencyAfter;
+}
+function proposeVoluntaryRole(w,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+   Object.keys(params).some(k=>!['id','groupId','memberActorId','title',
+    'scope','startDay','untilDay','regionId','place','witness'].includes(k)))
+  throw Error('A practical group responsibility cannot specify consent, command power, compulsory service or pay');
+ const {id,groupId,memberActorId,title,scope,startDay,untilDay,
+  regionId,place,witness}=params;
+ const e=lookup(w,groupId),reg=Atlas.R[regionId],
+  member=e?.origin==='player-declaration'?
+   e.additionalMembers.find(m=>m.actorId===memberActorId&&m.active!==false):null;
+ const People=require('./person-presence'),Agency=require('./group-member-agency');
+ const person=typeof member?.witness?.details?.npcId==='string'?
+  People.resolve(w,member.witness.details.npcId,place,startDay):null;
+ if(!e||!member||!person||person.actorId!==memberActorId||
+  person.name!==member.name||!reg||reg.polity!==e.polity||
+  Atlas.LOCATION_REGION[place]!==regionId||
+  !Number.isInteger(startDay)||startDay<e.foundedDay||
+  startDay>w.lastTickDay||
+  !Number.isInteger(untilDay)||untilDay<startDay||
+  untilDay>10000000||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(id)||
+  typeof title!=='string'||title.trim().length<7||title.length>110||
+  typeof scope!=='string'||scope.trim().length<35||scope.length>530||
+  typeof witness!=='string'||witness.trim().length<40||witness.length>590||
+  (e.internalRoles||[]).some(x=>x.id===id||
+   x.memberActorId===memberActorId&&x.title===title&&
+   x.startDay===startDay))
+  throw Error('Only a personally present, consenting group member may independently consider a distinct, genuine local responsibility');
+ const t=Agency.ensure(w),agencyBefore=t.rngState;
+ const q0={origin:INTERNAL_ROLE,id,groupId:e.id,groupOriginHash:e.originHash,
+  memberActorId,memberConsentHash:member.hash,
+  memberName:member.name,requestingFounder:e.founder.name,
+  title,scope,startDay,untilDay,regionId,place,witness,
+  presentProof:person.presence?hash(person.presence):null,
+  groupStatus:e.status,groupSuccesses:e.completedEfforts,
+  groupFailures:e.failedEfforts};
+ const agreeChance=responsibilityChance(q0),draw=Agency.draw(t),
+  agreed=draw<agreeChance;
+ const q={...q0,agencyBefore,agencyAfter:t.rngState,
+  agreeChance,draw,agreed};
+ const entry={id,origin:INTERNAL_ROLE,memberActorId,
+  memberConsentHash:member.hash,title,scope,startDay,untilDay,
+  agreed,status:agreed?'agreed':'declined',source:q,sourceHash:hash(q)};
+ if(!verifyInternalRole(e,entry))
+  throw Error('A voluntary practical role failed its real independent choice proof');
+ e.internalRoles||=[];
+ e.internalRoles.push(entry);
+ if(!validate(e))throw Error('An organisation cannot record false role consent');
+ record(ensure(w),e,startDay,'independent-practical-role-response',{
+  sourceHash:entry.sourceHash,memberActorId,
+  agreed,roleTitle:title,
+  noGroupFundsSpent:true,noGovernmentOffice:true,
+  noForcedMemberAction:true},null);
+ return {id,groupId,memberActorId,agreed,
+  status:agreed?'accepted':'declined',
+  noPublicOffice:true,noCompulsoryDuty:true,
+  noAutomaticWage:true,noInventedProjectCompletion:true};
+}
+function voluntaryRoleStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId);
+ if(!e)throw Error('Real original organisation source and membership are required');
+ const d=day===undefined?w.lastTickDay:day;
+ if(!Number.isInteger(d)||d<e.foundedDay)
+  throw Error('A valid original world day is needed for role history');
+ return (e.internalRoles||[]).map(entry=>{
+  const member=e.additionalMembers.find(x=>x.actorId===entry.memberActorId&&
+   x.hash===entry.memberConsentHash);
+  const departed=member?.active===false&&member.departure?.day<=d;
+  const status=!entry.agreed?'declined':
+   d<entry.startDay?'not-started':
+   departed?'ended-after-independent-departure':
+   d>entry.untilDay?'term-ended':'voluntarily-serving';
+  return {id:entry.id,memberActorId:entry.memberActorId,
+   title:entry.title,scope:entry.scope,status,
+   startDay:entry.startDay,untilDay:entry.untilDay,
+   noLegalOrHereditaryAuthority:true,noCompulsoryCooperation:true,
+   noAutomaticPay:true};
+ });
+}
+
 function visible(s,w){
  const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
@@ -552,4 +696,5 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  registerOriginAdapter,registerFromEvidence,registerMemberConsentAdapter,
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
- INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus};
+ INTERNAL_PRIORITY,deliberateInternalPriority,internalPriorityStatus,
+ INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus};
