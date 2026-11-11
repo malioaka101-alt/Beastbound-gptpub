@@ -668,7 +668,10 @@ function verifyInternalPositionHistory(e){
   if(ids.has(row?.id)||!verifyInternalPosition(e,row))return false;
   const p=e.internalPriorities.find(x=>x.id===row.priorityId),
    before=positionBefore(e,p,row.memberActorId,seen),q=row.source;
-  if(row.day<=before.day||
+  // Another real member may respond at the original meeting on its day.
+  // The same member may not reroll their own first answer on that day.
+  if(row.day<before.day||
+   (row.day===before.day&&before.hash!==null)||
    q.previousStance!==before.stance||
    q.previousPositionHash!==before.hash||
    q.previousPositionDay!==before.day)return false;
@@ -702,7 +705,8 @@ function considerInternalPosition(w,params={}){
   !reg||reg.polity!==e.polity||
   Atlas.LOCATION_REGION[place]!==regionId||
   !eco||!host||!Number.isInteger(day)||day>w.lastTickDay||
-  !previous||day<=previous.day||
+  !previous||(day<previous.day||
+   (day===previous.day&&previous.hash!==null))||
   !/^[a-z][a-z0-9_-]{5,80}$/.test(id)||
   typeof reason!=='string'||reason.trim().length<35||reason.length>540||
   typeof meetingWitness!=='string'||
