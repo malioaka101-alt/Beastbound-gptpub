@@ -87,7 +87,11 @@ function verifiedOriginalMilestone(p,row){
   ctx.newGroupReputation>ctx.incumbentReputation;
  if(ev.kind==='local-competition-changed')
   return leading&&positive(ctx.sustainedMonths)&&ctx.sustainedMonths>=3;
- return !leading;
+ // A documented reversal can also arise from the original group's
+ // suspension even while its numerical membership/reputation advantage
+ // persists. The exact original event source, not invented financial
+ // data or a fictional new election, is the historical proof.
+ return ev.kind==='local-competition-reversed';
 }
 function verifyMilestones(p){
  if(p.organisationMilestones===undefined)return true;
