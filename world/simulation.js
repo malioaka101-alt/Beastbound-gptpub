@@ -344,7 +344,9 @@ function publicTradeRouteHistory(s,params={}){
  if(typeof routeId!=='string'||routeId.length<3)
   throw Error('A particular existing known trade corridor is required');
  const r=A.tradeRoutes.find(x=>x.id===routeId),
-  local=polityOf(s),now=worldDay(s),w=peek(s);
+  regionId=A.LOCATION_REGION[s.world?.location]||
+   require('./lived-places').get(s,s.world?.location)?.regionId,
+  local=A.R[regionId]?.polity,now=worldDay(s),w=peek(s);
  if(!r||!(r.a===local||r.b===local))
   throw Error('Only a genuinely local inter-polity public corridor can be inspected, not a distant private shipping record');
  if(!verifyOriginalRouteHistory(w,r))
@@ -357,6 +359,191 @@ function publicTradeRouteHistory(s,params={}){
     sourceHash:x.sourceHash,
     noTreatyConcluded:true,noUnknownMerchantFinancesRevealed:true})),
   note:'Only actual released local original merchant notices are shown; privately changing foreign statuses, hidden risk and stock levels are not revealed.'};
+}
+
+
+/*
+ * #18: TWO EXISTING GOVERNMENTS, TWO GENUINE INDEPENDENT choices, ONE
+ * ACTUAL recently disrupted common trade corridor. This is willingness
+ * to explore contact, NOT a signed treaty, appointed envoy, actual talks,
+ * mandated law, money transfer or reopened route.
+ *
+ * Each pair's separate deterministic agency stream is stored/replayed:
+ * no extra original world/player RNG, and no repeated approach to the
+ * same original disruption source.
+ */
+const BILATERAL_CONTACT='independent-two-sided-practical-contact-over-original-route-v1';
+function bilateralSeed(w,key){
+ const v=parseInt(diplomaticHash({seed:w.worldSeed,key,kind:BILATERAL_CONTACT}).slice(0,8),16)>>>0;
+ return v||0x593f56bc;
+}
+function bilateralRelationAt(d,day){
+ const a=d.diplomaticAudit?.anchor;
+ if(!a||a.day>day)return null;
+ const t=d.diplomaticAudit.transitions.filter(x=>x.day<=day).at(-1);
+ return {status:t?.to||a.status,hash:t?.hash||null};
+}
+function bilateralChance(status,stability,legitimacy){
+ return Math.max(.12,Math.min(.84,.48+
+  (status==='cooperation'?.15:status==='war'?-.18:
+   status==='strained'?-.06:0)+
+  (stability>=65?.08:stability<30?-.12:0)+
+  (legitimacy<25?-.1:0)));
+}
+function contactBulletin(route,day){
+ return {day,region:'international',
+  subject:[route.a,route.b].sort().join('|'),
+  text:'Following disruption of the '+route.mode+' between '+
+   A.P[route.a].name+' and '+A.P[route.b].name+
+   ', both governments independently indicate willingness to explore practical contact. No envoy, agreed terms or reopening is confirmed.',
+  channel:'foreign courier',releaseDay:day+14,severity:'routine'};
+}
+function verifyContact(w,key,row,previousRng){
+ const d=w.diplomacy?.[key],q=row?.source,
+  route=A.tradeRoutes.find(x=>x.id===q?.routeId);
+ if(!d||!q||!route||
+  row.origin!==BILATERAL_CONTACT||q.origin!==BILATERAL_CONTACT||
+  row.sourceHash!==diplomaticHash(q)||
+  row.id!==q.id||row.day!==q.day||
+  row.bothWilling!==q.bothWilling||
+  q.pairKey!==key||q.a!==d.a||q.b!==d.b||
+  [route.a,route.b].sort().join('|')!==key||
+  q.id!=='bilateral_contact_'+q.routeChangeId||
+  !Number.isInteger(q.day)||q.day<0||
+  !Number.isInteger(q.monthNumber)||q.monthNumber<1||
+  !Number.isInteger(q.rngBefore)||q.rngBefore!==previousRng||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  q.noTreatyOrRepresentation!==true||
+  q.noTradeOrWorldRandomChanged!==true||
+  q.noLegalPermissionOrFiscalTransfer!==true||
+  !verifyOriginalRouteHistory(w,route))
+  return false;
+ const change=w.routes[route.id].originalChanges?.find(x=>
+  x.id===q.routeChangeId&&x.sourceHash===q.originalRouteSourceHash);
+ if(!change||!change.disrupted||
+  q.day<change.day||q.day-change.day>60||
+  q.originalRouteDay!==change.day||
+  q.originalRouteReleaseDay!==change.source.originalNotice.releaseDay)
+  return false;
+ const historical=bilateralRelationAt(d,q.day);
+ if(!historical||q.diplomaticStatus!==historical.status||
+  q.originalDiplomaticHash!==historical.hash||
+  !officeContextMatches(w,d.a,q.day,q.officeA)||
+  !officeContextMatches(w,d.b,q.day,q.officeB)||
+  ![q.stabilityA,q.stabilityB,q.legitimacyA,q.legitimacyB].
+   every(x=>Number.isFinite(x)&&x>=0&&x<=100))
+  return false;
+ const ca=bilateralChance(historical.status,q.stabilityA,q.legitimacyA),
+  cb=bilateralChance(historical.status,q.stabilityB,q.legitimacyB),
+  copy={rngState:previousRng},ra=random(copy),rb=random(copy);
+ if(q.chanceA!==ca||q.chanceB!==cb||
+  q.choiceA!==ra||q.choiceB!==rb||
+  q.rngAfter!==copy.rngState||
+  q.willingA!==(ra<ca)||q.willingB!==(rb<cb)||
+  q.bothWilling!==(q.willingA&&q.willingB))
+  return false;
+ return JSON.stringify(q.originalPublicBulletin)===
+  JSON.stringify(q.bothWilling?contactBulletin(route,q.day):null);
+}
+function verifyBilateralContacts(w,key){
+ const d=w.diplomacy?.[key];
+ if(!d||!verifyDiplomaticOfficeContexts(w,key))return false;
+ if(d.contactAttempts===undefined&&d.contactRngState===undefined)
+  return true;
+ if(!Array.isArray(d.contactAttempts)||
+  !Number.isInteger(d.contactRngState)||d.contactRngState<1)
+  return false;
+ let rng=bilateralSeed(w,key),priorDay=-1;
+ const seen=new Set();
+ for(const row of d.contactAttempts){
+  if(!verifyContact(w,key,row,rng)||
+   seen.has(row.source.routeChangeId)||row.day<priorDay)
+   return false;
+  rng=row.source.rngAfter;
+  priorDay=row.day;
+  seen.add(row.source.routeChangeId);
+ }
+ return rng===d.contactRngState;
+}
+function independentBilateralContactsMonth(w,day){
+ for(const [key,d] of Object.entries(w.diplomacy)){
+  if(!verifyBilateralContacts(w,key))
+   throw Error('Original two-government contact source has been rewritten');
+  const hist=bilateralRelationAt(d,day);
+  if(!hist)continue;
+  const options=A.tradeRoutes.filter(r=>
+   [r.a,r.b].sort().join('|')===key)
+   .sort((a,b)=>a.id.localeCompare(b.id));
+  const eligible=options.map(route=>({
+   route,change:w.routes[route.id]?.originalChanges?.at(-1)
+  })).find(({route,change})=>
+   change?.disrupted&&w.routes[route.id].disrupted&&
+   change.day<=day&&day-change.day<=60&&
+   !(d.contactAttempts||[]).some(x=>x.source.routeChangeId===change.id));
+  if(!eligible)continue;
+  const {route,change}=eligible,a=w.countries[d.a],b=w.countries[d.b];
+  if(!a||!b)
+   throw Error('Two existing real governments are required to consider independent contact');
+  const rngBefore=d.contactRngState??bilateralSeed(w,key),
+   gen={rngState:rngBefore},
+   chanceA=bilateralChance(hist.status,a.stability,a.legitimacy),
+   chanceB=bilateralChance(hist.status,b.stability,b.legitimacy),
+   choiceA=random(gen),choiceB=random(gen),
+   willingA=choiceA<chanceA,willingB=choiceB<chanceB,
+   bothWilling=willingA&&willingB;
+  const source={origin:BILATERAL_CONTACT,
+    id:'bilateral_contact_'+change.id,
+    pairKey:key,a:d.a,b:d.b,routeId:route.id,
+    routeChangeId:change.id,originalRouteSourceHash:change.sourceHash,
+    originalRouteDay:change.day,
+    originalRouteReleaseDay:change.source.originalNotice.releaseDay,
+    day,monthNumber:w.ticks.months,
+    diplomaticStatus:hist.status,
+    originalDiplomaticHash:hist.hash,
+    officeA:originalOfficeContext(w,d.a,day),
+    officeB:originalOfficeContext(w,d.b,day),
+    stabilityA:a.stability,stabilityB:b.stability,
+    legitimacyA:a.legitimacy,legitimacyB:b.legitimacy,
+    chanceA,chanceB,rngBefore,choiceA,choiceB,rngAfter:gen.rngState,
+    willingA,willingB,bothWilling,
+    originalPublicBulletin:bothWilling?contactBulletin(route,day):null,
+    noTreatyOrRepresentation:true,
+    noTradeOrWorldRandomChanged:true,
+    noLegalPermissionOrFiscalTransfer:true};
+  const row={id:source.id,origin:BILATERAL_CONTACT,
+    day,bothWilling,source,sourceHash:diplomaticHash(source)};
+  if(!verifyContact(w,key,row,rngBefore))
+   throw Error('Original bilateral willingness lacks two independently replayable decisions');
+  d.contactAttempts||=[];d.contactAttempts.push(row);
+  d.contactRngState=gen.rngState;
+  if(!verifyBilateralContacts(w,key))
+   throw Error('Two-sided original government choice cannot bypass source validation');
+  if(source.originalPublicBulletin)event(w,source.originalPublicBulletin);
+ }
+}
+function publicBilateralContactHistory(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>k!=='pairKey')||
+  typeof params.pairKey!=='string')
+  throw Error('Only a genuine local diplomatic pair is readable, never injected choices or refusals');
+ const w=peek(s),d=w.diplomacy?.[params.pairKey],
+  regionId=A.LOCATION_REGION[s.world?.location]||
+   require('./lived-places').get(s,s.world?.location)?.regionId,
+  local=A.R[regionId]?.polity;
+ if(!d||![d.a,d.b].includes(local))
+  throw Error('A foreign hidden government contact cannot be inspected from outside its polity');
+ if(!verifyBilateralContacts(w,params.pairKey))
+  throw Error('The two original governments have no valid decision history');
+ return {pairKey:params.pairKey,
+  publiclyAnnouncedMutualContact:(d.contactAttempts||[])
+   .filter(x=>x.bothWilling&&x.source.originalPublicBulletin?.releaseDay<=worldDay(s))
+   .map(x=>({day:x.day,releaseDay:x.source.originalPublicBulletin.releaseDay,
+    notice:x.source.originalPublicBulletin.text,
+    originalDisruptedRouteId:x.source.routeId,
+    sourceHash:x.sourceHash,
+    exploratoryOnly:true,noSignedTreaty:true,
+    noEnvoyOrActualMeetingInferred:true})),
+  note:'Only released public two-sided willingness is shown. Private unilateral refusals, unappointed envoys and unnegotiated terms remain unknown.'};
 }
 
 function initial(s,startingDay=0){
@@ -813,6 +1000,9 @@ function tickMonth(w,day){
    event(w,{day,region:'international',subject:key,text:txt,channel:'foreign courier',releaseDay:day+14,severity:d.status==='war'?'warning':'important'});
   }
  }
+ // Two state-level choices use a separate audited political agency stream.
+ // The original month has already resolved its actual corridor and diplomacy.
+ independentBilateralContactsMonth(w,day);
  // Migration uses neighbouring habitats that genuinely support the same lineage.
  // Populations move; they do not appear from nowhere when a new scene starts.
  for(const r of A.regions){
@@ -1028,6 +1218,7 @@ function synopsis(s){const w=peek(s);return {version:w.version,continents:A.cont
 module.exports={initial,ensure,peek,
  DIPLOMATIC_SOURCE,verifyDiplomaticAudit,diplomaticTransitionHistory,
  ROUTE_CHANGE_SOURCE,verifyOriginalRouteHistory,publicTradeRouteHistory,
+ BILATERAL_CONTACT,verifyBilateralContacts,publicBilateralContactHistory,
  BILATERAL_OFFICE_CONTEXT,verifyDiplomaticOfficeContexts,
  localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
  // testing/GM diagnostics only; never pass hidden state to player-facing panels.

@@ -459,6 +459,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.professionals':return Realm.publicProfessionals(s);
   case 'world.initiativesStatus':return Realm.publicInitiatives(s,params);
   case 'world.tradeRouteHistory':return Realm.publicTradeRouteHistory(s,params);
+  case 'world.bilateralContactHistory':return Realm.publicBilateralContactHistory(s,params);
   case 'world.diffusionStatus':return Realm.publicDiffusion(s,params);
   case 'world.localResearchStatus':{
    if(Object.keys(params).length)throw Error('Local world research status is read-only');
