@@ -428,7 +428,8 @@ function verifyTaskService(e,row){
   typeof work.details?.success!=='boolean'||
   work.details?.success!==(work.kind==='verified-volunteer-work')||
   q.actualWorkHash!==work.hash||
-  q.noSecondWorkOrPay!==true)
+  q.noSecondWorkOrPay!==true||
+  q.taskSpecificCompletionNotEstablished!==true)
   return false;
  const {hash:sourceHash,notice,releaseDay,...body}=work;
  return hash(body)===sourceHash;
@@ -444,11 +445,12 @@ function retainOriginalTaskService(e,taskId,actualGroupEvent){
   taskWitnessHash:task.witnessHash,
   actualWorkHash:actualGroupEvent.hash,
   originalWork:structuredClone(actualGroupEvent),
-  noSecondWorkOrPay:true};
+  noSecondWorkOrPay:true,
+  taskSpecificCompletionNotEstablished:true};
  const row={origin:TASK_SERVICE,taskId,
   memberActorId:task.memberActorId,source:q,sourceHash:hash(q)};
  if(!verifyTaskService(e,row))
-  throw Error('Only a source-corroborated original world service can satisfy a group invitation');
+  throw Error('Only a source-corroborated original world service can be linked to a group invitation');
  e.taskServices||=[];e.taskServices.push(row);
  if(!validate(e))throw Error('Group task linked to non-original member work');
  return row;
@@ -470,14 +472,16 @@ function voluntaryTaskStatus(w,groupId,{day}={}){
    task:x.task,individualDecision:x.decision,
    untilDay:x.untilDay,
    status:result?
-    result.source.originalWork.details.success?'completed-original-work':
-     'original-work-attempt-failed':
+    result.source.originalWork.details.success?
+     'original-member-work-recorded-task-not-verified':
+     'original-member-work-failed-task-not-verified':
     x.decision!=='accepted'?x.decision:
     departed?'ended-after-member-departure':
     today>x.untilDay?'expired-without-recorded-work':
     'freely-accepted-not-guaranteed',
    originalServiceHash:result?.source.actualWorkHash||null,
    originalMinutes:result?.source.originalWork.details.actualWorkMinutes||0,
+   specificTaskCompletionVerified:false,
    noCompulsoryService:true,noNewWorkOrMoney:true};
  });
 }
