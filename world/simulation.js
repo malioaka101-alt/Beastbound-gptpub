@@ -654,7 +654,8 @@ function localProvisioner(w,day=w.lastTickDay){
     !Array.isArray(v.laborPayments??[])||
     !require('./person-careers').verifyLocalTradePayments(w)||
     !require('./merchant-voluntary-work-terms').verify(w)||
-    !require('./original-wholesale-transport').verify(w,v))
+    !require('./original-wholesale-transport').verify(w,v)||
+    !require('./independent-local-purchases').verify(w))
   throw Error('Existing provisioner stock, source-paid labour, owner or funds need reconciliation');
  return v;
 }
@@ -1145,6 +1146,9 @@ function tick(s,weekDays=[],monthDays=[]){
    // Real residents independently choose whether to POST a local interest
    // in genuine regional goods. No new sales, wages, items, or world RNG.
    require('./independent-regional-demand').sixday(w,day);
+   // A real paid worker can independently purchase a real ration using
+   // existing wages. Only source-funded actual sales move goods or Scales.
+   require('./independent-local-purchases').sixday(w,day);
    OriginRelatives.sixday(w,day);
    // People with genuine overlapping work-shift witnesses may freely meet
    // and share limited ordinary information without automatic teaching.
