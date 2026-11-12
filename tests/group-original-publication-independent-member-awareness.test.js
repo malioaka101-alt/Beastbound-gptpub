@@ -38,7 +38,7 @@ function setup(seed,withConversation=false){
  const {s,w,e,agency,groupId,first}=setup(997999);
  const charter=e.charter.duty,playerCoins=s.player.coins,
   origMemberCount=e.members,originalRng=s.rngState,
-  rev=e.purposeHistory.at(-1),priorHistoryLength=e.purposeResponses.length;
+  rev=e.purposeHistory.at(-1),priorHistoryLength=(e.purposeResponses||[]).length;
  A.equal(priorHistoryLength,0);
  A.equal(G.currentPurpose(e,{day:rev.releaseDay-1}),charter,
   'the earlier founding purpose is what was public before actual release');
