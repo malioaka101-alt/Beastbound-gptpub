@@ -1142,6 +1142,9 @@ function tick(s,weekDays=[],monthDays=[]){
    // anywhere in the known simulated geography, without player observation.
    // Their independent decisions are dated and source-bound.
    EmergentPeople.sixday(s,w,day);
+   // Real residents independently choose whether to POST a local interest
+   // in genuine regional goods. No new sales, wages, items, or world RNG.
+   require('./independent-regional-demand').sixday(w,day);
    OriginRelatives.sixday(w,day);
    // People with genuine overlapping work-shift witnesses may freely meet
    // and share limited ordinary information without automatic teaching.
@@ -1242,7 +1245,9 @@ function publicEconomy(s,{polity=null}={}){
  if(!A.P[id])throw Error('Unknown nation');
  if(id!==polityOf(s))return {name:A.P[id].name,knownGoods:A.P[id].resources,currentMarket:'No verified local market prices; request a trade report'};
  const data=w.market[id];
- return {name:A.P[id].name,indices:{...data},note:'Regional estimates only, not binding shop quotes; published local market prices require an actual merchant'};
+ return {name:A.P[id].name,indices:{...data},
+  locallyPostedGoodsInterest:require('./independent-regional-demand').publicLocal(s,w),
+  note:'Regional indices and real public local goods interest are not binding shop quotes, confirmed purchases or evidence of funds; an actual merchant must independently quote and sell'};
 }
 function calendar(s){const w=peek(s);const anchor=w.calendarAnchor;
  if(!anchor)return {day:worldDay(s)+1,absoluteDate:null,season:null,note:'No established absolute calendar date in this campaign save; the in-world day counter remains authoritative.'};
