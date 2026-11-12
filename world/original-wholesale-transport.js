@@ -71,14 +71,16 @@ function verify(w,v){
   !Array.isArray(v.history))return false;
  let previous=-1;
  for(const row of v.history){
-  if(!row||!Number.isInteger(row.day)||row.day<previous)
-   return false;
-  previous=row.day;
+  if(!row)return false;
   const proof=row.originalTransportWitness;
+  // Ordinary physical sales record worldMinute, not day; keep the
+  // pre-existing authentic sale and wage ledgers untouched.
   if(row.kind!=='independent-wholesale-attempt'){
    if(proof!==undefined)return false;
    continue;
   }
+  if(!Number.isInteger(row.day)||row.day<previous)return false;
+  previous=row.day;
   if(row.day<start){
    if(proof!==undefined)return false;
    continue;
