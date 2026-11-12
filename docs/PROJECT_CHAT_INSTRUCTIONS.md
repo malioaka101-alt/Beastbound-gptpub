@@ -1,5 +1,16 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Current #19: source-grounded genuine local market scarcity (12 November 2026)
+
+**#18 PAUSED OPEN** per player direction: fantasy politics will later need full cultural, ideological, ecological, spiritual, species and magic diversity, not a universal government/office template.
+
+**#19 ACTIVE OPEN**; accepted source-backed property [PR #82](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/82) and actual conserved original production [PR #83](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/83). #83 passed **200/200** exact-head independent 3-batch + final integration [CI #43201489401](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43201489401), GitHub merged SHA `41f7c270b79ca0fdca5f265b33ad3fdcf9a514d1`.
+
+**NEW #19 ISOLATED DRAFT** `foundation/source-evidence-local-provisioning-prices-20261112`: the original, physically present Morrowfen provisioner quotes supply-sensitive prices based on the already original monthly regional grain index, actual local ecology forage/quality and finite seller-owned ration stock, with the witnessed snapshot hashed. Healthy initial prices and older fixed-price offers preserved; low supply or stock raises only future legitimately witnessed prices, never unquoted store stock, fictitious demand, new trade, extra dice, wages, imposed price controls, or guaranteed negotiation. Public offer reasons are qualitative and only derive from the actual witnessed local market, not hidden NPC information. Existing physical stock/cash transfer logic remains authoritative. New `tests/economy-original-scarcity-market-quotations.test.js` joins complete **201-test** parallel regression plus original final gate; **PENDING CI**. See `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`. No saves or campaign progression changed. **17/25 accepted; #19 NOT CHECKED**.
+
+---
+
+
 ## Current active #19: original real material production provenance (12 November 2026)
 
 **DO NOT resume #18** unless the player requests it; it is PAUSED OPEN with broad fantasy cultural and ideological complexity explicitly required. #19 is active and OPEN: [PR #82](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/82) merged source-verified existing player/NPC/merchant physical asset observations following **199/199 full three-batch + required final gate** success ([CI #43197720043](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43197720043)), GitHub acknowledged main SHA `a5e8c690676ab419978cc8ca7fdce1bb05307074`.
