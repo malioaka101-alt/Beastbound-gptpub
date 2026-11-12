@@ -20,6 +20,12 @@ function validateAccount(a,id){
  if(!a||a.actorId!==id||!Number.isInteger(a.rngState)||a.rngState<1||
   !a.held||typeof a.held!=='object'||Array.isArray(a.held)||
   !Array.isArray(a.history)||a.history.length>90||
+  (a.purchaseReceipts!==undefined&&
+   (!Array.isArray(a.purchaseReceipts)||a.purchaseReceipts.length>10000||
+    a.purchaseReceipts.some(x=>x?.origin!=='genuine-independent-funded-local-ration-purchase-v1'||
+     x.actorId!==id||x.item!=='clean_rations'||x.quantity!==1||
+     x.hash!==hash(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='hash'))))||
+    new Set(a.purchaseReceipts.map(x=>x.purchaseSourceHash)).size!==a.purchaseReceipts.length))||
   Object.entries(a.held).some(([item,quantity])=>
    !Object.hasOwn(E.RESOURCES,item)||!Number.isInteger(quantity)||
     quantity<0||quantity>100000))
@@ -390,7 +396,7 @@ function preflightPurchasedRation(w,id,row){
   row.source.item!=='clean_rations'||row.source.quantity!==1||
   !Number.isInteger(row.source.day)||row.source.day<1||
   !Number.isInteger(held)||held<0||held>=100000||
-  c?.accounts?.[id]?.history?.some(x=>
+  c?.accounts?.[id]?.purchaseReceipts?.some(x=>
    x.origin===SOURCE_PURCHASE&&x.purchaseSourceHash===row.sourceHash))
   throw Error('One existing personally owned ration may be credited only from a new genuine funded sale');
  return true;
@@ -405,6 +411,7 @@ function creditPurchasedRation(w,id,row){
  a.held.clean_rations=(a.held.clean_rations||0)+1;
  a.history.push(r);
  if(a.history.length>90)a.history.shift();
+ a.purchaseReceipts||=[];a.purchaseReceipts.push(structuredClone(r));
  validateAccount(a,id);
  return r.hash;
 }
