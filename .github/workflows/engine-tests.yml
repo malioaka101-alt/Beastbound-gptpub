@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/group-evolving-declared-purpose.test.js
             tests/original-diplomatic-courier-public-provenance.test.js
             tests/diplomacy-genuine-bilateral-exploratory-contact.test.js
             tests/trade-original-interstate-corridor-history.test.js
