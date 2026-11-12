@@ -246,7 +246,7 @@ function verifyPurposeResponse(e,row){
   d.day!==q.day||d.minute!==q.minute||
   d.minutes!==18||d.discussion!==q.discussion||
   d.presenceHash!==q.presenceHash||
-  d.noSelectedResponse===false||
+  d.noSelectedResponse!==true||
   d.noObligationOrMandate!==true||
   d.noFundsOrWorkGranted!==true)
   return false;
