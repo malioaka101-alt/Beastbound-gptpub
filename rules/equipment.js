@@ -91,6 +91,9 @@ function validOffer(s,id,{mustBeInStock=true}={}){
     (q.originalMarketScarcity!==undefined&&
      !MarketScarcity.verify(q.originalMarketScarcity,
       q.originalMarketScarcityHash,q.priceScales,q.initialStock))||
+    (q.originalMarketScarcity?.originalPaidDemand!==undefined&&
+     !require('./original-paid-demand-price').backedByActualSeller(
+      s.table?.realm,q.originalMarketScarcity.originalPaidDemand))||
     (q.originalMarketScarcity===undefined&&
      q.originalMarketScarcityHash!==undefined)||
     !v||v.sellerNpcId!=='otto'||v.item!=='clean_rations'||
@@ -127,7 +130,9 @@ function offers(s,p={}){
        ...(offer.originalMarketScarcity.localQuality<35?
         ['Strained local habitat conditions']:[]),
        ...(offer.originalMarketScarcity.actualSellerStock<=1?
-        ['Very limited genuinely owned seller stock']:[])
+        ['Very limited genuinely owned seller stock']:[]),
+       ...(offer.originalMarketScarcity.originalPaidDemand?.realFundedBuyerSalesCount>0?
+        ['Recently completed local paid purchases']:[])
       ]}:{})}:
       {weaponActionId:offer.action.id})});
   }catch{}
