@@ -39,6 +39,14 @@ Each item is checked only when an **expandable, connected, persisted, engine-ver
 ## Progress and acceptance
 
 
+### #18 — member reaction source accepted; real optional consequences under exact-head review (12 November 2026)
+
+[PR #77](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/77) passed the complete [193/193 exact-head CI #43163828369](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43163828369) at `a5889b7044d7187601a0f8885cda0e8715006260` and GitHub merged `5b679baa0efea898f862cb36ccfc95d4baed03e9`. Existing source-identified, individually consenting and actually locally present members can privately disagree with genuinely later GM-authored organisational purposes; the original agency RNG determines each independent viewpoint, immutable founding facts and source witnesses remain intact. Current full count 17/25.
+
+Isolated new **DRAFT**, `foundation/voluntary-purpose-dissent-consequences-20261112`, connects at least two actually independent source-sealed founder purpose revisions and a consenting member's individually witnessed persistent dissent to the **already-existing voluntary membership departure process** at the genuine world-month review. The person alone may choose to leave; another stays, a later changed personal view removes lingering dissent, and no fictitious group expulsion, rival faction, money, new legal office, or supernatural result occurs. Prospective members assess the organisation's current declared purpose. New focused full **194-group** suite **NOT YET verified**, see `docs/GROUP_PURPOSE_DISSENT_WORLD_CONSEQUENCES.md`. #18 remains UNCHECKED until meaningful actual legal/diplomatic/authority foundations are accepted; no new fixed roster or menu.
+
+
+
 ### #18 — verified changing organisations; individually independent member reactions drafted (12 November 2026)
 
 [PR #76](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/76) passed full **192/192 exact-head** [CI #43135134916](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43135134916) and GitHub merged `7489808cb20b7a27f9abff7fa863bf24969de618`. The **existing** organisation registry now retains a freeform evolving public founder purpose independently of the immutable original charter, actual members, world resources, and genuine service outcomes. The three first fixture examples are *not a content ceiling*. The original group month no longer needs to narratively attach unrelated work to a newly revised purpose.
