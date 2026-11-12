@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Active #19 — original genuinely funded independent resident purchases (12 November 2026)
+
+**17/25 foundations accepted, #18 PAUSED OPEN, #19 ACTIVE OPEN.** Previous [PR #87](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/87) — independent real local buyer *expressions*, without guaranteed income or sale — passed **204/204** three-batch regression plus final cross-system integration in [CI #43223937265](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43223937265); GitHub merged `72932aace515b2265f6fc648492d7daf45108c07`.
+
+**New isolated #19 draft** `foundation/source-funded-independent-local-purchases-20261112`: first real actual resident purchase only after a previously independently source-witnessed local grain/feed interest, original present living worker's own person-bound optional buying choice, **actual successful original independently performed professional work**, its genuinely paid real merchant-to-worker Scales, same seller's owned finite clean rations, and a truthful current price. One purchase debits buyer Scales, credits same unit to existing real merchant balance and transfers one **actual original** ration from seller stock to the buyer's **existing** shared personal material-custody account. Existing source-verifiable career cash balance reconciles genuine wage inflow LESS actual recorded expenditure; later original sixday can consume the ration. No invented income, mandatory food purchase, a universe-wide ration/price menu, NPC mindreading, extra dice, legal rights, or automatic player goods. Cross-source data persist in original worker, merchant, and owned material ledgers. New `tests/economy-independent-funded-real-local-purchase.test.js` adds a **205th** full-suite regression, exact-head three batches + mandatory final integration **PENDING**. See `docs/REAL_INDEPENDENT_FUNDED_LOCAL_PURCHASES.md`. Do not modify campaign saves or queues. #18 remains paused for later deeply cultural, ideological, spiritual, historical, species and magical political systems.
+
+---
+
+
 ## ACTIVE #19 — genuine independent local demand expressions (12 November 2026)
 
 **17/25 foundations accepted. #18 remains PAUSED OPEN** by player choice; its later politics must respect culturally, ideologically, spiritually, historically, species- and magic-shaped living institutions, not fixed offices. **#19 remains ACTIVE OPEN.** Last verified accepted [PR #86](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/86) connected genuine original trade corridor interruptions to finite local wholesale grain/feed delivery. It passed **203/203** exact-head regression across all 3 batches + required final gate [CI #43219795030](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43219795030) and GitHub acknowledged main squash `da64eaa93b8d9c503793bd414e20c6f186812abd`.
