@@ -1,4 +1,13 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
+
+## ACTIVE #19 — genuine independent local demand expressions (12 November 2026)
+
+**17/25 foundations accepted. #18 remains PAUSED OPEN** by player choice; its later politics must respect culturally, ideologically, spiritually, historically, species- and magic-shaped living institutions, not fixed offices. **#19 remains ACTIVE OPEN.** Last verified accepted [PR #86](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/86) connected genuine original trade corridor interruptions to finite local wholesale grain/feed delivery. It passed **203/203** exact-head regression across all 3 batches + required final gate [CI #43219795030](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43219795030) and GitHub acknowledged main squash `da64eaa93b8d9c503793bd414e20c6f186812abd`.
+
+**New isolated #19 DRAFT:** `foundation/independent-regional-demand-expressions-20261112` adds original `world/independent-regional-demand.js` at the **existing real sixday tick**, after actual `EmergentPeople.sixday`. Genuine independently living residents in an actual recorded local physical shift may individually decide whether to publish interest in source-existing goods from their own region. The individual-source/locale/ecology/original stated purpose, original physical presence and person-bound separate replayable choice are sealed; public view `world.publicEconomy` exposes only real published, unexpired **same-region** requests, never refusals/secret regions. A request is **NOT** physical purchasing power, confirmed order, labor, shipment, sale, production, item, money or market census; no universal law or menu is introduced. All original worker/world/player RNG streams and merchant financial stock remain authoritative; the actual sixday count handles Concord Days. `tests/economy-independent-regional-market-demand.test.js` is automatically the **204th regression** with mandatory final integration; **CI PENDING**. See `docs/INDEPENDENT_REGIONAL_DEMAND_SOURCE.md`. Do not touch campaign saves or transfer Jory-specific facts into Aerin's world.
+
+---
+
  
 ## Active #19: original source-grounded grain/feed corridor logistics (12 November 2026)
 

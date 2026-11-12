@@ -3,6 +3,14 @@
 **Created:** 8 November 2026. **Authority:** `/mnt/data/Beastbound_Realms_Unified_Master_Prompt.md`, the original 57-section Unified Master Prompt, existing verified campaign facts, and the current engine. This is **not** a list of things that must all be finished before play. No campaign is active.
 
 ## How to use this checklist
+
+## #19 independent source-backed living regional demand draft (12 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** Prior [PR #86](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/86) passed **203/203** full exact-head original regression + final gate ([CI #43219795030](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43219795030)) and was merged `da64eaa93b8d9c503793bd414e20c6f186812abd`, source-linking authentic regional corridor interruptions to physical wholesale limits with no invented total local blockade.
+
+**New #19 draft:** `foundation/independent-regional-demand-expressions-20261112`: source-verified real independent resident, genuine local shift and lived ecology may lead to an actual personally chosen **public market expression of interest** in existing regional goods. An individual may also decline privately. Real original person identity, place, cultural source, date, separate replayable decision, publication and expiration are retained in the same world, without extra original RNG, buyer funds, order, new labour, goods, cash, or compulsory market deal. Only physically local, actually released notices are displayed. This is evidence of **expressed** demand, not a universal price formula or proven purchasing power. See `docs/INDEPENDENT_REGIONAL_DEMAND_SOURCE.md`; new `tests/economy-independent-regional-market-demand.test.js` adds a **204th** full-suite regression, **CI PENDING**. #19 still needs genuine paid consumer transactions, broader regional production/transport and culturally/magically diverse demand before completion.
+
+
  
 ## #19 source-authenticated actual transport exposure — isolated draft (12 November 2026)
 
