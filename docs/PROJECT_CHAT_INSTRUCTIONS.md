@@ -1,6 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## #18 — accepted independent coordinator delegation; purpose/role reconsideration DRAFT (12 November 2026)
+
+The accepted engine main includes [PR #79](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/79) (196/196 complete source-parallel batches, merged `785806623d894ac4d70e600dd763c1a0968c2a99`) and [PR #80](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/80) (197/197 + required final integration, merged `5a9297bee347a087f64d449e31cd8872022e5a2b`). Original organisations change purpose; source-backed independent members can notice, dissent, remain, leave; genuinely consenting limited coordinators may independently offer tasks, which each recipient may independently decline. No public office, compulsory labour, magic, salary, fake resources or forced NPC consent follows.
+
+**NEW #18 DRAFT:** `foundation/coordinator-purpose-role-reconsideration-20261112`, original `coordinationReviews` can now record independent coordinator's choice to keep or relinquish an accepted LIMITED responsibility after their own genuinely witnessed, still-current dissent toward a published founder purpose, with original source and member agency RNG replay. Membership, original work, existing treasury and legal governance unaffected. Later independently changed views remove the pressure. New focused **198-test** three-batch suite + required final integration **PENDING**. See `docs/INDEPENDENT_COORDINATOR_PURPOSE_ROLE_REVIEW.md`. **17/25, #18 unchecked.** Protect active campaign `saves/`, `requests/`, `results/`. Future #18 priority: genuinely authorised individual diplomatic envoys and honest law/fiscal custody, not arbitrary fixed organisation menus.
+
+---
+
+
 ## #18 — original independent public member awareness MERGED; limited voluntary coordinator work DRAFT (12 November 2026)
 
 **17/25 foundation targets verified; #18 remains OPEN.** [PR #79](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/79) passed **196/196 exact-head three-batch full regression + final integration gate** in [CI #43183366165](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43183366165) at `ef2733cc5f0baeb76afc9229c276b3a6ac99af6b` and GitHub merged `785806623d894ac4d70e600dd763c1a0968c2a99`. Real independently consenting members can privately notice/miss a genuinely published founder purpose change on the original world tick, form an independent personal view only if they actually know it, and never reveal private unknown thoughts to the player.
