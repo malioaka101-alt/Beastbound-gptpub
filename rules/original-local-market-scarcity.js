@@ -4,12 +4,14 @@
 // price-law, imagined demand survey, tax, wage, price for distant goods, or
 // implicit consumption of forage during an ordinary price conversation.
 // A market's original world tick already reflects original trade conditions.
-const Crypto=require('node:crypto'),E=require('../engine.js');
+const Crypto=require('node:crypto'),E=require('../engine.js'),
+ PaidDemand=require('./original-paid-demand-price');
 const ORIGIN='original-local-provisioner-scarcity-quotation-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function percent(q){
  return (q.localForage<45?12:0)+(q.localQuality<35?10:0)+
-  (q.actualSellerStock<=1?8:0);
+  (q.actualSellerStock<=1?8:0)+
+  (q.originalPaidDemand?.originalSellerSpecificMarkupPct||0);
 }
 function price(q){
  const base=E.RESOURCES.clean_rations.value*100;
@@ -27,6 +29,10 @@ function proof(q){
   physicalGoodsNeverCreated:true,
   regionalIndexAlreadyRespondsToOriginalTradeAndProsperity:true,
   householdDemandNotInvented:true,
+  ...(q.originalPaidDemand!==undefined?{
+   originalPaidDemand:q.originalPaidDemand,
+   originalPaidDemandHash:q.originalPaidDemandHash,
+   genuinePaidLocalDemandNotUnfundedPosts:true}:{}),
   scarcityPremiumPct:percent(q),
   actualQuotedPriceScales:price(q)};
 }
@@ -40,8 +46,11 @@ function observe(w,v){
   !Number.isInteger(eco.quality)||eco.quality<0||eco.quality>100||
   !Number.isInteger(v.stock)||v.stock<0||v.stock>8)
   throw Error('A real original regional commodity index, habitat and seller-owned stock are required for the local price');
+ const paidDemand=PaidDemand.observe(w,v);
  const source=proof({originalGrainIndex:index,localForage:eco.forage,
-  localQuality:eco.quality,actualSellerStock:v.stock});
+  localQuality:eco.quality,actualSellerStock:v.stock,
+  originalPaidDemand:paidDemand.source,
+  originalPaidDemandHash:paidDemand.sourceHash});
  return {source,sourceHash:hash(source)};
 }
 function verify(source,sourceHash,priceScales,initialStock){
@@ -55,6 +64,12 @@ function verify(source,sourceHash,priceScales,initialStock){
   !Number.isInteger(source.actualSellerStock)||
   source.actualSellerStock<0||source.actualSellerStock>8||
   source.actualSellerStock!==initialStock||
+  (source.originalPaidDemand!==undefined&&
+   (!PaidDemand.validate(source.originalPaidDemand,source.originalPaidDemandHash)||
+    source.genuinePaidLocalDemandNotUnfundedPosts!==true))||
+  (source.originalPaidDemand===undefined&&
+   (source.originalPaidDemandHash!==undefined||
+    source.genuinePaidLocalDemandNotUnfundedPosts!==undefined))||
   sourceHash!==hash(source))return false;
  const expected=proof(source);
  return JSON.stringify(source)===JSON.stringify(expected)&&
