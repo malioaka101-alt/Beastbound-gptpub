@@ -4,6 +4,14 @@
 
 ## How to use this checklist
 
+## #19 actual paid local sales influence only later verified seller pricing — isolated draft (12 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** First truly independently funded living resident real purchase [PR #88](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/88) passed exact-head **205/205** three full parallel regression batches and final gate [CI #43271009539](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43271009539), merged `64dd92c73c853a0e2be440cda53aa9ee485107b0`. Real independent buying now conserves the originally earned buyer Scales, physical seller rations, seller proceeds, individual item custody and later personal consumption.
+
+**New #19 draft:** `foundation/original-funded-purchase-price-pressure-20261112` extends the original local seller's real grain, habitat and owned-stock quotations to consider **only actual source-verified earlier funded resident ration purchases**, with bounded seller-specific pressure on a **new** price, never on earlier fixed offers. Genuine public but unfunded market interest does not create imaginary buying power or sales. A price quote proves original receipt ids/hashes/quantities/amounts against the existing private merchant/wage/physical-custody ledger without exposing purchaser identities. New `tests/economy-original-paid-demand-price-pressure.test.js` + actual sale regression updates yield **206** complete test files; three-batch/final integration **PENDING**. Not a universal regional demand curve, culturally forced rule or completion of diverse production/finance/property/transport #19. #18 remains paused for richer political systems.
+
+
+
 ## #19 actual source-funded independent local resident buying DRAFT (12 November 2026)
 
 **17/25 accepted; #18 PAUSED OPEN, #19 ACTIVE OPEN.** [PR #87](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/87), real independently expressed local public goods interest with no imaginary buyer cash, passed **204/204** complete exact-head three-batch regression plus final gate ([CI #43223937265](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43223937265)), merged `72932aace515b2265f6fc648492d7daf45108c07`.
