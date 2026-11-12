@@ -58,10 +58,21 @@ function backedByActualSeller(w,source){
  if(!source)return true; // Honest historical quotes predate this record.
  if(!validate(source,hash(source)))return false;
  const rows=w?.localProvisioner?.independentCustomerPurchases||[];
- if(!Array.isArray(rows))return false;
- return source.genuineSellerPaidSales.every(sale=>{
-  const row=rows.find(x=>x.id===sale.receiptId);
-  return !!row&&row.sourceHash===sale.sourceHash&&
+ if(!Array.isArray(rows)||
+  !Number.isInteger(w?.lastTickDay)||
+  source.observedOriginalSixday>w.lastTickDay)return false;
+ // Every real completed seller sale in that original sixday window must
+ // appear EXACTLY once, not merely a subset chosen to suppress the
+ // new quoted price. Existing original customer proof is authoritative.
+ const eligible=rows.filter(row=>
+  Number.isInteger(row?.source?.day)&&
+  row.source.day<=source.observedOriginalSixday&&
+  row.source.day>=source.observedOriginalSixday-WINDOW)
+  .sort((a,b)=>a.source.day-b.source.day||a.id.localeCompare(b.id));
+ if(eligible.length!==source.genuineSellerPaidSales.length)return false;
+ return source.genuineSellerPaidSales.every((sale,i)=>{
+  const row=eligible[i];
+  return !!row&&row.id===sale.receiptId&&row.sourceHash===sale.sourceHash&&
    row.origin==='genuine-independent-funded-local-ration-purchase-v1'&&
    row.source?.sellerId==='otto'&&
    row.source?.sellerRegionId==='morrowfen_basin'&&
