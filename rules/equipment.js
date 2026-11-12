@@ -6,6 +6,7 @@ const Crypto=require('node:crypto');
 const E=require('../engine.js'),C=require('./core'),Wallet=require('./unified');
 const Realm=require('../world/simulation'),Presence=require('../world/person-presence');
 const Weapons=require('./player-combat-action');
+const MarketScarcity=require('./original-local-market-scarcity');
 const MAX_QUOTE_AGE=6*1440;
 const PROVISION_ORIGIN='source-witnessed-local-provisions-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -14,7 +15,10 @@ function quoteProof(q){
   seller:q.seller,location:q.location,item:q.item,
   source:q.source,worldMinute:q.worldMinute,
   expiresAtMinute:q.expiresAtMinute,priceScales:q.priceScales,
-  initialStock:q.initialStock};
+  initialStock:q.initialStock,
+  ...(q.originalMarketScarcity?{
+   originalMarketScarcity:q.originalMarketScarcity,
+   originalMarketScarcityHash:q.originalMarketScarcityHash}:{})};
 }
 function inquire(s,p={}){
  input(p,['npcId']);
@@ -29,16 +33,16 @@ function inquire(s,p={}){
  const time=s.world.minutes%1440;
  if(time+5>18*60)throw Error('The provisioner cannot finish this quotation outside the recorded shift');
  const v=Realm.localProvisioner(s),now=s.world.minutes;
- const index=s.table.realm.market.reedmarch.grain;
- if(!Number.isFinite(index)||index<=0||index>5)
-  throw Error('An actual current regional grain market index is needed for this seller');
- const priceScales=Math.max(100,Math.round(E.RESOURCES.clean_rations.value*100*index/10)*10);
+ const scarcity=MarketScarcity.observe(s.table.realm,v);
+ const priceScales=scarcity.source.actualQuotedPriceScales;
  const id='orrin_rations_'+(++s.sequence);
  const q={id,kind:'provisions',origin:PROVISION_ORIGIN,
   publiclyKnown:true,sellerNpcId:'otto',seller:v.seller,
   source:'Original in-person quote from the source-established beast provisioner backed by regional grain/feed and owned stock',
   location:v.location,item:'clean_rations',worldMinute:now,
   expiresAtMinute:now+1440,priceScales,stock:v.stock,initialStock:v.stock,
+  originalMarketScarcity:scarcity.source,
+  originalMarketScarcityHash:scarcity.sourceHash,
   purchases:[]};
  q.proofHash=hash(quoteProof(q));
  s.table.merchantOffers||={};s.table.merchantOffers[id]=q;
@@ -46,7 +50,8 @@ function inquire(s,p={}){
  C.event(s,'trade',v.seller+' quotes actual stocked clean rations from the local provisioner.',{
   origin:PROVISION_ORIGIN,offerId:id,sellerNpcId:'otto',
   item:q.item,quotedStock:q.stock,priceScales:q.priceScales,
-  proofHash:q.proofHash,worldMinute:now});
+  proofHash:q.proofHash,worldMinute:now,
+  originalMarketScarcityHash:q.originalMarketScarcityHash});
  return {quoted:true,offerId:id,seller:v.seller,item:q.item,
   priceScales,stock:v.stock,elapsedMinutes:5,
   message:v.stock>0?
@@ -83,6 +88,11 @@ function validOffer(s,id,{mustBeInStock=true}={}){
       'Original in-person quote from the source-established beast provisioner backed by regional grain/feed and owned stock'||
     !Number.isInteger(q.initialStock)||q.initialStock<0||q.initialStock>8||
     q.stock>q.initialStock||q.proofHash!==hash(quoteProof(q))||
+    (q.originalMarketScarcity!==undefined&&
+     !MarketScarcity.verify(q.originalMarketScarcity,
+      q.originalMarketScarcityHash,q.priceScales,q.initialStock))||
+    (q.originalMarketScarcity===undefined&&
+     q.originalMarketScarcityHash!==undefined)||
     !v||v.sellerNpcId!=='otto'||v.item!=='clean_rations'||
     !Number.isInteger(v.stock)||v.stock<0||v.stock>8||
     !Number.isInteger(v.fundsScales)||v.fundsScales<0||
