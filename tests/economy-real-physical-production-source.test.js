@@ -134,4 +134,31 @@ function fresh(seed){return E.newGame({name:'Disposable Source Production',seed,
  s.table.fieldCraftAttempts[0].usedMaterials.marsh_reed=999;
  A.equal(P.verify(s),false);
 }
+{
+ // A real legacy checkpoint kept the first day's authentic field-craft
+ // witness while deleting the newer per-attempt array. That source is
+ // still proof: do not invalidate it or invent the historical dice anew.
+ const s=fresh(993701);
+ s.player.inventory.marsh_reed=4;
+ s.player.inventory.clean_rations=2; // disposable physical supplies
+ const first=craft(s),original=E.exportGame(s),
+  oldHash=s.table.physicalProductionHistory[0].sourceHash;
+ A.equal(P.verify(s),true);
+ delete s.table.fieldCraftAttempts;
+ A.equal(P.verify(s),true,
+  'authenticated legacy daily-first-attempt proof still backs its original production');
+ const second=craft(s);
+ A.equal(P.verify(s),true);
+ A.equal(s.table.fieldCraftAttempts.length,1,
+  'the newer modern list honestly contains only this second attempt');
+ A.equal(s.table.physicalProductionHistory.length,2);
+ A.equal(s.table.physicalProductionHistory[0].sourceHash,oldHash);
+ A.notEqual(s.table.physicalProductionHistory[1].sourceHash,oldHash);
+ A.equal(second.attemptNumberToday,2);
+ const reloaded=E.importGame(E.exportGame(s));
+ A.equal(P.verify(reloaded),true);
+ A.equal(report(reloaded).personallyDocumentedProduction.length,2);
+ A.equal(first.noExtraRoll,true);
+ A.notEqual(E.exportGame(s),original,'second separate attempt actually spent materials');
+}
 console.log('Source-backed #19 historical production conserves genuine field-medicine and individually designed tool inputs; original failures consume stock, no output on failure, saved history survives, no replay/double-award and forged production is rejected PASS');
