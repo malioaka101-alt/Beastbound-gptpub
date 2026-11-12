@@ -38,6 +38,14 @@ Each item is checked only when an **expandable, connected, persisted, engine-ver
 
 ## Progress and acceptance
 
+
+### #18 — original foreign couriers accepted; living freeform association purposes drafted (12 November 2026)
+
+[PR #74](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/74) passed the [191-group exact-head full GitHub Actions regression #43108820145](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43108820145), then GitHub confirmed merge `27ed7f27d8a3dc90223f4304c3e2ff296446cdec` on 11 November. The original history of genuine foreign courier notices survives short-news rotation without inventing treaties, private diplomatic choices or new events.
+
+Next isolated foundation slice, `foundation/living-group-purpose-20261112`: the existing association registry now preserves an immutable original founding charter **and** append-only independently source-checked, later freeform stated purposes. Local founder actions use real 25-minute time, original scene witnesses and two-day public publication; no new dice, money, members, legal rights or claim of consent. A trusted world-source adapter can later connect genuinely independently authored NPC group directions. Three disposable examples verify that the mechanic is **not a fixed list**, with repeatable changes and save integrity. See `docs/LIVING_GROUP_PURPOSE_FOUNDATION.md`. **Full exact-head 192-group CI not yet verified; #18 remains OPEN and 17/25 completed.** Real named negotiated diplomacy, legal authority and property custody are still missing.
+
+
 ### #18 — independent two-sided government willingness merged; actual already-published foreign courier history being repaired (11 November 2026)
 
 [PR #75](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/75) passed full **190/190 exact-head** [CI #43105330374](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43105330374) on `001564886a7aeafaaeca1a17deb0d8f813607767` and merged as `283e94121f93d07777b1e9d1bb340973687cd17d`. Original governments independently consider nonbinding corridor diplomacy, can refuse without publicly disclosing private answers, and cannot automatically appoint envoys, sign treaties, or grant property; originallly already-disrupted trade is the genuine issue. Rebased older [PR #74](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/74) retains copies of actual preexisting independently emitted foreign *status* courier reports inside original source-audited status changes after the short public chronicle rotates, with no new RNG/event, no earlier release or invented old-save history. It fixes the case-sensitive error-text test failure and retains **all 191 regression groups** including PR #75. **Full exact-head 191 CI NOT YET VERIFIED. 17/25 foundations, #18 unchecked.** Real authorised individual negotiation, valid treaties, accountable sovereignty over money and broader factions remain open.
