@@ -14,7 +14,7 @@ function fieldSource(s,index,originalReceiptHash=null){
  // solely in fieldCraftDaily after the newer attempt list was removed.
  // Match the EXACT original immutable receipt, never assume a result.
  const current=s.table?.fieldCraftAttempts?.[index];
- const h=originalReceiptHash&&hash(current)!==originalReceiptHash?
+ const h=originalReceiptHash&&(!current||hash(current)!==originalReceiptHash)?
   Object.values(s.table?.fieldCraftDaily||{}).find(x=>
    hash(x)===originalReceiptHash):current;
  if(!h||h.recipe!=='field_poultice'||
