@@ -69,6 +69,8 @@ function checkItem(s,id){
 }
 function build(s,p={}){
  const id=one(p),d=design(s,id),site=local(s);
+ if(!require('./physical-production-ledger').verify(s))
+  throw Error('Original source-verified production history must remain intact before assembly');
  if(d.prototypeId)throw Error('A previous successful prototype exists; use or test it rather than duplicating free output');
  const supply=C.int(s.player.inventory?.marsh_reed??0,'real Marsh Reed stock',0,100000);
  if(supply<2)throw Error('A physical reed-based water indicator needs 2 actual Marsh Reed');
@@ -103,6 +105,7 @@ function build(s,p={}){
  const trialIndex=d.attempts.length;
  if(!roll.success){
   d.status='trial-failed';
+  require('./physical-production-ledger').record(s,{kind:'prototype',designId:id,index:trialIndex-1});
   C.event(s,'research','The reed arrangement cannot retain a usable physical calibration. The supplied reeds are spent.',{
    origin:ORIGIN,designId:id,trialIndex,success:false,
    input:{marsh_reed:2},checkWitnessHash,noFreeEffect:true});
@@ -122,6 +125,7 @@ function build(s,p={}){
  s.table.creationPrototypes||={};
  s.table.creationPrototypes[prototypeId]=item;
  d.prototypeId=prototypeId;d.status='prototyped';
+ require('./physical-production-ledger').record(s,{kind:'prototype',designId:id,index:trialIndex-1});
  C.event(s,'research','One uncalibrated field indicator is physically assembled. It still needs a real water calibration before use.',{
   origin:ORIGIN,designId:id,prototypeId,checkWitnessHash,
   materialConsumed:{marsh_reed:2},notMagic:true});

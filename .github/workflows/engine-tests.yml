@@ -63,6 +63,9 @@ jobs:
           node tests/original-diplomatic-courier-public-provenance.test.js
           node tests/diplomacy-genuine-bilateral-exploratory-contact.test.js
           node tests/economy-existing-owned-material-assets.test.js
+          node tests/economy-real-physical-production-source.test.js
+          node tests/field-crafting.test.js
+          node tests/rank-depth-prototypes.test.js
           node tests/voluntary-person-material-handoffs.test.js
           node tests/live-provisioner-trade.test.js
           node tests/source-parity.test.js

@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Current active #19: original real material production provenance (12 November 2026)
+
+**DO NOT resume #18** unless the player requests it; it is PAUSED OPEN with broad fantasy cultural and ideological complexity explicitly required. #19 is active and OPEN: [PR #82](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/82) merged source-verified existing player/NPC/merchant physical asset observations following **199/199 full three-batch + required final gate** success ([CI #43197720043](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43197720043)), GitHub acknowledged main SHA `a5e8c690676ab419978cc8ca7fdce1bb05307074`.
+
+**NEXT #19 ISOLATED DRAFT:** `foundation/real-material-production-history-20261112`: keep the GM open and creative, while sealing the **actual original** ingredient-consuming field medicine Crafting work and separately original already-authored, independently trialled reed survey tool assembly into source-verifiable, dated physical production history. Preserve real one-time original rolls, failures with lost materials, owned output only on original success, and historical save reload, without invented recipes/wages/waste/sales, or item duplication. Read-only `craft.productionHistory` shows only the player's originally witnessed production. New focused test `tests/economy-real-physical-production-source.test.js` joins **200/200 complete batch inventory**, pending exact-head CI. `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md` explains source and limitations. No `saves/`, `requests/`, `results/` modifications. **17/25 accepted; #19 NOT checked.**
+
+---
+
+
 ## Current foundation priority: #19 property, production and deep economy (12 November 2026)
 
 By explicit player direction **PAUSE #18 Organisational and political depth OPEN**; preserve accepted prior work, but do not continue or merge the unfinished `foundation/independent-original-diplomatic-envoy-appointments-20261112` branch. When revisiting #18, politics must grow from freeform GM-authored fantasy ideologies, species, cultures, cosmology, histories, institutions, living people, economics and actual causes; the existing prototype's one scripted envoy/office or relation-roll is not universal political law. The GM remains the world-builder and narrator; the engine checks only real consequences and continuity.

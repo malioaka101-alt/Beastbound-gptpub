@@ -3,6 +3,13 @@
 **Created:** 8 November 2026. **Authority:** `/mnt/data/Beastbound_Realms_Unified_Master_Prompt.md`, the original 57-section Unified Master Prompt, existing verified campaign facts, and the current engine. This is **not** a list of things that must all be finished before play. No campaign is active.
 
 ## How to use this checklist
+## #19 verified property ownership; original production witness next (12 November 2026)
+
+**#18 remains PAUSED OPEN**, for later flexible and richly cultural, ideological, species-aware fantasy politics. **#19 remains ACTIVE OPEN; 17/25 accepted.** [PR #82](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/82) merged at `a5e8c690676ab419978cc8ca7fdce1bb05307074` after the full **199/199 three-source-batch CI and final cross-system gate** passed exact-head [run #43197720043](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43197720043). Existing physical player/NPC/merchant property can be described by the GM without minting items, funds, title or compelled assent.
+
+**New #19 draft batch:** `foundation/real-material-production-history-20261112` seals real material-conserving original medicine preparation and independently authored tool assembly into a dated production ledger of **actual spent ingredients, actual success/failure and the verified output**, with no new rolls, stock, quality, waste claims or false older-save history. The complete **200-test** source-parallel matrix and final integration are **PENDING**. See `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`. Future #19 work must still include verified flexible physical productive assets and trades, genuine compensated workers, voluntary terms and responsive real regional demand. Both #18 and #19 remain unchecked until their stated foundation criteria are met.
+
+
 
 ## Current priority — #19 property and deep economy (12 November 2026)
 
