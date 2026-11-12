@@ -520,6 +520,7 @@ function act(s,{system,operation,params={}}={}){
   }
   case 'social.inviteGroupMember':return GroupInvitations.invitation(s,params);
   case 'social.groupTaskRequest':return GroupInvitations.taskRequest(s,params);
+  case 'social.coordinatorTaskRequest':return GroupInvitations.coordinatorTaskRequest(s,params);
   case 'social.formGroup':return EmergentGroups.form(s,params);
   case 'social.groupContribute':return EmergentGroups.contribute(s,params);
   case 'social.inquire':return SocialFabric.inquire(s,params);

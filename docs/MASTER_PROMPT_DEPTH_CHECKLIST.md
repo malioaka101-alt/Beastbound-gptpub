@@ -39,6 +39,14 @@ Each item is checked only when an **expandable, connected, persisted, engine-ver
 ## Progress and acceptance
 
 
+### #18 — verified original independent public-awareness agency; actual bounded coordinator work request DRAFT (12 November 2026)
+
+[PR #79](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/79) is **MERGED** as `785806623d894ac4d70e600dd763c1a0968c2a99` after the complete [196/196 exact-head three-batch CI #43183366165](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43183366165) and required final integration check on `ef2733cc5f0baeb76afc9229c276b3a6ac99af6b`. The original world's independent individual association member may or may not notice a truly public purpose change, and private views do not become player omniscience or invented group consensus.
+
+New **isolated DRAFT** `foundation/consented-coordinator-task-delegation-batch-20261112`: source-valid currently active **voluntarily accepted** group operational coordinators can independently consider initiating a GM-authored freeform task suggestion to a different already consenting and present member, who separately responds through the original NPC agency; accepted tasks enter the SAME original `voluntaryTasks` and original world independent work pipeline, not a new system or automatic achievement. Real 20-minute scene, membership, original mandate/scope proof, two genuine replayable independent draws, no forced command, payments or civic rank. See `docs/CONSENTED_COORDINATOR_TASK_AUTHORITY.md` and new `tests/group-independent-coordinator-work-invitations.test.js`. Complete **197-test three-batch regression + final integration NOT YET VERIFIED**, #18 unchecked at 17/25, legal/economic/diplomatic authorities still require genuine source-backed work.
+
+
+
 ### #18 — three-batch full verification accepted; genuine independent public-purpose awareness draft (12 November 2026)
 
 The first complete grouped foundation [PR #78](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/78) passed [Actions #43179195029](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43179195029) at exact tested head `27a0df22749c602cbdc3414c35d6b4ebd03c46ed`: **195/195 original+focused test files**, three distinct complete-coverage parallel batches of 65 each, original required `test` gate, auto-inventory validation and eight final cross-system reruns. GitHub confirmed squash-merge `7ec1ca5459b114c0dd2dd48f6e80e4addfd0651b`. A genuine individual may now independently stay, leave or later reconcile after at least two original source-sealed freeform purpose revisions and genuine personally witnessed dissent. The original membership and financial audit are preserved; there are no forced factions, votes, expulsions or new roster limits. All future newly added `tests/*.test.js` files are discovered automatically without hand-editing CI.
