@@ -118,7 +118,17 @@ function offers(s,p={}){
    available.push({offerId:id,seller:offer.seller,item:offer.item,
     priceScales:offer.priceScales,stock:realStock,
     expiresAtMinute:offer.expiresAtMinute,
-    ...(offer.kind==='provisions'?{kind:'provisions'}:
+    ...(offer.kind==='provisions'?{kind:'provisions',
+     ...(offer.originalMarketScarcity?{
+      knownPriceBasis:[
+       'Original local regional grain market',
+       ...(offer.originalMarketScarcity.localForage<45?
+        ['Strained local forage conditions']:[]),
+       ...(offer.originalMarketScarcity.localQuality<35?
+        ['Strained local habitat conditions']:[]),
+       ...(offer.originalMarketScarcity.actualSellerStock<=1?
+        ['Very limited genuinely owned seller stock']:[])
+      ]}:{})}:
       {weaponActionId:offer.action.id})});
   }catch{}
  }
