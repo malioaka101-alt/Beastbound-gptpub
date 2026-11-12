@@ -39,6 +39,14 @@ Each item is checked only when an **expandable, connected, persisted, engine-ver
 ## Progress and acceptance
 
 
+### #18 — verified changing organisations; individually independent member reactions drafted (12 November 2026)
+
+[PR #76](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/76) passed full **192/192 exact-head** [CI #43135134916](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43135134916) and GitHub merged `7489808cb20b7a27f9abff7fa863bf24969de618`. The **existing** organisation registry now retains a freeform evolving public founder purpose independently of the immutable original charter, actual members, world resources, and genuine service outcomes. The three first fixture examples are *not a content ceiling*. The original group month no longer needs to narratively attach unrelated work to a newly revised purpose.
+
+Current isolated **draft** `foundation/member-purpose-responses-20261112`: source-valid individual members can personally respond to the changed declaration with their **own genuine** supported/dissented/undecided stance, using original membership consent, physical presence, existing independent member decision RNG, original time/scene witness and recorded source history. A later real change or conversation can alter personal views; same-day duplicate answers, fabricated assent, unanimous votes, money, rank, compulsory work or political authority are not created. See `docs/INDEPENDENT_GROUP_PURPOSE_DISCUSSIONS.md` and first `tests/group-purpose-independent-member-responses.test.js`. **Full exact-head 193-group CI NOT YET VERIFIED; #18 stays unchecked at 17/25.** Continue toward real authorised diplomacy, independent authority, legal property custody and enforceable law without adding new fixed enumerated kinds.
+
+
+
 ### #18 — original foreign couriers accepted; living freeform association purposes drafted (12 November 2026)
 
 [PR #74](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/74) passed the [191-group exact-head full GitHub Actions regression #43108820145](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43108820145), then GitHub confirmed merge `27ed7f27d8a3dc90223f4304c3e2ff296446cdec` on 11 November. The original history of genuine foreign courier notices survives short-news rotation without inventing treaties, private diplomatic choices or new events.
