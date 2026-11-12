@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## #19 — Actual funded resident buying MERGED; later local verified demand-sensitive price DRAFT (12 November 2026)
+
+**17/25 accepted. #18 PAUSED OPEN; #19 ACTIVE OPEN.** [PR #88](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/88) passed **205/205** full regression tests in all three source batches and required final integration at exact head [CI #43271009539](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43271009539). GitHub merged `64dd92c73c853a0e2be440cda53aa9ee485107b0`: a genuinely paid, independently deciding local resident now can spend actual originally earned Scales on a real ration, moving the existing seller's stock/money and the buyer's existing physical custody exactly once, without player loot or invented customer funding.
+
+**Next isolated #19 DRAFT:** `foundation/original-funded-purchase-price-pressure-20261112`. The original in-person local ration merchant quotes new prices with a modest seller-specific pressure **only from genuine earlier buyer-funded sales in the original prior sixday**. The original regional grain market, living habitat and real seller stock still determine price. Paid sales remain source-sealed to original buyer/merchant/custody receipts; **unfunded public requests remain interest, not paid demand**. Historical witnessed price and old save receipts never reprice. Public price reasons may say recent local paid purchases, not disclose private buyer identities/finances. No other merchants are covered by this one source-first example and no universal wage, culture or price law is imposed. `tests/economy-original-paid-demand-price-pressure.test.js` adds a **206th** complete regression, and `tests/economy-independent-funded-real-local-purchase.test.js` checks actual conserved sales now exert later price pressure. Exact-head three-batch CI + final integration **PENDING**. Full details in `docs/REAL_INDEPENDENT_FUNDED_LOCAL_PURCHASES.md`. Do not change active campaign `saves/`, `requests/`, `results/`, or import Jory facts into Aerin. #18 later must span diverse ideologies, histories, beliefs, cultures, species and magic.
+
+---
+
+
 ## Active #19 — original genuinely funded independent resident purchases (12 November 2026)
 
 **17/25 foundations accepted, #18 PAUSED OPEN, #19 ACTIVE OPEN.** Previous [PR #87](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/87) — independent real local buyer *expressions*, without guaranteed income or sale — passed **204/204** three-batch regression plus final cross-system integration in [CI #43223937265](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43223937265); GitHub merged `72932aace515b2265f6fc648492d7daf45108c07`.
