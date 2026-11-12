@@ -23,6 +23,7 @@ jobs:
         shell: bash
         run: |
           tests=(
+            tests/group-purpose-sustained-independent-departure.test.js
             tests/group-purpose-independent-member-responses.test.js
             tests/group-evolving-declared-purpose.test.js
             tests/original-diplomatic-courier-public-provenance.test.js
