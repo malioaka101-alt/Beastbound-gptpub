@@ -490,6 +490,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupTreasuryStatus':return EmergentGroups.treasuryStatus(s,params);
   case 'social.groupPurposeHistory':return EmergentGroups.purposeHistory(s,params);
+  case 'social.groupPurposeResponses':return EmergentGroups.purposeResponses(s,params);
+  case 'social.discussGroupPurpose':return EmergentGroups.discussPurpose(s,params);
   case 'social.restateGroupPurpose':return EmergentGroups.restatePurpose(s,params);
   case 'social.groupMembersStatus':return GroupInvitations.status(s,params);
   case 'social.groupTasksStatus':return GroupInvitations.taskStatus(s,params);
