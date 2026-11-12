@@ -116,6 +116,48 @@ function contribute(s,p={}){
   ...(priorityId!==undefined?{originalPriorityLink:priorityId}:{}),
   noAutomaticNewMembers:true,noPowerOrStatusGranted:true};
 }
+function restatePurpose(s,p={}){
+ fields(p,['groupId','purpose','reason']);
+ if(typeof p.groupId!=='string')throw Error('An existing real association is needed');
+ const purpose=words(p.purpose,12,750,'New declared purpose'),
+  reason=words(p.reason,10,600,'Explanation of this real change');
+ locale(s,FOUNDTIME);
+ const w=Realm.ensure(s),e=Groups.lookup(w,p.groupId);
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.actorId!=='player'||e.founder.name!==s.player.name||
+  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world.location]]?.polity)
+  throw Error('Only the actual locally present founder may change their own public declaration');
+ const previous=Groups.currentPurpose(e);
+ if(purpose===previous)
+  throw Error('The declared purpose has not changed; no time or turn is spent');
+ const oldMinute=s.world.minutes;
+ E.advance(s,FOUNDTIME);W.finalizeTime(s,oldMinute);
+ Health.sync(s,{source:'legacy'});
+ const minute=s.world.minutes,day=Math.floor(minute/1440);
+ C.event(s,'story',s.player.name+' publicly revises the stated purpose of '+
+  e.charter.name+'. Other members retain their own voice and obligations.',{
+   origin:'declared-group-purpose-change',groupId:e.id,
+   actor:s.player.name,previousPurpose:previous,purpose,reason,
+   minute,day,minutes:FOUNDTIME,
+   otherMembersBound:false,legalAuthorityGranted:false,
+   workCompleted:false,moneyTransferred:false
+ });
+ const witness=structuredClone(s.log.at(-1));
+ return {...Groups.revisePurposeFromEvidence(w,e.id,{
+  origin:Groups.PURPOSE_SOURCE,actorId:'player',actorName:s.player.name,
+  purpose,reason,minute,witness}),actualMinutes:FOUNDTIME};
+}
+function purposeHistory(s,p={}){
+ fields(p,['groupId']);
+ if(typeof p.groupId!=='string')throw Error('A real group identity is required');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||
+  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity)
+  throw Error('An actual local founder may inspect their own declaration history');
+ return Groups.purposeHistoryStatus(w,e.id,{
+  day:Math.floor(s.world.minutes/1440)});
+}
 function treasuryStatus(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')
@@ -131,4 +173,4 @@ function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,status,treasuryStatus};
+module.exports={form,contribute,restatePurpose,purposeHistory,status,treasuryStatus};
