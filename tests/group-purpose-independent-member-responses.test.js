@@ -45,6 +45,10 @@ function ask(npcId,rev=revisionId){
 const before=s.world.minutes;
 const ghostState=E.exportGame(s),ghostRng=agency.rngState;
 A.throws(()=>ask('nonexistent'),/genuine present member/);
+A.throws(()=>R.act(s,{system:'social',operation:'discussGroupPurpose',
+ params:{groupId,revisionId,npcId:'elira',discussion,stance:'supported'}}),
+ /only the real founder|actual contributed work|group action accepts/,
+ 'the caller may not supply an NPC answer at all');
 A.equal(E.exportGame(s),ghostState);
 A.equal(agency.rngState,ghostRng,'a nonexistent member may never consume a secret answer');
 agency.rngState=seedFor(x=>x<.001);
@@ -97,7 +101,8 @@ A.equal(G.validate(e),true);
 // current statement; the prohibition is duplicate answers, not a forever gate.
 W.advance(s,6);
 const beforeNewDay=Math.floor(s.world.minutes/1440);
-A.ok(beforeNewDay>revised.stance.length*0);
+A.ok(beforeNewDay>e.purposeResponses.at(-1).day,
+ 'ordinary world time makes a later personally witnessed discussion possible');
 const laterRevId=next.revisionId;
 agency.rngState=seedFor(x=>x>.40&&x<.44);
 const later=ask('elira',laterRevId);
