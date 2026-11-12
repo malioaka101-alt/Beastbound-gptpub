@@ -152,6 +152,8 @@ function snapshot(w,p,day){
 }
 function sixday(w,day){
  if(!Number.isInteger(day)||day<6||day%6!==0||
+  !Number.isInteger(w?.lastTickDay)||day>w.lastTickDay+6||
+  !Number.isInteger(w?.ticks?.sixdays)||w.ticks.sixdays<1||
   !verify(w))throw Error('Regional demand can only evolve at a verified original sixday');
  const prior=w.independentMarketDemand;
  if(prior&&day<=prior.lastSixday)
