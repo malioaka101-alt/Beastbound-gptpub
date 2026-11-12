@@ -42,6 +42,8 @@ const buy=(s,id)=>R.act(s,{system:'gear',operation:'purchase',
  const before=E.exportGame(s);
  const fromMarket=offers(s);
  A.equal(fromMarket.available[0].priceScales,800);
+ A.deepEqual(fromMarket.available[0].knownPriceBasis,
+  ['Original local regional grain market']);
  A.equal(E.exportGame(s),before,'an already witnessed market offer is read-only');
  const result=buy(s,first.offerId);
  A.equal(result.paidScales,800);
@@ -76,6 +78,9 @@ const buy=(s,id)=>R.act(s,{system:'gear',operation:'purchase',
  A.equal(s.player.coins,oldCoins);
  A.equal(Market.verify(snapshot,q.originalMarketScarcityHash,
   q.priceScales,q.initialStock),true);
+ A.deepEqual(offers(s).available.find(x=>x.offerId===strained.offerId).knownPriceBasis,
+  ['Original local regional grain market','Strained local forage conditions',
+   'Strained local habitat conditions']);
  A.equal(base.priceScales,oldPrice,'a past witnessed quote never reprices itself');
  const purchase=buy(s,strained.offerId);
  A.equal(purchase.paidScales,strained.priceScales);
