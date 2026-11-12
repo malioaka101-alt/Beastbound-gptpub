@@ -63,11 +63,16 @@ function makeRealLocal(w,t,reg,day=0){
   'ordinary existing world sixday decisions still use their established RNG');
  A.equal(s.player.coins,playerCoins);
  A.deepEqual(s.player.inventory,playerStock);
+ const originalWholesale=w.localProvisioner.history
+  .filter(x=>x.kind==='independent-wholesale-attempt');
+ A.equal(originalWholesale.length,1);
+ const actualReplenishment=originalWholesale.reduce((n,x)=>n+x.received,0);
  A.equal(w.localProvisioner.fundsScales,
-  clock.table.realm.localProvisioner.fundsScales,
-  'world still runs original independently financed wholesaling only');
+  merchantMoney-500*actualReplenishment,
+  'only the original preexisting wholesale paid out seller money');
  A.equal(w.localProvisioner.stock,
-  clock.table.realm.localProvisioner.stock);
+  merchantStock+actualReplenishment,
+  'interest expressions cannot create rations beyond real paid original restock');
  A.equal(Demand.verify(w),true);
  const ledger=w.independentMarketDemand;
  A.equal(ledger.origin,Demand.LEDGER);
