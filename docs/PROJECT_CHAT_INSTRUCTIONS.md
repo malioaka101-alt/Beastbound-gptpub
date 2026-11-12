@@ -1,6 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## Foundation #18 — source-verified living group purpose MERGED; independent member responses DRAFT (12 November 2026)
+
+**Current verified base: 17/25 foundations, #18 still OPEN.** [PR #76](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/76) passed [192/192 exact-head regression groups in CI #43135134916](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43135134916) on `654325b382408c1edde03a39aef07c1a54c0b560`, GitHub merged it as `7489808cb20b7a27f9abff7fa863bf24969de618`. The original mutable group registry now preserves distinct immutable founding purpose and independently sourced freeform founder declarations over real time, not a fixed catalogue of guilds, schools or factions. No existing member consent, money, completed work, legal office or rank is invented.
+
+**Current #18 isolated DRAFT:** `foundation/member-purpose-responses-20261112`, see `docs/INDEPENDENT_GROUP_PURPOSE_DISCUSSIONS.md`. A genuine named, previously consenting and physically present member may independently support, dissent or be uncertain about the current real founder declaration in an actual 18-minute scene. Reuses the original `world/group-member-agency.js` drawing procedure and `world/emergent-groups.js` historical identity/source ledger. Saved personal views change with later genuine conversation, never become automatic group-wide votes or compelled work; the GM creates all dialogue and cultural context. One new focused disposable test first in full **193-group CI**. **Do not treat this draft as verified/merged until exact-head CI passes.** Never edit `saves/`, `requests/`, `results/`, import Jory into Aerin, invent another subsystem or fixed content roster.
+
+---
+
+
 ## Foundation #18 — original diplomatic courier verification MERGED; living purpose changes DRAFT (12 November 2026)
 
 **Current accepted baseline: 17/25; #18 remains unchecked.** [PR #74](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/74) completed [full exact-head GitHub Actions #43108820145](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43108820145) successfully at head `c8e926e1f49bc3c52b51ea2d5bd71de933e7f7e4` and GitHub acknowledged its merge to `main` as `27ed7f27d8a3dc90223f4304c3e2ff296446cdec`. Original actual delayed international courier event history is now retained with true source, not fictional treaty or envoy assent.
