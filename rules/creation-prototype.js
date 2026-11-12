@@ -50,6 +50,70 @@ function local(s){
   throw Error('An incapacitated person cannot complete a physical prototype trial');
  return {site:s.world.location,region:reg,loc};
 }
+// Repairs are extensions of the existing owned physical invention, not a
+// separate craft, maintenance currency, free durability grant or universal
+// work menu. New receipts preserve the *original* paid physical-work events
+// after the short scene log rotates. Older unsourced repair entries remain
+// historical but cannot masquerade as newly witnessed repair evidence.
+function genuineRepair(row,id){
+ if(!row||typeof row!=='object'||Array.isArray(row)||
+  typeof row.sourceHash!=='string')return false;
+ const {sourceHash,...q}=row;
+ const w=row.originalWorkbench,c=row.originalRoll;
+ return sourceHash===hash(q)&&
+  Number.isInteger(row.fromMinute)&&row.fromMinute>=0&&
+  row.finishMinute-row.fromMinute===50&&
+  typeof row.location==='string'&&E.LOCATIONS[row.location]&&
+  row.toolId===id&&row.owner!==undefined&&
+  Number.isInteger(row.durabilityBefore)&&
+  row.durabilityBefore>=0&&row.durabilityBefore<=5&&
+  Number.isInteger(row.durabilityAfter)&&
+  row.durabilityAfter>=0&&row.durabilityAfter<=5&&
+  row.durabilityBefore<5&&
+  row.statusBefore!==undefined&&
+  ['unverified','calibrated','broken'].includes(row.statusBefore)&&
+  row.statusAfter===(row.success?'unverified':row.statusBefore)&&
+  row.durabilityAfter===(row.success?
+   Math.min(5,row.durabilityBefore+2):row.durabilityBefore)&&
+  JSON.stringify(row.replacement)===JSON.stringify({marsh_reed:1})&&
+  typeof row.success==='boolean'&&
+  w?.type==='world'&&w.details?.origin===ORIGIN&&
+  w.details.prototypeId===id&&w.details.location===row.location&&
+  w.details.fromMinute===row.fromMinute&&
+  JSON.stringify(w.details.replacement)===JSON.stringify(row.replacement)&&
+  w.details.notNewInvention===true&&
+  c?.type==='roll'&&c.details?.success===row.success&&
+  c.details.dc===12&&
+  Number.isInteger(c.details.roll)&&c.details.roll>=1&&
+  c.details.roll<=20&&
+  Number.isInteger(c.details.margin)&&
+  row.success===(c.details.margin>=0)&&
+  hash(w)===row.workHash&&hash(c)===row.rollHash&&
+  row.noNewItemOrGrade===true;
+}
+function legitimateRepairHistory(t){
+ if(t.repairs===undefined)return true;
+ if(!Array.isArray(t.repairs)||t.repairs.length>10000)return false;
+ let previous=-1;
+ for(const row of t.repairs){
+  if(!row||!Number.isInteger(row.fromMinute)||
+   row.fromMinute<previous||
+   row.finishMinute-row.fromMinute!==50)return false;
+  if(row.sourceHash!==undefined){
+   if(!genuineRepair(row,t.id)||row.owner!==t.owner)return false;
+  }else if(row.originalWorkbench!==undefined||
+   row.originalRoll!==undefined||
+   row.toolId!==undefined||
+   typeof row.workHash!=='string'||
+   typeof row.rollHash!=='string'||
+   typeof row.success!=='boolean'||
+   JSON.stringify(row.replacement)!==JSON.stringify({marsh_reed:1})){
+   return false;
+  }
+  previous=row.fromMinute;
+ }
+ return true;
+}
 function checkItem(s,id){
  const t=s.table?.creationPrototypes?.[id];
  if(!t||t.origin!==ORIGIN||t.id!==id||t.owner!==s.player.name||
@@ -59,7 +123,8 @@ function checkItem(s,id){
   t.source.checkWitnessHash!==t.checkWitnessHash||
   !['unverified','calibrated','broken'].includes(t.status)||
   !Number.isInteger(t.durability)||t.durability<0||t.durability>6||
-  !Array.isArray(t.readings)||t.readings.length>8)
+  !Array.isArray(t.readings)||t.readings.length>8||
+  !legitimateRepairHistory(t))
   throw Error('No source-verified owned physical invention is available');
  const d=design(s,t.designId);
  if(d.prototypeId!==id||t.source.designScopeHash!==d.scopeHash||
@@ -214,15 +279,23 @@ function repair(s,p={}){
  const completed=Work.perform(s,prepared);
  const check=completed.check,workHash=completed.witnessHash,
   rollHash=completed.rollHash;
- t.repairs||=[];
- t.repairs.push({fromMinute:old,finishMinute:s.world.minutes,
-  location:site.site,workHash,rollHash,
-  success:check.success,replacement:{marsh_reed:1}});
- if(t.repairs.length>20)t.repairs.shift();
+ const durabilityBefore=t.durability,statusBefore=t.status;
  if(check.success){
   t.durability=Math.min(5,t.durability+2);
   t.status='unverified'; // recalibration after changing measuring reeds
  }
+ const repairSource={fromMinute:old,finishMinute:s.world.minutes,
+  location:site.site,toolId:id,owner:t.owner,
+  workHash,rollHash,success:check.success,
+  replacement:{marsh_reed:1},
+  durabilityBefore,statusBefore,durabilityAfter:t.durability,
+  statusAfter:t.status,
+  originalWorkbench:completed.originalWorkbench,
+  originalRoll:completed.originalRoll,
+  noNewItemOrGrade:true};
+ const repairReceipt={...repairSource,sourceHash:hash(repairSource)};
+ t.repairs||=[];
+ t.repairs.push(repairReceipt);
  C.event(s,'research',check.success?
   'The physical sensor is mended but must be recalibrated after repair.':
   'The reed repair fails; the replacement stock is spent.',{
@@ -249,7 +322,13 @@ function status(s,p={}){
    grade:t.source.grade,status:t.status,
    durability:t.durability,quality:t.prototypeQuality,
    lastPersonallyObserved:t.readings.at(-1)?.observedCategory||null,
+   repairHistory:(t.repairs||[]).slice(-12).map(r=>({
+    fromMinute:r.fromMinute,finishMinute:r.finishMinute,
+    succeeded:r.success,actuallySpent:r.replacement,
+    originalSourceVerified:r.sourceHash!==undefined,
+    sourceHash:r.sourceHash||null,
+    noNewGradeOrPhysicalOutput:true})),
    notMagical:true,notYetGeneralArtefactCrafting:true};
  }),note:'Only source-backed owned physical prototypes, not an inventory of hypothetical spells, magical items or hidden remote data'};
 }
-module.exports={ORIGIN,build,calibrate,measure,repair,status,_debug:{checkItem,design,local,hash}};
+module.exports={ORIGIN,build,calibrate,measure,repair,status,_debug:{checkItem,design,local,hash,genuineRepair}};
