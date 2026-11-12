@@ -3,7 +3,8 @@
 // verified clean medical facilities using shared physical work. No invented
 // medicines or caller-selected quality, method, DC or ingredient shortcuts.
 const E=require('../engine.js'),C=require('./core'),H=require('./unified'),
- Practice=require('./earned-practice'),Work=require('./physical-work');
+ Practice=require('./earned-practice'),Work=require('./physical-work'),
+ Production=require('./physical-production-ledger');
 const DAY=1440,MINUTES=70,STAMINA=3,ITEM='field_poultice',DC=12;
 function only(p){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
@@ -63,6 +64,7 @@ function status(s,p={}){
 function craft(s,p={}){
  only(p);
  const loc=scene(s),day=Math.floor(s.world.minutes/DAY);
+ if(!Production.verify(s))throw Error('Prior genuine production work history needs reconciliation before crafting');
  const previousAttempts=craftCount(s,day);
  if(s.table?.fieldCraftDaily!==undefined&&
     (!s.table.fieldCraftDaily||typeof s.table.fieldCraftDaily!=='object'||
@@ -113,6 +115,7 @@ function craft(s,p={}){
   output:succeeded?{healing_balm:1}:{},check:{roll:check.roll,dc:check.dc,margin:check.margin}
  };
  s.table.fieldCraftAttempts.push(history);
+ const made=Production.record(s,{kind:'field',index:s.table.fieldCraftAttempts.length-1});
  // Older saves used exactly one record per day. Never rewrite their first
  // original attempt; new independently paid attempts retain their own ledger.
  if(!s.table.fieldCraftDaily[String(day)])
@@ -127,6 +130,7 @@ function craft(s,p={}){
  return {...practice,recipe:ITEM,succeeded,quality:succeeded?'standard':'unsafe',
   output:succeeded?{healing_balm:1}:{},usedMaterials:{marsh_reed:2,clean_rations:1},
   elapsedMinutes:MINUTES,staminaSpent:STAMINA,worksite:loc.name,
-  attemptNumberToday:previousAttempts+1,check,noExtraRoll:true};
+  attemptNumberToday:previousAttempts+1,check,noExtraRoll:true,
+  materialProductionHash:made.sourceHash,noExtraProductionOutput:true};
 }
 module.exports={craft,status};
