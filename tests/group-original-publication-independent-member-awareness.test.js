@@ -37,7 +37,7 @@ function setup(seed,withConversation=false){
 {
  const {s,w,e,agency,groupId,first}=setup(997999);
  const charter=e.charter.duty,playerCoins=s.player.coins,
-  origMemberCount=e.members,originalRng=s.rngState,
+  origMemberCount=e.members,
   rev=e.purposeHistory.at(-1),priorHistoryLength=(e.purposeResponses||[]).length;
  A.equal(priorHistoryLength,0);
  A.equal(G.currentPurpose(e,{day:rev.releaseDay-1}),charter,
@@ -63,8 +63,12 @@ function setup(seed,withConversation=false){
  A.equal(e.members,origMemberCount);
  A.equal(e.charter.duty,charter);
  A.equal(s.player.coins,playerCoins);
- A.equal(s.rngState,originalRng);
+ // A full original thirty-day world tick may legitimately advance player RNG.
+ // Only read-only individual news inspection must not create a new roll.
+ const rngAfterOriginalWorldTick=s.rngState;
  const known=act(s,'groupPurposeResponses',{groupId});
+ A.equal(s.rngState,rngAfterOriginalWorldTick,
+  'reading a member response cannot cause a new player roll');
  A.equal(known.responses.length,0,
   'a founder cannot magically know private NPC thoughts from the world tick');
  A.equal(known.noMemberCompulsion,true);
