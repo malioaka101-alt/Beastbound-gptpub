@@ -9,8 +9,14 @@ const E=require('../engine.js'),C=require('./core'),
   Prototype=require('./creation-prototype');
 const ORIGIN='original-real-physical-production-conservation-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
-function fieldSource(s,index){
- const h=s.table?.fieldCraftAttempts?.[index];
+function fieldSource(s,index,originalReceiptHash=null){
+ // Some authentic older checkpoints retain the historical first attempt
+ // solely in fieldCraftDaily after the newer attempt list was removed.
+ // Match the EXACT original immutable receipt, never assume a result.
+ const current=s.table?.fieldCraftAttempts?.[index];
+ const h=originalReceiptHash&&hash(current)!==originalReceiptHash?
+  Object.values(s.table?.fieldCraftDaily||{}).find(x=>
+   hash(x)===originalReceiptHash):current;
  if(!h||h.recipe!=='field_poultice'||
   !['crossing','academy'].includes(h.site)||
   !h.originalWorkbench||!h.originalRoll||
@@ -96,7 +102,7 @@ function prototypeSource(s,designId,index){
 }
 function derived(s,q){
  if(q?.kind==='existing-field-medicine')
-  return fieldSource(s,q.originalIndex);
+  return fieldSource(s,q.originalIndex,q.originalReceiptHash);
  if(q?.kind==='existing-authored-tool-trial')
   return prototypeSource(s,q.designId,q.originalIndex);
  throw Error('There is no original finished physical work matching this production type');
