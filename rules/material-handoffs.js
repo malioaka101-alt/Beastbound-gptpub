@@ -27,7 +27,8 @@ function validateAccount(a,id){
  for(const record of a.history){
   if(!record||typeof record!=='object'||
      (record.origin!==ORIGIN&&
-      record.origin!=='independent-personal-ration-use-v1'))
+      record.origin!=='independent-personal-ration-use-v1'&&
+      record.origin!=='genuine-independent-funded-local-ration-purchase-v1'))
    throw Error('A recipient’s material history must have authentic provenance');
   if(record.origin===ORIGIN){
    const {hash:seal,...source}=record;
@@ -36,6 +37,16 @@ function validateAccount(a,id){
       ![0,1].includes(record.quantityMoved)||
       record.accepted!==(record.quantityMoved===1))
     throw Error('An original witnessed material handoff must retain its source proof');
+  }else if(record.origin==='genuine-independent-funded-local-ration-purchase-v1'){
+   const {hash:seal,...source}=record;
+   if(seal!==hash(source)||record.actorId!==id||
+    record.item!=='clean_rations'||record.quantity!==1||
+    !Number.isInteger(record.day)||record.day<1||
+    typeof record.purchaseSourceHash!=='string'||
+    !/^[a-f0-9]{64}$/.test(record.purchaseSourceHash)||
+    record.noNewPhysicalItemCreated!==true||
+    record.noFreeCurrencyAwarded!==true)
+    throw Error('An independently paid physical ration must have a real sale source');
   }else if(record.actorId!==id||record.item!=='clean_rations'||
     record.quantity!==1||!Number.isInteger(record.day))
    throw Error('Independent personal material use needs a real source receipt');
@@ -356,5 +367,48 @@ function assetStatus(s,p={}){
   note:'Actual original physical stock and witnessed acceptance govern custody. Descriptions register observations, not duplicate goods, enforce contracts or grant new ownership. People may independently use or move their possessions; old attestations remain historical.'};
 }
 
+
+/*
+ * Real independent citizen purchasing reuses SAME ORIGINAL physical
+ * personal material account as gifts and later sixday ration use. It is
+ * never a new player-facing item, secret duplicated wallet or free stock.
+ */
+const SOURCE_PURCHASE='genuine-independent-funded-local-ration-purchase-v1';
+function preflightPurchasedRation(w,id,row){
+ const c=w?.materialCustody;
+ if(c!==undefined){
+  if(c?.version!==1||!c.accounts||typeof c.accounts!=='object'||
+   Array.isArray(c.accounts))
+   throw Error('Real person physical stock accounts must reconcile before funded trade');
+  for(const [key,a] of Object.entries(c.accounts))validateAccount(a,key);
+ }
+ const held=c?.accounts?.[id]?.held?.clean_rations??0;
+ if(typeof id!=='string'||!id.startsWith('emergent:person_')||
+  !row||row.origin!==SOURCE_PURCHASE||
+  row.sourceHash!==hash(row.source)||
+  row.source?.actorId!==id||
+  row.source.item!=='clean_rations'||row.source.quantity!==1||
+  !Number.isInteger(row.source.day)||row.source.day<1||
+  !Number.isInteger(held)||held<0||held>=100000||
+  c?.accounts?.[id]?.history?.some(x=>
+   x.origin===SOURCE_PURCHASE&&x.purchaseSourceHash===row.sourceHash))
+  throw Error('One existing personally owned ration may be credited only from a new genuine funded sale');
+ return true;
+}
+function creditPurchasedRation(w,id,row){
+ preflightPurchasedRation(w,id,row);
+ const a=personAccount(w,id),q={
+  origin:SOURCE_PURCHASE,actorId:id,item:'clean_rations',quantity:1,
+  day:row.source.day,purchaseSourceHash:row.sourceHash,
+  noNewPhysicalItemCreated:true,noFreeCurrencyAwarded:true};
+ const r={...q,hash:hash(q)};
+ a.held.clean_rations=(a.held.clean_rations||0)+1;
+ a.history.push(r);
+ if(a.history.length>90)a.history.shift();
+ validateAccount(a,id);
+ return r.hash;
+}
+
 module.exports={ORIGIN,ASSET_ORIGIN,offer,status,sixday,
- attestAsset,assetStatus,verifyAssetAttestations};
+ attestAsset,assetStatus,verifyAssetAttestations,
+ SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation};
