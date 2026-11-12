@@ -265,6 +265,30 @@ function month(w,day,emit){
          noNewProjectOrMoney:true,
          noOtherMemberCompelled:true});
      }
+     // A genuinely held latest dissenting view of the CURRENT source-backed
+     // founder purpose can separately prompt a voluntary ROLE review. This
+     // never orders resignation, ends membership or spends group funds.
+     // Do not create two review draws for one coordinator on this same tick.
+     const latest=(e.purposeResponses||[]).filter(x=>
+      x.memberActorId===m.actorId&&x.stance!=='unaware'&&
+      x.minute<=day*1440).at(-1),
+      current=e.purposeHistory?.filter(x=>x.minute<=day*1440).at(-1);
+     if(latest?.stance==='dissented'&&
+      latest.revisionId===current?.id&&
+      day-latest.day>=6&&day-latest.day<=180){
+      const considered=G.reconsiderCoordinatorOnPurposeDissent(w,{
+       groupId:e.id,mandateId:coordinator.mandateId,
+       responseId:latest.id,day});
+      if(considered.reconsidered)
+       logDecision(w,t,e,day,npcId,
+        considered.independentlyResigned?
+         'independent-coordinator-left-limited-duty':
+         'independent-coordinator-kept-limited-duty',{
+         originalPersonalResponseHash:considered.responseSourceHash,
+         mandateId:coordinator.mandateId,
+         membershipUnchanged:true,noCompulsoryPoliticalAlignment:true,
+         noExtraProjectOrMoney:true});
+     }
     }
    }
    // A review is prompted by genuinely adverse, continuing circumstances.

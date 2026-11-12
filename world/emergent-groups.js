@@ -2168,7 +2168,140 @@ function verifiedOriginalFailedWork(e,rev){
  const {hash:seal,notice,releaseDay,...body}=rev;
  return hash(body)===seal;
 }
+
+/*
+ * Source-grounded later personal dissent can prompt an existing consenting
+ * coordinator to reconsider only their OPTIONAL operational responsibility.
+ * Actual membership and previous work are not undone. A separate genuine
+ * member-agency draw decides; the founder cannot choose a resignation.
+ */
+const COORDINATION_PURPOSE_REVIEW='original-member-independent-purpose-coordinator-reconsideration-v1';
+function purposeCoordinatorChance(q){
+ return clamp(.27+(q.groupStatus==='inactive'?.11:0)+
+  (q.failedEffortsAtDecision>q.completedEffortsAtDecision?.08:0),.14,.55);
+}
+function verifyPurposeCoordinatorReview(e,row){
+ const q=row?.source,role=e?.coordinationMandates?.find(x=>x.id===row?.mandateId),
+  response=e?.purposeResponses?.find(x=>x.id===q?.responseId),
+  revision=e?.purposeHistory?.find(x=>x.id===q?.revisionId),
+  latest=e?.purposeResponses?.filter(x=>
+   x.memberActorId===q?.memberActorId&&x.stance!=='unaware'&&
+   x.minute<=q?.day*1440).at(-1),
+  current=e?.purposeHistory?.filter(x=>x.minute<=q?.day*1440).at(-1);
+ if(!q||!role||!response||!revision||!current||
+  e.origin!=='player-declaration'||
+  row.origin!==COORDINATION_PURPOSE_REVIEW||
+  q.origin!==COORDINATION_PURPOSE_REVIEW||
+  row.sourceHash!==hash(q)||row.id!==q.id||
+  q.id!=='coord_purpose_'+hash({groupId:e.id,mandateId:role.id,
+   responseHash:response.sourceHash}).slice(0,24)||
+  row.mandateId!==role.id||q.mandateId!==role.id||
+  row.memberActorId!==role.memberActorId||
+  q.memberActorId!==role.memberActorId||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.originalMandateHash!==role.sourceHash||
+  q.originalMembershipHash!==role.originalMembershipHash||
+  !role.agreed||!verifyCoordinationMandate(e,role)||
+  q.responseId!==response.id||q.responseHash!==response.sourceHash||
+  response.memberActorId!==role.memberActorId||
+  response.stance!=='dissented'||latest?.id!==response.id||
+  response.revisionId!==revision.id||q.revisionId!==revision.id||
+  revision.sourceHash!==q.revisionSourceHash||
+  current.id!==revision.id||
+  !verifyPurposeHistory(e)||!verifyPurposeResponsesHistory(e)||
+  !Number.isInteger(q.day)||q.day!==row.day||
+  q.day<role.startDay||q.day>role.untilDay||
+  q.day-response.day<6||q.day-response.day>180||
+  response.minute>q.day*1440||
+  q.responseDay!==response.day||
+  q.originalRoleScope!==role.scope||
+  !['organising','inactive','active','operating'].includes(q.groupStatus)||
+  !Number.isInteger(q.completedEffortsAtDecision)||
+  q.completedEffortsAtDecision<0||
+  !Number.isInteger(q.failedEffortsAtDecision)||
+  q.failedEffortsAtDecision<0||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.draw!=='number'||q.draw<0||q.draw>=1||
+  q.resignChance!==purposeCoordinatorChance(q)||
+  q.resigned!==(q.draw<q.resignChance)||
+  row.resigned!==q.resigned||
+  q.noMemberDismissal!==true||
+  q.noWorkOrTreasuryChange!==true||
+  q.noForcedReplacementOrLegalOffice!==true)return false;
+ const member=e.additionalMembers?.find(m=>
+  m.actorId===role.memberActorId&&m.hash===role.originalMembershipHash&&
+  m.witness?.details?.day<=row.day&&
+  (m.active!==false||m.departure?.day>row.day));
+ if(!member)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore};
+ return Agency.draw(rng)===q.draw&&rng.rngState===q.agencyAfter;
+}
+function reconsiderCoordinatorOnPurposeDissent(w,{
+ groupId,mandateId,responseId,day}={}){
+ const e=lookup(w,groupId),
+  role=e?.coordinationMandates?.find(x=>x.id===mandateId),
+  response=e?.purposeResponses?.find(x=>x.id===responseId),
+  latest=e?.purposeResponses?.filter(x=>
+   x.memberActorId===role?.memberActorId&&x.stance!=='unaware'&&
+   x.minute<=day*1440).at(-1),
+  revision=e?.purposeHistory?.filter(x=>x.minute<=day*1440).at(-1),
+  holder=e&&Number.isInteger(day)?coordinatorStatus(w,e.id,{day}):null;
+ if(!e||!role||!role.agreed||!response||
+  !Number.isInteger(day)||day<=w.lastTickDay||
+  holder?.mandateId!==role.id||
+  latest?.id!==response.id||response.stance!=='dissented'||
+  revision?.id!==response.revisionId||
+  day-response.day<6||day-response.day>180||
+  !verifyPurposeHistory(e)||!verifyPurposeResponsesHistory(e)||
+  (e.coordinationReviews||[]).some(x=>
+   x.mandateId===role.id&&(x.resigned||x.day===day||
+    x.source.responseId===response.id)))
+  return {reconsidered:false,reason:'no new independently held source-backed disagreement while serving'};
+ const Agency=require('./group-member-agency'),t=Agency.ensure(w),
+  before=t.rngState,
+  q0={origin:COORDINATION_PURPOSE_REVIEW,
+   id:'coord_purpose_'+hash({groupId:e.id,mandateId:role.id,
+    responseHash:response.sourceHash}).slice(0,24),
+   groupId:e.id,groupOriginHash:e.originHash,
+   mandateId:role.id,originalMandateHash:role.sourceHash,
+   memberActorId:role.memberActorId,
+   originalMembershipHash:role.originalMembershipHash,
+   responseId:response.id,responseHash:response.sourceHash,
+   responseDay:response.day,revisionId:revision.id,
+   revisionSourceHash:revision.sourceHash,
+   originalRoleScope:role.scope,day,groupStatus:e.status,
+   completedEffortsAtDecision:e.completedEfforts,
+   failedEffortsAtDecision:e.failedEfforts,
+   noMemberDismissal:true,noWorkOrTreasuryChange:true,
+   noForcedReplacementOrLegalOffice:true},
+  resignChance=purposeCoordinatorChance(q0),
+  draw=Agency.draw(t),resigned=draw<resignChance,
+  q={...q0,agencyBefore:before,agencyAfter:t.rngState,
+   resignChance,draw,resigned},
+  row={id:q.id,origin:COORDINATION_PURPOSE_REVIEW,
+   mandateId:role.id,memberActorId:role.memberActorId,
+   day,resigned,source:q,sourceHash:hash(q)};
+ if(!verifyPurposeCoordinatorReview(e,row))
+  throw Error('Independent role reconsideration lacked the original source');
+ e.coordinationReviews||=[];e.coordinationReviews.push(row);
+ if(!validate(e)){e.coordinationReviews.pop();
+  throw Error('Personal role reconsideration contradicted prior role history');}
+ record(ensure(w),e,day,
+  resigned?'coordinator-independently-relieved-own-limited-duty':
+   'coordinator-independently-kept-own-limited-duty',{
+   mandateId:role.id,memberActorId:role.memberActorId,
+   responseHash:response.sourceHash,reviewHash:row.sourceHash,
+   resigned,memberStillFree:true,noWorkOrTreasuryChange:true,
+   noForcedReplacement:true},null);
+ return {reconsidered:true,independentlyResigned:resigned,
+  mandateId:role.id,responseSourceHash:response.sourceHash,
+  noMemberDismissalOrPayment:true};
+}
+
 function verifyCoordinationReview(e,row){
+ if(row?.origin===COORDINATION_PURPOSE_REVIEW)
+  return verifyPurposeCoordinatorReview(e,row);
  const q=row?.source,role=e?.coordinationMandates?.find(x=>x.id===row?.mandateId),
   rev=q?.originalReview;
  if(!role||!role.agreed||!q||e.origin!=='player-declaration'||
@@ -2221,9 +2354,11 @@ function verifyCoordinationReviewHistory(e){
   if(ids.has(row?.id)||!verifyCoordinationReview(e,row)||
    row.day<day||
    resigned.has(row.mandateId)||
-   reviewed.has(row.mandateId+':'+row.source.originalReviewHash))
+   reviewed.has(row.mandateId+':'+
+    (row.source.originalReviewHash||row.source.responseHash)))
    return false;
-  ids.add(row.id);reviewed.add(row.mandateId+':'+row.source.originalReviewHash);
+  ids.add(row.id);reviewed.add(row.mandateId+':'+
+   (row.source.originalReviewHash||row.source.responseHash));
   if(row.resigned)resigned.add(row.mandateId);
   day=row.day;
  }
@@ -2294,7 +2429,10 @@ function coordinationReviewStatus(w,groupId,{day}={}){
   id:x.id,mandateId:x.mandateId,
   memberActorId:x.memberActorId,day:x.day,
   independentlyResigned:x.resigned,
-  originalFailedWorkHash:x.source.originalReviewHash,
+  ...(x.origin===COORDINATION_PURPOSE_REVIEW?
+   {originalPurposeResponseHash:x.source.responseHash,
+    voluntaryPurposeResponsibilityReview:true}:
+   {originalFailedWorkHash:x.source.originalReviewHash}),
   noOtherMembersBound:true,noNewWorkOrMoney:true}));
 }
 
@@ -2417,8 +2555,10 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus,
- COORDINATION_REVIEW,verifyCoordinationReview,
- reconsiderCoordinatorOnOriginalFailure,coordinationReviewStatus,
+ COORDINATION_REVIEW,COORDINATION_PURPOSE_REVIEW,
+ verifyCoordinationReview,verifyPurposeCoordinatorReview,
+ reconsiderCoordinatorOnOriginalFailure,
+ reconsiderCoordinatorOnPurposeDissent,coordinationReviewStatus,
  VOLUNTARY_TASK,TASK_SERVICE,COORDINATOR_TASK,
  voluntaryTaskChance,coordinatorTaskOfferChance,verifyVoluntaryTask,
  recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
