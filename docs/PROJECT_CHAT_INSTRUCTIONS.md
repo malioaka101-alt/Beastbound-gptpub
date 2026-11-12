@@ -1,6 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## #18 — independent member responses verified; genuine living-purpose disagreement consequences DRAFT (12 November 2026)
+
+**17/25 checked; #18 still OPEN.** [PR #77](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/77) passed the complete 193/193 exact-head groups in [CI #43163828369](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43163828369) at `a5889b7044d7187601a0f8885cda0e8715006260`; GitHub acknowledged squash-merge `5b679baa0efea898f862cb36ccfc95d4baed03e9`. Real voluntary group participants physically and personally respond to new purpose statements using the original independently replayable group-member agency stream. Personal assent, dissent and uncertainty never imply group-wide consent or legal authority.
+
+**CURRENT ISOLATED #18 DRAFT:** `foundation/voluntary-purpose-dissent-consequences-20261112`. Connect original later source-proven **different purpose revisions** and genuine personally documented continuing member dissent to the existing original independent **optional withdrawal** after monthly world review. Voluntary stay and later reconciliation remain possible; never force an expulsion, invent factions, delete another's money or turn private views into binding offices. Invitations use actual latest purpose rather than old charter alone. Two new focused cases (original personal consequences plus automatic batch-inventory validation) lead a **195-test complete regression inventory** in three deterministic parallel batches, followed by a required eight-test integrated gate. Exact-head CI NOT YET verified. See `docs/GROUP_PURPOSE_DISSENT_WORLD_CONSEQUENCES.md`. Continue open-ended GM authorship, original character/world source, real time, consent, and no fixed roster. Do not alter live `saves/`, `requests/`, `results/`.
+
+---
+
+
 ## Foundation #18 — source-verified living group purpose MERGED; independent member responses DRAFT (12 November 2026)
 
 **Current verified base: 17/25 foundations, #18 still OPEN.** [PR #76](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/76) passed [192/192 exact-head regression groups in CI #43135134916](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43135134916) on `654325b382408c1edde03a39aef07c1a54c0b560`, GitHub merged it as `7489808cb20b7a27f9abff7fa863bf24969de618`. The original mutable group registry now preserves distinct immutable founding purpose and independently sourced freeform founder declarations over real time, not a fixed catalogue of guilds, schools or factions. No existing member consent, money, completed work, legal office or rank is invented.

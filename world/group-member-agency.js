@@ -75,9 +75,47 @@ function independentDissentEvidence(e,actorId,day){
    independentlyDissentedOnDay:last.day}];
  }).sort((a,b)=>a.priorityId.localeCompare(b.priorityId));
 }
+/*
+ * Individual members may independently dissent from two different actual
+ * founder purpose revisions. The current personal view must STILL be
+ * dissenting, and both distinct revisions must be original-source valid.
+ * This is optional pressure in the original departure process, not an
+ * automatic exit, a group vote or an expulsion.
+ */
+const PURPOSE_DISSENT_PRESSURE='sustained independent disagreement with evolving founder purposes';
+function independentPurposeDissentEvidence(e,actorId,day){
+ if(!e||e.origin!=='player-declaration'||!Number.isInteger(day)||day<0||
+  !G.verifyPurposeHistory(e)||!G.verifyPurposeResponsesHistory(e))
+  return [];
+ const history=(e.purposeResponses||[]).filter(x=>
+  x.memberActorId===actorId&&x.day<=day),
+  latest=history.at(-1);
+ if(!latest||latest.stance!=='dissented'||day-latest.day<6||
+  day-latest.day>180)return [];
+ const evidence=[];
+ for(const revision of e.purposeHistory||[]){
+  const last=history.filter(x=>x.revisionId===revision.id).at(-1);
+  if(!last||last.stance!=='dissented'||day-last.day<6||
+   day-last.day>180||last.minute<revision.minute||
+   last.source.revisionSourceHash!==revision.sourceHash||
+   last.source.memberActorId!==actorId||
+   last.source.memberConsentHash!==
+    e.additionalMembers.find(m=>m.actorId===actorId)?.hash)
+   continue;
+  evidence.push({
+   revisionId:revision.id,revisionSourceHash:revision.sourceHash,
+   personalResponseId:last.id,personalResponseHash:last.sourceHash,
+   independentlyDissentedOnDay:last.day});
+ }
+ return evidence.sort((a,b)=>a.revisionId.localeCompare(b.revisionId));
+}
 function verifyIndependentDissentWithdrawal(e,m,d){
- if(d?.actualPressure!==DISSENT_PRESSURE)return true;
- const evidence=independentDissentEvidence(e,m.actorId,d.day);
+ const isPriority=d?.actualPressure===DISSENT_PRESSURE,
+  isPurpose=d?.actualPressure===PURPOSE_DISSENT_PRESSURE;
+ if(!isPriority&&!isPurpose)return true; // prior genuine hardship decisions
+ const evidence=isPurpose?
+  independentPurposeDissentEvidence(e,m.actorId,d.day):
+  independentDissentEvidence(e,m.actorId,d.day);
  if(evidence.length<2||
   !Array.isArray(d.disagreementEvidence)||
   JSON.stringify(d.disagreementEvidence)!==JSON.stringify(evidence)||
@@ -141,7 +179,7 @@ function common(a,b){
 }
 function evaluate(w,t,e,npc,proposal,meetings=0){
  const host=w.countries[e.polity];
- const alignment=Math.min(3,common(e.charter.duty+' '+proposal,
+ const alignment=Math.min(3,common(G.currentPurpose(e)+' '+proposal,
   npc.goal+' '+npc.topic+' '+npc.profession));
  const npcId=npc.id||Object.keys(E.NPCS).find(k=>E.NPCS[k]===npc);
  const previous=(e.invitations||[]).filter(x=>x.npcId===npcId);
@@ -231,18 +269,25 @@ function month(w,day,emit){
    }
    // A review is prompted by genuinely adverse, continuing circumstances.
    // Successful groups do not lose members merely because time passes.
-   const politicalEvidence=localPolity===e.polity?
+   const priorityEvidence=localPolity===e.polity?
     independentDissentEvidence(e,m.actorId,day):[];
-   const isPoliticalDissent=politicalEvidence.length>=2;
+   const purposeEvidence=localPolity===e.polity?
+    independentPurposeDissentEvidence(e,m.actorId,day):[];
+   const isPoliticalDissent=priorityEvidence.length>=2;
+   const isPurposeDissent=purposeEvidence.length>=2;
    const hardship=e.status==='inactive'&&e.unfundedMonths>=3?
     'sustained inactivity with little practical support':
     e.failedEfforts>=e.completedEfforts+3?
      'repeated genuinely failed group efforts':
     host.stability<25?'severe observed regional instability':
-    isPoliticalDissent?DISSENT_PRESSURE:null;
+    isPoliticalDissent?DISSENT_PRESSURE:
+    isPurposeDissent?PURPOSE_DISSENT_PRESSURE:null;
    if(hardship&&day-m.witness.details.day>=30&&
       (!m.lastReviewDay||day-m.lastReviewDay>=60)){
-    const dissentReason=hardship===DISSENT_PRESSURE;
+    const dissentReason=hardship===DISSENT_PRESSURE||
+     hardship===PURPOSE_DISSENT_PRESSURE;
+    const politicalEvidence=hardship===PURPOSE_DISSENT_PRESSURE?
+     purposeEvidence:priorityEvidence;
     const chance=clamp(.18+(e.unfundedMonths>=6?.16:0)+
       (host.stability<25?.14:0)+(dissentReason?.07:0),.12,.55);
     const agencyBefore=t.rngState,pick=draw(t);
@@ -331,4 +376,5 @@ function privateStatus(s,w,groupId){
 }
 module.exports={ORIGIN,DEPART,SOURCE,ensure,draw,evaluate,month,privateStatus,
  DISSENT_PRESSURE,independentDissentEvidence,
+ PURPOSE_DISSENT_PRESSURE,independentPurposeDissentEvidence,
  _debug:{common,logDecision}};
