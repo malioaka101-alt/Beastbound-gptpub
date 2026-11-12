@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+
+## Foundation #18 — original diplomatic courier verification MERGED; living purpose changes DRAFT (12 November 2026)
+
+**Current accepted baseline: 17/25; #18 remains unchecked.** [PR #74](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/74) completed [full exact-head GitHub Actions #43108820145](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43108820145) successfully at head `c8e926e1f49bc3c52b51ea2d5bd71de933e7f7e4` and GitHub acknowledged its merge to `main` as `27ed7f27d8a3dc90223f4304c3e2ff296446cdec`. Original actual delayed international courier event history is now retained with true source, not fictional treaty or envoy assent.
+
+**Current isolated #18 DRAFT:** `foundation/living-group-purpose-20261112`, see `docs/LIVING_GROUP_PURPOSE_FOUNDATION.md`. Continue to extend the **same source-verified living association registry**, not a fixed number of kinds or a new parallel simulation. A real local founder can restate a freeform purpose with the original world clock, original story witness and two-day public delay. Preserve original charter, other members' separate views, resources, approvals and all proven world history; trusted-source adapters allow future verified autonomous organisations to develop without predetermined templates. Three fixture examples demonstrate repeatability, not a species/guild roster. New focused test first in full **192-group** engine CI; **CI and merge not yet accepted**. Leave #18 unchecked until much deeper actual authorised governance, diplomacy and lawful property exist. Never touch active campaign saves or import Jory's history into Aerin's story.
+
+---
+
 ## Foundation #18 — independent bilateral willingness MERGED; original foreign-courier public history DRAFT (11 November 2026)
 
 **Verified 17/25 foundations; #18 remains OPEN.** Original Unified Beastbound Master Prompt §§33–36, Table Rules and real separate campaign records govern. Maintain independently consenting people, polities, actual news delivery, freeform role/political interests and lawful rights. Do not infer signatories from diplomatic status, or backfill fictional older history. Never edit campaign `saves/`, `requests/` or `results/`; do not merge Jory and Aerin.
