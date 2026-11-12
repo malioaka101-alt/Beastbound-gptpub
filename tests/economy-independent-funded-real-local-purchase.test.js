@@ -153,6 +153,13 @@ function fixture(seed=994821,count=72){
  A.equal(demand.genuineSellerPaidSales[0].paidOriginalScales,q.paidPriceScales);
  A.equal(PaidDemand.validate(demand,nextQuote.source.originalPaidDemandHash),true);
  A.equal(PaidDemand.backedByActualSeller(w,demand),true);
+ const selectivelyOmitted=structuredClone(demand);
+ selectivelyOmitted.genuineSellerPaidSales=[];
+ selectivelyOmitted.realFundedBuyerSalesCount=0;
+ selectivelyOmitted.originalSellerSpecificMarkupPct=0;
+ A.equal(PaidDemand.validate(selectivelyOmitted,hash(selectivelyOmitted)),true);
+ A.equal(PaidDemand.backedByActualSeller(w,selectivelyOmitted),false,
+  'a new quote cannot erase a genuine prior paid customer from its witness to force an artificial discount');
  A.equal(Scarcity.verify(nextQuote.source,nextQuote.sourceHash,
   nextQuote.source.actualQuotedPriceScales,seller.stock),true);
  A.equal(previousQuote.originalPaidDemand.realFundedBuyerSalesCount,0,
