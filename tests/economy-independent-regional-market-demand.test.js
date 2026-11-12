@@ -11,6 +11,13 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Demand=require('../world/independent-regional-demand');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const DAY=1440;
+{
+ const boundary=World.calendarTicks(359,14);
+ A.deepEqual(boundary.sixdays,[360,371],
+  'Concord Days move genuine sixday ticks off the naive day modulo');
+ A.equal(371%6!==0,true,
+  'real market interest cannot assume the unanchored sixday absolute day modulo');
+}
 function makeRealLocal(w,t,reg,day=0){
  const eco=w.ecosystems[reg.id],country=w.countries[reg.polity],
   polity=Atlas.P[reg.polity];
@@ -65,6 +72,7 @@ function makeRealLocal(w,t,reg,day=0){
  const ledger=w.independentMarketDemand;
  A.equal(ledger.origin,Demand.LEDGER);
  A.equal(ledger.lastSixday,6);
+ A.equal(ledger.lastSixdayNumber,1);
  const decisions=ledger.records;
  A.ok(decisions.length>=8,'genuine original local-shift people act independently');
  const publicOnes=decisions.filter(x=>x.accepted),
@@ -102,7 +110,7 @@ function makeRealLocal(w,t,reg,day=0){
   Object.values(w.emergentPeople.people).map(p=>[p.id,p.rngState])),
   unchangedPeopleRng,
   'regional public market status never creates a second personal decision draw');
- A.throws(()=>Demand.sixday(w,18),/verified original sixday/);
+ A.throws(()=>Demand.sixday(w,18),/cannot invent a later world tick/);
  A.equal(E.exportGame(s),first);
  // All public notices are gated by the actual next day's release.
  A.deepEqual(Realm.publicEconomy(s).locallyPostedGoodsInterest,[]);
