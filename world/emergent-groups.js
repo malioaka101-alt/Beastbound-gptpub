@@ -187,12 +187,170 @@ function revisePurposeFromEvidence(w,groupId,{origin,actorId,actorName,
  */
 const PURPOSE_RESPONSE='witnessed-independent-member-group-purpose-view-v1';
 function priorPurposeResponse(rows,actorId){
- const last=[...rows].reverse().find(x=>x.memberActorId===actorId);
+ const last=[...rows].reverse().find(x=>
+  x.memberActorId===actorId&&x.stance!=='unaware');
  return last?{stance:last.stance,hash:last.sourceHash,
   minute:last.minute,day:last.day}:
   {stance:'unrecorded',hash:null,minute:-1,day:-1};
 }
+/*
+ * An existing REAL public purpose declaration can be noticed privately by
+ * a genuinely consenting local member on the ORIGINAL monthly world tick.
+ * No dialogue, physical meeting, founder demand or faction vote is invented.
+ * 'unaware' is persisted as a non-opinion to prevent repeat notice draws;
+ * it never erases the member's earlier actual views.
+ */
+const PUBLISHED_PURPOSE_RESPONSE='independent-member-view-after-original-published-group-purpose-v1';
+function publishedPurposeNoticeChance(q){
+ return Math.min(.65,Math.max(.24,.40+
+  (q.localStability>=55?.08:0)+
+  (q.groupCompletedEfforts>0?.05:0)));
+}
+function verifyPublishedPurposeResponse(e,row){
+ const q=row?.source,revision=e.purposeHistory?.find(x=>x.id===row?.revisionId);
+ if(!q||!revision||!verifyPurposeHistory(e)||
+  e.origin!=='player-declaration'||
+  q.origin!==PUBLISHED_PURPOSE_RESPONSE||
+  row.origin!==PUBLISHED_PURPOSE_RESPONSE||
+  row.sourceHash!==hash(q)||row.id!==q.id||
+  row.id!=='published_purpose_'+hash({
+   groupId:e.id,revisionId:revision.id,
+   actorId:q.memberActorId,day:q.day}).slice(0,24)||
+  row.revisionId!==q.revisionId||row.stance!==q.stance||
+  row.memberActorId!==q.memberActorId||
+  row.memberConsentHash!==q.memberConsentHash||
+  row.day!==q.day||row.minute!==q.minute||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.revisionSourceHash!==revision.sourceHash||
+  q.revisionPurpose!==revision.purpose||
+  q.originalReleaseDay!==revision.releaseDay||
+  !Number.isInteger(q.day)||q.day<revision.releaseDay||
+  q.day-revision.releaseDay>=30||
+  !Number.isInteger(q.minute)||q.minute!==q.day*1440||
+  !Atlas.R[q.membershipRegionId]||
+  Atlas.R[q.membershipRegionId].polity!==e.polity||
+  q.localPolity!==e.polity||
+  typeof q.memberName!=='string'||q.memberName.length<3||
+  typeof q.npcId!=='string'||!q.npcId.trim()||
+  typeof q.previousResponseHash!=='string'&&q.previousResponseHash!==null||
+  typeof q.previousStance!=='string'||
+  !['unrecorded','supported','dissented','undecided'].includes(q.previousStance)||
+  !Number.isInteger(q.previousResponseMinute)||
+  !Number.isInteger(q.previousResponseDay)||
+  !Number.isInteger(q.groupCompletedEfforts)||q.groupCompletedEfforts<0||
+  !Number.isInteger(q.groupFailedEfforts)||q.groupFailedEfforts<0||
+  !Number.isInteger(q.localStability)||q.localStability<0||q.localStability>100||
+  !q.worldSnapshot||
+  !['pressure','quality','stability','prosperity'].every(k=>
+   Number.isFinite(q.worldSnapshot[k])&&
+   q.worldSnapshot[k]>=0&&q.worldSnapshot[k]<=100)||
+  !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
+  !Number.isInteger(q.agencyAfter)||q.agencyAfter<1||
+  typeof q.noticeDraw!=='number'||q.noticeDraw<0||q.noticeDraw>=1||
+  q.noticeChance!==publishedPurposeNoticeChance(q)||
+  q.noticed!==(q.noticeDraw<q.noticeChance)||
+  q.draw!==null&&(typeof q.draw!=='number'||q.draw<0||q.draw>=1)||
+  !['supported','dissented','undecided','unaware'].includes(q.stance)||
+  q.noDirectMeetingInvented!==true||
+  q.noPlayerSelectedAnswer!==true||
+  q.noCollectiveObligation!==true||
+  q.noExtraGroupMoneyOrWork!==true)
+  return false;
+ const member=e.additionalMembers?.find(x=>
+  x.actorId===q.memberActorId&&x.hash===q.memberConsentHash&&
+  x.name===q.memberName&&
+  x.witness?.details?.npcId===q.npcId&&
+  Atlas.LOCATION_REGION[x.witness?.details?.location]===
+   q.membershipRegionId&&
+  Number.isInteger(x.witness?.details?.day)&&
+  x.witness.details.day<=q.day&&
+  (x.active!==false||x.departure?.day>q.day));
+ if(!member)return false;
+ const Agency=require('./group-member-agency'),rng={rngState:q.agencyBefore},
+  noticeDraw=Agency.draw(rng);
+ const choices=positionChances({previousStance:q.previousStance,
+  groupCompletedEfforts:q.groupCompletedEfforts,
+  groupFailedEfforts:q.groupFailedEfforts,
+  worldSnapshot:q.worldSnapshot});
+ const seen=noticeDraw<q.noticeChance,
+  opinionDraw=seen?Agency.draw(rng):null,
+  stance=seen?(opinionDraw<choices.support?'supported':
+   opinionDraw<choices.support+choices.dissent?'dissented':'undecided'):'unaware';
+ return q.noticeDraw===noticeDraw&&q.draw===opinionDraw&&
+  q.supportChance===choices.support&&q.dissentChance===choices.dissent&&
+  q.noticed===seen&&q.stance===stance&&
+  rng.rngState===q.agencyAfter;
+}
+function considerPublishedPurpose(w,{groupId,npcId,day}={}){
+ const e=lookup(w,groupId),revision=e?.purposeHistory?.at(-1),
+  member=e?.origin==='player-declaration'?
+   e.additionalMembers.find(x=>x.active!==false&&
+    x.witness?.details?.npcId===npcId):null;
+ const People=require('./person-presence'),Agency=require('./group-member-agency'),
+  npc=member?People.identity(w,npcId):null,
+  localPolity=npc?.polity||
+   Atlas.R[Atlas.LOCATION_REGION[npc?.location]]?.polity,
+  regionId=Atlas.LOCATION_REGION[member?.witness?.details?.location],
+  eco=w.ecosystems?.[regionId],host=w.countries?.[e?.polity],
+  prior=member?priorPurposeResponse(e.purposeResponses||[],member.actorId):null;
+ const already=(e?.purposeResponses||[]).some(x=>
+  x.memberActorId===member?.actorId&&
+  x.revisionId===revision?.id);
+ if(!e||!revision||!member||!npc||localPolity!==e.polity||
+  !Number.isInteger(day)||day<revision.releaseDay||
+  day-revision.releaseDay>=30||already||
+  !eco||!host||!regionId)
+  return {reviewed:false,reason:'no new locally accessible original publication'};
+ if(![eco.pressure,eco.quality,host.stability,host.prosperity].every(x=>
+  Number.isFinite(x)&&x>=0&&x<=100))
+  throw Error('An original local world must exist before independent publication awareness');
+ const t=Agency.ensure(w),before=t.rngState,
+  q0={origin:PUBLISHED_PURPOSE_RESPONSE,groupId:e.id,
+   groupOriginHash:e.originHash,
+   revisionId:revision.id,revisionSourceHash:revision.sourceHash,
+   revisionPurpose:revision.purpose,originalReleaseDay:revision.releaseDay,
+   memberActorId:member.actorId,memberConsentHash:member.hash,
+   memberName:member.name,npcId,membershipRegionId:regionId,
+   localPolity,day,minute:day*1440,
+   previousStance:prior.stance,previousResponseHash:prior.hash,
+   previousResponseMinute:prior.minute,previousResponseDay:prior.day,
+   groupCompletedEfforts:e.completedEfforts,
+   groupFailedEfforts:e.failedEfforts,localStability:host.stability,
+   worldSnapshot:{pressure:eco.pressure,quality:eco.quality,
+    stability:host.stability,prosperity:host.prosperity},
+   noDirectMeetingInvented:true,noPlayerSelectedAnswer:true,
+   noCollectiveObligation:true,noExtraGroupMoneyOrWork:true};
+ const noticeChance=publishedPurposeNoticeChance(q0),
+  noticeDraw=Agency.draw(t),noticed=noticeDraw<noticeChance,
+  chances=positionChances(q0),draw=noticed?Agency.draw(t):null,
+  stance=noticed?(draw<chances.support?'supported':
+   draw<chances.support+chances.dissent?'dissented':'undecided'):'unaware',
+  id='published_purpose_'+hash({groupId:e.id,revisionId:revision.id,
+   actorId:member.actorId,day}).slice(0,24),
+  q={...q0,id,agencyBefore:before,agencyAfter:t.rngState,
+   noticeChance,noticeDraw,noticed,draw,
+   supportChance:chances.support,dissentChance:chances.dissent,stance},
+  row={id,origin:PUBLISHED_PURPOSE_RESPONSE,revisionId:revision.id,
+   memberActorId:member.actorId,memberConsentHash:member.hash,
+   day,minute:day*1440,stance,source:q,sourceHash:hash(q)};
+ if(!verifyPublishedPurposeResponse(e,row))
+  throw Error('Independently noticed public association purpose has no genuine original source');
+ e.purposeResponses||=[];e.purposeResponses.push(row);
+ if(!validate(e)){
+  e.purposeResponses.pop();
+  throw Error('An unsourced independent publication cannot enter the original group');
+ }
+ // Private individual notice processing: a missed notice is not knowledge,
+ // and even a noticed member's stance is not a public founder-facing vote.
+ return {reviewed:true,noticed,memberActorId:member.actorId,
+  revisionId:revision.id,sourceHash:row.sourceHash,
+  noFictionalMeeting:true,noPublicMemberDisclosure:true,
+  noNewMoneyOrObligation:true};
+}
+
 function verifyPurposeResponse(e,row){
+ if(row?.origin===PUBLISHED_PURPOSE_RESPONSE)
+  return verifyPublishedPurposeResponse(e,row);
  const q=row?.source,ev=q?.witness,d=ev?.details,
   revision=e.purposeHistory?.find(x=>x.id===row?.revisionId);
  if(!q||!revision||!verifyPurposeHistory(e)||
@@ -276,7 +434,7 @@ function verifyPurposeResponsesHistory(e){
  for(const row of e.purposeResponses){
   const q=row?.source;
   if(!q||!verifyPurposeResponse(e,row)||ids.has(row.id)||
-   row.minute<=previousMinute)return false;
+   row.minute<previousMinute)return false;
   const prev=priorPurposeResponse(seen,row.memberActorId);
   if(q.previousStance!==prev.stance||
    q.previousResponseHash!==prev.hash||
@@ -284,7 +442,8 @@ function verifyPurposeResponsesHistory(e){
    q.previousResponseDay!==prev.day||
    row.minute<=prev.minute||
    seen.some(x=>x.memberActorId===row.memberActorId&&
-    x.revisionId===row.revisionId&&x.day===row.day))
+    x.revisionId===row.revisionId&&x.day===row.day&&
+    x.stance!=='unaware'&&row.stance!=='unaware'))
    return false;
   ids.add(row.id);seen.push(row);previousMinute=row.minute;
  }
@@ -312,7 +471,8 @@ function considerPurposeRevision(w,{groupId,revisionId,npcId,
   Atlas.R[regionId].polity!==e.polity||
   !eco||!host||!previous||
   responses.some(x=>x.memberActorId===member.actorId&&
-   x.revisionId===revisionId&&x.day===day)||
+   x.revisionId===revisionId&&x.day===day&&
+   x.stance!=='unaware')||
   typeof discussion!=='string'||discussion.trim()!==discussion||
   discussion.length<30||discussion.length>750||
   !witness||witness.type!=='story'||
@@ -369,7 +529,8 @@ function purposeResponseStatus(w,groupId,{day}={}){
  if(!e||!Number.isInteger(today)||today<e.foundedDay)
   throw Error('Only true locally witnessed group member views can be inspected');
  return {groupId:e.id,foundingPurpose:e.charter.duty,
-  responses:(e.purposeResponses||[]).filter(x=>x.day<=today).map(x=>({
+  responses:(e.purposeResponses||[]).filter(x=>
+   x.day<=today&&x.origin===PURPOSE_RESPONSE).map(x=>({
    revisionId:x.revisionId,day:x.day,
    memberActorId:x.memberActorId,memberName:x.source.memberName,
    stance:x.stance,previousStance:x.source.previousStance,
@@ -2140,6 +2301,7 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  PURPOSE_SOURCE,registerPurposeRevisionAdapter,verifyPurposeHistory,
  currentPurpose,purposeHistoryStatus,revisePurposeFromEvidence,
  PURPOSE_RESPONSE,verifyPurposeResponsesHistory,considerPurposeRevision,purposeResponseStatus,
+ PUBLISHED_PURPOSE_RESPONSE,verifyPublishedPurposeResponse,considerPublishedPurpose,
  registerOriginAdapter,registerFromEvidence,registerMemberConsentAdapter,
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,

@@ -88,7 +88,7 @@ function independentPurposeDissentEvidence(e,actorId,day){
   !G.verifyPurposeHistory(e)||!G.verifyPurposeResponsesHistory(e))
   return [];
  const history=(e.purposeResponses||[]).filter(x=>
-  x.memberActorId===actorId&&x.day<=day),
+  x.memberActorId===actorId&&x.day<=day&&x.stance!=='unaware'),
   latest=history.at(-1);
  if(!latest||latest.stance!=='dissented'||day-latest.day<6||
   day-latest.day>180)return [];
@@ -351,6 +351,36 @@ function month(w,day,emit){
     npc.name+' independently contributes documented practical voluntary work to '+
      e.charter.name+'. This does not establish any familial inheritance or grant a special technique.':null);
    if(task)G.retainOriginalTaskService(e,task.id,actual);
+  }
+ }
+ /*
+  * After all existing original monthly choices resolve, real local
+  * independent members may notice a genuinely released original purpose.
+  * This happens AFTER prior monthly work/departure agency so new knowledge
+  * never retroactively changes those results or their original RNG.
+  * Missed notices produce only private audited 'unaware' records.
+  */
+ for(const group of G.all(w)){
+  if(group.origin!=='player-declaration')continue;
+  const revision=group.purposeHistory?.at(-1);
+  if(!revision||revision.releaseDay>day||day-revision.releaseDay>=30)
+   continue;
+  for(const member of group.additionalMembers||[]){
+   if(member.active===false||member.origin!==ORIGIN)continue;
+   const npcId=member.witness?.details?.npcId,
+    npc=People.identity(w,npcId),
+    polity=npc?.polity||A.R[A.LOCATION_REGION[npc?.location]]?.polity;
+   if(!npc||polity!==group.polity)continue;
+   const noticed=G.considerPublishedPurpose(w,{
+    groupId:group.id,npcId,day});
+   if(noticed.reviewed)
+    logDecision(w,t,group,day,npcId,
+     noticed.noticed?'privately-considered-released-purpose':
+      'did-not-encounter-released-purpose',{
+      originalPurposeRevision:revision.id,
+      actualIndividualNoticeHash:noticed.sourceHash,
+      privatePersonalKnowledgeNotRevealed:true,
+      noImaginedEncounterOrGroupVote:true});
   }
  }
  return t;

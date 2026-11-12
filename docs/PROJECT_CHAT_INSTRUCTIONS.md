@@ -1,6 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## #18 — original 195-test three-batch gate MERGED; independent publication-driven NPC agency DRAFT (12 November 2026)
+
+**17/25 confirmed complete, #18 STILL OPEN.** Original public [PR #78](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/78) passed exact-head [Actions #43179195029](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43179195029), all **195/195 test files in three independent parallel full-coverage batches**, every batch reported success, and the required unchanged `test` gate passed automatic inventory validation and eight final cross-system tests. GitHub squash-merged `7ec1ca5459b114c0dd2dd48f6e80e4addfd0651b`. Original individual group members can independently stay, later leave, or reconcile after genuinely sourced sustained discord about actual changed organisational goals; they cannot be expelled by founder decree.
+
+**NEXT #18 DRAFT:** `foundation/independent-public-purpose-world-response-batch-20261112`. The existing monthly original group-member agency can independently notice or miss a real already-public local founder-purpose revision. No compelled knowledge, telepathic NPC insight, fabricated meetings or group votes. Source-proven private member thoughts and an 'unaware' marker reside in the **existing** purpose-response history and use the **same** original agency RNG; only actual face-to-face previous discussions are shown to the founder. Original voluntary departures, money, real world ticks and consent still dominate. Read `docs/GROUP_PURPOSE_PUBLIC_WORLD_AGENCY.md`. One new source test added to **196 complete automatically discovered test files** on three parallel jobs plus final gate. **NOT TESTED OR MERGED until exact-head CI passes.** No current campaign saves, requests, results or Jory/Aerin cross-pollination.
+
+---
+
+
 ## #18 — independent member responses verified; genuine living-purpose disagreement consequences DRAFT (12 November 2026)
 
 **17/25 checked; #18 still OPEN.** [PR #77](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/77) passed the complete 193/193 exact-head groups in [CI #43163828369](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43163828369) at `a5889b7044d7187601a0f8885cda0e8715006260`; GitHub acknowledged squash-merge `5b679baa0efea898f862cb36ccfc95d4baed03e9`. Real voluntary group participants physically and personally respond to new purpose statements using the original independently replayable group-member agency stream. Personal assent, dissent and uncertainty never imply group-wide consent or legal authority.
