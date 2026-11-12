@@ -53,7 +53,7 @@ jobs:
       - name: Verify automatic full inventory coverage and no duplicate tests
         shell: bash
         run: node scripts/run-regression-batches.js --shards=3 --validate
-      - name: Final integration gate — living organisation and independent world
+      - name: Final integration gate — original property custody, trade, organisations and world
         shell: bash
         run: |
           node tests/group-purpose-sustained-independent-departure.test.js
@@ -62,5 +62,8 @@ jobs:
           node tests/group-original-coordinator-setback-reconsideration.test.js
           node tests/original-diplomatic-courier-public-provenance.test.js
           node tests/diplomacy-genuine-bilateral-exploratory-contact.test.js
+          node tests/economy-existing-owned-material-assets.test.js
+          node tests/voluntary-person-material-handoffs.test.js
+          node tests/live-provisioner-trade.test.js
           node tests/source-parity.test.js
           node tests/source-coverage.test.js
