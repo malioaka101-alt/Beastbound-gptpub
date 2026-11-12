@@ -3,6 +3,14 @@
 **Created:** 8 November 2026. **Authority:** `/mnt/data/Beastbound_Realms_Unified_Master_Prompt.md`, the original 57-section Unified Master Prompt, existing verified campaign facts, and the current engine. This is **not** a list of things that must all be finished before play. No campaign is active.
 
 ## How to use this checklist
+
+## #19 real production MERGED; original local scarcity quotes staged (12 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** The original source-backed physical production step [PR #83](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/83) passed **200/200 full three-batch source regression and required final integration** at exact head [CI #43201489401](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43201489401), merged `41f7c270b79ca0fdca5f265b33ad3fdcf9a514d1`. Medicine and actual researched devices carry durable original exact material input/failed-loss and successful-output records. Source-compatible old crafting checkpoints survive without invented past dice.
+
+**Next draft #19** `foundation/source-evidence-local-provisioning-prices-20261112` connects original genuinely quoted local grain prices to actual original regional forage/quality and owned seller stock without additional random draws, arbitrary money or inventory creation. The original independent world-month trade/prosperity already shapes the grain index. Source-bounded pricing is one seller-specific example of real market supply pressure, **not a universal law**; old witnessed quotes remain valid until original expiry, and a real new price needs an actual new local conversation. `tests/economy-original-scarcity-market-quotations.test.js` is the **201st** regression test; full CI **PENDING**. Future depth: true production chains, willing employed labour, negotiated credit/contract wages, region-specific buyers and demands, nonhuman/ecological markets, rights and scarcity effects. Never check #19 prematurely.
+
+
 ## #19 verified property ownership; original production witness next (12 November 2026)
 
 **#18 remains PAUSED OPEN**, for later flexible and richly cultural, ideological, species-aware fantasy politics. **#19 remains ACTIVE OPEN; 17/25 accepted.** [PR #82](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/82) merged at `a5e8c690676ab419978cc8ca7fdce1bb05307074` after the full **199/199 three-source-batch CI and final cross-system gate** passed exact-head [run #43197720043](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43197720043). Existing physical player/NPC/merchant property can be described by the GM without minting items, funds, title or compelled assent.
