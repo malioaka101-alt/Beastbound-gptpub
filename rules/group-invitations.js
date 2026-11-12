@@ -5,7 +5,7 @@
 const E=require('../engine.js'),C=require('./core'),W=require('./world'),
  Health=require('./unified'),Realm=require('../world/simulation'),
  G=require('../world/emergent-groups'),Agency=require('../world/group-member-agency'),
- People=require('../world/person-presence');
+ People=require('../world/person-presence'),A=require('../world/atlas');
 const MINUTES=18;
 function fields(p,allowed,needed=allowed){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -191,6 +191,140 @@ function taskRequest(s,p={}){
   noForcedDuty:true,noMemberFees:true,
   noNewMoneyOrLegalOffice:true};
 }
+
+/*
+ * A founder can initiate one real local conversation, but cannot select
+ * either independent NPC's answer. The already accepted volunteer coordinator
+ * first freely decides whether to issue an open-ended invitation; only then
+ * can the second actual member freely consider it. Neither decision creates
+ * completed work, a salary, a government office or treasury control.
+ */
+function coordinatorTaskRequest(s,p={}){
+ fields(p,['groupId','coordinatorNpcId','memberNpcId','task','untilDay']);
+ const task=phrase(p.task),w0=Realm.peek(s),
+  startDay=Math.floor(s.world.minutes/1440),
+  place=s.world.location,
+  e0=G.lookup(w0,p.groupId),
+  coordinator=e0?G.coordinatorStatus(w0,e0.id,{day:startDay}):null,
+  issuer=People.resolve(w0,p.coordinatorNpcId,place,startDay),
+  recipient=People.resolve(w0,p.memberNpcId,place,startDay),
+  issuerMember=e0?.additionalMembers?.find(x=>
+   x.active!==false&&x.actorId===issuer?.actorId),
+  recipientMember=e0?.additionalMembers?.find(x=>
+   x.active!==false&&x.actorId===recipient?.actorId),
+  role=e0?.coordinationMandates?.find(x=>x.id===coordinator?.mandateId);
+ if(!e0||e0.origin!=='player-declaration'||
+  e0.founder.name!==s.player?.name||
+  !role||!role.agreed||
+  coordinator.actorId!==issuerMember?.actorId||
+  !issuer||!recipient||!issuerMember||!recipientMember||
+  issuerMember.actorId===recipientMember.actorId||
+  ![issuer,recipient].every(x=>x.location===place))
+  throw Error('A genuine currently serving voluntary coordinator and a different consenting member must both actually be present');
+ if(typeof p.task!=='string'||p.task.trim().length<30||p.task.length>750)
+  throw Error('A real freely described work opportunity is needed, not a fixed mandated task');
+ if(!Number.isInteger(p.untilDay)||p.untilDay<startDay||
+  p.untilDay>10000000)
+  throw Error('The proposed optional opportunity needs an actual later expiry day');
+ if(s.battle||s.encounter||
+  s.table?.combatants?.player?.status&&
+   s.table.combatants.player.status!=='ok')
+  throw Error('An urgent encounter prevents this considered voluntary group discussion');
+ if((e0.voluntaryTasks||[]).some(x=>
+  x.memberActorId===recipientMember.actorId&&x.day===startDay))
+  throw Error('This person has already considered an optional association work request today');
+ const endDay=Math.floor((s.world.minutes+20)/1440);
+ if(role.untilDay<endDay||p.untilDay<endDay||
+  !People.resolve(w0,p.coordinatorNpcId,place,endDay)||
+  !People.resolve(w0,p.memberNpcId,place,endDay))
+  throw Error('Both actual members and their voluntarily accepted coordination must last through the conversation');
+ const beforeMinute=s.world.minutes;
+ E.advance(s,20);W.finalizeTime(s,beforeMinute);
+ Health.sync(s,{source:'legacy'});
+ const w=Realm.ensure(s),e=G.lookup(w,p.groupId),
+  day=Math.floor(s.world.minutes/1440),minute=s.world.minutes,
+  actualIssuer=People.resolve(w,p.coordinatorNpcId,place,day),
+  actualRecipient=People.resolve(w,p.memberNpcId,place,day),
+  active=e?G.coordinatorStatus(w,e.id,{day}):null,
+  actualRole=e?.coordinationMandates?.find(x=>x.id===role.id);
+ if(!e||!actualIssuer||!actualRecipient||
+  active.mandateId!==role.id||
+  actualRole?.sourceHash!==role.sourceHash||
+  !e.additionalMembers.some(x=>
+   x.active!==false&&x.actorId===issuerMember.actorId&&
+   x.hash===issuerMember.hash)||
+  !e.additionalMembers.some(x=>
+   x.active!==false&&x.actorId===recipientMember.actorId&&
+   x.hash===recipientMember.hash))
+  throw Error('The original limited mandate and both distinct actual consenting people must remain present');
+ const t=Agency.ensure(w),agencyBefore=t.rngState,
+  scopeOverlap=Math.min(4,Agency._debug.common(actualRole.scope,task)),
+  context={scopeOverlap,groupStatusAtOffer:e.status,
+   groupCompletedEfforts:e.completedEfforts,
+   groupFailedEfforts:e.failedEfforts},
+  issuerChance=G.coordinatorTaskOfferChance(context),
+  issuerDraw=Agency.draw(t),issuerAgreed=issuerDraw<issuerChance,
+  recipientChance=issuerAgreed?G.voluntaryTaskChance(context):null,
+  recipientDraw=issuerAgreed?Agency.draw(t):null,
+  decision=!issuerAgreed?'not-offered':
+   recipientDraw<recipientChance?'accepted':
+   recipientDraw<Math.min(.92,recipientChance+.25)?
+    'considering':'declined';
+ const id='group_coordtask_'+G.hash({
+  groupId:e.id,mandateId:role.id,
+  recipientActorId:recipientMember.actorId,minute,task}).slice(0,23);
+ const regionId=A.LOCATION_REGION[place];
+ if(!A.R[regionId]||A.R[regionId].polity!==e.polity)
+  throw Error('A local jurisdiction cannot be inferred from a fictional place');
+ const details={origin:G.COORDINATOR_TASK,id,
+  groupId:e.id,groupOriginHash:e.originHash,
+  originalFounder:e.founder.name,
+  mandateId:role.id,mandateSourceHash:role.sourceHash,
+  issuerActorId:issuerMember.actorId,
+  issuerMembershipHash:issuerMember.hash,
+  issuerName:issuerMember.name,issuerNpcId:p.coordinatorNpcId,
+  memberActorId:recipientMember.actorId,
+  memberConsentHash:recipientMember.hash,
+  memberName:recipientMember.name,npcId:p.memberNpcId,
+  issuerPresenceHash:actualIssuer.presence?
+   G.hash(actualIssuer.presence):null,
+  recipientPresenceHash:actualRecipient.presence?
+   G.hash(actualRecipient.presence):null,
+  issuerWasPresent:true,recipientWasPresent:true,founderWasPresent:true,
+  place,regionId,day,minute,minutes:20,
+  untilDay:p.untilDay,roleScope:role.scope,task,...context,
+  issuerChance,issuerDraw,issuerAgreed,
+  recipientChance,recipientDraw,decision,
+  agencyBefore,agencyAfter:t.rngState,
+  noCompulsoryWork:true,noAutomaticPayOrStatus:true,
+  noNewWorkResult:true,noNewGroupFundsSpent:true,
+  noPublicOfficeOrTreasuryPower:true,
+  noPlayerSelectedNpcAnswers:true};
+ C.event(s,'story',
+  s.player.name+' asks whether the existing volunteer coordinator '+
+  issuerMember.name+' wishes to discuss a possible task with '+
+  recipientMember.name+'. The coordinator independently '+
+  (issuerAgreed?'makes the optional request':'does not offer the task')+
+  (issuerAgreed?'; the other member independently responds '+decision+'.':'.'),
+  details);
+ const result=G.recordVoluntaryTask(w,e.id,
+  structuredClone(s.log.at(-1)));
+ Agency._debug.logDecision(w,t,e,day,p.memberNpcId,decision,{
+  source:'witnessed-original-independent-coordinator-work-request',
+  coordinatorActorId:issuerMember.actorId,
+  issuerAgreed,taskId:result.taskId,
+  sourceHash:G.hash(s.log.at(-1)),
+  noCompelledWorkOrNewGroupMoney:true});
+ return {discussed:true,groupId:e.id,
+  coordinatorActorId:issuerMember.actorId,
+  memberActorId:recipientMember.actorId,
+  taskId:result.taskId,task,issuerAgreed,
+  decision,memberAccepted:result.accepted,
+  minutes:20,untilDay:p.untilDay,
+  noCompulsoryWork:true,noGuaranteedWork:true,
+  noInventedFundsOrPower:true};
+}
+
 function taskStatus(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')
@@ -207,4 +341,4 @@ function taskStatus(s,p={}){
   note:'Independent member responses are real; a request cannot force labor, funds, a task outcome, an office or a contract.'};
 }
 
-module.exports={invitation,status,taskRequest,taskStatus};
+module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus};
