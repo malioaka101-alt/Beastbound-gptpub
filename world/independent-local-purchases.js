@@ -85,7 +85,7 @@ function verifyOne(w,row){
   q.sellerId!=='otto'||q.sellerName!==E.NPCS.otto.name||
   q.sellerRegionId!=='morrowfen_basin'||q.sellerLocation!=='crossing'||
   q.item!=='clean_rations'||q.quantity!==1||
-  !Number.isInteger(q.day)||q.day<6||q.day>w.lastTickDay+15||
+  !Number.isInteger(q.day)||q.day<1||q.day>w.lastTickDay+15||
   !Number.isInteger(q.originalSixdayNumber)||q.originalSixdayNumber<1||
   q.originalSixdayNumber>w.ticks.sixdays||
   q.personCashAfter!==q.personCashBefore-q.paidPriceScales||
@@ -156,7 +156,7 @@ function buy(w,p,day){
   merchant.item!=='clean_rations'||merchant.location!=='crossing'||
   !People.verify(w,p)||p.status!=='active'||
   p.regionId!==merchant.regionId||p.lastTickDay!==day||
-  !Number.isInteger(day)||day<6||
+  !Number.isInteger(day)||day<1||
   !Number.isInteger(w.ticks?.sixdays)||w.ticks.sixdays<1||
   day<=w.lastTickDay||day>w.lastTickDay+15||
   !People.presence(w,p.actorId,'crossing',day)||
@@ -219,7 +219,7 @@ function buy(w,p,day){
   hiddenIndependentPurchaseNotAutomaticallyPublic:true};
 }
 function sixday(w,day){
- if(!Number.isInteger(day)||day<6||day<=w.lastTickDay||
+ if(!Number.isInteger(day)||day<1||day<=w.lastTickDay||
   !verify(w))throw Error('Only the real current original sixday can settle independent retail trade');
  const buyerList=Object.values(w.emergentPeople?.people||{})
   .filter(x=>x.regionId==='morrowfen_basin'&&
