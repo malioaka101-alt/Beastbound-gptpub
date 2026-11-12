@@ -178,7 +178,8 @@ function discussPurpose(s,p={}){
   person.name!==member.name||
   (e.purposeResponses||[]).some(x=>
    x.memberActorId===member.actorId&&
-   x.revisionId===revision.id&&x.day===currentDay))
+   x.revisionId===revision.id&&x.day===currentDay&&
+   x.stance!=='unaware'))
   throw Error('A genuine present member may individually discuss a real current declaration once per original conversation day');
  const oldMinute=s.world.minutes,place=s.world.location,
   endDay=Math.floor((oldMinute+18)/1440);
