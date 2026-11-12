@@ -4,6 +4,14 @@
 
 ## How to use this checklist
 
+## #19 actual source-funded independent local resident buying DRAFT (12 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN, #19 ACTIVE OPEN.** [PR #87](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/87), real independently expressed local public goods interest with no imaginary buyer cash, passed **204/204** complete exact-head three-batch regression plus final gate ([CI #43223937265](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43223937265)), merged `72932aace515b2265f6fc648492d7daf45108c07`.
+
+**Next isolated #19 draft:** `foundation/source-funded-independent-local-purchases-20261112` adds an actual optional, source-backed real NPC ration transaction that conserves the *same actual finite* Scales and rations. Real original independent resident earned genuine locally paid cash through successful existing source-verified work, and previously independently expressed local grain/feed interest. Independently chosen local purchase requires present person, real funded wages, existing merchant ration inventory and current sourced quoted price. One sale debits worker cash, credits existing merchant Scales and transfers one actual ration into the *existing* original material custody record, available for genuine later independent consumption, without new buyer, salary, credit, player loot, item source, or universal market formula. Source ledger reconciles cross party and shared material custody, with no hidden customer information leaked to player. New `tests/economy-independent-funded-real-local-purchase.test.js` joins complete **205** tests, three batches and final integration, exact-head **CI PENDING**. Details in `docs/REAL_INDEPENDENT_FUNDED_LOCAL_PURCHASES.md`. Continue wider cultures/species/region/production and labour depth; do NOT mark #19 complete yet.
+
+
+
 ## #19 independent source-backed living regional demand draft (12 November 2026)
 
 **17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** Prior [PR #86](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/86) passed **203/203** full exact-head original regression + final gate ([CI #43219795030](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43219795030)) and was merged `da64eaa93b8d9c503793bd414e20c6f186812abd`, source-linking authentic regional corridor interruptions to physical wholesale limits with no invented total local blockade.
