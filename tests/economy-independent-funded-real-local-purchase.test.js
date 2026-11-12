@@ -9,7 +9,9 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  People=require('../world/emergent-people'),
  Careers=require('../world/person-careers'),
  Demand=require('../world/independent-regional-demand'),
- Market=require('../world/independent-local-purchases');
+ Market=require('../world/independent-local-purchases'),
+ Scarcity=require('../rules/original-local-market-scarcity'),
+ PaidDemand=require('../rules/original-paid-demand-price');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const DAY=1440;
 function fixture(seed=994821,count=72){
@@ -140,6 +142,25 @@ function fixture(seed=994821,count=72){
  A.equal(Market.verifyPersonal(p).valid,true);
  A.equal(Market.verifyPersonal(p).spentScales,q.paidPriceScales);
  A.equal(Careers.verifyLocalTradePayments(w),true);
+ A.equal(Market.verify(w),true);
+ // This verified and FINANCED transaction — never an unfunded request —
+ // creates one seller-specific paid-demand signal for future quotes.
+ const nextQuote=Scarcity.observe(w,seller),demand=nextQuote.source.originalPaidDemand,
+  previousQuote=q.priceSource;
+ A.equal(demand.realFundedBuyerSalesCount,1);
+ A.equal(demand.originalSellerSpecificMarkupPct,6);
+ A.equal(demand.genuineSellerPaidSales[0].sourceHash,row.sourceHash);
+ A.equal(demand.genuineSellerPaidSales[0].paidOriginalScales,q.paidPriceScales);
+ A.equal(PaidDemand.validate(demand,nextQuote.source.originalPaidDemandHash),true);
+ A.equal(PaidDemand.backedByActualSeller(w,demand),true);
+ A.equal(Scarcity.verify(nextQuote.source,nextQuote.sourceHash,
+  nextQuote.source.actualQuotedPriceScales,seller.stock),true);
+ A.equal(previousQuote.originalPaidDemand.realFundedBuyerSalesCount,0,
+  'earlier witnessed customer price remains history, even after real later sale');
+ A.equal(Scarcity.verify(previousQuote,q.priceSourceHash,
+  q.paidPriceScales,q.sellerStockBefore),true);
+ A.ok(nextQuote.source.actualQuotedPriceScales>q.paidPriceScales,
+  'a completed and genuinely paid local sale creates an appropriate future quote premium');
  A.equal(Market.verify(w),true);
  A.equal(s.player.coins,beforePlayerCoins,
   'real NPC shopping does not pay the player or change player-owned Scales');
