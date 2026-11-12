@@ -70,6 +70,8 @@ jobs:
           node tests/live-provisioner-trade.test.js
           node tests/economy-original-scarcity-market-quotations.test.js
           node tests/economy-voluntary-original-merchant-worker-terms.test.js
+          node tests/economy-original-wholesale-transport-disruptions.test.js
+          node tests/trade-original-interstate-corridor-history.test.js
           node tests/living-career-real-merchant-payments.test.js
           node tests/source-parity.test.js
           node tests/source-coverage.test.js
