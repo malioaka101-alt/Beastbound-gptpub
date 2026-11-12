@@ -48,11 +48,142 @@ function draw(t){
  let x=t.rngState>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;
  t.rngState=(x>>>0)||0x4521d639;return t.rngState/4294967296;
 }
+/*
+ * A group's founding charter is historical evidence, not a frozen list of
+ * everything it will ever attempt. Evolving PUBLIC PURPOSE is a separately
+ * dated declaration, never a rewritten founding witness, compelled member
+ * obligation, new public office, work result or money transfer.
+ *
+ * A small starting group uses a genuine founder's own scene. Other authored
+ * independent institutions can use a trusted, source-checking world adapter.
+ * New purposes are free text, not one of a fixed set of guild/faction types.
+ */
+const PURPOSE_SOURCE='witnessed-original-founder-restates-association-purpose-v1';
+const PURPOSE_ADAPTERS=new Map();
+function registerPurposeRevisionAdapter(origin,check){
+ if(typeof origin!=='string'||!/^[a-z][a-z0-9_-]{5,79}$/.test(origin)||
+  origin===PURPOSE_SOURCE||PURPOSE_ADAPTERS.has(origin)||
+  typeof check!=='function')
+  throw Error('An independent group purpose source requires its own trusted evidence verifier');
+ PURPOSE_ADAPTERS.set(origin,check);
+}
+function verifyPurposeHistory(e){
+ if(e.purposeHistory===undefined)return true; // older genuine saves
+ if(!Array.isArray(e.purposeHistory))return false;
+ let previous=e.charter.duty,priorHash=e.originHash,priorMinute=-1;
+ const ids=new Set();
+ for(const row of e.purposeHistory){
+  const q=row?.source,ev=q?.witness,details=ev?.details;
+  if(!q||row.origin!==q.origin||row.sourceHash!==hash(q)||
+   row.id!==q.id||ids.has(row.id)||
+   q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+   q.priorHash!==priorHash||q.priorPurpose!==previous||
+   row.purpose!==q.purpose||row.day!==q.day||
+   row.minute!==q.minute||row.releaseDay!==q.day+2||
+   !Number.isInteger(q.minute)||q.minute<=priorMinute||
+   !Number.isInteger(q.day)||q.day<e.foundedDay||
+   q.day!==Math.floor(q.minute/1440)||
+   typeof q.actorId!=='string'||!q.actorId.trim()||
+   typeof q.actorName!=='string'||!q.actorName.trim()||
+   typeof q.purpose!=='string'||q.purpose.trim()!==q.purpose||
+   q.purpose.length<12||q.purpose.length>750||
+   q.purpose===previous||
+   typeof q.reason!=='string'||q.reason.trim()!==q.reason||
+   q.reason.length<10||q.reason.length>600||
+   q.noMembersCompelled!==true||q.noLegalOfficeOrWorkGranted!==true||
+   q.noResourceChanges!==true||
+   !ev||hash(ev)!==q.witnessHash)
+   return false;
+  if(q.origin===PURPOSE_SOURCE){
+   if(e.origin!=='player-declaration'||
+    q.actorId!==e.founder.actorId||q.actorName!==e.founder.name||
+    ev.type!=='story'||details?.origin!=='declared-group-purpose-change'||
+    details.groupId!==e.id||details.actor!==e.founder.name||
+    details.previousPurpose!==previous||
+    details.purpose!==q.purpose||details.reason!==q.reason||
+    details.minute!==q.minute||details.day!==q.day||
+    details.minutes!==25||details.otherMembersBound!==false||
+    details.legalAuthorityGranted!==false||
+    details.workCompleted!==false||details.moneyTransferred!==false)
+    return false;
+  }else if(!PURPOSE_ADAPTERS.has(q.origin)||
+   PURPOSE_ADAPTERS.get(q.origin)(e,q,ev)!==true){
+   return false;
+  }
+  ids.add(row.id);priorMinute=q.minute;
+  priorHash=row.sourceHash;previous=q.purpose;
+ }
+ return true;
+}
+function currentPurpose(e,{day=Infinity}={}){
+ if(!e||!verifyPurposeHistory(e))throw Error('Group purpose history lacks original verified evidence');
+ const rows=(e.purposeHistory||[]).filter(x=>x.releaseDay<=day);
+ return rows.length?rows.at(-1).purpose:e.charter.duty;
+}
+function purposeHistoryStatus(w,groupId,{day}={}){
+ const e=lookup(w,groupId),today=day===undefined?w.lastTickDay:day;
+ if(!e||!Number.isInteger(today)||today<e.foundedDay)
+  throw Error('An existing valid group and observed world day are needed');
+ const rows=(e.purposeHistory||[]).filter(x=>x.day<=today);
+ return {groupId:e.id,name:e.charter.name,
+  foundingPurpose:e.charter.duty,
+  founderDeclarationNow:rows.length?rows.at(-1).purpose:e.charter.duty,
+  publiclyReleasedPurpose:currentPurpose(e,{day:today}),
+  revisions:rows.map(x=>({id:x.id,day:x.day,actor:x.source.actorName,
+   declaredPurpose:x.purpose,reason:x.source.reason,
+   publicReleaseDay:x.releaseDay,sourceHash:x.sourceHash})),
+  notMemberConsensus:true,noNewLegalRights:true,noCompletedWork:true,
+  noAdditionalFunds:true};
+}
+function revisePurposeFromEvidence(w,groupId,{origin,actorId,actorName,
+ purpose,reason,minute,witness}={}){
+ const e=lookup(w,groupId),r=ensure(w);
+ if(!e||!Number.isInteger(minute)||minute<0||
+  typeof origin!=='string'||typeof actorId!=='string'||
+  typeof actorName!=='string'||!actorName.trim()||
+  typeof purpose!=='string'||purpose.trim()!==purpose||
+  purpose.length<12||purpose.length>750||
+  typeof reason!=='string'||reason.trim()!==reason||
+  reason.length<10||reason.length>600||
+  !witness||typeof witness!=='object'||
+  (origin!==PURPOSE_SOURCE&&!PURPOSE_ADAPTERS.has(origin)))
+  throw Error('A real verified original association and new freeform purpose witness are required');
+ const rows=e.purposeHistory||[],prior=rows.at(-1),
+  priorPurpose=prior?.purpose||e.charter.duty,
+  priorHash=prior?.sourceHash||e.originHash,day=Math.floor(minute/1440);
+ if(day<e.foundedDay||minute<0||purpose===priorPurpose||
+   (prior&&minute<=prior.minute))
+  throw Error('An actual later change in the founding group purpose is required');
+ const q0={origin,groupId:e.id,groupOriginHash:e.originHash,
+  priorHash,priorPurpose,actorId,actorName,
+  purpose,reason,day,minute,witness:structuredClone(witness),
+  witnessHash:hash(witness),
+  noMembersCompelled:true,noLegalOfficeOrWorkGranted:true,
+  noResourceChanges:true};
+ const id='purpose_'+hash({groupId,priorHash,minute,purpose}).slice(0,24),
+  source={...q0,id},
+  row={id,origin,purpose,day,minute,releaseDay:day+2,
+   source,sourceHash:hash(source)};
+ e.purposeHistory||=[];e.purposeHistory.push(row);
+ if(!validate(e)){
+  e.purposeHistory.pop();
+  throw Error('A forged declaration cannot change saved institutional history');
+ }
+ record(r,e,day,'founder-purpose-declaration-changed',
+  {revisionId:id,actorId,originalCharterPreserved:true,
+   publicReleaseDay:row.releaseDay,noOtherMembersBound:true},null);
+ return {groupId:e.id,revisionId:id,foundingPurpose:e.charter.duty,
+  newlyDeclaredPurpose:purpose,publicReleaseDay:row.releaseDay,
+  noOtherMembersBound:true,noLegalOfficeOrFundsGranted:true,
+  noWorkSuccessClaim:true};
+}
+
 function validate(e){
  if(!e||!(TYPES.has(e.origin)||ADAPTERS.has(e.origin))||!Atlas.P[e.polity]||
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
   !Number.isInteger(e.foundedDay)||e.foundedDay<0)return false;
+ if(!verifyPurposeHistory(e))return false;
  if(e.treasuryAudit!==undefined&&!verifyTreasuryAudit(e))return false;
  if(e.voluntaryTasks!==undefined&&
   (!Array.isArray(e.voluntaryTasks)||
@@ -731,7 +862,7 @@ function month(w,day,emit){
      decisionDraw:x,chance,
      originalActionHashes:attempts.map(a=>a.hash)},
     emit,success?
-     e.charter.name+' reports a limited, independently checked contribution toward '+e.charter.duty+
+     e.charter.name+' reports a limited, independently checked contribution toward '+currentPurpose(e)+
       '. No family rank, inherited power or legal office follows.':null);
    if(cost>0)addTreasuryReceipt(e,{
     kind:'original-independent-work-cost',day,amount:cost,
@@ -1795,7 +1926,8 @@ function visible(s,w){
    e.founder.name===s.player?.name));
  return {polity:Atlas.P[id]?.name||null,groups:entries.map(e=>({
   id:e.id,name:e.charter.name,kind:e.charter.kind,
-  founder:e.founder.name,purpose:e.charter.duty,
+  founder:e.founder.name,purpose:currentPurpose(e,{day:
+   e.origin==='player-declaration'&&e.founder.name===s.player?.name?Infinity:day}),
   memberCount:e.origin==='worker-spinoff'?e.members:
    e.founder.name===s.player?.name?reportedMemberCount(e,day):null,
   status:e.status,
@@ -1805,6 +1937,8 @@ function visible(s,w){
   note:'A charter is not automatically a noble family or a verified bloodline. Other named members require real individual consent; future groups are not limited to the initial atlas.'};
 }
 module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,lookup,
+ PURPOSE_SOURCE,registerPurposeRevisionAdapter,verifyPurposeHistory,
+ currentPurpose,purposeHistoryStatus,revisePurposeFromEvidence,
  registerOriginAdapter,registerFromEvidence,registerMemberConsentAdapter,
  registerMemberDepartureAdapter,admitMemberFromEvidence,departMemberFromEvidence,
  reportedMemberCount,createPlayer,syncWorkerFounders,month,visible,record,
