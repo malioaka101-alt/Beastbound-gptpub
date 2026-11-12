@@ -4,6 +4,14 @@
 
 ## How to use this checklist
 
+## Current priority — #19 property and deep economy (12 November 2026)
+
+**17/25 accepted.** On the player's explicit direction, **#18 Organisational and political depth is PAUSED OPEN**, not accepted as completed. Existing accepted source-grounded 198/198 regression code remains on main; the unfinished `foundation/independent-original-diplomatic-envoy-appointments-20261112` branch remains unmerged and must not be treated as playable canon. When resuming #18, ground independent politics in the original living cultures, ideology, historical philosophies, beliefs, species, magic, economic pressures, legitimate authority, competing individual loyalties, and freeform world development. No universal envoy/minister list or fixed ideology menu may limit the GM.
+
+**#19 Property, production and deep economy is now ACTIVE OPEN.** First isolated source-linked slice: an original actually owned physical item may receive a GM-authored descriptive property observation in the **existing** player inventory / actual voluntary NPC custody / local merchant stock without creating resources, cash, sovereignty or guessed consent. Original independent consumption and real sales continue to govern present ownership; attested history stays historical, and private holdings stay private. Test `tests/economy-existing-owned-material-assets.test.js` is automatically included in the full **199-test three-batch suite**, **exact-head CI NOT YET VERIFIED**. See `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`. Remaining #19 work: sustainable materials-to-output production, assets beyond current items, genuinely sourced wages and contracts, transport and regional demand, independent tick consequences. Do not prematurely check #19.
+
+
+
 The **Game Master** chooses/creates cosmology, culture, people, histories, powers, events and scenes in imaginative prose, limited by the original Master Prompt and established facts. The **engine** is the mechanical/continuity worker: it records real identities, laws, ownership, sources, time, limits, independent changes, rolls and consequences. The GM supplies examples and starting facts, **not a fixed cap or a prefab roster**. Never design a new subsystem when an existing living-world, mythic, ecology, person, bond, law, career, resource or character record can be extended. Never turn a character's established pre-game biography into a permission roll. 
 
 Each item is checked only when an **expandable, connected, persisted, engine-verified foundation** exists and tests demonstrate that it can create, develop, inspect and maintain instances across real saves. A handful of seeded examples are **illustrations**, not exhaustive content. Detailed mastery beyond a foundation remains future work; record known limitations. Work sequentially, beginning at #01, and update this checklist with commit/CI evidence. Do not pre-emptively tick untested work.

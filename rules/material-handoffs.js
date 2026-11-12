@@ -176,4 +176,185 @@ function sixday(w,day){
   if(a.history.length>90)a.history.shift();
  }
 }
-module.exports={ORIGIN,offer,status,sixday};
+
+/*
+ * #19 — an original GM-authored freeform description can be attached to
+ * ACTUALLY OWNED finite material without creating it. The source of each
+ * registered fact is the original inventory, a real voluntary accepted
+ * person-to-person handoff, or the existing merchant-owned local stock.
+ * These are witnessed property observations, NOT arbitrary legal deeds:
+ * later consumption, trade or another person's wishes remain independent.
+ *
+ * This intentionally extends the original physical custody system instead
+ * of creating a new shop, item currency, or default economic profession.
+ */
+const ASSET_ORIGIN='witnessed-existing-material-owner-and-stock-attestation-v1';
+const STOCK_OWNER='merchant:otto';
+function ownerStock(s,ownerId,item,{requireLocal=false}={}){
+ const w=Realm.peek(s),day=Math.floor(s.world.minutes/DAY);
+ if(!Object.hasOwn(E.RESOURCES,item))
+  throw Error('Only an actually existing material may be documented as owned');
+ if(ownerId==='player'){
+  const n=s.player.inventory?.[item]??0;
+  C.int(n,'actual player-owned material',0,100000);
+  return {kind:'player-inventory',count:n,
+   source:'saved original physically owned player inventory',
+   ownerName:s.player.name,originalRoot:hash({
+    source:'character-existing-inventory',seed:s.seed,
+    character:s.player.name})};
+ }
+ if(ownerId===STOCK_OWNER){
+  const v=w.localProvisioner;
+  if(!v||v.origin!=='established-reedmarch-provisions-v1'||
+   v.sellerNpcId!=='otto'||v.item!==item||
+   v.location!=='crossing'||v.regionId!=='morrowfen_basin')
+   throw Error('Only genuine existing merchant-owned stock can be observed');
+  if(requireLocal&&(s.world.location!==v.location||
+   !Presence.localStatus(s,w).people.some(x=>x.npcId==='otto')))
+   throw Error('Merchant stock cannot be viewed without genuine local presence');
+  C.int(v.stock,'actual merchant-owned stock',0,100000);
+  return {kind:'original-merchant-stock',count:v.stock,
+   source:'original independent local provisioner owned stock',
+   ownerName:v.seller,originalRoot:hash({
+    origin:v.origin,founding:v.founding,sellerNpcId:v.sellerNpcId,
+    location:v.location,item:v.item})};
+ }
+ if(typeof ownerId!=='string'||!ownerId.startsWith('npc:'))
+  throw Error('The owner must be the real character, established merchant or known real recipient');
+ const npcId=ownerId.slice(4),npc=Presence.identity(w,npcId),
+  holdings=w.materialCustody?.accounts?.[npcId];
+ if(!npc||!holdings)
+  throw Error('Only an actual sourced independently owning person may be documented');
+ validateAccount(holdings,npcId);
+ if(requireLocal&&(s.world.location!==npc.location&&
+  !Presence.resolve(w,npcId,s.world.location,day)||
+  !Presence.localStatus(s,w).people.some(x=>x.npcId===npcId)))
+  throw Error('Private recipient goods cannot be documented without actual presence');
+ const receipts=(s.table?.personalMaterialOffers||[]).filter(x=>
+  x.npcId===npcId&&x.item===item&&x.accepted&&
+  x.quantityMoved===1&&x.hash===hash(Object.fromEntries(
+   Object.entries(x).filter(([k])=>k!=='hash'))));
+ if(!receipts.length)
+  throw Error('A real independently accepted original handoff is required to establish known person-owned material');
+ const count=holdings.held[item]??0;
+ C.int(count,'existing person-owned material',0,100000);
+ return {kind:'original-accepted-person-handoff',count,
+  source:'original source-witnessed independent-person material acceptance',
+  ownerName:npc.name,originalRoot:receipts[0].hash,
+  referenceReceipt:receipts[0].hash};
+}
+function verifyAssetAttestations(s){
+ const records=s.table?.materialAssetAttestations;
+ if(records===undefined)return true;
+ if(!Array.isArray(records)||records.length>500)return false;
+ const seen=new Set();let previousMinute=-1;
+ for(const row of records){
+  const q=row?.source;
+  if(!q||row.hash!==hash(q)||row.id!==q.id||
+   q.origin!==ASSET_ORIGIN||
+   row.id!=='physical_asset_'+hash({
+    ownerId:q.ownerId,item:q.item,description:q.description,
+    minute:q.minute,quantity:q.quantity}).slice(0,25)||
+   seen.has(row.id)||
+   row.ownerId!==q.ownerId||row.item!==q.item||
+   row.quantity!==q.quantity||
+   !Object.hasOwn(E.RESOURCES,q.item)||
+   typeof q.description!=='string'||
+   q.description.trim()!==q.description||
+   q.description.length<20||q.description.length>450||
+   !Number.isInteger(q.quantity)||q.quantity<1||
+   q.quantity>100000||
+   !Number.isInteger(q.physicalStockAtWitness)||
+   q.physicalStockAtWitness<q.quantity||
+   q.physicalStockAtWitness>100000||
+   !Number.isInteger(q.minute)||q.minute<previousMinute||
+   q.day!==Math.floor(q.minute/DAY)||
+   typeof q.ownerName!=='string'||!q.ownerName||
+   typeof q.originalRoot!=='string'||q.originalRoot.length!==64||
+   q.noNewPhysicalStock!==true||
+   q.noLegalTitleOrForcedConsent!==true||
+   q.noCurrencyOrGuaranteedProduction!==true)
+   return false;
+  try{
+   const owner=ownerStock(s,q.ownerId,q.item);
+   if(owner.kind!==q.ownerKind||owner.originalRoot!==q.originalRoot||
+    owner.ownerName!==q.ownerName)return false;
+  }catch{return false;}
+  seen.add(row.id);previousMinute=q.minute;
+ }
+ return true;
+}
+function attestAsset(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).sort().join('|')!=='description|item|ownerId|quantity')
+  throw Error('Actual material ownership attestation accepts only an owner, sourced physical item, quantity and freeform GM description');
+ if(typeof p.description!=='string'||p.description.trim()!==p.description||
+  p.description.length<20||p.description.length>450)
+  throw Error('A meaningful freeform physical asset description is necessary, not an invented legal deed or quality award');
+ C.int(p.quantity,'physically attested material quantity',1,100000);
+ if(!verifyAssetAttestations(s))
+  throw Error('The existing source-backed physical asset journal has been altered');
+ const owner=ownerStock(s,p.ownerId,p.item,{requireLocal:true});
+ if(owner.count<p.quantity)
+  throw Error('Property documentation cannot create unowned items or exceed actual owner stock');
+ const minute=s.world.minutes,q={
+  origin:ASSET_ORIGIN,ownerId:p.ownerId,item:p.item,
+  ownerKind:owner.kind,ownerName:owner.ownerName,
+  originalRoot:owner.originalRoot,
+  minute,day:Math.floor(minute/DAY),
+  quantity:p.quantity,physicalStockAtWitness:owner.count,
+  description:p.description,
+  noNewPhysicalStock:true,noLegalTitleOrForcedConsent:true,
+  noCurrencyOrGuaranteedProduction:true};
+ q.id='physical_asset_'+hash({ownerId:q.ownerId,item:q.item,
+  description:q.description,minute:q.minute,quantity:q.quantity}).slice(0,25);
+ const row={id:q.id,ownerId:q.ownerId,item:q.item,
+  quantity:q.quantity,source:q,hash:hash(q)};
+ const existing=s.table?.materialAssetAttestations||[];
+ if(existing.some(x=>x.id===row.id))
+  throw Error('An unchanged physical asset observation cannot be double recorded');
+ s.table||={};s.table.materialAssetAttestations||=[];
+ s.table.materialAssetAttestations.push(row);
+ if(!verifyAssetAttestations(s)){
+  s.table.materialAssetAttestations.pop();
+  throw Error('An asset observation must remain consistent with its original owner');
+ }
+ return {documented:true,id:row.id,ownerId:p.ownerId,
+  ownerName:owner.ownerName,item:p.item,quantity:p.quantity,
+  description:p.description,sourceHash:row.hash,
+  actualStockUnchanged:true,noNewGoodsOrCurrency:true,
+  noLegalTitleOrCompulsoryAgreement:true};
+}
+function assetStatus(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).some(k=>k!=='ownerId')||
+  p.ownerId!==undefined&&typeof p.ownerId!=='string')
+  throw Error('Physical assets can only be inspected by a source-known owner identity');
+ if(!verifyAssetAttestations(s))
+  throw Error('Original physical owner history failed reconciliation');
+ const journal=s.table?.materialAssetAttestations||[];
+ const ownerId=p.ownerId;
+ const rows=journal.filter(x=>ownerId===undefined||x.ownerId===ownerId)
+  .map(x=>{
+   const q=x.source;
+   const owner=ownerStock(s,q.ownerId,q.item);
+   // A previous snapshot remains valid history even when goods were
+   // consumed, sold, handed away or replenished. Never imply a hidden
+   // person's exact private stock from an earlier witnessed receipt.
+   return {id:x.id,ownerId:x.ownerId,ownerName:q.ownerName,
+    description:q.description,item:x.item,
+    quantityAtOriginalWitness:q.quantity,
+    day:q.day,sourceHash:x.hash,
+    ...(q.ownerId==='player'?
+     {currentlyCarried:owner.count,stillHasAtLeastQuantity:
+      owner.count>=q.quantity}:{
+       currentPrivateHoldingNotDisclosed:true}),
+    legalTitleNotEstablished:true,
+    materialNotCreated:true};
+  });
+ return {knownOwnedPhysicalMaterialObservations:rows.slice(-40),
+  note:'Actual original physical stock and witnessed acceptance govern custody. Descriptions register observations, not duplicate goods, enforce contracts or grant new ownership. People may independently use or move their possessions; old attestations remain historical.'};
+}
+
+module.exports={ORIGIN,ASSET_ORIGIN,offer,status,sixday,
+ attestAsset,assetStatus,verifyAssetAttestations};
