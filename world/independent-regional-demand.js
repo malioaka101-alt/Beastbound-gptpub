@@ -209,4 +209,4 @@ function publicLocal(s,w){
    confirmedOrder:false,confirmedBuyerFunds:false,
    noSaleOrTransfer:true}));
 }
-module.exports={ORIGIN,LEDGER,sixday,verify,publicLocal};
+module.exports={ORIGIN,LEDGER,sixday,verify,verifyOne,publicLocal};
