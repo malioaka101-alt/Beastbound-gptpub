@@ -147,6 +147,18 @@ function verify(w){
  for(const p of Object.values(w.emergentPeople?.people||{}))
   for(const row of p.independentMarketPurchases||[])
    if(!seen.has(row.id))return false;
+ // Also check the other direction: NO forged 'paid purchase' can be
+ // inserted into the existing personal material-custody account without
+ // the same actual seller-funded sale. This remains true after the
+ // rolling independent-use journal has pruned old events.
+ const sales=new Set(rows.map(x=>x.sourceHash));
+ for(const [actorId,acct] of Object.entries(w.materialCustody?.accounts||{}))
+  for(const receipt of acct.purchaseReceipts||[])
+   if(receipt.actorId!==actorId||
+    !sales.has(receipt.purchaseSourceHash)||
+    !rows.some(x=>x.sourceHash===receipt.purchaseSourceHash&&
+     x.source.actorId===actorId))
+    return false;
  return true;
 }
 function buy(w,p,day){
