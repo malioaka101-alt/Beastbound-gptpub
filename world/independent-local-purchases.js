@@ -85,7 +85,7 @@ function verifyOne(w,row){
   q.sellerId!=='otto'||q.sellerName!==E.NPCS.otto.name||
   q.sellerRegionId!=='morrowfen_basin'||q.sellerLocation!=='crossing'||
   q.item!=='clean_rations'||q.quantity!==1||
-  !Number.isInteger(q.day)||q.day<6||q.day>w.lastTickDay+6||
+  !Number.isInteger(q.day)||q.day<6||q.day>w.lastTickDay+15||
   !Number.isInteger(q.originalSixdayNumber)||q.originalSixdayNumber<1||
   q.originalSixdayNumber>w.ticks.sixdays||
   q.personCashAfter!==q.personCashBefore-q.paidPriceScales||
@@ -119,7 +119,7 @@ function verifyOne(w,row){
   !p.independentMarketPurchases?.some(x=>x.id===row.id&&
    x.sourceHash===row.sourceHash&&JSON.stringify(x)===JSON.stringify(row))||
   !acct||
-  !acct.history?.some(x=>x.origin===ORIGIN&&
+  !acct.purchaseReceipts?.some(x=>x.origin===ORIGIN&&
    x.purchaseSourceHash===row.sourceHash&&
    x.actorId===p.actorId&&x.item==='clean_rations'&&
    x.quantity===1&&x.hash===hash(Object.fromEntries(
@@ -158,7 +158,7 @@ function buy(w,p,day){
   p.regionId!==merchant.regionId||p.lastTickDay!==day||
   !Number.isInteger(day)||day<6||
   !Number.isInteger(w.ticks?.sixdays)||w.ticks.sixdays<1||
-  day<=w.lastTickDay||day>w.lastTickDay+6||
+  day<=w.lastTickDay||day>w.lastTickDay+15||
   !People.presence(w,p.actorId,'crossing',day)||
   !verify(w))
   throw Error('One real present original worker and source-verified original local seller are required');
