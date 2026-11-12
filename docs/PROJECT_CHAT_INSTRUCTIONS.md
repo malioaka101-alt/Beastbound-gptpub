@@ -1,4 +1,13 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
+ 
+## Active #19: original source-grounded grain/feed corridor logistics (12 November 2026)
+
+**#18 stays PAUSED OPEN**, pending the player's return to rich cultural/species/magical/ideological political depth. **#19 remains ACTIVE OPEN, overall 17/25.** [PR #85](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/85) mutual independently decided original merchant-worker service wages passed **202/202** complete 3-batch + final integration in [CI #43211694911](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43211694911) and GitHub acknowledged main squash `f6641bdabf63162244ed1aae1db087af1ec71773`.
+
+**New #19 isolated DRAFT branch** `foundation/source-original-wholesale-transport-20261112`: do not replace the GM, original world weather, trade, routes, law, ecology, professional agency, dice or money. Original actual Reedmarch grain/feed corridors `trade_1` and `trade_2`, whose disruptions already follow true independently authenticated monthly source and actual diplomacy/weather world ticks, can reduce a later sixday locally established provisioner's outside-wholesale delivery from up to two to up to one real ration. This is **not** all grain production stopping: original local Reedmarch grain/feed, living habitat and genuine merchant cash still decide whether a delivery is possible. Source-witness the existing merchant original wholesale history against historical route changes, retain genuine legacy history and live purchase/worker payment ledgers, no extra world/player RNG and no player-visible hidden merchant finances or prematurely released route news. `tests/economy-original-wholesale-transport-disruptions.test.js` joins complete **203-test** matrix and final integration, exact-head CI PENDING. For future #19, broaden sources, tangible assets and contracts across cultures/species/regions rather than turning this source-specific example into a universal rule. No active `saves/`, `requests/` or `results/` changes or Jory-to-Aerin imports. See `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`.
+
+---
+
 
 ## #19 real voluntarily agreed compensated local work (12 November 2026)
 

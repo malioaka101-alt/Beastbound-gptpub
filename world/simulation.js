@@ -653,7 +653,8 @@ function localProvisioner(w,day=w.lastTickDay){
     !Number.isInteger(v.lastRestockDay)||!Array.isArray(v.history)||
     !Array.isArray(v.laborPayments??[])||
     !require('./person-careers').verifyLocalTradePayments(w)||
-    !require('./merchant-voluntary-work-terms').verify(w))
+    !require('./merchant-voluntary-work-terms').verify(w)||
+    !require('./original-wholesale-transport').verify(w,v))
   throw Error('Existing provisioner stock, source-paid labour, owner or funds need reconciliation');
  return v;
 }
@@ -667,12 +668,21 @@ function restockLocalProvisioner(w,day){
  const market=w.market.reedmarch;
  const supplyOk=eco.quality>=35&&eco.forage>=35&&
   host.prosperity>=30&&Number.isFinite(market.grain)&&market.grain<=1.5;
- const units=supplyOk?Math.min(2,8-v.stock,Math.floor(v.fundsScales/500)):0;
+ // A genuine originally archived grain/feed corridor disruption may
+ // constrain outside wholesale volume, not erase local field production.
+ const witness=require('./original-wholesale-transport').observe(w,day),
+  ceiling=witness.source.wholesaleUnitCeiling;
+ const units=supplyOk?Math.min(ceiling,8-v.stock,
+  Math.floor(v.fundsScales/500)):0;
  if(units>0){v.stock+=units;v.fundsScales-=units*500;}
  v.lastRestockDay=day;
+ if(v.originalTransportWitnessStartDay===undefined)
+  v.originalTransportWitnessStartDay=day;
  v.history.push({day,kind:'independent-wholesale-attempt',received:units,
   paidScales:units*500,supplySupported:supplyOk,
-  remainingStock:v.stock});
+  remainingStock:v.stock,originalTransportWitness:witness});
+ if(!require('./original-wholesale-transport').verify(w,v))
+  throw Error('Original local corridor transport and wholesale stock failed reconciliation');
  if(v.history.length>80)v.history.shift();
 }
 // Shared physical source catalogue: these are *existing* local habitat

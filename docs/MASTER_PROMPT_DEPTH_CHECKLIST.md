@@ -3,6 +3,14 @@
 **Created:** 8 November 2026. **Authority:** `/mnt/data/Beastbound_Realms_Unified_Master_Prompt.md`, the original 57-section Unified Master Prompt, existing verified campaign facts, and the current engine. This is **not** a list of things that must all be finished before play. No campaign is active.
 
 ## How to use this checklist
+ 
+## #19 source-authenticated actual transport exposure — isolated draft (12 November 2026)
+
+**17/25 accepted, #18 PAUSED OPEN, #19 ACTIVE OPEN.** Prior independently voluntary original real worker/seller payment [PR #85](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/85) passed exact-head **202/202** original regression tests in all three batches and final gate [CI #43211694911](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43211694911), GitHub merged `f6641bdabf63162244ed1aae1db087af1ec71773`.
+
+Next #19 **draft** `foundation/source-original-wholesale-transport-20261112`: actual original Reedmarch grain/feed inter-polity corridors (not new roads) may become *independently disrupted* by original month world weather/diplomacy, and limit the existing physically financed small local merchant's outside grain/feed wholesale delivery (up to 1 rather than 2) on a later original sixday, **not** erase local food. Historical original disruptions and new actual wholesale receipts are source cross-linked and save replayed, with no new die, automatic cargo, tax, merchant, pay, loss or hidden route news. New `tests/economy-original-wholesale-transport-disruptions.test.js` is **203rd** regression test, pending complete three-source-batch and final gate. This is a bounded meaningful original transport bridge, not the completion of #19's broad land, market, manufacturing, energy, finite labour, cross-cultural trade and genuinely emergent demand foundations.
+
+
 
 ## #19 source-backed independently chosen local wages DRAFT (12 November 2026)
 
