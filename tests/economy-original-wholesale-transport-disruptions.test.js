@@ -56,6 +56,16 @@ const newWholesale=w=>w.localProvisioner.history.filter(x=>x.kind==='independent
  A.equal(Realm.localProvisioner(s).stock,merchant.stock);
 }
 {
+ // Some original legacy route saves did not archive the risk/status change.
+ // Such an unproven past obstruction must NOT be invented as new historic
+ // source evidence or prohibit the existing locally sourced trade.
+ const s=fresh(983154),w=Realm.ensure(s);
+ w.routes.trade_1.disrupted=true;
+ A.equal(w.routes.trade_1.originalChanges,undefined);
+ A.equal(Transport.sourceAt(w,6).wholesaleUnitCeiling,2);
+ A.equal(Transport.verify(w,w.localProvisioner),true);
+}
+{
  // A legitimate legacy merchant archive can lack the new source structure
  // and must not have an invented historic route decision added to it.
  const s=fresh(983153),w=Realm.ensure(s),v=w.localProvisioner;
@@ -75,6 +85,10 @@ for(let n=0;n<22;n++){
  for(const r of Transport.supplyCorridors())
   w.routes[r.id].risk=100; // test severe transport-risk pressure only.
  W.advance(s,30); // genuine original monthly weather and diplomatic draws
+ // The sixday delivery on day 30 ALREADY happened before the day-30
+ // monthly route review. Never reprice/restrict that earlier work.
+ A.equal(Transport.sourceAt(w,30).wholesaleUnitCeiling,2);
+ A.equal(Transport.verify(w,w.localProvisioner),true);
  const actuallyDisrupted=Transport.supplyCorridors().filter(r=>
   w.routes[r.id].disrupted);
  if(!actuallyDisrupted.length)continue;
