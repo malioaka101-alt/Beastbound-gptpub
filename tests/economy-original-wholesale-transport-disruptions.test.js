@@ -154,14 +154,14 @@ A.ok(disrupted,'at least one authentic original grain/feed route can close under
   sha(entry.originalTransportWitness.source);
  A.equal(Transport.verify(w,v),false);
  A.throws(()=>Realm.localProvisioner(s),/reconciliation/);
- entry.originalTransportWitness=real;
+ entry.originalTransportWitness=structuredClone(real);
  A.equal(Transport.verify(w,v),true);
  // Forging a corridor that the actual atlas never contained is rejected.
  entry.originalTransportWitness.source.originalTradeCorridors[0].routeId='invented_beast_tunnel';
  entry.originalTransportWitness.sourceHash=
   sha(entry.originalTransportWitness.source);
  A.equal(Transport.verify(w,v),false);
- entry.originalTransportWitness=real;
+ entry.originalTransportWitness=structuredClone(real);
  A.equal(Transport.verify(w,v),true);
 }
 console.log('Original #19 local wholesale logistics: only real grain/feed routes, original independently verified month closure, subsequent sixday constrained physically purchased stock, no global blockade, no extra RNG, actual saved historical proof, tamper refusal and legacy merchant sale coexistence PASS');
