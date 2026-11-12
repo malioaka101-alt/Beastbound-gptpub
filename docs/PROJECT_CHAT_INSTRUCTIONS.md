@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Current foundation priority: #19 property, production and deep economy (12 November 2026)
+
+By explicit player direction **PAUSE #18 Organisational and political depth OPEN**; preserve accepted prior work, but do not continue or merge the unfinished `foundation/independent-original-diplomatic-envoy-appointments-20261112` branch. When revisiting #18, politics must grow from freeform GM-authored fantasy ideologies, species, cultures, cosmology, histories, institutions, living people, economics and actual causes; the existing prototype's one scripted envoy/office or relation-roll is not universal political law. The GM remains the world-builder and narrator; the engine checks only real consequences and continuity.
+
+Advance **#19 Property, production and deep economy OPEN**, grounded in original Unified Prompt §§35 and 50. New isolated draft branch `foundation/owned-physical-assets-source-attestations-20261112` extends original physical item custody with source-bound GM-described observations of what player, real freely accepting recipient or original merchant genuinely owns; does not grant new goods, legal rights, money, work results or unknowable NPC information. `tests/economy-existing-owned-material-assets.test.js` joins the automatic full **199-test** three-batch regression + final integration gate, pending confirmation. Later add actual production input/output, wages, fulfilled contracts and regional demand using original world and independent workers. Source design in `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`. No active campaign `saves/`, `requests/`, `results/` touched, no Jory-to-Aerin transfer.
+
+---
+
+
 
 ## #18 — accepted independent coordinator delegation; purpose/role reconsideration DRAFT (12 November 2026)
 
