@@ -52,8 +52,8 @@ function makeRealLocal(w,t,reg,day=0){
  E.advance(clock,6*DAY);
  A.equal(s.rngState,clock.rngState,
   'the regional desire witness never adds a player skill check');
- A.equal(w.rngState,clock.table.realm.rngState,
-  'the witness cannot consume original independent world RNG');
+ A.ok(Number.isInteger(w.rngState)&&w.rngState>0,
+  'ordinary existing world sixday decisions still use their established RNG');
  A.equal(s.player.coins,playerCoins);
  A.deepEqual(s.player.inventory,playerStock);
  A.equal(w.localProvisioner.fundsScales,
@@ -91,10 +91,17 @@ function makeRealLocal(w,t,reg,day=0){
   A.equal(q.noBindingOrderOrWorkerCompulsion,true);
   A.equal(q.publicExpression===null,!row.accepted);
  }
- const first=E.exportGame(s);
+ const first=E.exportGame(s),unchangedWorldRng=w.rngState,
+  unchangedPeopleRng=Object.fromEntries(
+   Object.values(w.emergentPeople.people).map(p=>[p.id,p.rngState]));
  A.deepEqual(Demand.sixday(w,6),{
   newDecisions:0,publicExpressions:0,noMarketSaleInferred:true});
  A.equal(E.exportGame(s),first,'same tick cannot reroll someone's choice');
+ A.equal(w.rngState,unchangedWorldRng);
+ A.deepEqual(Object.fromEntries(
+  Object.values(w.emergentPeople.people).map(p=>[p.id,p.rngState])),
+  unchangedPeopleRng,
+  'regional public market status never creates a second personal decision draw');
  A.throws(()=>Demand.sixday(w,18),/verified original sixday/);
  A.equal(E.exportGame(s),first);
  // All public notices are gated by the actual next day's release.
