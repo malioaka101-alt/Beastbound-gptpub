@@ -560,6 +560,211 @@ function independentBilateralContactsMonth(w,day){
   if(source.originalPublicBulletin)event(w,source.originalPublicBulletin);
  }
 }
+
+/*
+ * #18 — one genuine disrupted-corridor mutual exploratory contact may lead
+ * to two independently decided LIMITED diplomatic representative offers.
+ * Each side's ACTUAL original sovereign office independently chooses whether
+ * to nominate a real, existing professional civic representative, then that
+ * individual independently accepts or declines. Neither government's desire
+ * can substitute for an actual person's assent.
+ *
+ * No meetings, agreements, border permissions, salaries, taxes, treaties,
+ * road reopenings, binding powers or extra ordinary world/player RNG.
+ * Existing notables remain real independent people, not a newly spawned
+ * "ambassador" roster. A state may choose other real persons in a future
+ * authored procedure; this original monthly public-office route considers
+ * its established civic professional only.
+ *
+ * Older saves without the ledger are not retroactively presumed to contain
+ * representatives; only actual future original world-month ticks create
+ * newly source-linked decisions.
+ */
+const ENVOY_OFFER='two-independent-original-civic-envoy-appointment-choices-v1';
+function envoySeed(w,key){
+ const n=parseInt(diplomaticHash({seed:w.worldSeed,key,
+  kind:ENVOY_OFFER}).slice(0,8),16)>>>0;
+ return n||0x593f56bc;
+}
+function civicNominee(w,polity){
+ return Object.values(w.notables||{}).find(x=>
+  x.polity===polity&&x.profession==='civic representative'&&
+  x.id===polity+'_civic'&&!!w.institutions?.[x.institution])||null;
+}
+function envoyNominationChance(q){
+ return Math.min(.82,Math.max(.14,.43+
+  (q.diplomaticStatus==='cooperation'?.13:
+   q.diplomaticStatus==='war'?-.17:0)+
+  (q.stability>=60?.08:q.stability<30?-.11:0)+
+  (q.legitimacy<25?-.10:0)));
+}
+function envoyAcceptanceChance(q){
+ return Math.min(.76,Math.max(.16,.50+
+  (q.professionalRank>=2?.07:0)+
+  (q.stability<30?-.10:0)+
+  (q.diplomaticStatus==='war'?-.14:0)));
+}
+function envoyPublicBulletin(q){
+ return {day:q.day,region:q.polity,subject:q.pairKey,
+  text:A.P[q.polity].name+' confirms that '+q.candidateName+
+   ' independently accepted a limited, exploratory appointment concerning the '+
+   A.P[q.otherPolity].name+
+   ' trade corridor. No negotiation, treaty, meeting, authority over foreigners or reopening is confirmed.',
+  channel:'foreign courier',releaseDay:q.day+10,severity:'routine'};
+}
+function verifyEnvoyOffer(w,key,row,previousRng){
+ const d=w.diplomacy?.[key],q=row?.source,
+  contact=d?.contactAttempts?.find(x=>x.id===q?.originalContactId),
+  nominee=civicNominee(w,q?.polity);
+ if(!q||!d||!contact||!nominee||
+  row.origin!==ENVOY_OFFER||q.origin!==ENVOY_OFFER||
+  row.id!==q.id||row.day!==q.day||row.polity!==q.polity||
+  row.accepted!==q.accepted||row.sourceHash!==diplomaticHash(q)||
+  q.id!=='original_envoy_'+q.originalContactId+'_'+q.polity||
+  q.pairKey!==key||![d.a,d.b].includes(q.polity)||
+  q.otherPolity!==(q.polity===d.a?d.b:d.a)||
+  !contact.bothWilling||contact.sourceHash!==q.originalContactHash||
+  q.originalContactDay!==contact.day||
+  !Number.isInteger(q.day)||q.day<contact.day+30||
+  q.day>contact.day+120||
+  !Number.isInteger(q.monthNumber)||q.monthNumber<1||
+  q.candidateId!==nominee.id||q.candidateName!==nominee.name||
+  q.candidateProfession!==nominee.profession||
+  q.candidateInstitution!==nominee.institution||
+  q.professionalRank!==nominee.professional?.rank&&
+    (!Number.isInteger(q.professionalRank)||q.professionalRank<1)||
+  !Number.isInteger(q.professionalRank)||q.professionalRank<1||
+  !Number.isInteger(q.stability)||q.stability<0||q.stability>100||
+  !Number.isInteger(q.legitimacy)||q.legitimacy<0||q.legitimacy>100||
+  !Number.isInteger(q.rngBefore)||q.rngBefore!==previousRng||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  !officeContextMatches(w,q.polity,q.day,q.originalSovereignOffice)||
+  q.noMeetingOrTreaty!==true||
+  q.noSalaryOrTaxOrTradeTransfer!==true||
+  q.noBindingForeignMandate!==true||
+  q.noOriginalWorldOrPlayerRandomChanged!==true)
+  return false;
+ const relation=bilateralRelationAt(d,q.day);
+ if(!relation||relation.status!==q.diplomaticStatus||
+  relation.hash!==q.originalDiplomaticHash)return false;
+ const copy={rngState:previousRng},choice=random(copy),
+  chances=envoyNominationChance(q),nominated=choice<chances;
+ if(q.nominationChance!==chances||q.nominationDraw!==choice||
+  q.nominated!==nominated)return false;
+ if(nominated){
+  const acceptChance=envoyAcceptanceChance(q),acceptDraw=random(copy);
+  if(q.acceptanceChance!==acceptChance||
+   q.acceptanceDraw!==acceptDraw||
+   q.accepted!==(acceptDraw<acceptChance))return false;
+ }else if(q.acceptanceChance!==null||
+  q.acceptanceDraw!==null||q.accepted!==false)return false;
+ if(copy.rngState!==q.rngAfter)return false;
+ return JSON.stringify(q.originalPublicBulletin)===
+  JSON.stringify(q.accepted?envoyPublicBulletin(q):null);
+}
+function verifyEnvoyOffers(w,key){
+ const d=w.diplomacy?.[key];
+ if(!d||!verifyBilateralContacts(w,key))return false;
+ if(d.envoyOffers===undefined&&d.envoyRngState===undefined)return true;
+ if(!Array.isArray(d.envoyOffers)||
+  !Number.isInteger(d.envoyRngState)||d.envoyRngState<1)return false;
+ let rng=envoySeed(w,key),priorDay=-1;
+ const seen=new Set();
+ for(const row of d.envoyOffers){
+  const id=row?.source?.originalContactId+':'+row?.polity;
+  if(!verifyEnvoyOffer(w,key,row,rng)||seen.has(id)||
+   row.day<priorDay)return false;
+  rng=row.source.rngAfter;priorDay=row.day;seen.add(id);
+ }
+ return rng===d.envoyRngState;
+}
+function independentEnvoyOffersMonth(w,day){
+ for(const [key,d] of Object.entries(w.diplomacy)){
+  if(!verifyEnvoyOffers(w,key))
+   throw Error('Source-supported civic diplomatic envoy records were rewritten');
+  for(const original of d.contactAttempts||[]){
+   if(!original.bothWilling||day<original.day+30||
+    day>original.day+120)continue;
+   for(const polity of [d.a,d.b]){
+    if((d.envoyOffers||[]).some(x=>
+      x.source.originalContactId===original.id&&x.polity===polity))
+      continue;
+    const nominee=civicNominee(w,polity),
+     host=w.countries?.[polity],office=w.governance?.[polity],
+     relation=bilateralRelationAt(d,day);
+    if(!nominee||!host||!office||!relation)continue;
+    const rngBefore=d.envoyRngState??envoySeed(w,key),
+     generator={rngState:rngBefore},
+     q0={origin:ENVOY_OFFER,
+      id:'original_envoy_'+original.id+'_'+polity,
+      pairKey:key,polity,otherPolity:polity===d.a?d.b:d.a,
+      originalContactId:original.id,
+      originalContactHash:original.sourceHash,
+      originalContactDay:original.day,
+      day,monthNumber:w.ticks.months,
+      originalSovereignOffice:originalOfficeContext(w,polity,day),
+      candidateId:nominee.id,candidateName:nominee.name,
+      candidateProfession:nominee.profession,
+      candidateInstitution:nominee.institution,
+      professionalRank:nominee.professional.rank,
+      diplomaticStatus:relation.status,
+      originalDiplomaticHash:relation.hash,
+      stability:host.stability,legitimacy:host.legitimacy,
+      noMeetingOrTreaty:true,
+      noSalaryOrTaxOrTradeTransfer:true,
+      noBindingForeignMandate:true,
+      noOriginalWorldOrPlayerRandomChanged:true},
+     nominationChance=envoyNominationChance(q0),
+     nominationDraw=random(generator),
+     nominated=nominationDraw<nominationChance,
+     acceptanceChance=nominated?envoyAcceptanceChance(q0):null,
+     acceptanceDraw=nominated?random(generator):null,
+     accepted=nominated&&acceptanceDraw<acceptanceChance,
+     q={...q0,rngBefore,rngAfter:generator.rngState,
+      nominationChance,nominationDraw,nominated,
+      acceptanceChance,acceptanceDraw,accepted};
+    q.originalPublicBulletin=accepted?envoyPublicBulletin(q):null;
+    const row={id:q.id,origin:ENVOY_OFFER,
+     day,polity,accepted,source:q,sourceHash:diplomaticHash(q)};
+    if(!verifyEnvoyOffer(w,key,row,rngBefore))
+     throw Error('A genuine independent office choice and candidate assent are required');
+    d.envoyOffers||=[];d.envoyOffers.push(row);
+    d.envoyRngState=generator.rngState;
+    if(!verifyEnvoyOffers(w,key))
+     throw Error('An independent envoy could not be replayed against existing offices and people');
+    if(q.originalPublicBulletin)event(w,q.originalPublicBulletin);
+   }
+  }
+ }
+}
+function publicEnvoyAppointments(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+  Object.keys(params).some(k=>k!=='pairKey')||
+  typeof params.pairKey!=='string')
+  throw Error('Only an original locally known diplomatic pair can be read');
+ const w=peek(s),d=w.diplomacy?.[params.pairKey],
+  regionId=A.LOCATION_REGION[s.world?.location]||
+   require('./lived-places').get(s,s.world?.location)?.regionId,
+  local=A.R[regionId]?.polity;
+ if(!d||![d.a,d.b].includes(local))
+  throw Error('A foreign original envoy record cannot be read outside its polity');
+ if(!verifyEnvoyOffers(w,params.pairKey))
+  throw Error('The original state nomination and individual consent history is invalid');
+ return {pairKey:params.pairKey,
+  publiclyConfirmedAppointments:(d.envoyOffers||[])
+   .filter(x=>x.accepted&&
+    x.source.originalPublicBulletin?.releaseDay<=worldDay(s))
+   .map(row=>({polity:row.polity,day:row.day,
+    name:row.source.candidateName,
+    officeAtAppointment:row.source.originalSovereignOffice.office,
+    appointmentSourceHash:row.sourceHash,
+    bulletin:row.source.originalPublicBulletin.text,
+    releaseDay:row.source.originalPublicBulletin.releaseDay,
+    limitedExploratoryOnly:true,noMeetingOrSignedTreaty:true,
+    noFiscalTransferOrBindingForeignPower:true})),
+  note:'A public, individually accepted limited nomination is not an actual meeting, treaty, border permission or power to compel. Private refusals and unannounced decisions stay unknown.'};
+}
+
 function publicBilateralContactHistory(s,params={}){
  if(!params||typeof params!=='object'||Array.isArray(params)||
   Object.keys(params).some(k=>k!=='pairKey')||
@@ -1049,6 +1254,9 @@ function tickMonth(w,day){
  // Two state-level choices use a separate audited political agency stream.
  // The original month has already resolved its actual corridor and diplomacy.
  independentBilateralContactsMonth(w,day);
+ // Independent nominations require at least thirty further actual days after
+ // the original two-government willingness; no instant envoy or treaty.
+ independentEnvoyOffersMonth(w,day);
  // Migration uses neighbouring habitats that genuinely support the same lineage.
  // Populations move; they do not appear from nowhere when a new scene starts.
  for(const r of A.regions){
@@ -1292,6 +1500,7 @@ module.exports={initial,ensure,peek,
  ORIGINAL_FOREIGN_COURIER,verifyOriginalForeignCourier,foreignCourierHistory,
  ROUTE_CHANGE_SOURCE,verifyOriginalRouteHistory,publicTradeRouteHistory,
  BILATERAL_CONTACT,verifyBilateralContacts,publicBilateralContactHistory,
+ ENVOY_OFFER,verifyEnvoyOffers,publicEnvoyAppointments,
  BILATERAL_OFFICE_CONTEXT,verifyDiplomaticOfficeContexts,
  localProvisioner:s=>localProvisioner(ensure(s),worldDay(s)),gatheringSource,sourceItemAt:location=>GATHER_SOURCES[location]?.item||null,PROPAGATION_ORIGIN,plantingHash,worldDraw:s=>random(ensure(s)),tick,calendar,anchorCalendar,publicAtlas,publicStatus,publicInitiatives:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public initiative status accepts no hidden plans, chosen outcomes or remote covert reports');return AgentInitiatives.visible(s,peek(s));},publicDiffusion:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Knowledge diffusion status accepts no invented sources or remote hidden results');return KnowledgeDiffusion.visible(s,peek(s));},publicAmbitions:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public NPC ambition status accepts no chosen outcomes or secret future plans');return AdaptiveAmbitions.visible(s,peek(s));},publicPeers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public peer status accepts no hidden personal intentions or selected relationship outcomes');return ProfessionalPeers.visible(s,peek(s));},publicFamilyMembers:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Public family-person status accepts no fabricated ancestry, appointed heir or chosen private dispute');return FamilyMembers.publicStatus(s,peek(s));},publicEmergentGroups:(s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Association status cannot be used to invent members, office or heritage');return EmergentGroups.visible(s,peek(s));},publicGovernment: (s,p={})=>{if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)throw Error('Local government status accepts no forged ruler, sovereign claims or selected remote offices');return Gov.local(s,peek(s));},publicNews,publicEconomy,observe,knownTaxon,revealNews,publicProfessionals,revealProfessional,mythicLore,synopsis,
  // testing/GM diagnostics only; never pass hidden state to player-facing panels.
