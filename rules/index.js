@@ -337,6 +337,7 @@ function act(s,{system,operation,params={}}={}){
   case 'creation.repair':return CreationPrototype.repair(s,params);
   case 'craft.fieldPoultice':return FieldCrafting.craft(s,params);
   case 'craft.status':return FieldCrafting.status(s,params);
+  case 'craft.productionHistory':return require('./physical-production-ledger').status(s,params);
   case 'gear.offers':return Equipment.offers(s,params);
   case 'gear.inquire':return Equipment.inquire(s,params);
   case 'gear.purchase':return Equipment.purchase(s,params);
