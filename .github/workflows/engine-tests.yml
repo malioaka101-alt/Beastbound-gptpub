@@ -68,5 +68,6 @@ jobs:
           node tests/rank-depth-prototypes.test.js
           node tests/voluntary-person-material-handoffs.test.js
           node tests/live-provisioner-trade.test.js
+          node tests/economy-original-scarcity-market-quotations.test.js
           node tests/source-parity.test.js
           node tests/source-coverage.test.js
