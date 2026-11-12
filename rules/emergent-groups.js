@@ -158,6 +158,70 @@ function purposeHistory(s,p={}){
  return Groups.purposeHistoryStatus(w,e.id,{
   day:Math.floor(s.world.minutes/1440)});
 }
+function discussPurpose(s,p={}){
+ fields(p,['groupId','revisionId','npcId','discussion']);
+ if(typeof p.groupId!=='string'||typeof p.revisionId!=='string'||
+  typeof p.npcId!=='string')
+  throw Error('A real earlier purpose declaration and personally identifiable member are needed');
+ const discussion=words(p.discussion,30,750,'Voluntary purpose discussion');
+ const polity=locale(s,18),w=Realm.peek(s),
+  e=Groups.lookup(w,p.groupId),revision=e?.purposeHistory?.at(-1);
+ const People=require('../world/person-presence');
+ const currentDay=Math.floor(s.world.minutes/1440),
+  member=e?.additionalMembers?.find(x=>x.active!==false&&
+   x.witness?.details?.npcId===p.npcId),
+  person=member?People.resolve(w,p.npcId,s.world.location,currentDay):null;
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player.name||e.polity!==polity||
+  !revision||revision.id!==p.revisionId||
+  !member||!person||person.actorId!==member.actorId||
+  person.name!==member.name||
+  (e.purposeResponses||[]).some(x=>
+   x.memberActorId===member.actorId&&
+   x.revisionId===revision.id&&x.day===currentDay))
+  throw Error('A genuine present member may individually discuss a real current declaration once per original conversation day');
+ const oldMinute=s.world.minutes,place=s.world.location,
+  endDay=Math.floor((oldMinute+18)/1440);
+ if(!People.resolve(w,p.npcId,place,endDay))
+  throw Error('The person cannot actually remain for the proposed local conversation');
+ E.advance(s,18);W.finalizeTime(s,oldMinute);
+ Health.sync(s,{source:'legacy'});
+ const next=Realm.ensure(s),minute=s.world.minutes,day=Math.floor(minute/1440),
+  available=People.resolve(next,p.npcId,place,day),
+  after=Groups.lookup(next,p.groupId);
+ if(!available||!after||!after.additionalMembers.some(x=>
+   x.actorId===member.actorId&&x.active!==false))
+  throw Error('The conversation needs the same independently available participant');
+ const regionId=Atlas.LOCATION_REGION[place],
+  presenceHash=available.presence?Groups.hash(available.presence):null;
+ C.event(s,'story',s.player.name+' discusses the new stated direction of '+
+  after.charter.name+' with '+member.name+
+  '. Their personal view is not yet assumed.',{
+   origin:'witnessed-group-purpose-member-discussion',
+   groupId:after.id,revisionId:revision.id,
+   revisionSourceHash:revision.sourceHash,
+   purpose:revision.purpose,founder:s.player.name,
+   memberActorId:member.actorId,memberName:member.name,
+   place,regionId,day,minute,minutes:18,discussion,presenceHash,
+   noSelectedResponse:true,noObligationOrMandate:true,
+   noFundsOrWorkGranted:true
+  });
+ return {...Groups.considerPurposeRevision(next,{
+  groupId:after.id,revisionId:revision.id,npcId:p.npcId,
+  place,minute,discussion,witness:structuredClone(s.log.at(-1))}),
+  actualMinutes:18};
+}
+function purposeResponses(s,p={}){
+ fields(p,['groupId']);
+ if(typeof p.groupId!=='string')throw Error('A true group ID is necessary');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
+  polity=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||e.polity!==polity)
+  throw Error('Only the actual local founder knows their own personally witnessed discussion records');
+ return Groups.purposeResponseStatus(w,e.id,{
+  day:Math.floor(s.world.minutes/1440)});
+}
 function treasuryStatus(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')
@@ -173,4 +237,4 @@ function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,restatePurpose,purposeHistory,status,treasuryStatus};
+module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus};
