@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## #19 real voluntarily agreed compensated local work (12 November 2026)
+
+**#18 is PAUSED OPEN** for later fantastical cultural and ideological politics. **#19 is ACTIVE OPEN; still 17/25 foundations accepted.** [PR #84](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/84) authentic local grain/ecology/seller-stock pressure, 201/201 full regression and mandatory final gate [CI #43208946263](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43208946263), merged SHA `6fd86e4ef3a6c8a417cadde1d395971f3a06d9bf`.
+
+**New isolated draft #19** `foundation/voluntary-original-merchant-work-terms-20261112`: keep the GM's boundless world/role authoring and use *existing real people and seller-owned physical Scales*, NOT universal salary or forced progression. In `world/merchant-voluntary-work-terms.js`, original source-grounded trade-service terms explicitly include freely written scope and proposed sum bounded by source-confirmed real original merchant funds. Merchant and worker each independently choose (the original worker's own personal RNG, separate source merchant RNG); both can refuse. No work, wage, rank, institution, law, tax or power arises from an offer or acceptance. Real payment needs an actual later original independently performed successful task by that same worker under the same original sourced trade duty, and original `payVerifiedTradeWork` conserves exact funds across authentic seller and worker ledgers. Terms are privately held, source replayed, never a broadcast of hidden NPC thoughts. New `tests/economy-voluntary-original-merchant-worker-terms.test.js`, **202-test complete regression + required final gate PENDING**. Source details: `docs/ORIGINAL_PHYSICAL_PROPERTY_ECONOMY_FOUNDATION.md`. Do not modify Aerin campaign `saves/`, `requests/`, `results/`; do not mix Jory-specific facts.
+
+---
+
+
 ## Current #19: source-grounded genuine local market scarcity (12 November 2026)
 
 **#18 PAUSED OPEN** per player direction: fantasy politics will later need full cultural, ideological, ecological, spiritual, species and magic diversity, not a universal government/office template.

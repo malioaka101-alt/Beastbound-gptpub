@@ -4,6 +4,14 @@
 
 ## How to use this checklist
 
+## #19 source-backed independently chosen local wages DRAFT (12 November 2026)
+
+**17/25 accepted, #18 PAUSED OPEN, #19 ACTIVE OPEN.** Source-grounded local scarcity/merchant pricing [PR #84](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/84) passed **201/201** exact-head three-batch + final gate [CI #43208946263](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43208946263), merged `6fd86e4ef3a6c8a417cadde1d395971f3a06d9bf`.
+
+**Next #19 draft:** `foundation/voluntary-original-merchant-work-terms-20261112` creates one example of genuine individually negotiated local service compensation, tied to the real seller's finite funds and the real worker's authored original duty. Both independently accept or decline, with distinct replayable choice streams; agreement creates no task success, wages, money, legal title, obligation to work, skill or universal salary. Only an actual later independently completed original signed task can be settled once through preexisting conservation-verified two-party Scales transfer. `tests/economy-voluntary-original-merchant-worker-terms.test.js` is the **202nd** regression test; **full CI pending**. This is NOT universal legal contract or economic foundation completion: culture- and species-specific productive property, regional demand, diverse compensation norms, risk and transport remain #19 open. Keep #18 rich fantasy cultural/ideological future review paused.
+
+
+
 ## #19 real production MERGED; original local scarcity quotes staged (12 November 2026)
 
 **17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** The original source-backed physical production step [PR #83](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/83) passed **200/200 full three-batch source regression and required final integration** at exact head [CI #43201489401](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43201489401), merged `41f7c270b79ca0fdca5f265b33ad3fdcf9a514d1`. Medicine and actual researched devices carry durable original exact material input/failed-loss and successful-output records. Source-compatible old crafting checkpoints survive without invented past dice.

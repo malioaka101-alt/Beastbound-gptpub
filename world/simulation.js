@@ -652,7 +652,8 @@ function localProvisioner(w,day=w.lastTickDay){
     !Number.isInteger(v.fundsScales)||v.fundsScales<0||v.fundsScales>100000000||
     !Number.isInteger(v.lastRestockDay)||!Array.isArray(v.history)||
     !Array.isArray(v.laborPayments??[])||
-    !require('./person-careers').verifyLocalTradePayments(w))
+    !require('./person-careers').verifyLocalTradePayments(w)||
+    !require('./merchant-voluntary-work-terms').verify(w))
   throw Error('Existing provisioner stock, source-paid labour, owner or funds need reconciliation');
  return v;
 }
