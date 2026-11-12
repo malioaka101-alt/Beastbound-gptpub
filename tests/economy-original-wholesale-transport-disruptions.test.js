@@ -13,7 +13,7 @@ const fresh=seed=>E.newGame({seed,name:'Disposable Original Route Wholesale',pat
 const newWholesale=w=>w.localProvisioner.history.filter(x=>x.kind==='independent-wholesale-attempt');
 {
  const s=fresh(983151),w=Realm.ensure(s),v=w.localProvisioner;
- const originalPlayerCoins=s.player.coins,originalPlayerRng=s.rngState,
+ const originalPlayerCoins=s.player.coins,unmodifiedClock=structuredClone(s),
   originalSellerFunds=v.fundsScales,prior=v.stock,
   corridors=Transport.supplyCorridors();
  A.equal(corridors.length,2);
@@ -24,6 +24,7 @@ const newWholesale=w=>w.localProvisioner.history.filter(x=>x.kind==='independent
  A.equal(v.originalTransportWitnessStartDay,undefined,
   'valid old original world saves have no retroactive source link');
  W.advance(s,6);
+ E.advance(unmodifiedClock,6*1440); // original engine's genuine passive time RNG
  const day=6,row=newWholesale(w)[0],q=row.originalTransportWitness.source;
  A.equal(row.day,day);
  A.equal(v.originalTransportWitnessStartDay,day);
@@ -34,7 +35,8 @@ const newWholesale=w=>w.localProvisioner.history.filter(x=>x.kind==='independent
  A.equal(v.stock,prior+row.received);
  A.equal(v.fundsScales,originalSellerFunds-500*row.received);
  A.equal(s.player.coins,originalPlayerCoins);
- A.equal(s.rngState,originalPlayerRng);
+ A.equal(s.rngState,unmodifiedClock.rngState,
+  'source transport observation uses no RNG beyond original time passage');
  A.equal(q.originalTradeCorridors.length,2);
  A.equal(row.originalTransportWitness.sourceHash,sha(q));
  A.equal(Transport.verify(w,v),true);
@@ -104,7 +106,7 @@ for(let n=0;n<22;n++){
 A.ok(disrupted,'at least one authentic original grain/feed route can close under real recorded weather');
 {
  const {s,w,roads}=disrupted,v=w.localProvisioner,
-  originalMoney=s.player.coins,oldPlayerRng=s.rngState;
+  originalMoney=s.player.coins,unmodifiedClock=structuredClone(s);
  // Supply pressure fixtures do not invent a road closure; that was
  // independently settled and sealed by the actual original world tick.
  v.stock=0;v.fundsScales=2500;
@@ -124,6 +126,7 @@ A.ok(disrupted,'at least one authentic original grain/feed route can close under
   w.routes[roads[0].id].originalChanges.at(-1).sourceHash);
  const beforeTime=s.world.minutes;
  W.advance(s,6); // next genuine sixday warehouse replacement
+ E.advance(unmodifiedClock,6*1440);
  const entry=newWholesale(w).at(-1);
  A.equal(entry.day,day);
  A.equal(entry.received,1);
@@ -132,7 +135,8 @@ A.ok(disrupted,'at least one authentic original grain/feed route can close under
  A.equal(v.stock,1);
  A.equal(v.fundsScales,2000);
  A.equal(s.player.coins,originalMoney);
- A.equal(s.rngState,oldPlayerRng);
+ A.equal(s.rngState,unmodifiedClock.rngState,
+  'only original passive engine world time consumes player RNG');
  A.equal(s.world.minutes,beforeTime+6*1440);
  A.equal(entry.originalTransportWitness.sourceHash,
   sha(entry.originalTransportWitness.source));
