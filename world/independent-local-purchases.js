@@ -108,6 +108,9 @@ function verifyOne(w,row){
    source:q.originalDemandSource,sourceHash:q.originalDemandHash})||
   !Scarcity.verify(q.priceSource,q.priceSourceHash,
    q.paidPriceScales,q.sellerStockBefore)||
+  (q.priceSource?.originalPaidDemand!==undefined&&
+   !require('../rules/original-paid-demand-price').backedByActualSeller(
+    w,q.priceSource.originalPaidDemand))||
   q.originalBuyerChoice!==Math.floor(independentChoice(p,{
    sourceHash:q.originalDemandHash})*4294967296)||
   q.individualWillingness!==chance(q)||
