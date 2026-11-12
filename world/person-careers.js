@@ -111,7 +111,9 @@ function verify(p){
     new Set(c.tradePayments.map(x=>x.source.workHash)).size!==c.tradePayments.length))
   return false;
  const received=(c.tradePayments||[]).reduce((n,x)=>n+x.amountScales,0);
- if(!Number.isSafeInteger(received)||received!==(p.cashScales??0))return false;
+ const spending=require('./independent-local-purchases').verifyPersonal(p);
+ if(!spending.valid||!Number.isSafeInteger(received)||
+  received!==(p.cashScales??0)+spending.spentScales)return false;
  if(c.safetyIncidents!==undefined&&
   (!Array.isArray(c.safetyIncidents)||
    c.safetyIncidents.some(e=>!verifySafetyIncident(p,e))||
