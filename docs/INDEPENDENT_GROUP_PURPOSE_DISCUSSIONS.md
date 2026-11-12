@@ -1,0 +1,27 @@
+# Foundation #18 — genuinely independent member views of a changing organisation
+
+**Authority:** Unified Beastbound Master Prompt §§33–34, 42; current Table Rules; existing world association registry, locally present individuals, prior original voluntary membership, source-linked purpose history, and original independent group-member decision stream.
+
+## Connected source of truth
+
+A new world group is not one of a fixed number of selectable types. The GM authors its history, name, purpose, circumstances and people. The engine verifies only what has actually been established: where the player and other individuals are, who consented to participate, what the founder genuinely declared, each member's separate view, independently earned activities, public information and actual world time.
+
+The accepted purpose-change foundation [PR #76](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/76) passed 192 full source regressions [#43135134916](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43135134916) and merged as `7489808cb20b7a27f9abff7fa863bf24969de618`. It preserved an original group's immutable founding statement alongside its changing declaration. **A founder changing what they say the association is about does not compel even one member to agree.**
+
+## One genuine scene can reveal one individual's changing view
+
+After the founder personally restates a purpose, the existing **social.discussGroupPurpose** rule takes an actually established current purpose revision, an identified present and previously independently consenting member, and a freeform description of a real conversation. It checks original membership and physical presence before consuming any time or RNG. It then uses the existing 18-minute local conversation time flow and original event witness, not a new social minigame or compulsory fee. The independent member's own established original agency RNG produces supported, dissented or undecided according to the *existing* contextual individual-position chance model, influenced by prior views, genuine original group work and local ecological/political conditions.
+
+The result belongs solely to the individual. The response is stored **inside the same group** as an append-only `purposeResponses` history with the exact original founder revision source, original conversation witness, the person's originally verified membership, actual local presence, previous individual view, true world day/minute and replayable original agency RNG before/draw/after. A member can disagree, remain undecided, or change their view after a new substantive revision or a genuinely later world day. A duplicate same-person/same-declaration/same-day attempt is rejected before time or another draw. The founder may not supply a desired NPC stance. A personally witnessed conversation is private knowledge, **not** an automatic public vote or binding collective decision.
+
+A genuine local founder may read **social.groupPurposeResponses** without consuming time or fabricating a member. Neither this record nor the updated purpose changes original charter, group members, voluntary offices, resources, legal permission, other people's obligations, project outcomes or NPC private motives. A revised purpose must not retroactively imply that earlier actual work supported it: original public group-work notices remain explicitly limited to their originally witnessed effort and independently verified result.
+
+## Examples demonstrate scalability rather than enumerate it
+
+A natural-history circle may gain a new focus on river safety: one genuine member agrees and another dissents, while the founding charter, actual people and money stay unchanged. The first person can later become uncertain when the founder honestly broadens the stated activity, and can reconsider on a later world day. The same general machinery would work for a trader circle, small clan, school, beast-welfare association or a new type the GM plausibly creates. Future non-player founders need an actual source-confirmed independent membership/presence adapter before the same interaction can be claimed for them; there is **no invented NPC group consent**.
+
+## Evidence and remaining work
+
+`tests/group-purpose-independent-member-responses.test.js` leads the unchanged original full suite plus one new group. It covers real local membership acceptance, independently different personal answers, refusal of caller-selected answers, preflight errors with no time or RNG, same-day duplicate protection, changed stance from later real talk, exact original source and dice replay, no new funds or authority, tamper rejection and saved export/import.
+
+**DRAFT until full exact-head 193-group GitHub Actions verification and merge.** Foundation #18 remains unchecked at 17/25: actual authorised named diplomatic representatives and bilateral legally binding terms, source-valid property/sovereign fiscal custody, enforceable local law and wider independent organisational leadership choices are still incomplete. No active campaign saves, requests or results were modified.
