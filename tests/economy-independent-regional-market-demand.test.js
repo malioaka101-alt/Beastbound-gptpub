@@ -109,7 +109,7 @@ function makeRealLocal(w,t,reg,day=0){
    Object.values(w.emergentPeople.people).map(p=>[p.id,p.rngState]));
  A.deepEqual(Demand.sixday(w,6),{
   newDecisions:0,publicExpressions:0,noMarketSaleInferred:true});
- A.equal(E.exportGame(s),first,'same tick cannot reroll someone's choice');
+ A.equal(E.exportGame(s),first,'the same original tick cannot reroll the individual decision');
  A.equal(w.rngState,unchangedWorldRng);
  A.deepEqual(Object.fromEntries(
   Object.values(w.emergentPeople.people).map(p=>[p.id,p.rngState])),
