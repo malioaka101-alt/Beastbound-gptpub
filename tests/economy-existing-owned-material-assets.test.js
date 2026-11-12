@@ -5,6 +5,7 @@
 // Disposable original engine saves only.
 const A=require('node:assert/strict'),E=require('../engine.js'),
  R=require('../rules'),W=require('../rules/world'),
+ Realm=require('../world/simulation'),
  H=require('../rules/material-handoffs');
 const action=(s,operation,params)=>R.act(s,{system:'social',operation,params});
 const description='A real hand-carried reed supply identified by its owner for ordinary wetland survey notes, without an asserted magical property.';
@@ -14,6 +15,7 @@ const fresh=seed=>E.newGame({seed,name:'Disposable Real Physical Ownership',path
 function local(seed){
  const s=fresh(seed);
  s.world.minutes=8*60;
+ Realm.ensure(s);
  return s;
 }
 {
