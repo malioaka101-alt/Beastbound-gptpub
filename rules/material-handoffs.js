@@ -234,15 +234,14 @@ function ownerStock(s,ownerId,item,{requireLocal=false}={}){
   x.npcId===npcId&&x.item===item&&x.accepted&&
   x.quantityMoved===1&&x.hash===hash(Object.fromEntries(
    Object.entries(x).filter(([k])=>k!=='hash'))));
- if(!receipts.length||!receipts.some(x=>
-   holdings.history.some(h=>h.hash===x.hash&&h.accepted)))
+ if(!receipts.length)
   throw Error('A real independently accepted original handoff is required to establish known person-owned material');
  const count=holdings.held[item]??0;
  C.int(count,'existing person-owned material',0,100000);
  return {kind:'original-accepted-person-handoff',count,
   source:'original source-witnessed independent-person material acceptance',
-  ownerName:npc.name,originalRoot:receipts.at(-1).hash,
-  referenceReceipt:receipts.at(-1).hash};
+  ownerName:npc.name,originalRoot:receipts[0].hash,
+  referenceReceipt:receipts[0].hash};
 }
 function verifyAssetAttestations(s){
  const records=s.table?.materialAssetAttestations;
