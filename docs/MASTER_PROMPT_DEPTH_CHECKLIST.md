@@ -4,6 +4,13 @@
 
 ## How to use this checklist
 
+## #19 durable maintenance of original GM-authored tools — isolated draft (12 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** [PR #89](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/89) passed the exact-head **206/206** complete three-batch regression, inventory verification and final cross-system integration ([GitHub Actions #43301107330](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43301107330)); GitHub acknowledged squash merge `145ba62bb362d1f6aaa2db59571a233bd42af369`. A genuine later local quote may now reflect previously **paid** physical purchases, never mere expressions of interest.
+
+**Next isolated #19 draft:** `foundation/source-attested-living-tool-maintenance-20261112` strengthens the **existing** authored invention, physical-work, inventory and status records. A real player-authored researched ordinary wetland gauge (one example, not a fixed menu) can undergo actual calibration wear, independently checked repair with spent original finite materials and a genuine Crafting roll; its existing personal tool record retains durable original workbench and roll witnesses instead of losing repair evidence when the short scene log rotates. Previously completed repairs stay honest legacy observations, never falsely awarded new proof. Repairs cannot manufacture new instruments, grades, money or hidden resources. New `tests/economy-original-tool-maintenance-provenance.test.js` joins the automatic complete regression inventory (**207 tests** anticipated) and final gate, **CI PENDING**. The two existing initial physical production demonstrations (field medicine and researched field tool), the repair lifecycle, and the original independent labour/trade/purchasing examples are **starting illustrations**, not a ceiling. In future, feed more GM-authored processes through `rules/physical-work.js` and the authentic owner/production/consumption records only once there is actual source-backed capability. **#19 not checked.**
+
+
 ## #19 actual paid local sales influence only later verified seller pricing — isolated draft (12 November 2026)
 
 **17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** First truly independently funded living resident real purchase [PR #88](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/88) passed exact-head **205/205** three full parallel regression batches and final gate [CI #43271009539](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43271009539), merged `64dd92c73c853a0e2be440cda53aa9ee485107b0`. Real independent buying now conserves the originally earned buyer Scales, physical seller rations, seller proceeds, individual item custody and later personal consumption.
