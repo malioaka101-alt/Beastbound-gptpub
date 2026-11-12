@@ -169,6 +169,17 @@ function fixture(seed=994821,count=72){
  A.equal(Market.verify(w),false,'a resealed personal ration without original sale is rejected');
  acct.purchaseReceipts[0]=structuredClone(originalAcct);
  A.equal(Market.verify(w),true);
+ // Rehashing an additional fake ownership receipt alone is not enough:
+ // the same actual money-and-stock seller record must also exist.
+ const invented=structuredClone(originalAcct);
+ invented.purchaseSourceHash='e'.repeat(64);
+ invented.hash=hash(Object.fromEntries(
+  Object.entries(invented).filter(([key])=>key!=='hash')));
+ acct.purchaseReceipts.push(invented);
+ A.equal(Market.verify(w),false,
+  'orphaned fabricated personal purchased goods are not real merchant sales');
+ acct.purchaseReceipts.pop();
+ A.equal(Market.verify(w),true);
  const originalCash=p.cashScales;
  p.cashScales+=q.paidPriceScales;
  A.equal(Careers.verify(p),false,'spending cash cannot be silently restored as freshly earned wages');
