@@ -29,9 +29,13 @@ function sourceAt(w,day){
   if(!v||!Sim.verifyOriginalRouteHistory(w,r))
    throw Error('A genuine original recorded trade route is required for wholesale provenance');
   const changes=v.originalChanges||[];
-  if(v.disrupted&&!changes.length)
-   throw Error('An unrecorded private route closure cannot be treated as a real disruption');
-  const latest=changes.filter(x=>x.day<=day).at(-1);
+  // The original SIXDAY seller delivery happens before the MONTHLY
+  // route review when both occur on the same day (e.g. day 30).
+  // Source only strictly EARLIER original closures; a day-30 closure
+  // cannot retroactively restrict a day-30 morning delivery.
+  // A legacy unarchived closure has no authentic source and MUST NOT
+  // fabricate a historic route decision, either.
+  const latest=changes.filter(x=>x.day<day).at(-1);
   const disrupted=latest?.disrupted??false;
   // These are actual prior ORIGINAL month decisions, not new inferred
   // weather checks, merchant roll results or newly imported stock.
