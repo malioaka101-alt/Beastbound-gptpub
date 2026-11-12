@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## Current #19 — real paid demand accepted; original durable tool upkeep DRAFT (12 November 2026)
+
+**17/25 foundation targets accepted. #18 remains PAUSED OPEN; #19 remains ACTIVE OPEN.** Original genuine paid local buyer demand-sensitive future price [PR #89](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/89) passed **206/206** full three-batch regressions and mandatory final gate ([Actions #43301107330](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43301107330)) at exact head `5452086b08ab4fbca01743ad01df3088a7ec61b8`, and GitHub merged `145ba62bb362d1f6aaa2db59571a233bd42af369`.
+
+**Isolated next draft** `foundation/source-attested-living-tool-maintenance-20261112` uses only existing original physical-work, personally designed instrument, world time, finite reed material, honest Crafting roll and owned-tool history. Later genuine repair attempts record their original source witness after short logs rotate; older repairs are labelled honestly as legacy rather than falsely certified. This connects creation, development, wear and maintenance as one illustrative physical-asset lifecycle, **not a fixed set of allowed arts, items or businesses**, and mints no tools, money, abilities, status, rewards or favourable rolls. Focused new `tests/economy-original-tool-maintenance-provenance.test.js` and complete **207-test** exact-head CI/final integration are **PENDING**. The GM authors world and prose; existing physical and economy engines enforce only source-established outcomes. Never modify `saves/`, `requests/`, `results/` during this foundation. No Aerin/Jory cross-campaign migration.
+
+---
+
+
 ## #19 — Actual funded resident buying MERGED; later local verified demand-sensitive price DRAFT (12 November 2026)
 
 **17/25 accepted. #18 PAUSED OPEN; #19 ACTIVE OPEN.** [PR #88](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/88) passed **205/205** full regression tests in all three source batches and required final integration at exact head [CI #43271009539](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43271009539). GitHub merged `64dd92c73c853a0e2be440cda53aa9ee485107b0`: a genuinely paid, independently deciding local resident now can spend actual originally earned Scales on a real ration, moving the existing seller's stock/money and the buyer's existing physical custody exactly once, without player loot or invented customer funding.
