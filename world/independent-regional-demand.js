@@ -71,7 +71,9 @@ function verifyOne(w,row){
   q.cultureId!==Atlas.P[reg.polity]?.culture||
   !Array.isArray(q.originalLocalGoods)||
   JSON.stringify(q.originalLocalGoods)!==JSON.stringify(reg.goods)||
-  !Number.isInteger(q.day)||q.day<6||q.day%6!==0||
+  !Number.isInteger(q.day)||q.day<1||
+  !Number.isInteger(q.originalSixdayNumber)||q.originalSixdayNumber<1||
+  q.originalSixdayNumber>w.ticks.sixdays||
   q.day<p.birthSource.day||
   q.site!==People.siteFor(reg.id)||
   !verifyShift(q)||
@@ -96,14 +98,17 @@ function verify(w){
  const ledger=w?.independentMarketDemand;
  if(ledger===undefined)return true; // Existing world checkpoints remain valid.
  if(!ledger||ledger.origin!==LEDGER||ledger.version!==1||
-  !Number.isInteger(ledger.lastSixday)||ledger.lastSixday<6||
-  ledger.lastSixday%6!==0||
+  !Number.isInteger(ledger.lastSixday)||ledger.lastSixday<1||
+  !Number.isInteger(ledger.lastSixdayNumber)||
+  ledger.lastSixdayNumber<1||
+  ledger.lastSixdayNumber>w.ticks.sixdays||
   !Array.isArray(ledger.records)||ledger.records.length>280)
   return false;
  const seen=new Set();let previous=-1;
  for(const row of ledger.records){
   if(!verifyOne(w,row)||seen.has(row.id)||
-   row.day<previous||row.day>ledger.lastSixday)return false;
+   row.day<previous||row.day>ledger.lastSixday||
+   row.source.originalSixdayNumber>ledger.lastSixdayNumber)return false;
   seen.add(row.id);previous=row.day;
  }
  return true;
@@ -111,7 +116,7 @@ function verify(w){
 function snapshot(w,p,day){
  if(!People.verify(w,p)||p.status!=='active'||
   p.lastTickDay!==day||
-  !Number.isInteger(day)||day<6||day%6!==0)
+  !Number.isInteger(day)||day<1)
   return null;
  const reg=Atlas.R[p.regionId],eco=w.ecosystems?.[reg?.id],
   site=People.siteFor(p.regionId);
@@ -131,7 +136,8 @@ function snapshot(w,p,day){
   cultureId:Atlas.P[reg.polity].culture,language:p.language,
   originalLocalGoods:reg.goods.slice(),
   originalIndependentPresence:structuredClone(sh),
-  site,day,good:suggestedGood(p.originHash,day,reg),
+  site,day,originalSixdayNumber:w.ticks.sixdays,
+  good:suggestedGood(p.originHash,day,reg),
   ecologyAtDecision:{quality:eco.quality,pressure:eco.pressure,
    forage:eco.forage,water:eco.water},
   fatigueAtDecision:p.fatigue,
@@ -151,13 +157,20 @@ function snapshot(w,p,day){
  return row;
 }
 function sixday(w,day){
- if(!Number.isInteger(day)||day<6||day%6!==0||
-  !Number.isInteger(w?.lastTickDay)||day>w.lastTickDay+6||
+ if(!Number.isInteger(day)||day<1||
+  !Number.isInteger(w?.lastTickDay)||
   !Number.isInteger(w?.ticks?.sixdays)||w.ticks.sixdays<1||
   !verify(w))throw Error('Regional demand can only evolve at a verified original sixday');
  const prior=w.independentMarketDemand;
- if(prior&&day<=prior.lastSixday)
+ if(prior&&day===prior.lastSixday&&
+  w.ticks.sixdays===prior.lastSixdayNumber)
   return {newDecisions:0,publicExpressions:0,noMarketSaleInferred:true};
+ // A true tick incremented the original sixday count BEFORE this hook.
+ // Concord Days can shift the next tick's absolute day: no modulo clock.
+ if(day<=w.lastTickDay||
+  prior&&(day<=prior.lastSixday||
+   w.ticks.sixdays<=prior.lastSixdayNumber))
+  throw Error('Regional demand cannot invent a later world tick or reroll a prior choice');
  const people=Object.values(w.emergentPeople?.people||{})
   .sort((a,b)=>a.id.localeCompare(b.id));
  const additions=[];
@@ -167,12 +180,13 @@ function sixday(w,day){
  }
  if(!w.independentMarketDemand)
   w.independentMarketDemand={origin:LEDGER,version:1,
-   lastSixday:day,records:[]};
+   lastSixday:day,lastSixdayNumber:w.ticks.sixdays,records:[]};
  const ledger=w.independentMarketDemand;
  ledger.records.push(...additions);
  if(ledger.records.length>280)
   ledger.records.splice(0,ledger.records.length-280);
  ledger.lastSixday=day;
+ ledger.lastSixdayNumber=w.ticks.sixdays;
  if(!verify(w))
   throw Error('A locally expressed real person demand was not source-replayable');
  return {newDecisions:additions.length,
