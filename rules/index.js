@@ -484,6 +484,8 @@ function act(s,{system,operation,params={}}={}){
   case 'competition.fieldAssessment':return FieldCompetition.fieldAssessment(s,params);
   case 'npc.converse':return NPCConversations.converse(s,params);
   case 'npc.status':return NPCConversations.status(s,params);
+  case 'social.documentOwnedMaterial':return MaterialHandoffs.attestAsset(s,params);
+  case 'social.ownedMaterialHistory':return MaterialHandoffs.assetStatus(s,params);
   case 'social.materialHandoff':return MaterialHandoffs.offer(s,params);
   case 'social.materialHandoffsStatus':return MaterialHandoffs.status(s,params);
   case 'social.status':return SocialFabric.status(s,params);
