@@ -1,6 +1,15 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 
+## #18 — original independent public member awareness MERGED; limited voluntary coordinator work DRAFT (12 November 2026)
+
+**17/25 foundation targets verified; #18 remains OPEN.** [PR #79](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/79) passed **196/196 exact-head three-batch full regression + final integration gate** in [CI #43183366165](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43183366165) at `ef2733cc5f0baeb76afc9229c276b3a6ac99af6b` and GitHub merged `785806623d894ac4d70e600dd763c1a0968c2a99`. Real independently consenting members can privately notice/miss a genuinely published founder purpose change on the original world tick, form an independent personal view only if they actually know it, and never reveal private unknown thoughts to the player.
+
+**CURRENT ISOLATED #18 DRAFT:** `foundation/consented-coordinator-task-delegation-batch-20261112`, based on exact PR #79 merged content, connecting *actually accepted* original member coordination mandates to *already existing* original voluntary group work invitations. The coordinator independently chooses whether to propose one original freeform task; a separately consenting and locally present member independently chooses acceptance/hesitation/refusal. The original source-verified task ledger, actual original world work loop, member agency RNG and 20-minute scene are reused, not copied into a new command/organisation system. No compelled labour, direct money transfer, civic office or rank. Focused `tests/group-independent-coordinator-work-invitations.test.js` is automatically discovered in full **197-test three-batch+final gate CI**, NOT YET VERIFIED. Read `docs/CONSENTED_COORDINATOR_TASK_AUTHORITY.md`. No campaign `saves/`, `requests/`, `results/` touched; no imported Jory facts into Aerin's record, no website/hosting.
+
+---
+
+
 ## #18 — original 195-test three-batch gate MERGED; independent publication-driven NPC agency DRAFT (12 November 2026)
 
 **17/25 confirmed complete, #18 STILL OPEN.** Original public [PR #78](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/78) passed exact-head [Actions #43179195029](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43179195029), all **195/195 test files in three independent parallel full-coverage batches**, every batch reported success, and the required unchanged `test` gate passed automatic inventory validation and eight final cross-system tests. GitHub squash-merged `7ec1ca5459b114c0dd2dd48f6e80e4addfd0651b`. Original individual group members can independently stay, later leave, or reconcile after genuinely sourced sustained discord about actual changed organisational goals; they cannot be expelled by founder decree.
