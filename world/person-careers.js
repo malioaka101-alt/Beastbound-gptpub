@@ -113,7 +113,9 @@ function verify(p){
  const received=(c.tradePayments||[]).reduce((n,x)=>n+x.amountScales,0);
  const spending=require('./independent-local-purchases').verifyPersonal(p);
  if(!spending.valid||!Number.isSafeInteger(received)||
-  received!==(p.cashScales??0)+spending.spentScales)return false;
+  !Number.isSafeInteger(received+spending.receivedScales)||
+  received+spending.receivedScales!==
+    (p.cashScales??0)+spending.spentScales)return false;
  if(c.safetyIncidents!==undefined&&
   (!Array.isArray(c.safetyIncidents)||
    c.safetyIncidents.some(e=>!verifySafetyIncident(p,e))||
