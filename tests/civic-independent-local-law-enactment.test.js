@@ -56,11 +56,11 @@ function scene(s,ids,original){
   ...(original?{enactment:original}:{})});
  return s.log.length-1;
 }
-function caseHearing(s,ids,caseId,ruleId){
+function caseHearing(s,ids,caseId,ruleId,followUp=''){
  Core.event(s,'story','Two previously encountered independent reef people offer different witnessed accounts of a contested local passage event; neither is presumed guilty.',{
   origin:Civic.SESSION,polityId:charter.polityId,
   institutionId:charter.institutionId,location:s.world.location,
-  topic:'An actual contested local civic question about an existing public rule',
+  topic:'An actual contested local civic question about an existing public rule'+followUp,
   result:'The independent original civic institution hears two distinct accounts without an offence verdict, sanction or enforced settlement.',
   basis:'The two genuinely present free people each state an independently heard position and can disagree with the other in this particular local hearing.',
   participants:ids,visibility:'public',
@@ -221,7 +221,8 @@ function rule(s,ids,id,conduct){
    /original effective local rule/);
  A.equal(E.exportGame(s),caseBefore);
  A.notEqual(E.exportGame(s),legitimate,'a narrative witness is a distinct record, not a legal result');
- caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id);
+ caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id,
+  ' following a second separately witnessed local account');
  const duplicateBefore=E.exportGame(s);
  A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:caseIndex}),
