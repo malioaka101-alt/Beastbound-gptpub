@@ -310,6 +310,7 @@ function localRightsContext(s,p={}){
   const id=p.beastId,b=typeof id==='string'&&s.beasts?.[id],
    persons=require('./sapient-beast-persons');
   if(!b||b.id!==id||!b.sapientLife||!persons.verify(b)||
+   s.encounter?.beastId!==id||
    b.location!==s.world.location||b.away===true||
    !Number.isInteger(b.sapientLife.source?.encounteredAtMinute)||
    b.sapientLife.source.encounteredAtMinute>s.world.minutes)
