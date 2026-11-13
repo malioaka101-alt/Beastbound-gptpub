@@ -79,6 +79,14 @@ const concept=()=>({
  A.ok(free.gaps.some(x=>/Original mechanism is unverified/.test(x)));
  A.ok(free.gaps.some(x=>/Original medium is unverified/.test(x)));
  A.equal(free.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(free.envelope.effectGrade,null,
+  'an original unknown mechanism has no pre-assigned working grade');
+ A.equal(free.envelope.researchBudget.theoreticalDC,null,
+  'original mechanism cannot be forced into a fixed default DC');
+ A.equal(free.envelope.researchBudget.nominalMaterialsPerSixdayTalons,null,
+  'the engine cannot assign a made-up universal research fee');
+ A.equal(free.prerequisites.noveltyLeadRankRequired,null,
+  'no mandatory proficiency gate is inferred before the mechanism exists');
  A.equal(free.noPractisedPowerGranted,true);
  A.equal(free.noItemCreated,true);
  const arcane=call(s,'evaluate',{...unstudied,system:'arcane'});
