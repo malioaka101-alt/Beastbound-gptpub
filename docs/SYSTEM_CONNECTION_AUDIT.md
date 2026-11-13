@@ -28,6 +28,8 @@
 
 **The original person-custody balance is checked end-to-end:** new voluntarily accepted/refused handoff receipts, genuinely wage-funded independent purchases and sixday ration consumption now retain their real item before/after evidence **inside the existing material account and original receipts**. The same account verifier rejects an unexplained extra current holding for different people and goods, and keeps older receipt formats compatible. No new balance ledger, player-visible private stock, automatic consent, goods or currency.
 
+**No discontinuous stock under receipt replay:** the original existing personal custody verifier now walks the actual chronological gift, funded purchase and ration-use records as one per-item before/after chain. An individually source-hashed row cannot silently skip unowned stock between two receipts; old pre-provenance rows remain readable when they precede witnessed history, but may not be introduced in the middle to hide a forged gap. Existing actor, consent, market and privacy checks remain the source of authority.
+
 **Not merged:** employment agreements are not paid labour; posted demand is not funded purchases; beast consent and human powers are not universal ranks; local legal rights, supply sources and ecological change retain their respective original systems. #19 remains open for true actor/good generality; the goal is a connected foundation rather than additional individually scripted examples.
 
 ## Integrate first where overlap already exists

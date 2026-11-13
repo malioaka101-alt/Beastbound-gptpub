@@ -148,6 +148,15 @@ function fixture(seed=994821,count=72){
  phantom.held.clean_rations=2;
  A.throws(()=>H.validateAccount(phantom,p.actorId),/balance disagrees/,
   'the original funded sale may only credit its one physical item');
+ const fakeSale=structuredClone(acct),receipt={...fakeSale.history.at(-1),
+  heldBefore:47,heldAfter:48};
+ delete receipt.hash;
+ receipt.hash=hash(receipt);
+ fakeSale.history.push(receipt);
+ fakeSale.held.clean_rations=48;
+ A.throws(()=>H.validateAccount(fakeSale,p.actorId),
+  /unexplained transfer balance jump/,
+  'a second paid-looking receipt cannot leap from one purchased item to forty-eight');
  const tampered=structuredClone(acct);
  tampered.purchaseReceipts[0].heldAfter=2;
  A.throws(()=>H.validateAccount(tampered,p.actorId),

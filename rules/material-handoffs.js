@@ -33,6 +33,22 @@ function validateAccount(a,id){
  // Use existing original events, not a separate stock ledger. New entries
  // retain complete before/after proof; historical save rows still parse.
  const latestVerifiedHolding=new Map();
+ function sourceStep(item,before,after){
+  // A valid isolated receipt can still hide a created unit if the next
+  // purported receipt starts from a different stock balance. Existing
+  // source records must form one continuous chain per original good.
+  const prior=latestVerifiedHolding.get(item);
+  if(prior!==undefined&&prior!==before)
+   throw Error('Original personal material custody has an unexplained transfer balance jump');
+  latestVerifiedHolding.set(item,after);
+ }
+ function historicalStep(item){
+  // An old save can begin with original pre-provenance receipts, but
+  // the current code never writes an old-format receipt AFTER a new
+  // fully witnessed balance. Do not accept a forged downgrade.
+  if(latestVerifiedHolding.has(item))
+   throw Error('A legacy material receipt cannot interrupt a proven original custody chain');
+ }
  for(const record of a.history){
   if(!record||typeof record!=='object'||
      (record.origin!==ORIGIN&&
@@ -61,8 +77,8 @@ function validateAccount(a,id){
       [record.playerStockBefore,record.recipientStockBefore]
        .some(n=>n<0||n>100000))
      throw Error('Voluntary physical handoff must conserve or record a genuine refusal');
-    latestVerifiedHolding.set(record.item,record.recipientStockAfter);
-   }
+    sourceStep(record.item,record.recipientStockBefore,record.recipientStockAfter);
+   }else historicalStep(record.item);
   }else if(record.origin==='genuine-independent-funded-local-ration-purchase-v1'){
    const {hash:seal,...source}=record;
    if(seal!==hash(source)||record.actorId!==id||
@@ -79,8 +95,8 @@ function validateAccount(a,id){
        record.heldBefore<0||record.heldAfter>100000||
        record.heldAfter!==record.heldBefore+record.quantity)
      throw Error('An original funded purchase must credit exactly the paid-for material');
-    latestVerifiedHolding.set(record.item,record.heldAfter);
-   }
+    sourceStep(record.item,record.heldBefore,record.heldAfter);
+   }else historicalStep(record.item);
   }else{
    if(record.actorId!==id||record.item!=='clean_rations'||
      record.quantity!==1||!Number.isInteger(record.day))
@@ -93,8 +109,8 @@ function validateAccount(a,id){
        record.heldBefore<1||record.heldBefore>100000||
        record.remainingOwned!==record.heldBefore-record.quantity)
      throw Error('Independently used ration must retain its real original balance');
-    latestVerifiedHolding.set(record.item,record.remainingOwned);
-   }
+    sourceStep(record.item,record.heldBefore,record.remainingOwned);
+   }else historicalStep(record.item);
   }
  }
  for(const [item,quantity] of latestVerifiedHolding)
