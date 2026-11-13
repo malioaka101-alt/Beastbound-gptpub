@@ -7,6 +7,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  C=require('./core'),Health=require('./unified'),Time=require('./world'),
  Realm=require('../world/simulation'),Presence=require('../world/person-presence');
 const ORIGIN='voluntary-in-person-material-transfer-v1',WORK=6,DAY=1440;
+const PERSON_SALE='genuine-owner-chosen-funded-personal-material-sale-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const personSeed=(w,id)=>Crypto.createHash('sha256')
  .update(String(w.worldSeed)+'|'+id+'|physical-material-custody-v1')
@@ -20,6 +21,12 @@ function validateAccount(a,id){
  if(!a||a.actorId!==id||!Number.isInteger(a.rngState)||a.rngState<1||
   !a.held||typeof a.held!=='object'||Array.isArray(a.held)||
   !Array.isArray(a.history)||a.history.length>90||
+  (a.saleReceipts!==undefined&&
+   (!Array.isArray(a.saleReceipts)||a.saleReceipts.length>10000||
+    a.saleReceipts.some(x=>x?.origin!==PERSON_SALE||
+     x.source?.sellerActorId!==id||x.source?.accepted!==true||
+     x.sourceHash!==hash(x.source))||
+    new Set(a.saleReceipts.map(x=>x.sourceHash)).size!==a.saleReceipts.length))||
   (a.purchaseReceipts!==undefined&&
    (!Array.isArray(a.purchaseReceipts)||a.purchaseReceipts.length>10000||
     a.purchaseReceipts.some(x=>x?.origin!=='genuine-independent-funded-local-ration-purchase-v1'||
@@ -53,7 +60,8 @@ function validateAccount(a,id){
   if(!record||typeof record!=='object'||
      (record.origin!==ORIGIN&&
       record.origin!=='independent-personal-ration-use-v1'&&
-      record.origin!=='genuine-independent-funded-local-ration-purchase-v1'))
+      record.origin!=='genuine-independent-funded-local-ration-purchase-v1'&&
+      record.origin!==PERSON_SALE))
    throw Error('A recipient’s material history must have authentic provenance');
   if(record.origin===ORIGIN){
    const {hash:seal,...source}=record;
@@ -101,6 +109,45 @@ function validateAccount(a,id){
      throw Error('An original funded purchase must credit exactly the paid-for material');
     sourceStep(record.item,record.heldBefore,record.heldAfter);
    }else historicalStep(record.item);
+  }else if(record.origin===PERSON_SALE){
+   const q=record.source;
+   if(!q||record.sourceHash!==hash(q)||q.origin!==PERSON_SALE||
+      q.sellerActorId!==id||!Object.hasOwn(E.RESOURCES,q.item)||
+      !Number.isSafeInteger(q.quantity)||q.quantity<1||
+      !Number.isInteger(q.day)||q.day<0||
+      q.sellerHeldBefore<q.quantity||
+      q.sellerHeldAfter!==(q.accepted?
+       q.sellerHeldBefore-q.quantity:q.sellerHeldBefore)||
+      !Number.isSafeInteger(q.sellerHeldBefore)||
+      !Number.isSafeInteger(q.sellerHeldAfter)||
+      q.sellerHeldAfter<0||
+      q.sellerHeldBefore>100000||
+      q.buyerHeldAfter!==(q.accepted?
+       q.buyerHeldBefore+q.quantity:q.buyerHeldBefore)||
+      !Number.isSafeInteger(q.buyerHeldBefore)||
+      !Number.isSafeInteger(q.buyerHeldAfter)||
+      q.buyerHeldAfter>100000||
+      q.priceScales!==E.RESOURCES[q.item].value*100*q.quantity||
+      !Number.isSafeInteger(q.priceScales)||q.priceScales<1||
+      q.priceScales>100000000||
+      !Number.isInteger(q.sellerRngBefore)||q.sellerRngBefore<1||
+      !Number.isInteger(q.sellerRngAfter)||q.sellerRngAfter<1||
+      !Number.isInteger(q.drawBits)||q.drawBits<1||
+      q.sellerRngAfter!==q.drawBits||
+      q.sellerAccepted!==(q.drawBits/4294967296<.62)||
+      q.accepted!==q.sellerAccepted||
+      (q.accepted?
+       !C.conservedItems({sourceBefore:q.sellerHeldBefore,
+        sourceAfter:q.sellerHeldAfter,targetBefore:q.buyerHeldBefore,
+        targetAfter:q.buyerHeldAfter,amount:q.quantity})||
+       !C.conservedScales({sourceBefore:q.buyerScalesBefore,
+        sourceAfter:q.buyerScalesAfter,targetBefore:q.sellerScalesBefore,
+        targetAfter:q.sellerScalesAfter,amount:q.priceScales}):
+       q.buyerScalesAfter!==q.buyerScalesBefore||
+       q.sellerScalesAfter!==q.sellerScalesBefore)||
+      q.noCreatedGoodsOrScales!==true||q.noCompelledSale!==true)
+    throw Error('An independently chosen original seller receipt must conserve real original money and personal goods');
+   sourceStep(q.item,q.sellerHeldBefore,q.sellerHeldAfter);
   }else{
    if(record.actorId!==id||record.item!=='clean_rations'||
      record.quantity!==1||!Number.isInteger(record.day))
@@ -244,6 +291,118 @@ function offer(s,p={}){
   noContract:true,noCurrencyAward:true,message:accepted?
    n.name+' accepts the material, taking ownership of '+(quantity===1?'one actual item':quantity+' actual items')+'. No favour or return payment is promised.':
    n.name+' declines the item. You still own it; the conversation creates no agreement.'};
+}
+// Only an already independently living, physically present person may
+// exchange their ACTUALLY OWNED material for the player's actual Scales.
+// Their cash is the original career/market cash, not a new merchant bank.
+// The original resource reference value is merely this witnessed offer's
+// starting price; it is not a universal regional pricing law.
+function purchaseFromPerson(s,input={}){
+ if(!input||typeof input!=='object'||Array.isArray(input)||
+   !['item|npcId','item|npcId|quantity'].includes(
+    Object.keys(input).sort().join('|'))||
+   typeof input.npcId!=='string'||typeof input.item!=='string'||
+   !Object.hasOwn(E.RESOURCES,input.item))
+  throw Error('An actual present independent owner and existing item are required, not a chosen price or decision');
+ const quantity=C.int(input.quantity??1,'finite owner-sold material units',1,100000);
+ if(s.battle||s.encounter||s.table?.combatants?.player?.status&&
+   s.table.combatants.player.status!=='ok')
+  throw Error('An ongoing fight or incapacitation prevents personal trading');
+ const w=Realm.peek(s),day=Math.floor(s.world.minutes/DAY),
+  known=Presence.localStatus(s,w).people.find(x=>x.npcId===input.npcId),
+  n=known&&Presence.resolve(w,input.npcId,s.world.location,day);
+ if(!n||!Presence.proof(w,input.npcId,s.world.location,day,n.presence)||
+    !input.npcId.startsWith('emergent:'))
+  throw Error('A genuine independently present person with an established cash account is required');
+ const p=w.emergentPeople?.people?.[input.npcId.slice(9)],
+  People=require('../world/emergent-people'),
+  Market=require('../world/independent-local-purchases'),
+  personAcct=w.materialCustody?.accounts?.[input.npcId];
+ if(!p||p.actorId!==input.npcId||p.status!=='active'||
+    !People.verify(w,p)||!Market.verify(w)||!personAcct)
+  throw Error('An independently verified owner, real goods and original money history are required');
+ validateAccount(personAcct,input.npcId);
+ const owned=C.int(personAcct.held[input.item]??0,
+  'original individually owned material',0,100000);
+ if(owned<quantity)
+  throw Error('Independent seller cannot transfer materials that are not actually owned');
+ const original=personAcct.history.find(x=>
+  x.origin===ORIGIN&&x.item===input.item&&x.accepted&&
+  x.hash===hash(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='hash'))))||
+  personAcct.purchaseReceipts?.find(x=>x.item===input.item&&
+   x.hash===hash(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='hash'))));
+ if(!original)
+  throw Error('Seller stock must descend from an original independently received physical item');
+ const listed=E.RESOURCES[input.item].value;
+ if(!Number.isSafeInteger(listed)||listed<1)
+  throw Error('No original source-established reference price exists for this good');
+ const price=C.int(listed*quantity*100,'original witnessed item reference price',1,100000000);
+ const purse=C.int(Math.round(s.player.coins*100),'original player purse in Scales',0,100000000);
+ if(!Number.isFinite(s.player.coins)||Math.abs(s.player.coins*100-purse)>0.001||
+   purse<price)throw Error('A real accurate funded player purse is required');
+ const sellerCash=C.int(p.cashScales??0,'original independent seller cash',0,1000000000);
+ if(sellerCash+price>1000000000)throw Error('The original seller cash capacity would be exceeded');
+ const plan=Health.planItems(s,{[input.item]:quantity}), moved=plan.entries[0];
+ if(!C.conservedItems({sourceBefore:owned,sourceAfter:owned-quantity,
+  targetBefore:moved.before,targetAfter:moved.after,amount:quantity})||
+   !C.conservedScales({sourceBefore:purse,sourceAfter:purse-price,
+    targetBefore:sellerCash,targetAfter:sellerCash+price,amount:price}))
+  throw Error('Original seller-to-player money and item balances failed conservation');
+ const circumstanceHash=hash({sellerId:input.npcId,item:input.item,quantity,
+  day,location:s.world.location,ownerHeld:owned,presence:n.presence?.hash||null});
+ if(personAcct.lastSaleOffer?.circumstanceHash===circumstanceHash)
+  return {offered:false,repeated:true,accepted:false,noAdditionalSellerDecision:true,
+   message:'The independent owner has already decided about this unchanged sale offer.'};
+ const sellerRngBefore=personAcct.rngState,
+  random=draw(personAcct),sellerRngAfter=personAcct.rngState,
+  accepted=random<.62,before=s.world.minutes;
+ const q={origin:PERSON_SALE,sellerActorId:input.npcId,
+  sellerId:p.id,sellerOriginHash:p.originHash,sellerName:p.name,
+  buyerName:s.player.name,buyerSeed:s.seed,location:s.world.location,
+  day,worldMinute:before,
+  presenceHash:n.presence?.hash||null,originalOwnedSourceHash:
+   original.hash,item:input.item,quantity,
+  referenceValueScales:listed*100,priceScales:price,
+  sellerHeldBefore:owned,sellerHeldAfter:accepted?owned-quantity:owned,
+  buyerHeldBefore:moved.before,
+  buyerHeldAfter:accepted?moved.after:moved.before,
+  buyerScalesBefore:purse,buyerScalesAfter:accepted?purse-price:purse,
+  sellerScalesBefore:sellerCash,
+  sellerScalesAfter:accepted?sellerCash+price:sellerCash,
+  sellerRngBefore,sellerRngAfter,drawBits:sellerRngAfter,
+  sellerAccepted:accepted,accepted,
+  noCreatedGoodsOrScales:true,noCompelledSale:true,
+  noUniversalTradePrice:true};
+ const row={origin:PERSON_SALE,source:q,sourceHash:hash(q)};
+ personAcct.lastSaleOffer={circumstanceHash,accepted};
+ if(accepted){
+  Health.spend(s,{scales:price,reason:'Voluntary funded materials sale from '+p.name});
+  Health.applyItems(s,plan);
+  personAcct.held[input.item]=owned-quantity;
+  if(!personAcct.held[input.item])delete personAcct.held[input.item];
+  p.cashScales=sellerCash+price;
+  p.independentMarketSales||=[];p.independentMarketSales.push(structuredClone(row));
+  personAcct.saleReceipts||=[];personAcct.saleReceipts.push(structuredClone(row));
+ }
+ personAcct.history.push(row);
+ if(personAcct.history.length>90)personAcct.history.shift();
+ validateAccount(personAcct,input.npcId);
+ if(!People.verify(w,p)||!Market.verify(w))
+  throw Error('Original trade failed independent seller cash-and-custody reconciliation');
+ C.event(s,'trade',accepted?
+  p.name+' chooses to sell '+quantity+' genuinely owned '+E.RESOURCES[input.item].name+
+   ' for the witnessed offer price.':
+  p.name+' declines to sell the requested material; no goods or money move.',{
+  origin:PERSON_SALE,sellerId:input.npcId,item:input.item,quantity,
+  accepted,paidScales:accepted?price:0,sourceHash:row.sourceHash});
+ E.advance(s,WORK);Time.finalizeTime(s,before);Health.sync(s,{source:'legacy'});
+ return {offered:true,accepted,sellerId:input.npcId,
+  item:input.item,quantityMoved:accepted?quantity:0,
+  paidScales:accepted?price:0,sourceHash:row.sourceHash,
+  elapsedMinutes:WORK,noPlayerDice:true,noForcedNPCSale:true,
+  privateSellerCashNotDisclosed:true,
+  message:accepted?'A real voluntary sale is complete, with original material and Scales conserved.':
+   'The owner independently declines the sale. Nothing changes hands.'};
 }
 function status(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
@@ -530,6 +689,6 @@ function creditPurchasedRation(w,id,row){
  return r.hash;
 }
 
-module.exports={ORIGIN,ASSET_ORIGIN,offer,status,sixday,
+module.exports={ORIGIN,ASSET_ORIGIN,PERSON_SALE,offer,purchaseFromPerson,status,sixday,
  attestAsset,assetStatus,verifyAssetAttestations,validateAccount,
  SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation};
