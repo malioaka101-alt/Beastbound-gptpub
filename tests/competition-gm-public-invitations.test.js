@@ -154,8 +154,18 @@ function reach(s,site){
  A.equal(witness.actorId,person.actorId);
  A.equal(witness.personOriginHash,person.originHash);
  A.equal(Emergent.verifyPublicInvitationChoice(witness.independentDecision),true);
+ A.equal(witness.originalPresence.hash,
+   Emergent._debug.hash(Object.fromEntries(Object.entries(witness.originalPresence)
+    .filter(([key])=>key!=='hash'))));
  A.equal(act(s,'publicEvents').events[0].witnessedInterests[0].interested,choice.interested);
  const safe=E.exportGame(s),individualRng=person.rngState;
+ const presenceHash=witness.originalPresence.hash;
+ witness.originalPresence.hash='0'.repeat(64);
+ const corruptPresence=E.exportGame(s);
+ A.throws(()=>act(s,'publicEvents'),/lost their original source/);
+ A.equal(E.exportGame(s),corruptPresence);
+ witness.originalPresence.hash=presenceHash;
+ A.equal(E.exportGame(s),safe);
  A.throws(()=>act(s,'expressInterest',{eventId:'person_local_open_forum',npcId:person.actorId}),
    /already received/);
  A.equal(E.exportGame(s),safe);
