@@ -12,7 +12,8 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Demand=require('../world/independent-regional-demand'),
  Market=require('../world/independent-local-purchases'),
  Scarcity=require('../rules/original-local-market-scarcity'),
- PaidDemand=require('../rules/original-paid-demand-price');
+ PaidDemand=require('../rules/original-paid-demand-price'),
+ H=require('../rules/material-handoffs');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const DAY=1440;
 function fixture(seed=994821,count=72){
@@ -140,6 +141,18 @@ function fixture(seed=994821,count=72){
    .reduce((n,x)=>n+x.received,0)-1);
  const acct=w.materialCustody.accounts[p.actorId];
  A.equal(acct.held.clean_rations,1);
+ A.equal(acct.purchaseReceipts[0].heldBefore,0);
+ A.equal(acct.purchaseReceipts[0].heldAfter,1);
+ A.doesNotThrow(()=>H.validateAccount(acct,p.actorId));
+ const phantom=structuredClone(acct);
+ phantom.held.clean_rations=2;
+ A.throws(()=>H.validateAccount(phantom,p.actorId),/balance disagrees/,
+  'the original funded sale may only credit its one physical item');
+ const tampered=structuredClone(acct);
+ tampered.purchaseReceipts[0].heldAfter=2;
+ A.throws(()=>H.validateAccount(tampered,p.actorId),
+  /reconciliation|custody|source/,
+  'repricing or rewriting a paid purchase cannot mint physical owner stock');
  A.equal(Core.conservedItems({sourceBefore:q.sellerStockBefore,
   sourceAfter:q.sellerStockAfter,targetBefore:0,
   targetAfter:acct.held.clean_rations,amount:1}),true,

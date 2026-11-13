@@ -30,6 +30,9 @@ function validateAccount(a,id){
    !Object.hasOwn(E.RESOURCES,item)||!Number.isInteger(quantity)||
     quantity<0||quantity>100000))
   throw Error('A real recipient’s existing physical material custody needs reconciliation');
+ // Use existing original events, not a separate stock ledger. New entries
+ // retain complete before/after proof; historical save rows still parse.
+ const latestVerifiedHolding=new Map();
  for(const record of a.history){
   if(!record||typeof record!=='object'||
      (record.origin!==ORIGIN&&
@@ -43,6 +46,23 @@ function validateAccount(a,id){
       ![0,1].includes(record.quantityMoved)||
       record.accepted!==(record.quantityMoved===1))
     throw Error('An original witnessed material handoff must retain its source proof');
+   const fields=['playerStockBefore','playerStockAfter',
+    'recipientStockBefore','recipientStockAfter'];
+   if(fields.some(k=>record[k]!==undefined)){
+    if(!fields.every(k=>Number.isSafeInteger(record[k])))
+     throw Error('Voluntary physical handoff must retain both original balances');
+    if(record.accepted?
+      !C.conservedItems({sourceBefore:record.playerStockBefore,
+       sourceAfter:record.playerStockAfter,
+       targetBefore:record.recipientStockBefore,
+       targetAfter:record.recipientStockAfter,amount:record.quantityMoved}):
+      record.playerStockAfter!==record.playerStockBefore||
+      record.recipientStockAfter!==record.recipientStockBefore||
+      [record.playerStockBefore,record.recipientStockBefore]
+       .some(n=>n<0||n>100000))
+     throw Error('Voluntary physical handoff must conserve or record a genuine refusal');
+    latestVerifiedHolding.set(record.item,record.recipientStockAfter);
+   }
   }else if(record.origin==='genuine-independent-funded-local-ration-purchase-v1'){
    const {hash:seal,...source}=record;
    if(seal!==hash(source)||record.actorId!==id||
@@ -53,10 +73,33 @@ function validateAccount(a,id){
     record.noNewPhysicalItemCreated!==true||
     record.noFreeCurrencyAwarded!==true)
     throw Error('An independently paid physical ration must have a real sale source');
-  }else if(record.actorId!==id||record.item!=='clean_rations'||
-    record.quantity!==1||!Number.isInteger(record.day))
-   throw Error('Independent personal material use needs a real source receipt');
+   if(record.heldBefore!==undefined||record.heldAfter!==undefined){
+    if(!Number.isSafeInteger(record.heldBefore)||
+       !Number.isSafeInteger(record.heldAfter)||
+       record.heldBefore<0||record.heldAfter>100000||
+       record.heldAfter!==record.heldBefore+record.quantity)
+     throw Error('An original funded purchase must credit exactly the paid-for material');
+    latestVerifiedHolding.set(record.item,record.heldAfter);
+   }
+  }else{
+   if(record.actorId!==id||record.item!=='clean_rations'||
+     record.quantity!==1||!Number.isInteger(record.day))
+    throw Error('Independent personal material use needs a real source receipt');
+   // Legacy saved sixday uses were not source-hashed. Never pretend they
+   // received a newer proof or invalidate the old historical save.
+   if(record.heldBefore!==undefined||record.hash!==undefined){
+    const {hash:seal,...source}=record;
+    if(seal!==hash(source)||!Number.isSafeInteger(record.heldBefore)||
+       record.heldBefore<1||record.heldBefore>100000||
+       record.remainingOwned!==record.heldBefore-record.quantity)
+     throw Error('Independently used ration must retain its real original balance');
+    latestVerifiedHolding.set(record.item,record.remainingOwned);
+   }
+  }
  }
+ for(const [item,quantity] of latestVerifiedHolding)
+  if((a.held[item]??0)!==quantity)
+   throw Error('Original personal material custody balance disagrees with its latest witnessed transfer');
  const prior=[...a.history].reverse().find(h=>h.origin===ORIGIN);
  if(a.lastOffer!==null&&a.lastOffer!==undefined&&
     (!prior||a.lastOffer.circumstanceHash!==prior.circumstanceHash||
@@ -142,10 +185,14 @@ function offer(s,p={}){
   Health.applyItems(s,materialPlan);
   holder.held[p.item]=prior+1;
  }
+ const moved=materialPlan.entries[0];
  const witness={origin:ORIGIN,npcId:p.npcId,
   name:n.name,profession:n.profession,source:n.source,
   location:s.world.location,day,worldMinute:before,
   item:p.item,quantityOffered:1,quantityMoved:accepted?1:0,
+  playerStockBefore:moved.before,
+  playerStockAfter:accepted?moved.after:moved.before,
+  recipientStockBefore:prior,recipientStockAfter:accepted?prior+1:prior,
   accepted,recipientPresenceHash:n.presence?.hash||null,
   circumstanceHash,noCompelledAcceptance:true,
   noContract:true,noAutomaticTrust:true,noCurrencyAward:true};
@@ -191,12 +238,15 @@ function sixday(w,day){
   validateAccount(a,id);
   if((a.held.clean_rations||0)<1)continue;
   if(draw(a)>=.7)continue;
+  const heldBefore=a.held.clean_rations;
   a.held.clean_rations--;
   if(a.held.clean_rations===0)delete a.held.clean_rations;
-  a.history.push({origin:'independent-personal-ration-use-v1',
+  const used={origin:'independent-personal-ration-use-v1',
    actorId:id,item:'clean_rations',quantity:1,day,
-   noPlayerBenefit:true,remainingOwned:a.held.clean_rations||0});
+   noPlayerBenefit:true,heldBefore,remainingOwned:a.held.clean_rations||0};
+  a.history.push({...used,hash:hash(used)});
   if(a.history.length>90)a.history.shift();
+  validateAccount(a,id);
  }
 }
 
@@ -432,12 +482,13 @@ function preflightPurchasedRation(w,id,row){
 }
 function creditPurchasedRation(w,id,row){
  preflightPurchasedRation(w,id,row);
- const a=personAccount(w,id),q={
-  origin:SOURCE_PURCHASE,actorId:id,item:'clean_rations',quantity:1,
-  day:row.source.day,purchaseSourceHash:row.sourceHash,
-  noNewPhysicalItemCreated:true,noFreeCurrencyAwarded:true};
+ const a=personAccount(w,id),heldBefore=a.held.clean_rations??0,
+  q={origin:SOURCE_PURCHASE,actorId:id,item:'clean_rations',quantity:1,
+   day:row.source.day,purchaseSourceHash:row.sourceHash,
+   heldBefore,heldAfter:heldBefore+1,
+   noNewPhysicalItemCreated:true,noFreeCurrencyAwarded:true};
  const r={...q,hash:hash(q)};
- a.held.clean_rations=(a.held.clean_rations||0)+1;
+ a.held.clean_rations=q.heldAfter;
  a.history.push(r);
  if(a.history.length>90)a.history.shift();
  a.purchaseReceipts||=[];a.purchaseReceipts.push(structuredClone(r));
@@ -446,5 +497,5 @@ function creditPurchasedRation(w,id,row){
 }
 
 module.exports={ORIGIN,ASSET_ORIGIN,offer,status,sixday,
- attestAsset,assetStatus,verifyAssetAttestations,
+ attestAsset,assetStatus,verifyAssetAttestations,validateAccount,
  SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation};

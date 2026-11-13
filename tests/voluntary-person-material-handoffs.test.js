@@ -4,7 +4,8 @@
 // All states and file-backed turns are disposable: never modify Aerin.
 const A=require('node:assert/strict'),FS=require('node:fs'),OS=require('node:os'),
  Path=require('node:path'),E=require('../engine.js'),R=require('../rules'),
- Core=require('../rules/core'),Turn=require('../scripts/chat-turn.js');
+ Core=require('../rules/core'),H=require('../rules/material-handoffs'),
+ Turn=require('../scripts/chat-turn.js');
 const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-material-to-person-')),
  file=Path.join(dir,'test.json');
 const write=s=>FS.writeFileSync(file,E.exportGame(s)+'\n');
@@ -70,6 +71,25 @@ try{
  let after=load(),account=after.table.realm.materialCustody.accounts.otto;
  A.equal(after.player.inventory.clean_rations,priorFood-1);
  A.equal(account.held.clean_rations,1);
+ A.doesNotThrow(()=>H.validateAccount(account,'otto'));
+ const witness=account.history.find(x=>x.origin===H.ORIGIN);
+ A.equal(witness.playerStockBefore,priorFood);
+ A.equal(witness.playerStockAfter,priorFood-1);
+ A.equal(witness.recipientStockBefore,0);
+ A.equal(witness.recipientStockAfter,1);
+ const inflated=structuredClone(account);
+ inflated.held.clean_rations=2;
+ A.throws(()=>H.validateAccount(inflated,'otto'),/balance disagrees/,
+  'another privately held ration cannot appear without its original incoming receipt');
+ // Historical source-hashed offers lacked the newer balance fields. They
+ // remain readable without reinterpreting their old original decision.
+ const legacy=structuredClone(account),priorWitness=legacy.history.find(x=>x.origin===H.ORIGIN);
+ for(const key of ['playerStockBefore','playerStockAfter',
+  'recipientStockBefore','recipientStockAfter'])delete priorWitness[key];
+ delete priorWitness.hash;
+ priorWitness.hash=require('node:crypto').createHash('sha256')
+  .update(JSON.stringify(priorWitness)).digest('hex');
+ A.doesNotThrow(()=>H.validateAccount(legacy,'otto'));
  A.equal(Core.conservedItems({sourceBefore:priorFood,
   sourceAfter:after.player.inventory.clean_rations,
   targetBefore:0,targetAfter:account.held.clean_rations,amount:1}),true);
@@ -144,6 +164,12 @@ try{
  after=load();
  A.equal(after.player.inventory.marsh_reed,oldReed-1);
  A.equal(after.table.realm.materialCustody.accounts.sera.held.marsh_reed,1);
+ const secondOwner=after.table.realm.materialCustody.accounts.sera;
+ A.doesNotThrow(()=>H.validateAccount(secondOwner,'sera'));
+ const extraReeds=structuredClone(secondOwner);
+ extraReeds.held.marsh_reed=2;
+ A.throws(()=>H.validateAccount(extraReeds,'sera'),/balance disagrees/,
+  'unrelated physical goods and person identities share the same verified custody balance');
  A.equal(Core.conservedItems({sourceBefore:oldReed,
   sourceAfter:after.player.inventory.marsh_reed,targetBefore:0,
   targetAfter:after.table.realm.materialCustody.accounts.sera.held.marsh_reed,
