@@ -331,4 +331,14 @@ function status(s,p={}){
    notMagical:true,notYetGeneralArtefactCrafting:true};
  }),note:'Only source-backed owned physical prototypes, not an inventory of hypothetical spells, magical items or hidden remote data'};
 }
-module.exports={ORIGIN,build,calibrate,measure,repair,status,_debug:{checkItem,design,local,hash,genuineRepair}};
+// An actually manufactured, still-physically-held item may be witnessed by
+// the existing property ledger. This observation gives no output, title,
+// hidden person-owned object, supernatural effect or new inventory unit.
+function ownedAsset(s,id){
+ const t=checkItem(s,id);
+ if(t.owner!==s.player.name)
+  throw Error('Only an originally verified physically owned invention may be documented');
+ return {id:t.id,owner:t.owner,originalRoot:t.sourceHash,
+  quantity:1,physicalStatus:t.status};
+}
+module.exports={ORIGIN,build,calibrate,measure,repair,status,ownedAsset,_debug:{checkItem,design,local,hash,genuineRepair}};

@@ -209,8 +209,17 @@ const ASSET_ORIGIN='witnessed-existing-material-owner-and-stock-attestation-v1';
 const STOCK_OWNER='merchant:otto';
 function ownerStock(s,ownerId,item,{requireLocal=false}={}){
  const w=Realm.peek(s),day=Math.floor(s.world.minutes/DAY);
- if(!Object.hasOwn(E.RESOURCES,item))
-  throw Error('Only an actually existing material may be documented as owned');
+ // Individually authored, actually built physical tools are already owned
+ // objects even though they are not stackable global resource definitions.
+ // Never spawn an instrument or impose a new universal equipment catalogue.
+ if(!Object.hasOwn(E.RESOURCES,item)){
+  if(ownerId!=='player'||typeof item!=='string')
+   throw Error('Only a real personally owned physical invention may be documented outside original stackable resources');
+  const tool=require('./creation-prototype').ownedAsset(s,item);
+  return {kind:'existing-authored-personal-tool',count:tool.quantity,
+   source:'original completed and retained personally authored physical instrument',
+   ownerName:tool.owner,originalRoot:tool.originalRoot};
+ }
  if(ownerId==='player'){
   const n=s.player.inventory?.[item]??0;
   C.int(n,'actual player-owned material',0,100000);
@@ -275,7 +284,10 @@ function verifyAssetAttestations(s){
    seen.has(row.id)||
    row.ownerId!==q.ownerId||row.item!==q.item||
    row.quantity!==q.quantity||
-   !Object.hasOwn(E.RESOURCES,q.item)||
+   (!Object.hasOwn(E.RESOURCES,q.item)&&
+    (q.ownerId!=='player'||
+     q.ownerKind!=='existing-authored-personal-tool'||
+     q.quantity!==1||q.physicalStockAtWitness!==1))||
    typeof q.description!=='string'||
    q.description.trim()!==q.description||
    q.description.length<20||q.description.length>450||

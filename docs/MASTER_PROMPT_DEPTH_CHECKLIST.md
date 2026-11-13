@@ -12,6 +12,15 @@ This sets the **implementation direction** for #19 and #25: grow broadly composi
 
 ## How to use this checklist
 
+## #19 original GM-authored physical tools join existing property custody — next isolated draft (13 November 2026)
+
+**17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** The previous [PR #90](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/90) hardens a real authored individual tool's source-attested finite-reed maintenance and saved repairs; its exact-head full suite is separately under verification. **This independent follow-on branch is NOT an accepted milestone until its own CI confirms it.**
+
+The **original** `rules/material-handoffs.js` physical-asset attestation journal already knows real held inventory, actual independently accepted person-owned goods and actually owned merchant provisions. The original researched, physically built, personally owned wetland instrument did not count as a stackable `E.RESOURCES` item, so an authentic GM description could not yet enter the same documented ownership history. Extend `rules/creation-prototype.js` with a **read-only original physically built owned asset source** and let the **existing** property observation look up that source. A tool must already truly exist, belong to the player, and pass its original invention, manufacture and maintenance proofs. Only one actual instance may be described, with its same original source root. No special `water_indicator` string in the new custody path and no globally limited number of names: the mechanism is sourced from original actual built objects, not an invented catalogue.
+
+This **does not** grant new tools, construction, ownership, consent, magic, legal title, independent private holdings, transfer rights, valuation, wages, money or item trading. It does not imply that foreign NPCs own duplicates. Existing original stackable source items, merchant and independent handoff histories remain unchanged. **Next test:** `tests/economy-personally-authored-tool-property-attestations.test.js` validates actual separate original design/build -> owned asset attestation -> real wear/repair -> historical source replay, duplicate and forged quantity rejection, no inventory or money creation, and compatibility with earlier asset records. Full **208-test** 3-batch + final gate pending. Broader fantasy property rights, asset production, repairs and culturally/species-distinct custody stay open; this is an extensible example, never a cap.
+
+
 ## #19 durable maintenance of original GM-authored tools — isolated draft (12 November 2026)
 
 **17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN.** [PR #89](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/89) passed the exact-head **206/206** complete three-batch regression, inventory verification and final cross-system integration ([GitHub Actions #43301107330](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43301107330)); GitHub acknowledged squash merge `145ba62bb362d1f6aaa2db59571a233bd42af369`. A genuine later local quote may now reflect previously **paid** physical purchases, never mere expressions of interest.
