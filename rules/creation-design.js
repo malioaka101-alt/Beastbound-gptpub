@@ -162,9 +162,10 @@ function analysis(s,raw){
   gaps.push('Original mechanism is unverified: establish physical or supernatural causal evidence and an appropriate bounded action before any effect can operate');
  if(!knownMedium)
   gaps.push('Original medium is unverified: its physical form, limits and feasible execution must be established before manufacture, activation or use');
- const requiredSkill=ordinaryPrototype?0:novelty.rank;
- if(rank<requiredSkill)gaps.push('Earn genuine '+spec.skill+' skill rank '+requiredSkill+' or credible independently supported collaboration');
- if(!ordinaryPrototype&&p.novelty!=='rediscovery'&&
+ const requiredSkill=knownMechanism?(ordinaryPrototype?0:novelty.rank):null;
+ if(requiredSkill!==null&&rank<requiredSkill)
+  gaps.push('Earn genuine '+spec.skill+' skill rank '+requiredSkill+' or credible independently supported collaboration');
+ if(knownMechanism&&!ordinaryPrototype&&p.novelty!=='rediscovery'&&
   researchRank<novelty.rank)
   gaps.push('Obtain suitable documented research competence or an independently validated research team');
  if(ordinaryPrototype){
