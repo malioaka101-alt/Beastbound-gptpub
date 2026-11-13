@@ -353,7 +353,12 @@ function ownerStock(s,ownerId,item,{requireLocal=false}={}){
   throw Error('Private recipient goods cannot be documented without actual presence');
  const receipts=(s.table?.personalMaterialOffers||[]).filter(x=>
   x.npcId===npcId&&x.item===item&&x.accepted&&
-  x.quantityMoved===1&&x.hash===hash(Object.fromEntries(
+  // A historical one-unit gift and a source-verified larger finite bundle
+  // are both legitimate custody roots; never assume that all gifts are one.
+  Number.isSafeInteger(x.quantityOffered??1)&&
+  (x.quantityOffered??1)>0&&
+  x.quantityMoved===(x.quantityOffered??1)&&
+  x.hash===hash(Object.fromEntries(
    Object.entries(x).filter(([k])=>k!=='hash'))));
  if(!receipts.length)
   throw Error('A real independently accepted original handoff is required to establish known person-owned material');
