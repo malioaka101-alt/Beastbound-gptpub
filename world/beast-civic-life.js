@@ -15,10 +15,12 @@ const nonneg=v=>Number.isInteger(v)&&v>=0&&v<=10000000;
 const LOCAL_RULE='personally-witnessed-local-civic-enactment-v1';
 function competence(c){
  return c&&typeof c==='object'&&!Array.isArray(c)&&
-  Object.keys(c).sort().join('|')==='authoritySource|minimumNoticeDays|procedure|scope'&&
+  Object.keys(c).sort().join('|')==='authoritySource|minimumNoticeDays|procedure|requiredAssents|scope'&&
   valid(c.authoritySource,24,900)&&valid(c.procedure,24,900)&&
   valid(c.scope,16,600)&&Number.isInteger(c.minimumNoticeDays)&&
-  c.minimumNoticeDays>=1&&c.minimumNoticeDays<=360;
+  c.minimumNoticeDays>=0&&c.minimumNoticeDays<=360&&
+  Number.isInteger(c.requiredAssents)&&c.requiredAssents>=1&&
+  c.requiredAssents<=24;
 }
 // No universal offence menu, automatic punishment, seizure or assumed
 // consent: these are actual ORIGINAL free-person deliberations only.
@@ -39,7 +41,7 @@ function validLocalEnactment(inst,row){
   e.originalProcedure!==authority.procedure||
   !Number.isInteger(e.effectiveDay)||
   e.effectiveDay<row.source.sessionDay+authority.minimumNoticeDays||
-  e.effectiveDay>row.source.sessionDay+3650||
+  e.effectiveDay>10000000||
   !Array.isArray(e.ratifications)||e.ratifications.length!==d.participants.length||
   !Array.isArray(row.source.participatingBeasts)||
   row.source.participatingBeasts.length!==d.participants.length)
@@ -52,7 +54,7 @@ function validLocalEnactment(inst,row){
   new Set(e.ratifications.map(x=>x?.beastId)).size!==identities.size||
   e.ratifications.some(x=>!x||!identities.has(x.beastId)||
    typeof x.assented!=='boolean'||!valid(x.basis,18,600))||
-  e.ratifications.filter(x=>x.assented).length<2)
+  e.ratifications.filter(x=>x.assented).length<authority.requiredAssents)
   return false;
  return true;
 }
@@ -222,7 +224,7 @@ function proceeding(s,p={}){
  if(!validLocalEnactment(inst,receipt)||
   d.enactment!==undefined&&
    inst.sessions.some(x=>x.source.details.enactment?.id===d.enactment.id))
-  throw Error('An actual public local law requires a pre-existing competent charter, two independent consenting ratifiers, actual jurisdiction, published procedure and a future effective date');
+  throw Error('An actual public local law requires a pre-existing competent charter, its own actual assent threshold, separate witnessed individual positions, real jurisdiction and the charter notice period');
  inst.sessions.push(receipt);
  if(inst.sessions.length>80)inst.sessions.splice(0,20);
  append(inst,Math.floor(s.world.minutes/1440),'personally-witnessed-civic-session',
