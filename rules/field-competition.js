@@ -210,7 +210,7 @@ function verifyJudgedHistory(s){
    q.reward!== (q.result==='Unplaced'?0:event.reward)||
    !Number.isInteger(q.judgedAtMinute)||
    Math.floor(q.judgedAtMinute/DAY)+1!==q.eventDay||
-   q.judgedAtMinute>s.world.minutes-DURATION||
+   q.judgedAtMinute>s.world.minutes||
    q.judgedAtMinute%DAY<OPEN||q.judgedAtMinute%DAY>CLOSE||
    !n||n.used!==true||n.submittedCheckId!==q.checkId||
    n.enteredAtMinute!==q.judgedAtMinute||
