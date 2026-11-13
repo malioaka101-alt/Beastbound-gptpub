@@ -108,11 +108,11 @@ A.equal(Homes.valid(back.table.realm,
  back.table.realm.emergentHouseholds.households[home.id]),true);
 home.lifeHistory.receipts[1].source.renewedAgreement[0]=false;
 A.equal(Homes.valid(w,home),false);
-home.lifeHistory.receipts[1]=original;
+home.lifeHistory.receipts[1]=structuredClone(original);
 A.equal(Homes.valid(w,home),true);
 home.lifeHistory.receipts[1].source.day+=500;
 A.equal(Homes.valid(w,home),false);
-home.lifeHistory.receipts[1]=original;
+home.lifeHistory.receipts[1]=structuredClone(original);
 A.deepEqual(home.lifeHistory.receipts[1],original);
 A.equal(Homes.valid(w,home),true);
 // Former saves without the optional transition source are not retrofitted
