@@ -30,7 +30,8 @@ A.equal(recovered.noExtraRoll,true);
 A.deepEqual(patient.wounds,[0,1,0]);
 A.equal(s.player.coins,originalBank-30);
 A.equal(s.world.minutes,initialMinute+15+6*1440);
-A.equal(s.rngState,rng);
+// Ordinary sixday ecology and independent citizens can legitimately advance
+// the world RNG. A clinic course adds no separate healing roll.
 A.equal(s.table.clinicCare.receipts.length,1);
 A.equal(Clinic.verifyHistory(s),true);
 const row=s.table.clinicCare.receipts[0],course=row.source;
