@@ -1,7 +1,9 @@
 'use strict';
 // Foundation #21: local *admission* is not an invented tournament score.
 // All states and saves here are disposable, with original work already done.
-const A=require('node:assert/strict'),E=require('../engine.js'),
+const A=require('node:assert/strict'),FS=require('node:fs'),
+ OS=require('node:os'),Path=require('node:path'),
+ E=require('../engine.js'),Turn=require('../scripts/chat-turn.js'),
  R=require('../rules'),Clock=require('../rules/world'),
  Core=require('../rules/core'),Realm=require('../world/simulation'),
  Emergent=require('../world/emergent-people');
@@ -87,6 +89,41 @@ function until(s,day,time=13*60){
  A.equal(E.exportGame(s),saved);
  for(let i=0;i<105;i++)Core.event(s,'world','Ordinary scenes rotate after the event '+i,{i});
  A.equal(act(E.importGame(E.exportGame(s)),'publicEvents').events[0].actualOpenEntrants.length,1);
+}
+{
+ // The private chat executor must preserve a real entry once and reject
+ // a second turn ID trying to obtain another decision or free status change.
+ const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'beastbound-entry-'));
+ try{
+  const file=Path.join(dir,'save.json'),s=newGame(818012),
+   e=event('verified_source_entry_chat_04');
+  act(s,'announceLocal',e);
+  act(s,'expressInterest',{eventId:e.eventId});
+  R.act(s,{system:'craft',operation:'fieldPoultice',params:{}});
+  const id=s.table.physicalProductionHistory[0].id;
+  act(s,'submitWork',{eventId:e.eventId,
+   sourceOwner:'physical-production',sourceId:id});
+  until(s,e.eventDay);
+  FS.writeFileSync(file,E.exportGame(s)+'\\n');
+  const request={id:'witnessed_entry_first_818012',mode:'rule',
+   system:'competition',operation:'enter',params:{
+    eventId:e.eventId,sourceOwner:'physical-production',sourceId:id}};
+  const first=Turn.execute(file,request);
+  A.equal(first.applied,true);
+  A.equal(first.output.rules.registered,true);
+  A.equal(first.output.rules.noJudgedScoreRankOrReward,true);
+  A.equal(Turn.execute(file,request).duplicate,true);
+  const final=FS.readFileSync(file,'utf8');
+  const status=Turn.execute(file,{id:'witnessed_entry_status_818012',
+   mode:'rule',system:'competition',operation:'publicEvents',
+   params:{eventId:e.eventId}});
+  A.equal(status.applied,false);
+  A.equal(status.output.rules.events[0].actualOpenEntrants.length,1);
+  A.equal(FS.readFileSync(file,'utf8'),final);
+  A.throws(()=>Turn.execute(file,{...request,
+   id:'witnessed_entry_illicit_repeat_818012'}),/already had one/);
+  A.equal(FS.readFileSync(file,'utf8'),final);
+ }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
 {
  // Previously published words alone do not grant procedural permission;
