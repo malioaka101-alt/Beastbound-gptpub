@@ -48,7 +48,7 @@ function textField(v,name,min=5,max=250){
 function input(raw){
  if(!raw||typeof raw!=='object'||Array.isArray(raw)||
   Object.keys(raw).some(k=>!['title','purpose','medium','system','function',
-  'magnitude','range','area','duration','novelty','materials','researchId','target'].includes(k)))
+  'magnitude','range','area','duration','novelty','materials','researchId','target','basedOnDesignId'].includes(k)))
   throw Error('Creation accepts only a proposed purpose and bounded mechanism, never invented rank, item stats, resources, DC or result');
  const p={
   title:textField(raw.title,'invention title',4,100),
@@ -59,6 +59,12 @@ function input(raw){
   magnitude:raw.magnitude??null,range:raw.range??null,area:raw.area??null,
   duration:raw.duration??null,novelty:raw.novelty??null
  };
+ if(raw.basedOnDesignId!==undefined){
+  if(typeof raw.basedOnDesignId!=='string'||
+     !/^design_[1-9][0-9]*$/.test(raw.basedOnDesignId))
+   throw Error('A concept continuation must name a genuine earlier saved design ID');
+  p.basedOnDesignId=raw.basedOnDesignId;
+ }
  if(raw.target!==undefined){
   // Targets are GM-authored proposals, not a fixed list of permissible
   // inventions. Only an actual researched/implemented mechanism can later
@@ -142,6 +148,28 @@ function sealedResearch(s,p,grade){
 // Preserve unfinished GM-led concepts inside the existing design ledger.
 // This is not a separate class of craft, mystery points, automatic research,
 // new power discipline, or a generic 'try anything' output executor.
+// A later GM idea may build upon a genuinely SAVED earlier idea without a
+// second innovation engine. This checks source and identity, not feasibility,
+// accrued practice, consent, scientific proof or a working mechanical effect.
+function verifiedEarlierConcept(s,id){
+ if(id===undefined)return null;
+ const prior=s.table?.creationDesigns?.records?.[id],src=prior?.source;
+ if(!prior||prior.id!==id||prior.origin!==ORIGIN||
+    !src||src.id!==id||src.origin!==ORIGIN||
+    src.creator!==s.player?.name||
+    prior.sourceHash!==hash(src)||
+    prior.proposalHash!==hash(prior.proposal)||
+    src.proposalHash!==prior.proposalHash||
+    src.scopeHash!==prior.scopeHash||
+    !Number.isInteger(src.authoredAtMinute)||src.authoredAtMinute<0||
+    !Number.isInteger(src.finishedAtMinute)||
+    src.finishedAtMinute<src.authoredAtMinute||
+    src.finishedAtMinute>s.world.minutes||
+    prior.implementedEffect!==false)
+  throw Error('Concept continuation requires an intact original personally authored prior design');
+ return {id,sourceHash:prior.sourceHash,proposalHash:prior.proposalHash,
+  finishedAtMinute:src.finishedAtMinute};
+}
 function incompleteConcept(s,p){
  const required=['medium','system','function','magnitude','range','area','duration','novelty'];
  const omitted=required.filter(k=>p[k]===null);
@@ -174,6 +202,7 @@ function incompleteConcept(s,p){
 }
 function analysis(s,raw){
  const p=input(raw);
+ if(p.basedOnDesignId!==undefined)verifiedEarlierConcept(s,p.basedOnDesignId);
  if(['medium','system','function','magnitude','range','area','duration','novelty']
   .some(k=>p[k]===null))return incompleteConcept(s,p);
  const
@@ -349,6 +378,7 @@ function analysis(s,raw){
 function evaluate(s,p={}){return analysis(s,p);}
 function draft(s,p={}){
  const v=analysis(s,p);
+ const earlier=verifiedEarlierConcept(s,v.proposal.basedOnDesignId);
  if(s.battle||s.encounter)
   throw Error('A dangerous active encounter prevents a settled technical-design session');
  const combat=s.table?.combatants?.player;
@@ -367,7 +397,10 @@ function draft(s,p={}){
   origin:ORIGIN,id,creator:s.player.name,
   authoredAtMinute:old,finishedAtMinute:s.world.minutes,
   location:s.world.location,proposalHash:hash(v.proposal),skill:v.prerequisites.skill,
-  earnedRank:v.prerequisites.earnedRank,scopeHash:v.scopeHash};
+  earnedRank:v.prerequisites.earnedRank,scopeHash:v.scopeHash,
+  ...(earlier?{basedOnDesignId:earlier.id,
+   basedOnSourceHash:earlier.sourceHash,
+   basedOnProposalHash:earlier.proposalHash}: {})};
  const entry={id,origin:ORIGIN,source,sourceHash:hash(source),
   proposalHash:hash(v.proposal),
   proposal:v.proposal,scopeHash:v.scopeHash,envelope:v.envelope,
@@ -392,6 +425,14 @@ function status(s,p={}){
  return {designs:rows.slice(-35).map(x=>{
   if(x.origin!==ORIGIN||x.sourceHash!==hash(x.source)||
     x.source.id!==x.id||x.scopeHash!==x.source.scopeHash||
+    (x.source.basedOnDesignId!==undefined&&(()=>{
+     const previous=verifiedEarlierConcept(s,x.source.basedOnDesignId);
+     return x.proposal?.basedOnDesignId!==previous.id||
+      x.source.basedOnSourceHash!==previous.sourceHash||
+      x.source.basedOnProposalHash!==previous.proposalHash||
+      previous.finishedAtMinute>x.source.authoredAtMinute||
+      Number(previous.id.slice(7))>=Number(x.id.slice(7));
+    })())||
     (x.proposalHash!==undefined&&
      (x.proposalHash!==hash(x.proposal)||x.source.proposalHash!==x.proposalHash))||
     !['unproven-concept','prototyped','trial-failed'].includes(x.status)||
@@ -401,6 +442,7 @@ function status(s,p={}){
    medium:x.envelope.medium,system:x.envelope.system,
    boundMechanism:x.envelope.function,effectGrade:x.envelope.effectGrade,
    gaps:x.gaps.slice(),status:x.status,prototypeId:x.prototypeId||null,
+   ...(x.source.basedOnDesignId?{developsFrom:x.source.basedOnDesignId}:{}),
    ...(x.personalDevelopment?{personalExpression:{
     progress:x.personalDevelopment.progress,required:PERSONAL_REQUIRED,
     identityMilestone:x.personalDevelopment.identity?.milestone,
