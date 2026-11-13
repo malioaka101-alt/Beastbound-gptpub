@@ -66,4 +66,44 @@ function perform(s,job){
   witnessIndex,witnessHash,rollIndex,rollHash,
   originalWorkbench,originalRoll};
 }
-module.exports={plan,perform};
+// A read-only verifier for the ORIGINAL completed physical-work witnesses.
+// Shared by real medicine, built objects and repairs. It is not a new work
+// executor, a roll oracle or a caller-supplied way to grant output.
+function verifyReceipt({originalWorkbench:w,originalRoll:e,witnessHash,rollHash,
+  inputs,inputKey,startedAtMinute,finishedAtMinute,minutes}={}){
+ if(!w||!e||typeof w!=='object'||typeof e!=='object'||
+    w.type!=='world'&&w.type!=='research'||e.type!=='roll'||
+    !w.details||typeof w.details!=='object'||Array.isArray(w.details)||
+    !e.details||typeof e.details!=='object'||Array.isArray(e.details)||
+    typeof w.text!=='string'||w.text.trim().length<18||
+    typeof e.text!=='string'||!e.text.trim()||
+    w.day!==e.day||w.time!==e.time||
+    !Number.isInteger(w.day)||w.day<0||
+    proof(w)!==witnessHash||proof(e)!==rollHash)
+  return false;
+ if(!inputs||typeof inputs!=='object'||Array.isArray(inputs)||
+    Object.keys(inputs).length===0||
+    Object.keys(inputs).some(k=>!Number.isInteger(inputs[k])||inputs[k]<1)||
+    !['inputs','input','replacement'].includes(inputKey)||
+    JSON.stringify(w.details[inputKey])!==JSON.stringify(inputs))
+  return false;
+ if(!Number.isInteger(startedAtMinute)||startedAtMinute<0||
+    !Number.isInteger(finishedAtMinute)||
+    !Number.isInteger(minutes)||minutes<1||minutes>480||
+    finishedAtMinute-startedAtMinute!==minutes)
+  return false;
+ const c=e.details;
+ if(!Array.isArray(c.dice)||c.dice.length!==1||
+    !Number.isInteger(c.roll)||c.roll<1||c.roll>20||
+    c.dice[0]!==c.roll||
+    !Number.isInteger(c.modifier)||c.modifier< -100||c.modifier>100||
+    !Number.isInteger(c.dc)||c.dc<2||c.dc>40)
+  return false;
+ const naturalBonus=C.naturalAdjustment(c.roll),
+  total=c.roll+c.modifier+naturalBonus,
+  margin=total-c.dc,degree=C.degree(margin);
+ return c.naturalBonus===naturalBonus&&c.total===total&&
+  c.margin===margin&&c.degree===degree&&
+  c.success===(margin>=0)&&c.progress===C.progress(degree);
+}
+module.exports={plan,perform,verifyReceipt};

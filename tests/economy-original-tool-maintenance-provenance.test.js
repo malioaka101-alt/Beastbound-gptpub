@@ -6,7 +6,8 @@
 const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  E=require('../engine.js'),R=require('../rules'),
  Prototype=require('../rules/creation-prototype'),
- Production=require('../rules/physical-production-ledger');
+ Production=require('../rules/physical-production-ledger'),
+ Work=require('../rules/physical-work');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const act=(s,operation,params={})=>R.act(s,{system:'creation',operation,params});
 const spec=()=>({title:'Original Hand-Crafted Wetland Gauge',
@@ -67,6 +68,22 @@ A.equal(hash(receipt.originalRoll),receipt.rollHash);
 A.equal(receipt.originalWorkbench.details.prototypeId,tool);
 A.equal(receipt.originalRoll.details.success,receipt.success);
 A.equal(receipt.noNewItemOrGrade,true);
+A.equal(Work.verifyReceipt({
+ originalWorkbench:receipt.originalWorkbench,originalRoll:receipt.originalRoll,
+ witnessHash:receipt.workHash,rollHash:receipt.rollHash,
+ inputs:receipt.replacement,inputKey:'replacement',
+ startedAtMinute:receipt.fromMinute,finishedAtMinute:receipt.finishMinute,
+ minutes:50
+}),true,'maintenance and medicine use the same real-work verification');
+const alteredRoll=structuredClone(receipt.originalRoll);
+alteredRoll.details.total++;
+A.equal(Work.verifyReceipt({
+ originalWorkbench:receipt.originalWorkbench,originalRoll:alteredRoll,
+ witnessHash:receipt.workHash,rollHash:hash(alteredRoll),
+ inputs:receipt.replacement,inputKey:'replacement',
+ startedAtMinute:receipt.fromMinute,finishedAtMinute:receipt.finishMinute,
+ minutes:50
+}),false,'resealed inconsistent Crafting totals remain unsupported');
 A.equal(Prototype._debug.genuineRepair(receipt,tool),true);
 A.equal(s.table.physicalProductionHistory[0].sourceHash,originalProduct);
 A.equal(Production.verify(s),true);

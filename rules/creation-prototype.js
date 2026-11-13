@@ -77,6 +77,12 @@ function genuineRepair(row,id){
    Math.min(5,row.durabilityBefore+2):row.durabilityBefore)&&
   JSON.stringify(row.replacement)===JSON.stringify({marsh_reed:1})&&
   typeof row.success==='boolean'&&
+  Work.verifyReceipt({
+   originalWorkbench:w,originalRoll:c,
+   witnessHash:row.workHash,rollHash:row.rollHash,
+   inputs:row.replacement,inputKey:'replacement',
+   startedAtMinute:row.fromMinute,finishedAtMinute:row.finishMinute,minutes:50
+  })&&
   w?.type==='world'&&w.details?.origin===ORIGIN&&
   w.details.prototypeId===id&&w.details.location===row.location&&
   w.details.fromMinute===row.fromMinute&&
@@ -165,7 +171,11 @@ function build(s,p={}){
  const trial={startMinute:old,finishMinute:s.world.minutes,
   location:site.site,resources:{marsh_reed:2},
   check:{roll:roll.roll,dc:roll.dc,degree:roll.degree,margin:roll.margin},
-  witnessHash:precheckHash,checkWitnessHash,success:roll.success};
+  witnessHash:precheckHash,checkWitnessHash,success:roll.success,
+  // Preserve original one-roll/workbench evidence for the same shared
+  // verifier after short scene logs rotate; legacy hash-only trials remain.
+  originalWorkbench:completed.originalWorkbench,
+  originalRoll:completed.originalRoll};
  d.attempts.push(trial);
  const trialIndex=d.attempts.length;
  if(!roll.success){

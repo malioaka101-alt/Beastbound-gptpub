@@ -5,6 +5,7 @@
 // output only on actual success. All fixtures are disposable.
 const A=require('node:assert/strict'),E=require('../engine.js'),
  R=require('../rules'),P=require('../rules/physical-production-ledger'),
+ Work=require('../rules/physical-work'),
  Crypto=require('node:crypto');
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const report=s=>R.act(s,{system:'craft',operation:'productionHistory',params:{}});
@@ -53,6 +54,22 @@ function fresh(seed){return E.newGame({name:'Disposable Source Production',seed,
   A.equal(s.player.inventory.clean_rations||0,previous.clean_rations-1);
   A.equal(s.player.inventory.healing_balm||0,
    (previous.healing_balm||0)+(result.succeeded?1:0));
+  A.equal(Work.verifyReceipt({
+   originalWorkbench:orig.originalWorkbench,originalRoll:orig.originalRoll,
+   witnessHash:orig.witnessHash,rollHash:orig.rollHash,
+   inputs:orig.usedMaterials,inputKey:'inputs',
+   startedAtMinute:orig.preparedMinute,finishedAtMinute:orig.finishedMinute,
+   minutes:70
+  }),true);
+  const fabricated=structuredClone(orig.originalRoll);
+  fabricated.details.modifier++;
+  A.equal(Work.verifyReceipt({
+   originalWorkbench:orig.originalWorkbench,originalRoll:fabricated,
+   witnessHash:orig.witnessHash,rollHash:digest(fabricated),
+   inputs:orig.usedMaterials,inputKey:'inputs',
+   startedAtMinute:orig.preparedMinute,finishedAtMinute:orig.finishedMinute,
+   minutes:70
+  }),false,'resealing an impossible check does not make its roll arithmetic true');
   A.equal(orig.rollHash,digest(orig.originalRoll));
   A.equal(orig.witnessHash,digest(orig.originalWorkbench));
   A.equal(P.verify(s),true);
@@ -84,6 +101,25 @@ function fresh(seed){return E.newGame({name:'Disposable Source Production',seed,
   A.equal(s.player.inventory.marsh_reed,before-2);
   A.notEqual(s.rngState,rng,'exactly the original physical work check rolls');
   A.equal(outcome.consumed.marsh_reed,2);
+  const originalTrial=s.table.creationDesigns.records[design.id].attempts.at(-1);
+  A.equal(Work.verifyReceipt({
+   originalWorkbench:originalTrial.originalWorkbench,
+   originalRoll:originalTrial.originalRoll,
+   witnessHash:originalTrial.witnessHash,
+   rollHash:originalTrial.checkWitnessHash,
+   inputs:originalTrial.resources,inputKey:'input',
+   startedAtMinute:originalTrial.startMinute,
+   finishedAtMinute:originalTrial.finishMinute,minutes:85
+  }),true,'newly completed original builds retain their true common witnesses');
+  const falseRoll=structuredClone(originalTrial.originalRoll);
+  falseRoll.details.total++;
+  A.equal(Work.verifyReceipt({
+   originalWorkbench:originalTrial.originalWorkbench,
+   originalRoll:falseRoll,witnessHash:originalTrial.witnessHash,
+   rollHash:digest(falseRoll),inputs:originalTrial.resources,inputKey:'input',
+   startedAtMinute:originalTrial.startMinute,
+   finishedAtMinute:originalTrial.finishMinute,minutes:85
+  }),false);
   const reportRows=report(s).personallyDocumentedProduction;
   A.equal(reportRows.length,1);
   A.equal(reportRows[0].kind,'existing-authored-tool-trial');

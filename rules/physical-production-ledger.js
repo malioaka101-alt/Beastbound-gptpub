@@ -6,7 +6,7 @@
 // permissions, engineering successes, or knowledge of private citizens.
 const Crypto=require('node:crypto');
 const E=require('../engine.js'),C=require('./core'),
-  Prototype=require('./creation-prototype');
+  Prototype=require('./creation-prototype'),Work=require('./physical-work');
 const ORIGIN='original-real-physical-production-conservation-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function fieldSource(s,index,originalReceiptHash=null){
@@ -17,7 +17,12 @@ function fieldSource(s,index,originalReceiptHash=null){
  const h=originalReceiptHash&&(!current||hash(current)!==originalReceiptHash)?
   Object.values(s.table?.fieldCraftDaily||{}).find(x=>
    hash(x)===originalReceiptHash):current;
- if(!h||h.recipe!=='field_poultice'||
+ if(!h||!Work.verifyReceipt({
+  originalWorkbench:h.originalWorkbench,originalRoll:h.originalRoll,
+  witnessHash:h.witnessHash,rollHash:h.rollHash,inputs:h.usedMaterials,
+  inputKey:'inputs',startedAtMinute:h.preparedMinute,
+  finishedAtMinute:h.finishedMinute,minutes:70
+ })||h.recipe!=='field_poultice'||
   !['crossing','academy'].includes(h.site)||
   !h.originalWorkbench||!h.originalRoll||
   hash(h.originalWorkbench)!==h.witnessHash||
@@ -61,6 +66,21 @@ function prototypeSource(s,designId,index){
  const h=d.attempts[index];
  if(!h||!Number.isInteger(h.startMinute)||h.startMinute<0||
   h.finishMinute-h.startMinute!==85||
+  (h.originalWorkbench!==undefined||h.originalRoll!==undefined)&&(
+   !Work.verifyReceipt({
+    originalWorkbench:h.originalWorkbench,originalRoll:h.originalRoll,
+    witnessHash:h.witnessHash,rollHash:h.checkWitnessHash,
+    inputs:h.resources,inputKey:'input',
+    startedAtMinute:h.startMinute,finishedAtMinute:h.finishMinute,minutes:85
+   })||
+   h.originalWorkbench.details.origin!==Prototype.ORIGIN||
+   h.originalWorkbench.details.designId!==designId||
+   h.originalWorkbench.details.location!==h.location||
+   h.originalRoll.details.roll!==h.check?.roll||
+   h.originalRoll.details.margin!==h.check?.margin||
+   h.originalRoll.details.dc!==h.check?.dc||
+   h.originalRoll.details.success!==h.success
+  )||
   typeof h.location!=='string'||!E.LOCATIONS[h.location]||
   JSON.stringify(h.resources)!==JSON.stringify({marsh_reed:2})||
   !Number.isInteger(h.check?.roll)||h.check.roll<1||h.check.roll>20||
