@@ -123,7 +123,11 @@ function materialReplantIntent(action){
 function materialPersonIntent(s,action){
  const m=action.match(/^(?:give|offer|hand|pass)\s+(.+?)\s+to\s+(.+)$/);
  if(!m)return null;
- const item=namedMaterial(m[1]);
+ // The requested bundle is sourced from existing inventory; it does not
+ // select the other person's response or create stock.
+ const offered=m[1].trim(),bundle=offered.match(/^(\d+)\s+(.+)$/);
+ const quantity=bundle?Number(bundle[1]):1;
+ const item=namedMaterial(bundle?bundle[2]:offered);
  if(!item)return null;
  const target=m[2].trim().replace(/^(?:the|a|an)\s+/,'');
  const beast=s.encounter?.beastId?s.beasts?.[s.encounter.beastId]:null;
@@ -140,7 +144,7 @@ function materialPersonIntent(s,action){
   throw Error(matching.length?
    'Several actually present people match; name the exact recipient':
    'No single actually present person matches this intended recipient');
- return {npcId:matching[0].npcId,item};
+ return {npcId:matching[0].npcId,item,quantity};
 }
 function materialOfferIntent(s,action){
  if(action==='feed'||action==='offer food')return {item:'clean_rations'};
@@ -415,9 +419,9 @@ function execute(savePath, req) {
    }else if(materialPersonIntent(s,action)){
      // A real targeted person gets a choice and physical custody of an
      // accepted item. Neither speech nor gift promises reciprocal favour.
-     const {item,npcId}=materialPersonIntent(s,action);
+     const {item,npcId,quantity}=materialPersonIntent(s,action);
      response.handoff=Rules.act(s,{system:'social',
-       operation:'materialHandoff',params:{npcId,item}});
+       operation:'materialHandoff',params:{npcId,item,quantity}});
      response.message=response.handoff.message;
    }else if(materialOfferIntent(s,action)){
      const {item}=materialOfferIntent(s,action);
