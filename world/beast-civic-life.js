@@ -131,6 +131,44 @@ function validLocalCase(inst,row,w){
  const current=inst.sessions.find(x=>x.source?.eventHash===src.eventHash);
  return !current||hash(current.source)===hash(src);
 }
+// A party's later formal challenge is a real, personally witnessed filing
+// under the law's OWN authored appeal process, not an adjudicator's ruling.
+// This uses the existing institution's original case and session sources.
+function validLocalChallenge(inst,row,w){
+ const d=row?.source?.details,q=d?.caseChallenge;
+ if(q===undefined)return row?.source?.challengeAuthorityHash===undefined&&
+  row?.source?.challengeRegionId===undefined&&
+  row?.source?.challengedCaseSource===undefined;
+ const original=row?.source?.challengedCaseSource;
+ if(!caseCompetence(inst.origin.caseCompetence)||
+  row.source.challengeAuthorityHash!==inst.originHash||
+  !q||typeof q!=='object'||Array.isArray(q)||
+  Object.keys(q).sort().join('|')!==
+   'appealProcess|caseId|challengerId|grounds|id|requestedReview'||
+  !ident(q.id)||!ident(q.caseId)||!valid(q.challengerId,3,100)||
+  !valid(q.grounds,20,900)||!valid(q.requestedReview,18,900)||
+  !valid(q.appealProcess,18,900)||
+  d.visibility!=='public'||inst.origin.visibility!=='public'||
+  d.enactment!==undefined||d.caseReview!==undefined||
+  d.office!==undefined||d.treaty!==undefined||
+  !original||!validLocalCase(inst,{source:original},w)||
+  original.details?.caseReview?.caseId!==q.caseId||
+  ![original.details.caseReview.claimantId,
+    original.details.caseReview.respondentId].includes(q.challengerId)||
+  original.citedLaw?.details?.enactment?.appealProcess!==q.appealProcess||
+  !Array.isArray(d.participants)||!d.participants.includes(q.challengerId)||
+  !Array.isArray(row.source.participatingBeasts)||
+  !row.source.participatingBeasts.some(p=>p.id===q.challengerId&&
+   original.participatingBeasts.some(k=>
+    k.id===p.id&&k.lifeSourceHash===p.lifeSourceHash))||
+  row.source.challengeRegionId!==original.caseRegionId||
+  row.source.sessionDay<original.sessionDay||
+  (Atlas.LOCATION_REGION[d.location]!==undefined&&
+   Atlas.LOCATION_REGION[d.location]!==row.source.challengeRegionId))
+  return false;
+ const current=inst.sessions.find(x=>x.source?.eventHash===original.eventHash);
+ return !current||hash(current.source)===hash(original);
+}
 const localRegion=s=>Atlas.LOCATION_REGION[s.world?.location]||
  require('./lived-places').get(s,s.world?.location)?.regionId||null;
 function realm(s){return require('./simulation').ensure(s);}
@@ -199,13 +237,17 @@ function verifyInstitution(w,p,id){
     x.source.event?.details?.origin!==SESSION||
     x.source.event?.details?.location!==x.source.details.location||
     hash(x.source.event.details)!==hash(x.source.details)||
-    !validLocalEnactment(inst,x)||!validLocalCase(inst,x,w))||
+    !validLocalEnactment(inst,x)||!validLocalCase(inst,x,w)||
+    !validLocalChallenge(inst,x,w))||
   new Set(inst.sessions.filter(x=>x.source?.details?.enactment).
    map(x=>x.source.details.enactment.id)).size!==
   inst.sessions.filter(x=>x.source?.details?.enactment).length||
   new Set(inst.sessions.filter(x=>x.source?.details?.caseReview).
    map(x=>x.source.details.caseReview.caseId)).size!==
-  inst.sessions.filter(x=>x.source?.details?.caseReview).length)
+  inst.sessions.filter(x=>x.source?.details?.caseReview).length||
+  new Set(inst.sessions.filter(x=>x.source?.details?.caseChallenge).
+   map(x=>x.source.details.caseChallenge.id)).size!==
+  inst.sessions.filter(x=>x.source?.details?.caseChallenge).length)
   throw Error('Institutional origin, witnessed law or historical decisions were changed');
  return inst;
 }
@@ -309,6 +351,16 @@ function proceeding(s,p={}){
   inst.sessions.some(x=>x.source?.details?.caseReview?.caseId===
    d.caseReview.caseId)))
   throw Error('A contested case needs the original effective local rule, unique case and independently authored hearing competence');
+ // A later challenge is real only if its affected person belongs to an
+ // originally witnessed case, and the actual rule authorises the cited
+ // freeform appeal process. The GM cannot change the historical case or
+ // invent a favourable verdict by giving the petition a persuasive name.
+ const challenged=d.caseChallenge?inst.sessions.find(x=>
+  x.source?.details?.caseReview?.caseId===d.caseChallenge.caseId):null;
+ if(d.caseChallenge&&(!caseCompetence(inst.origin.caseCompetence)||
+  !challenged||inst.sessions.some(x=>
+   x.source?.details?.caseChallenge?.id===d.caseChallenge.id)))
+  throw Error('A genuine new appeal needs the existing case and an original competent local process');
  // An existing freeform personally recorded site note can corroborate
  // physical CONTEXT, not a named actor's alleged deed. Never use a remote
  // annotation or fabricate a fresh observation as case proof.
@@ -330,9 +382,13 @@ function proceeding(s,p={}){
    caseRegionId:localRegion(s),
    ...(siteNote?{caseWitnessMinute:s.world.minutes,
     siteEvidence:structuredClone(siteNote)}:{}),
-   citedLaw:structuredClone(cited.source)})};
+   citedLaw:structuredClone(cited.source)}),
+  ...(d.caseChallenge===undefined?{}:{challengeAuthorityHash:inst.originHash,
+   challengeRegionId:localRegion(s),
+   challengedCaseSource:structuredClone(challenged.source)})};
  const receipt={origin:SESSION,source,seal:hash(source)};
  if(!validLocalEnactment(inst,receipt)||!validLocalCase(inst,receipt,w)||
+  !validLocalChallenge(inst,receipt,w)||
   d.enactment!==undefined&&
    inst.sessions.some(x=>x.source.details.enactment?.id===d.enactment.id))
   throw Error('An actual public local law requires a pre-existing competent charter, its own actual assent threshold, separate witnessed individual positions, real jurisdiction and the charter notice period');
@@ -355,6 +411,8 @@ function proceeding(s,p={}){
     effectiveDay:d.enactment.effectiveDay}:{}),
   ...(d.caseReview?{witnessedCaseId:d.caseReview.caseId,
     contestedStatementsOnly:true,noJudicialFindingOrEnforcement:true}:{}),
+  ...(d.caseChallenge?{witnessedChallengeId:d.caseChallenge.id,
+    challengeSubmitted:true,noGrantedReviewOrRemedy:true}:{}),
   legalOutcomeOnlyAsWitnessed:true,noUnchosenMemberOrPowers:true,
   noAutomaticOffenceOrEnforcement:true};
 }
@@ -457,6 +515,18 @@ function status(s,p={}){
       noteIsNotProofOfOffence:true
      }}:{}),
      allegationUnproven:true,noFindingOrRemedyExecuted:true
+    })).slice(-20),
+   publicCaseChallenges:x.sessions.filter(e=>e.source.details.caseChallenge&&
+    e.source.details.visibility==='public').map(e=>({
+     challengeId:e.source.details.caseChallenge.id,
+     caseId:e.source.details.caseChallenge.caseId,
+     challengerId:e.source.details.caseChallenge.challengerId,
+     grounds:e.source.details.caseChallenge.grounds,
+     requestedReview:e.source.details.caseChallenge.requestedReview,
+     originalAppealProcess:e.source.details.caseChallenge.appealProcess,
+     sourceEventHash:e.source.eventHash,
+     receivedButNotAdjudicated:true,
+     noReviewOrRemedyGranted:true
     })).slice(-20),
    publicOffices:x.sessions.filter(e=>e.source.details.visibility==='public'&&
      e.source.details.office).map(e=>({
