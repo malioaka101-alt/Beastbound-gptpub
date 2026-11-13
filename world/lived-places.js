@@ -148,6 +148,10 @@ function note(s,p={}){
  if(place.notes.length>=120)throw Error('This bounded local journal needs archival review before further additions');
  const body={source:SOURCE,placeId:p.placeId,minute:s.world.minutes,
   category:p.category,name:p.name.trim(),context:p.context.trim(),
+  // The authored note can concern any place. Only genuinely being THERE
+  // at the moment of recording establishes the limited in-person-site
+  // provenance needed by a later civic inquiry. This proves no offence.
+  witnessedAtSite:s.world.location===p.placeId,
   noAutomaticNPCPresence:true,noAutomaticResourceOrOffice:true};
  const seal=hash(body);
  if(place.notes.some(n=>n.seal===seal))return {alreadyKnown:true,noTimeElapsed:true};
