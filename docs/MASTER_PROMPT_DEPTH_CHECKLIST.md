@@ -2,6 +2,12 @@
 
 **Created:** 8 November 2026. **Authority:** `/mnt/data/Beastbound_Realms_Unified_Master_Prompt.md`, the original 57-section Unified Master Prompt, existing verified campaign facts, and the current engine. This is **not** a list of things that must all be finished before play. No campaign is active.
 
+## Foundational authoring consolidation — original creation proposals, not a new item category (13 November 2026)
+
+**Current accepted progress remains 17/25; #18 PAUSED OPEN; #19 ACTIVE OPEN; #25 also OPEN.** New isolated `foundation/generalized-source-backed-authoring-20261113` updates the already existing `rules/creation-design.js` concept pipeline so the GM may propose **new textual targets, physical media and mechanisms** without adding a whitelist entry for each imagined invention. Existing eight supported mechanism primitives and discipline identities still apply their original verified maths when selected; unfamiliar mechanisms/media remain explicitly **unverified ideas only** and do not inherit a budget or actual effect. The original `creation.prototype` remains restricted to its presently validated real water measurement model until another source-backed operating mechanism is established. No new material, skill, rank, item, effect, dice or NPC fact appears by describing a proposal. Existing `tests/creation-design.test.js` now probes varied proposals, lack of granted effect, unchanged original RNG and resources, failure of unsupported construction, and save replay. One existing test file is extended rather than adding a separate item-specific test suite. The exact-head **207-test** three-batch and final integration remain unverified at draft time.
+
+This sets the **implementation direction** for #19 and #25: grow broadly compositional, source-verifiable action/property/lifecycle foundations first; only implement unique world mechanisms where genuinely necessary, not one engine subsystem per illustrative object. Examples are authored states exercised through the shared mechanisms, never a finite canon list.
+
 ## How to use this checklist
 
 ## #19 durable maintenance of original GM-authored tools — isolated draft (12 November 2026)
