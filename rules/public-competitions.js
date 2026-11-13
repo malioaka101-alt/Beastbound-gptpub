@@ -403,6 +403,41 @@ function verifyWorkReview(s,row,item){
 function reviewWork(s,p={}){
  return require('./public-event-review').review(s,p);
 }
+// The seasonal board is a READ-ONLY projection of locally witnessed reviews.
+// One admitted person's original work counts at most once per event; a later
+// independent second opinion stays visible but does not double-credit it.
+// No universal league, private reputation, automatic points or new rank owner.
+function localSeasonBoard(rows){
+ const groups=new Map();
+ for(const row of rows){
+  const a=row.source,policy=a.workReview;
+  if(!policy)continue;
+  const scope=[a.regionId,a.season,policy.professionalDomain].join('|');
+  if(!groups.has(scope))groups.set(scope,{regionId:a.regionId,
+   season:a.season,discipline:policy.professionalDomain,people:new Map()});
+  const group=groups.get(scope);
+  for(const entry of row.entrants||[]){
+   if(!entry.source.registered)continue;
+   const reviews=(row.reviews||[]).filter(x=>
+    x.source.entrySourceHash===entry.sourceHash&&x.source.willing);
+   if(!reviews.length)continue;
+   const who=entry.source.actorId;
+   if(!group.people.has(who))group.people.set(who,{
+    actorId:who,verifiedCompletions:0,verifiedAttempts:0,events:[]});
+   const x=group.people.get(who);
+   x.verifiedAttempts++;
+   if(reviews[0].source.benchmarkMet===true)x.verifiedCompletions++;
+   x.events.push(row.id);
+  }
+ }
+ return [...groups.values()].map(g=>({regionId:g.regionId,
+  season:g.season,discipline:g.discipline,
+  standings:[...g.people.values()].sort((a,b)=>
+   b.verifiedCompletions-a.verifiedCompletions||
+   b.verifiedAttempts-a.verifiedAttempts||
+   a.actorId.localeCompare(b.actorId)),
+  note:'Only locally witnessed original-work completions. This is not an official league rank, power grade, qualification, prize entitlement or universal contest score.'}));
+}
 function status(s,p={}){
  shape(p,[],['eventId']);
  if(p.eventId!==undefined&&!validId(p.eventId))
@@ -410,7 +445,7 @@ function status(s,p={}){
  const notices=Object.values(s.table?.competitionNotices||{})
   .filter(x=>x?.origin===ORIGIN&&
    (p.eventId===undefined||x.id===p.eventId));
- return {events:notices.map(row=>{
+ return {seasonalWorkBoard:localSeasonBoard(notices),events:notices.map(row=>{
   const a=verify(s,row);
   return {eventId:a.eventId,title:a.title,venue:a.venue,
    eventDay:a.eventDay,startsAtMinuteOfDay:a.startsAtMinuteOfDay,
