@@ -53,7 +53,9 @@ function input(raw){
  const p={
   title:textField(raw.title,'invention title',4,100),
   purpose:textField(raw.purpose,'practical cultural or technical purpose',12,700),
-  medium:raw.medium,system:raw.system,function:raw.function,
+  medium:textField(raw.medium,'proposed medium',3,100),
+  system:raw.system,
+  function:textField(raw.function,'proposed mechanism',3,120),
   magnitude:raw.magnitude,range:raw.range,area:raw.area,
   duration:raw.duration,novelty:raw.novelty
  };
@@ -64,8 +66,7 @@ function input(raw){
   // alone never changes world state or authorises a technique.
   p.target=textField(raw.target,'proposed target',3,160);
  }
- if(!MEDIUMS.includes(p.medium)||!Object.hasOwn(SYSTEMS,p.system)||
-   !Object.hasOwn(FUNCTIONS,p.function)||
+ if(!Object.hasOwn(SYSTEMS,p.system)||
    !RANGE.includes(p.range)||!AREA.includes(p.area)||
    !DURATION.includes(p.duration)||!NOVELTY.includes(p.novelty))
   throw Error('An actual medium, technique mechanism, scale and creation novelty are required');
@@ -135,7 +136,11 @@ function sealedResearch(s,p,grade){
  return {documented:!!legitimate};
 }
 function analysis(s,raw){
- const p=input(raw),spec=SYSTEMS[p.system],skill=FUNCTIONS[p.function],
+ const p=input(raw),spec=SYSTEMS[p.system],
+  knownMechanism=Object.hasOwn(FUNCTIONS,p.function),
+  knownMedium=MEDIUMS.includes(p.medium),
+  skill=knownMechanism?FUNCTIONS[p.function]:{
+   family:null,meaning:'Original GM-authored unverified mechanism; no working effect, energy budget or capability is established by this proposal.'},
   rank=C.int(s.player?.skills?.[spec.skill]?.rank??0,
    'earned '+spec.skill+' skill',0,5),
   researchRank=C.int(s.player?.skills?.research?.rank??0,'earned research rank',0,5),
@@ -147,9 +152,14 @@ function analysis(s,raw){
  // researcher. Its real materials, physical trial and skill check will decide
  // if it works. Advanced, supernatural and genuinely novel effects do need
  // independent knowledge and proof.
- const ordinaryPrototype=p.system==='mundane'&&p.magnitude<=1&&
+ const ordinaryPrototype=knownMechanism&&knownMedium&&
+  p.system==='mundane'&&p.magnitude<=1&&
   ['rediscovery','variant'].includes(p.novelty)&&
   ['sense','signal','ward','shape','move','support'].includes(p.function);
+ if(!knownMechanism)
+  gaps.push('Original mechanism is unverified: establish physical or supernatural causal evidence and an appropriate bounded action before any effect can operate');
+ if(!knownMedium)
+  gaps.push('Original medium is unverified: its physical form, limits and feasible execution must be established before manufacture, activation or use');
  const requiredSkill=ordinaryPrototype?0:novelty.rank;
  if(rank<requiredSkill)gaps.push('Earn genuine '+spec.skill+' skill rank '+requiredSkill+' or credible independently supported collaboration');
  if(!ordinaryPrototype&&p.novelty!=='rediscovery'&&
@@ -173,7 +183,7 @@ function analysis(s,raw){
   !s.table?.materialRecords?.[m.id]?.verified);
  if(hasUnverifiedMaterials)gaps.push('Novel material identities and grades require authenticated discovery and appraisal');
  let budget=null;
- if(p.system==='arcane'){
+ if(p.system==='arcane'&&knownMechanism){
   budget=arcaneBudget(p);
   if(budget.unsupportedMagnitude||budget.minCircle===null||
      !status.verified||status.stage<Math.max(1,budget.minCircle??10))
@@ -202,14 +212,14 @@ function analysis(s,raw){
     rng:p.range==='self'?'touch':p.range,area:p.area,
     projectionM:p.magnitude}),kind:'provisional physical technique budget'};
   }
- }else if(p.system==='soul'){
+ }else if(p.system==='soul'&&knownMechanism){
   const minimum=p.function==='sense'?1:
    p.function==='signal'?3:p.function==='mend'?4:
    p.function==='ward'?2:4;
   budget={minimumPhaseForThisConcept:minimum};
   if(!status.verified||status.stage<minimum)
    gaps.push('The actual Soul phase does not establish the required spiritual anatomy and engineering basis');
- }else if(p.system==='rift'){
+ }else if(p.system==='rift'&&knownMechanism){
   const min=p.function==='sense'?1:p.function==='signal'?2:
    p.function==='move'?3:p.function==='ward'?4:5;
   budget={minimumRiftStepForThisConcept:min};
@@ -226,6 +236,11 @@ function analysis(s,raw){
  }else if(['runes','formations','alchemy','healing'].includes(p.system)){
   gaps.push('Specialist progress, material and stability standards require source-backed individual records; ordinary Crafting rank alone cannot grant supernatural effects');
  }
+ // An unfamiliar primitive has no verified cross-discipline scaling or
+ // executable budget. The GM can still keep the idea, research it and
+ // later establish an original bounded mechanism rather than a fixed menu.
+ if(!knownMechanism&&['arcane','meridian','soul','rift'].includes(p.system))
+  gaps.push('No proved energy or physiology model yet supports this original mechanism; no spell, technique, stage or cost is inferred');
  if(p.function==='mend'&&p.magnitude>=2)
   gaps.push('This primitive still only supports superficial repair; major healing needs another verified medical mechanism');
  if(p.duration==='permanent')
