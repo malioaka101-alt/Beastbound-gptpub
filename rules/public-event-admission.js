@@ -86,6 +86,8 @@ function verify(s,row,item){
   q.entryMinute<row.source.scheduledAtMinute||
   q.entryMinute>row.source.scheduledAtMinute+a.windowMinutes||
   q.entryMinute>s.world.minutes||
+  (Number.isInteger(o.completedAtMinute)&&o.completedAtMinute>q.entryMinute)||
+  (Number.isInteger(o.completedDay)&&o.completedDay>Math.floor(q.entryMinute/DAY))||
   !row.interests.some(x=>x.actorId===q.actorId&&
    x.source?.voluntarilyInterested===true)||
   !qualifies(row,o)||
