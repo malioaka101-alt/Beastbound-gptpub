@@ -30,6 +30,9 @@
 
 **No discontinuous stock under receipt replay:** the original existing personal custody verifier now walks the actual chronological gift, funded purchase and ration-use records as one per-item before/after chain. An individually source-hashed row cannot silently skip unowned stock between two receipts; old pre-provenance rows remain readable when they precede witnessed history, but may not be introduced in the middle to hide a forged gap. Existing actor, consent, market and privacy checks remain the source of authority.
 
+**Original material handoff accepts actual quantities:** The existing `rules/material-handoffs.js` player-to-person operation and `scripts/chat-turn.js` freeform material interpretation now carry a source-owned positive whole quantity, rather than fixing every volunteered bundle to one unit. An independently present recipient still decides; the existing owner and recipient balances conserve that exact original good, the source receipt is durable, and the player sees only the witnessed decision, not a private inventory. Earlier single-item receipts and caller operations remain valid. The two already-established examples of finite rations and gathered reeds demonstrate the common path without authoring a new item or merchant. No bulk-transport, general NPC sales, legal transfer rights or arbitrary-item generator is claimed.
+
+
 **Not merged:** employment agreements are not paid labour; posted demand is not funded purchases; beast consent and human powers are not universal ranks; local legal rights, supply sources and ecological change retain their respective original systems. #19 remains open for true actor/good generality; the goal is a connected foundation rather than additional individually scripted examples.
 
 ## Integrate first where overlap already exists

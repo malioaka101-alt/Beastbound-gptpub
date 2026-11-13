@@ -57,10 +57,14 @@ function validateAccount(a,id){
    throw Error('A recipient’s material history must have authentic provenance');
   if(record.origin===ORIGIN){
    const {hash:seal,...source}=record;
+   // Earlier witnessed single-item receipts remain valid; newly offered
+   // quantities are finite, source-owned and independently accepted.
+   const offered=record.quantityOffered===undefined?1:record.quantityOffered;
    if(seal!==hash(source)||record.npcId!==id||
       !Object.hasOwn(E.RESOURCES,record.item)||
-      ![0,1].includes(record.quantityMoved)||
-      record.accepted!==(record.quantityMoved===1))
+      !Number.isSafeInteger(offered)||offered<1||offered>100000||
+      ![0,offered].includes(record.quantityMoved)||
+      record.accepted!==(record.quantityMoved===offered))
     throw Error('An original witnessed material handoff must retain its source proof');
    const fields=['playerStockBefore','playerStockAfter',
     'recipientStockBefore','recipientStockAfter'];
@@ -149,9 +153,11 @@ function responseChance(person,item){
 }
 function offer(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
-    Object.keys(p).sort().join('|')!=='item|npcId'||
+    !['item|npcId','item|npcId|quantity'].includes(
+     Object.keys(p).sort().join('|'))||
     typeof p.npcId!=='string'||typeof p.item!=='string')
-  throw Error('A material handoff requires one actually present person and one real carried item, never a caller-selected response, quantity or trust change');
+  throw Error('A material handoff requires one actually present person and one real carried item, never a caller-selected decision or trust change');
+ const quantity=C.int(p.quantity??1,'actually offered physical item quantity',1,100000);
  if(s.battle||s.encounter)
   throw Error('Resolve the immediate encounter or battle before handing ordinary goods to a person');
  const state=s.table?.combatants?.player?.status;
@@ -177,7 +183,7 @@ function offer(s,p={}){
  const journal=s.table?.personalMaterialOffers;
  if(journal!==undefined&&!Array.isArray(journal))
   throw Error('Personally witnessed material handoffs need a valid original journal');
- const materialPlan=Health.planItems(s,{[p.item]:-1});
+ const materialPlan=Health.planItems(s,{[p.item]:-quantity});
  const world=Realm.ensure(s),holder=personAccount(world,p.npcId);
  const prior=C.int(holder.held[p.item]??0,'actual recipient-held material',0,100000);
  const circumstanceHash=hash({npcId:p.npcId,item:p.item,day,
@@ -189,26 +195,27 @@ function offer(s,p={}){
    noAdditionalDecision:true,noAutomaticRelationship:true,
    message:'The person has already considered this same material offer under unchanged circumstances.'};
  }
- const accepted=prior<100000&&draw(holder)<responseChance(n,p.item),
+ const accepted=prior+quantity<=100000&&draw(holder)<responseChance(n,p.item),
   before=s.world.minutes;
  if(accepted){
   // The original player material plan and the independent person's existing
   // physical account are the two sides of ONE real voluntary item movement.
   const moved=materialPlan.entries[0];
   if(!C.conservedItems({sourceBefore:moved.before,
-    sourceAfter:moved.after,targetBefore:prior,targetAfter:prior+1,amount:1}))
+    sourceAfter:moved.after,targetBefore:prior,
+    targetAfter:prior+quantity,amount:quantity}))
    throw Error('Voluntary physical material transfer failed common finite conservation');
   Health.applyItems(s,materialPlan);
-  holder.held[p.item]=prior+1;
+  holder.held[p.item]=prior+quantity;
  }
  const moved=materialPlan.entries[0];
  const witness={origin:ORIGIN,npcId:p.npcId,
   name:n.name,profession:n.profession,source:n.source,
   location:s.world.location,day,worldMinute:before,
-  item:p.item,quantityOffered:1,quantityMoved:accepted?1:0,
+  item:p.item,quantityOffered:quantity,quantityMoved:accepted?quantity:0,
   playerStockBefore:moved.before,
   playerStockAfter:accepted?moved.after:moved.before,
-  recipientStockBefore:prior,recipientStockAfter:accepted?prior+1:prior,
+  recipientStockBefore:prior,recipientStockAfter:accepted?prior+quantity:prior,
   accepted,recipientPresenceHash:n.presence?.hash||null,
   circumstanceHash,noCompelledAcceptance:true,
   noContract:true,noAutomaticTrust:true,noCurrencyAward:true};
@@ -225,16 +232,17 @@ function offer(s,p={}){
  // never copy them to a player-facing scene event.
  const {recipientStockBefore:_privateBefore,
   recipientStockAfter:_privateAfter,...publicWitness}=witness;
+ const physicalName=E.RESOURCES[p.item].name;
  C.event(s,'story',accepted?
-  n.name+' voluntarily accepts one real '+E.RESOURCES[p.item].name+'.':
-  n.name+' declines the offered '+E.RESOURCES[p.item].name+'; you retain it.',{
+  n.name+' voluntarily accepts '+(quantity===1?'one real ':quantity+' real units of ')+physicalName+'.':
+  n.name+' declines the offered '+(quantity===1?'':quantity+' units of ')+physicalName+'; you retain it.',{
    ...publicWitness,witnessHash:receipt.hash});
  E.advance(s,WORK);Time.finalizeTime(s,before);Health.sync(s,{source:'legacy'});
  return {offered:true,accepted,npcId:p.npcId,person:n.name,
-  item:p.item,quantityMoved:accepted?1:0,elapsedMinutes:WORK,
+  item:p.item,quantityMoved:accepted?quantity:0,elapsedMinutes:WORK,
   witnessHash:receipt.hash,noPlayerDice:true,noAutomaticRelationship:true,
   noContract:true,noCurrencyAward:true,message:accepted?
-   n.name+' accepts the material, taking ownership of one actual item. No favour or return payment is promised.':
+   n.name+' accepts the material, taking ownership of '+(quantity===1?'one actual item':quantity+' actual items')+'. No favour or return payment is promised.':
    n.name+' declines the item. You still own it; the conversation creates no agreement.'};
 }
 function status(s,p={}){
