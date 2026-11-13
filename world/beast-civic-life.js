@@ -70,17 +70,23 @@ function validLocalEnactment(inst,row){
 // A case hearing records the TWO independently present people's witnessed
 // statements, not a judicial finding. Its law is snapshotted FROM an actual
 // earlier sealed enactment, never supplied by the requesting player/GM.
-function validLocalCase(inst,row){
+function validLocalCase(inst,row,w){
  const d=row?.source?.details,q=d?.caseReview;
  if(q===undefined)return row?.source?.caseAuthorityHash===undefined&&
   row?.source?.caseRegionId===undefined&&
+  row?.source?.siteEvidence===undefined&&
+  row?.source?.caseWitnessMinute===undefined&&
   row?.source?.citedLaw===undefined;
  const auth=inst.origin.caseCompetence,src=row?.source?.citedLaw;
  if(!caseCompetence(auth)||row.source.caseAuthorityHash!==inst.originHash||
   !src||src.origin!==SESSION||!validLocalEnactment(inst,{source:src})||
   !q||typeof q!=='object'||Array.isArray(q)||
-  Object.keys(q).sort().join('|')!==
-   'allegation|caseId|claimantId|claimantStatement|requestedFollowUp|respondentId|respondentStatement|ruleId'||
+  !['allegation','caseId','claimantId','claimantStatement',
+    'requestedFollowUp','respondentId','respondentStatement','ruleId']
+   .every(key=>Object.hasOwn(q,key))||
+  Object.keys(q).some(key=>!['allegation','caseId','claimantId',
+   'claimantStatement','requestedFollowUp','respondentId',
+   'respondentStatement','ruleId','siteNoteSeal'].includes(key))||
   !ident(q.caseId)||!ident(q.ruleId)||q.claimantId===q.respondentId||
   !valid(q.allegation,20,900)||!valid(q.claimantStatement,18,900)||
   !valid(q.respondentStatement,18,900)||!valid(q.requestedFollowUp,18,900)||
@@ -99,6 +105,29 @@ function validLocalCase(inst,row){
   (Atlas.LOCATION_REGION[d.location]!==undefined&&
    Atlas.LOCATION_REGION[d.location]!==row.source.caseRegionId))
   return false;
+ // The original local landscape note is contextual evidence only.
+ // It was not an accusation, testimony, culprit finding or court order.
+ const noteSeal=q.siteNoteSeal,record=row.source.siteEvidence,
+  moment=row.source.caseWitnessMinute;
+ if(noteSeal===undefined){
+  if(record!==undefined||moment!==undefined)return false;
+ }else{
+  if(typeof noteSeal!=='string'||!/^[a-f0-9]{64}$/.test(noteSeal)||
+   !Number.isSafeInteger(moment)||moment<0||
+   Math.floor(moment/1440)!==row.source.sessionDay||
+   !record||Object.keys(record).sort().join('|')!=='seal|source'||
+   record.seal!==noteSeal||hash(record.source)!==noteSeal||
+   record.source?.source!==require('./lived-places').SOURCE||
+   record.source?.placeId!==d.location||
+   record.source?.witnessedAtSite!==true||
+   !Number.isSafeInteger(record.source?.minute)||
+   record.source.minute<0||record.source.minute>moment||
+   !w?.livedPlaces?.places?.[d.location]||
+   !require('./lived-places').verifyPlace(w.livedPlaces.places[d.location])||
+   !w.livedPlaces.places[d.location].notes.some(n=>
+    n.seal===record.seal&&hash(n.source)===hash(record.source)))
+   return false;
+ }
  const current=inst.sessions.find(x=>x.source?.eventHash===src.eventHash);
  return !current||hash(current.source)===hash(src);
 }
@@ -170,7 +199,7 @@ function verifyInstitution(w,p,id){
     x.source.event?.details?.origin!==SESSION||
     x.source.event?.details?.location!==x.source.details.location||
     hash(x.source.event.details)!==hash(x.source.details)||
-    !validLocalEnactment(inst,x)||!validLocalCase(inst,x))||
+    !validLocalEnactment(inst,x)||!validLocalCase(inst,x,w))||
   new Set(inst.sessions.filter(x=>x.source?.details?.enactment).
    map(x=>x.source.details.enactment.id)).size!==
   inst.sessions.filter(x=>x.source?.details?.enactment).length||
@@ -280,15 +309,30 @@ function proceeding(s,p={}){
   inst.sessions.some(x=>x.source?.details?.caseReview?.caseId===
    d.caseReview.caseId)))
   throw Error('A contested case needs the original effective local rule, unique case and independently authored hearing competence');
+ // An existing freeform personally recorded site note can corroborate
+ // physical CONTEXT, not a named actor's alleged deed. Never use a remote
+ // annotation or fabricate a fresh observation as case proof.
+ let siteNote=null;
+ if(d.caseReview?.siteNoteSeal!==undefined){
+  const seal=d.caseReview.siteNoteSeal;
+  const place=require('./lived-places').get(s,s.world.location);
+  siteNote=place?.notes.find(n=>n.seal===seal);
+  if(!siteNote||!place||!siteNote.source?.witnessedAtSite||
+   siteNote.source.placeId!==s.world.location||
+   siteNote.source.minute>s.world.minutes)
+   throw Error('A disputed case needs an actual earlier personally witnessed local site note, not remote lore or a claimed offence');
+ }
  const source={origin:SESSION,eventHash:evHash,event:structuredClone(ev),
   details:structuredClone(d),sessionDay:Math.floor(s.world.minutes/1440),
   participatingBeasts:actual.map(b=>({id:b.id,lifeSourceHash:b.sapientLife.sourceHash})),
   ...(d.enactment===undefined?{}:{legalAuthorityHash:inst.originHash}),
   ...(d.caseReview===undefined?{}:{caseAuthorityHash:inst.originHash,
    caseRegionId:localRegion(s),
+   ...(siteNote?{caseWitnessMinute:s.world.minutes,
+    siteEvidence:structuredClone(siteNote)}:{}),
    citedLaw:structuredClone(cited.source)})};
  const receipt={origin:SESSION,source,seal:hash(source)};
- if(!validLocalEnactment(inst,receipt)||!validLocalCase(inst,receipt)||
+ if(!validLocalEnactment(inst,receipt)||!validLocalCase(inst,receipt,w)||
   d.enactment!==undefined&&
    inst.sessions.some(x=>x.source.details.enactment?.id===d.enactment.id))
   throw Error('An actual public local law requires a pre-existing competent charter, its own actual assent threshold, separate witnessed individual positions, real jurisdiction and the charter notice period');
@@ -405,6 +449,13 @@ function status(s,p={}){
      respondentStatement:e.source.details.caseReview.respondentStatement,
      proposedNextStep:e.source.details.caseReview.requestedFollowUp,
      originalWitnessHash:e.source.eventHash,
+     ...(e.source.siteEvidence?{witnessedLocalContext:{
+      recordedDetail:e.source.siteEvidence.source.context,
+      recordedSubject:e.source.siteEvidence.source.name,
+      originalSiteSeal:e.source.siteEvidence.seal,
+      placeId:e.source.siteEvidence.source.placeId,
+      noteIsNotProofOfOffence:true
+     }}:{}),
      allegationUnproven:true,noFindingOrRemedyExecuted:true
     })).slice(-20),
    publicOffices:x.sessions.filter(e=>e.source.details.visibility==='public'&&

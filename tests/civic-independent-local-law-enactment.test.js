@@ -7,7 +7,8 @@
 const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  E=require('../engine.js'),R=require('../rules'),Core=require('../rules/core'),
  Time=require('../rules/world'),Civic=require('../world/beast-civic-life'),
- Realm=require('../world/simulation'),Persons=require('../world/sapient-beast-persons');
+ Realm=require('../world/simulation'),Persons=require('../world/sapient-beast-persons'),
+ Places=require('../world/lived-places');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const op=(s,operation,params={})=>R.act(s,{system:'world',operation,params});
 const legalCompetence={
@@ -56,7 +57,7 @@ function scene(s,ids,original){
   ...(original?{enactment:original}:{})});
  return s.log.length-1;
 }
-function caseHearing(s,ids,caseId,ruleId,followUp=''){
+function caseHearing(s,ids,caseId,ruleId,followUp='',siteNoteSeal){
  Core.event(s,'story','Two previously encountered independent reef people offer different witnessed accounts of a contested local passage event; neither is presumed guilty.',{
   origin:Civic.SESSION,polityId:charter.polityId,
   institutionId:charter.institutionId,location:s.world.location,
@@ -65,6 +66,7 @@ function caseHearing(s,ids,caseId,ruleId,followUp=''){
   basis:'The two genuinely present free people each state an independently heard position and can disagree with the other in this particular local hearing.',
   participants:ids,visibility:'public',
   caseReview:{caseId,ruleId,claimantId:ids[0],respondentId:ids[1],
+   ...(siteNoteSeal===undefined?{}:{siteNoteSeal}),
    allegation:'A resident reports that access to an existing public passage was obstructed; this remains an unproved allegation.',
    claimantStatement:'The first individual reports an obstruction but does not supply proof of another person\'s wrongdoing.',
    respondentStatement:'The second individual disputes responsibility and requests that their contrary account be kept in the public record.',
@@ -110,6 +112,13 @@ function rule(s,ids,id,conduct){
   regionId:'living_atoll',
   description:'A physically reached, original public reef assembly where independent sapient members may speak or decline without surrendering their autonomy.',
   kind:'communal chamber',sceneType:'structure'});
+ // A remote freeform note remains a legitimate authored description,
+ // but cannot impersonate a firsthand observation of this same site.
+ op(s,'recordPlaceNote',{placeId:'reef_law_meeting_room',category:'route',
+  name:'Distant report of the nursery approach',
+  context:'A report about a distant reef channel may be recorded without the observer visiting; this is not a directly witnessed site condition.'});
+ const remoteNote=Places.get(s,'reef_law_meeting_room').notes[0];
+ A.equal(remoteNote.source.witnessedAtSite,false);
  const trip=op(s,'travelTo',{destinationId:'reef_law_meeting_room',
   minutes:180,journey:'The witnessed original sea crossing reaches an existing freely attended reef civic meeting space without creating government authority.',
   uncontested:true});
@@ -196,15 +205,31 @@ function rule(s,ids,id,conduct){
  A.equal(view.publicLocalRules[0].appealProcess,first.appealProcess);
  A.equal(view.publicLocalRules[0].noAutomaticConvictionOrPropertyTransfer,true);
  A.equal(view.publicLocalRules[1].jurisdictionRegionId,'living_atoll');
+ // Two unlike GM-authored local physical contexts are recorded through the
+ // ORIGINAL lived-place owner while actually present at this same place.
+ // They prove the source context exists, never that an accused person acted.
+ op(s,'recordPlaceNote',{placeId:'reef_law_meeting_room',category:'route',
+  name:'Nursery approach sill',
+  context:'The shallow nursery approach has a visibly narrow tidal shelf at the public meeting route; this does not establish who used or obstructed it.'});
+ op(s,'recordPlaceNote',{placeId:'reef_law_meeting_room',category:'landmark',
+  name:'Rescue current marker',
+  context:'The independent rescue passage retains a visibly weathered public boundary marker; no obstruction or person is identified by this site description.'});
+ const site=Places.get(s,'reef_law_meeting_room');
+ const siteNotes=site.notes.filter(n=>n.source.witnessedAtSite).map(x=>x.seal);
+ A.equal(site.notes.length,3);
+ A.equal(siteNotes.length,2);
+ A.ok(site.notes.slice(1).every(n=>n.source.witnessedAtSite===true));
  // A genuinely contested hearing is not a trial verdict. It references an
  // effective law, the original exact source, and TWO already present distinct
  // sapient persons. The same original civic sessions keep the provenance.
- let caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id),
+ let caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id,
+  '',siteNotes[0]),
   heard=op(s,'beastCivicProceeding',{polityId:charter.polityId,
    institutionId:charter.institutionId,eventIndex:caseIndex});
  A.equal(heard.witnessedCaseId,'nursery_access_dispute');
  A.equal(heard.noJudicialFindingOrEnforcement,true);
- caseIndex=caseHearing(s,ids,'rescue_passage_dispute',second.id);
+ caseIndex=caseHearing(s,ids,'rescue_passage_dispute',second.id,
+  '',siteNotes[1]);
  A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:caseIndex}).
   witnessedCaseId,'rescue_passage_dispute');
@@ -214,6 +239,27 @@ function rule(s,ids,id,conduct){
  A.ok(view.publicContestedCases.every(x=>
   x.allegationUnproven&&x.noFindingOrRemedyExecuted));
  A.deepEqual(view.publicContestedCases.map(x=>x.ruleId),[first.id,second.id]);
+ A.deepEqual(view.publicContestedCases.map(x=>
+  x.witnessedLocalContext.originalSiteSeal),siteNotes);
+ A.ok(view.publicContestedCases.every(x=>
+  x.witnessedLocalContext.noteIsNotProofOfOffence&&
+  x.allegationUnproven&&x.noFindingOrRemedyExecuted));
+ // The same real rule cannot be accompanied by a nonexistent physical
+ // witness chosen by the caller; rejected records must leave no result.
+ let badIndex=caseHearing(s,ids,'invented_site_context',first.id,
+  ' with an independently differing hearing topic','0'.repeat(64));
+ let beforeBad=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badIndex}),
+  /earlier personally witnessed local site note/);
+ A.equal(E.exportGame(s),beforeBad);
+ badIndex=caseHearing(s,ids,'remote_report_as_proof',first.id,
+  ' for a distinct remote-note reliability question',remoteNote.seal);
+ beforeBad=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badIndex}),
+  /earlier personally witnessed local site note/);
+ A.equal(E.exportGame(s),beforeBad);
  const legitimate=E.exportGame(s);
  caseIndex=caseHearing(s,ids,'forged_rule_case','foreign_article');
  const caseBefore=E.exportGame(s);
@@ -229,6 +275,17 @@ function rule(s,ids,id,conduct){
   institutionId:charter.institutionId,eventIndex:caseIndex}),
   /original effective local rule/);
  A.equal(E.exportGame(s),duplicateBefore);
+ A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
+ // Altering an actual physical source after it was cited must not silently
+ // rewrite the archived case evidence, even if its local note is resealed.
+ const citedSiteNote=site.notes.find(n=>n.seal===siteNotes[0]);
+ A.ok(citedSiteNote,'the tampered note must actually be cited by the original case');
+ const sourceNote=structuredClone(citedSiteNote);
+ citedSiteNote.source.context='An altered observation falsely claims an established culprit without independently verified evidence.';
+ citedSiteNote.seal=hash(citedSiteNote.source);
+ A.throws(()=>Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),
+  /Institutional origin, witnessed law/);
+ site.notes[site.notes.indexOf(citedSiteNote)]=sourceNote;
  A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
  A.equal(s.player.coins,coins);
  A.equal(s.rngState,caseRngBefore,
@@ -269,4 +326,4 @@ function rule(s,ids,id,conduct){
  A.equal(op(s,'beastCivicStatus').known[0].publicLocalRules.length,2);
  A.equal(E.exportGame(E.importGame(E.exportGame(s))),E.exportGame(s));
 }
-console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay, two independent contested local case records with no verdict or enforced remedy PASS');
+console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay, two independent contested local case records, two different original in-person physical site observations, rejected forged/tampered evidence, no verdict or enforced remedy PASS');
