@@ -24,6 +24,8 @@
 
 **Duplicate ownership adapter:** built instruments and paid equipment already publish their own verified `ownedAsset` source. `rules/material-handoffs.js` now consumes their shared `kind/owner/quantity/originalRoot/source` result instead of reconstructing separate provenance labels. Only the owning system determines whether the item exists. A quote, proposal or document never creates goods, magic, legal title or consent.
 
+**Shared physical conservation:** source-authorised player sales, independently funded resident purchases and separately accepted person-to-person material gifts now use the same finite two-account physical-unit invariant in `rules/core.js`; existing `conservedScales` uses the identical arithmetic with its own denomination and balance limits. Each original owning system still verifies source, presence, stock, choice, provenance, time and persistence. No new transfer permission or item menu.
+
 **Not merged:** employment agreements are not paid labour; posted demand is not funded purchases; beast consent and human powers are not universal ranks; local legal rights, supply sources and ecological change retain their respective original systems. #19 remains open for true actor/good generality; the goal is a connected foundation rather than additional individually scripted examples.
 
 ## Integrate first where overlap already exists

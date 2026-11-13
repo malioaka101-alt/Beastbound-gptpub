@@ -4,7 +4,7 @@
 // All states and file-backed turns are disposable: never modify Aerin.
 const A=require('node:assert/strict'),FS=require('node:fs'),OS=require('node:os'),
  Path=require('node:path'),E=require('../engine.js'),R=require('../rules'),
- Turn=require('../scripts/chat-turn.js');
+ Core=require('../rules/core'),Turn=require('../scripts/chat-turn.js');
 const dir=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-material-to-person-')),
  file=Path.join(dir,'test.json');
 const write=s=>FS.writeFileSync(file,E.exportGame(s)+'\n');
@@ -70,6 +70,9 @@ try{
  let after=load(),account=after.table.realm.materialCustody.accounts.otto;
  A.equal(after.player.inventory.clean_rations,priorFood-1);
  A.equal(account.held.clean_rations,1);
+ A.equal(Core.conservedItems({sourceBefore:priorFood,
+  sourceAfter:after.player.inventory.clean_rations,
+  targetBefore:0,targetAfter:account.held.clean_rations,amount:1}),true);
  A.equal(after.player.coins,beforeCoins,'The gift is not a sale');
  A.equal(after.table.realm.localProvisioner.stock,merchantStock,
   'Personally donated rations do not magically become quoted commercial stock');
@@ -141,6 +144,11 @@ try{
  after=load();
  A.equal(after.player.inventory.marsh_reed,oldReed-1);
  A.equal(after.table.realm.materialCustody.accounts.sera.held.marsh_reed,1);
+ A.equal(Core.conservedItems({sourceBefore:oldReed,
+  sourceAfter:after.player.inventory.marsh_reed,targetBefore:0,
+  targetAfter:after.table.realm.materialCustody.accounts.sera.held.marsh_reed,
+  amount:1}),true,
+  'another sourced item and distinct person share the same physical conservation');
  A.equal(after.rngState,doRng);
  const oldSave=read();
  A.throws(()=>act('material_nonlocal_person_01',

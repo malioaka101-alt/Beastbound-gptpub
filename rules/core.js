@@ -3,14 +3,22 @@
 // published rules; no Python modules are imported or committed.
 const E=require('../engine.js');
 const int=(n,name,min=-Infinity,max=Infinity)=>{if(!Number.isInteger(n)||n<min||n>max)throw Error(`${name} must be an integer in [${min},${max}]`);return n;};
-// Pure conservation: the original worker/merchant transaction modules still
-// verify identities, permission, goods, wages and original source evidence.
-function conservedScales({sourceBefore,sourceAfter,targetBefore,targetAfter,amount}={}){
- return [sourceBefore,sourceAfter,targetBefore,targetAfter,amount]
-  .every(Number.isSafeInteger)&&amount>0&&sourceBefore>=amount&&
-  targetBefore>=0&&sourceAfter===sourceBefore-amount&&
-  targetAfter===targetBefore+amount;
+// One pure finite two-account conservation law for an ORIGINAL witnessed
+// transfer. Caller-owned systems still establish the real actors, physical
+// stock, consent, price, reason and immutable receipt; this grants none.
+function conservedTransfer({sourceBefore,sourceAfter,targetBefore,targetAfter,
+ amount,maxBalance=Number.MAX_SAFE_INTEGER}={}){
+ return [sourceBefore,sourceAfter,targetBefore,targetAfter,amount,maxBalance]
+  .every(Number.isSafeInteger)&&maxBalance>0&&amount>0&&
+  sourceBefore>=amount&&sourceBefore<=maxBalance&&
+  targetBefore>=0&&targetBefore<=maxBalance&&
+  sourceAfter===sourceBefore-amount&&sourceAfter>=0&&
+  targetAfter===targetBefore+amount&&targetAfter<=maxBalance;
 }
+// Currency and physical goods retain distinct denominational/capacity rules,
+// but DO NOT invent different conservation arithmetic.
+function conservedScales(p={}){return conservedTransfer(p);}
+function conservedItems(p={}){return conservedTransfer({...p,maxBalance:100000});}
 function die(s,sides=20){
   int(sides,'sides',2,1000);
   let x=s.rngState>>>0;
@@ -92,4 +100,4 @@ function wardHit(target,severity){
   target.ward.steps=Math.max(0,target.ward.steps-severity);
   return {absorbed:true,remaining:target.ward.steps,collapsed:target.ward.steps===0};
 }
-module.exports={int,conservedScales,die,roll,degree,progress,naturalAdjustment,event,check,opposed,assist,assistChecks,castAttack,wardHit};
+module.exports={int,conservedTransfer,conservedScales,conservedItems,die,roll,degree,progress,naturalAdjustment,event,check,opposed,assist,assistChecks,castAttack,wardHit};

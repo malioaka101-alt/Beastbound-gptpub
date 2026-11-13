@@ -140,6 +140,13 @@ function fixture(seed=994821,count=72){
    .reduce((n,x)=>n+x.received,0)-1);
  const acct=w.materialCustody.accounts[p.actorId];
  A.equal(acct.held.clean_rations,1);
+ A.equal(Core.conservedItems({sourceBefore:q.sellerStockBefore,
+  sourceAfter:q.sellerStockAfter,targetBefore:0,
+  targetAfter:acct.held.clean_rations,amount:1}),true,
+  'funded independent customer and original seller conserve the same real item');
+ A.equal(Core.conservedItems({sourceBefore:q.sellerStockBefore,
+  sourceAfter:q.sellerStockAfter,targetBefore:0,
+  targetAfter:acct.held.clean_rations+1,amount:1}),false);
  A.equal(acct.purchaseReceipts.length,1);
  A.equal(acct.purchaseReceipts[0].purchaseSourceHash,row.sourceHash);
  A.equal(acct.purchaseReceipts[0].hash,

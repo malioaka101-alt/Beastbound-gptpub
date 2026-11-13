@@ -4,7 +4,7 @@
 // another shop, guaranteed output, deed, forced transfer or money printer.
 // Disposable original engine saves only.
 const A=require('node:assert/strict'),E=require('../engine.js'),
- R=require('../rules'),W=require('../rules/world'),
+ R=require('../rules'),Core=require('../rules/core'),W=require('../rules/world'),
  Realm=require('../world/simulation'),
  H=require('../rules/material-handoffs');
 const action=(s,operation,params)=>R.act(s,{system:'social',operation,params});
@@ -83,7 +83,7 @@ function local(seed){
 {
  const s=local(992311),w=s.table.realm,
   v=w.localProvisioner,oldStock=v.stock,oldFunds=v.fundsScales,
-  beforeCoins=s.player.coins;
+  beforeCoins=s.player.coins,oldRations=s.player.inventory.clean_rations??0;
  A.ok(v.stock>=1);
  const result=action(s,'documentOwnedMaterial',{
   ownerId:'merchant:otto',item:'clean_rations',
@@ -98,6 +98,12 @@ function local(seed){
   params:{offerId:quote.offerId}});
  A.equal(bought.purchased,true);
  A.equal(v.stock,oldStock-1);
+ A.equal(Core.conservedItems({sourceBefore:oldStock,sourceAfter:v.stock,
+  targetBefore:oldRations,targetAfter:s.player.inventory.clean_rations,amount:1}),true);
+ A.equal(Core.conservedScales({sourceBefore:Math.round(beforeCoins*100),
+  sourceAfter:Math.round(s.player.coins*100),
+  targetBefore:oldFunds,targetAfter:v.fundsScales,amount:bought.paidScales}),true,
+  'one original merchant sale conserves goods and price in existing payer/seller accounts');
  A.equal(H.verifyAssetAttestations(s),true);
  const observed=action(s,'ownedMaterialHistory',{ownerId:'merchant:otto'});
  A.equal(observed.knownOwnedPhysicalMaterialObservations.length,1);
