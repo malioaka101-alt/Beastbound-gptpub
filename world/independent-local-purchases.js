@@ -28,10 +28,9 @@ function receiptId(personId,interestId){
 function verifyPersonal(p){
  // Exact conservation is checked by the existing independently paid career
  // balance verifier. This function only audits physically confirmed spends.
- const rows=p?.independentMarketPurchases;
- if(rows===undefined)return {valid:true,spentScales:0};
+ const rows=p?.independentMarketPurchases||[];
  if(!Array.isArray(rows)||rows.length>10000)
-  return {valid:false,spentScales:0};
+  return {valid:false,spentScales:0,receivedScales:0};
  let spent=0,prior=-1;
  const seen=new Set();
  for(const row of rows){
@@ -59,7 +58,78 @@ function verifyPersonal(p){
    return {valid:false,spentScales:0};
   spent+=q.paidPriceScales;prior=q.day;seen.add(q.id);
  }
- return {valid:true,spentScales:spent};
+ // Original owner-to-player purchases are physical SALES by this citizen.
+ // They are not earned work, and they cannot be misclassified as wages.
+ // This is the same citizen's existing independent-market source and cash.
+ let received=0;
+ const saleRows=p?.independentMarketSales||[];
+ if(!Array.isArray(saleRows)||saleRows.length>10000)
+  return {valid:false,spentScales:spent,receivedScales:0};
+ const seenSales=new Set();
+ for(const row of saleRows){
+  const q=row?.source,resource=E.RESOURCES[q?.item];
+  if(!q||row.origin!==Handoffs.PERSON_SALE||
+     q.origin!==Handoffs.PERSON_SALE||
+     row.sourceHash!==hash(q)||!q.accepted||
+     q.sellerActorId!==p.actorId||q.sellerId!==p.id||
+     q.sellerOriginHash!==p.originHash||q.sellerName!==p.name||
+     typeof q.buyerName!=='string'||q.buyerName.length<3||
+     !Number.isSafeInteger(q.buyerSeed)||
+     typeof q.originalOwnedSourceHash!=='string'||
+     !/^[a-f0-9]{64}$/.test(q.originalOwnedSourceHash)||
+     typeof q.location!=='string'||!E.LOCATIONS[q.location]||
+     !Number.isInteger(q.worldMinute)||q.worldMinute<0||
+     q.day!==Math.floor(q.worldMinute/1440)||
+     !resource||!Number.isSafeInteger(resource.value)||resource.value<1||
+     !Number.isSafeInteger(q.quantity)||q.quantity<1||
+     q.referenceValueScales!==resource.value*100||
+     q.priceScales!==q.referenceValueScales*q.quantity||
+     !Number.isSafeInteger(q.priceScales)||q.priceScales<1||
+     !Core.conservedItems({sourceBefore:q.sellerHeldBefore,
+      sourceAfter:q.sellerHeldAfter,targetBefore:q.buyerHeldBefore,
+      targetAfter:q.buyerHeldAfter,amount:q.quantity})||
+     !Core.conservedScales({sourceBefore:q.buyerScalesBefore,
+      sourceAfter:q.buyerScalesAfter,targetBefore:q.sellerScalesBefore,
+      targetAfter:q.sellerScalesAfter,amount:q.priceScales})||
+     !Number.isInteger(q.sellerRngBefore)||q.sellerRngBefore<1||
+     !Number.isInteger(q.sellerRngAfter)||q.sellerRngAfter<1||
+     q.sellerRngAfter!==nextOwnerRng(q.sellerRngBefore)||
+     q.drawBits!==q.sellerRngAfter||
+     q.sellerAccepted!==true||
+     q.drawBits/4294967296>=.62||
+     q.noCreatedGoodsOrScales!==true||
+     q.noCompelledSale!==true||q.noUniversalTradePrice!==true||
+     seenSales.has(row.sourceHash))
+   return {valid:false,spentScales:spent,receivedScales:0};
+  received+=q.priceScales;
+  if(!Number.isSafeInteger(received))
+   return {valid:false,spentScales:spent,receivedScales:0};
+  seenSales.add(row.sourceHash);
+ }
+ return {valid:true,spentScales:spent,receivedScales:received};
+}
+function nextOwnerRng(n){
+ let x=n>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;
+ return (x>>>0)||0x45aef127;
+}
+function verifyOwnerSales(w){
+ for(const p of Object.values(w?.emergentPeople?.people||{})){
+  if(!verifyPersonal(p).valid)return false;
+  const acct=w.materialCustody?.accounts?.[p.actorId];
+  for(const row of p.independentMarketSales||[]){
+   if(!acct?.saleReceipts?.some(x=>x.sourceHash===row.sourceHash&&
+      JSON.stringify(x)===JSON.stringify(row)))return false;
+  }
+ }
+ for(const [id,acct] of Object.entries(w?.materialCustody?.accounts||{})){
+  const person=id.startsWith('emergent:')?
+   w.emergentPeople?.people?.[id.slice(9)]:null;
+  for(const row of acct.saleReceipts||[])
+   if(!person?.independentMarketSales?.some(x=>
+     x.sourceHash===row.sourceHash&&JSON.stringify(x)===JSON.stringify(row)))
+    return false;
+ }
+ return true;
 }
 function actualInterest(w,p,day){
  const candidates=w.independentMarketDemand?.records||[];
@@ -137,10 +207,10 @@ function verifyOne(w,row){
 }
 function verify(w){
  const merchant=w?.localProvisioner;
- if(!merchant)return true;
+ if(!merchant)return verifyOwnerSales(w);
  const rows=merchant.independentCustomerPurchases;
  if(rows===undefined)
-  return Object.values(w.emergentPeople?.people||{}).every(p=>
+  return verifyOwnerSales(w)&&Object.values(w.emergentPeople?.people||{}).every(p=>
    (p.independentMarketPurchases||[]).length===0);
  if(!Array.isArray(rows)||rows.length>10000)return false;
  const seen=new Set();
@@ -163,7 +233,7 @@ function verify(w){
     !rows.some(x=>x.sourceHash===receipt.purchaseSourceHash&&
      x.source.actorId===actorId))
     return false;
- return true;
+ return verifyOwnerSales(w);
 }
 function buy(w,p,day){
  const merchant=w.localProvisioner;
