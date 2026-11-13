@@ -54,7 +54,7 @@ function input(raw){
   title:textField(raw.title,'invention title',4,100),
   purpose:textField(raw.purpose,'practical cultural or technical purpose',12,700),
   medium:textField(raw.medium,'proposed medium',3,100),
-  system:raw.system,
+  system:textField(raw.system,'proposed system or discipline',3,100),
   function:textField(raw.function,'proposed mechanism',3,120),
   magnitude:raw.magnitude,range:raw.range,area:raw.area,
   duration:raw.duration,novelty:raw.novelty
@@ -66,8 +66,7 @@ function input(raw){
   // alone never changes world state or authorises a technique.
   p.target=textField(raw.target,'proposed target',3,160);
  }
- if(!Object.hasOwn(SYSTEMS,p.system)||
-   !RANGE.includes(p.range)||!AREA.includes(p.area)||
+ if(!RANGE.includes(p.range)||!AREA.includes(p.area)||
    !DURATION.includes(p.duration)||!NOVELTY.includes(p.novelty))
   throw Error('An actual medium, technique mechanism, scale and creation novelty are required');
  C.int(p.magnitude,'bounded proposed Magnitude',0,7);
@@ -136,36 +135,40 @@ function sealedResearch(s,p,grade){
  return {documented:!!legitimate};
 }
 function analysis(s,raw){
- const p=input(raw),spec=SYSTEMS[p.system],
+ const p=input(raw),
+  knownSystem=Object.hasOwn(SYSTEMS,p.system),
+  spec=knownSystem?SYSTEMS[p.system]:null,
   knownMechanism=Object.hasOwn(FUNCTIONS,p.function),
   knownMedium=MEDIUMS.includes(p.medium),
   skill=knownMechanism?FUNCTIONS[p.function]:{
    family:null,meaning:'Original GM-authored unverified mechanism; no working effect, energy budget or capability is established by this proposal.'},
-  rank=C.int(s.player?.skills?.[spec.skill]?.rank??0,
-   'earned '+spec.skill+' skill',0,5),
+  rank=knownSystem?C.int(s.player?.skills?.[spec.skill]?.rank??0,
+   'earned '+spec.skill+' skill',0,5):null,
   researchRank=C.int(s.player?.skills?.research?.rank??0,'earned research rank',0,5),
   novelty=R.NOVELTY[p.novelty],
-  effectGrade=knownMechanism?B.effectGrade(p.magnitude,
+  effectGrade=knownSystem&&knownMechanism?B.effectGrade(p.magnitude,
    {trivial:p.magnitude===0}):null,
-  status=attained(s,p.system),gaps=[];
- const known=knownMechanism?sealedResearch(s,p,effectGrade):
+  status=knownSystem?attained(s,p.system):{stage:null,verified:false},gaps=[];
+ const known=knownSystem&&knownMechanism?sealedResearch(s,p,effectGrade):
   {documented:false};
  // A basic mundane tool should not require an academic degree or paid
  // researcher. Its real materials, physical trial and skill check will decide
  // if it works. Advanced, supernatural and genuinely novel effects do need
  // independent knowledge and proof.
- const ordinaryPrototype=knownMechanism&&knownMedium&&
+ const ordinaryPrototype=knownSystem&&knownMechanism&&knownMedium&&
   p.system==='mundane'&&p.magnitude<=1&&
   ['rediscovery','variant'].includes(p.novelty)&&
   ['sense','signal','ward','shape','move','support'].includes(p.function);
+ if(!knownSystem)
+  gaps.push('Original proposed discipline is not yet a proved power system: no rank, energy, anatomy, social tradition or mechanic is established by the name');
  if(!knownMechanism)
   gaps.push('Original mechanism is unverified: establish physical or supernatural causal evidence and an appropriate bounded action before any effect can operate');
  if(!knownMedium)
   gaps.push('Original medium is unverified: its physical form, limits and feasible execution must be established before manufacture, activation or use');
- const requiredSkill=knownMechanism?(ordinaryPrototype?0:novelty.rank):null;
+ const requiredSkill=knownSystem&&knownMechanism?(ordinaryPrototype?0:novelty.rank):null;
  if(requiredSkill!==null&&rank<requiredSkill)
   gaps.push('Earn genuine '+spec.skill+' skill rank '+requiredSkill+' or credible independently supported collaboration');
- if(knownMechanism&&!ordinaryPrototype&&p.novelty!=='rediscovery'&&
+ if(knownSystem&&knownMechanism&&!ordinaryPrototype&&p.novelty!=='rediscovery'&&
   researchRank<novelty.rank)
   gaps.push('Obtain suitable documented research competence or an independently validated research team');
  if(ordinaryPrototype){
@@ -266,7 +269,7 @@ function analysis(s,raw){
  // Unfamiliar mechanisms cannot inherit an invented canonical grade,
  // mandatory fee, research DC or time schedule. Once a real effect family
  // is established, the ORIGINAL existing formulas can evaluate its scope.
- const researchBudget=knownMechanism?{
+ const researchBudget=knownSystem&&knownMechanism?{
   grade:effectGrade,
   theoreticalDC:10+2*effectGrade+novelty.dc,
   progressionTrack:novelty.base+5*effectGrade,
@@ -293,7 +296,7 @@ function analysis(s,raw){
    researchBudget:{...researchBudget,ordinaryPrototypeRoute:ordinaryPrototype},
    requiredAuthenticatedMaterialGrade:deviceMaterialGrade,
    notACopyOfParentOrBeastPower:true},
-  prerequisites:{skill:spec.skill,earnedRank:rank,
+  prerequisites:{skill:spec?.skill??null,earnedRank:rank,
    noveltyLeadRankRequired:requiredSkill,earnedResearchRank:researchRank,
    disciplineStage:status.stage,stageVerified:status.verified,
    matchingReplicatedEvidence:known.documented,missingMaterials},
