@@ -123,6 +123,7 @@ function notice(s,p={}){
 function status(s,p={}){
  requireOnly(p,[]);
  const {event}=canonical();
+ verifyJudgedHistory(s);
  const eventDay=upcoming(s),key=ID+'_'+eventDay;
  const notice=s.table?.competitionNotices?.[key];
  if(notice)verifiedNotice(s,notice,event,canonical().official,eventDay);
@@ -178,10 +179,101 @@ function proof(s,checkId,eventDay){
   throw Error('The actual earlier survival die, margin and recorded interpretation must agree');
  return {a,f,r};
 }
+// A competition's posted notice is not a *judged result*. Keep each
+// result tied to the original independently resolved performance and the
+// existing player competitionRecord, ranking and receipt. This verifier
+// does not award scores, author a prize budget or define an event system.
+// Historical pre-source-seal results remain readable, but cannot be
+// retroactively claimed to have a new source witness.
+function verifyJudgedHistory(s){
+ const receipts=s.table?.competitionReceipts||{},
+  records=s.player?.competitionRecord||[];
+ if(!receipts||typeof receipts!=='object'||Array.isArray(receipts)||
+  !Array.isArray(records))
+  throw Error('The original competition result history needs reconciliation');
+ const {event,official}=canonical(),seen=new Set(),seals=new Set();
+ for(const [key,row] of Object.entries(receipts)){
+  if(!key.startsWith(ID+'_'))continue;
+  const q=row?.source,seal=row?.sourceHash;
+  if(q===undefined&&seal===undefined)continue; // real older saves
+  const n=s.table?.competitionNotices?.[key],
+   a=s.table?.sceneChecks?.[q?.checkId],
+   f=s.table?.habitatSurveyFindings?.[q?.checkId],
+   roll=f?.rollEvent,details=roll?.details,
+   record=records.filter(x=>x?.sourceJudgementHash===seal);
+  if(!q||!seal||seal!==digest(q)||seals.has(seal)||
+   q.origin!=='original-witnessed-competition-judgement-v1'||
+   q.eventId!==ID||key!==ID+'_'+q.eventDay||
+   !Number.isInteger(q.eventDay)||q.eventDay<1||
+   q.eventDay%6!==0||
+   q.official!==official.name||q.entryFee!==event.fee||
+   q.reward!== (q.result==='Unplaced'?0:event.reward)||
+   !Number.isInteger(q.judgedAtMinute)||
+   Math.floor(q.judgedAtMinute/DAY)+1!==q.eventDay||
+   q.judgedAtMinute>s.world.minutes-DURATION||
+   q.judgedAtMinute%DAY<OPEN||q.judgedAtMinute%DAY>CLOSE||
+   !n||n.used!==true||n.submittedCheckId!==q.checkId||
+   n.enteredAtMinute!==q.judgedAtMinute||
+   q.originalNoticeHash!==n.publicationEventHash||
+   !a||!f||a.checkId!==q.checkId||
+   a.origin!=='engine-habitat-survey'||a.location!=='forest'||
+   !a.used||f.checkId!==q.checkId||
+   f.observedSceneHash!==a.eventHash||
+   !a.observationEvent||digest(a.observationEvent)!==a.eventHash||
+   !roll||digest(roll)!==f.rollEventHash||
+   q.originalReportHash!==f.rollEventHash||
+   !details||roll.type!=='roll'||!Number.isInteger(details.roll)||
+   details.roll<1||details.roll>20||
+   !Number.isInteger(details.total)||!Number.isInteger(details.margin)||
+   details.margin!==details.total-details.dc||
+   details.dc!==a.dc||details.success!==(details.margin>=0)||
+   !Number.isInteger(a.worldMinute)||a.worldMinute<n.worldMinute||
+   a.worldMinute>q.judgedAtMinute||
+   !Number.isInteger(a.checkedAtMinute)||
+   a.checkedAtMinute<a.worldMinute||a.checkedAtMinute>q.judgedAtMinute||
+   s.table?.sceneCheckEventsUsed?.[a.eventHash]!==q.checkId||
+   s.table?.competitionReportsUsed?.[q.checkId]!==q.eventDay||
+   seen.has(q.checkId)||record.length!==1)
+   throw Error('A source-sealed competition judgement cannot be reconstructed from original events');
+  verifiedNotice(s,n,event,official,q.eventDay);
+  const margin=details.total-event.dc,
+   result=margin>=10?'Distinction':margin>=5?'Merit':
+    margin>=0?'Pass':'Unplaced',
+   points=margin>=0?Math.max(0,Math.min(30,margin+10)):0,
+   earned=margin>=0?event.reward:0,
+   credential=margin>=0?event.name+' — '+result:null,
+   match=record[0];
+  if(q.score!==details.total||q.result!==result||
+   q.points!==points||q.reward!==earned||
+   q.qualification!==credential||
+   !Number.isSafeInteger(q.coinsBefore)||q.coinsBefore<event.fee||
+   q.coinsAfter!==q.coinsBefore-event.fee+earned||
+   !Number.isInteger(q.pointsBefore)||q.pointsBefore<0||
+   q.pointsAfter!==q.pointsBefore+points||
+   !Number.isInteger(q.guildReputationBefore)||
+   q.guildReputationAfter!==q.guildReputationBefore+(margin>=0?2:0)||
+   row.eventDay!==q.eventDay||row.checkId!==q.checkId||
+   row.result!==result||row.points!==points||
+   row.fee!==event.fee||row.reward!==earned||
+   row.official!==official.name||
+   match.event!==ID||match.day!==q.eventDay||
+   match.eventDay!==q.eventDay||match.result!==result||
+   match.points!==points||match.score!==details.total||
+   match.sourceCheckId!==q.checkId||
+   match.origin!=='judged-witnessed-habitat-report')
+   throw Error('The existing competition ranking, award or qualification result was altered');
+  seen.add(q.checkId);seals.add(seal);
+ }
+ if(records.some(x=>x?.sourceJudgementHash!==undefined&&
+  x.event===ID&&!seals.has(x.sourceJudgementHash)))
+  throw Error('A competition result cannot claim a nonexistent source-sealed judgement');
+ return {verified:seals.size};
+}
 function fieldAssessment(s,p={}){
  requireOnly(p,['checkId']);
  safe(s);
  const {event,official}=canonical();
+ verifyJudgedHistory(s);
  const eventDay=day(s),clock=minuteOfDay(s);
  if(eventDay%6!==0||clock<OPEN||clock>CLOSE)
   throw Error('Official Copperwood field-report assessments run only on a scheduled sixth day, 09:00–15:00');
@@ -205,6 +297,23 @@ function fieldAssessment(s,p={}){
  const result=margin>=10?'Distinction':margin>=5?'Merit':margin>=0?'Pass':'Unplaced';
  const points=margin>=0?Math.max(0,Math.min(30,margin+10)):0;
  const reward=margin>=0?event.reward:0;
+ // Preserve the ORIGINAL score, qualification and funds/ranking changes
+ // in one existing result receipt. No extra die or external contest.
+ const judgedAtMinute=s.world.minutes,
+  source={origin:'original-witnessed-competition-judgement-v1',
+   eventId:ID,eventDay,official:official.name,checkId:p.checkId,
+   originalNoticeHash:n.publicationEventHash,
+   originalReportHash:report.f.rollEventHash,
+   judgedAtMinute,score:report.r.total,result,points,
+   entryFee:event.fee,reward,
+   coinsBefore:s.player.coins,
+   coinsAfter:s.player.coins-event.fee+reward,
+   pointsBefore:s.player.rankings.fieldwork,
+   pointsAfter:s.player.rankings.fieldwork+points,
+   guildReputationBefore:s.player.reputation.guild,
+   guildReputationAfter:s.player.reputation.guild+(margin>=0?2:0),
+   qualification:margin>=0?event.name+' — '+result:null},
+  sourceHash=digest(source);
  // No second roll. All eligibility checks have completed before spending.
  s.player.coins-=event.fee;
  s.player.coins+=reward;
@@ -217,12 +326,15 @@ function fieldAssessment(s,p={}){
  }
  s.player.competitionRecord.push({event:ID,day:eventDay,eventDay,
   result,points,score:report.r.total,sourceCheckId:p.checkId,
-  origin:'judged-witnessed-habitat-report'});
+  origin:'judged-witnessed-habitat-report',
+  sourceJudgementHash:sourceHash});
  n.used=true;n.enteredAtMinute=s.world.minutes;n.submittedCheckId=p.checkId;
  s.table.competitionReceipts||={};s.table.competitionReportsUsed||={};
  s.table.competitionReceipts[key]={eventDay,checkId:p.checkId,
-  result,points,fee:event.fee,reward,official:official.name};
+  result,points,fee:event.fee,reward,official:official.name,
+  source,sourceHash};
  s.table.competitionReportsUsed[p.checkId]=eventDay;
+ verifyJudgedHistory(s);
  const old=s.world.minutes;
  E.advance(s,DURATION);
  W.finalizeTime(s,old);
