@@ -470,14 +470,21 @@ function orderPublicRecordsInspection(s,w,hearingId){
   noFindingOfGuilt:true,noCompulsoryPrivateAction:true};
 }
 function followUpPublicRecordsInspections(w,day,emit){
- // Original saves may not yet have a current-day civic register. The
- // established constitutional migration must run before this sixday read,
- // exactly as it does before the original monthly office transitions.
+ if(!Number.isInteger(day)||day<0)
+  throw Error('Public order follow-up requires a real completed world day');
+ // Most original sixdays have no pending legal office work. Do not replay
+ // every sovereign mandate and entire historical legal record on every
+ // world tick when no council remedy ever existed. Legacy saves with no
+ // civic office history continue using their original monthly migration.
+ const docket=w?.governance?.reedmarch?.publicHearingDockets;
+ if(docket===undefined||
+   (Array.isArray(docket)&&docket.every(x=>x?.recordsInspection===undefined)))
+  return 0;
+ // If any council remedy exists (even a completed or malformed one), use
+ // the original comprehensive office and source-history verifier.
  ensure(w);
  const {c,v}=valid(w,'reedmarch'),
   council=w.institutions?.marsh_council;
- if(!Number.isInteger(day)||day<0)
-  throw Error('Public order follow-up requires a real completed world day');
  if(!council||council.status!=='active'||
   !Number.isFinite(council.capacity)||council.capacity<45||
   !['in_office','interim'].includes(v.status))return 0;
