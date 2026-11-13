@@ -144,10 +144,12 @@ function analysis(s,raw){
   rank=C.int(s.player?.skills?.[spec.skill]?.rank??0,
    'earned '+spec.skill+' skill',0,5),
   researchRank=C.int(s.player?.skills?.research?.rank??0,'earned research rank',0,5),
-  novelty=R.NOVELTY[p.novelty],effectGrade=B.effectGrade(p.magnitude,
-   {trivial:p.magnitude===0}),
+  novelty=R.NOVELTY[p.novelty],
+  effectGrade=knownMechanism?B.effectGrade(p.magnitude,
+   {trivial:p.magnitude===0}):null,
   status=attained(s,p.system),gaps=[];
- const known=sealedResearch(s,p,effectGrade);
+ const known=knownMechanism?sealedResearch(s,p,effectGrade):
+  {documented:false};
  // A basic mundane tool should not require an academic degree or paid
  // researcher. Its real materials, physical trial and skill check will decide
  // if it works. Advanced, supernatural and genuinely novel effects do need
@@ -260,12 +262,21 @@ function analysis(s,raw){
  const scope={medium:p.medium,system:p.system,function:p.function,
   magnitude:p.magnitude,range:p.range,area:p.area,duration:p.duration,
   ...(p.target?{target:p.target}:{})};
- const researchBudget={grade:effectGrade,
+ // Unfamiliar mechanisms cannot inherit an invented canonical grade,
+ // mandatory fee, research DC or time schedule. Once a real effect family
+ // is established, the ORIGINAL existing formulas can evaluate its scope.
+ const researchBudget=knownMechanism?{
+  grade:effectGrade,
   theoreticalDC:10+2*effectGrade+novelty.dc,
   progressionTrack:novelty.base+5*effectGrade,
   nominalMaterialsPerSixdayTalons:R.COST[effectGrade],
   researchLeadRank:novelty.rank,
-  interpretation:'Provisional canon research maths, not an accepted project, paid materials or proof of feasibility'};
+  interpretation:'Provisional canon research maths, not an accepted project, paid materials or proof of feasibility'
+ }:{
+  grade:null,theoreticalDC:null,progressionTrack:null,
+  nominalMaterialsPerSixdayTalons:null,researchLeadRankRequired:null,
+  interpretation:'An unverified original mechanism has no earned grade or fixed research price, DC, timeline or operating effect; determine appropriate sources in play'
+ };
  const deviceMaterialGrade=(p.medium==='device'||p.medium==='formation'||
   p.medium==='infrastructure')&&p.system!=='mundane'?
   effectGrade:null;
