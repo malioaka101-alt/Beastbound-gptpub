@@ -40,8 +40,13 @@ function verifiedNotice(s,n,event,official,eventDay){
  const text=official.name+' posts the '+event.name+
   ' field-report assessment for Day '+eventDay+
   ', from 09:00 to 15:00 at the crossing.';
+ const publicationDay=Math.floor(n?.worldMinute/DAY)+1,
+  minute=(n?.worldMinute??0)%DAY;
+ const originalClock='Day '+publicationDay+', '+
+  String(Math.floor(minute/60)).padStart(2,'0')+':'+
+  String(minute%60).padStart(2,'0');
  const correct=ev=>ev?.type==='world'&&ev.text===text&&
-  ev.day===Math.floor(n.worldMinute/DAY)+1&&
+  ev.day===publicationDay&&ev.time===originalClock&&
   ev.details?.eventId===ID&&ev.details.eventDay===eventDay&&
   ev.details.venue==='crossing'&&ev.details.official===official.name;
  if(!n||n.eventId!==ID||n.eventDay!==eventDay||
