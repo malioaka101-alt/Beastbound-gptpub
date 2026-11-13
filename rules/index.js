@@ -485,6 +485,7 @@ function act(s,{system,operation,params={}}={}){
   case 'competition.announceLocal':return PublicCompetitions.announce(s,params);
   case 'competition.publicEvents':return PublicCompetitions.status(s,params);
   case 'competition.expressInterest':return PublicCompetitions.interest(s,params);
+  case 'competition.submitWork':return PublicCompetitions.submitWork(s,params);
   case 'competition.notice':return FieldCompetition.notice(s,params);
   case 'competition.status':return FieldCompetition.status(s,params);
   case 'competition.fieldAssessment':return FieldCompetition.fieldAssessment(s,params);

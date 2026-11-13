@@ -8,9 +8,12 @@ const Crypto=require('node:crypto'),
  E=require('../engine.js'),Core=require('./core'),Time=require('./world'),
  Health=require('./unified'),Place=require('../world/lived-places'),
  Realm=require('../world/simulation'),People=require('../world/person-presence'),
- Emergent=require('../world/emergent-people');
+ Emergent=require('../world/emergent-people'),
+ Habitat=require('./habitat-survey'),
+ Production=require('./physical-production-ledger');
 const ORIGIN='gm-observed-local-public-competition-invitation-v1',
  INTEREST='personally-witnessed-voluntary-public-competition-interest-v1',
+ WORK='personally-offered-original-public-competition-work-v1',
  PREFIX='public_competition_',DAY=1440;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const validId=s=>typeof s==='string'&&/^[a-z][a-z0-9_-]{4,55}$/.test(s);
@@ -66,7 +69,13 @@ function verify(s,row){
    prizeTerms:a.prizeTerms,season:a.season})||
   !Array.isArray(row.interests)||row.interests.length>100||
   row.interests.some((x,i)=>!verifyInterest(row,x)||
-   row.interests.findIndex(y=>y.actorId===x.actorId)!==i))
+   row.interests.findIndex(y=>y.actorId===x.actorId)!==i)||
+  (row.submissions!==undefined&&
+   (!Array.isArray(row.submissions)||row.submissions.length>100||
+    row.submissions.some((x,i)=>!verifySubmittedWork(s,row,x)||
+     row.submissions.findIndex(y=>y.source?.originalWork?.sourceOwner===
+       x.source.originalWork.sourceOwner&&
+      y.source.originalWork.sourceId===x.source.originalWork.sourceId)!==i))))
   throw Error('The locally observed competition invitation or voluntary responses have lost their original source');
  // An original still-present event cannot be silently replaced by an
  // archived copy. After ordinary journal rotation the archived true event
@@ -110,6 +119,72 @@ function verifyInterest(row,x){
    .filter(([k])=>k!=='hash')))!==q.originalPresence.hash)
   return false;
  return Emergent.verifyPublicInvitationChoice(q.independentDecision);
+}
+// A source-specific OWNER validates an actual earlier physical achievement.
+// This bridge does not convert two different kinds of labour into one score.
+// Other authentic disciplines can expose their own witness only when proven;
+// arbitrary caller-supplied performance numbers are not accepted.
+function originalWork(s,sourceOwner,sourceId){
+ if(typeof sourceId!=='string'||sourceId.length>100)
+  throw Error('A real original work reference must be given, not claimed performance points');
+ if(sourceOwner==='habitat-survey'){
+  const q=Habitat.historical(s,sourceId);
+  return {sourceOwner,sourceId,completedAtMinute:q.interpretedAtMinute,
+   originalObservationHash:q.observationHash,
+   originalResultHash:q.rollHash,
+   originalOutcome:q.success?'interpreted':'unresolved-traces'};
+ }
+ if(sourceOwner==='physical-production'){
+  if(!Production.verify(s))
+   throw Error('The original material production ledger does not reconcile');
+  const record=s.table?.physicalProductionHistory?.find(x=>x.id===sourceId);
+  if(!record||record.source?.finishMinute>s.world.minutes)
+   throw Error('An actual previously completed physical work receipt is required');
+  return {sourceOwner,sourceId,
+   completedAtMinute:record.source.finishMinute,
+   originalResultHash:record.sourceHash,
+   originalOutcome:record.source.originalOutcome};
+ }
+ throw Error('Competition evidence needs a real source owner, never a caller-authored score or outcome');
+}
+function verifySubmittedWork(s,row,item){
+ const q=item?.source,o=q?.originalWork,ev=item?.submissionEvent,
+  seal=item?.submissionEventHash;
+ if(!q||!o||item.origin!==WORK||q.origin!==WORK||
+  item.sourceHash!==hash(q)||
+  q.eventId!==row.id||q.invitationHash!==row.sourceHash||
+  q.actorId!=='player'||q.playerName!==row.source.playerNameAtPublication||
+  q.venue!==row.venue||
+  !Number.isInteger(q.submittedAtMinute)||
+  q.submittedAtMinute<row.publishedMinute||
+  q.submittedAtMinute>s.world.minutes||
+  !Number.isInteger(o.completedAtMinute)||
+  o.completedAtMinute<0||o.completedAtMinute>q.submittedAtMinute||
+  q.preannouncedWork!==(o.completedAtMinute>=row.publishedMinute)||
+  q.noAcceptedEntryOrEligibility!==true||
+  q.noJudgeScoreRankOrReward!==true||
+  !ev||seal!==hash(ev)||ev.type!=='story'||
+  ev.text!=='You offer original completed work for the announced public gathering; no judge has accepted it.'||
+  ev.day!==Math.floor(q.submittedAtMinute/DAY)+1||
+  ev.time!=='Day '+(Math.floor(q.submittedAtMinute/DAY)+1)+', '+
+   String(Math.floor((q.submittedAtMinute%DAY)/60)).padStart(2,'0')+':'+
+   String(q.submittedAtMinute%60).padStart(2,'0')||
+  ev.details?.origin!==WORK||ev.details?.eventId!==row.id||
+  ev.details?.actorId!=='player'||
+  ev.details?.originalSourceHash!==hash(o)||
+  ev.details?.noAdjudication!==true)
+  return false;
+ // The actual archived original work source is independently reverified
+ // every time: one cannot reseal a production history to claim extra items.
+ let expected;
+ try{expected=originalWork(s,o.sourceOwner,o.sourceId)}catch{return false;}
+ if(JSON.stringify(o)!==JSON.stringify(expected))return false;
+ const live=(s.log||[]).filter(x=>x.details?.origin===WORK&&
+  x.details.eventId===row.id&&
+  x.details.originalSourceHash===hash(o));
+ if(live.some(x=>hash(x)!==seal)||
+  (!live.some(x=>hash(x)===seal)&&s.log.length<90))return false;
+ return true;
 }
 function announce(s,p={}){
  shape(p,['eventId','title','description','criteria','eligibility','judging','appeals','prizeTerms','season','eventDay','startsAtMinuteOfDay']);
@@ -155,7 +230,7 @@ function announce(s,p={}){
   publishedMinute:s.world.minutes,eventDay:p.eventDay,
   source,sourceHash:hash(source),
   publicationEvent,publicationEventHash:hash(publicationEvent),
-  playerNameAtFirstNotice:s.player.name,interests:[]};
+  playerNameAtFirstNotice:s.player.name,interests:[],submissions:[]};
  s.table.competitionNotices[key(p.eventId)]=record;
  verify(s,record);
  return {observed:true,eventId:p.eventId,title,venue:venue.name,
@@ -220,6 +295,53 @@ function interest(s,p={}){
   independentlyDecided:true,notRegistered:true,noRankOrPrize:true,
   noPlayerRngConsumed:true,elapsedMinutes:0};
 }
+// This is an evidence *offer*, not entry, eligibility determination or
+// competition judgment. Both proof classes are actual earlier original
+// engine actions, checked by their own authoritative modules.
+function submitWork(s,p={}){
+ shape(p,['eventId','sourceOwner','sourceId']);
+ const row=s.table?.competitionNotices?.[key(p.eventId)];
+ if(!row)throw Error('A real already published public gathering is necessary to offer work');
+ verify(s,row);
+ if(s.battle||s.encounter||s.world.location!==row.venue)
+  throw Error('Original personal work may be offered only at this witnessed local public gathering');
+ if(!row.interests.some(x=>x.actorId==='player'&&
+  x.source?.voluntarilyInterested===true))
+  throw Error('Only the original willing person may submit their own work after expressing interest');
+ const proof=originalWork(s,p.sourceOwner,p.sourceId);
+ if((row.submissions||[]).some(x=>x.source?.originalWork?.sourceOwner===p.sourceOwner&&
+  x.source.originalWork.sourceId===p.sourceId))
+  throw Error('The same original completed work has already been offered to this event');
+ if((row.submissions||[]).length>=100)
+  throw Error('This public record cannot accept more personal work witnesses');
+ // No universal event deadline: the original announced terms may permit
+ // archive presentations, live contests or retrospective review.
+ // This still confers ZERO mechanical eligibility or scored result.
+ const old=s.world.minutes;
+ E.advance(s,5);Time.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
+ const source={origin:WORK,eventId:row.id,invitationHash:row.sourceHash,
+  actorId:'player',playerName:s.player.name,venue:row.venue,
+  submittedAtMinute:s.world.minutes,originalWork:proof,
+  preannouncedWork:proof.completedAtMinute>=row.publishedMinute,
+  noAcceptedEntryOrEligibility:true,noJudgeScoreRankOrReward:true};
+ Core.event(s,'story',
+  'You offer original completed work for the announced public gathering; no judge has accepted it.',
+  {origin:WORK,eventId:row.id,actorId:'player',
+   originalSourceHash:hash(proof),noAdjudication:true});
+ const submissionEvent=structuredClone(s.log.at(-1));
+ const item={origin:WORK,source,sourceHash:hash(source),
+  submissionEvent,submissionEventHash:hash(submissionEvent)};
+ row.submissions||=[];
+ row.submissions.push(item);
+ if(!verifySubmittedWork(s,row,item))
+  throw Error('Original work did not produce a valid source-attested public submission');
+ return {offered:true,eventId:row.id,
+  sourceOwner:p.sourceOwner,sourceId:p.sourceId,
+  originalOutcome:proof.originalOutcome,
+  preannouncedWork:source.preannouncedWork,
+  notAcceptedOrJudged:true,notRankedOrRewarded:true,
+  noSecondPerformanceRoll:true,elapsedMinutes:5};
+}
 function status(s,p={}){
  shape(p,[],['eventId']);
  if(p.eventId!==undefined&&!validId(p.eventId))
@@ -236,8 +358,14 @@ function status(s,p={}){
    judging:a.judging,appeals:a.appeals,prizeTerms:a.prizeTerms,
    witnessedInterests:row.interests.map(x=>({
     actorId:x.actorId,interested:x.source.voluntarilyInterested})),
+   playerOfferedWork:(row.submissions||[]).map(x=>({
+    sourceOwner:x.source.originalWork.sourceOwner,
+    sourceId:x.source.originalWork.sourceId,
+    originalOutcome:x.source.originalWork.originalOutcome,
+    preannouncedWork:x.source.preannouncedWork,
+    noEligibilityOrJudgeDecision:true})),
    noConfirmedEntrants:true,noJudgedResults:true,
    noCreditedRankOrRewards:true};
  }),note:'Observed local public invitations only. Described prizes, public rules and willingness do not establish competent officials, funded payouts, proven eligibility, actual performance or scored competition.'};
 }
-module.exports={ORIGIN,INTEREST,announce,interest,status,verify};
+module.exports={ORIGIN,INTEREST,WORK,announce,interest,submitWork,status,verify};
