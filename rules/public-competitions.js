@@ -172,7 +172,7 @@ function verifySubmittedWork(s,row,item){
   ev.details?.origin!==WORK||ev.details?.eventId!==row.id||
   ev.details?.actorId!=='player'||
   ev.details?.originalSourceHash!==hash(o)||
-  ev.details?.noAdjudication===true&&false)
+  ev.details?.noAdjudication!==true)
   return false;
  // The actual archived original work source is independently reverified
  // every time: one cannot reseal a production history to claim extra items.
