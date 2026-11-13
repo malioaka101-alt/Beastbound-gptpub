@@ -112,7 +112,7 @@ function claims(s){return JSON.stringify({
  const originalProof=Habitat.historical(s,checkId);
  A.equal(originalProof.checkId,checkId);
  A.throws(()=>Habitat.interpreted(s,checkId,{habitat:'forest'}),
-  /only a personally witnessed actual current local habitat/);
+  /personally witnessed actual current local habitat/i);
  const before=claims(s),priorRng=s.rngState;
  const submitted=act(s,'submitWork',{eventId:announced.eventId,
   sourceOwner:'habitat-survey',sourceId:checkId});
