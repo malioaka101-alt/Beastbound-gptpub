@@ -105,6 +105,46 @@ function considerPublicEventEntry(w,p,eventAdmissionHash){
   throw Error('The independent person event entry choice cannot be verified');
  return {consentsToEnter:q.consentsToEnter,source:q};
 }
+// A professional does not become an event judge by being nearby or by
+// possessing a career label. A real qualified peer can freely refuse even
+// a narrowly scoped original-work benchmark, using their OWN living RNG.
+const PUBLIC_WORK_REVIEW='independent-person-local-work-evidence-review-v1';
+function verifyPublicWorkReviewChoice(q){
+ if(!q||q.origin!==PUBLIC_WORK_REVIEW||
+  !/^[a-f0-9]{64}$/.test(q.personOriginHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.reviewRequestHash||'')||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter!==nextRng(q.rngBefore)||
+  !Number.isFinite(q.fatigue)||q.fatigue<0||q.fatigue>100||
+  !['active','recovering','relocated'].includes(q.status)||
+  !['curious','steady','independent','reserved'].includes(q.personality)||
+  typeof q.willing!=='boolean'||q.noCompulsoryJudging!==true)return false;
+ const base=q.personality==='curious'?.64:
+  q.personality==='steady'?.62:
+  q.personality==='independent'?.49:.38;
+ const chance=Math.max(.08,Math.min(.76,base-q.fatigue/300));
+ return q.willing===(q.status==='active'&&q.fatigue<76&&
+  q.rngAfter/4294967296<chance);
+}
+function considerPublicWorkReview(w,p,reviewRequestHash){
+ if(!/^[a-f0-9]{64}$/.test(reviewRequestHash||'')||
+  !verify(w,p)||!Number.isInteger(p.rngState)||p.rngState<1)
+  throw Error('Only an original present professional can consider a real local peer review');
+ const before=p.rngState,personality=p.personality,fatigue=p.fatigue,status=p.status;
+ draw(p);
+ const base=personality==='curious'?.64:
+  personality==='steady'?.62:
+  personality==='independent'?.49:.38;
+ const chance=Math.max(.08,Math.min(.76,base-fatigue/300));
+ const source={origin:PUBLIC_WORK_REVIEW,personOriginHash:p.originHash,
+  reviewRequestHash,rngBefore:before,rngAfter:p.rngState,
+  fatigue,status,personality,
+  willing:status==='active'&&fatigue<76&&p.rngState/4294967296<chance,
+  noCompulsoryJudging:true};
+ if(!verifyPublicWorkReviewChoice(source))
+  throw Error('A local professional review decision failed individual source verification');
+ return {willing:source.willing,source};
+}
 function seed(w){
  return {version:1,rngState:((w.worldSeed^0x4bc771ae)>>>0)||0x91e10da5,
   counter:0,lastSixday:-1,people:{},history:[]};
@@ -780,7 +820,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
