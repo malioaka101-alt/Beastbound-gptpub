@@ -434,8 +434,8 @@ function status(s,p={}){
     preannouncedWork:x.source.preannouncedWork,
     noEligibilityOrJudgeDecision:true})),
    noConfirmedEntrants:!(row.entrants||[]).some(x=>x.source.registered),
-   noJudgedResults:!(row.reviews||[]).some(x=>x.source.willing),
+   noJudgedResults:true, // Peer benchmark is not an official scored contest result.
    noCreditedRankOrRewards:true};
- }),note:'Observed local public invitations only. Described prizes, public rules and willingness do not establish competent officials, funded payouts, proven eligibility, actual performance or scored competition.'};
+ }),note:'The original local event may include a voluntary witnessed professional work benchmark. A peer observation does not create official contest scoring, institutional recognition, funded rewards, skill progress or qualifications.'};
 }
 module.exports={ORIGIN,INTEREST,WORK,ENTRY,validOpenAdmission,validWorkReview,originalWork,announce,interest,submitWork,enter,reviewWork,status,verify};
