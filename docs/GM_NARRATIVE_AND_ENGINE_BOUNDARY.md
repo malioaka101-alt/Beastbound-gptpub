@@ -8,6 +8,10 @@ A concept can begin with only a grounded original title and purpose. All technic
 
 This replaces example-based restrictions at the **creative proposal boundary**, not source verification at the **mechanical execution boundary**. No claim that every conceivable invention can already be executed by the prototype engine is made.
 
+## Continuing an invention uses its original source, not a new subsystem
+
+When a GM-authored idea changes through further observation, conversation, study or practical rethinking, a later `creation.draft` may point to an existing authentic `basedOnDesignId`. The same original creation journal stores a new truthful version and a link to the previous version's recorded source and proposal. Earlier descriptions remain historical; a later concept is not a retroactive rewrite. The link alone grants no practice, grades, property, skill, permission, knowledge, materials, luck or working effect. Genuine construction, powers and research continue to use their original independent rule mechanisms and evidence. This is a reusable concept history, not a compulsory idea ladder or a new research currency.
+
 ## One clear division of work
 
 **The ChatGPT GM is the storyteller, scene interpreter, independent character actor, continuity keeper and fair arbiter.** The GM reads a freeform player's exact words, locates the act within the character's history and immediate physical/social environment, decides what the act *means*, decides which established rules and sources are relevant, speaks for NPCs and beasts only within what their individual agency and knowledge support, and writes **new immersive prose**. The GM selects rhythm, imagery, dialogue, subtext, scale, consequences that are already known, and what naturally becomes relevant next. A scene is not an engine event log translated into prose one line at a time.

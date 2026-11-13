@@ -10,6 +10,10 @@ A follow-on draft extends that *same* design journal to an initially incomplete,
 
 This sets the **implementation direction** for #19 and #25: grow broadly compositional, source-verifiable action/property/lifecycle foundations first; only implement unique world mechanisms where genuinely necessary, not one engine subsystem per illustrative object. Examples are authored states exercised through the shared mechanisms, never a finite canon list.
 
+## Same creation journal — linked development of open-ended concepts (13 November 2026, draft)
+
+**17/25 accepted, #18 PAUSED OPEN, #19 ACTIVE OPEN, #25 OPEN.** Following open-ended creation proposal PR #92 and incomplete-draft PR #93, isolated draft `foundation/connected-creation-concept-evolution-20261113` adds an **optional link to the original earlier saved design** via `basedOnDesignId`. It does not create a progression system: the new authored plan stays a separate original idea with the previous concept's genuine source hash and proposal witness in the **same** existing `creationDesigns.records`. Freeform later descriptions may take entirely different shapes, powers, methods, purposes or materials, but the lineage merely preserves observed development and never grants ranks, experience, engineering proof, material output, mastery, work completion or automatic access to a mechanism. Existing mechanics govern any actual trial, output, research or power. Original earlier draft records cannot be overwritten or fictitiously relinked; ownership and same-world time are checked. No fixed number of steps or required teacher is introduced. Existing `tests/creation-design.test.js` covers genuine continuation, forged prior rejection, original dice/persistence and zero free effect. Exact-head full regression and final integration **PENDING**.
+
 ## How to use this checklist
 
 ## #19 original GM-authored physical tools join existing property custody — next isolated draft (13 November 2026)
