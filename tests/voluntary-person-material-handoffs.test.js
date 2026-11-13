@@ -86,6 +86,24 @@ try{
  inflated.held.clean_rations=2;
  A.throws(()=>H.validateAccount(inflated,'otto'),/balance disagrees/,
   'another privately held ration cannot appear without its original incoming receipt');
+ const rebased=structuredClone(account),ghost={...rebased.history[0],
+  recipientStockBefore:8,recipientStockAfter:9};
+ delete ghost.hash;
+ ghost.hash=require('node:crypto').createHash('sha256')
+  .update(JSON.stringify(ghost)).digest('hex');
+ rebased.history.push(ghost);
+ rebased.held.clean_rations=9;
+ A.throws(()=>H.validateAccount(rebased,'otto'),/unexplained transfer balance jump/,
+  'two individually sealed receipts cannot bridge eight units of invented stock');
+ const downgraded=structuredClone(account),legacyGhost={...downgraded.history[0]};
+ for(const field of ['playerStockBefore','playerStockAfter',
+  'recipientStockBefore','recipientStockAfter'])delete legacyGhost[field];
+ delete legacyGhost.hash;
+ legacyGhost.hash=require('node:crypto').createHash('sha256')
+  .update(JSON.stringify(legacyGhost)).digest('hex');
+ downgraded.history.push(legacyGhost);
+ A.throws(()=>H.validateAccount(downgraded,'otto'),/legacy material receipt/,
+  'a newly recorded custody step cannot be rewritten as an old-format receipt');
  // Historical source-hashed offers lacked the newer balance fields. They
  // remain readable without reinterpreting their old original decision.
  const legacy=structuredClone(account),priorWitness=legacy.history.find(x=>x.origin===H.ORIGIN);
@@ -135,6 +153,8 @@ try{
  A.equal(later.history.filter(h=>h.origin===
   'independent-personal-ration-use-v1').length,
   (later.held.clean_rations||0)===0?1:0);
+ A.doesNotThrow(()=>H.validateAccount(later,'otto'),
+  'a genuine new consumption after an actual gift completes the same balance chain');
  A.equal(worldAccount.actorId,'otto');
 
  // A real rejection retains all the material; unchanged repeated offers
