@@ -13,6 +13,9 @@ function setup(seed){
  const distance=s.encounter.distanceMetres, id=s.encounter.beastId,
   beast=s.beasts[id];
  A.ok(distance>=2&&distance<=17);
+ // The old discovery object does not assign a wound-model sapience field;
+ // the disposable independently appraised profile establishes it here.
+ beast.sapience=1;
  A.ok(s.log.some(e=>e.type==='encounter'&&
   e.details?.origin==='engine-local-wildlife-encounter'&&
   e.details.beastId===id&&e.details.distanceMetres===distance));
