@@ -64,6 +64,14 @@ function verifiedNotice(s,n,event,official,eventDay){
   throw Error('The competition notice has lost part of its original publication evidence');
  const live=(s.log||[]).some(ev=>correct(ev)&&
   (!archived||digest(ev)===seal));
+ // If the original announcement is STILL identifiable in the active
+ // narrative log, altered text or timestamps are corruption, not valid
+ // log rotation—even if the log also happens to be at its 90-row limit.
+ const contradicted=(s.log||[]).some(ev=>
+  ev?.type==='world'&&ev.details?.eventId===ID&&
+  ev.details.eventDay===eventDay&&ev.details.venue==='crossing'&&
+  ev.details.official===official.name&&
+  archived&&digest(ev)!==seal);
  // Unarchived legacy notices can still be used IF their historic
  // publication event is genuinely still present; inventing old-format
  // notice fields without the original event cannot create a contest.
@@ -71,7 +79,7 @@ function verifiedNotice(s,n,event,official,eventDay){
   if(!live)throw Error('A legacy competition bulletin requires its actual original public scene');
  }else if(!correct(archived)||typeof seal!=='string'||
   !/^[a-f0-9]{64}$/.test(seal)||digest(archived)!==seal||
-  (!live&&s.log.length<90))
+  (!live&&(contradicted||s.log.length<90)))
   throw Error('A source-sealed original competition publication is required');
  return n;
 }
