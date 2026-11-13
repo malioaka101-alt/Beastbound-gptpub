@@ -278,6 +278,64 @@ function jurisdictionSnapshot(w,polity,regionId,day){
   incumbent:v.holder,mandateNumber:v.mandateNumber,day,
   noAutomaticEnforcement:true,noForeignJurisdiction:true};
 }
+/*
+ * #20: a public local legal baseline is NOT a lawmaker, verdict, arrest,
+ * offence, animal title, or personhood licence. Resolve only the actual
+ * place's original published rights and, optionally, ONE existing witnessed
+ * resident filing or a directly encountered, source-verified sapient person.
+ *
+ * Neither an allegation nor a beast's intellectual life supplies another
+ * jurisdiction's legal powers. This is a pure public/evidence view, so old
+ * saves, absent offices, unknown species and private decisions stay intact.
+ */
+function localRightsContext(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).length>1||
+  Object.keys(p).some(k=>!['beastId','petitionId'].includes(k)))
+  throw Error('Local public rights inquiry accepts only one original witnessed person or resident petition, not caller-specified law, guilt or verdict');
+ const regionId=A.LOCATION_REGION[s.world?.location]||
+  require('./lived-places').get(s,s.world?.location)?.regionId,
+  region=A.R[regionId],polity=region&&A.P[region.polity],
+  office=polity&&C[polity.id];
+ if(!region||!polity||!office||!polity.rights)
+  throw Error('A genuine present locally governed region with a published original public-rights baseline is required');
+ const view={polityId:polity.id,regionId:region.id,
+  polity:polity.name,governingBody:office.governingBody,
+  originalPublishedRights:polity.rights,
+  rightSource:'Original publicly authored polity charter in world/atlas.js',
+  claimOrSubject:null,
+  noUniversalRule:true,noOffenceFinding:true,
+  noAutomaticRemedyOrSeizure:true,noCompelledBeastConsent:true};
+ if(Object.hasOwn(p,'beastId')){
+  const id=p.beastId,b=typeof id==='string'&&s.beasts?.[id],
+   persons=require('./sapient-beast-persons');
+  if(!b||b.id!==id||!b.sapientLife||!persons.verify(b)||
+   b.location!==s.world.location||b.away===true||
+   !Number.isInteger(b.sapientLife.source?.encounteredAtMinute)||
+   b.sapientLife.source.encounteredAtMinute>s.world.minutes)
+   throw Error('An actually encountered, presently witnessed sapient individual is required; neither a species label nor a claimed pet confers ownership or permission');
+  view.claimOrSubject={kind:'personally-witnessed-sapient-person',
+   beastId:id,witnessedSourceHash:b.sapientLife.sourceHash,
+   personallyEstablished:true,
+   localPersonhoodOrProtectionMustFollowActualCharter:true,
+   notPropertyBySpecies:true,noAssumedContract:true};
+ }
+ if(Object.hasOwn(p,'petitionId')){
+  const id=p.petitionId,r=typeof id==='string'&&
+   s.table?.civicPetitions?.records?.find(x=>x.petitionId===id);
+  if(polity.id!=='reedmarch'||!r||
+   r.source!==require('./civic-petitions').SOURCE||
+   !require('./civic-petitions').sourceCheck(s,r))
+   throw Error('Only the resident\'s actual original locally filed civic allegation may be cross-referenced; no foreign office or private guilt is assumed');
+  view.claimOrSubject={kind:'original-resident-allegation',
+   petitionId:r.petitionId,originalFilingHash:r.eventHash,
+   residentStatement:r.statement,verifiedComplaintFiled:true,
+   allegationProven:false,
+   knownCouncilDecision:r.state==='collected'?r.decision:null,
+   noBindingOffenceOrLegalRemedy:true};
+ }
+ return view;
+}
 function attestOriginalCivicProcedure(s,w,{kind,witnessId}={}){
  // A PLAYER cannot pass an official verdict or new powers: every value is
  // reconstructed from the existing actual world review + original log.
@@ -663,7 +721,7 @@ function recover(w,id,day,emit){
 }
 module.exports={charters:CHARTERS,byId:C,seed,ensure,report,local,review,transition,crisisReview,recover,royalID,terms,
  MANDATE_SOURCE,historicMandates,verifyMandateAudit,
- CIVIC_PROCEDURE,verifyCivicProcedures,jurisdictionSnapshot,
+ CIVIC_PROCEDURE,verifyCivicProcedures,jurisdictionSnapshot,localRightsContext,
  RECORDS_REMEDY,verifyRecordsRemedies,orderPublicRecordsInspection,
  followUpPublicRecordsInspections,publicRecordsInspectionStatus,
  attestOriginalCivicProcedure,historicalCivicProcedures};
