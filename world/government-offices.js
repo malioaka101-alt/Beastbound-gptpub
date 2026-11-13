@@ -440,10 +440,7 @@ function verifyRecordsRemedies(v,c,w=null){
        order.fulfilled.hash!==hash(order.fulfilled.source)||
        JSON.stringify(order.fulfilled.source)!==
         JSON.stringify(originalInspectionCompletion(order,
-         order.fulfilled.source.completedDay,w?.calendarAnchor||null)))||
-     (w&&order.fulfilled&&
-      (!Number.isInteger(w.lastTickDay)||
-       order.fulfilled.source.completedDay>w.lastTickDay)))
+         order.fulfilled.source.completedDay,w?.calendarAnchor||null))))
     return false;
   }catch{return false;}
  }
