@@ -73,6 +73,20 @@ function caseHearing(s,ids,caseId,ruleId,followUp='',siteNoteSeal){
    requestedFollowUp:'The original local institution may seek further genuinely available evidence or offer voluntary discussion, without a compulsory order.'}});
  return s.log.length-1;
 }
+function caseChallenge(s,beastId,caseId,rule,challengeId){
+ Core.event(s,'story','A personally encountered free local person voices an independent challenge to a previously recorded unresolved civic case.',{
+  origin:Civic.SESSION,polityId:charter.polityId,
+  institutionId:charter.institutionId,location:s.world.location,
+  topic:'Affected person challenges original civic case '+challengeId,
+  result:'The civic register acknowledges a firsthand challenge, but no new hearing or remedy has been granted.',
+  basis:'A source-verified affected person speaks from direct presence, referring to the genuine case and the specific rule appeal process.',
+  participants:[beastId],visibility:'public',
+  caseChallenge:{id:challengeId,caseId,challengerId:beastId,
+   appealProcess:rule.appealProcess,
+   grounds:'This affected individual disputes that the previous records establish responsibility for the reported physical condition.',
+   requestedReview:'They request independent consideration of the original case evidence, without presumed guilt or compulsory sanction.'}});
+ return s.log.length-1;
+}
 function rule(s,ids,id,conduct){
  const day=Math.floor(s.world.minutes/1440);
  return {id,jurisdictionRegionId:'living_atoll',
@@ -181,8 +195,9 @@ function rule(s,ids,id,conduct){
  A.throws(()=>op(s,'beastCivicProceeding',{
   polityId:charter.polityId,institutionId:charter.institutionId,eventIndex:index
  }),/cannot be recorded twice/);
- const second=rule(s,ids,'free_current_access',
-  'Do not obstruct an independently established public rescue passage without a separately justified local safety hearing.');
+ const second={...rule(s,ids,'free_current_access',
+  'Do not obstruct an independently established public rescue passage without a separately justified local safety hearing.'),
+  appealProcess:'Affected rescue users may seek a separate, witnessed re-examination of the case record by the chartered institution, without automatic penalty or seized goods.'};
  index=scene(s,ids,second);
  A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:index}).witnessedLocalRuleId,
@@ -244,6 +259,44 @@ function rule(s,ids,id,conduct){
  A.ok(view.publicContestedCases.every(x=>
   x.witnessedLocalContext.noteIsNotProofOfOffence&&
   x.allegationUnproven&&x.noFindingOrRemedyExecuted));
+ // Two distinct original local appeal terms and two different affected
+ // people: source-attested requests do not adjudicate any allegation.
+ let challengeIndex=caseChallenge(s,ids[1],'nursery_access_dispute',first,'nursery_respondent_review');
+ A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:challengeIndex}).
+  witnessedChallengeId,'nursery_respondent_review');
+ challengeIndex=caseChallenge(s,ids[0],'rescue_passage_dispute',second,'rescue_claimant_review');
+ A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:challengeIndex}).
+  noGrantedReviewOrRemedy,true);
+ view=op(s,'beastCivicStatus').known.find(x=>x.id===charter.institutionId);
+ A.deepEqual(view.publicCaseChallenges.map(x=>x.caseId),
+  ['nursery_access_dispute','rescue_passage_dispute']);
+ A.deepEqual(view.publicCaseChallenges.map(x=>x.originalAppealProcess),
+  [first.appealProcess,second.appealProcess]);
+ A.ok(view.publicCaseChallenges.every(x=>x.receivedButNotAdjudicated&&x.noReviewOrRemedyGranted));
+ let badChallenge=caseChallenge(s,ids[0],'nursery_access_dispute',first,'invented_actor_challenge');
+ s.log[badChallenge].details.caseChallenge.challengerId='invented_person';
+ let noChange=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badChallenge}),/actual public local law/);
+ A.equal(E.exportGame(s),noChange);
+ const inventedTerms={...second,appealProcess:'Compulsory detention without appeal, unlike the original law.'};
+ badChallenge=caseChallenge(s,ids[0],'rescue_passage_dispute',inventedTerms,'wrong_process_challenge');
+ noChange=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badChallenge}),/actual public local law/);
+ A.equal(E.exportGame(s),noChange);
+ badChallenge=caseChallenge(s,ids[0],'nonexistent_case',first,'unknown_case_challenge');
+ noChange=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badChallenge}),/genuine new appeal/);
+ A.equal(E.exportGame(s),noChange);
+ badChallenge=caseChallenge(s,ids[0],'rescue_passage_dispute',second,'rescue_claimant_review');
+ noChange=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badChallenge}),/genuine new appeal/);
+ A.equal(E.exportGame(s),noChange);
  // The same real rule cannot be accompanied by a nonexistent physical
  // witness chosen by the caller; rejected records must leave no result.
  let badIndex=caseHearing(s,ids,'invented_site_context',first.id,
@@ -299,7 +352,7 @@ function rule(s,ids,id,conduct){
  A.equal(E.exportGame(snapshot),saved);
  A.deepEqual(op(snapshot,'beastCivicStatus'),op(s,'beastCivicStatus'));
  A.equal(Civic._debug.verifyInstitution(snapshot.table.realm,
-  charter.polityId,charter.institutionId).sessions.length,5);
+  charter.polityId,charter.institutionId).sessions.length,7);
  // A forged legal text cannot be made authentic by merely recalculating
  // its receipt seal: it must STILL match the original witnessed event.
  const receipt=inst.sessions[1],original=structuredClone(receipt);
@@ -326,4 +379,4 @@ function rule(s,ids,id,conduct){
  A.equal(op(s,'beastCivicStatus').known[0].publicLocalRules.length,2);
  A.equal(E.exportGame(E.importGame(E.exportGame(s))),E.exportGame(s));
 }
-console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay, two independent contested local case records, two different original in-person physical site observations, rejected forged/tampered evidence, no verdict or enforced remedy PASS');
+console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay, source-specific voluntary challenge filings by two affected people, original case evidence, forged identities/appeal terms rejected, no verdict or enforced remedy PASS');
