@@ -25,8 +25,7 @@ const concept=()=>({
   {...concept(),materials:[{id:'marsh_reed',quantity:2,grade:9}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2,free:true}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2},{id:'marsh_reed',quantity:1}]},
-  {...concept(),magnitude:999},
-  {...concept(),system:'universal_rank'}
+  {...concept(),magnitude:999}
  ])A.throws(()=>call(s,'evaluate',forged),/Creation accepts|material|Duplicate|actual medium|bounded proposed Magnitude/);
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
  const assessed=call(s,'evaluate',concept());
@@ -93,6 +92,27 @@ const concept=()=>({
  A.equal(arcane.envelope.provisionalArcaneOrQiBudget,null);
  A.ok(arcane.gaps.some(x=>/No proved energy or physiology model/.test(x)));
  A.equal(arcane.noTechniqueLearned,true);
+ // A novel discipline, even one with a familiar word such as 'sense',
+ // cannot borrow an established discipline's rank, costs, or success.
+ const originalSystem={...concept(),
+  title:'GM-proposed original discipline',
+  system:'unexplored communal echo practice'};
+ const systemView=call(s,'evaluate',originalSystem);
+ A.equal(systemView.proposal.system,originalSystem.system);
+ A.ok(systemView.gaps.some(x=>/Original proposed discipline/.test(x)));
+ A.equal(systemView.prerequisites.skill,null);
+ A.equal(systemView.prerequisites.earnedRank,null);
+ A.equal(systemView.prerequisites.noveltyLeadRankRequired,null);
+ A.equal(systemView.envelope.effectGrade,null);
+ A.equal(systemView.envelope.researchBudget.theoreticalDC,null);
+ A.equal(systemView.envelope.researchBudget.nominalMaterialsPerSixdayTalons,null);
+ A.equal(systemView.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(systemView.noItemCreated,true);
+ A.equal(systemView.noTechniqueLearned,true);
+ const misleading=call(s,'evaluate',{...originalSystem,
+  system:'universal_rank'});
+ A.equal(misleading.prerequisites.earnedRank,null);
+ A.equal(misleading.noPractisedPowerGranted,true);
  A.equal(E.exportGame(s),baseline);
  A.equal(s.rngState,rolls);
  for(const target of ['', '  ', 'x'.repeat(161),'unsafe'+String.fromCharCode(10)+'name',3]){
@@ -112,6 +132,16 @@ const concept=()=>({
  A.equal(E.exportGame(s),unprovedSave);
  A.equal(s.rngState,unprovedRng);
  A.equal(E.exportGame(E.importGame(unprovedSave)),unprovedSave);
+ const unheard=call(s,'draft',originalSystem);
+ A.equal(s.table.creationDesigns.records[unheard.id].proposal.system,
+  originalSystem.system);
+ A.equal(s.table.creationDesigns.records[unheard.id].implementedEffect,false);
+ const unreadSave=E.exportGame(s),unreadRng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:unheard.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),unreadSave);
+ A.equal(s.rngState,unreadRng);
+ A.equal(E.exportGame(E.importGame(unreadSave)),unreadSave);
  const custom={...concept(),
   title:'Original freely described signal probe',
   target:targets[0]};
