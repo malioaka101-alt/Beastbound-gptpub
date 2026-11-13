@@ -99,6 +99,19 @@ const concept=()=>({
   A.throws(()=>call(s,'evaluate',{...concept(),target}),/proposed target/);
  }
  A.equal(E.exportGame(s),baseline);
+ // A completely new mechanism and form can be saved in the same original
+ // design journal, with NO item or operational technique created.
+ const novel=call(s,'draft',unstudied);
+ const novelEntry=s.table.creationDesigns.records[novel.id];
+ A.equal(novelEntry.proposal.medium,unstudied.medium);
+ A.equal(novelEntry.proposal.function,unstudied.function);
+ A.equal(novelEntry.implementedEffect,false);
+ const unprovedSave=E.exportGame(s),unprovedRng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:novel.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),unprovedSave);
+ A.equal(s.rngState,unprovedRng);
+ A.equal(E.exportGame(E.importGame(unprovedSave)),unprovedSave);
  const custom={...concept(),
   title:'Original freely described signal probe',
   target:targets[0]};
