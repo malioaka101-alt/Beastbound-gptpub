@@ -150,4 +150,80 @@ function local(seed){
  s.table.materialAssetAttestations=copies;
  A.equal(H.verifyAssetAttestations(s),true);
 }
+
+{
+ // Two unlike source-established mundane objects use precisely the SAME
+ // owner-attestation mechanism as reeds and personally manufactured tools.
+ // Quotes, prices, two physical transfers and combat profiles are original
+ // disposable test witnesses, not new public stores or item definitions.
+ const s=local(992399),beforeRng=s.rngState,
+  startingCoins=s.player.coins,startingMinute=s.world.minutes;
+ const offers=[
+  {id:'crossing_field_staff_11',item:'field_staff',actionId:'staff_field_strike',
+   seller:'Established local equipment seller',priceScales:4,
+   source:'A previously witnessed local valuation of an ordinary field staff'},
+  {id:'crossing_work_knife_12',item:'work_knife',actionId:'knife_work_cut',
+   seller:'Different established local craft vendor',priceScales:7,
+   source:'A separate previously witnessed local valuation of a real work knife'}
+ ];
+ s.table.merchantOffers||={};
+ for(const v of offers){
+  s.table.merchantOffers[v.id]={id:v.id,publiclyKnown:true,
+   seller:v.seller,location:'crossing',worldMinute:startingMinute,
+   expiresAtMinute:startingMinute+1440,priceScales:v.priceScales,
+   stock:1,source:v.source,item:v.item,
+   action:{id:v.actionId,kind:'mundane',item:v.item,
+    attribute:'str',damage:2,offM:0,attackBonus:0,
+    canNonlethal:true,source:'Independently witnessed and assessed ordinary equipment for practical work',
+    worldMinute:startingMinute}};
+ }
+ const title='A documented ordinary physically purchased item with unchanged origin, seller and observed custody but without any legal title or hidden powers.';
+ const untouched=E.exportGame(s);
+ for(const item of ['field_staff','work_knife']){
+  A.throws(()=>action(s,'documentOwnedMaterial',{
+   ownerId:'player',item,quantity:1,description:title}),
+   /sourced existing mundane equipment profile|unambiguous original source-witnessed purchase/,
+   'a quotation by itself is NOT an owned object');
+  A.equal(E.exportGame(s),untouched);
+ }
+ for(const v of offers){
+  const sale=R.act(s,{system:'gear',operation:'purchase',params:{offerId:v.id}});
+  A.equal(sale.purchased,true);
+  A.equal(s.player.inventory[v.item],1);
+  const before=E.exportGame(s),rng=s.rngState,clock=s.world.minutes;
+  const recorded=action(s,'documentOwnedMaterial',{
+   ownerId:'player',item:v.item,quantity:1,
+   description:title+' Source: '+v.item+'.'});
+  A.equal(recorded.documented,true);
+  A.equal(s.rngState,rng);
+  A.equal(s.world.minutes,clock);
+  A.notEqual(E.exportGame(s),before,'history records a real observation only');
+  A.equal(H.verifyAssetAttestations(s),true);
+  A.equal(s.table.materialAssetAttestations.at(-1).source.ownerKind,
+   'existing-purchased-mundane-equipment');
+  A.throws(()=>action(s,'documentOwnedMaterial',{
+   ownerId:'merchant:otto',item:v.item,quantity:1,description:title}));
+  A.throws(()=>action(s,'documentOwnedMaterial',{
+   ownerId:'player',item:v.item,quantity:2,description:title}));
+ }
+ A.equal(s.rngState,beforeRng);
+ A.equal(s.player.coins,startingCoins-(4+7)/100);
+ A.equal(s.world.minutes,startingMinute+20);
+ const snapshot=E.exportGame(s);
+ A.equal(E.exportGame(E.importGame(snapshot)),snapshot);
+ A.equal(H.verifyAssetAttestations(E.importGame(snapshot)),true);
+ // Old ownership remains true as history after a legitimate physical loss.
+ delete s.player.inventory.field_staff;
+ A.equal(H.verifyAssetAttestations(s),true);
+ const report=action(s,'ownedMaterialHistory',{ownerId:'player'});
+ const lost=report.knownOwnedPhysicalMaterialObservations.find(x=>x.item==='field_staff');
+ A.equal(lost.currentlyCarried,0);
+ A.equal(lost.stillHasAtLeastQuantity,false);
+ const sealed=structuredClone(s.table.materialAssetAttestations);
+ s.table.merchantOffers.crossing_work_knife_12.purchases[0].priceScales=999;
+ A.equal(H.verifyAssetAttestations(s),false,
+  'forged or repriced source sale cannot support an already witnessed historic asset');
+ s.table.materialAssetAttestations=sealed;
+}
+
 console.log('Original #19 physical property source: GM-described witnessed real player, merchant and freely accepting NPC ownership; zero created items or money, live stock transfer, historical durable receipts, private inventory not revealed and forged claims rejected PASS');

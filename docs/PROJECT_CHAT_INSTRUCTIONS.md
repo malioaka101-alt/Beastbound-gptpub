@@ -2,6 +2,8 @@
 
 **Reconciled 13 November 2026.** This is the short **live operating guide**, not a replacement for the complete Beastbound rules or original setting. The unabridged former instructions, including development chronology, are preserved **byte-for-byte** at [the historical snapshot](archive/PROJECT_CHAT_INSTRUCTIONS_2026-11-13_pre_reconciliation.md). Historical "pending", "draft", repository and campaign references in that snapshot are *not* today's status.
 
+**Beastbound is a lived-in fantasy world first**, with the verified engine supporting its independent people, ecology, myth, choice and consequences—not replacing the world's story with menus or mechanical checklists.
+
 ## Canon, project and scope
 
 - **Single private repository:** `malioaka101-alt/Beastbound-gptpub`. The game is played **in Project chats**, not as a hosted website, public release or paid service.
