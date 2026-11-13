@@ -73,6 +73,7 @@ function validLocalEnactment(inst,row){
 function validLocalCase(inst,row){
  const d=row?.source?.details,q=d?.caseReview;
  if(q===undefined)return row?.source?.caseAuthorityHash===undefined&&
+  row?.source?.caseRegionId===undefined&&
   row?.source?.citedLaw===undefined;
  const auth=inst.origin.caseCompetence,src=row?.source?.citedLaw;
  if(!caseCompetence(auth)||row.source.caseAuthorityHash!==inst.originHash||
@@ -92,10 +93,11 @@ function validLocalCase(inst,row){
   src.details?.enactment?.id!==q.ruleId||
   src.details?.enactment?.effectiveDay>row.source.sessionDay||
   src.sessionDay>row.source.sessionDay||
-  src.details.enactment.jurisdictionRegionId!==
-   Atlas.LOCATION_REGION[d.location]&&
-   require('./lived-places').get({world:{location:d.location}},d.location)?.regionId!==
-    src.details.enactment.jurisdictionRegionId)
+  !Atlas.R[row.source.caseRegionId]||
+  Atlas.R[row.source.caseRegionId].polity!==inst.origin.polityId||
+  src.details.enactment.jurisdictionRegionId!==row.source.caseRegionId||
+  (Atlas.LOCATION_REGION[d.location]!==undefined&&
+   Atlas.LOCATION_REGION[d.location]!==row.source.caseRegionId))
   return false;
  const current=inst.sessions.find(x=>x.source?.eventHash===src.eventHash);
  return !current||hash(current.source)===hash(src);
@@ -283,6 +285,7 @@ function proceeding(s,p={}){
   participatingBeasts:actual.map(b=>({id:b.id,lifeSourceHash:b.sapientLife.sourceHash})),
   ...(d.enactment===undefined?{}:{legalAuthorityHash:inst.originHash}),
   ...(d.caseReview===undefined?{}:{caseAuthorityHash:inst.originHash,
+   caseRegionId:localRegion(s),
    citedLaw:structuredClone(cited.source)})};
  const receipt={origin:SESSION,source,seal:hash(source)};
  if(!validLocalEnactment(inst,receipt)||!validLocalCase(inst,receipt)||
