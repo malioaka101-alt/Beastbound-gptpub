@@ -1122,7 +1122,7 @@ function tick(s,weekDays=[],monthDays=[]){
  // the entire multiyear history for each internal sixday/month transition.
  EcologicalWebs.validate(w);
  for(const day of times){if(day<=w.lastTickDay)continue;
-  if(we.has(day)){tickSixday(w,day);Houses.deliver(s,w,day,()=>random(w));Civic.review(s,w,day,()=>random(w),v=>event(w,v));PublicHearings.review(s,w,day,()=>random(w),v=>event(w,v));Mediation.review(s,w,day,()=>random(w),v=>event(w,v));ProfessionalPeers.tick(w,day,v=>event(w,v));
+  if(we.has(day)){tickSixday(w,day);Houses.deliver(s,w,day,()=>random(w));Civic.review(s,w,day,()=>random(w),v=>event(w,v));PublicHearings.review(s,w,day,()=>random(w),v=>event(w,v));Gov.followUpPublicRecordsInspections(w,day,v=>event(w,v));Mediation.review(s,w,day,()=>random(w),v=>event(w,v));ProfessionalPeers.tick(w,day,v=>event(w,v));
    // Per-individual wildlife acts against the ecology at THIS specific day,
    // not the future conditions at the end of a multi-month time jump.
    WildLives.sixday(s,[day]);

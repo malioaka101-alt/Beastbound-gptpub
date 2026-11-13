@@ -95,6 +95,10 @@ function review(s,w,day,random,emit){
    day,releaseDay:day+2,disposition,sourceEventHash:r.eventHash});
   if(gov.publicHearingDockets.length>60)gov.publicHearingDockets.shift();
   Gov.attestOriginalCivicProcedure(s,w,{kind:'public_hearing',witnessId:r.hearingId});
+  // The independent council has genuinely ordered public-record inspection;
+  // only that procedural order, not lawmaking or guilt, enters its own docket.
+  if(disposition==='records_review')
+   Gov.orderPublicRecordsInspection(s,w,r.hearingId);
   if(typeof emit==='function')emit({
    day,region:'reedmarch',subject:'hearing:'+r.hearingId,
    text:'The March Council records a public procedural disposition on '+i.label+
