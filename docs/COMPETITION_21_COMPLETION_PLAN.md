@@ -1,6 +1,6 @@
 # Foundation #21 — complete competition lifecycle and cultural direction
 
-**Status:** Implementation planning and integration work on the active #21 branch. **Not accepted.** Source authority: original `reference/Beastbound_Realms_Unified_Master_Prompt.md` §§37–38, current `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md`, `docs/PROJECT_CHAT_INSTRUCTIONS.md`, original engine owners. This document is a **finite completion contract**, not a replacement for the original Master Prompt or an instruction to add more competition examples.
+**Status:** #21's bounded, GM-led competition support foundation **accepted** after merged PRs #112–#118 and exact-head three-batch/final integration [run #43520052590](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43520052590). **This document preserves the earlier phase goals as an audit and future design reference, not a demand to code every contest, appeal or prize variant.** Unsupported outcomes still require their own real source-owner evidence and consent; see the [live checklist closure](MASTER_PROMPT_DEPTH_CHECKLIST.md). Source authority: original `reference/Beastbound_Realms_Unified_Master_Prompt.md` §§37–38, current `docs/MASTER_PROMPT_DEPTH_CHECKLIST.md`, `docs/PROJECT_CHAT_INSTRUCTIONS.md`, original engine owners. This document is a **finite completion contract**, not a replacement for the original Master Prompt or an instruction to add more competition examples.
 
 ## 1. Cultural experience — manhua, manhwa and anime inspiration
 
