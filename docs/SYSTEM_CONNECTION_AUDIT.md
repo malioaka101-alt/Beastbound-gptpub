@@ -26,6 +26,8 @@
 
 **Shared physical conservation:** source-authorised player sales, independently funded resident purchases and separately accepted person-to-person material gifts now use the same finite two-account physical-unit invariant in `rules/core.js`; existing `conservedScales` uses the identical arithmetic with its own denomination and balance limits. Each original owning system still verifies source, presence, stock, choice, provenance, time and persistence. No new transfer permission or item menu.
 
+**The original person-custody balance is checked end-to-end:** new voluntarily accepted/refused handoff receipts, genuinely wage-funded independent purchases and sixday ration consumption now retain their real item before/after evidence **inside the existing material account and original receipts**. The same account verifier rejects an unexplained extra current holding for different people and goods, and keeps older receipt formats compatible. No new balance ledger, player-visible private stock, automatic consent, goods or currency.
+
 **Not merged:** employment agreements are not paid labour; posted demand is not funded purchases; beast consent and human powers are not universal ranks; local legal rights, supply sources and ecological change retain their respective original systems. #19 remains open for true actor/good generality; the goal is a connected foundation rather than additional individually scripted examples.
 
 ## Integrate first where overlap already exists
