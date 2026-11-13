@@ -215,11 +215,11 @@ function rule(s,ids,id,conduct){
  A.deepEqual(view.publicContestedCases.map(x=>x.ruleId),[first.id,second.id]);
  const legitimate=E.exportGame(s);
  caseIndex=caseHearing(s,ids,'forged_rule_case','foreign_article');
- const untouched=E.exportGame(s);
+ const caseBefore=E.exportGame(s);
  A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
    institutionId:charter.institutionId,eventIndex:caseIndex}),
    /original effective local rule/);
- A.equal(E.exportGame(s),untouched);
+ A.equal(E.exportGame(s),caseBefore);
  A.notEqual(E.exportGame(s),legitimate,'a narrative witness is a distinct record, not a legal result');
  caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id);
  const duplicateBefore=E.exportGame(s);
