@@ -32,6 +32,10 @@ try{
   {npcId:'otto',item:'phantom_leaf'},
   {npcId:'otto',item:'clean_rations',accept:true},
   {npcId:'otto',item:'clean_rations',amount:100},
+  {npcId:'otto',item:'clean_rations',quantity:0},
+  {npcId:'otto',item:'clean_rations',quantity:-1},
+  {npcId:'otto',item:'clean_rations',quantity:1.5},
+  {npcId:'otto',item:'clean_rations',quantity:3},
   {npcId:'notable:invented',item:'marsh_reed'}
  ]){
   A.throws(()=>R.act(impossible,{system:'social',operation:'materialHandoff',
@@ -217,5 +221,53 @@ try{
  A.throws(()=>R.act(forged,{system:'social',operation:'materialHandoff',
   params:{npcId:'sera',item:'marsh_reed'}}),/original witnessed material handoff/);
  A.equal(E.exportGame(forged),tampered);
+
+ // Same existing owner, goods, source/recipient choice and custody chain:
+ // the player can voluntarily offer more than one actually carried unit.
+ // The GM introduces no new material, merchant, rank, wage or dice stream.
+ const bundle=fresh(doctorSeed);
+ A.equal(E.dispatch(bundle,'travel academy').ok,true);
+ write(bundle);
+ const beforeBundle=load(),bundleRng=beforeBundle.rngState,
+  bundleMinute=beforeBundle.world.minutes,
+  bundleStock=beforeBundle.player.inventory.marsh_reed;
+ A.equal(bundleStock,2,'the original fieldworker truly carries the offered bundle');
+ const several=act('material_real_two_reeds_gift_01',
+  'give 2 marsh reeds to Professor Sera');
+ A.equal(several.output.handoff.accepted,true);
+ A.equal(several.output.handoff.quantityMoved,2);
+ const afterBundle=load(),receiver=afterBundle.table.realm.materialCustody.accounts.sera,
+  proof=receiver.history.at(-1);
+ A.equal(afterBundle.player.inventory.marsh_reed||0,0);
+ A.equal(receiver.held.marsh_reed,2);
+ A.equal(proof.quantityOffered,2);
+ A.equal(proof.quantityMoved,2);
+ A.equal(proof.playerStockBefore,bundleStock);
+ A.equal(proof.playerStockAfter,0);
+ A.equal(proof.recipientStockBefore,0);
+ A.equal(proof.recipientStockAfter,2);
+ A.equal(Core.conservedItems({sourceBefore:bundleStock,sourceAfter:0,
+  targetBefore:0,targetAfter:2,amount:2}),true);
+ A.doesNotThrow(()=>H.validateAccount(receiver,'sera'));
+ const visible=afterBundle.log.find(x=>x.details?.witnessHash===proof.hash);
+ A.ok(visible);
+ A.equal(Object.hasOwn(visible.details,'recipientStockBefore'),false);
+ A.equal(Object.hasOwn(visible.details,'recipientStockAfter'),false);
+ A.equal(afterBundle.rngState,bundleRng);
+ A.equal(afterBundle.world.minutes,bundleMinute+6);
+ const afterBundleSave=read();
+ A.equal(E.exportGame(E.importGame(afterBundleSave)),afterBundleSave.trim());
+ const duplicate=act('material_real_two_reeds_gift_01',
+  'give 2 marsh reeds to Professor Sera');
+ A.equal(duplicate.duplicate,true);
+ A.equal(read(),afterBundleSave);
+ const altered=structuredClone(receiver),fake={...altered.history[0],
+  quantityMoved:3};
+ delete fake.hash;
+ fake.hash=require('node:crypto').createHash('sha256')
+  .update(JSON.stringify(fake)).digest('hex');
+ altered.history[0]=fake;
+ A.throws(()=>H.validateAccount(altered,'sera'),/original witnessed material handoff/,
+  'even a rehashed bundle cannot claim more movement than the actual offer');
 }finally{FS.rmSync(dir,{recursive:true,force:true});}
 console.log('Genuine gifts of different materials to multiple present people preserve voluntary refusal, owner inventory and private world consequences');
