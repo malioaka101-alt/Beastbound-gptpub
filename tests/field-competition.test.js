@@ -141,6 +141,14 @@ function realReport(s){
  A.throws(()=>rule(s,'fieldAssessment',{checkId}),/source-sealed original competition publication/);
  A.equal(E.exportGame(s),corrupt);
  notice.publicationEventHash=hash;
+ // A changed official publication minute is not a harmless relabel:
+ // it could falsely put the original bulletin before a performance.
+ const originalMinute=notice.worldMinute;
+ notice.worldMinute=originalMinute-1;
+ const moved=E.exportGame(s);
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/source-sealed original competition publication/);
+ A.equal(E.exportGame(s),moved);
+ notice.worldMinute=originalMinute;
  const eventIndex=s.log.findIndex(x=>x.type==='world'&&
   x.details?.eventId==='field_assessment'&&x.details?.venue==='crossing');
  A.ok(eventIndex>=0);
