@@ -73,6 +73,9 @@ A.equal(E.exportGame(s),interrupted,'no duplicate event or second resolution');
 a.status='active';
 let nextDay=day+60,declined=false,returned=false;
 for(;nextDay<=day+450;nextDay+=30){
+ // Actual independent sixday lives establish today's presence and priorities.
+ People._debug.live(w,a,nextDay);
+ People._debug.live(w,b,nextDay);
  const expected=Homes.valid(w,home);
  A.equal(expected,true);
  const status=Homes.month(w,nextDay);
