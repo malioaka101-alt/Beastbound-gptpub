@@ -115,6 +115,68 @@ const concept=()=>({
  A.equal(s.rngState,rngAfter);
 }
 {
+ // Continued original ideas share the SAME saved creation journal.
+ // No dedicated item type, research currency, extra mechanical progress,
+ // presumed successful practice or mandatory institution is introduced.
+ const s=fresh(832014),rng=s.rngState;
+ const original={
+  title:'Unfinished locally inspired construction idea',
+  purpose:'Consider an unfamiliar practical approach seen in the local world, without assuming its shape or physical operation.'
+ };
+ const first=call(s,'draft',original),firstEntry=s.table.creationDesigns.records[first.id];
+ A.equal(first.recorded,true);
+ A.equal(firstEntry.implementedEffect,false);
+ const priorHash=firstEntry.sourceHash;
+ const beforeInvalid=E.exportGame(s),invalidRng=s.rngState;
+ for(const invalid of [
+  {...original,basedOnDesignId:'imaginary'},
+  {...original,basedOnDesignId:'design_9999'},
+  {...original,basedOnDesignId:'design_0'},
+  {...original,basedOnDesignId:first.id,boost:50}
+ ]){
+  A.throws(()=>call(s,'draft',invalid));
+  A.equal(E.exportGame(s),beforeInvalid);
+  A.equal(s.rngState,invalidRng);
+ }
+ const evolved={...original,title:'Observed variation of the earlier idea',
+  medium:'GM-described local construction',
+  basedOnDesignId:first.id};
+ const inspection=call(s,'evaluate',evolved);
+ A.equal(inspection.proposal.basedOnDesignId,first.id);
+ A.equal(inspection.noItemCreated,true);
+ A.equal(inspection.noTechniqueLearned,true);
+ A.equal(E.exportGame(s),beforeInvalid);
+ const next=call(s,'draft',evolved),nextEntry=s.table.creationDesigns.records[next.id];
+ A.equal(nextEntry.source.basedOnDesignId,first.id);
+ A.equal(nextEntry.source.basedOnSourceHash,priorHash);
+ A.equal(nextEntry.source.basedOnProposalHash,firstEntry.proposalHash);
+ A.equal(nextEntry.implementedEffect,false);
+ A.equal(firstEntry.sourceHash,priorHash,
+  'building on an idea never rewrites its original saved version');
+ const history=call(s,'status').designs;
+ A.equal(history.length,2);
+ A.equal(history[1].developsFrom,first.id);
+ A.equal(history[1].effectGrade,null);
+ A.equal(history[1].noItemCreated,true);
+ const saved=E.exportGame(s);
+ A.equal(E.exportGame(E.importGame(saved)),saved);
+ const unprovedRng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:next.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),saved);
+ A.equal(s.rngState,unprovedRng);
+ // An authentic continuation cannot be relinked to a fabricated prior
+ // source by changing only the ancestor's saved proposed description.
+ const originalProposal=structuredClone(firstEntry.proposal);
+ firstEntry.proposal.title='Falsified predecessor';
+ A.throws(()=>call(s,'status',{id:next.id}),
+  /Concept continuation requires an intact original/);
+ firstEntry.proposal=originalProposal;
+ A.equal(E.exportGame(s),saved);
+ A.equal(call(s,'status',{id:next.id}).designs[0].developsFrom,first.id);
+ A.equal(s.rngState,unprovedRng);
+}
+{
  // GM-authored target language is open-ended at the proposal layer:
  // neither a fixed water-target menu nor a fabricated working mechanism.
  // These are descriptions of possibilities, not extra power/item rules.
