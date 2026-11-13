@@ -9,11 +9,13 @@ const Crypto=require('node:crypto'),
  Health=require('./unified'),Place=require('../world/lived-places'),
  Realm=require('../world/simulation'),People=require('../world/person-presence'),
  Emergent=require('../world/emergent-people'),
+ Careers=require('../world/person-careers'),
  Habitat=require('./habitat-survey'),
  Production=require('./physical-production-ledger');
 const ORIGIN='gm-observed-local-public-competition-invitation-v1',
  INTEREST='personally-witnessed-voluntary-public-competition-interest-v1',
  WORK='personally-offered-original-public-competition-work-v1',
+ ENTRY='personally-witnessed-local-voluntary-original-work-admission-v1',
  PREFIX='public_competition_',DAY=1440;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const validId=s=>typeof s==='string'&&/^[a-z][a-z0-9_-]{4,55}$/.test(s);
@@ -26,6 +28,27 @@ const shape=(p,required,optional=[])=>{
   throw Error('A public competition invitation accepts only witnessed local facts, not a chosen score, competitor response, rank or reward');
 };
 const key=id=>PREFIX+id;
+const ADMISSION_OWNERS=Object.freeze(['habitat-survey','physical-production','independent-career-work']);
+function validOpenAdmission(x){
+ return x&&typeof x==='object'&&!Array.isArray(x)&&
+  Object.keys(x).sort().join('|')===
+   'acceptedSourceOwners|allowPriorWork|openSelfEntry|procedure|requireSuccess|windowMinutes'&&
+  x.openSelfEntry===true&&prose(x.procedure,25,800)&&
+  Number.isInteger(x.windowMinutes)&&x.windowMinutes>=15&&
+  x.windowMinutes<=10080&&
+  typeof x.allowPriorWork==='boolean'&&typeof x.requireSuccess==='boolean'&&
+  Array.isArray(x.acceptedSourceOwners)&&x.acceptedSourceOwners.length>0&&
+  x.acceptedSourceOwners.length<=ADMISSION_OWNERS.length&&
+  new Set(x.acceptedSourceOwners).size===x.acceptedSourceOwners.length&&
+  x.acceptedSourceOwners.every(z=>ADMISSION_OWNERS.includes(z));
+}
+const publishedTerms=a=>({
+ title:a.title,description:a.description,criteria:a.criteria,
+ eligibility:a.eligibility,judging:a.judging,appeals:a.appeals,
+ prizeTerms:a.prizeTerms,season:a.season,
+ ...(a.openAdmission!==undefined?{openAdmission:a.openAdmission}:{})
+});
+
 function verify(s,row){
  const a=row?.source,ev=row?.publicationEvent,created=row?.sourceHash,
   seal=row?.publicationEventHash;
@@ -51,6 +74,7 @@ function verify(s,row){
   a.noAutomaticInstitutionalAuthority!==true||
   a.noAutomaticEntrantsOrConsent!==true||
   a.noAutomaticScoreRankOrReward!==true||
+  (a.openAdmission!==undefined&&!validOpenAdmission(a.openAdmission))||
   !ev||seal!==hash(ev)||
   ev.type!=='world'||
   ev.text!=='A public local competition invitation is witnessed: '+a.title+'.'||
@@ -63,10 +87,7 @@ function verify(s,row){
   ev.details?.publishedMinute!==a.publishedMinute||
   ev.details?.eventDay!==a.eventDay||
   ev.details?.scheduledAtMinute!==a.scheduledAtMinute||
-  ev.details?.termsHash!==hash({
-   title:a.title,description:a.description,criteria:a.criteria,
-   eligibility:a.eligibility,judging:a.judging,appeals:a.appeals,
-   prizeTerms:a.prizeTerms,season:a.season})||
+  ev.details?.termsHash!==hash(publishedTerms(a))||
   !Array.isArray(row.interests)||row.interests.length>100||
   row.interests.some((x,i)=>!verifyInterest(row,x)||
    row.interests.findIndex(y=>y.actorId===x.actorId)!==i)||
@@ -75,7 +96,11 @@ function verify(s,row){
     row.submissions.some((x,i)=>!verifySubmittedWork(s,row,x)||
      row.submissions.findIndex(y=>y.source?.originalWork?.sourceOwner===
        x.source.originalWork.sourceOwner&&
-      y.source.originalWork.sourceId===x.source.originalWork.sourceId)!==i))))
+      y.source.originalWork.sourceId===x.source.originalWork.sourceId)!==i)))||
+  (row.entrants!==undefined&&
+   (!Array.isArray(row.entrants)||row.entrants.length>100||
+    row.entrants.some((e,i)=>!verifyAdmission(s,row,e)||
+     row.entrants.findIndex(y=>y.source.actorId===e.source.actorId)!==i))))
   throw Error('The locally observed competition invitation or voluntary responses have lost their original source');
  // An original still-present event cannot be silently replaced by an
  // archived copy. After ordinary journal rotation the archived true event
@@ -187,11 +212,13 @@ function verifySubmittedWork(s,row,item){
  return true;
 }
 function announce(s,p={}){
- shape(p,['eventId','title','description','criteria','eligibility','judging','appeals','prizeTerms','season','eventDay','startsAtMinuteOfDay']);
+ shape(p,['eventId','title','description','criteria','eligibility','judging','appeals','prizeTerms','season','eventDay','startsAtMinuteOfDay'],['openAdmission']);
  if(!validId(p.eventId)||!prose(p.title,5,110)||
   !['description','criteria','eligibility','judging','appeals','prizeTerms'].every(k=>
     prose(p[k],k==='description'?20:k==='criteria'?16:k==='prizeTerms'?8:10,900))||
-  !prose(p.season,3,120)||!Number.isInteger(p.eventDay)||
+  !prose(p.season,3,120)||
+  (p.openAdmission!==undefined&&!validOpenAdmission(p.openAdmission))||
+  !Number.isInteger(p.eventDay)||
   p.eventDay<1||p.eventDay>20000000||
   !Number.isInteger(p.startsAtMinuteOfDay)||
   p.startsAtMinuteOfDay<0||p.startsAtMinuteOfDay>=DAY||
@@ -213,6 +240,8 @@ function announce(s,p={}){
   scheduledAtMinute:(p.eventDay-1)*DAY+p.startsAtMinuteOfDay,
   playerNameAtPublication:s.player.name,
   title,description,criteria,eligibility,judging,appeals,prizeTerms,season,
+  ...(p.openAdmission!==undefined?
+   {openAdmission:structuredClone(p.openAdmission)}:{}),
   noAutomaticInstitutionalAuthority:true,noAutomaticEntrantsOrConsent:true,
   noAutomaticScoreRankOrReward:true};
  // Establish GM-visible and reader-known observation in the original world.
@@ -221,8 +250,7 @@ function announce(s,p={}){
   {origin:ORIGIN,eventId:p.eventId,venue:venue.id,
    publishedMinute:s.world.minutes,eventDay:p.eventDay,
    scheduledAtMinute:source.scheduledAtMinute,
-   termsHash:hash({title,description,criteria,eligibility,
-    judging,appeals,prizeTerms,season}),
+   termsHash:hash(publishedTerms(source)),
    noticeNotOfficialPermission:true,noAutomaticRewards:true});
  const publicationEvent=structuredClone(s.log.at(-1));
  s.table||={};s.table.competitionNotices||={};
@@ -230,13 +258,14 @@ function announce(s,p={}){
   publishedMinute:s.world.minutes,eventDay:p.eventDay,
   source,sourceHash:hash(source),
   publicationEvent,publicationEventHash:hash(publicationEvent),
-  playerNameAtFirstNotice:s.player.name,interests:[],submissions:[]};
+  playerNameAtFirstNotice:s.player.name,interests:[],submissions:[],entrants:[]};
  s.table.competitionNotices[key(p.eventId)]=record;
  verify(s,record);
  return {observed:true,eventId:p.eventId,title,venue:venue.name,
   eventDay:p.eventDay,startsAtMinuteOfDay:p.startsAtMinuteOfDay,
   season,announcedCriteria:criteria,
-  registrationNotAutomatic:true,rankAndPrizesNotGranted:true,elapsedMinutes:5};
+  registrationNotAutomatic:true,hasPublishedOpenAdmission:!!source.openAdmission,
+  rankAndPrizesNotGranted:true,elapsedMinutes:5};
 }
 function record(s,row,choice){
  const q={origin:INTEREST,eventId:row.id,invitationHash:row.sourceHash,
@@ -342,6 +371,12 @@ function submitWork(s,p={}){
   notAcceptedOrJudged:true,notRankedOrRewarded:true,
   noSecondPerformanceRoll:true,elapsedMinutes:5};
 }
+function verifyAdmission(s,row,item){
+ return require('./public-event-admission').verify(s,row,item);
+}
+function enter(s,p={}){
+ return require('./public-event-admission').enter(s,p);
+}
 function status(s,p={}){
  shape(p,[],['eventId']);
  if(p.eventId!==undefined&&!validId(p.eventId))
@@ -358,14 +393,18 @@ function status(s,p={}){
    judging:a.judging,appeals:a.appeals,prizeTerms:a.prizeTerms,
    witnessedInterests:row.interests.map(x=>({
     actorId:x.actorId,interested:x.source.voluntarilyInterested})),
+   actualOpenEntrants:(row.entrants||[]).map(x=>({
+    actorId:x.source.actorId,registered:x.source.registered,
+    localOpenEntryOnly:true,noJudgeOrOfficialRank:true})),
    playerOfferedWork:(row.submissions||[]).map(x=>({
     sourceOwner:x.source.originalWork.sourceOwner,
     sourceId:x.source.originalWork.sourceId,
     originalOutcome:x.source.originalWork.originalOutcome,
     preannouncedWork:x.source.preannouncedWork,
     noEligibilityOrJudgeDecision:true})),
-   noConfirmedEntrants:true,noJudgedResults:true,
+   noConfirmedEntrants:!(row.entrants||[]).some(x=>x.source.registered),
+   noJudgedResults:true,
    noCreditedRankOrRewards:true};
  }),note:'Observed local public invitations only. Described prizes, public rules and willingness do not establish competent officials, funded payouts, proven eligibility, actual performance or scored competition.'};
 }
-module.exports={ORIGIN,INTEREST,WORK,announce,interest,submitWork,status,verify};
+module.exports={ORIGIN,INTEREST,WORK,ENTRY,validOpenAdmission,originalWork,announce,interest,submitWork,enter,status,verify};
