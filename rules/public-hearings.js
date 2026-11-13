@@ -74,6 +74,10 @@ function status(s,p={}){
     status:know?'public decision posted':r.state==='reviewed'?'awaiting local public notice':'awaiting council review',
     councilDisposition:know?r.disposition:null,
     publicResponse:know?r.publicResponse:null,
+    // A council procedural remedy is public only after its own notice,
+    // never a fabricated offence finding or new law.
+    publicRecordsReview:know?Gov.publicRecordsInspectionStatus(
+     s.table?.realm,r.hearingId,now-1):null,
     writtenHouseholdReplies:know?r.householdResponses:null};
   }),
   limits:'No high birth, kinship, trade licence, gifted ability, family registration or tuition is required to speak. The council and households remain independent.'};
