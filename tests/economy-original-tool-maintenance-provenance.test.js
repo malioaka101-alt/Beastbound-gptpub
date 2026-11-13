@@ -84,7 +84,7 @@ A.equal(E.exportGame(s),saved,'observing maintenance never executes another repa
 A.equal(s.rngState,rng);
 // Re-sealing altered outcomes does not defeat the original physical witness.
 const intact=structuredClone(receipt);
-receipt.durabilityAfter=5;
+receipt.durabilityAfter=9;
 receipt.sourceHash=hash(Object.fromEntries(
  Object.entries(receipt).filter(([key])=>key!=='sourceHash')));
 A.throws(()=>act(s,'prototypeStatus'),/source-verified owned physical invention/);
