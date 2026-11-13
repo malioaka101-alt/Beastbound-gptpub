@@ -113,9 +113,11 @@ const status=act(s,'publicEvents',{eventId:event.eventId});
 A.equal(status.events[0].independentlyReviewedWork.length,1);
 A.equal(status.events[0].noCreditedRankOrRewards,true);
 A.equal(status.seasonalWorkBoard.length,1);
-A.equal(status.seasonalWorkBoard[0].standings.length,1);
-A.equal(status.seasonalWorkBoard[0].standings[0].actorId,'player');
-A.equal(status.seasonalWorkBoard[0].standings[0].verifiedAttempts,choice.willing?1:0);
+A.equal(status.seasonalWorkBoard[0].standings.length,choice.willing?1:0);
+if(choice.willing){
+ A.equal(status.seasonalWorkBoard[0].standings[0].actorId,'player');
+ A.equal(status.seasonalWorkBoard[0].standings[0].verifiedAttempts,1);
+}
 A.equal(status.events[0].independentlyReviewedWork[0].objectiveBenchmarkMet,
  result.originalWorkBenchmarkMet);
 const checkpoint=E.exportGame(s);
@@ -173,9 +175,10 @@ A.equal(act(E.importGame(E.exportGame(s)),'publicEvents',{eventId:event.eventId}
  A.equal(board.events[0].independentlyReviewedWork.length,1);
  A.equal(board.events[0].noCreditedRankOrRewards,true);
  A.equal(board.seasonalWorkBoard[0].season,event2.season);
- A.equal(board.seasonalWorkBoard[0].standings.length,1);
- A.equal(board.seasonalWorkBoard[0].standings[0].verifiedAttempts,
+ A.equal(board.seasonalWorkBoard[0].standings.length,
   observed.voluntarilyReviewed?1:0);
+ if(observed.voluntarilyReviewed)
+  A.equal(board.seasonalWorkBoard[0].standings[0].verifiedAttempts,1);
  A.equal(act(E.importGame(E.exportGame(h)),'publicEvents',
   {eventId:event2.eventId}).events[0].independentlyReviewedWork.length,1);
 }
