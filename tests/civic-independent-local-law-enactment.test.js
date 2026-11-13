@@ -14,7 +14,7 @@ const legalCompetence={
  authoritySource:'The independently established Reef Cantons communal charter authorises this assembly to enact only local nursery and navigation rules after witnessed voluntary council deliberation.',
  procedure:'Two or more actual independently consenting council members must personally support each published local rule, with every present member choosing their own recorded position.',
  scope:'Local nursery protection, public passage and living-water care within the original Reef Cantons.',
- minimumNoticeDays:2};
+ minimumNoticeDays:2,requiredAssents:2};
 const charter={polityId:'reef_cantons',institutionId:'reef_free_civic_council',
  name:'Reef Free Civic Council',kind:'independent civic council',
  mandate:'Make voluntary and publicly witnessed local rules for life in the original Reef Cantons within the limited source-backed charter.',
@@ -109,8 +109,35 @@ function rule(s,ids,id,conduct){
  let index=scene(s,ids,fakeFirst),untouched=E.exportGame(s);
  A.throws(()=>op(s,'beastCivicProceeding',{
   polityId:charter.polityId,institutionId:charter.institutionId,eventIndex:index
- }),/two independent consenting ratifiers/);
+ }),/own actual assent threshold/);
  A.equal(E.exportGame(s),untouched);
+ // A different authentic original charter may explicitly allow an
+ // individual accountable delegate to enact with a single assent. No
+ // universal engine-defined "two votes" rule can override that.
+ const singleCharter={...charter,institutionId:'one_voice_civic_council',
+  name:'One Voice Civic Council',
+  legalCompetence:{...legalCompetence,requiredAssents:1,
+   authoritySource:'This distinctly established independent reef civic charter entrusts rule adoption to one consenting accredited delegate after an open session, while preserving every attendee\'s right to refuse.',
+   procedure:'An original open local hearing records every actual attendee\'s individual position; one independently consenting local delegate may ratify the rule.'}};
+ A.equal(op(s,'beastCivicAuthorInstitution',singleCharter).established,true);
+ const oneVoiceRule={...first,id:'single_delegate_passage',
+  originalProcedure:singleCharter.legalCompetence.procedure,
+  ratifications:first.ratifications.map((v,i)=>({...v,
+   assented:i===0,basis:i===0?
+    'This named delegate personally supports the proposed rule in this witnessed open hearing.':
+    'This named delegate independently declines to support the proposed rule and retains their own opinion.'}))};
+ Core.event(s,'story','Each independent participant expresses a witnessed separate opinion in an original alternate constitutional council.',{
+  origin:Civic.SESSION,polityId:charter.polityId,
+  institutionId:singleCharter.institutionId,location:s.world.location,
+  topic:'Local passage article under different source-authored charter quorum',
+  result:'One consenting representative adopts the text under this distinct valid constitutional procedure, while another freely dissents.',
+  basis:'The two actual people are physically present and personally reveal different opinions; only the individual charter authority determines the constitutional adoption threshold.',
+  participants:ids,visibility:'public',enactment:oneVoiceRule});
+ A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:singleCharter.institutionId,
+  eventIndex:s.log.length-1}).witnessedLocalRuleId,oneVoiceRule.id);
+ A.equal(Civic._debug.verifyInstitution(w,charter.polityId,
+  singleCharter.institutionId).sessions.length,1);
  // An unrelated public debate does not enact ANY rules.
  index=scene(s,ids,null);
  A.equal(op(s,'beastCivicProceeding',{
@@ -177,7 +204,7 @@ function rule(s,ids,id,conduct){
   const i=scene(s,ids,altered),before=E.exportGame(s);
   A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
    institutionId:charter.institutionId,eventIndex:i}),
-   /competent charter|two independent consenting ratifiers/);
+   /competent charter|own actual assent threshold/);
   A.equal(E.exportGame(s),before);
  }
  A.equal(op(s,'beastCivicStatus').known[0].publicLocalRules.length,2);
