@@ -32,6 +32,43 @@ function requireOnly(p,keys){
     keys.some(k=>!Object.prototype.hasOwnProperty.call(p,k)))
   throw Error('Field assessment accepts only its established request fields, never a chosen date, judge, score or result');
 }
+// #21: The existing assessment cannot treat a caller-shaped bulletin as
+// proof that the public registrar actually published it. Tie its original
+// announced terms to the ACTUAL witnessed world event, with an archived
+// copy surviving the ordinary 90-entry narrative log rotation.
+function verifiedNotice(s,n,event,official,eventDay){
+ const text=official.name+' posts the '+event.name+
+  ' field-report assessment for Day '+eventDay+
+  ', from 09:00 to 15:00 at the crossing.';
+ const correct=ev=>ev?.type==='world'&&ev.text===text&&
+  ev.day===Math.floor(n.worldMinute/DAY)+1&&
+  ev.details?.eventId===ID&&ev.details.eventDay===eventDay&&
+  ev.details.venue==='crossing'&&ev.details.official===official.name;
+ if(!n||n.eventId!==ID||n.eventDay!==eventDay||
+  n.location!=='crossing'||n.official!==official.name||
+  n.fee!==event.fee||n.reward!==event.reward||
+  n.source!=='Official '+event.name+' bulletin at Morrowfen Crossing, posted by '+
+   official.name+' for work-sixday '+eventDay||
+  !Number.isInteger(n.worldMinute)||n.worldMinute<0||
+  n.worldMinute>s.world.minutes||
+  Math.floor(n.worldMinute/DAY)+1!==eventDay)
+  throw Error('An authentic originally witnessed competition notice for the correct date is required');
+ const archived=n.originalPublicationEvent,seal=n.publicationEventHash;
+ if((archived===undefined)!==(seal===undefined))
+  throw Error('The competition notice has lost part of its original publication evidence');
+ const live=(s.log||[]).some(ev=>correct(ev)&&
+  (!archived||digest(ev)===seal));
+ // Unarchived legacy notices can still be used IF their historic
+ // publication event is genuinely still present; inventing old-format
+ // notice fields without the original event cannot create a contest.
+ if(archived===undefined){
+  if(!live)throw Error('A legacy competition bulletin requires its actual original public scene');
+ }else if(!correct(archived)||typeof seal!=='string'||
+  !/^[a-f0-9]{64}$/.test(seal)||digest(archived)!==seal||
+  (!live&&s.log.length<90))
+  throw Error('A source-sealed original competition publication is required');
+ return n;
+}
 function safe(s){
  if(s.battle||s.encounter)throw Error('Resolve the present beast encounter or fight before visiting the guild assessment');
  if(s.world?.location!=='crossing')throw Error('The Copperwood Assessment registrar and public notice board are at Morrowfen Crossing');
@@ -54,12 +91,16 @@ function notice(s,p={}){
   ' for work-sixday '+eventDay;
  const key=ID+'_'+eventDay;
  s.table||={};s.table.competitionNotices||={};
- s.table.competitionNotices[key]={
-  eventId:ID,eventDay,location:'crossing',official:official.name,
-  source,worldMinute:s.world.minutes,fee:event.fee,reward:event.reward,used:false
- };
  C.event(s,'world',official.name+' posts the '+event.name+' field-report assessment for Day '+eventDay+
   ', from 09:00 to 15:00 at the crossing.',{eventId:ID,eventDay,venue:'crossing',official:official.name});
+ const originalPublicationEvent=structuredClone(s.log.at(-1));
+ s.table.competitionNotices[key]={
+  eventId:ID,eventDay,location:'crossing',official:official.name,
+  source,worldMinute:s.world.minutes,fee:event.fee,reward:event.reward,used:false,
+  originalPublicationEvent,
+  publicationEventHash:digest(originalPublicationEvent)
+ };
+ verifiedNotice(s,s.table.competitionNotices[key],event,official,eventDay);
  return {witnessed:true,eventId:ID,eventName:event.name,eventDay,
   open:'09:00',lastEntry:'15:00',fee:event.fee,
   judgedOn:'One independently witnessed and resolved Copperwood Verge habitat survey in this work-sixday',
@@ -70,6 +111,7 @@ function status(s,p={}){
  const {event}=canonical();
  const eventDay=upcoming(s),key=ID+'_'+eventDay;
  const notice=s.table?.competitionNotices?.[key];
+ if(notice)verifiedNotice(s,notice,event,canonical().official,eventDay);
  const results=(s.player?.competitionRecord||[]).filter(x=>
   x.event===ID&&x.origin==='judged-witnessed-habitat-report')
   .map(x=>({eventDay:x.eventDay,result:x.result,points:x.points,reportId:x.sourceCheckId}))
@@ -130,16 +172,12 @@ function fieldAssessment(s,p={}){
  if(eventDay%6!==0||clock<OPEN||clock>CLOSE)
   throw Error('Official Copperwood field-report assessments run only on a scheduled sixth day, 09:00–15:00');
  const key=ID+'_'+eventDay,n=s.table?.competitionNotices?.[key];
- if(!n||n.used||n.eventId!==ID||n.eventDay!==eventDay||
-   n.location!=='crossing'||n.official!==official.name||
-   n.fee!==event.fee||n.reward!==event.reward||
-   n.source!=='Official '+event.name+' bulletin at Morrowfen Crossing, posted by '+official.name+
-    ' for work-sixday '+eventDay||
-   !Number.isInteger(n.worldMinute)||n.worldMinute<0||
-   n.worldMinute>s.world.minutes||
-   s.table?.competitionReceipts?.[key])
+ if(!n||n.used||s.table?.competitionReceipts?.[key])
   throw Error('A previously witnessed, unused official guild assessment notice for today is required');
+ verifiedNotice(s,n,event,official,eventDay);
  const report=proof(s,p.checkId,eventDay);
+ if(report.a.worldMinute<n.worldMinute)
+  throw Error('Competition criteria must be actually published before the qualifying work, not retroactively assigned');
  if(s.table?.competitionReportsUsed?.[p.checkId])
   throw Error('This witnessed field report has already been submitted for an official assessment');
  if(!Number.isInteger(s.player.coins)||s.player.coins<event.fee)
