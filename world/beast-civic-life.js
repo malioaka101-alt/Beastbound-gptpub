@@ -113,13 +113,15 @@ function validLocalCase(inst,row,w){
   if(record!==undefined||moment!==undefined)return false;
  }else{
   if(typeof noteSeal!=='string'||!/^[a-f0-9]{64}$/.test(noteSeal)||
-   !nonneg(moment)||Math.floor(moment/1440)!==row.source.sessionDay||
+   !Number.isSafeInteger(moment)||moment<0||
+   Math.floor(moment/1440)!==row.source.sessionDay||
    !record||Object.keys(record).sort().join('|')!=='seal|source'||
    record.seal!==noteSeal||hash(record.source)!==noteSeal||
    record.source?.source!==require('./lived-places').SOURCE||
    record.source?.placeId!==d.location||
    record.source?.witnessedAtSite!==true||
-   !nonneg(record.source?.minute)||record.source.minute>moment||
+   !Number.isSafeInteger(record.source?.minute)||
+   record.source.minute<0||record.source.minute>moment||
    !w?.livedPlaces?.places?.[d.location]||
    !require('./lived-places').verifyPlace(w.livedPlaces.places[d.location])||
    !w.livedPlaces.places[d.location].notes.some(n=>
