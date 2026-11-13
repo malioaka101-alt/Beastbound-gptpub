@@ -25,9 +25,7 @@ const concept=()=>({
   {...concept(),materials:[{id:'marsh_reed',quantity:2,grade:9}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2,free:true}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2},{id:'marsh_reed',quantity:1}]},
-  {...concept(),function:'all_powerful_soul_harvest'},
-  {...concept(),magnitude:999},
-  {...concept(),system:'universal_rank'}
+  {...concept(),magnitude:999}
  ])A.throws(()=>call(s,'evaluate',forged),/Creation accepts|material|Duplicate|actual medium|bounded proposed Magnitude/);
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
  const assessed=call(s,'evaluate',concept());
@@ -46,6 +44,120 @@ const concept=()=>({
  A.equal(assessed.prerequisites.noveltyLeadRankRequired,0,
   'novice mundane work is not barred by compulsory paid training');
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
+}
+{
+ // GM-authored target language is open-ended at the proposal layer:
+ // neither a fixed water-target menu nor a fabricated working mechanism.
+ // These are descriptions of possibilities, not extra power/item rules.
+ const s=fresh(832011),baseline=E.exportGame(s),rolls=s.rngState;
+ const targets=[
+  'a hand-accessible change in a local instrument signal',
+  'a nearby work surface that could support ordinary shaping',
+  'an unstudied biological or supernatural signature'
+ ];
+ for(const target of targets){
+  const proposal={...concept(),title:'Unverified original proposal '+target.slice(0,32),target};
+  const assessment=call(s,'evaluate',proposal);
+  A.equal(assessment.proposal.target,target);
+  A.equal(assessment.noItemCreated,true);
+  A.ok(assessment.gaps.length>0,
+   'a descriptive target does not prove the corresponding effect');
+ }
+ A.equal(E.exportGame(s),baseline);
+ A.equal(s.rngState,rolls);
+ // Neither a novel shape nor a novel creative mechanism needs a name in
+ // an engine enum to be considered. It also cannot become working power.
+ const unstudied={...concept(),
+  title:'GM-proposed original physical form',
+  medium:'living woven support geometry',
+  function:'entirely unstudied local mechanism',
+  target:'surface contact at a fictional worksite'};
+ const free=call(s,'evaluate',unstudied);
+ A.equal(free.proposal.medium,unstudied.medium);
+ A.equal(free.proposal.function,unstudied.function);
+ A.ok(free.gaps.some(x=>/Original mechanism is unverified/.test(x)));
+ A.ok(free.gaps.some(x=>/Original medium is unverified/.test(x)));
+ A.equal(free.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(free.envelope.effectGrade,null,
+  'an original unknown mechanism has no pre-assigned working grade');
+ A.equal(free.envelope.researchBudget.theoreticalDC,null,
+  'original mechanism cannot be forced into a fixed default DC');
+ A.equal(free.envelope.researchBudget.nominalMaterialsPerSixdayTalons,null,
+  'the engine cannot assign a made-up universal research fee');
+ A.equal(free.prerequisites.noveltyLeadRankRequired,null,
+  'no mandatory proficiency gate is inferred before the mechanism exists');
+ A.equal(free.noPractisedPowerGranted,true);
+ A.equal(free.noItemCreated,true);
+ const arcane=call(s,'evaluate',{...unstudied,system:'arcane'});
+ A.equal(arcane.envelope.provisionalArcaneOrQiBudget,null);
+ A.ok(arcane.gaps.some(x=>/No proved energy or physiology model/.test(x)));
+ A.equal(arcane.noTechniqueLearned,true);
+ // A novel discipline, even one with a familiar word such as 'sense',
+ // cannot borrow an established discipline's rank, costs, or success.
+ const originalSystem={...concept(),
+  title:'GM-proposed original discipline',
+  system:'unexplored communal echo practice'};
+ const systemView=call(s,'evaluate',originalSystem);
+ A.equal(systemView.proposal.system,originalSystem.system);
+ A.ok(systemView.gaps.some(x=>/Original proposed discipline/.test(x)));
+ A.equal(systemView.prerequisites.skill,null);
+ A.equal(systemView.prerequisites.earnedRank,null);
+ A.equal(systemView.prerequisites.noveltyLeadRankRequired,null);
+ A.equal(systemView.envelope.effectGrade,null);
+ A.equal(systemView.envelope.researchBudget.theoreticalDC,null);
+ A.equal(systemView.envelope.researchBudget.nominalMaterialsPerSixdayTalons,null);
+ A.equal(systemView.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(systemView.noItemCreated,true);
+ A.equal(systemView.noTechniqueLearned,true);
+ const misleading=call(s,'evaluate',{...originalSystem,
+  system:'universal_rank'});
+ A.equal(misleading.prerequisites.earnedRank,null);
+ A.equal(misleading.noPractisedPowerGranted,true);
+ A.equal(E.exportGame(s),baseline);
+ A.equal(s.rngState,rolls);
+ for(const target of ['', '  ', 'x'.repeat(161),'unsafe'+String.fromCharCode(10)+'name',3]){
+  A.throws(()=>call(s,'evaluate',{...concept(),target}),/proposed target/);
+ }
+ A.equal(E.exportGame(s),baseline);
+ // A completely new mechanism and form can be saved in the same original
+ // design journal, with NO item or operational technique created.
+ const novel=call(s,'draft',unstudied);
+ const novelEntry=s.table.creationDesigns.records[novel.id];
+ A.equal(novelEntry.proposal.medium,unstudied.medium);
+ A.equal(novelEntry.proposal.function,unstudied.function);
+ A.equal(novelEntry.implementedEffect,false);
+ const unprovedSave=E.exportGame(s),unprovedRng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:novel.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),unprovedSave);
+ A.equal(s.rngState,unprovedRng);
+ A.equal(E.exportGame(E.importGame(unprovedSave)),unprovedSave);
+ const unheard=call(s,'draft',originalSystem);
+ A.equal(s.table.creationDesigns.records[unheard.id].proposal.system,
+  originalSystem.system);
+ A.equal(s.table.creationDesigns.records[unheard.id].implementedEffect,false);
+ const unreadSave=E.exportGame(s),unreadRng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:unheard.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),unreadSave);
+ A.equal(s.rngState,unreadRng);
+ A.equal(E.exportGame(E.importGame(unreadSave)),unreadSave);
+ const custom={...concept(),
+  title:'Original freely described signal probe',
+  target:targets[0]};
+ const d=call(s,'draft',custom);
+ A.equal(d.recorded,true);
+ A.equal(s.table.creationDesigns.records[d.id].proposal.target,targets[0]);
+ A.equal(s.table.creationDesigns.records[d.id].implementedEffect,false);
+ const noTrial=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:d.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),noTrial);
+ A.equal(s.rngState,rng);
+ A.equal(s.table.creationPrototypes,undefined);
+ const restored=E.importGame(noTrial);
+ A.equal(E.exportGame(restored),noTrial);
+ A.equal(call(restored,'status',{id:d.id}).designs[0].noItemCreated,true);
 }
 {
  const s=fresh(832002),now=s.world.minutes,stamina=s.player.stamina,

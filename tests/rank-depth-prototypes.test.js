@@ -66,8 +66,13 @@ function begin(s){
   medium:'tool',system:'mundane',function:'sense',magnitude:0,
   range:'touch',area:'single',duration:'1min',target:'surface_water'}));
  A.equal(E.exportGame(s),before);
- A.throws(()=>go(s,'evaluate',{...spec(),target:'souls_of_unseen_people'}),
-  /actual medium|effect target/);
+ const unfamiliar=go(s,'evaluate',{...spec(),target:'souls_of_unseen_people'});
+ A.equal(unfamiliar.proposal.target,'souls_of_unseen_people',
+  'GM-authored target is a proposed concept, not a whitelist selection');
+ A.equal(unfamiliar.noItemCreated,true);
+ A.equal(unfamiliar.noTechniqueLearned,true);
+ A.notEqual(unfamiliar.scopeHash,go(s,'evaluate',spec()).scopeHash,
+  'unverified target must remain distinct from the established physical water model');
  A.throws(()=>go(s,'evaluate',{...spec(),quality:'ultimate'}),
   /Creation accepts/);
  A.equal(E.exportGame(s),before);

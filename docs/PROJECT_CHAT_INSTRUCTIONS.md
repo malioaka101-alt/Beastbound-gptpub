@@ -1,3 +1,9 @@
+## Creative authoring boundary: examples are not the world's permitted inventory (13 November 2026)
+
+Original Unified Master Prompt and the GM/engine boundary govern. On `foundation/generalized-source-backed-authoring-20261113`, the original `creation.evaluate` and `creation.draft` can now store arbitrary readable GM-authored targets, media, proposed mechanisms and unfamiliar disciplines **as unverified concepts**; no predeclared item, medium, effect or power-system names are required for a concept; an unknown discipline creates no earned rank or capability. The executable physical prototype, power disciplines, materials, knowledge, original checks and costs retain source-confirmed limits. The engine must **not** deny the world's possibility of a concept merely because a concrete executor does not yet exist, but it must not award working effects simply from an invented label. This is shared foundation work, not a new special object or recipe. Draft CI is pending, #19 and #25 remain OPEN, #18 is PAUSED OPEN, accepted total **17/25**. No campaign or turn state changes.
+
+---
+
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
 ## #19 — physically built authored tools share original owned-property record (13 November 2026)
