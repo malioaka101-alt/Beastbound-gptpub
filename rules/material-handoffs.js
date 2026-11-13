@@ -209,16 +209,22 @@ const ASSET_ORIGIN='witnessed-existing-material-owner-and-stock-attestation-v1';
 const STOCK_OWNER='merchant:otto';
 function ownerStock(s,ownerId,item,{requireLocal=false}={}){
  const w=Realm.peek(s),day=Math.floor(s.world.minutes/DAY);
- // Individually authored, actually built physical tools are already owned
- // objects even though they are not stackable global resource definitions.
- // Never spawn an instrument or impose a new universal equipment catalogue.
+ // Real non-stackable objects from BOTH existing physical construction and
+ // paid mundane equipment purchases use this same historic owner journal.
+ // The owner is verified by the original system; a description awards none.
  if(!Object.hasOwn(E.RESOURCES,item)){
   if(ownerId!=='player'||typeof item!=='string')
-   throw Error('Only a real personally owned physical invention may be documented outside original stackable resources');
-  const tool=require('./creation-prototype').ownedAsset(s,item);
-  return {kind:'existing-authored-personal-tool',count:tool.quantity,
-   source:'original completed and retained personally authored physical instrument',
-   ownerName:tool.owner,originalRoot:tool.originalRoot};
+   throw Error('Only a real original personally owned object may be documented outside existing stackable resources');
+  if(Object.hasOwn(s.table?.creationPrototypes||{},item)){
+   const tool=require('./creation-prototype').ownedAsset(s,item);
+   return {kind:'existing-authored-personal-tool',count:tool.quantity,
+    source:'original completed and retained personally authored physical instrument',
+    ownerName:tool.owner,originalRoot:tool.originalRoot};
+  }
+  const bought=require('./equipment').ownedAsset(s,item);
+  return {kind:'existing-purchased-mundane-equipment',count:bought.quantity,
+   source:'original locally witnessed and paid mundane equipment purchase',
+   ownerName:bought.owner,originalRoot:bought.originalRoot};
  }
  if(ownerId==='player'){
   const n=s.player.inventory?.[item]??0;
@@ -286,7 +292,8 @@ function verifyAssetAttestations(s){
    row.quantity!==q.quantity||
    (!Object.hasOwn(E.RESOURCES,q.item)&&
     (q.ownerId!=='player'||
-     q.ownerKind!=='existing-authored-personal-tool'||
+     !['existing-authored-personal-tool',
+       'existing-purchased-mundane-equipment'].includes(q.ownerKind)||
      q.quantity!==1||q.physicalStockAtWitness!==1))||
    typeof q.description!=='string'||
    q.description.trim()!==q.description||

@@ -243,4 +243,53 @@ function status(s,p={}){
  }
  return {equippedWeapon:owned.find(x=>x.equipped)?.item||null,owned:owned.slice(0,30)};
 }
-module.exports={offers,inquire,purchase,equip,unequip,status};
+// Source-only bridge into the EXISTING physical property ledger. It neither
+// transfers a weapon nor revalues it: a historically purchased mundane item
+// can be described there without becoming a new type of inventory.
+function ownedAsset(s,item){
+ if(typeof item!=='string'||!/^[a-z_]{3,60}$/.test(item))
+  throw Error('An original purchased mundane item ID is required');
+ const present=C.int(s.player?.inventory?.[item]??0,
+  'original physically carried equipment',0,1);
+ const actions=Object.entries(s.player?.combatActions||{})
+  .filter(([,a])=>a?.item===item);
+ if(actions.length!==1)
+  throw Error('A uniquely sourced existing mundane equipment profile is required');
+ const [actionId,action]=actions[0];
+ Weapons.validateSpec(s,actionId,action);
+ const witnesses=[];
+ for(const [id,q] of Object.entries(s.table?.merchantOffers||{})){
+  if(!q||q.kind==='provisions'||q.item!==item||q.id!==id||
+    q.publiclyKnown!==true||typeof q.source!=='string'||
+    q.source.trim().length<18||typeof q.seller!=='string'||
+    q.seller.trim().length<3||!E.LOCATIONS[q.location]||
+    !Number.isInteger(q.worldMinute)||q.worldMinute<0||
+    q.worldMinute>s.world.minutes||
+    !Number.isInteger(q.expiresAtMinute)||
+    q.expiresAtMinute-q.worldMinute<0||
+    q.expiresAtMinute-q.worldMinute>MAX_QUOTE_AGE||
+    !Number.isInteger(q.priceScales)||q.priceScales<1||
+    q.priceScales>100000000||
+    !Number.isInteger(q.stock)||q.stock<0||q.stock>100||
+    !Array.isArray(q.purchases)||
+    JSON.stringify(q.action)!==JSON.stringify(action))
+   continue;
+  const purchases=q.purchases.filter(p=>p&&
+   p.buyer===s.player.name&&p.priceScales===q.priceScales&&
+   Number.isInteger(p.worldMinute)&&p.worldMinute>=q.worldMinute&&
+   p.worldMinute<=q.expiresAtMinute&&p.worldMinute<=s.world.minutes);
+  // A sale requires the original known quote, original paid purchase row
+  // and the exact combat action that purchase actually installed.
+  if(purchases.length!==1)continue;
+  witnesses.push({offerId:id,seller:q.seller,location:q.location,
+   originalSource:q.source,quotedAtMinute:q.worldMinute,
+   expiresAtMinute:q.expiresAtMinute,priceScales:q.priceScales,
+   item,action:structuredClone(q.action),purchase:structuredClone(purchases[0])});
+ }
+ if(witnesses.length!==1)
+  throw Error('No unambiguous original source-witnessed purchase exists for this carried equipment');
+ return {id:item,owner:s.player.name,quantity:present,
+  originalRoot:hash({origin:'verified-existing-mundane-equipment-purchase-v1',
+   ...witnesses[0]}),source:'one original paid existing mundane equipment purchase'};
+}
+module.exports={offers,inquire,purchase,equip,unequip,status,ownedAsset};
