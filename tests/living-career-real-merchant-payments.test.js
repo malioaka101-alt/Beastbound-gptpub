@@ -3,6 +3,7 @@
 // The test's local person is made by the ORIGINAL causal source-demand factory;
 // it does not assert a random independent spawn or force an NPC employer's assent.
 const A=require('node:assert/strict'),E=require('../engine.js'),
+ Core=require('../rules/core'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
  People=require('../world/emergent-people'),Career=require('../world/person-careers');
 const s=E.newGame({seed:976171,name:'Physical Money Career Test',path:'undecided'}),
@@ -59,6 +60,15 @@ A.equal(paid.noNewMoneyCreated,true);
 A.equal(vendor.fundsScales,merchantBefore-amountScales);
 A.equal(p.cashScales,workerBefore+amountScales);
 A.equal(vendor.fundsScales+p.cashScales,merchantBefore+workerBefore);
+A.equal(Core.conservedScales({sourceBefore:merchantBefore,
+ sourceAfter:vendor.fundsScales,targetBefore:workerBefore,
+ targetAfter:p.cashScales,amount:amountScales}),true);
+A.equal(Core.conservedScales({sourceBefore:merchantBefore,
+ sourceAfter:vendor.fundsScales,targetBefore:workerBefore,
+ targetAfter:p.cashScales+1,amount:amountScales}),false);
+A.equal(Core.conservedScales({sourceBefore:1,sourceAfter:0,
+ targetBefore:Number.MAX_SAFE_INTEGER,targetAfter:Number.MAX_SAFE_INTEGER+1,
+ amount:1}),false);
 A.equal(p.funds,formerFunds,'Abstract personal livelihood is NOT cash');
 A.equal(s.player.coins,originalPlayerMoney,'Unrelated player Talons are NOT wages');
 A.equal(p.career.recognizedLicence,null);

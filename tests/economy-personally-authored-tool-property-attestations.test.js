@@ -42,6 +42,8 @@ const {s,design,id}=genuineBuild();
 const physical=s.table.creationPrototypes[id];
 A.equal(physical.owner,s.player.name);
 A.equal(Prototype.ownedAsset(s,id).originalRoot,physical.sourceHash);
+ A.equal(Prototype.ownedAsset(s,id).kind,'existing-authored-personal-tool');
+ A.match(Prototype.ownedAsset(s,id).source,/original completed/);
 const existingCount=Object.keys(s.table.creationPrototypes).length;
 const inventory=structuredClone(s.player.inventory);
 const money=structuredClone(s.player.money);

@@ -190,6 +190,10 @@ function local(seed){
   const sale=R.act(s,{system:'gear',operation:'purchase',params:{offerId:v.id}});
   A.equal(sale.purchased,true);
   A.equal(s.player.inventory[v.item],1);
+  const provider=require('../rules/equipment').ownedAsset(s,v.item);
+  A.equal(provider.kind,'existing-purchased-mundane-equipment');
+  A.equal(provider.quantity,1);
+  A.equal(provider.owner,s.player.name);
   const before=E.exportGame(s),rng=s.rngState,clock=s.world.minutes;
   const recorded=action(s,'documentOwnedMaterial',{
    ownerId:'player',item:v.item,quantity:1,

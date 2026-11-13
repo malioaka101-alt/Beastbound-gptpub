@@ -290,6 +290,7 @@ function ownedAsset(s,item){
   throw Error('No unambiguous original source-witnessed purchase exists for this carried equipment');
  return {id:item,owner:s.player.name,quantity:present,
   originalRoot:hash({origin:'verified-existing-mundane-equipment-purchase-v1',
-   ...witnesses[0]}),source:'one original paid existing mundane equipment purchase'};
+   ...witnesses[0]}),kind:'existing-purchased-mundane-equipment',
+  source:'original locally witnessed and paid mundane equipment purchase'};
 }
 module.exports={offers,inquire,purchase,equip,unequip,status,ownedAsset};
