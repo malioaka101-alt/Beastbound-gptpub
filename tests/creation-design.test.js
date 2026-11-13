@@ -48,6 +48,47 @@ const concept=()=>({
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
 }
 {
+ // GM-authored target language is open-ended at the proposal layer:
+ // neither a fixed water-target menu nor a fabricated working mechanism.
+ // These are descriptions of possibilities, not extra power/item rules.
+ const s=fresh(832011),baseline=E.exportGame(s),rolls=s.rngState;
+ const targets=[
+  'a hand-accessible change in a local instrument signal',
+  'a nearby work surface that could support ordinary shaping',
+  'an unstudied biological or supernatural signature'
+ ];
+ for(const target of targets){
+  const proposal={...concept(),title:'Unverified original proposal '+target.slice(0,32),target};
+  const assessment=call(s,'evaluate',proposal);
+  A.equal(assessment.proposal.target,target);
+  A.equal(assessment.noItemCreated,true);
+  A.ok(assessment.gaps.length>0,
+   'a descriptive target does not prove the corresponding effect');
+ }
+ A.equal(E.exportGame(s),baseline);
+ A.equal(s.rngState,rolls);
+ for(const target of ['', '  ', 'x'.repeat(161),'unsafe\\nname',3]){
+  A.throws(()=>call(s,'evaluate',{...concept(),target}),/proposed target/);
+ }
+ A.equal(E.exportGame(s),baseline);
+ const custom={...concept(),
+  title:'Original freely described signal probe',
+  target:targets[0]};
+ const d=call(s,'draft',custom);
+ A.equal(d.recorded,true);
+ A.equal(s.table.creationDesigns.records[d.id].proposal.target,targets[0]);
+ A.equal(s.table.creationDesigns.records[d.id].implementedEffect,false);
+ const noTrial=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:d.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),noTrial);
+ A.equal(s.rngState,rng);
+ A.equal(s.table.creationPrototypes,undefined);
+ const restored=E.importGame(noTrial);
+ A.equal(E.exportGame(restored),noTrial);
+ A.equal(call(restored,'status',{id:d.id}).designs[0].noItemCreated,true);
+}
+{
  const s=fresh(832002),now=s.world.minutes,stamina=s.player.stamina,
   materials=JSON.stringify(s.player.inventory),mana=s.player.mana,
   qi=s.player.qi,rank=s.player.skills.crafting.rank;
