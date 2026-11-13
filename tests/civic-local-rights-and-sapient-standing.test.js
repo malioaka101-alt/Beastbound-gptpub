@@ -124,6 +124,7 @@ const petitionText='I ask the existing March Council to examine whether resident
  A.throws(()=>read(s,{beastId:'imaginary_sapient_person'}),/actually encountered/);
  A.equal(E.exportGame(s),before);
  A.equal(E.dispatch(s,'leave').ok,true);
+ A.equal(E.dispatch(s,'travel crossing').ok,true);
  A.throws(()=>read(s,{beastId:b.id}),/presently witnessed|actually encountered/);
  const after=E.exportGame(s);
  A.equal(E.exportGame(E.importGame(after)),after);
