@@ -112,6 +112,13 @@ function rule(s,ids,id,conduct){
   regionId:'living_atoll',
   description:'A physically reached, original public reef assembly where independent sapient members may speak or decline without surrendering their autonomy.',
   kind:'communal chamber',sceneType:'structure'});
+ // A remote freeform note remains a legitimate authored description,
+ // but cannot impersonate a firsthand observation of this same site.
+ op(s,'recordPlaceNote',{placeId:'reef_law_meeting_room',category:'route',
+  name:'Distant report of the nursery approach',
+  context:'A report about a distant reef channel may be recorded without the observer visiting; this is not a directly witnessed site condition.'});
+ const remoteNote=Places.get(s,'reef_law_meeting_room').notes[0];
+ A.equal(remoteNote.source.witnessedAtSite,false);
  const trip=op(s,'travelTo',{destinationId:'reef_law_meeting_room',
   minutes:180,journey:'The witnessed original sea crossing reaches an existing freely attended reef civic meeting space without creating government authority.',
   uncontested:true});
@@ -208,9 +215,10 @@ function rule(s,ids,id,conduct){
   name:'Rescue current marker',
   context:'The independent rescue passage retains a visibly weathered public boundary marker; no obstruction or person is identified by this site description.'});
  const site=Places.get(s,'reef_law_meeting_room');
- const siteNotes=site.notes.map(x=>x.seal);
+ const siteNotes=site.notes.filter(n=>n.source.witnessedAtSite).map(x=>x.seal);
+ A.equal(site.notes.length,3);
  A.equal(siteNotes.length,2);
- A.ok(site.notes.every(n=>n.source.witnessedAtSite===true));
+ A.ok(site.notes.slice(1).every(n=>n.source.witnessedAtSite===true));
  // A genuinely contested hearing is not a trial verdict. It references an
  // effective law, the original exact source, and TWO already present distinct
  // sapient persons. The same original civic sessions keep the provenance.
@@ -241,6 +249,13 @@ function rule(s,ids,id,conduct){
  let badIndex=caseHearing(s,ids,'invented_site_context',first.id,
   ' with an independently differing hearing topic','0'.repeat(64));
  let beforeBad=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:badIndex}),
+  /earlier personally witnessed local site note/);
+ A.equal(E.exportGame(s),beforeBad);
+ badIndex=caseHearing(s,ids,'remote_report_as_proof',first.id,
+  ' for a distinct remote-note reliability question',remoteNote.seal);
+ beforeBad=E.exportGame(s);
  A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:badIndex}),
   /earlier personally witnessed local site note/);
