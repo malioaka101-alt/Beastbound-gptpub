@@ -1,7 +1,7 @@
 'use strict';
 // All test states and saves are disposable. No canonical player's checkpoint is altered.
 const A=require('node:assert/strict'),FS=require('node:fs'),OS=require('node:os'),Path=require('node:path');
-const E=require('../engine.js'),R=require('../rules'),Turn=require('../scripts/chat-turn.js');
+const E=require('../engine.js'),R=require('../rules'),Core=require('../rules/core'),Turn=require('../scripts/chat-turn.js');
 const DAY=1440;
 const rule=(s,operation,params={})=>R.act(s,{system:'competition',operation,params});
 const fresh=(seed=87213)=>E.newGame({seed,name:'Assessment Fixture',path:'undecided'});
@@ -100,4 +100,93 @@ function realReport(s){
   A.equal(FS.readFileSync(file,'utf8'),final);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
-console.log('Scheduled witnessed Copperwood field assessment: authenticated report, single award, no second die');
+
+{
+ // An attacker who knows every literal notice field still cannot smuggle
+ // a made-up competition through the bulletin owner without a real scene.
+ const s=fresh(87217);sixthDay(s);
+ const {checkId}=realReport(s),event=E.COMPETITIONS.find(x=>x.id==='field_assessment'),
+  official=E.NPCS.elira;
+ s.table||={};s.table.competitionNotices||={};
+ s.table.competitionNotices.field_assessment_6={
+  eventId:event.id,eventDay:6,location:'crossing',official:official.name,
+  source:'Official '+event.name+' bulletin at Morrowfen Crossing, posted by '+
+   official.name+' for work-sixday 6',
+  worldMinute:s.table.sceneChecks[checkId].worldMinute-1,
+  fee:event.fee,reward:event.reward,used:false};
+ const untouched=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>rule(s,'status'),/legacy competition bulletin/);
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/legacy competition bulletin/);
+ A.equal(E.exportGame(s),untouched);A.equal(s.rngState,rng);
+}
+{
+ // The genuine registrar's bulletin posted AFTER the performance cannot
+ // retroactively make that work a preannounced judged competition.
+ const s=fresh(87218);sixthDay(s);
+ const {checkId}=realReport(s);
+ A.equal(rule(s,'notice').witnessed,true);
+ const untouched=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/criteria must be actually published before/);
+ A.equal(E.exportGame(s),untouched);A.equal(s.rngState,rng);
+}
+{
+ // Corrupt the retained public announcement or the still-present source:
+ // neither the source archive nor caller-shaped values can replace it.
+ const s=fresh(87219);sixthDay(s);
+ rule(s,'notice');
+ const {checkId}=realReport(s),notice=s.table.competitionNotices.field_assessment_6;
+ const hash=notice.publicationEventHash;
+ notice.publicationEventHash='0'.repeat(64);
+ const corrupt=E.exportGame(s);
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/source-sealed original competition publication/);
+ A.equal(E.exportGame(s),corrupt);
+ notice.publicationEventHash=hash;
+ // A changed official publication minute is not a harmless relabel:
+ // it could falsely put the original bulletin before a performance.
+ const originalMinute=notice.worldMinute;
+ notice.worldMinute=originalMinute-1;
+ const moved=E.exportGame(s);
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/source-sealed original competition publication/);
+ A.equal(E.exportGame(s),moved);
+ notice.worldMinute=originalMinute;
+ const eventIndex=s.log.findIndex(x=>x.type==='world'&&
+  x.details?.eventId==='field_assessment'&&x.details?.venue==='crossing');
+ A.ok(eventIndex>=0);
+ const original=structuredClone(s.log[eventIndex]);
+ s.log[eventIndex].text='The old guild event announcement was silently altered.';
+ const altered=E.exportGame(s);
+ A.throws(()=>rule(s,'fieldAssessment',{checkId}),/source-sealed original competition publication/);
+ A.equal(E.exportGame(s),altered);
+ s.log[eventIndex]=original;
+ const evaluated=rule(s,'fieldAssessment',{checkId});
+ A.equal(evaluated.assessed,true);
+}
+{
+ // Original old-format posted saves remain usable when the genuine
+ // unmodified original announcement still exists in the original log.
+ const s=fresh(87220);sixthDay(s);
+ rule(s,'notice');
+ const legacy=s.table.competitionNotices.field_assessment_6;
+ delete legacy.publicationEventHash;
+ delete legacy.originalPublicationEvent;
+ A.equal(rule(s,'status').posted,true);
+ const original=structuredClone(s.log.find(x=>x.details?.eventId==='field_assessment'));
+ A.ok(original);
+ const i=s.log.findIndex(x=>x.details?.eventId==='field_assessment');
+ s.log[i].text='This is a forged legacy event.';
+ A.throws(()=>rule(s,'status'),/legacy competition bulletin/);
+ s.log[i]=original;
+ A.equal(rule(s,'status').posted,true);
+}
+{
+ // The original source archive retains a real announced event after the
+ // short rotating narrative log has let the old notice scroll away.
+ const s=fresh(87221);
+ A.equal(rule(s,'notice').eventDay,6);
+ const seal=s.table.competitionNotices.field_assessment_6.publicationEventHash;
+ for(let i=0;i<96;i++)Core.event(s,'world','Ordinary unrelated public market noise.',{i});
+ A.equal(s.log.length,90);
+ A.equal(rule(s,'status').posted,true);
+ A.equal(s.table.competitionNotices.field_assessment_6.publicationEventHash,seal);
+}
+console.log('Scheduled witnessed Copperwood field assessment: original published event source, prior notice before performance, rejection of forged and rewritten bulletin, archival replay and legacy log compatibility, single award, no second die');
