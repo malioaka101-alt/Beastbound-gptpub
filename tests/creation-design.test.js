@@ -46,6 +46,75 @@ const concept=()=>({
  A.equal(E.exportGame(s),old);A.equal(s.rngState,rng);
 }
 {
+ // The GM can begin with a story-grounded idea, not an invented universal
+ // rank, shape, distance, craft time, price, effect scale or curriculum.
+ // These remain ordinary ORIGINAL design records, not separate new systems.
+ const s=fresh(832013),before=E.exportGame(s),oldRng=s.rngState;
+ const idea={
+  title:'Uncharted living-world craft possibility',
+  purpose:'Study whether a newly encountered cultural technique or natural phenomenon can become a useful practice without assuming it already works.'
+ };
+ const view=call(s,'evaluate',idea);
+ A.equal(view.proposal.title,idea.title);
+ A.equal(view.proposal.purpose,idea.purpose);
+ for(const k of ['medium','system','function','magnitude','range','area','duration','novelty'])
+  A.equal(view.proposal[k],null,'unspecified facts are not fabricated: '+k);
+ A.equal(view.envelope.effectGrade,null);
+ A.equal(view.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(view.envelope.researchBudget.theoreticalDC,null);
+ A.equal(view.envelope.researchBudget.nominalMaterialsPerSixdayTalons,null);
+ A.equal(view.prerequisites.earnedRank,null);
+ A.equal(view.prerequisites.noveltyLeadRankRequired,null);
+ A.equal(view.noItemCreated,true);
+ A.equal(view.noTechniqueLearned,true);
+ A.equal(E.exportGame(s),before);
+ A.equal(s.rngState,oldRng);
+ const partially={...idea,medium:'original constructed object',
+  system:'unexplored craft tradition'};
+ const second=call(s,'evaluate',partially);
+ A.equal(second.proposal.medium,partially.medium);
+ A.equal(second.proposal.system,partially.system);
+ A.equal(second.envelope.effectGrade,null);
+ A.ok(second.gaps.length);
+ A.equal(E.exportGame(s),before);
+ for(const malformed of [{...idea,magnitude:999},
+  {...idea,range:'no physical limit'},
+  {...idea,novelty:'automatic godhood'},
+  {...idea,medium:12}]){
+  A.throws(()=>call(s,'evaluate',malformed));
+  A.equal(E.exportGame(s),before);
+ }
+ const time=s.world.minutes,stamina=s.player.stamina,
+  stock=structuredClone(s.player.inventory);
+ const drafted=call(s,'draft',idea);
+ A.equal(drafted.recorded,true);
+ A.equal(drafted.prerequisites.skill,null);
+ A.equal(s.world.minutes,time+35);
+ A.equal(s.player.stamina,stamina-1);
+ A.deepEqual(s.player.inventory,stock);
+ const original=s.table.creationDesigns.records[drafted.id];
+ A.equal(original.proposal.system,null);
+ A.equal(original.implementedEffect,false);
+ const observed=call(s,'status',{id:drafted.id}).designs[0];
+ A.equal(observed.effectGrade,null);
+ A.equal(observed.noItemCreated,true);
+ const saved=E.exportGame(s),rng=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:drafted.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),saved);
+ A.equal(s.rngState,rng);
+ A.equal(E.exportGame(E.importGame(saved)),saved);
+ const recorded=call(s,'draft',partially);
+ A.equal(s.table.creationDesigns.records[recorded.id].proposal.medium,
+  partially.medium);
+ A.equal(s.table.creationDesigns.records[recorded.id].implementedEffect,false);
+ const after=E.exportGame(s),rngAfter=s.rngState;
+ A.throws(()=>call(s,'prototype',{id:recorded.id}),
+  /No proven physical prototype adapter/);
+ A.equal(E.exportGame(s),after);
+ A.equal(s.rngState,rngAfter);
+}
+{
  // GM-authored target language is open-ended at the proposal layer:
  // neither a fixed water-target menu nor a fabricated working mechanism.
  // These are descriptions of possibilities, not extra power/item rules.

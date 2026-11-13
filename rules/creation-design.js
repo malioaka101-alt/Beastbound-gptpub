@@ -53,11 +53,11 @@ function input(raw){
  const p={
   title:textField(raw.title,'invention title',4,100),
   purpose:textField(raw.purpose,'practical cultural or technical purpose',12,700),
-  medium:textField(raw.medium,'proposed medium',3,100),
-  system:textField(raw.system,'proposed system or discipline',3,100),
-  function:textField(raw.function,'proposed mechanism',3,120),
-  magnitude:raw.magnitude,range:raw.range,area:raw.area,
-  duration:raw.duration,novelty:raw.novelty
+  medium:raw.medium==null?null:textField(raw.medium,'proposed medium',3,100),
+  system:raw.system==null?null:textField(raw.system,'proposed system or discipline',3,100),
+  function:raw.function==null?null:textField(raw.function,'proposed mechanism',3,120),
+  magnitude:raw.magnitude??null,range:raw.range??null,area:raw.area??null,
+  duration:raw.duration??null,novelty:raw.novelty??null
  };
  if(raw.target!==undefined){
   // Targets are GM-authored proposals, not a fixed list of permissible
@@ -66,10 +66,15 @@ function input(raw){
   // alone never changes world state or authorises a technique.
   p.target=textField(raw.target,'proposed target',3,160);
  }
- if(!RANGE.includes(p.range)||!AREA.includes(p.area)||
-   !DURATION.includes(p.duration)||!NOVELTY.includes(p.novelty))
-  throw Error('An actual medium, technique mechanism, scale and creation novelty are required');
- C.int(p.magnitude,'bounded proposed Magnitude',0,7);
+ // A creative concept may be incomplete. Supplied numeric categories still
+ // have to be honest; missing mechanics are never auto-filled with made-up
+ // ranges, disciplines, ranks, costs or working abilities.
+ if((p.range!==null&&!RANGE.includes(p.range))||
+    (p.area!==null&&!AREA.includes(p.area))||
+    (p.duration!==null&&!DURATION.includes(p.duration))||
+    (p.novelty!==null&&!NOVELTY.includes(p.novelty)))
+  throw Error('A supplied creation scale or novelty must match an established mechanical category');
+ if(p.magnitude!==null)C.int(p.magnitude,'bounded proposed Magnitude',0,7);
  if(raw.researchId!==undefined){
   if(typeof raw.researchId!=='string'||!/^[a-z][a-z0-9_-]{1,48}$/.test(raw.researchId))
    throw Error('A valid previously completed research ID is required');
@@ -134,8 +139,44 @@ function sealedResearch(s,p,grade){
   rec.truth?.feasibility!=='not_as_framed';
  return {documented:!!legitimate};
 }
+// Preserve unfinished GM-led concepts inside the existing design ledger.
+// This is not a separate class of craft, mystery points, automatic research,
+// new power discipline, or a generic 'try anything' output executor.
+function incompleteConcept(s,p){
+ const required=['medium','system','function','magnitude','range','area','duration','novelty'];
+ const omitted=required.filter(k=>p[k]===null);
+ const scope={medium:p.medium,system:p.system,function:p.function,
+  magnitude:p.magnitude,range:p.range,area:p.area,duration:p.duration,
+  ...(p.target?{target:p.target}:{})};
+ const missingMaterials=p.materials.filter(m=>
+  !Number.isInteger(s.player?.inventory?.[m.id])||
+  s.player.inventory[m.id]<m.quantity)
+  .map(m=>({id:m.id,need:m.quantity,recorded:s.player?.inventory?.[m.id]||0}));
+ const budget={
+  grade:null,theoreticalDC:null,progressionTrack:null,
+  nominalMaterialsPerSixdayTalons:null,researchLeadRankRequired:null,
+  ordinaryPrototypeRoute:false,
+  interpretation:'Not yet specified or established; no mandatory research price, time, grade, rank or effect is implied'};
+ return {proposal:p,scopeHash:hash(scope),
+  envelope:{function:p.function,meaning:'An authored possibility, not an established working effect',
+   magnitude:p.magnitude,effectGrade:null,range:p.range,area:p.area,
+   duration:p.duration,novelty:p.novelty,medium:p.medium,system:p.system,
+   provisionalArcaneOrQiBudget:null,researchBudget:budget,
+   requiredAuthenticatedMaterialGrade:null,notACopyOfParentOrBeastPower:true},
+  prerequisites:{skill:null,earnedRank:null,noveltyLeadRankRequired:null,
+   earnedResearchRank:null,disciplineStage:null,stageVerified:false,
+   matchingReplicatedEvidence:false,missingMaterials},
+  gaps:['The original concept does not yet establish: '+omitted.join(', ')+'. Its actual mechanics must arise from witnessed research, practice or physical work.',
+   ...(missingMaterials.length?['The proposed material quantities are not actually held or sourced']:[])],
+  stage:'idea-under-evaluation',noTechniqueLearned:true,noItemCreated:true,
+  noPractisedPowerGranted:true,
+  note:'An unfinished idea can be recorded and investigated; no craft, power, world fact, price or successful outcome is granted by its description.'};
+}
 function analysis(s,raw){
- const p=input(raw),
+ const p=input(raw);
+ if(['medium','system','function','magnitude','range','area','duration','novelty']
+  .some(k=>p[k]===null))return incompleteConcept(s,p);
+ const
   knownSystem=Object.hasOwn(SYSTEMS,p.system),
   spec=knownSystem?SYSTEMS[p.system]:null,
   knownMechanism=Object.hasOwn(FUNCTIONS,p.function),
