@@ -188,6 +188,7 @@ function rule(s,ids,id,conduct){
  A.deepEqual(beasts.map(b=>b.level),oldRanks);
  A.deepEqual(s.player.partnerIds,initialPartners);
  Time.advance(s,2);
+ const caseRngBefore=s.rngState;
  view=op(s,'beastCivicStatus').known.find(x=>x.id===charter.institutionId);
  A.deepEqual(view.publicLocalRules.map(x=>x.instrumentId),[first.id,second.id]);
  A.equal(view.publicLocalRules[0].conductRule,first.conductRule);
@@ -230,7 +231,8 @@ function rule(s,ids,id,conduct){
  A.equal(E.exportGame(s),duplicateBefore);
  A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
  A.equal(s.player.coins,coins);
- A.equal(s.rngState,beforePlayerRng);
+ A.equal(s.rngState,caseRngBefore,
+  'recording disputed testimony must not draw another player roll after actual world ticks');
  A.deepEqual(beasts.map(b=>b.owner),oldOwners);
  A.deepEqual(s.player.partnerIds,initialPartners);
  A.equal(s.player.coins,coins);
