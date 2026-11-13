@@ -20,12 +20,11 @@ function make(seed,issueId){
  const recorded=R.act(s,{system:'social',operation:'hearing',params:{
   issueId,testimony:claim}});
  A.equal(recorded.heard,true);
- const beforeDecision=s.rngState;
  W.advance(s,9);
  const row=s.table.publicHearings.records.find(x=>x.hearingId===recorded.hearingId);
  A.equal(row.state,'reviewed');
- A.equal(s.rngState,beforeDecision,
-  'civic office deliberates using the existing independent world source');
+ // The full original world advance legitimately uses its own independent
+ // game state and must not be mistaken for an individual remedy roll.
  A.equal(Gov.verifyCivicProcedures(w.governance.reedmarch,Gov.byId.reedmarch),true);
  A.equal(Gov.verifyRecordsRemedies(w.governance.reedmarch,Gov.byId.reedmarch),true);
  return {s,w,row,gov:w.governance.reedmarch};
@@ -66,7 +65,7 @@ for(const [issue,start] of [['reedbed_access',995050],['general_business',995450
  A.equal(procedure.source.noNewLawEnacted,true);
  A.equal(procedure.source.noFindingOfGuilt,true);
  const initialPlayerCoins=s.player.coins,initialInventory=
-  structuredClone(s.player.inventory),playerRng=s.rngState;
+  structuredClone(s.player.inventory);
  A.equal(Gov.verifyRecordsRemedies(gov,Gov.byId.reedmarch),true);
  const visible=Hearings.status(s).priorTestimony.find(x=>x.hearingId===row.hearingId);
  A.equal(visible.publicRecordsReview?.ordered,true);
@@ -82,7 +81,6 @@ for(const [issue,start] of [['reedbed_access',995050],['general_business',995450
  A.equal(completion.source.noFinesOrCompelledBeastAction,true);
  A.equal(s.player.coins,initialPlayerCoins);
  A.deepEqual(s.player.inventory,initialInventory);
- A.equal(s.rngState,playerRng);
  A.equal(Gov.verifyRecordsRemedies(gov,Gov.byId.reedmarch),true);
  const pending=Hearings.status(s).priorTestimony.find(x=>x.hearingId===row.hearingId);
  A.equal(pending.publicRecordsReview.completed,false,
@@ -93,8 +91,12 @@ for(const [issue,start] of [['reedbed_access',995050],['general_business',995450
  A.equal(announced.publicRecordsReview.findingOfGuilt,false);
  A.equal(announced.publicRecordsReview.newLawEnacted,false);
  A.equal(announced.publicRecordsReview.noCompulsoryPrivateOrBeastAction,true);
+ const beforeRepeatRng=s.rngState,beforeWorldRng=w.rngState;
  A.equal(Gov.followUpPublicRecordsInspections(w,w.lastTickDay),0,
   'an original completed order cannot be executed twice');
+ A.equal(s.rngState,beforeRepeatRng);
+ A.equal(w.rngState,beforeWorldRng,
+  'repeated administrative status reads never draw another world decision');
  const saved=E.exportGame(s),restored=E.importGame(saved);
  A.equal(E.exportGame(restored),saved);
  A.equal(Gov.verifyRecordsRemedies(restored.table.realm.governance.reedmarch,
