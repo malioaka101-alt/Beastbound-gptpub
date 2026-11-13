@@ -104,7 +104,7 @@ function until(s,day,time=13*60){
   act(s,'submitWork',{eventId:e.eventId,
    sourceOwner:'physical-production',sourceId:id});
   until(s,e.eventDay);
-  FS.writeFileSync(file,E.exportGame(s)+'\\n');
+  FS.writeFileSync(file,E.exportGame(s)+'\n');
   const request={id:'witnessed_entry_first_818012',mode:'rule',
    system:'competition',operation:'enter',params:{
     eventId:e.eventId,sourceOwner:'physical-production',sourceId:id}};
