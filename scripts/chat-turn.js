@@ -136,15 +136,32 @@ function materialPersonIntent(s,action){
   E.SPECIES[beast.species]?.name.toLowerCase()
  ]:['beast','animal','creature'];
  if(animalNames.includes(target))return null;
+ return {npcId:actuallyPresentMaterialPerson(s,target),item,quantity};
+}
+// The same original witness of co-presence applies to giving, buying or
+// discussing material ownership. A name is never proof of assent or stock.
+function actuallyPresentMaterialPerson(s,target){
  const visible=localScene(s).nearbyPeople;
  const matching=visible.filter(person=>
-   [person.name.toLowerCase(),person.npcId.toLowerCase(),
-    person.name.toLowerCase().split(' ')[0]].includes(target));
+  [person.name.toLowerCase(),person.npcId.toLowerCase(),
+   person.name.toLowerCase().split(' ')[0]].includes(target));
  if(matching.length!==1)
   throw Error(matching.length?
-   'Several actually present people match; name the exact recipient':
-   'No single actually present person matches this intended recipient');
- return {npcId:matching[0].npcId,item,quantity};
+   'Several actually present people match; name the exact person':
+   'No single actually present person matches this intended person');
+ return matching[0].npcId;
+}
+// A freeform offer to BUY actual goods from their independently owning
+// person, never a caller-set price, merchant stock or forced acceptance.
+function personalMaterialPurchaseIntent(s,action){
+ const m=action.match(/^(?:buy|purchase)\s+(.+?)\s+from\s+(.+)$/);
+ if(!m)return null;
+ const offered=m[1].trim(),bundle=offered.match(/^(\d+)\s+(.+)$/);
+ const quantity=bundle?Number(bundle[1]):1;
+ const item=namedMaterial(bundle?bundle[2]:offered);
+ if(!item)return null;
+ const target=m[2].trim().replace(/^(?:the|a|an)\s+/,'');
+ return {npcId:actuallyPresentMaterialPerson(s,target),item,quantity};
 }
 function materialOfferIntent(s,action){
  if(action==='feed'||action==='offer food')return {item:'clean_rations'};
@@ -416,6 +433,11 @@ function execute(savePath, req) {
      response.gear=Rules.act(s,{system:'gear',operation:'inquire',
        params:{npcId:'otto'}});
      response.message=response.gear.message;
+   }else if(personalMaterialPurchaseIntent(s,action)){
+     const {npcId,item,quantity}=personalMaterialPurchaseIntent(s,action);
+     response.trade=Rules.act(s,{system:'social',
+       operation:'purchaseOwnedMaterial',params:{npcId,item,quantity}});
+     response.message=response.trade.message;
    }else if(materialPersonIntent(s,action)){
      // A real targeted person gets a choice and physical custody of an
      // accepted item. Neither speech nor gift promises reciprocal favour.

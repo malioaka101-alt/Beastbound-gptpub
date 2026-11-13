@@ -488,6 +488,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.documentOwnedMaterial':return MaterialHandoffs.attestAsset(s,params);
   case 'social.ownedMaterialHistory':return MaterialHandoffs.assetStatus(s,params);
   case 'social.materialHandoff':return MaterialHandoffs.offer(s,params);
+  case 'social.purchaseOwnedMaterial':return MaterialHandoffs.purchaseFromPerson(s,params);
   case 'social.materialHandoffsStatus':return MaterialHandoffs.status(s,params);
   case 'social.status':return SocialFabric.status(s,params);
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
