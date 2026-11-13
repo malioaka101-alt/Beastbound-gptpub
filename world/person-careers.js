@@ -3,7 +3,7 @@
 // living people. Time only dates genuine work; it never awards experience.
 // No automatic school fees, surnames, licences, magical disciplines, or
 // player-centred promotions. Challenge and aptitude determine growth.
-const Crypto=require('node:crypto'),Atlas=require('./atlas');
+const Crypto=require('node:crypto'),Atlas=require('./atlas'),Core=require('../rules/core');
 const ORIGIN='independent-person-earned-profession-v1',
  WORK='source-verified-person-work-v1',VERSION=1,
  TITLES=['Untrained','Novice','Trained','Expert','Master','Grandmaster'],
@@ -618,10 +618,9 @@ function verifyTradePayment(p,e){
   Number.isInteger(q.day)&&q.day>=p.birthSource.day&&
   Number.isInteger(q.amountScales)&&q.amountScales>=1&&
   q.amountScales<=100000000&&
-  Number.isInteger(q.sellerBeforeScales)&&q.sellerBeforeScales>=q.amountScales&&
-  q.sellerAfterScales===q.sellerBeforeScales-q.amountScales&&
-  Number.isInteger(q.workerBeforeScales)&&q.workerBeforeScales>=0&&
-  q.workerAfterScales===q.workerBeforeScales+q.amountScales&&
+  Core.conservedScales({sourceBefore:q.sellerBeforeScales,
+   sourceAfter:q.sellerAfterScales,targetBefore:q.workerBeforeScales,
+   targetAfter:q.workerAfterScales,amount:q.amountScales})&&
   typeof q.workHash==='string'&&q.workHash===hash(work)&&
   work?.origin===WORK&&work.personId===p.id&&
   work.personOriginHash===p.originHash&&

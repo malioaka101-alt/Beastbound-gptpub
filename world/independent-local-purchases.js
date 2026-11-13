@@ -4,7 +4,8 @@
 // living worker at the established seller, NOT a universal demand curve,
 // invented wages, player-controlled agency or newly generated goods.
 const Crypto=require('node:crypto'),
- E=require('../engine.js'),Atlas=require('./atlas'),
+ E=require('../engine.js'),Core=require('../rules/core'),
+ Atlas=require('./atlas'),
  People=require('./emergent-people'),
  Demand=require('./independent-regional-demand'),
  Scarcity=require('../rules/original-local-market-scarcity'),
@@ -42,12 +43,11 @@ function verifyPersonal(p){
    q.actorId!==p.actorId||
    q.item!=='clean_rations'||q.quantity!==1||
    !Number.isInteger(q.paidPriceScales)||q.paidPriceScales<100||
-   !Number.isInteger(q.personCashBefore)||q.personCashBefore<q.paidPriceScales||
-   q.personCashAfter!==q.personCashBefore-q.paidPriceScales||
+   !Core.conservedScales({sourceBefore:q.personCashBefore,
+    sourceAfter:q.personCashAfter,targetBefore:q.sellerScalesBefore,
+    targetAfter:q.sellerScalesAfter,amount:q.paidPriceScales})||
    !Number.isInteger(q.day)||q.day<prior||
    !Number.isInteger(q.originalBuyerChoice)||
-   !Number.isInteger(q.sellerScalesBefore)||q.sellerScalesBefore<0||
-   q.sellerScalesAfter!==q.sellerScalesBefore+q.paidPriceScales||
    !Number.isInteger(q.sellerStockBefore)||q.sellerStockBefore<1||q.sellerStockBefore>8||
    q.sellerStockAfter!==q.sellerStockBefore-1||
    q.noCreditOrGoodsCreated!==true||
@@ -88,8 +88,9 @@ function verifyOne(w,row){
   !Number.isInteger(q.day)||q.day<1||q.day>w.lastTickDay+15||
   !Number.isInteger(q.originalSixdayNumber)||q.originalSixdayNumber<1||
   q.originalSixdayNumber>w.ticks.sixdays||
-  q.personCashAfter!==q.personCashBefore-q.paidPriceScales||
-  q.sellerScalesAfter!==q.sellerScalesBefore+q.paidPriceScales||
+  !Core.conservedScales({sourceBefore:q.personCashBefore,
+   sourceAfter:q.personCashAfter,targetBefore:q.sellerScalesBefore,
+   targetAfter:q.sellerScalesAfter,amount:q.paidPriceScales})||
   q.sellerStockAfter!==q.sellerStockBefore-1||
   q.independentOriginalPresence?.hash!==hash(Object.fromEntries(
    Object.entries(q.independentOriginalPresence||{}).filter(([k])=>k!=='hash')))||

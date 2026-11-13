@@ -18,6 +18,14 @@
 | **Competitions, merit and public reputation** | `rules/field-competition.js`, `rules/scene-check.js`, `world/person-careers.js`, original calendar and ranks | Recognise true already witnessed fieldwork, independent entrant/official, actual event day, qualification and award only when its event criteria are established. | No automatic conversion between professional certification, sport placement, political power, soul stage or human evolution. |
 | **History, research, public belief and secrecy** | `world/causal-history.js`, `world/knowledge-diffusion.js`, `rules/research.js`, original public/private world reports | Let different systems cite the **same witnessed world event** with original date, source, public release and allowed knowledge. Later interpretations can change without rewriting the event. | Not every fact recorded by the simulation is player-known. Rumour, proof, belief, private choice and physical fact are distinct. |
 
+## Consolidation audit: shared proofs, independent rules (13 November 2026)
+
+**Duplicate monetary verification:** `world/person-careers.js` and `world/independent-local-purchases.js` each checked the same before/after Scales conservation independently. Their actual existing receipts now reuse the **pure** `rules/core.js` conserved-Scales check. Actual person choice, payee identity, work completion, seller stock, demand, money movements, and persistence remain in their original owners. No additional ledger, payment, RNG or buyer is created.
+
+**Duplicate ownership adapter:** built instruments and paid equipment already publish their own verified `ownedAsset` source. `rules/material-handoffs.js` now consumes their shared `kind/owner/quantity/originalRoot/source` result instead of reconstructing separate provenance labels. Only the owning system determines whether the item exists. A quote, proposal or document never creates goods, magic, legal title or consent.
+
+**Not merged:** employment agreements are not paid labour; posted demand is not funded purchases; beast consent and human powers are not universal ranks; local legal rights, supply sources and ecological change retain their respective original systems. #19 remains open for true actor/good generality; the goal is a connected foundation rather than additional individually scripted examples.
+
 ## Integrate first where overlap already exists
 
 **1. Reuse verified shared work proof (#19 / #24).** PR #95 completed the exact-head three-batch regression and final gate and **merged** at `e14a448cae39978bacaff052ebbd399704a58862`. Its existing work, repair and material receipts should be one source of evidence for real downstream property consequences; no further item-specific PR is implied. One more distinct *source-established* activity will later test generality, not a pre-created library of fantasy recipes.

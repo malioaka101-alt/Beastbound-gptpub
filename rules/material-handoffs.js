@@ -215,16 +215,20 @@ function ownerStock(s,ownerId,item,{requireLocal=false}={}){
  if(!Object.hasOwn(E.RESOURCES,item)){
   if(ownerId!=='player'||typeof item!=='string')
    throw Error('Only a real original personally owned object may be documented outside existing stackable resources');
-  if(Object.hasOwn(s.table?.creationPrototypes||{},item)){
-   const tool=require('./creation-prototype').ownedAsset(s,item);
-   return {kind:'existing-authored-personal-tool',count:tool.quantity,
-    source:'original completed and retained personally authored physical instrument',
-    ownerName:tool.owner,originalRoot:tool.originalRoot};
-  }
-  const bought=require('./equipment').ownedAsset(s,item);
-  return {kind:'existing-purchased-mundane-equipment',count:bought.quantity,
-   source:'original locally witnessed and paid mundane equipment purchase',
-   ownerName:bought.owner,originalRoot:bought.originalRoot};
+  // One read-only owner contract; original construction or purchase proof
+  // is still verified only by the responsible source module.
+  const provider=Object.hasOwn(s.table?.creationPrototypes||{},item)?
+   require('./creation-prototype'):require('./equipment');
+  const asset=provider.ownedAsset(s,item);
+  if(!asset||asset.id!==item||asset.owner!==s.player.name||
+   !['existing-authored-personal-tool',
+     'existing-purchased-mundane-equipment'].includes(asset.kind)||
+   !Number.isInteger(asset.quantity)||asset.quantity<0||asset.quantity>1||
+   typeof asset.originalRoot!=='string'||asset.originalRoot.length!==64||
+   typeof asset.source!=='string'||asset.source.length<18)
+   throw Error('Original physical source provider failed common ownership reconciliation');
+  return {kind:asset.kind,count:asset.quantity,source:asset.source,
+   ownerName:asset.owner,originalRoot:asset.originalRoot};
  }
  if(ownerId==='player'){
   const n=s.player.inventory?.[item]??0;

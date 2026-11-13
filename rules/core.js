@@ -3,6 +3,14 @@
 // published rules; no Python modules are imported or committed.
 const E=require('../engine.js');
 const int=(n,name,min=-Infinity,max=Infinity)=>{if(!Number.isInteger(n)||n<min||n>max)throw Error(`${name} must be an integer in [${min},${max}]`);return n;};
+// Pure conservation: the original worker/merchant transaction modules still
+// verify identities, permission, goods, wages and original source evidence.
+function conservedScales({sourceBefore,sourceAfter,targetBefore,targetAfter,amount}={}){
+ return [sourceBefore,sourceAfter,targetBefore,targetAfter,amount]
+  .every(Number.isSafeInteger)&&amount>0&&sourceBefore>=amount&&
+  targetBefore>=0&&sourceAfter===sourceBefore-amount&&
+  targetAfter===targetBefore+amount;
+}
 function die(s,sides=20){
   int(sides,'sides',2,1000);
   let x=s.rngState>>>0;
@@ -84,4 +92,4 @@ function wardHit(target,severity){
   target.ward.steps=Math.max(0,target.ward.steps-severity);
   return {absorbed:true,remaining:target.ward.steps,collapsed:target.ward.steps===0};
 }
-module.exports={int,die,roll,degree,progress,naturalAdjustment,event,check,opposed,assist,assistChecks,castAttack,wardHit};
+module.exports={int,conservedScales,die,roll,degree,progress,naturalAdjustment,event,check,opposed,assist,assistChecks,castAttack,wardHit};

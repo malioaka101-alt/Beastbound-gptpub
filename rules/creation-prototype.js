@@ -349,6 +349,7 @@ function ownedAsset(s,id){
  if(t.owner!==s.player.name)
   throw Error('Only an originally verified physically owned invention may be documented');
  return {id:t.id,owner:t.owner,originalRoot:t.sourceHash,
-  quantity:1,physicalStatus:t.status};
+  quantity:1,physicalStatus:t.status,kind:'existing-authored-personal-tool',
+  source:'original completed and retained personally authored physical instrument'};
 }
 module.exports={ORIGIN,build,calibrate,measure,repair,status,ownedAsset,_debug:{checkItem,design,local,hash,genuineRepair}};

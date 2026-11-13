@@ -4,7 +4,8 @@
 // expressed regional interest, real merchant stock, original personal material
 // custody and the unchanged true sixday world clock. All people disposable.
 const A=require('node:assert/strict'),Crypto=require('node:crypto'),
- E=require('../engine.js'),W=require('../rules/world'),
+ E=require('../engine.js'),Core=require('../rules/core'),
+ W=require('../rules/world'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
  People=require('../world/emergent-people'),
  Careers=require('../world/person-careers'),
@@ -121,6 +122,12 @@ function fixture(seed=994821,count=72){
  A.equal(q.sellerStockAfter,q.sellerStockBefore-1);
  A.equal(q.sellerScalesAfter,q.sellerScalesBefore+q.paidPriceScales);
  A.equal(q.personCashAfter,q.personCashBefore-q.paidPriceScales);
+ A.equal(Core.conservedScales({sourceBefore:q.personCashBefore,
+  sourceAfter:q.personCashAfter,targetBefore:q.sellerScalesBefore,
+  targetAfter:q.sellerScalesAfter,amount:q.paidPriceScales}),true);
+ A.equal(Core.conservedScales({sourceBefore:q.personCashBefore,
+  sourceAfter:q.personCashAfter,targetBefore:q.sellerScalesBefore,
+  targetAfter:q.sellerScalesAfter+1,amount:q.paidPriceScales}),false);
  A.equal(p.independentMarketPurchases.length,1);
  A.equal(p.cashScales,actualWage-q.paidPriceScales);
  A.equal(other.cashScales,0,'unfunded person with same local needs cannot buy by assumption');
