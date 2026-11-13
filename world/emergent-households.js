@@ -5,6 +5,7 @@
 const Crypto=require('node:crypto'),Atlas=require('./atlas'),
  People=require('./emergent-people'),Contacts=require('./independent-contacts');
 const ORIGIN='mutually-established-adult-household-v1';
+const LIFE='original-independent-household-life-transition-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const unit=x=>parseInt(hash(x).slice(0,8),16)/4294967296;
 function ensure(w){
@@ -16,6 +17,119 @@ function ensure(w){
   !t.households||typeof t.households!=='object'||Array.isArray(t.households))
   throw Error('The living household register is inconsistent');
  return t;
+}
+// Life changes are consequences of the original two individuals' locations,
+// health and independent renewed choice. They do not infer romance, marriage,
+// biological parenthood, legal succession, grief, affection or ownership.
+function lifeBaseline(h,status){
+ return hash({origin:LIFE,householdSourceHash:h.sourceHash,status});
+}
+function ensureLife(h){
+ if(h.lifeHistory===undefined){
+  const anchor=lifeBaseline(h,h.status);
+  h.lifeHistory={baseline:h.status,anchor,headHash:anchor,receipts:[]};
+ }
+ return h.lifeHistory;
+}
+function personFact(p){
+ return {id:p.id,actorId:p.actorId,originHash:p.originHash,
+  regionId:p.regionId,status:p.status,lastTickDay:p.lastTickDay,
+  personality:p.personality};
+}
+function returnChoice(w,a,b,day){
+ const x=unit({origin:LIFE,seed:w.worldSeed,actor:a.actorId,
+  originHash:a.originHash,personality:a.personality,
+  other:b.actorId,day,purpose:'renew-voluntary-shared-household'});
+ return x<(a.personality==='independent'?.51:.69);
+}
+function sameHome(a,b){
+ return a.regionId===b.regionId&&a.status==='active'&&b.status==='active';
+}
+function witnessedReturn(w,people,day){
+ return people.every(p=>p.lastTickDay===day&&
+  !!People.presence(w,p.actorId,People.siteFor(p.regionId),day));
+}
+function historicalPresence(f,shift,day){
+ if(!shift||shift.source!==People.SHIFT||
+  shift.actorId!==f.actorId||shift.npcId!==f.actorId||
+  shift.personId!==f.id||shift.originHash!==f.originHash||
+  shift.location!==People.siteFor(f.regionId)||
+  shift.scheduledAtDay!==day||shift.fromDay!==day||
+  shift.throughDay!==day+5)return false;
+ const {hash:seal,...basis}=shift;
+ return seal===hash(basis);
+}
+function validLife(w,h){
+ const t=h.lifeHistory;
+ if(t===undefined)return true; // Already saved families remain valid.
+ if(!t||!['shared','apart'].includes(t.baseline)||
+  t.anchor!==lifeBaseline(h,t.baseline)||!Array.isArray(t.receipts)||
+  t.receipts.length>10000)return false;
+ let prior=t.baseline,previous=t.anchor,lastDay=h.source.foundedDay-1;
+ for(const r of t.receipts){
+  const q=r?.source;
+  if(!q||r.hash!==hash(q)||q.origin!==LIFE||
+   q.householdId!==h.id||q.originalHouseholdHash!==h.sourceHash||
+   q.previous!==previous||q.previousStatus!==prior||
+   !['shared','apart'].includes(q.nextStatus)||q.nextStatus===prior||
+   !Number.isInteger(q.day)||q.day<=lastDay||
+   q.day<h.source.foundedDay||
+   !Array.isArray(q.people)||q.people.length!==2||
+   q.noPresumedMarriageOrChildren!==true||
+   q.noInvoluntaryReunion!==true)return false;
+  const persons=q.people.map(f=>w.emergentPeople?.people?.[f?.id]);
+  if(persons.some((p,i)=>!p||p.actorId!==q.people[i].actorId||
+   p.originHash!==q.people[i].originHash||
+   p.personality!==q.people[i].personality||
+   !['active','recovering','relocated'].includes(q.people[i].status)||
+   !Atlas.R[q.people[i].regionId]||
+   !Number.isInteger(q.people[i].lastTickDay)||
+   q.people[i].lastTickDay>q.day)||
+   q.people.some((f,i)=>f.id!==h.source.founders[i].id||
+    f.originHash!==h.source.founders[i].originHash))
+   return false;
+  const colocated=sameHome(...q.people);
+  if(q.nextStatus==='shared'&&
+   (!colocated||prior!=='apart'||
+    !q.people.every(f=>f.lastTickDay===q.day)||
+    q.renewedPresence?.length!==2||
+    !q.renewedPresence.every((sh,i)=>
+     historicalPresence(q.people[i],sh,q.day))||
+    q.renewedAgreement?.length!==2||
+    !q.renewedAgreement.every((v,i)=>
+      v===returnChoice(w,q.people[i],q.people[1-i],q.day))||
+    q.renewedAgreement.some(v=>!v)))return false;
+  if(q.nextStatus==='apart'&&
+   (colocated||prior!=='shared'||q.renewedAgreement!==null||
+    q.renewedPresence!==null))return false;
+  prior=q.nextStatus;previous=r.hash;lastDay=q.day;
+ }
+ return t.headHash===previous&&h.status===prior;
+}
+function noteChange(w,h,day,next,people){
+ const t=ensureLife(h),prior=h.status;
+ const facts=people.map(personFact),coLocated=sameHome(...facts),
+  votes=next==='shared'?facts.map((f,i)=>
+   returnChoice(w,f,facts[1-i],day)):null,
+  shifts=next==='shared'?people.map(p=>People.presence(w,p.actorId,
+   People.siteFor(p.regionId),day)):null;
+ if(prior===next||
+  next==='shared'&&(!coLocated||!witnessedReturn(w,people,day)||votes.some(v=>!v))||
+  next==='apart'&&coLocated)
+  throw Error('A living household cannot change without real conditions and separate consent');
+ const source={origin:LIFE,householdId:h.id,originalHouseholdHash:h.sourceHash,
+  day,previousStatus:prior,nextStatus:next,people:facts,
+  renewedAgreement:votes,renewedPresence:shifts,previous:t.headHash,
+  noPresumedMarriageOrChildren:true,noInvoluntaryReunion:true};
+ const row={source,hash:hash(source)};
+ t.receipts.push(row);t.headHash=row.hash;
+ h.status=next;
+ h.history.push({day,event:next==='shared'?
+  'shared-home-resumed-by-two-independent-people':
+  'shared-home-interrupted-by-real-life-circumstances',
+  transitionSourceHash:row.hash});
+ if(h.history.length>24)h.history.shift();
+ if(!validLife(w,h))throw Error('Household life change lost its original sources');
 }
 function valid(w,h){
  if(!h||h.origin!==ORIGIN||h.source?.origin!==ORIGIN||
@@ -36,7 +150,7 @@ function valid(w,h){
   const p=w.emergentPeople?.people?.[f.id];
   return p&&People.verify(w,p)&&p.originHash===f.originHash&&
    p.actorId===f.actorId&&p.family===h.id;
- });
+ })&&validLife(w,h);
 }
 function choice(w,p,other,day){
  return unit({origin:ORIGIN,worldSeed:w.worldSeed,
@@ -81,6 +195,7 @@ function sixday(w,day,emit){
    status:'shared',commonFunds:6,history:[{day,
     event:'chosen-family-home-established',remainingSharedFunds:6}],
    releaseDay:day+6};
+  ensureLife(home);
   a.funds-=3;b.funds-=3;a.family=id;b.family=id;
   t.households[id]=home;
   if(!valid(w,home))throw Error('Two independently chosen household founders cannot be authenticated');
@@ -103,8 +218,20 @@ function month(w,day){
   const [a,b]=home.source.founders.map(f=>w.emergentPeople.people[f.id]),
    coLocated=a.regionId===b.regionId&&a.status==='active'&&
     b.status==='active';
-  if(!coLocated){home.status='apart';apart++;continue;}
-  home.status='shared';
+  ensureLife(home);
+  if(!coLocated){
+   if(home.status==='shared')noteChange(w,home,day,'apart',[a,b]);
+   apart++;continue;
+  }
+  // Founders' first consent is not a lifetime obligation. After time
+  // apart they must each independently want to resume a shared home.
+  if(home.status==='apart'){
+   if(!witnessedReturn(w,[a,b],day)||
+      !returnChoice(w,a,b,day)||!returnChoice(w,b,a,day)){
+    apart++;continue;
+   }
+   noteChange(w,home,day,'shared',[a,b]);
+  }
   // A shared kitchen costs food and takes actual existing contributions.
   // No offscreen income, forged children, compelled work or magic privileges.
   const paid=[a,b].map(p=>p.funds>=2?1:0);
@@ -133,10 +260,12 @@ function visible(s,w){
   if(h.source.polity!==polity||h.releaseDay>day)continue;
   homes.push({id:h.id,name:h.name,founders:h.source.founders.map(x=>x.name),
    foundedDay:h.source.foundedDay,
-   currentlyShared:h.status==='shared',foundFamilyNotBloodline:true,
+   currentlyShared:null, // An original founding notice does not reveal private later arrangements.
+   lastPubliclyWitnessedArrangement:'established-together',
+   foundFamilyNotBloodline:true,
    noKnownChildren:true,noAutomaticMarriage:true,noInheritedPowers:true});
  }
  return {localEstablishedHouseholds:homes.slice(-20),
   note:'Voluntarily chosen households, not automatic aristocratic houses, biological ancestry, marriages, heir rights or special techniques.'};
 }
-module.exports={ORIGIN,ensure,valid,choice,sixday,month,visible};
+module.exports={ORIGIN,LIFE,ensure,valid,choice,sixday,month,visible};
