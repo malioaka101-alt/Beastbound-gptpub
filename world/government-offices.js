@@ -129,7 +129,7 @@ function ensure(w){
     note:'Auditing begins from an earlier original save; historic names and decisions were not recorded'};
    v.mandateHistory=[];
   }
-  if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c))
+  if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c,w))
    throw Error('Civic mandate evidence or witnessed jurisdictional procedure is inconsistent');
  }
  return w.governance;
@@ -402,9 +402,15 @@ function originalRecordsOrder(v,c,docket){
   noNewLaw:true,noFindingOfGuilt:true,
   noPrivateDisclosureOrForcedWitness:true,noPropertyTransfer:true};
 }
-function originalInspectionCompletion(order,day){
+function originalInspectionCompletion(order,day,calendarAnchor=null){
  const q=order.source;
- if(!Number.isInteger(day)||day<q.orderedDay+6)
+ // A dated receipt is not proof of a world tick. This public office may
+ // complete work only on the ORIGINAL calendar's actual sixday boundary,
+ // including the original anchored calendar and Concord Days.
+ const originalSixday=Number.isInteger(day)&&day>0&&day<=100000&&
+  require('../rules/world').calendarTicks(day-1,1,calendarAnchor).
+   sixdays.includes(day);
+ if(!originalSixday||day<q.orderedDay+6)
   throw Error('An actual later completed world-sixday is necessary before council records can be inspected');
  return {origin:RECORDS_REMEDY,kind:'completed-original-public-records-inspection',
   hearingId:q.hearingId,orderSourceHash:order.hash,
@@ -415,7 +421,7 @@ function originalInspectionCompletion(order,day){
   noNewLaw:true,noFindingOfGuilt:true,noPrivateRecordsOpened:true,
   noFinesOrCompelledBeastAction:true};
 }
-function verifyRecordsRemedies(v,c){
+function verifyRecordsRemedies(v,c,w=null){
  if(v?.publicHearingDockets===undefined)return true;
  if(!Array.isArray(v.publicHearingDockets))return false;
  const seen=new Set();
@@ -434,7 +440,10 @@ function verifyRecordsRemedies(v,c){
        order.fulfilled.hash!==hash(order.fulfilled.source)||
        JSON.stringify(order.fulfilled.source)!==
         JSON.stringify(originalInspectionCompletion(order,
-         order.fulfilled.source.completedDay)))))
+         order.fulfilled.source.completedDay,w?.calendarAnchor||null)))||
+     (w&&order.fulfilled&&
+      (!Number.isInteger(w.lastTickDay)||
+       order.fulfilled.source.completedDay>w.lastTickDay)))
     return false;
   }catch{return false;}
  }
@@ -458,7 +467,7 @@ function orderPublicRecordsInspection(s,w,hearingId){
     declaredDispute:x.declaredDispute}))))
   throw Error('Previously witnessed public charter positions cannot be silently rewritten');
  docket.recordsInspection={source:q,hash:hash(q),fulfilled:null};
- if(!verifyRecordsRemedies(v,c))
+ if(!verifyRecordsRemedies(v,c,w))
   throw Error('The original public administrative order failed its own source history');
  return {ordered:true,hearingId,noNewLaw:true,
   noFindingOfGuilt:true,noCompulsoryPrivateAction:true};
@@ -480,7 +489,7 @@ function followUpPublicRecordsInspections(w,day,emit){
   const order=docket.recordsInspection;
   if(!order||order.fulfilled!==null||
     day<order.source.orderedDay+6)continue;
-  const source=originalInspectionCompletion(order,day);
+  const source=originalInspectionCompletion(order,day,w.calendarAnchor||null);
   order.fulfilled={source,hash:hash(source)};
   completed++;
   if(typeof emit==='function')emit({
@@ -489,14 +498,14 @@ function followUpPublicRecordsInspections(w,day,emit){
    channel:'public notice',releaseDay:day+2,severity:'routine'
   });
  }
- if(!verifyRecordsRemedies(v,c))
+ if(!verifyRecordsRemedies(v,c,w))
   throw Error('An independent council records review lacks original jurisdiction or charter sources');
  return completed;
 }
 function publicRecordsInspectionStatus(w,hearingId,day){
  const v=w?.governance?.reedmarch;
  if(!v)return null;
- if(!Number.isInteger(day)||day<0||!verifyRecordsRemedies(v,C.reedmarch))
+ if(!Number.isInteger(day)||day<0||!verifyRecordsRemedies(v,C.reedmarch,w))
   throw Error('Original public records order source cannot be verified');
  const order=v.publicHearingDockets?.find(x=>
   x.hearingId===hearingId)?.recordsInspection;
@@ -533,7 +542,7 @@ function valid(w,id){
     !Array.isArray(v.recentPublic)||
     !Number.isInteger(v.mandateNumber)||v.mandateNumber<0||
     (v.auditVersion!==undefined&&!verifyMandateAudit(v,c))||
-    !verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c))
+    !verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c,w))
   throw Error('Existing civic leadership record or original mandate history is not internally consistent');
  return {c,v};
 }
