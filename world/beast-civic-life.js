@@ -13,6 +13,15 @@ const nonneg=v=>Number.isInteger(v)&&v>=0&&v<=10000000;
 // #20: A living polity's independent council may have a genuinely
 // authored legislative COMPETENCE, but a charter alone never enacts law.
 const LOCAL_RULE='personally-witnessed-local-civic-enactment-v1';
+// The existing sovereign institution MAY have its own separately authored
+// authority to hear a contested civil matter. This one optional adapter does
+// not define courts, compulsory procedures or outcomes for other societies.
+const CASE='source-witnessed-contested-local-civic-case-v1';
+function caseCompetence(c){
+ return c&&typeof c==='object'&&!Array.isArray(c)&&
+  Object.keys(c).sort().join('|')==='authoritySource|procedure|scope'&&
+  valid(c.authoritySource,24,900)&&valid(c.procedure,24,900)&&valid(c.scope,16,600);
+}
 function competence(c){
  return c&&typeof c==='object'&&!Array.isArray(c)&&
   Object.keys(c).sort().join('|')==='authoritySource|minimumNoticeDays|procedure|requiredAssents|scope'&&
@@ -57,6 +66,39 @@ function validLocalEnactment(inst,row){
   e.ratifications.filter(x=>x.assented).length<authority.requiredAssents)
   return false;
  return true;
+}
+// A case hearing records the TWO independently present people's witnessed
+// statements, not a judicial finding. Its law is snapshotted FROM an actual
+// earlier sealed enactment, never supplied by the requesting player/GM.
+function validLocalCase(inst,row){
+ const d=row?.source?.details,q=d?.caseReview;
+ if(q===undefined)return row?.source?.caseAuthorityHash===undefined&&
+  row?.source?.citedLaw===undefined;
+ const auth=inst.origin.caseCompetence,src=row?.source?.citedLaw;
+ if(!caseCompetence(auth)||row.source.caseAuthorityHash!==inst.originHash||
+  !src||src.origin!==SESSION||!validLocalEnactment(inst,{source:src})||
+  !q||typeof q!=='object'||Array.isArray(q)||
+  Object.keys(q).sort().join('|')!==
+   'allegation|caseId|claimantId|claimantStatement|requestedFollowUp|respondentId|respondentStatement|ruleId'||
+  !ident(q.caseId)||!ident(q.ruleId)||q.claimantId===q.respondentId||
+  !valid(q.allegation,20,900)||!valid(q.claimantStatement,18,900)||
+  !valid(q.respondentStatement,18,900)||!valid(q.requestedFollowUp,18,900)||
+  !d.participants.includes(q.claimantId)||!d.participants.includes(q.respondentId)||
+  d.visibility!=='public'||inst.origin.visibility!=='public'||
+  !Array.isArray(row.source.participatingBeasts)||
+  !row.source.participatingBeasts.some(x=>x.id===q.claimantId)||
+  !row.source.participatingBeasts.some(x=>x.id===q.respondentId)||
+  src.details?.institutionId!==inst.id||
+  src.details?.enactment?.id!==q.ruleId||
+  src.details?.enactment?.effectiveDay>row.source.sessionDay||
+  src.sessionDay>row.source.sessionDay||
+  src.details.enactment.jurisdictionRegionId!==
+   Atlas.LOCATION_REGION[d.location]&&
+   require('./lived-places').get({world:{location:d.location}},d.location)?.regionId!==
+    src.details.enactment.jurisdictionRegionId)
+  return false;
+ const current=inst.sessions.find(x=>x.source?.eventHash===src.eventHash);
+ return !current||hash(current.source)===hash(src);
 }
 const localRegion=s=>Atlas.LOCATION_REGION[s.world?.location]||
  require('./lived-places').get(s,s.world?.location)?.regionId||null;
@@ -118,25 +160,32 @@ function verifyInstitution(w,p,id){
   !nonneg(inst.lastReviewMonth)||!Array.isArray(inst.sessions)||inst.sessions.length>100||
   (inst.origin.legalCompetence!==undefined&&
    !competence(inst.origin.legalCompetence))||
+  (inst.origin.caseCompetence!==undefined&&
+   !caseCompetence(inst.origin.caseCompetence))||
   inst.sessions.some(x=>!x||x.origin!==SESSION||x.seal!==hash(x.source)||
     x.source?.details?.institutionId!==id||x.source?.details?.polityId!==p||
     x.source.eventHash!==hash(x.source.event)||
     x.source.event?.details?.origin!==SESSION||
     x.source.event?.details?.location!==x.source.details.location||
     hash(x.source.event.details)!==hash(x.source.details)||
-    !validLocalEnactment(inst,x))||
+    !validLocalEnactment(inst,x)||!validLocalCase(inst,x))||
   new Set(inst.sessions.filter(x=>x.source?.details?.enactment).
    map(x=>x.source.details.enactment.id)).size!==
-  inst.sessions.filter(x=>x.source?.details?.enactment).length)
+  inst.sessions.filter(x=>x.source?.details?.enactment).length||
+  new Set(inst.sessions.filter(x=>x.source?.details?.caseReview).
+   map(x=>x.source.details.caseReview.caseId)).size!==
+  inst.sessions.filter(x=>x.source?.details?.caseReview).length)
   throw Error('Institutional origin, witnessed law or historical decisions were changed');
  return inst;
 }
 function authorInstitution(s,p={}){
- const keys=['polityId','institutionId','name','kind','mandate','language','medium','rules','source','visibility','legalCompetence'];
+ const keys=['polityId','institutionId','name','kind','mandate','language','medium','rules','source','visibility','legalCompetence','caseCompetence'];
  if(!p||Object.keys(p).some(k=>!keys.includes(k))||
   !ident(p.institutionId)||!valid(p.name,3,160)||!valid(p.kind,4,160)||
   !valid(p.mandate)||!valid(p.language,3,200)||
   !valid(p.medium,3,200)||!valid(p.rules)||!valid(p.source,24,1200)||
+  (p.caseCompetence!==undefined&&(!caseCompetence(p.caseCompetence)||
+    (p.visibility||'gm-only')!=='public'))||
   (p.legalCompetence!==undefined&&(!competence(p.legalCompetence)||
     (p.visibility||'gm-only')!=='public'))||
   !['public','gm-only'].includes(p.visibility||'gm-only'))
@@ -151,6 +200,8 @@ function authorInstitution(s,p={}){
   source:p.source.trim(),visibility:p.visibility||'gm-only',
   ...(p.legalCompetence===undefined?{}:{
    legalCompetence:structuredClone(p.legalCompetence)}),
+  ...(p.caseCompetence===undefined?{}:{
+   caseCompetence:structuredClone(p.caseCompetence)}),
   foundedDay:Math.floor(s.world.minutes/1440)};
  const digest=hash(origin);
  t.institutions[p.institutionId]={id:p.institutionId,origin,
@@ -216,12 +267,25 @@ function proceeding(s,p={}){
   throw Error('The proposed treaty has no actual diplomatic relationship');
  if(diplomaticTie?.civicTreaties?.some(y=>y.source?.eventHash===evHash))
   throw Error('A bilateral scene cannot ratify duplicate treaty entries');
+ // A disputed case may reference only an actual, already-effective rule
+ // issued by this original institution. Its source copy survives bounded
+ // proceeding-history rotation without fabricating a second law ledger.
+ const cited=d.caseReview?inst.sessions.find(x=>
+  x.source?.details?.enactment?.id===d.caseReview.ruleId):null;
+ if(d.caseReview&&(!caseCompetence(inst.origin.caseCompetence)||
+  !cited||cited.source.details.enactment.effectiveDay>
+   Math.floor(s.world.minutes/1440)||
+  inst.sessions.some(x=>x.source?.details?.caseReview?.caseId===
+   d.caseReview.caseId)))
+  throw Error('A contested case needs the original effective local rule, unique case and independently authored hearing competence');
  const source={origin:SESSION,eventHash:evHash,event:structuredClone(ev),
   details:structuredClone(d),sessionDay:Math.floor(s.world.minutes/1440),
   participatingBeasts:actual.map(b=>({id:b.id,lifeSourceHash:b.sapientLife.sourceHash})),
-  ...(d.enactment===undefined?{}:{legalAuthorityHash:inst.originHash})};
+  ...(d.enactment===undefined?{}:{legalAuthorityHash:inst.originHash}),
+  ...(d.caseReview===undefined?{}:{caseAuthorityHash:inst.originHash,
+   citedLaw:structuredClone(cited.source)})};
  const receipt={origin:SESSION,source,seal:hash(source)};
- if(!validLocalEnactment(inst,receipt)||
+ if(!validLocalEnactment(inst,receipt)||!validLocalCase(inst,receipt)||
   d.enactment!==undefined&&
    inst.sessions.some(x=>x.source.details.enactment?.id===d.enactment.id))
   throw Error('An actual public local law requires a pre-existing competent charter, its own actual assent threshold, separate witnessed individual positions, real jurisdiction and the charter notice period');
@@ -242,6 +306,8 @@ function proceeding(s,p={}){
  return {recorded:true,institutionId:p.institutionId,
   ...(d.enactment?{witnessedLocalRuleId:d.enactment.id,
     effectiveDay:d.enactment.effectiveDay}:{}),
+  ...(d.caseReview?{witnessedCaseId:d.caseReview.caseId,
+    contestedStatementsOnly:true,noJudicialFindingOrEnforcement:true}:{}),
   legalOutcomeOnlyAsWitnessed:true,noUnchosenMemberOrPowers:true,
   noAutomaticOffenceOrEnforcement:true};
 }
@@ -327,6 +393,17 @@ function status(s,p={}){
      effectiveDay:e.source.details.enactment.effectiveDay,
      sourceEventHash:e.source.eventHash,
      noAutomaticConvictionOrPropertyTransfer:true})).slice(-30),
+   publicContestedCases:x.sessions.filter(e=>e.source.details.caseReview&&
+    e.source.details.visibility==='public').map(e=>({
+     caseId:e.source.details.caseReview.caseId,
+     ruleId:e.source.details.caseReview.ruleId,
+     allegation:e.source.details.caseReview.allegation,
+     claimantStatement:e.source.details.caseReview.claimantStatement,
+     respondentStatement:e.source.details.caseReview.respondentStatement,
+     proposedNextStep:e.source.details.caseReview.requestedFollowUp,
+     originalWitnessHash:e.source.eventHash,
+     allegationUnproven:true,noFindingOrRemedyExecuted:true
+    })).slice(-20),
    publicOffices:x.sessions.filter(e=>e.source.details.visibility==='public'&&
      e.source.details.office).map(e=>({
       title:e.source.details.office.title,
@@ -346,5 +423,5 @@ function status(s,p={}){
  return {polity:Atlas.P[polityId].name,known,households,
   note:'Local public charter and witnessed proceedings only; no private officeholders, undiscovered languages, hidden court decisions or automatic comprehension'};
 }
-module.exports={ROOT,SESSION,HOME,LOCAL_RULE,authorInstitution,proceeding,household,monthly,status,
+module.exports={ROOT,SESSION,HOME,LOCAL_RULE,CASE,authorInstitution,proceeding,household,monthly,status,
  _debug:{create,polity,journal,verifyInstitution,sourcePerson}};
