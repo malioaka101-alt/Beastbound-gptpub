@@ -278,12 +278,14 @@ function rule(s,ids,id,conduct){
  A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
  // Altering an actual physical source after it was cited must not silently
  // rewrite the archived case evidence, even if its local note is resealed.
- const sourceNote=structuredClone(site.notes[0]);
- site.notes[0].source.context='An altered observation falsely claims an established culprit without independently verified evidence.';
- site.notes[0].seal=hash(site.notes[0].source);
+ const citedSiteNote=site.notes.find(n=>n.seal===siteNotes[0]);
+ A.ok(citedSiteNote,'the tampered note must actually be cited by the original case');
+ const sourceNote=structuredClone(citedSiteNote);
+ citedSiteNote.source.context='An altered observation falsely claims an established culprit without independently verified evidence.';
+ citedSiteNote.seal=hash(citedSiteNote.source);
  A.throws(()=>Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),
   /Institutional origin, witnessed law/);
- site.notes[0]=sourceNote;
+ site.notes[site.notes.indexOf(citedSiteNote)]=sourceNote;
  A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
  A.equal(s.player.coins,coins);
  A.equal(s.rngState,caseRngBefore,
