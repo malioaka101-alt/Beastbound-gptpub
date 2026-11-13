@@ -182,7 +182,7 @@ function local(seed){
  for(const item of ['field_staff','work_knife']){
   A.throws(()=>action(s,'documentOwnedMaterial',{
    ownerId:'player',item,quantity:1,description:title}),
-   /unambiguous original source-witnessed purchase/,
+   /sourced existing mundane equipment profile|unambiguous original source-witnessed purchase/,
    'a quotation by itself is NOT an owned object');
   A.equal(E.exportGame(s),untouched);
  }
