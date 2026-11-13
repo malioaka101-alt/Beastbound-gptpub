@@ -92,6 +92,11 @@ function verifyReceipt({originalWorkbench:w,originalRoll:e,witnessHash,rollHash,
     !Number.isInteger(minutes)||minutes<1||minutes>480||
     finishedAtMinute-startedAtMinute!==minutes)
   return false;
+ // Event timestamps are original world-clock witnesses, not self-reported
+ // metadata. Never accept a consistently rehashed roll attached to a
+ // different historic minute or location in the character's timeline.
+ const atStart={world:{minutes:startedAtMinute}};
+ if(w.day!==E.day(atStart)||w.time!==E.clock(atStart))return false;
  const c=e.details;
  if(!Array.isArray(c.dice)||c.dice.length!==1||
     !Number.isInteger(c.roll)||c.roll<1||c.roll>20||

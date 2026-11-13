@@ -61,6 +61,19 @@ function fresh(seed){return E.newGame({name:'Disposable Source Production',seed,
    startedAtMinute:orig.preparedMinute,finishedAtMinute:orig.finishedMinute,
    minutes:70
   }),true);
+  const displaced=structuredClone(orig.originalWorkbench);
+  displaced.time='Day 999, 00:00';
+  const displacedHash=digest(displaced);
+  A.equal(Work.verifyReceipt({
+   originalWorkbench:displaced,originalRoll:{
+    ...orig.originalRoll,time:displaced.time
+   },
+   witnessHash:displacedHash,
+   rollHash:digest({...orig.originalRoll,time:displaced.time}),
+   inputs:orig.usedMaterials,inputKey:'inputs',
+   startedAtMinute:orig.preparedMinute,finishedAtMinute:orig.finishedMinute,
+   minutes:70
+  }),false,'resealed original events cannot be moved to a different world minute');
   const fabricated=structuredClone(orig.originalRoll);
   fabricated.details.modifier++;
   A.equal(Work.verifyReceipt({
