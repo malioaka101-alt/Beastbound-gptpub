@@ -371,6 +371,12 @@ function submitWork(s,p={}){
   notAcceptedOrJudged:true,notRankedOrRewarded:true,
   noSecondPerformanceRoll:true,elapsedMinutes:5};
 }
+function verifyAdmission(s,row,item){
+ return require('./public-event-admission').verify(s,row,item);
+}
+function enter(s,p={}){
+ return require('./public-event-admission').enter(s,p);
+}
 function status(s,p={}){
  shape(p,[],['eventId']);
  if(p.eventId!==undefined&&!validId(p.eventId))
@@ -401,4 +407,4 @@ function status(s,p={}){
    noCreditedRankOrRewards:true};
  }),note:'Observed local public invitations only. Described prizes, public rules and willingness do not establish competent officials, funded payouts, proven eligibility, actual performance or scored competition.'};
 }
-module.exports={ORIGIN,INTEREST,WORK,ENTRY,announce,interest,submitWork,enter,status,verify};
+module.exports={ORIGIN,INTEREST,WORK,ENTRY,validOpenAdmission,originalWork,announce,interest,submitWork,enter,status,verify};
