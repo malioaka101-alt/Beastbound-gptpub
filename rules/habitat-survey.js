@@ -97,9 +97,12 @@ function status(s,p={}){
 // original recorded scene and check, not a fresh resource roll or a second
 // XP track. The 90-line narrative log can rotate; original sealed witnesses
 // are retained separately for genuinely executed modern checks.
-function interpreted(s,id,{habitat=s.world.location,mustSucceed=false,maxAgeMinutes=null}={}){
+// All original habitat evidence consumers use this one witness proof.
+// Historical consultation does NOT demand that the player still occupies
+// the original habitat; resource gathering retains its existing local gate.
+function sourceProof(s,id,{habitat,mustSucceed=false,maxAgeMinutes=null,requireLocal=true}={}){
  if(typeof id!=='string'||!/^habitat_(forest|fen|hills|ruins)_[0-9]{5}$/.test(id)||
-   habitat!==s.world.location||!E.LOCATIONS[habitat])
+   (requireLocal&&habitat!==s.world.location)||!E.LOCATIONS[habitat])
   throw Error('Only a personally witnessed actual current local habitat check can support material gathering');
  if(maxAgeMinutes!==null&&
     (!Number.isInteger(maxAgeMinutes)||maxAgeMinutes<0||maxAgeMinutes>100000))
@@ -166,4 +169,13 @@ function interpreted(s,id,{habitat=s.world.location,mustSucceed=false,maxAgeMinu
   interpretedAtMinute:f.interpretedAtMinute};
 }
 
-module.exports={prepare,status,interpreted,SURVEYS};
+function interpreted(s,id,{habitat=s.world.location,mustSucceed=false,maxAgeMinutes=null}={}){
+ return sourceProof(s,id,{habitat,mustSucceed,maxAgeMinutes,requireLocal:true});
+}
+// Read-only, personally completed historical work evidence. It cannot
+// permit harvesting remotely or give another skill roll, XP or findings.
+function historical(s,id){
+ const habitat=s.table?.sceneChecks?.[id]?.location;
+ return sourceProof(s,id,{habitat,requireLocal:false});
+}
+module.exports={prepare,status,interpreted,historical,SURVEYS};
