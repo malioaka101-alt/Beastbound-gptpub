@@ -58,9 +58,11 @@ function input(raw){
   duration:raw.duration,novelty:raw.novelty
  };
  if(raw.target!==undefined){
-  if(!['surface_water'].includes(raw.target))
-   throw Error('An effect target must be established by a real supported physical or supernatural mechanism');
-  p.target=raw.target;
+  // Targets are GM-authored proposals, not a fixed list of permissible
+  // inventions. Only an actual researched/implemented mechanism can later
+  // give an authored target a physical or supernatural effect. This text
+  // alone never changes world state or authorises a technique.
+  p.target=textField(raw.target,'proposed target',3,160);
  }
  if(!MEDIUMS.includes(p.medium)||!Object.hasOwn(SYSTEMS,p.system)||
    !Object.hasOwn(FUNCTIONS,p.function)||
