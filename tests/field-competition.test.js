@@ -61,7 +61,19 @@ function realReport(s){
  A.equal(s.table.competitionNotices.field_assessment_6.used,true);
  A.equal(s.table.competitionReportsUsed[checkId],6);
  A.equal(s.player.competitionRecord.at(-1).sourceCheckId,checkId);
+ const receipt=s.table.competitionReceipts.field_assessment_6;
+ A.equal(receipt.source.originalNoticeHash,
+  s.table.competitionNotices.field_assessment_6.publicationEventHash);
+ A.equal(receipt.source.originalReportHash,
+  s.table.habitatSurveyFindings[checkId].rollEventHash);
+ A.equal(s.player.competitionRecord.at(-1).sourceJudgementHash,receipt.sourceHash);
+ A.equal(receipt.source.coinsBefore,beforeCoins);
+ A.equal(receipt.source.coinsAfter,s.player.coins);
+ A.equal(receipt.source.pointsBefore,beforePoints);
+ A.equal(receipt.source.pointsAfter,s.player.rankings.fieldwork);
+ A.equal(rule(s,'status').recentResults.at(-1).reportId,checkId);
  const after=E.exportGame(s);
+ A.equal(rule(E.importGame(after),'status').recentResults.at(-1).reportId,checkId);
  A.throws(()=>rule(s,'fieldAssessment',{checkId}),/previously witnessed, unused official/);
  A.equal(E.exportGame(s),after);A.equal(s.rngState,rng);
 }
@@ -189,4 +201,69 @@ function realReport(s){
  A.equal(rule(s,'status').posted,true);
  A.equal(s.table.competitionNotices.field_assessment_6.publicationEventHash,seal);
 }
-console.log('Scheduled witnessed Copperwood field assessment: original published event source, prior notice before performance, rejection of forged and rewritten bulletin, archival replay and legacy log compatibility, single award, no second die');
+
+{
+ // A source-sealed judgement is an original result: the published notice,
+ // original field roll, personal score, qualification and recorded money
+ // change must not be independently rewritten after a successful check.
+ const s=fresh(87222);sixthDay(s);
+ rule(s,'notice');
+ const {checkId}=realReport(s);
+ rule(s,'fieldAssessment',{checkId});
+ const receipt=s.table.competitionReceipts.field_assessment_6,
+  record=s.player.competitionRecord.at(-1),
+  finding=s.table.habitatSurveyFindings[checkId],
+  used=s.table.competitionReportsUsed;
+ const pristine=E.exportGame(s),rng=s.rngState;
+ A.equal(rule(s,'status').recentResults.at(-1).reportId,checkId);
+ function reject(change,restore,pattern=/competition (?:judgement|ranking)/){
+  change();const changed=E.exportGame(s);
+  A.throws(()=>rule(s,'status'),pattern);
+  A.equal(E.exportGame(s),changed);
+  A.equal(s.rngState,rng);
+  restore();A.equal(E.exportGame(s),pristine);
+ }
+ const sealed=receipt.sourceHash;
+ reject(()=>{receipt.source.points++;},
+  ()=>{receipt.source.points--;},/source-sealed competition judgement/);
+ reject(()=>{receipt.sourceHash='0'.repeat(64);},
+  ()=>{receipt.sourceHash=sealed;},/source-sealed competition judgement/);
+ const originalScore=record.score;
+ reject(()=>{record.score+=10;},()=>{record.score=originalScore;},
+  /competition ranking, award or qualification/);
+ const originalReport=finding.rollEventHash;
+ reject(()=>{finding.rollEventHash='0'.repeat(64);},
+  ()=>{finding.rollEventHash=originalReport;},
+  /source-sealed competition judgement/);
+ const originalDay=used[checkId];
+ reject(()=>{used[checkId]=originalDay+6;},
+  ()=>{used[checkId]=originalDay;},
+  /source-sealed competition judgement/);
+ const originalCash=receipt.source.coinsBefore;
+ reject(()=>{receipt.source.coinsBefore+=100;},
+  ()=>{receipt.source.coinsBefore=originalCash;},
+  /source-sealed competition judgement/);
+ // The genuine original source remains verifiable after ordinary log rotation
+ // and export/import; a copied freeform history string is insufficient.
+ for(let i=0;i<100;i++)Core.event(s,'world','Independent unrelated public observations.',{i});
+ A.equal(s.log.length,90);
+ const restored=E.importGame(E.exportGame(s));
+ A.equal(rule(restored,'status').recentResults.at(-1).reportId,checkId);
+}
+{
+ // Pre-existing stored awards have no retrospective cryptographic claim.
+ // Old saves may still show those historical results without rewriting them
+ // into forged new-style adjudication evidence.
+ const s=fresh(87223);sixthDay(s);
+ rule(s,'notice');
+ const {checkId}=realReport(s);
+ rule(s,'fieldAssessment',{checkId});
+ const oldReceipt=s.table.competitionReceipts.field_assessment_6;
+ delete oldReceipt.source;
+ delete oldReceipt.sourceHash;
+ delete s.player.competitionRecord.at(-1).sourceJudgementHash;
+ const legacy=E.exportGame(s);
+ A.equal(rule(E.importGame(legacy),'status').recentResults.at(-1).reportId,checkId);
+ A.equal(E.exportGame(s),legacy);
+}
+console.log('Original competition judgement receipts verify the source-announced terms, witnessed performance, score, rank and fee/prize deltas, preserve legacy reports and replay, and reject independent tampering');
