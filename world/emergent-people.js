@@ -13,6 +13,54 @@ function draw(t){
  t.rngState=(x>>>0)||0x91e10da5;
  return t.rngState/4294967296;
 }
+// Reuse the SAME independently living person's RNG and actual conditions
+// when a verified local public invitation asks whether they are interested.
+// This is NOT entry consent, future attendance, service, sponsorship or
+// a performance. The original public-event source belongs to its caller.
+const PUBLIC_INVITE='independent-person-public-activity-interest-v1';
+function nextRng(n){
+ let x=n>>>0;
+ x^=x<<13;x^=x>>>17;x^=x<<5;
+ return (x>>>0)||0x91e10da5;
+}
+function verifyPublicInvitationChoice(q){
+ if(!q||q.origin!==PUBLIC_INVITE||
+  !/^[a-f0-9]{64}$/.test(q.personOriginHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.activityHash||'')||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  q.rngAfter!==nextRng(q.rngBefore)||
+  !Number.isInteger(q.fatigue)||q.fatigue<0||q.fatigue>100||
+  !['active','recovering','relocated'].includes(q.status)||
+  !['curious','steady','independent','reserved'].includes(q.personality)||
+  typeof q.interested!=='boolean'||q.notRegistration!==true)
+  return false;
+ const base=q.personality==='curious'?.67:q.personality==='independent'?.48:
+  q.personality==='reserved'?.43:.57,
+  chance=Math.max(.08,Math.min(.75,base-q.fatigue/350));
+ return q.interested===(q.status==='active'&&q.fatigue<=76&&
+  q.rngAfter/4294967296<chance);
+}
+function considerPublicInvitation(w,p,activityHash){
+ if(!/^[a-f0-9]{64}$/.test(activityHash||'')||!verify(w,p)||
+  !Number.isInteger(p.rngState)||p.rngState<1)
+  throw Error('A source-backed public invitation and genuine living individual are necessary');
+ const rngBefore=p.rngState,fatigue=p.fatigue,status=p.status,
+  personality=p.personality;
+ // Advance this individual's original RNG ONCE, not the player's dice and
+ // not a shared deterministic decree that every citizen must participate.
+ draw(p);
+ const q={origin:PUBLIC_INVITE,personOriginHash:p.originHash,
+  activityHash,rngBefore,rngAfter:p.rngState,fatigue,status,personality,
+  interested:false,notRegistration:true};
+ const base=personality==='curious'?.67:personality==='independent'?.48:
+  personality==='reserved'?.43:.57,
+  chance=Math.max(.08,Math.min(.75,base-fatigue/350));
+ q.interested=status==='active'&&fatigue<=76&&p.rngState/4294967296<chance;
+ if(!verifyPublicInvitationChoice(q))
+  throw Error('The independent person invitation decision cannot be reconstructed');
+ return {interested:q.interested,source:q};
+}
 function seed(w){
  return {version:1,rngState:((w.worldSeed^0x4bc771ae)>>>0)||0x91e10da5,
   counter:0,lastSixday:-1,people:{},history:[]};
@@ -688,7 +736,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,SHIFT,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};

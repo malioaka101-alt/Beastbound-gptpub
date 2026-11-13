@@ -34,6 +34,7 @@ const ReedHarvest=require('./reed-harvest');
 const TimePassage=require('./time-passage');
 const CivilCalendar=require('./civil-calendar-evidence');
 const FieldCompetition=require('./field-competition');
+const PublicCompetitions=require('./public-competitions');
 const FirstContact=require('./first-contact');
 const ClinicCare=require('./clinic-care');
 const PhysicianRescue=require('./physician-rescue');
@@ -481,6 +482,9 @@ function act(s,{system,operation,params={}}={}){
   case 'world.familyMembersStatus':return Realm.publicFamilyMembers(s,params);
   case 'world.revealProfessional':return Realm.revealProfessional(s,params);
   case 'world.publishNews':return Realm.revealNews(s,params);
+  case 'competition.announceLocal':return PublicCompetitions.announce(s,params);
+  case 'competition.publicEvents':return PublicCompetitions.status(s,params);
+  case 'competition.expressInterest':return PublicCompetitions.interest(s,params);
   case 'competition.notice':return FieldCompetition.notice(s,params);
   case 'competition.status':return FieldCompetition.status(s,params);
   case 'competition.fieldAssessment':return FieldCompetition.fieldAssessment(s,params);
