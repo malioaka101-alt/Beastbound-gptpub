@@ -95,7 +95,19 @@ function verifyInterest(row,x){
   q.noNPCChoice!==false||typeof q.voluntarilyInterested!=='boolean'||
   !q.independentDecision||typeof q.independentDecision!=='object'||
   q.independentDecision.personOriginHash!==q.personOriginHash||
-  q.independentDecision.activityHash!==row.sourceHash)
+  q.independentDecision.activityHash!==row.sourceHash||
+  !q.originalPresence||q.originalPresence.source!==Emergent.SHIFT||
+  q.originalPresence.actorId!==q.actorId||
+  q.originalPresence.npcId!==q.actorId||
+  q.originalPresence.originHash!==q.personOriginHash||
+  q.originalPresence.location!==q.venue||
+  q.originalPresence.fromDay>Math.floor(q.worldMinute/DAY)||
+  q.originalPresence.throughDay<Math.floor(q.worldMinute/DAY)||
+  q.originalPresence.throughDay-q.originalPresence.fromDay!==5||
+  q.originalPresence.scheduledAtDay!==q.originalPresence.fromDay||
+  !/^[a-f0-9]{64}$/.test(q.originalPresence.hash||'')||
+  hash(Object.fromEntries(Object.entries(q.originalPresence)
+   .filter(([k])=>k!=='hash')))!==q.originalPresence.hash)
   return false;
  return Emergent.verifyPublicInvitationChoice(q.independentDecision);
 }
@@ -159,6 +171,7 @@ function record(s,row,choice){
   noNPCChoice:choice.actorId==='player',
   ...(choice.actorId==='player'?{playerName:s.player.name}:{
     personOriginHash:choice.originHash,
+    originalPresence:choice.presence,
     independentDecision:choice.decision})};
  row.interests.push({origin:INTEREST,actorId:choice.actorId,
   source:q,hash:hash(q)});
@@ -195,7 +208,8 @@ function interest(s,p={}){
   throw Error('Only a genuinely present and independent living person may consider this invitation');
  const choice=Emergent.considerPublicInvitation(w,person,row.sourceHash);
  record(s,row,{actorId:actor,interested:choice.interested,
-  originHash:person.originHash,decision:choice.source});
+  originHash:person.originHash,presence:structuredClone(shift),
+  decision:choice.source});
  Core.event(s,'story',person.name+(choice.interested?
   ' expresses interest in the announced event; this is not accepted entry.':
   ' declines the invitation to take interest in this event.'),
