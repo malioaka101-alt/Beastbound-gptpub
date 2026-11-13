@@ -464,6 +464,10 @@ function orderPublicRecordsInspection(s,w,hearingId){
   noFindingOfGuilt:true,noCompulsoryPrivateAction:true};
 }
 function followUpPublicRecordsInspections(w,day,emit){
+ // Original saves may not yet have a current-day civic register. The
+ // established constitutional migration must run before this sixday read,
+ // exactly as it does before the original monthly office transitions.
+ ensure(w);
  const {c,v}=valid(w,'reedmarch'),
   council=w.institutions?.marsh_council;
  if(!Number.isInteger(day)||day<0)
