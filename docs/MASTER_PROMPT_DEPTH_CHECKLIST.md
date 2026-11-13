@@ -4,6 +4,8 @@
 
 ## Governing foundation audit and stopping rule (13 November 2026)
 
+**Cross-system connections:** [Existing mechanics, owners, boundaries, and priority links](SYSTEM_CONNECTION_AUDIT.md). Reuse one witnessed fact across related systems while keeping independent agency, power disciplines and law distinct. The integration map is an audit, not a new engine or a new acceptance checklist.
+
 **Canonical current status: 17/25 accepted; #18 PAUSED OPEN; #19 ACTIVE OPEN; #20–#25 remain OPEN.** This overrides superseded draft/pending wording in the historical notes below. Verified and merged [#91](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/91), [#92](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/92), and [#93](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/93) connect original ownership and GM-authored creation mechanics. Optional idea-lineage [#94](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/94) was deliberately **closed without merging**: a technically valid optional feature is not an acceptance prerequisite.
 
 ### Source-to-function audit of #19 — examples are not the foundation
