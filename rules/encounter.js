@@ -38,9 +38,11 @@ function inspectSpace(s,fight){
  const matching=(s.log||[]).filter(a=>a.type==='encounter'&&
   a.details?.origin==='engine-local-wildlife-encounter'&&
   a.details.beastId===x.beastId&&a.details.location===x.location);
- if(matching.some(a=>hash(a)!==x.sourceEventHash)||
-  (!matching.some(a=>hash(a)===x.sourceEventHash)&&
-   (s.log||[]).length<90))
+ // A real beast may be re-encountered at the same site. Older true
+ // sightings are not tampering with the most recent original observation.
+ const latest=matching.at(-1);
+ if((latest&&hash(latest)!==x.sourceEventHash)||
+  (!latest&&(s.log||[]).length<90))
   throw Error('The original observed encounter range no longer matches the actual scene');
  return x;
 }
