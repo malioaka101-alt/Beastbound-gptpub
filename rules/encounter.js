@@ -91,13 +91,13 @@ function begin(s,p={}){
  const existingPlayer=s.table?.combatants?.player;
  if(existingPlayer&&existingPlayer.status!=='ok')
   throw Error('Player is not able to initiate combat; witnessed external rescue is required');
+ const space=originalSpace(s,p.beastId);
  H.ensurePlayer(s);
  if(!p.source||typeof p.source!=='string'||p.source.length<10)throw Error('Beast stat provenance/observation required');
  C.int(p.attack,'beast attack modifier',-20,50);C.int(p.damage,'beast damage',0,100);
  const linked=H.ensureBeast(s,p);
  const enemy=s.table.combatants[linked.id];enemy.attackModifier=p.attack;enemy.damage=p.damage;
  enemy.source=p.source.slice(0,180);
- const space=originalSpace(s,p.beastId);
  s.battle={mode:'wounds-v1',enemyId:linked.id,beastId:p.beastId,round:1,terrain:E.LOCATIONS[s.world.location].biome,
    objective:'survive, negotiate, restrain or disengage',startedAt:E.clock(s),
    ...(space?{originalSpace:space}:{})};
