@@ -248,7 +248,7 @@ function status(s,p={}){
 // can be described there without becoming a new type of inventory.
 function ownedAsset(s,item){
  if(typeof item!=='string'||!/^[a-z_]{3,60}$/.test(item))
-  throw Error('An original purchased mundane item ID is required');
+  throw Error('An original purchased mundane item ID or source-verified owned physical invention is required');
  const present=C.int(s.player?.inventory?.[item]??0,
   'original physically carried equipment',0,1);
  const actions=Object.entries(s.player?.combatActions||{})
