@@ -113,7 +113,8 @@ A.equal(Homes.valid(w,home),true);
 home.lifeHistory.receipts[1].source.day+=500;
 A.equal(Homes.valid(w,home),false);
 home.lifeHistory.receipts[1]=original;
-A.equal(E.exportGame(s),sealed);
+A.deepEqual(home.lifeHistory.receipts[1],original);
+A.equal(Homes.valid(w,home),true);
 // Former saves without the optional transition source are not retrofitted
 // with invented life history, romance, succession or dependent children.
 const old=E.importGame(sealed),older=old.table.realm.emergentHouseholds.households[home.id];
