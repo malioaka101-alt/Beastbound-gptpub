@@ -204,10 +204,15 @@ function offer(s,p={}){
  if(!Array.isArray(s.table.personalMaterialOffers))
   throw Error('Personally witnessed material handoffs need a valid original journal');
  s.table.personalMaterialOffers.push(receipt);
+ // These before/after fields are real, PRIVATE recipient holdings. Retain
+ // their full source proof only in the canonical custody/journal records;
+ // never copy them to a player-facing scene event.
+ const {recipientStockBefore:_privateBefore,
+  recipientStockAfter:_privateAfter,...publicWitness}=witness;
  C.event(s,'story',accepted?
   n.name+' voluntarily accepts one real '+E.RESOURCES[p.item].name+'.':
   n.name+' declines the offered '+E.RESOURCES[p.item].name+'; you retain it.',{
-   ...witness,witnessHash:receipt.hash});
+   ...publicWitness,witnessHash:receipt.hash});
  E.advance(s,WORK);Time.finalizeTime(s,before);Health.sync(s,{source:'legacy'});
  return {offered:true,accepted,npcId:p.npcId,person:n.name,
   item:p.item,quantityMoved:accepted?1:0,elapsedMinutes:WORK,

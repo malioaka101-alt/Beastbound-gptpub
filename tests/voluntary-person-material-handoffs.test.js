@@ -72,11 +72,16 @@ try{
  A.equal(after.player.inventory.clean_rations,priorFood-1);
  A.equal(account.held.clean_rations,1);
  A.doesNotThrow(()=>H.validateAccount(account,'otto'));
- const witness=account.history.find(x=>x.origin===H.ORIGIN);
- A.equal(witness.playerStockBefore,priorFood);
- A.equal(witness.playerStockAfter,priorFood-1);
- A.equal(witness.recipientStockBefore,0);
- A.equal(witness.recipientStockAfter,1);
+ const custodyWitness=account.history.find(x=>x.origin===H.ORIGIN);
+ A.equal(custodyWitness.playerStockBefore,priorFood);
+ A.equal(custodyWitness.playerStockAfter,priorFood-1);
+ A.equal(custodyWitness.recipientStockBefore,0);
+ A.equal(custodyWitness.recipientStockAfter,1);
+ const sceneEvent=after.log.find(x=>x.details?.witnessHash===custodyWitness.hash);
+ A.ok(sceneEvent,'the genuinely witnessed handoff remains in the scene log');
+ A.equal(Object.hasOwn(sceneEvent.details,'recipientStockBefore'),false);
+ A.equal(Object.hasOwn(sceneEvent.details,'recipientStockAfter'),false,
+  'a narrator receives the actual acceptance, not the other person’s private inventory');
  const inflated=structuredClone(account);
  inflated.held.clean_rations=2;
  A.throws(()=>H.validateAccount(inflated,'otto'),/balance disagrees/,
