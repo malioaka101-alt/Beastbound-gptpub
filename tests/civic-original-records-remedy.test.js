@@ -45,6 +45,18 @@ function chosen(issueId,start){
  }
  throw Error('A genuinely independent council must issue a public record-review order in at least one original fixture');
 }
+// Zero pending original remedies must be a read-only no-op: walking every
+// sovereign mandate at every world sixday would be both false work and slow.
+{
+ const s=E.newGame({seed:995021,name:'Disposable Unchanged Civic Tick',
+  path:'undecided'}),w=Realm.ensure(s),before=E.exportGame(s);
+ A.equal(Gov.followUpPublicRecordsInspections(w,w.lastTickDay),0);
+ A.equal(E.exportGame(s),before);
+ delete w.governance; // historical saved states can predate office registers
+ A.equal(Gov.followUpPublicRecordsInspections(w,w.lastTickDay),0);
+ A.equal(w.governance,undefined,
+  'an irrelevant sixday may not silently reconstruct every old civic office');
+}
 for(const [issue,start] of [['reedbed_access',995050],['general_business',995450]]){
  const {s,w,row,gov,negative}=chosen(issue,start),
   docket=gov.publicHearingDockets.find(x=>x.hearingId===row.hearingId),
