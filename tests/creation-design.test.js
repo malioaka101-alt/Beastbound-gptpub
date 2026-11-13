@@ -67,7 +67,7 @@ const concept=()=>({
  }
  A.equal(E.exportGame(s),baseline);
  A.equal(s.rngState,rolls);
- for(const target of ['', '  ', 'x'.repeat(161),'unsafe\\nname',3]){
+ for(const target of ['', '  ', 'x'.repeat(161),'unsafe'+String.fromCharCode(10)+'name',3]){
   A.throws(()=>call(s,'evaluate',{...concept(),target}),/proposed target/);
  }
  A.equal(E.exportGame(s),baseline);
