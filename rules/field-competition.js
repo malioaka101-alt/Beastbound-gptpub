@@ -51,7 +51,8 @@ function verifiedNotice(s,n,event,official,eventDay){
    official.name+' for work-sixday '+eventDay||
   !Number.isInteger(n.worldMinute)||n.worldMinute<0||
   n.worldMinute>s.world.minutes||
-  Math.floor(n.worldMinute/DAY)+1!==eventDay)
+  Math.floor(n.worldMinute/DAY)+1>eventDay||
+  eventDay-(Math.floor(n.worldMinute/DAY)+1)>6)
   throw Error('An authentic originally witnessed competition notice for the correct date is required');
  const archived=n.originalPublicationEvent,seal=n.publicationEventHash;
  if((archived===undefined)!==(seal===undefined))
