@@ -76,6 +76,7 @@ jobs:
           node tests/economy-independent-person-owned-material-sales.test.js
           node tests/civic-original-records-remedy.test.js
           node tests/civic-local-rights-and-sapient-standing.test.js
+          node tests/civic-independent-local-law-enactment.test.js
           node tests/economy-original-paid-demand-price-pressure.test.js
           node tests/economy-original-scarcity-market-quotations.test.js
           node tests/living-career-real-merchant-payments.test.js
