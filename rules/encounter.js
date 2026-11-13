@@ -1,7 +1,51 @@
 'use strict';
 // One text-RPG combat exchange: a player intent and an independently committed
 // NPC/beast plan are resolved together, never after the GM sees a favourable die.
+const Crypto=require('node:crypto');
 const E=require('../engine.js'), C=require('./core'), H=require('./unified'), Combat=require('./combat'), Agency=require('./combat-agency'), PlayerAttack=require('./player-combat-action'), WeaponIntent=require('./specialist-weapon-intent'), Spark=require('./arcane-spark'), QiStrike=require('./meridian-qi-strike'), ArcaneWard=require('./arcane-ward'),DualArcane=require('./arcane-dual-channel'),Creation=require('./creation-design'),Aspect=require('./personal-aspect');
+const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+// A measured starting separation belongs to the ORIGINAL lived wildlife
+// encounter, not a caller-selected arena grid. Keep the first observation
+// for an honest GM scene; later rounds have no invented exact metre count.
+function originalSpace(s,beastId){
+ const distance=s.encounter?.distanceMetres;
+ if(distance===undefined)return null; // Older saved encounters have no reading.
+ if(!Number.isInteger(distance)||distance<2||distance>17)
+  throw Error('Encounter separation must have the original engine-measured range');
+ const source=[...(s.log||[])].reverse().find(e=>e.type==='encounter'&&
+  e.details?.origin==='engine-local-wildlife-encounter'&&
+  e.details.beastId===beastId&&e.details.location===s.world.location);
+ if(!source||source.details.distanceMetres!==distance||
+  source.details.species!==s.beasts?.[beastId]?.species)
+  throw Error('A measured combat distance requires its original local encounter observation');
+ return {origin:'original-engine-wildlife-encounter-distance',
+  beastId,location:s.world.location,distanceMetres:distance,
+  sourceEvent:structuredClone(source),sourceEventHash:hash(source)};
+}
+function inspectSpace(s,fight){
+ const x=fight.originalSpace;
+ if(x===undefined)return null; // Existing combat saves continue unchanged.
+ const e=x?.sourceEvent;
+ if(!x||x.origin!=='original-engine-wildlife-encounter-distance'||
+  x.beastId!==fight.beastId||x.location!==s.world.location||
+  !Number.isInteger(x.distanceMetres)||x.distanceMetres<2||
+  x.distanceMetres>17||x.sourceEventHash!==hash(e)||
+  e?.type!=='encounter'||e.details?.origin!=='engine-local-wildlife-encounter'||
+  e.details.beastId!==x.beastId||e.details.location!==x.location||
+  e.details.distanceMetres!==x.distanceMetres||
+  e.details.species!==s.beasts?.[x.beastId]?.species)
+  throw Error('The original encounter separation or place was altered');
+ const matching=(s.log||[]).filter(a=>a.type==='encounter'&&
+  a.details?.origin==='engine-local-wildlife-encounter'&&
+  a.details.beastId===x.beastId&&a.details.location===x.location);
+ // A real beast may be re-encountered at the same site. Older true
+ // sightings are not tampering with the most recent original observation.
+ const latest=matching.at(-1);
+ if((latest&&hash(latest)!==x.sourceEventHash)||
+  (!latest&&(s.log||[]).length<90))
+  throw Error('The original observed encounter range no longer matches the actual scene');
+ return x;
+}
 const COVER=Object.freeze({
  forest:{kind:'copperwood trunks',source:'Engine-established copperwood trunks in Copperwood Verge'},
  ruins:{kind:'ward-stone masonry',source:'Engine-established ward-stone masonry at Riftglass Outpost'}
@@ -27,9 +71,15 @@ function sceneStatus(s,p={}){
   throw Error('Combat scene status is a read-only view; no caller-selected cover or enemy plans');
  const fight=s.battle,loc=E.LOCATIONS[s.world?.location];
  if(!fight)return {active:false,location:loc?.name||'Unknown'};
- const held=inspectCover(s,fight);
+ const held=inspectCover(s,fight),space=inspectSpace(s,fight);
  return {active:true,round:fight.round,location:loc.name,terrain:fight.terrain,
    cover:held?.kind||null,coverBonus:held?2:0,
+   playerPosition:held?'behind-verified-cover':'not-at-verified-cover',
+   startingDistanceMetres:space?.distanceMetres??null,
+   currentDistanceMetres:space&&fight.round===1?space.distanceMetres:null,
+   preciseDistanceUnverified:!space||fight.round>1,
+   lineOfSight:'not independently established',
+   cooperativeEffect:'requires a real independently acting ally and its own source',
    availableCover:!held?COVER[loc.biome]?.kind||null:null,
    note:'Only player-known cover and terrain; enemy decisions and hidden statistics remain sealed'};
 }
@@ -43,6 +93,7 @@ function begin(s,p={}){
  const existingPlayer=s.table?.combatants?.player;
  if(existingPlayer&&existingPlayer.status!=='ok')
   throw Error('Player is not able to initiate combat; witnessed external rescue is required');
+ const space=originalSpace(s,p.beastId);
  H.ensurePlayer(s);
  if(!p.source||typeof p.source!=='string'||p.source.length<10)throw Error('Beast stat provenance/observation required');
  C.int(p.attack,'beast attack modifier',-20,50);C.int(p.damage,'beast damage',0,100);
@@ -50,10 +101,12 @@ function begin(s,p={}){
  const enemy=s.table.combatants[linked.id];enemy.attackModifier=p.attack;enemy.damage=p.damage;
  enemy.source=p.source.slice(0,180);
  s.battle={mode:'wounds-v1',enemyId:linked.id,beastId:p.beastId,round:1,terrain:E.LOCATIONS[s.world.location].biome,
-   objective:'survive, negotiate, restrain or disengage',startedAt:E.clock(s)};
+   objective:'survive, negotiate, restrain or disengage',startedAt:E.clock(s),
+   ...(space?{originalSpace:space}:{})};
  s.encounter=null;
  C.event(s,'combat','A dangerous encounter becomes an active fight. Neither side has to fight to the death.',{beastId:p.beastId});
- return {started:true,enemy:Combat.observedCombatant(enemy),round:1};
+ return {started:true,enemy:Combat.observedCombatant(enemy),round:1,
+  startingDistanceMetres:space?.distanceMetres??null};
 }
 function exchange(s,p={}){
  const fight=s.battle;if(!fight||fight.mode!=='wounds-v1')throw Error('No canonical wound-model combat scene is active');
@@ -81,6 +134,7 @@ function exchange(s,p={}){
  if(recordedPlayer&&recordedPlayer.status!=='ok')
   throw Error('Player is not able to act; intervention or rescue must be adjudicated');
  const held=inspectCover(s,fight);
+ inspectSpace(s,fight);
  if(p.intent==='take_cover'&&(!COVER[fight.terrain]||held))
   throw Error(held?'The player is already occupying this real cover':'This established terrain offers no verified solid cover in the current encounter');
  // Verify equipment, recorded damage and learned mundane ability before
