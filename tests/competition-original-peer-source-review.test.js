@@ -72,6 +72,7 @@ const {s,p}=findReviewer(),domain=p.career.workReceipts.find(r=>
  r.source?.outcome?.success&&
  /^[a-z][a-z-]{3,39}$/.test(r.source?.task?.domain||'')).source.task.domain;
 travel(s,p.shift.location);
+const secondOriginStart=E.exportGame(s);
 const event=base('original_peer_source_work_01',domain);
 event.eventDay=E.day(s)+2;
 A.equal(act(s,'announceLocal',event).hasOriginalWorkBenchmark,true);
@@ -111,6 +112,10 @@ A.equal(result.originalWorkBenchmarkMet,
 const status=act(s,'publicEvents',{eventId:event.eventId});
 A.equal(status.events[0].independentlyReviewedWork.length,1);
 A.equal(status.events[0].noCreditedRankOrRewards,true);
+A.equal(status.seasonalWorkBoard.length,1);
+A.equal(status.seasonalWorkBoard[0].standings.length,1);
+A.equal(status.seasonalWorkBoard[0].standings[0].actorId,'player');
+A.equal(status.seasonalWorkBoard[0].standings[0].verifiedAttempts,choice.willing?1:0);
 A.equal(status.events[0].independentlyReviewedWork[0].objectiveBenchmarkMet,
  result.originalWorkBenchmarkMet);
 const checkpoint=E.exportGame(s);
@@ -129,6 +134,51 @@ A.equal(E.exportGame(s),checkpoint);
 for(let i=0;i<95;i++)Core.event(s,'world','Ordinary world life after review '+i,{i});
 A.equal(act(E.importGame(E.exportGame(s)),'publicEvents',{eventId:event.eventId})
  .events[0].independentlyReviewedWork.length,1);
+{
+ // Reuse the very same authentic person-world starting point, not another
+ // hardcoded reviewer or a preset roll. Unlike craft, this is an existing
+ // original wild-habitat observation resolved by the original core check.
+ const h=E.importGame(secondOriginStart);
+ const event2=base('observed_habitat_source_02',domain);
+ event2.title='Forest Signs of the Visiting Season';
+ event2.description='A distinctly local gathering studies personally observed natural habitat traces, whether conclusions succeed or fail.';
+ event2.criteria='An original natural observation can be verified against its source, rather than treated as a crafted item.';
+ event2.judging='A willing local professional checks the real source-backed observation outcome without inventing an ecological specimen.';
+ event2.season='Independent forest observations season';
+ event2.eventDay=E.day(h)+2;
+ event2.openAdmission={...admission,acceptedSourceOwners:['habitat-survey']};
+ act(h,'announceLocal',event2);
+ act(h,'expressInterest',{eventId:event2.eventId});
+ const venue=h.world.location;
+ travel(h,'forest');
+ const scene=R.act(h,{system:'world',operation:'habitatSurvey',params:{}});
+ const check=R.act(h,{system:'core',operation:'check',params:{checkId:scene.checkId}});
+ A.ok(check.check);
+ travel(h,venue);
+ act(h,'submitWork',{eventId:event2.eventId,
+  sourceOwner:'habitat-survey',sourceId:scene.checkId});
+ const when=(event2.eventDay-1)*1440+13*60;
+ A.ok(when>h.world.minutes);
+ const prev=h.world.minutes;
+ E.advance(h,when-prev);Clock.finalizeTime(h,prev);
+ A.equal(act(h,'enter',{eventId:event2.eventId,
+  sourceOwner:'habitat-survey',sourceId:scene.checkId}).registered,true);
+ const purse=money(h),rng=h.rngState;
+ const observed=act(h,'reviewWork',{eventId:event2.eventId,
+  actorId:'player',reviewerId:p.actorId});
+ A.equal(observed.noSecondPerformanceRoll,true);
+ A.equal(money(h),purse);
+ A.equal(h.rngState,rng);
+ const board=act(h,'publicEvents',{eventId:event2.eventId});
+ A.equal(board.events[0].independentlyReviewedWork.length,1);
+ A.equal(board.events[0].noCreditedRankOrRewards,true);
+ A.equal(board.seasonalWorkBoard[0].season,event2.season);
+ A.equal(board.seasonalWorkBoard[0].standings.length,1);
+ A.equal(board.seasonalWorkBoard[0].standings[0].verifiedAttempts,
+  observed.voluntarilyReviewed?1:0);
+ A.equal(act(E.importGame(E.exportGame(h)),'publicEvents',
+  {eventId:event2.eventId}).events[0].independentlyReviewedWork.length,1);
+}
 {
  const v=E.newGame({name:'Unproven Judge',seed:818010,
   background:'fieldworker',path:'undecided'});
