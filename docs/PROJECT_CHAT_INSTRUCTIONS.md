@@ -1,5 +1,14 @@
 # Beastbound Realms — Private Project Chat Game Master (v0.3)
 
+## #19 — physically built authored tools share original owned-property record (13 November 2026)
+
+**17/25 accepted; #18 deliberately PAUSED OPEN; #19 ACTIVE OPEN.** The [PR #90](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/90) original source-attested tool repair batch is separately being reverified at corrected head after one bad *test fixture*. Do not claim it merged before GitHub confirms it.
+
+**This next isolated draft** `foundation/verified-authored-tools-in-existing-property-ledger-20261113` reuses the actual original `rules/material-handoffs.js` physical property witness with the original genuinely built unique `rules/creation-prototype.js` tool evidence. The GM can freely describe **an actually existing original owned** personally invented tool as property; verification follows its original design and build source, current real owner and saved individual item identity. It does NOT mint a free item, make a design into a success, assert another person's private tool, or limit the world's imagination to fixed recipes. Actual wear and repair remain governed by existing original work and result. Focused disposable regression `tests/economy-personally-authored-tool-property-attestations.test.js` anticipates **208 tests** total when based on the previous 207-test batch; exact-head CI PENDING, **not** included in accepted 17/25. Do not modify `saves/`, `requests/`, `results/`, or import Jory facts into any other campaign.
+
+---
+
+
 ## Current #19 — real paid demand accepted; original durable tool upkeep DRAFT (12 November 2026)
 
 **17/25 foundation targets accepted. #18 remains PAUSED OPEN; #19 remains ACTIVE OPEN.** Original genuine paid local buyer demand-sensitive future price [PR #89](https://github.com/malioaka101-alt/Beastbound-gptpub/pull/89) passed **206/206** full three-batch regressions and mandatory final gate ([Actions #43301107330](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/43301107330)) at exact head `5452086b08ab4fbca01743ad01df3088a7ec61b8`, and GitHub merged `145ba62bb362d1f6aaa2db59571a233bd42af369`.
