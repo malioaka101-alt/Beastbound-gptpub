@@ -6,6 +6,7 @@
 const Crypto=require('node:crypto'),A=require('./atlas'),Houses=require('./social-houses');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const MANDATE_SOURCE='original-public-office-independent-mandate-v1';
+const RECORDS_REMEDY='original-council-public-records-procedural-remedy-v1';
 const RAW=[
  // polity, public office, incumbent, independent non-family challenger
  ['reedmarch','March Council Speaker','Iria Highwater','Nessa Towbank'],
@@ -128,7 +129,7 @@ function ensure(w){
     note:'Auditing begins from an earlier original save; historic names and decisions were not recorded'};
    v.mandateHistory=[];
   }
-  if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c))
+  if(!verifyMandateAudit(v,c)||!verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c))
    throw Error('Civic mandate evidence or witnessed jurisdictional procedure is inconsistent');
  }
  return w.governance;
@@ -357,6 +358,155 @@ function historicalCivicProcedures(w,polity){
   }))};
 }
 
+/*
+ * #20 — an actual independent March Council "records_review" disposition
+ * is a narrowly competent PROCEDURAL order on its OWN civic docket, not
+ * a criminal finding, a new statute, confiscation or compelled third-party
+ * testimony. Its only presently grounded follow-up is inspection/indexing
+ * of the filed hearing and already PUBLIC household charters.
+ *
+ * Keep both steps inside the original government office and hearing docket;
+ * no universal law/merchant/rights ledger or second choice is created.
+ */
+function originalRecordsOrder(v,c,docket){
+ const procedure=(v.civicProcedures||[]).find(x=>
+  x.procedureId==='public_hearing:'+docket?.hearingId);
+ const q=procedure?.source,review=q?.originalReview;
+ if(!docket||!q||c.id!=='reedmarch'||
+  docket.disposition!=='records_review'||
+  review?.disposition!=='records_review'||
+  review.hearingId!==docket.hearingId||
+  review.issueId!==docket.issueId||
+  review.day!==docket.day||
+  review.sourceEventHash!==docket.sourceEventHash||
+  q.originalSourceHash!==docket.sourceEventHash||
+  q.day!==docket.day||!Array.isArray(review.familyResponses))
+  throw Error('Only a genuine independent council records-review decision can direct an official records inspection');
+ const charters=review.familyResponses.map(x=>{
+  const h=Houses.byId[x?.houseId];
+  if(!h||h.polity!=='reedmarch')
+   throw Error('The council cannot inspect imaginary private household charters');
+  return {houseId:h.id,name:h.name,publicDuty:h.duty,
+   declaredDispute:h.dispute};
+ });
+ if(new Set(charters.map(x=>x.houseId)).size!==charters.length)
+  throw Error('One original public household charter cannot be counted twice');
+ return {origin:RECORDS_REMEDY,kind:'public-charter-records-review',
+  polity:c.id,regionId:q.regionId,office:q.office,
+  incumbentAtDecision:q.incumbent,mandateAtDecision:q.mandateNumber,
+  hearingId:docket.hearingId,issueId:docket.issueId,orderedDay:docket.day,
+  originalHearingHash:docket.sourceEventHash,
+  originalCivicProcedureHash:procedure.hash,
+  originalPublicCharters:charters,
+  originalPublicRights:A.P[c.id].rights,
+  noNewLaw:true,noFindingOfGuilt:true,
+  noPrivateDisclosureOrForcedWitness:true,noPropertyTransfer:true};
+}
+function originalInspectionCompletion(order,day){
+ const q=order.source;
+ if(!Number.isInteger(day)||day<q.orderedDay+6)
+  throw Error('An actual later completed world-sixday is necessary before council records can be inspected');
+ return {origin:RECORDS_REMEDY,kind:'completed-original-public-records-inspection',
+  hearingId:q.hearingId,orderSourceHash:order.hash,
+  completedDay:day,releaseDay:day+2,
+  publicRecordsExamined:q.originalPublicCharters.map(x=>hash(x)),
+  residentFilingExamined:q.originalHearingHash,
+  outcome:'Existing public charter positions and the resident filing have been indexed for council review; no disputed allegation was judicially determined.',
+  noNewLaw:true,noFindingOfGuilt:true,noPrivateRecordsOpened:true,
+  noFinesOrCompelledBeastAction:true};
+}
+function verifyRecordsRemedies(v,c){
+ if(v?.publicHearingDockets===undefined)return true;
+ if(!Array.isArray(v.publicHearingDockets))return false;
+ const seen=new Set();
+ for(const docket of v.publicHearingDockets){
+  if(!docket||typeof docket.hearingId!=='string'||
+    seen.has(docket.hearingId))return false;
+  seen.add(docket.hearingId);
+  if(docket.recordsInspection===undefined)continue; // old, untouched saves
+  const order=docket.recordsInspection;
+  try{
+   const expected=originalRecordsOrder(v,c,docket);
+   if(!order||order.hash!==hash(order.source)||
+     JSON.stringify(order.source)!==JSON.stringify(expected)||
+     (order.fulfilled!==null&&
+      (!order.fulfilled||!order.fulfilled.source||
+       order.fulfilled.hash!==hash(order.fulfilled.source)||
+       JSON.stringify(order.fulfilled.source)!==
+        JSON.stringify(originalInspectionCompletion(order,
+         order.fulfilled.source.completedDay)))))
+    return false;
+  }catch{return false;}
+ }
+ return true;
+}
+function orderPublicRecordsInspection(s,w,hearingId){
+ const {c,v}=valid(w,'reedmarch'),docket=
+  v.publicHearingDockets?.find(x=>x.hearingId===hearingId),
+  rec=s.table?.publicHearings?.records?.find(x=>x.hearingId===hearingId);
+ if(!docket||!rec||docket.recordsInspection!==undefined||
+  rec.disposition!=='records_review'||
+  rec.state!=='reviewed'||rec.reviewDay!==docket.day||
+  !require('./public-hearings').sourceCheck(s,rec))
+  throw Error('Only one newly source-attested public council records order is possible');
+ const q=originalRecordsOrder(v,c,docket);
+ // Ensure the static charter source agrees with the exact public contents
+ // the resident could actually have heard at this particular hearing.
+ if(JSON.stringify(q.originalPublicCharters)!==
+   JSON.stringify(rec.writtenPositions.map(x=>({
+    houseId:x.houseId,name:x.name,publicDuty:x.publicDuty,
+    declaredDispute:x.declaredDispute}))))
+  throw Error('Previously witnessed public charter positions cannot be silently rewritten');
+ docket.recordsInspection={source:q,hash:hash(q),fulfilled:null};
+ if(!verifyRecordsRemedies(v,c))
+  throw Error('The original public administrative order failed its own source history');
+ return {ordered:true,hearingId,noNewLaw:true,
+  noFindingOfGuilt:true,noCompulsoryPrivateAction:true};
+}
+function followUpPublicRecordsInspections(w,day,emit){
+ const {c,v}=valid(w,'reedmarch'),
+  council=w.institutions?.marsh_council;
+ if(!Number.isInteger(day)||day<0)
+  throw Error('Public order follow-up requires a real completed world day');
+ if(!council||council.status!=='active'||
+  !Number.isFinite(council.capacity)||council.capacity<45||
+  !['in_office','interim'].includes(v.status))return 0;
+ let completed=0;
+ for(const docket of v.publicHearingDockets||[]){
+  const order=docket.recordsInspection;
+  if(!order||order.fulfilled!==null||
+    day<order.source.orderedDay+6)continue;
+  const source=originalInspectionCompletion(order,day);
+  order.fulfilled={source,hash:hash(source)};
+  completed++;
+  if(typeof emit==='function')emit({
+   day,region:'reedmarch',subject:'council-records:'+docket.hearingId,
+   text:'The March Council has indexed its existing public charter positions and the original citizen filing under a previously issued records-review order. No offence, new law, fine or private testimony is established.',
+   channel:'public notice',releaseDay:day+2,severity:'routine'
+  });
+ }
+ if(!verifyRecordsRemedies(v,c))
+  throw Error('An independent council records review lacks original jurisdiction or charter sources');
+ return completed;
+}
+function publicRecordsInspectionStatus(w,hearingId,day){
+ const v=w?.governance?.reedmarch;
+ if(!v)return null;
+ if(!Number.isInteger(day)||day<0||!verifyRecordsRemedies(v,C.reedmarch))
+  throw Error('Original public records order source cannot be verified');
+ const order=v.publicHearingDockets?.find(x=>
+  x.hearingId===hearingId)?.recordsInspection;
+ if(!order||order.source.orderedDay+2>day)return null;
+ const completion=order.fulfilled?.source,
+  released=completion&&completion.releaseDay<=day;
+ return {ordered:true,orderedDay:order.source.orderedDay,
+  proceduralRemedy:'Original council review of the cited public filing and already published charter positions',
+  completed:!!released,
+  publicCompletionDay:released?completion.completedDay:null,
+  findingOfGuilt:false,newLawEnacted:false,
+  noCompulsoryPrivateOrBeastAction:true};
+}
+
 function historicMandates(w,id){
  ensure(w);
  const {c,v}=valid(w,id);
@@ -379,7 +529,7 @@ function valid(w,id){
     !Array.isArray(v.recentPublic)||
     !Number.isInteger(v.mandateNumber)||v.mandateNumber<0||
     (v.auditVersion!==undefined&&!verifyMandateAudit(v,c))||
-    !verifyCivicProcedures(v,c))
+    !verifyCivicProcedures(v,c)||!verifyRecordsRemedies(v,c))
   throw Error('Existing civic leadership record or original mandate history is not internally consistent');
  return {c,v};
 }
@@ -497,4 +647,6 @@ function recover(w,id,day,emit){
 module.exports={charters:CHARTERS,byId:C,seed,ensure,report,local,review,transition,crisisReview,recover,royalID,terms,
  MANDATE_SOURCE,historicMandates,verifyMandateAudit,
  CIVIC_PROCEDURE,verifyCivicProcedures,jurisdictionSnapshot,
+ RECORDS_REMEDY,verifyRecordsRemedies,orderPublicRecordsInspection,
+ followUpPublicRecordsInspections,publicRecordsInspectionStatus,
  attestOriginalCivicProcedure,historicalCivicProcedures};
