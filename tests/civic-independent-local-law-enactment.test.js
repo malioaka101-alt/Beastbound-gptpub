@@ -73,11 +73,11 @@ function caseHearing(s,ids,caseId,ruleId,followUp='',siteNoteSeal){
    requestedFollowUp:'The original local institution may seek further genuinely available evidence or offer voluntary discussion, without a compulsory order.'}});
  return s.log.length-1;
 }
-function caseChallenge(s,beastId,caseId,rule,challengeId){
+function caseChallenge(s,beastId,caseId,rule,challengeId,followUp=''){
  Core.event(s,'story','A personally encountered free local person voices an independent challenge to a previously recorded unresolved civic case.',{
   origin:Civic.SESSION,polityId:charter.polityId,
   institutionId:charter.institutionId,location:s.world.location,
-  topic:'Affected person challenges original civic case '+challengeId,
+  topic:'Affected person challenges original civic case '+challengeId+followUp,
   result:'The civic register acknowledges a firsthand challenge, but no new hearing or remedy has been granted.',
   basis:'A source-verified affected person speaks from direct presence, referring to the genuine case and the specific rule appeal process.',
   participants:[beastId],visibility:'public',
@@ -292,7 +292,8 @@ function rule(s,ids,id,conduct){
  A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:badChallenge}),/genuine new appeal/);
  A.equal(E.exportGame(s),noChange);
- badChallenge=caseChallenge(s,ids[0],'rescue_passage_dispute',second,'rescue_claimant_review');
+ badChallenge=caseChallenge(s,ids[0],'rescue_passage_dispute',second,'rescue_claimant_review',
+  ' through a new subsequent witnessed filing');
  noChange=E.exportGame(s);
  A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
   institutionId:charter.institutionId,eventIndex:badChallenge}),/genuine new appeal/);
