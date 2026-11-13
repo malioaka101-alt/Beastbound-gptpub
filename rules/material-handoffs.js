@@ -133,6 +133,12 @@ function offer(s,p={}){
  const accepted=prior<100000&&draw(holder)<responseChance(n,p.item),
   before=s.world.minutes;
  if(accepted){
+  // The original player material plan and the independent person's existing
+  // physical account are the two sides of ONE real voluntary item movement.
+  const moved=materialPlan.entries[0];
+  if(!C.conservedItems({sourceBefore:moved.before,
+    sourceAfter:moved.after,targetBefore:prior,targetAfter:prior+1,amount:1}))
+   throw Error('Voluntary physical material transfer failed common finite conservation');
   Health.applyItems(s,materialPlan);
   holder.held[p.item]=prior+1;
  }

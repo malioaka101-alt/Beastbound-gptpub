@@ -216,6 +216,11 @@ function buy(w,p,day){
  if(!paymentCheck.valid)return {bought:false,reason:'wage-and-spend-ledger-invalid'};
  // Preflight physical destination BEFORE moving seller-owned stock or Scales.
  Handoffs.preflightPurchasedRation(w,p.actorId,row);
+ const heldBefore=w.materialCustody?.accounts?.[p.actorId]?.held?.clean_rations??0;
+ if(!Core.conservedItems({sourceBefore:q.sellerStockBefore,
+   sourceAfter:q.sellerStockAfter,targetBefore:heldBefore,
+   targetAfter:heldBefore+q.quantity,amount:q.quantity}))
+  throw Error('An original independently purchased physical item must conserve between seller and person custody');
  p.cashScales=q.personCashAfter;
  p.independentMarketPurchases||=[];p.independentMarketPurchases.push(row);
  merchant.stock=q.sellerStockAfter;merchant.fundsScales=q.sellerScalesAfter;

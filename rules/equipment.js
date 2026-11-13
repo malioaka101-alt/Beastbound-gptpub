@@ -154,6 +154,13 @@ function purchase(s,p={}){
   if(v.fundsScales+q.priceScales>100000000)
    throw Error('Seller account requires reconciliation before receiving money');
   const materialPlan=Wallet.planItems(s,{clean_rations:1});
+  const destination=materialPlan.entries[0];
+  if(!C.conservedItems({sourceBefore:v.stock,sourceAfter:v.stock-1,
+    targetBefore:destination.before,targetAfter:destination.after,amount:1})||
+    !C.conservedScales({sourceBefore:coins,sourceAfter:coins-q.priceScales,
+     targetBefore:v.fundsScales,targetAfter:v.fundsScales+q.priceScales,
+     amount:q.priceScales}))
+   throw Error('Real merchant stock and same-unit funds must conserve across both original accounts');
   // One unit physically leaves the vendor. No guessed seller consent, price,
   // inventory, weapon skill, or chosen dice. All preflights finish first.
   Wallet.spend(s,{scales:q.priceScales,reason:'Purchased clean rations from '+q.seller});
@@ -182,6 +189,9 @@ function purchase(s,p={}){
  if(!Number.isFinite(s.player.coins)||Math.abs(s.player.coins*100-coins)>0.001)
   throw Error('Purse requires an accurate Scales denomination');
  if(coins<q.priceScales)throw Error('Insufficient Scales for the actual quoted weapon');
+ if(!C.conservedItems({sourceBefore:q.stock,sourceAfter:q.stock-1,
+   targetBefore:0,targetAfter:1,amount:1}))
+  throw Error('The original finite equipment quote cannot transfer nonexistent stock');
  // Everything is checked before the purse, item, stock or world minute moves.
  Wallet.spend(s,{scales:q.priceScales,reason:'Purchased '+item+' from '+q.seller});
  s.player.inventory||={};s.player.inventory[item]=(s.player.inventory[item]||0)+1;
