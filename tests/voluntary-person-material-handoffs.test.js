@@ -255,7 +255,44 @@ try{
  A.equal(Object.hasOwn(visible.details,'recipientStockAfter'),false);
  A.equal(afterBundle.rngState,bundleRng);
  A.equal(afterBundle.world.minutes,bundleMinute+6);
+ // The same actual accepted two-unit receipt must also back a GM-authored
+ // observation of already owned material. It must not create another item,
+ // alter private stock, invent a deed, reroll consent or advance the clock.
+ const beforeAttest=E.exportGame(afterBundle),priorPersonRng=receiver.rngState,
+  assetNote='Two real reeds voluntarily accepted in person for ordinary fieldwork; this is a description, not a deed or a new material.';
+ const witnessed=R.act(afterBundle,{system:'social',
+  operation:'documentOwnedMaterial',params:{
+   ownerId:'npc:sera',item:'marsh_reed',quantity:2,
+   description:assetNote}});
+ A.equal(witnessed.documented,true);
+ A.equal(afterBundle.table.materialAssetAttestations.at(-1).source.originalRoot,
+  proof.hash,'the attestation reuses the same source-owned bundle receipt');
+ A.equal(H.verifyAssetAttestations(afterBundle),true);
+ A.equal(receiver.held.marsh_reed,2);
+ A.equal(afterBundle.player.inventory.marsh_reed||0,0);
+ A.equal(afterBundle.world.minutes,bundleMinute+6);
+ A.equal(afterBundle.rngState,bundleRng);
+ A.equal(receiver.rngState,priorPersonRng);
+ A.notEqual(E.exportGame(afterBundle),beforeAttest,
+  'only the existing original property-observation history changes');
+ const documented=R.act(afterBundle,{system:'social',
+  operation:'ownedMaterialHistory',params:{ownerId:'npc:sera'}});
+ A.equal(documented.knownOwnedPhysicalMaterialObservations[0].quantityAtOriginalWitness,2);
+ A.equal(documented.knownOwnedPhysicalMaterialObservations[0].currentPrivateHoldingNotDisclosed,true);
+ A.equal('currentlyCarried' in documented.knownOwnedPhysicalMaterialObservations[0],false);
+ const beforeUnowned=E.exportGame(afterBundle);
+ A.throws(()=>R.act(afterBundle,{system:'social',
+  operation:'documentOwnedMaterial',params:{
+   ownerId:'npc:sera',item:'marsh_reed',quantity:3,description:assetNote}}),
+  /cannot create unowned items/);
+ A.equal(E.exportGame(afterBundle),beforeUnowned);
+ const fakeJournal=structuredClone(afterBundle);
+ fakeJournal.table.personalMaterialOffers[0].quantityMoved=1;
+ A.equal(H.verifyAssetAttestations(fakeJournal),false,
+  'an altered historic player gift cannot ground the real two-unit property observation');
+ write(afterBundle);
  const afterBundleSave=read();
+ A.equal(H.verifyAssetAttestations(E.importGame(afterBundleSave)),true);
  A.equal(E.exportGame(E.importGame(afterBundleSave)),afterBundleSave.trim());
  const duplicate=act('material_real_two_reeds_gift_01',
   'give 2 marsh reeds to Professor Sera');
