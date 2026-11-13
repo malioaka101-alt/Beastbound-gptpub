@@ -45,6 +45,20 @@ function returnChoice(w,a,b,day){
 function sameHome(a,b){
  return a.regionId===b.regionId&&a.status==='active'&&b.status==='active';
 }
+function witnessedReturn(w,people,day){
+ return people.every(p=>p.lastTickDay===day&&
+  !!People.presence(w,p.actorId,People.siteFor(p.regionId),day));
+}
+function historicalPresence(f,shift,day){
+ if(!shift||shift.source!==People.SHIFT||
+  shift.actorId!==f.actorId||shift.npcId!==f.actorId||
+  shift.personId!==f.id||shift.originHash!==f.originHash||
+  shift.location!==People.siteFor(f.regionId)||
+  shift.scheduledAtDay!==day||shift.fromDay!==day||
+  shift.throughDay!==day+5)return false;
+ const {hash:seal,...basis}=shift;
+ return seal===hash(basis);
+}
 function validLife(w,h){
  const t=h.lifeHistory;
  if(t===undefined)return true; // Already saved families remain valid.
@@ -77,12 +91,17 @@ function validLife(w,h){
   const colocated=sameHome(...q.people);
   if(q.nextStatus==='shared'&&
    (!colocated||prior!=='apart'||
+    !q.people.every(f=>f.lastTickDay===q.day)||
+    q.renewedPresence?.length!==2||
+    !q.renewedPresence.every((sh,i)=>
+     historicalPresence(q.people[i],sh,q.day))||
     q.renewedAgreement?.length!==2||
     !q.renewedAgreement.every((v,i)=>
-      v===returnChoice(w,q.people[i],q.people[1-i],q.day))))
-   return false;
+      v===returnChoice(w,q.people[i],q.people[1-i],q.day))||
+    q.renewedAgreement.some(v=>!v)))return false;
   if(q.nextStatus==='apart'&&
-   (colocated||prior!=='shared'||q.renewedAgreement!==null))return false;
+   (colocated||prior!=='shared'||q.renewedAgreement!==null||
+    q.renewedPresence!==null))return false;
   prior=q.nextStatus;previous=r.hash;lastDay=q.day;
  }
  return t.headHash===previous&&h.status===prior;
@@ -91,14 +110,16 @@ function noteChange(w,h,day,next,people){
  const t=ensureLife(h),prior=h.status;
  const facts=people.map(personFact),coLocated=sameHome(...facts),
   votes=next==='shared'?facts.map((f,i)=>
-   returnChoice(w,f,facts[1-i],day)):null;
+   returnChoice(w,f,facts[1-i],day)):null,
+  shifts=next==='shared'?people.map(p=>People.presence(w,p.actorId,
+   People.siteFor(p.regionId),day)):null;
  if(prior===next||
-  next==='shared'&&(!coLocated||votes.some(v=>!v))||
+  next==='shared'&&(!coLocated||!witnessedReturn(w,people,day)||votes.some(v=>!v))||
   next==='apart'&&coLocated)
   throw Error('A living household cannot change without real conditions and separate consent');
  const source={origin:LIFE,householdId:h.id,originalHouseholdHash:h.sourceHash,
   day,previousStatus:prior,nextStatus:next,people:facts,
-  renewedAgreement:votes,previous:t.headHash,
+  renewedAgreement:votes,renewedPresence:shifts,previous:t.headHash,
   noPresumedMarriageOrChildren:true,noInvoluntaryReunion:true};
  const row={source,hash:hash(source)};
  t.receipts.push(row);t.headHash=row.hash;
@@ -205,7 +226,8 @@ function month(w,day){
   // Founders' first consent is not a lifetime obligation. After time
   // apart they must each independently want to resume a shared home.
   if(home.status==='apart'){
-   if(!returnChoice(w,a,b,day)||!returnChoice(w,b,a,day)){
+   if(!witnessedReturn(w,[a,b],day)||
+      !returnChoice(w,a,b,day)||!returnChoice(w,b,a,day)){
     apart++;continue;
    }
    noteChange(w,home,day,'shared',[a,b]);
