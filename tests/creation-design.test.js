@@ -25,7 +25,6 @@ const concept=()=>({
   {...concept(),materials:[{id:'marsh_reed',quantity:2,grade:9}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2,free:true}]},
   {...concept(),materials:[{id:'marsh_reed',quantity:2},{id:'marsh_reed',quantity:1}]},
-  {...concept(),function:'all_powerful_soul_harvest'},
   {...concept(),magnitude:999},
   {...concept(),system:'universal_rank'}
  ])A.throws(()=>call(s,'evaluate',forged),/Creation accepts|material|Duplicate|actual medium|bounded proposed Magnitude/);
@@ -65,6 +64,27 @@ const concept=()=>({
   A.ok(assessment.gaps.length>0,
    'a descriptive target does not prove the corresponding effect');
  }
+ A.equal(E.exportGame(s),baseline);
+ A.equal(s.rngState,rolls);
+ // Neither a novel shape nor a novel creative mechanism needs a name in
+ // an engine enum to be considered. It also cannot become working power.
+ const unstudied={...concept(),
+  title:'GM-proposed original physical form',
+  medium:'living woven support geometry',
+  function:'entirely unstudied local mechanism',
+  target:'surface contact at a fictional worksite'};
+ const free=call(s,'evaluate',unstudied);
+ A.equal(free.proposal.medium,unstudied.medium);
+ A.equal(free.proposal.function,unstudied.function);
+ A.ok(free.gaps.some(x=>/Original mechanism is unverified/.test(x)));
+ A.ok(free.gaps.some(x=>/Original medium is unverified/.test(x)));
+ A.equal(free.envelope.provisionalArcaneOrQiBudget,null);
+ A.equal(free.noPractisedPowerGranted,true);
+ A.equal(free.noItemCreated,true);
+ const arcane=call(s,'evaluate',{...unstudied,system:'arcane'});
+ A.equal(arcane.envelope.provisionalArcaneOrQiBudget,null);
+ A.ok(arcane.gaps.some(x=>/No proved energy or physiology model/.test(x)));
+ A.equal(arcane.noTechniqueLearned,true);
  A.equal(E.exportGame(s),baseline);
  A.equal(s.rngState,rolls);
  for(const target of ['', '  ', 'x'.repeat(161),'unsafe'+String.fromCharCode(10)+'name',3]){
