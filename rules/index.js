@@ -397,6 +397,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
+  case 'world.localRightsContext':return require('../world/government-offices').localRightsContext(s,params);
   case 'world.realmOverview':return Realm.synopsis(s);
   case 'world.atlas':return Realm.publicAtlas(s,params);
   case 'world.heritage':return WorldPractice.publicLore(s,params);
