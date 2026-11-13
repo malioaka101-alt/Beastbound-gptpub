@@ -31,10 +31,14 @@ function verify(s,row){
   a.origin!==ORIGIN||a.venue!==row.venue||
   a.publishedMinute!==row.publishedMinute||
   a.eventDay!==row.eventDay||
+  a.scheduledAtMinute!==(a.eventDay-1)*DAY+a.startsAtMinuteOfDay||
+  !Number.isInteger(a.startsAtMinuteOfDay)||
+  a.startsAtMinuteOfDay<0||a.startsAtMinuteOfDay>=DAY||
   !Number.isInteger(a.publishedMinute)||a.publishedMinute<0||
   a.publishedMinute>s.world.minutes||
   a.playerNameAtPublication!==row.playerNameAtFirstNotice||
-  !Number.isInteger(a.eventDay)||a.eventDay<=Math.floor(a.publishedMinute/DAY)||
+  !Number.isInteger(a.eventDay)||a.eventDay<1||
+  a.scheduledAtMinute<=a.publishedMinute||
   !Place.location(s,a.venue)||
   a.regionId!==Place.location(s,a.venue)?.regionId||
   !prose(a.title,5,110)||!prose(a.description,20,900)||
@@ -55,6 +59,7 @@ function verify(s,row){
   ev.details?.eventId!==a.eventId||ev.details?.venue!==a.venue||
   ev.details?.publishedMinute!==a.publishedMinute||
   ev.details?.eventDay!==a.eventDay||
+  ev.details?.scheduledAtMinute!==a.scheduledAtMinute||
   ev.details?.termsHash!==hash({
    title:a.title,description:a.description,criteria:a.criteria,
    eligibility:a.eligibility,judging:a.judging,appeals:a.appeals,
@@ -79,7 +84,7 @@ function verifyInterest(row,x){
   x.hash!==hash(q)||q.origin!==INTEREST||
   q.eventId!==row.id||q.invitationHash!==row.sourceHash||
   !Number.isInteger(q.worldMinute)||q.worldMinute<row.publishedMinute||
-  !Number.isInteger(q.worldMinute)||q.worldMinute>=row.eventDay*DAY||
+  !Number.isInteger(q.worldMinute)||q.worldMinute>=row.source.scheduledAtMinute||
   q.venue!==row.venue||q.noAutomaticEntryOrQualification!==true)
   return false;
  if(q.actorId==='player')
@@ -95,13 +100,15 @@ function verifyInterest(row,x){
  return Emergent.verifyPublicInvitationChoice(q.independentDecision);
 }
 function announce(s,p={}){
- shape(p,['eventId','title','description','criteria','eligibility','judging','appeals','prizeTerms','season','eventDay']);
+ shape(p,['eventId','title','description','criteria','eligibility','judging','appeals','prizeTerms','season','eventDay','startsAtMinuteOfDay']);
  if(!validId(p.eventId)||!prose(p.title,5,110)||
   !['description','criteria','eligibility','judging','appeals','prizeTerms'].every(k=>
     prose(p[k],k==='description'?20:k==='criteria'?16:k==='prizeTerms'?8:10,900))||
   !prose(p.season,3,120)||!Number.isInteger(p.eventDay)||
-  p.eventDay<=Math.floor((s.world.minutes+5)/DAY)||
-  p.eventDay>20000000)
+  p.eventDay<1||p.eventDay>20000000||
+  !Number.isInteger(p.startsAtMinuteOfDay)||
+  p.startsAtMinuteOfDay<0||p.startsAtMinuteOfDay>=DAY||
+  (p.eventDay-1)*DAY+p.startsAtMinuteOfDay<=s.world.minutes+5)
   throw Error('A real, future, locally witnessed public event must have GM-authored cultural terms and a dated schedule');
  if(s.battle||s.encounter)throw Error('Cannot publish an unrelated public event during an unresolved encounter');
  const venue=Place.location(s),old=s.world.minutes;
@@ -115,6 +122,8 @@ function announce(s,p={}){
   prizeTerms=p.prizeTerms.trim(),season=p.season.trim();
  const source={origin:ORIGIN,eventId:p.eventId,venue:venue.id,
   regionId:venue.regionId,publishedMinute:old+5,eventDay:p.eventDay,
+  startsAtMinuteOfDay:p.startsAtMinuteOfDay,
+  scheduledAtMinute:(p.eventDay-1)*DAY+p.startsAtMinuteOfDay,
   playerNameAtPublication:s.player.name,
   title,description,criteria,eligibility,judging,appeals,prizeTerms,season,
   noAutomaticInstitutionalAuthority:true,noAutomaticEntrantsOrConsent:true,
@@ -124,6 +133,7 @@ function announce(s,p={}){
  Core.event(s,'world','A public local competition invitation is witnessed: '+title+'.',
   {origin:ORIGIN,eventId:p.eventId,venue:venue.id,
    publishedMinute:s.world.minutes,eventDay:p.eventDay,
+   scheduledAtMinute:source.scheduledAtMinute,
    termsHash:hash({title,description,criteria,eligibility,
     judging,appeals,prizeTerms,season}),
    noticeNotOfficialPermission:true,noAutomaticRewards:true});
@@ -137,7 +147,8 @@ function announce(s,p={}){
  s.table.competitionNotices[key(p.eventId)]=record;
  verify(s,record);
  return {observed:true,eventId:p.eventId,title,venue:venue.name,
-  eventDay:p.eventDay,season,announcedCriteria:criteria,
+  eventDay:p.eventDay,startsAtMinuteOfDay:p.startsAtMinuteOfDay,
+  season,announcedCriteria:criteria,
   registrationNotAutomatic:true,rankAndPrizesNotGranted:true,elapsedMinutes:5};
 }
 function record(s,row,choice){
@@ -157,7 +168,7 @@ function interest(s,p={}){
  const row=s.table?.competitionNotices?.[key(p.eventId)];
  if(!row)throw Error('Only a personally observed and still recorded public invitation can receive an interest response');
  verify(s,row);
- if(s.world.location!==row.venue||s.world.minutes>=row.eventDay*DAY)
+ if(s.world.location!==row.venue||s.world.minutes>=row.source.scheduledAtMinute)
   throw Error('A genuine future event and presence at the original local public notice are required');
  if(s.battle||s.encounter)
   throw Error('Immediate danger prevents a considered in-person competition invitation');
@@ -205,7 +216,8 @@ function status(s,p={}){
  return {events:notices.map(row=>{
   const a=verify(s,row);
   return {eventId:a.eventId,title:a.title,venue:a.venue,
-   eventDay:a.eventDay,season:a.season,description:a.description,
+   eventDay:a.eventDay,startsAtMinuteOfDay:a.startsAtMinuteOfDay,
+   season:a.season,description:a.description,
    announcedCriteria:a.criteria,eligibility:a.eligibility,
    judging:a.judging,appeals:a.appeals,prizeTerms:a.prizeTerms,
    witnessedInterests:row.interests.map(x=>({
