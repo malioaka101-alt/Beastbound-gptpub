@@ -15,6 +15,10 @@ const legalCompetence={
  procedure:'Two or more actual independently consenting council members must personally support each published local rule, with every present member choosing their own recorded position.',
  scope:'Local nursery protection, public passage and living-water care within the original Reef Cantons.',
  minimumNoticeDays:2,requiredAssents:2};
+const caseCompetence={
+ authoritySource:'The original Reef Cantons local charter permits this established civic chamber to document public disputes about its own previously effective rules without independently granting punitive power.',
+ procedure:'The two genuinely present affected individuals may offer their separate own accounts for a public civic record; the entry itself cannot adjudicate guilt or compel a remedy.',
+ scope:'Noncoercive public contested hearings referring only to enacted and already effective rules in the original Reef Cantons.'};
 const charter={polityId:'reef_cantons',institutionId:'reef_free_civic_council',
  name:'Reef Free Civic Council',kind:'independent civic council',
  mandate:'Make voluntary and publicly witnessed local rules for life in the original Reef Cantons within the limited source-backed charter.',
@@ -22,7 +26,7 @@ const charter={polityId:'reef_cantons',institutionId:'reef_free_civic_council',
  medium:'Witnessed fin positions and shared luminous gestures',
  rules:'Only genuinely attending free participants can accept a public rule, with no imposed magical bond, custody or presumed understanding.',
  source:'The original reef polity establishes its public local rulemaking competence; it does not govern other sovereign polities or coerce any sapient person.',
- legalCompetence,visibility:'public'};
+ legalCompetence,caseCompetence,visibility:'public'};
 function newWorld(seed){return E.newGame({name:'Disposable Local Civic Law',seed,path:'undecided'});}
 function discover(s){
  A.equal(E.dispatch(s,'travel forest').ok,true);
@@ -50,6 +54,21 @@ function scene(s,ids,original){
   basis:'This previously chartered real reef council records independently witnessed assent and dissent at a personally attended deliberation.',
   participants:ids,visibility:'public',
   ...(original?{enactment:original}:{})});
+ return s.log.length-1;
+}
+function caseHearing(s,ids,caseId,ruleId,followUp=''){
+ Core.event(s,'story','Two previously encountered independent reef people offer different witnessed accounts of a contested local passage event; neither is presumed guilty.',{
+  origin:Civic.SESSION,polityId:charter.polityId,
+  institutionId:charter.institutionId,location:s.world.location,
+  topic:'An actual contested local civic question about an existing public rule'+followUp,
+  result:'The independent original civic institution hears two distinct accounts without an offence verdict, sanction or enforced settlement.',
+  basis:'The two genuinely present free people each state an independently heard position and can disagree with the other in this particular local hearing.',
+  participants:ids,visibility:'public',
+  caseReview:{caseId,ruleId,claimantId:ids[0],respondentId:ids[1],
+   allegation:'A resident reports that access to an existing public passage was obstructed; this remains an unproved allegation.',
+   claimantStatement:'The first individual reports an obstruction but does not supply proof of another person\'s wrongdoing.',
+   respondentStatement:'The second individual disputes responsibility and requests that their contrary account be kept in the public record.',
+   requestedFollowUp:'The original local institution may seek further genuinely available evidence or offer voluntary discussion, without a compulsory order.'}});
  return s.log.length-1;
 }
 function rule(s,ids,id,conduct){
@@ -169,6 +188,7 @@ function rule(s,ids,id,conduct){
  A.deepEqual(beasts.map(b=>b.level),oldRanks);
  A.deepEqual(s.player.partnerIds,initialPartners);
  Time.advance(s,2);
+ const caseRngBefore=s.rngState;
  view=op(s,'beastCivicStatus').known.find(x=>x.id===charter.institutionId);
  A.deepEqual(view.publicLocalRules.map(x=>x.instrumentId),[first.id,second.id]);
  A.equal(view.publicLocalRules[0].conductRule,first.conductRule);
@@ -176,6 +196,45 @@ function rule(s,ids,id,conduct){
  A.equal(view.publicLocalRules[0].appealProcess,first.appealProcess);
  A.equal(view.publicLocalRules[0].noAutomaticConvictionOrPropertyTransfer,true);
  A.equal(view.publicLocalRules[1].jurisdictionRegionId,'living_atoll');
+ // A genuinely contested hearing is not a trial verdict. It references an
+ // effective law, the original exact source, and TWO already present distinct
+ // sapient persons. The same original civic sessions keep the provenance.
+ let caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id),
+  heard=op(s,'beastCivicProceeding',{polityId:charter.polityId,
+   institutionId:charter.institutionId,eventIndex:caseIndex});
+ A.equal(heard.witnessedCaseId,'nursery_access_dispute');
+ A.equal(heard.noJudicialFindingOrEnforcement,true);
+ caseIndex=caseHearing(s,ids,'rescue_passage_dispute',second.id);
+ A.equal(op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:caseIndex}).
+  witnessedCaseId,'rescue_passage_dispute');
+ view=op(s,'beastCivicStatus').known.find(x=>x.id===charter.institutionId);
+ A.deepEqual(view.publicContestedCases.map(x=>x.caseId),
+  ['nursery_access_dispute','rescue_passage_dispute']);
+ A.ok(view.publicContestedCases.every(x=>
+  x.allegationUnproven&&x.noFindingOrRemedyExecuted));
+ A.deepEqual(view.publicContestedCases.map(x=>x.ruleId),[first.id,second.id]);
+ const legitimate=E.exportGame(s);
+ caseIndex=caseHearing(s,ids,'forged_rule_case','foreign_article');
+ const caseBefore=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+   institutionId:charter.institutionId,eventIndex:caseIndex}),
+   /original effective local rule/);
+ A.equal(E.exportGame(s),caseBefore);
+ A.notEqual(E.exportGame(s),legitimate,'a narrative witness is a distinct record, not a legal result');
+ caseIndex=caseHearing(s,ids,'nursery_access_dispute',first.id,
+  ' following a second separately witnessed local account');
+ const duplicateBefore=E.exportGame(s);
+ A.throws(()=>op(s,'beastCivicProceeding',{polityId:charter.polityId,
+  institutionId:charter.institutionId,eventIndex:caseIndex}),
+  /original effective local rule/);
+ A.equal(E.exportGame(s),duplicateBefore);
+ A.equal(Civic._debug.verifyInstitution(w,charter.polityId,charter.institutionId),inst);
+ A.equal(s.player.coins,coins);
+ A.equal(s.rngState,caseRngBefore,
+  'recording disputed testimony must not draw another player roll after actual world ticks');
+ A.deepEqual(beasts.map(b=>b.owner),oldOwners);
+ A.deepEqual(s.player.partnerIds,initialPartners);
  A.equal(s.player.coins,coins);
  A.deepEqual(s.player.partnerIds,initialPartners);
  A.deepEqual(beasts.map(b=>b.owner),oldOwners);
@@ -183,7 +242,7 @@ function rule(s,ids,id,conduct){
  A.equal(E.exportGame(snapshot),saved);
  A.deepEqual(op(snapshot,'beastCivicStatus'),op(s,'beastCivicStatus'));
  A.equal(Civic._debug.verifyInstitution(snapshot.table.realm,
-  charter.polityId,charter.institutionId).sessions.length,3);
+  charter.polityId,charter.institutionId).sessions.length,5);
  // A forged legal text cannot be made authentic by merely recalculating
  // its receipt seal: it must STILL match the original witnessed event.
  const receipt=inst.sessions[1],original=structuredClone(receipt);
@@ -210,4 +269,4 @@ function rule(s,ids,id,conduct){
  A.equal(op(s,'beastCivicStatus').known[0].publicLocalRules.length,2);
  A.equal(E.exportGame(E.importGame(E.exportGame(s))),E.exportGame(s));
 }
-console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay PASS');
+console.log('Foundation #20: source-authored independent beast-polity legal competence, genuine two-person ratified local conduct articles and bounded remedy/appeal text, distinct unlike laws, delayed public notice, never a conviction/ownership transfer, old charter compatibility, forged/cross-border/retroactive cases rejected, no second roll and original-save replay, two independent contested local case records with no verdict or enforced remedy PASS');
