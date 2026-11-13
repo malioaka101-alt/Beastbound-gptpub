@@ -61,6 +61,50 @@ function considerPublicInvitation(w,p,activityHash){
   throw Error('The independent person invitation decision cannot be reconstructed');
  return {interested:q.interested,source:q};
 }
+// Actual entry is a later individual decision, not a retroactive
+// conversion of interest into consent. The original person's RNG is owned
+// only by that person; there is no new tournament RNG.
+const PUBLIC_ENTRY='independent-person-open-public-event-entry-v1';
+function verifyPublicEventEntryChoice(q){
+ if(!q||q.origin!==PUBLIC_ENTRY||
+  !/^[a-f0-9]{64}$/.test(q.personOriginHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.eventAdmissionHash||'')||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  q.rngAfter!==nextRng(q.rngBefore)||
+  !Number.isFinite(q.fatigue)||q.fatigue<0||q.fatigue>100||
+  !['active','recovering','relocated'].includes(q.status)||
+  !['curious','steady','independent','reserved'].includes(q.personality)||
+  typeof q.consentsToEnter!=='boolean'||
+  q.noCompulsoryEntry!==true||q.noOfficialRankOrPrize!==true)
+  return false;
+ const base=q.personality==='curious'?.64:
+  q.personality==='steady'?.60:
+  q.personality==='independent'?.43:.35;
+ const chance=Math.max(.07,Math.min(.76,base-q.fatigue/300));
+ return q.consentsToEnter===(q.status==='active'&&q.fatigue<76&&
+  q.rngAfter/4294967296<chance);
+}
+function considerPublicEventEntry(w,p,eventAdmissionHash){
+ if(!/^[a-f0-9]{64}$/.test(eventAdmissionHash||'')||
+  !verify(w,p)||!Number.isInteger(p.rngState)||p.rngState<1)
+  throw Error('Only a verified independent present person and real public entry terms may be considered');
+ const rngBefore=p.rngState,personality=p.personality,
+  fatigue=p.fatigue,status=p.status;
+ draw(p);
+ const base=personality==='curious'?.64:
+  personality==='steady'?.60:
+  personality==='independent'?.43:.35;
+ const chance=Math.max(.07,Math.min(.76,base-fatigue/300));
+ const q={origin:PUBLIC_ENTRY,personOriginHash:p.originHash,
+  eventAdmissionHash,rngBefore,rngAfter:p.rngState,
+  personality,fatigue,status,consentsToEnter:
+  status==='active'&&fatigue<76&&p.rngState/4294967296<chance,
+  noCompulsoryEntry:true,noOfficialRankOrPrize:true};
+ if(!verifyPublicEventEntryChoice(q))
+  throw Error('The independent person event entry choice cannot be verified');
+ return {consentsToEnter:q.consentsToEnter,source:q};
+}
 function seed(w){
  return {version:1,rngState:((w.worldSeed^0x4bc771ae)>>>0)||0x91e10da5,
   counter:0,lastSixday:-1,people:{},history:[]};
@@ -736,7 +780,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
