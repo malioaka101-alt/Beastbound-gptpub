@@ -67,10 +67,14 @@ for(const [issue,start] of [['reedbed_access',995050],['general_business',995450
  const initialPlayerCoins=s.player.coins,initialInventory=
   structuredClone(s.player.inventory);
  A.equal(Gov.verifyRecordsRemedies(gov,Gov.byId.reedmarch),true);
+ const preNotice=Hearings.status(s).priorTestimony.find(x=>x.hearingId===row.hearingId);
+ A.equal(preNotice.publicRecordsReview,null,
+  'private pending council orders do not appear before their public release');
+ W.advance(s,2);
  const visible=Hearings.status(s).priorTestimony.find(x=>x.hearingId===row.hearingId);
  A.equal(visible.publicRecordsReview?.ordered,true);
  A.equal(visible.publicRecordsReview.completed,false);
- W.advance(s,6);
+ W.advance(s,4);
  const completion=docket.recordsInspection.fulfilled;
  A.ok(completion,'the existing competent council must index its public source in the next actual original sixday');
  A.equal(completion.source.originalHearingHash,undefined);
