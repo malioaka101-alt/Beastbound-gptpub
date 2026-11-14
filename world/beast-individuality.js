@@ -241,8 +241,10 @@ function status(s,{beastId}={}){
  const b=s.beasts?.[beastId];
  if(!b)return {known:false};
  const {life,kind}=foundation(b),r=life.individuality;
- if(kind==='wild'&&!life.witnessed?.length)
+ if(kind==='wild'&&!life.witnessed?.length&&!b.gmWild)
   return {known:false,note:'This animal has no personally witnessed identity'};
+ if(b.gmWild&&!require('./gm-wild-individuals').verify(s,b))
+  throw Error('The GM-established individual lacks verified species and first-sighting sources');
  if(!r)return {known:true,observations:[],techniques:[],
   note:'No personally witnessed distinct methods recorded'};
  if(!verify(b))throw Error('Individual beast memory failed source validation');
