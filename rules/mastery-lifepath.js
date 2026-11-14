@@ -380,4 +380,4 @@ function bonus(s,skill){
  return c.level>=9?2:c.level>=6?1:0;
 }
 module.exports={ORIGIN,BRIDGES,DEGREES,FOCI,SPEC,PROFESSION_FACETS,POINTS_PER_DEGREE,MINUTES,
- stage,derived,details,practice,bridge,bonus,depth,current,verify,hash};
+ stage,derived,details,validateAction,practice,bridge,bonus,depth,current,verify,hash};
