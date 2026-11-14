@@ -72,6 +72,43 @@ function get(s,placeId){
  if(!verifyPlace(p))throw Error('Saved authored place has lost its founding source');
  return p;
 }
+// Carry only the original immutable founding source across modules that
+// must validate group consent after a saved scene has rotated away.
+// A known location is NOT evidence of a willing person, facility or service.
+function originalSiteProof(s,placeId=s.world.location){
+ const E=require('../engine.js');
+ if(Object.hasOwn(E.LOCATIONS,placeId))return null;
+ const p=get(s,placeId);
+ if(!p)throw Error('A witnessed group meeting must use an existing verified place');
+ return {source:SOURCE,placeId:p.id,regionId:p.regionId,
+  founding:structuredClone(p.founding),foundingHash:p.foundingHash};
+}
+function verifiedSiteRegion(placeId,proof){
+ const canonical=Atlas.LOCATION_REGION[placeId];
+ if(canonical)return proof===undefined||proof===null?canonical:null;
+ if(typeof placeId!=='string'||!proof||typeof proof!=='object'||
+   Array.isArray(proof)||
+   Object.keys(proof).sort().join('|')!=='founding|foundingHash|placeId|regionId|source')
+  return null;
+ const founding=proof.founding;
+ if(proof.source!==SOURCE||proof.placeId!==placeId||
+  !Atlas.R[proof.regionId]||!founding||typeof founding!=='object'||
+  Array.isArray(founding)||founding.source!==SOURCE||
+  founding.placeId!==placeId||founding.regionId!==proof.regionId||
+  !Number.isInteger(founding.worldMinute)||founding.worldMinute<0||
+  !phrase(founding.name,3,100)||!phrase(founding.description,16,900)||
+  !phrase(founding.kind,3,70)||
+  !['settlement','wilderness','structure','unknown'].includes(founding.sceneType)||
+  !phrase(founding.culture,0,600)||
+  founding.gmContext!=='An in-scene GM-authored place added without rewinding the world'||
+  founding.noNPCConsent!==true||founding.noExtraPlayerResources!==true||
+  !['notablesHash','familiesHash','organisationsHash'].every(k=>
+   typeof founding[k]==='string'&&/^[0-9a-f]{64}$/.test(founding[k]))||
+  typeof proof.foundingHash!=='string'||
+  !/^[0-9a-f]{64}$/.test(proof.foundingHash)||
+  hash(founding)!==proof.foundingHash)return null;
+ return proof.regionId;
+}
 function location(s,placeId=s.world.location){
  const E=require('../engine.js');
  const fixed=E.LOCATIONS[placeId];
@@ -233,4 +270,4 @@ function travel(s,p={}){
   noUnresolvedHazardsResolved:true,
   note:'Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them.'};
 }
-module.exports={SOURCE,JOURNEY,peek,ensure,verifyPlace,get,location,establish,note,status,travel};
+module.exports={SOURCE,JOURNEY,peek,ensure,verifyPlace,get,location,originalSiteProof,verifiedSiteRegion,establish,note,status,travel};

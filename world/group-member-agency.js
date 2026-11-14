@@ -3,7 +3,7 @@
 // association. This initial physically grounded witness provider uses the
 // five existing local NPCs, but the group ledger and consent adapter are NOT
 // tied to those five people or to fixed kinds of family/clan/sect/guild.
-const E=require('../engine.js'),A=require('./atlas'),G=require('./emergent-groups'),People=require('./person-presence');
+const E=require('../engine.js'),A=require('./atlas'),G=require('./emergent-groups'),People=require('./person-presence'),Places=require('./lived-places');
 const SOURCE='Independent in-person NPC choice on a player-founded voluntary association';
 const ORIGIN='npc_local_group_assent';
 const DEPART='npc_independent_group_departure';
@@ -25,7 +25,7 @@ G.registerMemberConsentAdapter(ORIGIN,(e,m,ev)=>{
      typeof shift.originHash!=='string'||shift.originHash.length!==64):
     (shift.fromDay<=shift.scheduledAtDay||
      shift.throughDay-shift.fromDay>6))||
-   A.R[A.LOCATION_REGION[d.location]]?.polity!==shift.polity)return false;
+   A.R[Places.verifiedSiteRegion(d.location,d.placeProof)]?.polity!==shift.polity)return false;
   const {hash:originalHash,...body}=shift;
   return originalHash===People.hash(body);
  };
@@ -413,7 +413,7 @@ function privateStatus(s,w,groupId){
  const e=G.lookup(w,groupId),day=Math.floor(s.world.minutes/1440);
  if(!e||e.origin!=='player-declaration'||e.founder.name!==s.player.name)
   throw Error('Personal membership records belong to an actually founded group, not an unrelated society');
- const local=A.R[A.LOCATION_REGION[s.world.location]]?.polity,
+ const local=A.R[Places.location(s)?.regionId]?.polity,
   canHear=local===e.polity;
  return {groupId:e.id,groupName:e.charter.name,
   reportedMembers:1+e.additionalMembers.filter(m=>
