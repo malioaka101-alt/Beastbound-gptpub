@@ -51,7 +51,8 @@ for(const [type,id] of [
   {targetType:type,targetId:nonexistent.targetId,known:false,effects:[]},
   'A nonexistent and a currently unpublished GM subject reveal the same amount');
 }
-const beforeCoins=s.player.coins,beforeRng=s.rngState,beforeMinutes=s.world.minutes;
+const beforeCoins=s.player.coins,beforeRng=s.rngState,beforeMinutes=s.world.minutes,
+ beforePartners=[...s.player.partnerIds];
 const event={
  eventId:'river_path_inspection_remembered',
  era:'Living River Records',period:'The present generation',
@@ -96,7 +97,8 @@ A.equal(History.validate(w.causalHistory,w),true);
 A.equal(s.player.coins,beforeCoins);
 A.equal(s.rngState,beforeRng);
 A.equal(s.world.minutes,beforeMinutes);
-A.equal(s.player.partnerIds.length,0);
+A.deepEqual(s.player.partnerIds,beforePartners,
+ 'Recording history cannot add or revoke an existing bond');
 // A new *association* does not become an Atlas institution or accredited
 // school merely because a historical account talks about its work.
 const unchanged=E.exportGame(s);
