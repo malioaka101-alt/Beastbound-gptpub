@@ -82,6 +82,28 @@ A.equal(rule('beastIndividualObserve',{beastId:b.id,category:'patterned-flight',
  basis:'A unique factual observation follows this personally witnessed noninvasive ecological behaviour.',
  visibility:'gm-only'}).recorded,true);
 A.equal(Unique.verify(b),true);
+const beforeSearch=s.world.minutes,beforeStamina=s.player.stamina,
+ search=rule('seekKnownWildBeast',{beastId:b.id});
+A.equal(search.searched,true);
+A.equal(search.minutes,45);
+A.equal(s.world.minutes,beforeSearch+45);
+A.equal(s.player.stamina,beforeStamina-3);
+A.equal(search.noAutomaticBond,true);
+A.equal(s.encounter,null,'A distant GM-beast re-sighting never manufactures a combat or bond encounter');
+A.equal(search.noCombatOrBondEncounter,true);
+if(search.found){
+ A.equal(search.distantSightingOnly,true);
+ const foundProof=b.individualLife.returnEncounters.at(-1);
+ A.ok(foundProof?.originalSourceHash===b.individualLife.sourceHash);
+ // A genuine elapsed interval, not a fresh roll, permits the animal another watch.
+ E.advance(s,5);
+ const watchedAgain=rule('watchWildBeast',{beastId:b.id});
+ A.equal(watchedAgain.observed,true);
+ A.equal(b.individualLife.witnessed.length,2);
+ A.throws(()=>rule('watchWildBeast',{beastId:b.id}),
+   /source-witnessed later re-encounter|safely available/);
+}
+A.equal(Unique.verify(b),true);
 A.throws(()=>rule('beastTechniqueRecord',{beastId:b.id}),/unique technique needs/);
 const copy=E.importGame(E.exportGame(s));
 A.equal(copy.beasts[b.id].condition,undefined,'Save integration must not infer perfect condition');
