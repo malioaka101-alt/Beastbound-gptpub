@@ -86,7 +86,9 @@ function contribute(s,p={}){
     !e.internalPriorities?.some(x=>x.id===priorityId&&x.supported&&
       x.day<=Math.floor(s.world.minutes/1440))))
   throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
- const old=s.world.minutes;
+ // The original lived-place witness is established BEFORE the work
+ // advances time; a location description alone proves no ownership.
+ const originalSite=Places.originalSiteProof(s),old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
  const priorPlayerCoins=s.player.coins,priorGroupFunds=e.funds,
   fundingDay=Math.floor(s.world.minutes/1440);
@@ -97,6 +99,8 @@ function contribute(s,p={}){
   origin:'actually-attempted-voluntary-group-work',
   groupId:e.id,activity,coins:money,minutes:WORKTIME,
   actor:s.player.name,location:s.world.location,
+  siteMinute:s.world.minutes,
+  ...(originalSite?{placeProof:originalSite}:{}),
   ...(priorityId!==undefined?{priorityId}:{}),
   successClaimAccepted:false,noAutomaticFollowers:true
  });
@@ -235,8 +239,18 @@ function treasuryStatus(s,p={}){
   throw Error('Original association treasury records are private to its actual local founder');
  return Groups.treasuryAuditStatus(w,e.id);
 }
+function siteWorkStatus(s,p={}){
+ fields(p,['groupId','placeId'],['groupId']);
+ if(typeof p.groupId!=='string')
+  throw Error('Only an actual founded association may be inspected for site work');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
+ if(!e||e.origin!=='player-declaration'||
+    e.founder.name!==s.player?.name||e.polity!==polityAt(s))
+  throw Error('A founder may inspect only their own locally known association work; others’ private operating records are not a public registry');
+ return Groups.siteWorkStatus(w,e.id,{placeId:p.placeId});
+}
 function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus};
+module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus,siteWorkStatus};

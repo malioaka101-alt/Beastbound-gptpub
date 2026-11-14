@@ -539,7 +539,7 @@ function purposeResponseStatus(w,groupId,{day}={}){
   noMemberCompulsion:true,noMoneyOrCompletedWork:true};
 }
 
-function validate(e){
+function validate(e,w=null){
  if(!e||!(TYPES.has(e.origin)||ADAPTERS.has(e.origin))||!Atlas.P[e.polity]||
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
@@ -573,6 +573,11 @@ function validate(e){
    (!Array.isArray(e.priorityWork)||
     e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
     new Set(e.priorityWork.map(x=>x.originalActionHash)).size!==e.priorityWork.length))
+  return false;
+ if(e.siteWork!==undefined&&
+   (!Array.isArray(e.siteWork)||
+    e.siteWork.some(x=>!verifySiteWork(e,x,w))||
+    new Set(e.siteWork.map(x=>x.originalActionHash)).size!==e.siteWork.length))
   return false;
  if(e.coordinationReviews!==undefined&&!verifyCoordinationReviewHistory(e))
   return false;
@@ -634,11 +639,11 @@ function validate(e){
 function all(w,{publishedOnly=false,day=Infinity}={}){
  const saved=peek(w);
  return saved?Object.values(saved.entries).filter(e=>
-  validate(e)&&(!publishedOnly||e.releaseDay<=day)):[];
+  validate(e,w)&&(!publishedOnly||e.releaseDay<=day)):[];
 }
 function lookup(w,id,opts){
  const r=peek(w),e=r?.entries?.[id];
- if(!e||!validate(e))return null;
+ if(!e||!validate(e,w))return null;
  if(opts?.publishedOnly&&e.releaseDay>opts.day)return null;
  return e;
 }
@@ -1274,6 +1279,125 @@ function syncWorkerFounders(w,day,emit){
  }
  return added;
 }
+/*
+ * Original shared operating-site evidence, not a facility/property owner.
+ * This binds an ACTUAL funded-or-unfunded group-work attempt and its one
+ * original independent monthly result to the real established location
+ * where it was attempted. No second resolution, building, staff or revenue.
+ */
+const SITE_WORK='original-reviewed-association-established-place-work-v1';
+function siteRegion(w,placeId,proof,minute){
+ const Places=require('./lived-places');
+ const regionId=Places.verifiedSiteRegion(placeId,proof);
+ if(!regionId)return null;
+ if(proof!==undefined&&proof!==null){
+  if(proof.founding?.worldMinute>minute)return null;
+  if(w){
+   const p=w.livedPlaces?.places?.[placeId];
+   if(!p||!Places.verifyPlace(p)||
+      p.foundingHash!==proof.foundingHash||
+      p.regionId!==regionId||p.establishedMinute>minute)
+    return null;
+  }
+ }
+ return regionId;
+}
+function verifySiteWork(e,row,w=null){
+ const q=row?.source,a=q?.attempt,review=q?.review,
+  details=a?.witness?.details;
+ if(!q||row.origin!==SITE_WORK||q.origin!==SITE_WORK||
+  row.sourceHash!==hash(q)||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.attemptHash!==a?.hash||q.reviewHash!==review?.hash||
+  row.originalActionHash!==a?.hash||
+  row.id!=='site_work_'+hash({
+   groupId:e.id,actionHash:a?.hash,reviewHash:review?.hash}).slice(0,25)||
+  !a||a.hash!==hash(a.witness)||a.witness?.type!=='story'||
+  details?.origin!=='actually-attempted-voluntary-group-work'||
+  details.groupId!==e.id||details.actor!==e.founder?.name||
+  details.activity!==a.activity||
+  details.minutes!==45||a.minutes!==45||
+  !Number.isInteger(a.day)||a.day<e.foundedDay||
+  !Number.isInteger(a.amount)||a.amount<0||
+  details.coins!==a.amount||
+  !Number.isInteger(details.siteMinute)||details.siteMinute<0||
+  q.siteMinute!==details.siteMinute||
+  q.placeId!==details.location||
+  JSON.stringify(q.placeProof??null)!==JSON.stringify(details.placeProof??null)||
+  !Atlas.R[siteRegion(w,q.placeId,q.placeProof,q.siteMinute)]||
+  Atlas.R[siteRegion(w,q.placeId,q.placeProof,q.siteMinute)].polity!==e.polity||
+  !review||!['verified-limited-community-work',
+   'unverified-community-effort'].includes(review.kind)||
+  review.groupId!==e.id||review.originHash!==e.originHash||
+  !Number.isInteger(review.day)||review.day<a.day||
+  !Array.isArray(review.details?.originalActionHashes)||
+  !review.details.originalActionHashes.includes(a.hash)||
+  !Number.isInteger(review.details.actualEffortMinutes)||
+  review.details.actualEffortMinutes<a.minutes||
+  !Number.isInteger(review.details.actualFundsSpent)||
+  review.details.actualFundsSpent<0||
+  q.sharedOriginalCost!==review.details.actualFundsSpent||
+  q.originalResult!==review.kind||
+  typeof review.details.chance!=='number'||
+  review.details.chance<0||review.details.chance>1||
+  typeof review.details.decisionDraw!=='number'||
+  review.details.decisionDraw<0||review.details.decisionDraw>=1||
+  (review.kind==='verified-limited-community-work')!==
+   (review.details.decisionDraw<review.details.chance)||
+  q.noSeparateWorkRoll!==true||
+  q.noNewCashOrConstruction!==true||
+  q.noPropertyOrTeachingRights!==true)
+  return false;
+ const {hash:seal,notice,releaseDay,...body}=review;
+ return seal===hash(body);
+}
+function retainSiteWork(w,e,attempt,review){
+ const details=attempt?.witness?.details;
+ if(!Number.isInteger(details?.siteMinute))return null;
+ const regionId=siteRegion(w,details.location,details.placeProof,
+  details.siteMinute);
+ if(!regionId||Atlas.R[regionId]?.polity!==e.polity)
+  throw Error('An original established physical work location is required for association site evidence');
+ const q={origin:SITE_WORK,groupId:e.id,groupOriginHash:e.originHash,
+  placeId:details.location,siteMinute:details.siteMinute,
+  ...(details.placeProof?{placeProof:structuredClone(details.placeProof)}:{}),
+  attemptHash:attempt.hash,attempt:structuredClone(attempt),
+  reviewHash:review.hash,review:structuredClone(review),
+  originalResult:review.kind,sharedOriginalCost:review.details.actualFundsSpent,
+  noSeparateWorkRoll:true,noNewCashOrConstruction:true,
+  noPropertyOrTeachingRights:true};
+ const row={origin:SITE_WORK,id:'site_work_'+hash({
+  groupId:e.id,actionHash:attempt.hash,reviewHash:review.hash}).slice(0,25),
+  originalActionHash:attempt.hash,source:q,sourceHash:hash(q)};
+ if(!verifySiteWork(e,row,w))
+  throw Error('Association operating-site context lacks original independent work or place source');
+ e.siteWork||=[];
+ if(e.siteWork.some(x=>x.id===row.id||x.originalActionHash===row.originalActionHash))
+  throw Error('Original group operating-site work must not be counted twice');
+ e.siteWork.push(row);
+ return row;
+}
+function siteWorkStatus(w,groupId,{placeId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('A real founded voluntary association is required for personally known operating-site records');
+ if(placeId!==undefined&&typeof placeId!=='string')
+  throw Error('Only an existing actual place may filter a known group work record');
+ return {groupId:e.id,knownSiteActivity:(e.siteWork||[])
+  .filter(x=>placeId===undefined||x.source.placeId===placeId)
+  .map(x=>({id:x.id,placeId:x.source.placeId,
+   work:x.source.attempt.activity,dayOfReview:x.source.review.day,
+   originalResult:x.source.originalResult,
+   groupWideCostForSharedReview:x.source.sharedOriginalCost,
+   originalActionHash:x.originalActionHash,
+   originalReviewHash:x.source.reviewHash,
+   establishedSourceHash:x.source.placeProof?.foundingHash??null,
+   attemptedWorkNotSpecificConstruction:true,
+   noLegalRightToSiteOrFacilities:true,
+   noExtraMoneyOrTrainingAward:true})),
+  note:'Only the original independently reviewed limited shared work is recorded here. A site mention is not land ownership, building construction, school accreditation, staffed operation or authority to spend others’ resources.'};
+}
+
 function month(w,day,emit){
  const r=ensure(w);
  for(const e of all(w)){
@@ -1336,6 +1460,10 @@ function month(w,day,emit){
     before:available,
     proof:{originalReview:structuredClone(independentReview),
      originalReviewHash:independentReview.hash}});
+   // Retain location evidence from the one ORIGINAL world review. No
+   // second draw, expenditure or claimed facility construction.
+   for(const work of attempts)
+    retainSiteWork(w,e,work,independentReview);
    for(const work of attempts){
     if(work.priorityId===undefined)continue;
     const priority=e.internalPriorities.find(p=>p.id===work.priorityId);
@@ -2564,4 +2692,4 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
  voluntaryTaskStatus,
  TREASURY_AUDIT,verifyTreasuryAudit,openTreasuryAudit,addTreasuryReceipt,
- treasuryAuditStatus};
+ treasuryAuditStatus,SITE_WORK,verifySiteWork,siteWorkStatus};
