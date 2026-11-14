@@ -168,6 +168,23 @@
         "noItemOrPrize": true,
         "noOpponentRoll": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:25",
+      "type": "world",
+      "text": "A place is established in the lived world: Mossgate Common.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "mossgate_common",
+        "regionId": "orchard_vales",
+        "establishedMinute": 505,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
     }
   ],
   "world": {
@@ -654,7 +671,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 7,
+    "revision": 8,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -959,6 +976,55 @@
                 "dc": 12,
                 "noItemOrPrize": true,
                 "noOpponentRoll": true
+              }
+            }
+          ]
+        }
+      },
+      "mossgate_common_establish_20261114_a1": {
+        "revision": 8,
+        "mode": "rule",
+        "hash": "e58772271ca4c0806607d21c4399e610a61d207637bab3f80ed2bea101caa419",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:25",
+          "output": {
+            "rules": {
+              "established": true,
+              "place": {
+                "id": "mossgate_common",
+                "name": "Mossgate Common",
+                "kind": "orchard hamlet common",
+                "sceneType": "settlement",
+                "regionId": "orchard_vales",
+                "region": "Orchard Vales",
+                "description": "A small orchard hamlet green off the Tansyhook lane. A low slate-roofed reading house stands beside a public well; beyond the green is an enclosed practice yard with sand and training posts, and farther downwind are fenced beast-handling pens with water troughs.",
+                "culture": "An ordinary Asterwyn Orchard Vales hamlet serving orchard families, young learners, seasonal workers and licensed animal handlers. Buildings and paddocks are visible from public lanes; access, instruction, and beast welfare remain the responsibility of their actual caretakers.",
+                "knownNotables": [],
+                "knownFamilies": [],
+                "knownOrganisations": [],
+                "recordedDetails": [],
+                "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+              },
+              "noFreeNPCOrItem": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:25",
+              "type": "world",
+              "text": "A place is established in the lived world: Mossgate Common.",
+              "details": {
+                "source": "gm-authored-campaign-place-v1",
+                "placeId": "mossgate_common",
+                "regionId": "orchard_vales",
+                "establishedMinute": 505,
+                "knownNotables": 0,
+                "knownFamilies": 0,
+                "knownOrganisations": 0,
+                "notAnNPCSpawn": true,
+                "noItemsOrPowersCreated": true
               }
             }
           ]
@@ -6611,6 +6677,39 @@
               "noExtraPlayerResources": true
             },
             "foundingHash": "cc32afad1a62f38d7aaa60f22d4777a6bc5ccfa71edf1be6cde41d180f231357"
+          },
+          "mossgate_common": {
+            "source": "gm-authored-campaign-place-v1",
+            "id": "mossgate_common",
+            "name": "Mossgate Common",
+            "regionId": "orchard_vales",
+            "kind": "orchard hamlet common",
+            "sceneType": "settlement",
+            "description": "A small orchard hamlet green off the Tansyhook lane. A low slate-roofed reading house stands beside a public well; beyond the green is an enclosed practice yard with sand and training posts, and farther downwind are fenced beast-handling pens with water troughs.",
+            "culture": "An ordinary Asterwyn Orchard Vales hamlet serving orchard families, young learners, seasonal workers and licensed animal handlers. Buildings and paddocks are visible from public lanes; access, instruction, and beast welfare remain the responsibility of their actual caretakers.",
+            "establishedMinute": 505,
+            "notables": [],
+            "families": [],
+            "organisations": [],
+            "notes": [],
+            "founding": {
+              "source": "gm-authored-campaign-place-v1",
+              "placeId": "mossgate_common",
+              "regionId": "orchard_vales",
+              "worldMinute": 505,
+              "name": "Mossgate Common",
+              "kind": "orchard hamlet common",
+              "sceneType": "settlement",
+              "description": "A small orchard hamlet green off the Tansyhook lane. A low slate-roofed reading house stands beside a public well; beyond the green is an enclosed practice yard with sand and training posts, and farther downwind are fenced beast-handling pens with water troughs.",
+              "culture": "An ordinary Asterwyn Orchard Vales hamlet serving orchard families, young learners, seasonal workers and licensed animal handlers. Buildings and paddocks are visible from public lanes; access, instruction, and beast welfare remain the responsibility of their actual caretakers.",
+              "notablesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "familiesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "organisationsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "gmContext": "An in-scene GM-authored place added without rewinding the world",
+              "noNPCConsent": true,
+              "noExtraPlayerResources": true
+            },
+            "foundingHash": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663"
           }
         },
         "journeys": [
