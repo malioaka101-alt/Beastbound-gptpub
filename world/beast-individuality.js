@@ -8,7 +8,9 @@ const good=(v,a=8,b=800)=>typeof v==='string'&&v.trim().length>=a&&v.trim().leng
 const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{2,69}$/.test(x);
 const num=(v,a,b)=>Number.isInteger(v)&&v>=a&&v<=b;
 function foundation(b){
- if(!b||!E.SPECIES[b.species])throw Error('A real previously established beast is required');
+ if(!b||!(E.SPECIES[b.species]||
+   b.gmWild&&require('./gm-wild-individuals').sealed(b)))
+  throw Error('A real source-witnessed beast is required');
  if(b.sapientLife){
   const Person=require('./sapient-beast-persons');
   if(!Person.verify(b))throw Error('Unverified sapient person history');
