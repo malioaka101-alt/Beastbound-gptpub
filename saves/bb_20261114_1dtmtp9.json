@@ -413,11 +413,35 @@
         "notAnNPCSpawn": true,
         "noItemsOrPowersCreated": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 18:51",
+      "type": "travel",
+      "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "mossgate_common",
+        "to": "maddren_homestead",
+        "startMinute": 1089,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc parts from Tessa and Bram at the orchard lanes and walks back from Mossgate Common past Tansyhook Crossing and Thistlebell Yard to his family's nearby homestead in the fading evening light.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 1131,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 1089,
-    "location": "mossgate_common",
+    "minutes": 1131,
+    "location": "maddren_homestead",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -910,7 +934,8 @@
       "thistlebell_yard": true,
       "rillbend_orchard_path": true,
       "tansyhook_crossing": true,
-      "mossgate_common": true
+      "mossgate_common": true,
+      "maddren_homestead": true
     },
     "readIntro": false,
     "freeSourceSample": false,
@@ -920,7 +945,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 22,
+    "revision": 23,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1860,10 +1885,63 @@
             }
           ]
         }
+      },
+      "maddoc_evening_homeward_20261114_a1": {
+        "revision": 23,
+        "mode": "rule",
+        "hash": "2658181ca00522795746d9256161d60608bcd3994e5ed36a1fd24cbeba7fcd88",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 18:51",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Mossgate Common",
+              "to": "Maddren Homestead",
+              "location": "maddren_homestead",
+              "elapsedMinutes": 42,
+              "clock": "Day 1, 18:51",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 18:51",
+              "type": "travel",
+              "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "mossgate_common",
+                "to": "maddren_homestead",
+                "startMinute": 1089,
+                "elapsedMinutes": 42,
+                "describedRoute": "Maddoc parts from Tessa and Bram at the orchard lanes and walks back from Mossgate Common past Tansyhook Crossing and Thistlebell Yard to his family's nearby homestead in the fading evening light.",
+                "means": "walking",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 1131,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Return home from Mossgate before nightfall"
+      "Return to Maddren homestead for the evening; meet friends tomorrow"
     ],
     "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
     "journal": [
@@ -7639,6 +7717,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 524,
             "hash": "3ae03ce1fbc1dccafd0b6aca519e838effd505b03c3e3aa1075f34c8d290a4fb"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "mossgate_common",
+            "to": "maddren_homestead",
+            "startMinute": 1089,
+            "elapsedMinutes": 42,
+            "describedRoute": "Maddoc parts from Tessa and Bram at the orchard lanes and walks back from Mossgate Common past Tansyhook Crossing and Thistlebell Yard to his family's nearby homestead in the fading evening light.",
+            "means": "walking",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 1131,
+            "hash": "44a68bfda308e21de1ebb228f1c00c48c8537d731a41bf75cf1bad3dbc1ba89e"
           }
         ]
       }

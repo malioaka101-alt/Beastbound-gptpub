@@ -1,0 +1,89 @@
+{
+  "id": "maddoc_evening_homeward_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 23,
+  "stateHash": "596f7872eb70dfb99ae8b8b6d3be107bbdcae3f332ac5605e0083e641abf0ff2",
+  "clock": "Day 1, 18:51",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Mossgate Common",
+      "to": "Maddren Homestead",
+      "location": "maddren_homestead",
+      "elapsedMinutes": 42,
+      "clock": "Day 1, 18:51",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 18:51",
+      "type": "travel",
+      "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "mossgate_common",
+        "to": "maddren_homestead",
+        "startMinute": 1089,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc parts from Tessa and Bram at the orchard lanes and walks back from Mossgate Common past Tansyhook Crossing and Thistlebell Yard to his family's nearby homestead in the fading evening light.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 1131,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 18:51 · Evening · Cool         ║\n║ Maddren Homestead          0 S ║\n║ STA  █████████░          34/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Return to Maddren homestead… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "18:51",
+    "daypart": "Evening",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 34,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Return to Maddren homestead for the evening; meet friends tomorrow"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.\nPC: young learner, undecided; 0 S\nJOURNAL: soul practice: self-awareness; 0 training points. | A place is established in the lived world: Maddren Homestead. | The documented journey from Mossgate Common reaches Maddren Homestead.\nCURRENT: No opening hook"
+}
