@@ -562,6 +562,9 @@ function act(s,{system,operation,params={}}={}){
   case 'social.meetSapientBeast':return SapientBeasts.meet(s,params);
   case 'social.sapientBeastMemoriesStatus':return SapientBeasts.witnessedStatus(s,params);
   case 'social.introduceWitnessedPerson':return EmergentPeople.registerGM(s,params);
+  case 'social.authorWitnessedPersonDuty':return EmergentPeople.authorWitnessedDuty(s,params);
+  case 'social.retireWitnessedPersonDuty':return EmergentPeople.retireWitnessedDuty(s,params);
+  case 'social.witnessedPersonDutiesStatus':return EmergentPeople.witnessedDutyStatus(s,params);
   case 'social.witnessedPeopleStatus':return EmergentPeople.gmStatus(s,params);
   case 'social.speakLocalPerson':return EmergentPeople.meet(s,params);
   case 'social.metPeopleStatus':{
