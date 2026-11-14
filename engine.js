@@ -356,15 +356,15 @@
     if(!possibilities.length)return fail(s,`${b.name} has no catalogued next branch at this stage; researchers may discover more later.`);
     const activeBranches=branchesFor(s,b).filter(x=>!x.hidden||x.documented);
     if(!activeBranches.length)return fail(s,`No documented branch is known for ${b.name}. Study myths and lineages first.`);
-    const available=possibilities.filter(x=>{const status=activeBranches.find(z=>z.to===x.to);return status&&status.potentialOK&&b.level>=x.level&&b.trust>=x.trust&&status.maturity>=status.requiredMaturity;});
-    if(!available.length)return fail(s,`Evolution readiness for ${b.name}: ${activeBranches.map(x=>`${x.name}, ${x.maturity.toFixed(2)}/${x.requiredMaturity} maturity years; ${x.potentialOK?'potential compatible':'potential-gated'}`).join(' OR ')}. Use branches for all requirements.`);
+    const available=possibilities.filter(x=>{const status=activeBranches.find(z=>z.to===x.to);return status&&b.level>=x.level&&b.trust>=x.trust&&status.maturity>=status.requiredMaturity;});
+    if(!available.length)return fail(s,`Evolution readiness for ${b.name}: ${activeBranches.map(x=>`${x.name}, ${x.maturity.toFixed(2)}/${x.requiredMaturity} maturity years; ${x.potentialStrain?'higher adaptation difficulty':'ordinary adaptation difficulty'}`).join(' OR ')}. Use branches for all requirements.`);
     const e=available.find(x=>s.world.location===x.environment&&(s.player.inventory[x.resource]||0)>=1);
     if(!e)return fail(s,`Evolution needs a suitable environment and resource: ${available.map(x=>`${LOCATIONS[x.environment]?.name||x.environment} + ${RESOURCES[x.resource].name}`).join(' or ')}.`);
     if(!b.consent||b.needs.fatigue>40)return fail(s,`${b.name} is not willing or recovered enough for an irreversible change.`);
     const branchStatus=activeBranches.find(x=>x.to===e.to);
     if(branchStatus.unknownUnmet)return fail(s,'An undiscovered special condition prevents the Origin Pattern from completing. Research may identify the missing requirement.');
     take(s,e.resource,1);advance(s,180);
-    const r=check(s,{attribute:'wis',skill:'beastcraft',dc:16+(branchStatus?.knownUnmet||0)*2+(e.kind==='hidden'&&!branchStatus.documented?4:e.kind==='hidden'||e.kind==='rare'?2:0),extra:Math.floor(b.resonance/20)+(b.syncStage>=7?2:b.syncStage>=4?1:0)+(b.trust>=60?1:0),description:'Supported biological evolution'});
+    const r=check(s,{attribute:'wis',skill:'beastcraft',dc:16+(branchStatus?.knownUnmet||0)*2+(e.kind==='hidden'&&!branchStatus.documented?4:e.kind==='hidden'||e.kind==='rare'?2:0)+(branchStatus?.potentialStrain||0),extra:Math.floor(b.resonance/20)+(b.syncStage>=7?2:b.syncStage>=4?1:0)+(b.trust>=60?1:0),description:'Supported biological evolution'});
     if(r.margin<-4){b.hp=clamp(b.hp-12,1,b.maxHp);b.injuries.push('evolutionary strain');return success(s,`${b.name}'s evolution destabilises and stops without transforming. The material is spent; recovery is required.`);}
     const d=SPECIES[e.to];b.species=e.to;b.name=b.name===old.name?d.name:b.name;b.evolutionStage=d.name;b.speciesGrade=d.grade;b.lineage=d.lineage;b.maxHp+=16;b.hp+=16;b.maxEnergy+=12;b.energy+=12;b.techniques=[d.ability.name];b.mood='adapted';b.bondHistory.push(`Day ${day(s)}: chose ${d.name} evolution.`);
     const details={from:old.name,to:d.name,grade:d.grade,size:d.role,abilities:[d.ability.name],needs:[d.diet]};
@@ -643,11 +643,12 @@
         {label:'Maturity '+mat.years.toFixed(2)+'/'+mat.required+' years',met:mat.years>=mat.required}];
       if(br.specialConditions)details.push(...br.specialConditions.map(c=>({label:c.label,met:c.type==='technique'?b.techniques.includes(c.value):c.type==='sync'?b.syncStage>=c.value:!!c.met,sealed:!doc})));
       const neededPotential=br.potential||0;
-      const ceiling=1+Math.floor((b.potential.evolution||40)/20);
-      const potentialOK=neededPotential===0||ceiling>=neededPotential||(doc&&details.filter(c=>c.sealed||br.specialConditions?.some(sc=>sc.label===c.label)).every(c=>c.met));
+      const ceiling=1+Math.floor((b.potential?.evolution||40)/20);
+      const potentialStrain=Math.min(3,Math.max(0,neededPotential-ceiling));
       return {to:br.to,name:SPECIES[br.to]?.name||br.to,kind:br.kind||'common',hidden:!!br.hidden,documented:doc,
-        grade:br.grade||null,requirements:details,met:details.every(c=>c.met)&&potentialOK,
-        maturity:mat.years,requiredMaturity:mat.required,rate:maturityRate(s,b,br),potentialOK,
+        grade:br.grade||null,requirements:details,met:details.every(c=>c.met),
+        maturity:mat.years,requiredMaturity:mat.required,rate:maturityRate(s,b,br),
+        potentialOK:true,potentialStrain,
         unknownUnmet:details.some(c=>!c.met&&c.sealed),knownUnmet:details.filter(c=>!c.met&&!c.sealed).length};
     });
   }
