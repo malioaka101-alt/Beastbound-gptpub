@@ -532,12 +532,33 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 0,
-    "applied": {},
+    "revision": 1,
+    "applied": {
+      "fix_harness_maddoc_20261114_001": {
+        "revision": 1,
+        "mode": "checkpoint",
+        "hash": "146bdc7c30eea062277d99610705797fb51a7e4fa5bb9df160300f7ea92e6d75",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:00",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
+      }
+    },
     "focus": [
-      "A free morning at Thistlebell Yard"
+      "Attend to the burden beast's rubbed shoulder"
     ],
-    "scene": "At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges."
+    "scene": "At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.",
+    "journal": [
+      {
+        "day": 1,
+        "text": "Maddoc said, 'Is arguing all you can do?' and began putting right the twisted harness. An ash-coated burden beast had a tight metal fitting rubbing its left shoulder raw. He loosened and straightened that strap; the animal remained at the trough and made no commitment to pull the cart. No new bond, injury, material or resources recorded."
+      }
+    ]
   },
   "campaign": {
     "slug": "bb_20261114_1dtmtp9",

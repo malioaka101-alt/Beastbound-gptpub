@@ -1,0 +1,50 @@
+{
+  "id": "fix_harness_maddoc_20261114_001",
+  "ok": true,
+  "applied": true,
+  "revision": 1,
+  "stateHash": "24c350d75d9d92bbe487918176f1941547353df4ba4b915564054535e01ce2d1",
+  "clock": "Day 1, 08:00",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:00 · Morning · Cool         ║\n║ Thistlebell Yard           0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Attend to the burden beast'… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:00",
+    "daypart": "Morning",
+    "location": "Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Attend to the burden beast's rubbed shoulder"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.\nPC: young learner, undecided; 0 S\nJOURNAL: The public civil almanac dates 30 Seedwake 1156 AC. | A place is established in the lived world: Thistlebell Yard. | At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges.\nCURRENT: No opening hook"
+}
