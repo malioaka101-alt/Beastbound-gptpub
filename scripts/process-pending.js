@@ -1,18 +1,17 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
 const CP=require('node:child_process');
-// A push contains the exact new immutable request paths. Target those paths
-// instead of rescanning years of already-processed histories; a manual
-// recovery dispatch (or unavailable git metadata) still scans all pending.
+// Push events identify the changed immutable requests. Scan the full pending
+// tree only for workflow_dispatch recovery or unavailable git metadata.
 function changedRequests(){
  if(process.env.BB_CHANGED_ONLY!=='1')return null;
  try{
   const changes=CP.execFileSync('git',
    ['diff-tree','--no-commit-id','--name-only','-r','HEAD'],
-   {cwd:path.resolve(__dirname,'..'),encoding:'utf8'}).split('\\n');
+   {cwd:path.resolve(__dirname,'..'),encoding:'utf8'}).split('\n');
   const map=new Map();
   for(const item of changes){
-   const m=item.match(/^requests\\/([a-z0-9][a-z0-9_-]{4,79})\\/([a-z0-9][a-z0-9_-]{4,79}\\.json)$/);
+   const m=item.match(/^requests\/([a-z0-9][a-z0-9_-]{4,79})\/([a-z0-9][a-z0-9_-]{4,79}\.json)$/);
    if(!m)continue;
    if(!map.has(m[1]))map.set(m[1],[]);
    map.get(m[1]).push(m[2]);
