@@ -43,6 +43,7 @@ function run(savePath,req,{execute,hash}){
    const check=result.output?.rules?.check;
    if(i<req.steps.length-1&&(
      result.output?.rules?.complication||
+     result.output?.rules?.accepted===false||
      check?.degree==='severe failure'||
      state.battle||state.encounter||
      state.table?.combatants?.player?.status!=='ok'&&
