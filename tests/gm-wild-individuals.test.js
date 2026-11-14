@@ -73,7 +73,7 @@ A.equal(watch.observed,true);A.equal(s.world.minutes,minutes+12);
 A.equal(s.rngState,playerRng,'Beast alone makes its own behavioural decision');
 A.equal(b.individualLife.witnessed.length,1);
 A.ok(rule('wildMemoriesStatus').knownIndividuals.some(x=>x.beastId===b.id));
-if(!b.away)A.throws(()=>rule('watchWildBeast',{beastId:b.id}),/distinct later source-witnessed/);
+if(!b.away)A.throws(()=>rule('watchWildBeast',{beastId:b.id}),/source-witnessed later re-encounter/);
 A.equal(watch.noContactOrBond,true);
 A.equal(s.player.partnerIds.length,0);
 A.equal(Unique.verify(b),true);
