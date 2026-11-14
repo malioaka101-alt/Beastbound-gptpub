@@ -32,3 +32,16 @@ The specific new bridge \`rules/material-discovery.js\` observes **an already ex
 \`tests/gm-original-material-discovery.test.js\` covers one real pre-owned physical sample, witnessed GM name, original skill check, one-unit debit, isolated typed source receipt, design evaluation before/after recognition, source-tamper failure, exact release, failed independent appraisal and replay safety. It uses only a disposable new test state.
 
 This is the same philosophy as \`docs/SYSTEM_CONNECTION_AUDIT.md\`: the original property and physical-work systems own resources; the GM owns worlds and plausible discoveries; only independently proven effects may enter the existing mechanics.
+
+
+## Additional 3C seam — unusual ordinary actions at real GM-created places
+
+The same branch extends **the original** \`rules/scene-check.js::localSource\` to support an actually saved, verified GM location from \`world/lived-places.js\`, without introducing another roll engine, invented DC or universal task list. Original hard-coded sites keep their exact source text and mechanics.
+
+- The GM has already established a real place, its original founding description and physical geography. \`world/lived-places.js::originalSiteProof\` and \`verifiedSiteRegion\` must validate the saved founding.
+- Existing only \`footing\` and \`reading\` use the original physical \`LOCAL_DC\` mapping when the real established biome is one of the supported original ordinary terrain types. Any unfamiliar biome, action, invisible hazard or new technique remains **unresolved**, rather than defaulting to an arbitrary difficulty.
+- The prepared source text now includes the GM place's original founding hash; it cannot be quietly swapped for another location. The existing \`core.prepareSceneCheck\` and \`core.check\` each keep their own single real precommitted original observation and one-time d20 (or no check when narrated without uncertainty).
+- \`scripts/chat-turn.js\` already supports a GM-sourced \`gmSceneCheckMethod\` from freeform unknown intents, using the existing precommitted source-only route. The integration exposes that route at GM-founded sites rather than inventing outcomes.
+- No automatic movement, item, permission, hidden discovery, NPC consent, spell or special physical hazard is granted merely by passing a routine footing or terrain-reading check.
+
+\`tests/gm-place-original-terrain-check.test.js\` exercises GM original founding, single original roll and clock, source tamper rejection, replay refusal, and the actual private Project-chat freeform preparer/resolver on a disposable saved scenario. The original terrain-check tests remain authoritative.
