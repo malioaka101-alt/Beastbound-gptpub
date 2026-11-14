@@ -52,7 +52,10 @@ function verify(s,b){
   eco=w?.ecosystems?.[root.regionId],
   population=eco?.speciesWeb?.populations?.[root.speciesId],
   originalPlace=Places.location(s,root.locationId);
- return !!(species&&population&&originalPlace&&
+ if(!species)return false;
+ const {originHash,observations,...originalBiology}=species;
+ if(hash(originalBiology)!==originHash)return false;
+ return !!(population&&originalPlace&&
    root.regionId===originalPlace.regionId&&
    species.originHash===root.speciesOriginHash&&
    population.originHash===root.populationOriginHash&&
