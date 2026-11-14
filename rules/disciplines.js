@@ -827,7 +827,7 @@ function seaWork(s,params={}){
   record.formedAtMinute=now;
   formed=true;
  }
- const result={minute:now,method,source:independentSource('meridian','dantian-sea',self.site),
+ const result={minute:now,method,source:independentSource(s,'meridian','dantian-sea',self.site),
   roll:check.roll,degree:check.degree,earned,
   ...(approach?{approach:approach.trim().slice(0,240)}:{}),
   progress:record.points,formed};
@@ -1211,7 +1211,7 @@ function organWork(s,params={}){
   originalRoll:check.roll,earned,
   site:self.site,
   ...(approach?{approach:approach.trim()}:{}),
-  source:independentSource('body','organ-'+focus,self.site)};
+  source:independentSource(s,'body','organ-'+focus,self.site)};
  work.attempts.push(record);
  s.table.organCycleWork=work;
  let completedCycle=false;
