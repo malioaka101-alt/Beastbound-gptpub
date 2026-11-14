@@ -10,6 +10,21 @@ const legalId=x=>typeof x==='string' && /^[a-z0-9][a-z0-9_-]{4,79}$/.test(x);
 const recap=s=>s.chatRuntime?.scene ? E.recap(s).replace(/^SCENE:.*$/m,'SCENE: '+s.chatRuntime.scene) : E.recap(s);
 
 const LOOK_WORDS=new Set(['look','look around','where am i','scene','surroundings','who is here','nearby people','routes']);
+// These are plain-language ways to READ existing starting-world public lore,
+// not a menu restricting the player's invented actions or a new turn engine.
+const STARTING_WORLD_WORDS=Object.freeze({
+ 'starting world':'overview','world guide':'overview','common knowledge':'overview',
+ 'what does everyone know':'overview','what is common knowledge':'overview',
+ 'world continents':'continents','world geography':'continents',
+ 'world kingdoms':'polities','world countries':'polities','known kingdoms':'polities',
+ 'famous families':'families','well known families':'families','world families':'families',
+ 'world guilds':'institutions','world institutions':'institutions',
+ 'guilds and academies':'institutions','power systems':'systems',
+ 'cultivation systems':'systems','world powers':'systems',
+ 'common beasts':'beasts','beast families':'beasts','world beasts':'beasts',
+ 'everyday life':'life','world customs':'life','world history':'history',
+ 'local common knowledge':'local','local customs':'local','local world':'local'
+});
 const PANELS=Object.freeze({status:'status',stats:'character',character:'character',
  inventory:'bag',bag:'bag',beasts:'tamer',journal:'journal',quests:'quests'});
 function localScene(s){
@@ -231,6 +246,11 @@ function physicalDesignIntent(s,action){
  return {id,operation};
 }
 function nonConsequentialAction(s,action){
+ if(Object.hasOwn(STARTING_WORLD_WORDS,action)){
+  const topic=STARTING_WORLD_WORDS[action];
+  return {message:'Ordinary publicly taught Beastbound knowledge, not an observed current event or a learned technique.',
+   startingWorld:Rules.act(s,{system:'world',operation:'startingWorld',params:{topic}})};
+ }
  if(LOOK_WORDS.has(action)){
   const scene=localScene(s);
   return {message:scene.name+': '+scene.description+
@@ -368,7 +388,9 @@ function execute(savePath, req) {
  if(req.expectedHash && req.expectedHash!==preHash)return {id:req.id,ok:false,applied:false,error:'Stale checkpoint; reload before processing this turn',stateHash:preHash};
  if(s.campaign?.requiresGmOpening&&s.campaign.openingState!=='authored'&&
   req.mode!=='status'&&!(req.mode==='rule'&&req.system==='world'&&
-   req.operation==='authorOpening'))
+   ['authorOpening','startingWorld'].includes(req.operation))&&
+  !(req.mode==='act'&&typeof req.action==='string'&&
+    Object.hasOwn(STARTING_WORLD_WORDS,req.action.trim().toLowerCase())))
   throw Error('This campaign has no playable opening yet: the GM must first author a unique real scene and starting place');
  if(req.mode==='status'&&s.campaign?.requiresGmOpening&&
     s.campaign.openingState!=='authored')
@@ -391,7 +413,7 @@ function execute(savePath, req) {
  // prepared plans never creates a turn receipt or commits incidental state.
  if(req.mode==='rule'&&['research.designPlansStatus',
    'world.localResearchStatus','world.localInnovationsStatus',
-   'world.localHouseholdsStatus'].includes(req.system+'.'+req.operation)){
+   'world.localHouseholdsStatus','world.startingWorld'].includes(req.system+'.'+req.operation)){
    const viewed=Rules.act(s,req);
    return {id:req.id,ok:true,applied:false,revision:runtime.revision,
     stateHash:preHash,output:{rules:viewed},
