@@ -420,4 +420,65 @@ function responsibilityStatus(s,p={}){
   note:'These are individual independent time-limited practical responsibilities, not paid contracts, owned facilities, completed work, qualifications or control over others.'};
 }
 
-module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus,offerResponsibility,responsibilityStatus};
+// Source-link ONE real, independently chosen original career work check to
+// a member's already accepted voluntary group responsibility, at the same
+// genuinely visited physical site. No new work resolver or employee payroll.
+function observeResponsibilityWork(s,p={}){
+ fields(p,['groupId','roleId','npcId']);
+ const day=Math.floor(s.world.minutes/1440),w=Realm.peek(s),
+  e=G.lookup(w,p.groupId),role=e?.internalRoles?.find(x=>x.id===p.roleId),
+  member=e?.additionalMembers?.find(x=>
+   x.actorId===p.npcId&&x.hash===role?.memberConsentHash&&
+   (x.active!==false||x.departure?.day>day)),
+  place=Places.location(s),personal=People.resolve(w,p.npcId,s.world.location,day),
+  person=typeof p.npcId==='string'&&p.npcId.startsWith('emergent:')?
+   w.emergentPeople?.people?.[p.npcId.slice('emergent:'.length)]:null;
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||
+  !place||A.R[place.regionId]?.polity!==e.polity||
+  !role?.agreed||role.memberActorId!==p.npcId||
+  day<role.startDay||day>role.untilDay||
+  role.source.place!==s.world.location||
+  !member||!personal?.presence||!person||
+  person.origin!=='gm-witnessed-lived-person-v1'||
+  !require('../world/person-careers').verify(person)||
+  !person.career?.authoredDuties?.some(x=>
+   x.status==='available'&&x.regionId===person.regionId))
+  throw Error('A genuinely present GM professional with an authored duty must have freely accepted an unexpired group role at this exact place; no presumed employee, assignment or remote shift');
+ const originalShift=structuredClone(personal.presence),
+  beforeWorkCount=person.career.workCount;
+ const witnessed=require('../world/emergent-people').observeLocalWork(s,{npcId:p.npcId});
+ if(!witnessed.freelyAgreed)
+  return {...witnessed,groupId:e.id,roleId:role.id,
+   roleWorkRecorded:false,noCompulsoryService:true,noGroupPayroll:true};
+ const current=Realm.peek(s),worker=current.emergentPeople?.people?.[person.id],
+  event=s.log.at(-1),observed=s.table?.personWorkWitnesses?.records?.at(-1),
+  receipt=worker?.career?.workReceipts?.at(-1);
+ if(!worker||worker.career.workCount!==beforeWorkCount+1||
+  !receipt||!event||event.details?.origin!==
+   'local-independent-person-work-witness-v1'||
+  observed?.witnessHash!==G.hash(event)||
+  observed.npcId!==p.npcId||
+  event.details.localWorkSourceHash!==receipt.sourceHash)
+  throw Error('The original independent work owner did not confirm exactly one witnessed career receipt');
+ const linked=G.retainOriginalRoleWork(current,e.id,{
+  roleId:role.id,npcId:p.npcId,shift:originalShift,
+  event:structuredClone(event),workReceipt:structuredClone(receipt)});
+ return {...witnessed,groupId:e.id,roleId:role.id,
+  roleWorkRecorded:true,originalRoleWorkId:linked.serviceId,
+  originalWorkHash:linked.originalWorkHash,
+  noAdditionalRollOrTime:true,noGroupPayrollOrExtraTraining:true,
+  noAssertionThatGroupProjectFinished:true};
+}
+function responsibilityWorkStatus(s,p={}){
+ fields(p,['groupId','roleId'],['groupId']);
+ const w=Realm.peek(s),e=G.lookup(w,p.groupId),
+  site=Places.location(s);
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||
+  A.R[site?.regionId]?.polity!==e.polity)
+  throw Error('Only the original local group founder may read independently witnessed private member service');
+ return G.roleWorkStatus(w,e.id,{roleId:p.roleId});
+}
+
+module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus,offerResponsibility,responsibilityStatus,observeResponsibilityWork,responsibilityWorkStatus};
