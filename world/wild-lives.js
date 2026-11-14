@@ -446,7 +446,19 @@ function memories(s,p={}){
  const seen=[];
  for(const b of Object.values(s.beasts||{})){
   const life=b?.individualLife;
-  if(!life||!life.witnessed?.length)continue;
+  if(!life)continue;
+  if(b.gmWild&&!life.witnessed?.length){
+   // The original distant first sighting is already player-known.
+   // Display only that witnessed history, never private current whereabouts.
+   if(!require('./gm-wild-individuals').verify(s,b))
+    throw Error('A GM wildlife memory has an invalid original encounter');
+   seen.push({beastId:b.id,lastSeenLocation:b.gmWild.originalPlace,
+    lastSeenDay:Math.floor(b.gmWild.source.minute/DAY)+1,
+    lastObservedAction:'original visual sighting only',
+    lastSeenBy:'personally witnessed',currentlyPresent:'not established'});
+   continue;
+  }
+  if(!life.witnessed?.length)continue;
   ensure(s,b,null);
   const lastWatch=life.witnessed.at(-1),
    returned=life.returnEncounters?.at(-1);
