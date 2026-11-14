@@ -889,7 +889,13 @@ function task(w,p,day=w.lastTickDay){
       ...(active?{activeOfferId:active.id}:{})});
    }
  }
- const work=available[Math.floor(draw(p)*available.length)];
+ // A newly witnessed person cannot be assigned the original procedural
+ // trade template merely because their actual profession is unfamiliar.
+ // Only duties independently established in their own source are playable.
+ const credible=p.origin==='gm-witnessed-lived-person-v1'?
+  available.filter(d=>d.authoredDutyId):available;
+ if(!credible.length)throw Error('This GM-established professional has no witnessed executable duty yet');
+ const work=credible[Math.floor(draw(p)*credible.length)];
  const pressure=eco.pressure>69?3:eco.quality<38?2:0,
   scarcity=eco.water<40||eco.forage<40?2:0,
   instability=host.stability<40?2:0;
