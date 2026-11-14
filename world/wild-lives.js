@@ -112,7 +112,7 @@ function memory(life,event){
  life.history.push(event);if(life.history.length>24)life.history.shift();
 }
 function watch(s,p={}){
- if(p&&Object.hasOwn(p,'beastId'))
+ if(p&&Object.hasOwn(p,'beastId')&&s.beasts?.[p.beastId]?.gmWild)
   return require('./gm-wild-individuals').watch(s,p);
  noParams(p);
  const {b,ev,encounter}=originalEncounter(s);
