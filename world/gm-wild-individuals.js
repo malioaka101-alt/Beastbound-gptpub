@@ -21,6 +21,9 @@ function sealed(b){
  const life=b?.individualLife;
  if(!root||root.origin!==SOURCE||b.gmWild.seal!==hash(root)||
     root.id!==b.id||root.speciesId!==b.species||
+    !root.habitatAtWitness||
+    !['forage','water','quality','pressure'].every(k=>
+      integer(root.habitatAtWitness[k],0,100))||
     root.locationId!==b.gmWild.originalPlace||
     root.description!==b.gmWild.description||
     !text(root.description,12,500)||!text(root.marker,4,90)||
@@ -57,10 +60,10 @@ function verify(s,b){
    species.habitatRegions.includes(root.regionId)&&
    species.needs&&population.index>=0&&
    population.origin.startIndex>0&&
-   species.needs.minForage<=eco.forage&&
-   species.needs.minWater<=eco.water&&
-   species.needs.minQuality<=eco.quality&&
-   species.needs.maxPressure>=eco.pressure&&
+   species.needs.minForage<=root.habitatAtWitness.forage&&
+   species.needs.minWater<=root.habitatAtWitness.water&&
+   species.needs.minQuality<=root.habitatAtWitness.quality&&
+   species.needs.maxPressure>=root.habitatAtWitness.pressure&&
    b.gmWild.originalPlace===root.locationId&&
    b.id===root.id);
 }
@@ -102,6 +105,8 @@ function witnessed(s,p={}){
   speciesOriginHash:species.originHash,
   populationOriginHash:population.originHash,
   regionId:place.regionId,locationId:place.id,
+  habitatAtWitness:{forage:eco.forage,water:eco.water,
+   quality:eco.quality,pressure:eco.pressure},
   marker:p.marker.trim(),description:p.description.trim(),
   witness:p.witness.trim(),minute:s.world.minutes,
   noInferredGrade:true,noInferredSapience:true,
