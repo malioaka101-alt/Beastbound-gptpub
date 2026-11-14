@@ -190,6 +190,35 @@ function act(s,{system,operation,params={}}={}){
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
   case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
+  // A witnessed, informal orchard-game attempt: the GM established the
+  // place and instructions in play; the engine alone draws and records the
+  // player's die and derives a modest, visible physical outcome.
+  // This is not a rated competition, skill-award shortcut, or NPC contest.
+  case 'core.stoneSkip':{
+   if(Object.keys(params).length!==0)throw Error('A stone-skip throw takes no caller-selected modifier, result or target');
+   if(s.world.location!=='tansyhook_crossing'||s.battle||s.encounter)
+    throw Error('The witnessed stone-skipping scene at Tansyhook Crossing must be current and uncontested');
+   const dex=C.int(s.player.attributes.dex,'earned Dexterity',1,30);
+   const survival=C.int(s.player.skills.survival?.rank,'earned Survival rank',0,5);
+   const modifier=Math.floor((dex-10)/2)+survival*2;
+   const check=C.check(s,{modifier,dc:12,label:'Maddoc stone-skipping throw',risky:false});
+   const skips=check.total<8?0:check.total<11?1:check.total<15?2:check.total<19?3:check.total<23?4:5;
+   const beforeMinute=s.world.minutes;
+   E.advance(s,2);
+   W.finalizeTime(s,beforeMinute);
+   Unified.sync(s,{source:'legacy'});
+   s.table||={};s.table.casualGames||={};
+   s.table.casualGames.stoneSkipping||=[];
+   const attempt={placeId:'tansyhook_crossing',startMinute:beforeMinute,
+    endMinute:s.world.minutes,skips,roll:check.roll,modifier:check.modifier,
+    total:check.total,dc:check.dc, noItemOrPrize:true, noOpponentRoll:true};
+   s.table.casualGames.stoneSkipping.push(attempt);
+   if(s.table.casualGames.stoneSkipping.length>40)s.table.casualGames.stoneSkipping.shift();
+   C.event(s,'story','Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.',attempt);
+   return {skips,check,elapsedMinutes:2,comparison:{tessa:3,bram:4},
+    noPrize:true,noSkillAward:true, noNPCConsentInferred:true};
+  }
+
   case 'character.initialize':return {profileCreated:!!Character.ensure(s),attributesPreserved:true};
   case 'character.status':return Character.publicStatus(s);
   case 'character.assessPotential':return Character.assess(s,params);
