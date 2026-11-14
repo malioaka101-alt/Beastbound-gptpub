@@ -1,4 +1,5 @@
-> **Active state — 8 November 2026:** This is the **public** `malioaka101-alt/Beastbound-gptpub` source repository for a **private ChatGPT Project RPG**. There is **no active campaign**. Aerin's concluded trial save and request/result artifacts have been deleted; never resume or recreate that trial by default. Start a fresh character only on the player's explicit request. Historical campaign and formerly private-repository references below document earlier development, not current operating instructions.
+> **Final foundation status — 14 November 2026:** **25/25 bounded Beastbound foundations accepted** following exact-head successful full regression and confirmed merge of PR #123. Read [the final handover](docs/FOUNDATION_FINAL_HANDOFF_2026-11-14.md), [the live Project-chat instructions](docs/PROJECT_CHAT_INSTRUCTIONS.md) and [the authoritative checklist](docs/MASTER_PROMPT_DEPTH_CHECKLIST.md). The connected **GitHub repository is public**; the ChatGPT Project RPG is private, but committed saves are not confidential storage. Three older draft PRs remain unmerged. No character or campaign is active merely because a save file exists. No website or new hosting is required.
+> **Historical state — 8 November 2026:** This is the **public** `malioaka101-alt/Beastbound-gptpub` source repository for a **private ChatGPT Project RPG**. There is **no active campaign**. Aerin's concluded trial save and request/result artifacts have been deleted; never resume or recreate that trial by default. Start a fresh character only on the player's explicit request. Historical campaign and formerly private-repository references below document earlier development, not current operating instructions.
 
 > **Current power-system audit (v1.1):** `docs/SOURCE_TO_ENGINE_AUDIT_V11.md` is the honest section-by-section (all 57 Master Prompt sections + later additions) mechanical coverage ledger. `rules/character.js` supplies a four-domain seeded capability sheet and separately assessed potential; `rules/disciplines.js` supplies time/cost/risk-backed early discipline training and 108-Gate progression; `rules/progress.js` requires validated complete form profiles before successful beast evolution. Legacy shortcuts are blocked in private turns. **Full high-tier power and civilisation parity is not yet implemented.** Ivar's separate save is protected, and play remains in private Project chats.
 
@@ -6,7 +7,7 @@
 
 ## Random or guided new campaign starts
 
-**No campaign is active.** Only on an explicit new-game request, the GM can use scripts/new-campaign.js to roll a complete reproducible character or honour selectively chosen background details. The starting identity can have an ordinary newly generated family, a birth/ward connection to an existing historic or truly renowned house, a regional/institutional history, or a modest source-grounded informal association (one verified founder, no implied other members). These are backgrounds, **not free magical powers, inherited offices, titles or access**. The original 57-section Master Prompt and docs/CAMPAIGN_INITIALISATION_2026-11-08.md govern the initial scene. Home regions may be cross-continental; current mechanically playable locations remain the six Reedmarch sites.
+**Historical note (8 November 2026):** No campaign was active at that time. Always check the selected current save and the live Project-chat instructions. Only on an explicit new-game request, the GM can use scripts/new-campaign.js to roll a complete reproducible character or honour selectively chosen background details. The starting identity can have an ordinary newly generated family, a birth/ward connection to an existing historic or truly renowned house, a regional/institutional history, or a modest source-grounded informal association (one verified founder, no implied other members). These are backgrounds, **not free magical powers, inherited offices, titles or access**. The original 57-section Master Prompt and docs/CAMPAIGN_INITIALISATION_2026-11-08.md govern the initial scene. Home regions may be cross-continental; current mechanically playable locations remain the six Reedmarch sites.
 
 
 
@@ -23,10 +24,10 @@ Read `reference/Beastbound_Table_Rules.md` for 34-character panels, NPC knowledg
 ## Play inside a Project chat
 
 1. Open the **Beastbound** ChatGPT Project.
-2. To play, explicitly request a **new campaign**. There is currently no active campaign; Aerin's trial ended and her save and turn artifacts were removed.
+2. To play, explicitly request a **new campaign**, or identify the existing campaign you actually want to continue. Do not resume Aerin's concluded trial or silently select another person's saved character.
 3. The GM reads `docs/PROJECT_CHAT_INSTRUCTIONS.md`, the Master Prompt and Table Rules, creates a new character only when requested, and uses the actual saved state and verified engine for that new campaign.
 4. You respond in natural language. Rolls and state changes are computed by the engine, not improvised.
-5. At a checkpoint, the GM updates the private GitHub save, preserving the previous history through Git commits.
+5. At a checkpoint, the GM updates the exact selected GitHub save only after verified execution and successful GitHub persistence. The source repository is currently **public**, so its committed history is not private campaign storage.
 
 The repository connection lets ChatGPT **read and write files**, but GitHub does not execute the engine on its own. A chat needs an available execution tool for verified turns. Do **not** claim a turn, save sync or dice roll happened unless a tool confirms it. If code execution is unavailable, use the written rules transparently and keep a ledger until execution resumes.
 
