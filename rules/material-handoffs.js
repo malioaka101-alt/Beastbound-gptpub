@@ -691,4 +691,4 @@ function creditPurchasedRation(w,id,row){
 
 module.exports={ORIGIN,ASSET_ORIGIN,PERSON_SALE,offer,purchaseFromPerson,status,sixday,
  attestAsset,assetStatus,verifyAssetAttestations,validateAccount,
- SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation};
+ SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation,ownerStock};
