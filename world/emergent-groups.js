@@ -2235,7 +2235,15 @@ function verifyRoleWork(e,row,w=null){
     m.roleId!==row.roleId||m.originalRoleHash!==q.originalRoleHash||
     m.originalWorkHash!==row.workReceiptHash||
     m.teacherId!==q.memberActorId||m.learner!==e.founder.name||
-    m.skill!==job?.method||typeof m.focus!=='string'||
+    m.skill!==job?.method||
+    !m.masteryEvent||m.masteryEventHash!==hash(m.masteryEvent)||
+    m.masteryEvent.checkHash!==m.masteryCheckHash||
+    m.masteryEvent.fromMinute!==m.fromMinute||
+    m.masteryEvent.focus!==m.focus||
+    m.masteryEvent.earned!==m.earnedProgress||
+    !Number.isInteger(m.masteryEvent.day)||
+    m.masteryEvent.day!==Math.floor(m.fromMinute/1440)||
+    typeof m.focus!=='string'||
     m.focus.length<3||m.focus.length>100||
     typeof m.masteryKey!=='string'||m.masteryKey.length>160||
     typeof m.masteryCheckHash!=='string'||
