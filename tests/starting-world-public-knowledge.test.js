@@ -8,6 +8,7 @@ const A=require('node:assert/strict'),Fs=require('node:fs'),
  Atlas=require('../world/atlas'),Houses=require('../world/social-houses'),
  B=require('../world/bestiary'),Realm=require('../world/simulation'),
  Gov=require('../world/government-offices'),
+ Renown=require('../world/renown-and-practice'),
  View=require('../world/starting-world'),
  Turn=require('../scripts/chat-turn.js');
 const s=E.newGame({seed:180014,name:'Starting World Ordinary Resident',path:'undecided'});
@@ -21,6 +22,7 @@ A.equal(overview.continents.length,6);
 A.equal(overview.wellKnownStates.length,16);
 A.equal(overview.familiarHouseNames.length,14);
 A.equal(overview.recognisedPaths.length,8);
+A.equal(overview.famousHistoricalNames.length,Renown.HISTORICAL_LEGACIES.length);
 A.equal(overview.currentWorldUnchanged,true);
 A.ok(overview.neverGrants.includes('NPC consent'));
 const continents=view('continents');
@@ -41,6 +43,7 @@ A.ok(families.wellKnownHouses.every(x=>
  Houses.byId[x.id].name===x.name&&!Object.hasOwn(x,'privateRelations')&&
  !Object.hasOwn(x,'powers')&&!Object.hasOwn(x,'publicElder')));
 A.equal(view('institutions').familiarInstitutions.length,15);
+A.equal(view('institutions').renownedPublicTraditions.length,Renown.RENOWNED.length);
 const systems=view('systems');
 A.equal(systems.noUnifiedRankLadder,true);
 A.deepEqual(systems.disciplines.map(x=>x.id),[
@@ -57,6 +60,8 @@ A.ok(view('beasts').familiarLocalExamples.every(x=>x.folkGrade==='Common'&&
 A.equal(view('life').ordinaryCustoms.length,7);
 A.equal(view('life').publicFestivals.length,Atlas.festivals.length);
 A.deepEqual(view('history').commonHistory.map(x=>x.era),Atlas.history.map(x=>x.era));
+A.equal(view('history').familiarHistoricalFigures.length,Renown.HISTORICAL_LEGACIES.length);
+A.ok(view('history').familiarHistoricalFigures.every(x=>x.noPersonallyVerifiedPower===true));
 const local=view('local');
 A.equal(local.local.placed,true);
 A.equal(local.local.locationId,'crossing');
