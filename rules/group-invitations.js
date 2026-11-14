@@ -344,4 +344,80 @@ function taskStatus(s,p={}){
   note:'Independent member responses are real; a request cannot force labor, funds, a task outcome, an office or a contract.'};
 }
 
-module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus};
+// Connect the ORIGINAL independently chosen bounded group responsibility
+// to real, physically present consenting members, including GM-established
+// places. This does not hire a worker, move an asset or complete service.
+function offerResponsibility(s,p={}){
+ fields(p,['groupId','npcId','title','scope','untilDay']);
+ const title=typeof p.title==='string'?p.title.trim():'',
+  scope=typeof p.scope==='string'?p.scope.trim():'',
+  place=s.world.location,old=s.world.minutes,
+  day=Math.floor(old/1440),endDay=Math.floor((old+MINUTES)/1440);
+ if(title.length<7||title.length>110||scope.length<35||scope.length>530||
+  !Number.isInteger(p.untilDay)||p.untilDay<endDay||p.untilDay>10000000)
+  throw Error('Offer a real temporary practical responsibility, actual scope and future end day; never a salary, consent or chosen work result');
+ if(s.encounter||s.battle||
+  s.table?.combatants?.player?.status&&
+   s.table.combatants.player.status!=='ok')
+  throw Error('A dangerous encounter or incapacity prevents a considered in-person responsibility discussion');
+ const w0=Realm.peek(s),e0=G.lookup(w0,p.groupId),
+  member=e0?.additionalMembers?.find(x=>
+   x.active!==false&&x.witness?.details?.npcId===p.npcId),
+  person=member?People.resolve(w0,p.npcId,place,day):null,
+  site=Places.location(s);
+ if(!e0||e0.origin!=='player-declaration'||
+  e0.founder.name!==s.player?.name||!member||!person||
+  person.name!==member.name||person.actorId!==member.actorId||
+  !site||A.R[site.regionId]?.polity!==e0.polity||
+  !People.resolve(w0,p.npcId,place,endDay))
+  throw Error('Only a real local founder and a genuinely present, freely joined member can discuss their bounded responsibilities');
+ if((e0.internalRoles||[]).some(x=>
+   x.memberActorId===member.actorId&&x.title===title&&
+   x.startDay===endDay))
+  throw Error('The same member has already considered this exact responsibility today');
+ const originalSite=Places.originalSiteProof(s);
+ E.advance(s,MINUTES);W.finalizeTime(s,old);
+ Health.sync(s,{source:'legacy'});
+ const w=Realm.ensure(s),e=G.lookup(w,p.groupId),
+  currentDay=Math.floor(s.world.minutes/1440),
+  current=People.resolve(w,p.npcId,place,currentDay),
+  m=e?.additionalMembers?.find(x=>x.actorId===member.actorId&&
+   x.active!==false&&x.hash===member.hash);
+ if(!e||!m||!current||current.actorId!==m.actorId)
+  throw Error('The member must still freely belong and actually be present after the original conversation time');
+ const id='group_role_'+G.hash({groupId:e.id,
+  memberActorId:m.actorId,title,scope,minute:s.world.minutes}).slice(0,24),
+  witness=s.player.name+' asks '+m.name+' in person at '+place+
+   ' to consider the temporary practical responsibility "'+title+
+   '". Their agreement, continued membership and later work are not assumed.';
+ const result=G.proposeVoluntaryRole(w,{id,groupId:e.id,
+  memberActorId:m.actorId,title,scope,startDay:currentDay,
+  untilDay:p.untilDay,regionId:site.regionId,place,witness,
+  ...(originalSite?{siteMinute:s.world.minutes,placeProof:originalSite}:{})});
+ C.event(s,'story',s.player.name+' asks '+m.name+' whether they would voluntarily take responsibility as '+
+  title+'. '+(result.agreed?m.name+' accepts the limited responsibility.':
+   m.name+' declines the responsibility without penalty.'),{
+  origin:G.INTERNAL_ROLE,roleId:id,groupId:e.id,
+  memberActorId:m.actorId,roleSourceHash:e.internalRoles.at(-1).sourceHash,
+  place,day:currentDay,minutes:MINUTES,independentChoice:result.status,
+  noWorkPerformed:true,noWagesOrAccreditation:true,
+  noPropertyOrCompulsoryService:true});
+ return {...result,npcId:p.npcId,title,scope,
+  untilDay:p.untilDay,actualMinutes:MINUTES,
+  originalMemberResponsibilityOwner:true,noAutomaticEmployment:true,
+  noNewResourcesOrFacility:true};
+}
+function responsibilityStatus(s,p={}){
+ fields(p,['groupId']);
+ const w=Realm.peek(s),e=G.lookup(w,p.groupId),
+  site=Places.location(s);
+ if(!e||e.origin!=='player-declaration'||
+  e.founder.name!==s.player?.name||
+  A.R[site?.regionId]?.polity!==e.polity)
+  throw Error('Only a real local founder can inspect their own privately witnessed volunteer responsibilities');
+ return {groupId:e.id,responsibilities:
+  G.voluntaryRoleStatus(w,e.id,{day:Math.floor(s.world.minutes/1440)}),
+  note:'These are individual independent time-limited practical responsibilities, not paid contracts, owned facilities, completed work, qualifications or control over others.'};
+}
+
+module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus,offerResponsibility,responsibilityStatus};
