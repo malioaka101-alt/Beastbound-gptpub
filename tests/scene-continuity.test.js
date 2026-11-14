@@ -98,14 +98,24 @@ try{
   statement:'An unannounced archival interpretation remains uncertain.',
   witness:'The GM has an unpublished interpretation',visibility:'gm-only'};
  const privateReq={id:'scene_memory_private_170221',mode:'checkpoint',
-  summary:'The GM has an unpublished interpretation that has not been shared.',
+  summary:'The scene ended without an announcement.',
   scene:'The scene ends before the public announcement.',
+  gmWitness:'The GM has an unpublished interpretation that has not been shared.',
   continuity:[privateFact]};
- A.equal(Turn.execute(file,privateReq).applied,true);
+ const privateResult=Turn.execute(file,privateReq);
+ A.equal(privateResult.applied,true);
+ A.equal(privateResult.output.continuity.entries[0].private,true);
+ A.equal(privateResult.output.continuity.entries[0].id,undefined);
+ A.ok(!state().chatRuntime.journal.some(x=>x.text.includes(privateFact.witness)),
+  'GM-only witness must never be copied to player-facing journal');
  const privacy=Turn.execute(file,{id:'scene_memory_private_read_170221',mode:'rule',
   system:'world',operation:'sceneContinuityStatus',
   params:{id:privateFact.id}});
  A.deepEqual(privacy.output.rules.facts,[]);
+ const invalidPrivate=read();
+ A.throws(()=>Turn.execute(file,{...privateReq,id:'private_missing_witness_170221',
+  gmWitness:undefined}),/Narrative fact needs stable ID/);
+ A.equal(read(),invalidPrivate);
  // An unregistered narrative subject is expressly NOT a real actor.
  const unregistered={id:'named_person_not_registered',action:'record',
   subject:{kind:'narrative',id:'travelling_teacher_note'},
