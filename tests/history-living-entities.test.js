@@ -44,6 +44,12 @@ for(const [type,id] of [
  A.equal(unknown.known,false);
  A.equal(unknown.name,undefined);
  A.deepEqual(unknown.effects,[]);
+ const nonexistent=rule('world','historyStatus',{
+  targetType:type,targetId:type==='person'?'emergent:person_99999':
+   type==='group'?'association_not_real':'unknown_unfounded_place'});
+ A.deepEqual(nonexistent,
+  {targetType:type,targetId:nonexistent.targetId,known:false,effects:[]},
+  'A nonexistent and a currently unpublished GM subject reveal the same amount');
 }
 const beforeCoins=s.player.coins,beforeRng=s.rngState,beforeMinutes=s.world.minutes;
 const event={
