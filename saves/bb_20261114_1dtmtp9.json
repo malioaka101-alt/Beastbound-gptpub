@@ -48,6 +48,23 @@
         "noNewPlayerAssets": true,
         "firstSceneWrittenByGM": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "world",
+      "text": "A place is established in the lived world: Rillbend Orchard Path.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "rillbend_orchard_path",
+        "regionId": "orchard_vales",
+        "establishedMinute": 480,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
     }
   ],
   "world": {
@@ -532,7 +549,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 1,
+    "revision": 2,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -546,6 +563,55 @@
           },
           "events": [],
           "message": "Scene checkpoint recorded"
+        }
+      },
+      "orchard_path_establish_20261114_001": {
+        "revision": 2,
+        "mode": "rule",
+        "hash": "9ce0fb437e090fdf07330be50393c8c04fe595c1dfb32bb5808a6a265cc2b15a",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:00",
+          "output": {
+            "rules": {
+              "established": true,
+              "place": {
+                "id": "rillbend_orchard_path",
+                "name": "Rillbend Orchard Path",
+                "kind": "public orchard footpath",
+                "sceneType": "wilderness",
+                "regionId": "orchard_vales",
+                "region": "Orchard Vales",
+                "description": "A narrow public footpath beyond Thistlebell Yard, threading between old apple orchards and a shallow drainage rill. Moss-dark stone culverts carry rainwater beneath the trail; a wooden handrail crosses the lowest bend.",
+                "culture": "Asterwyn Orchard Vales; walkers share the path with farm workers, orchard carts on the nearby road and seasonal beasts passing through hedgerows.",
+                "knownNotables": [],
+                "knownFamilies": [],
+                "knownOrganisations": [],
+                "recordedDetails": [],
+                "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+              },
+              "noFreeNPCOrItem": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:00",
+              "type": "world",
+              "text": "A place is established in the lived world: Rillbend Orchard Path.",
+              "details": {
+                "source": "gm-authored-campaign-place-v1",
+                "placeId": "rillbend_orchard_path",
+                "regionId": "orchard_vales",
+                "establishedMinute": 480,
+                "knownNotables": 0,
+                "knownFamilies": 0,
+                "knownOrganisations": 0,
+                "notAnNPCSpawn": true,
+                "noItemsOrPowersCreated": true
+              }
+            }
+          ]
         }
       }
     },
@@ -6125,6 +6191,39 @@
               "noExtraPlayerResources": true
             },
             "foundingHash": "166bc0b066f9226d78ed6092695476303f9e3eb29963f6f4bdc863d0e70e2bbf"
+          },
+          "rillbend_orchard_path": {
+            "source": "gm-authored-campaign-place-v1",
+            "id": "rillbend_orchard_path",
+            "name": "Rillbend Orchard Path",
+            "regionId": "orchard_vales",
+            "kind": "public orchard footpath",
+            "sceneType": "wilderness",
+            "description": "A narrow public footpath beyond Thistlebell Yard, threading between old apple orchards and a shallow drainage rill. Moss-dark stone culverts carry rainwater beneath the trail; a wooden handrail crosses the lowest bend.",
+            "culture": "Asterwyn Orchard Vales; walkers share the path with farm workers, orchard carts on the nearby road and seasonal beasts passing through hedgerows.",
+            "establishedMinute": 480,
+            "notables": [],
+            "families": [],
+            "organisations": [],
+            "notes": [],
+            "founding": {
+              "source": "gm-authored-campaign-place-v1",
+              "placeId": "rillbend_orchard_path",
+              "regionId": "orchard_vales",
+              "worldMinute": 480,
+              "name": "Rillbend Orchard Path",
+              "kind": "public orchard footpath",
+              "sceneType": "wilderness",
+              "description": "A narrow public footpath beyond Thistlebell Yard, threading between old apple orchards and a shallow drainage rill. Moss-dark stone culverts carry rainwater beneath the trail; a wooden handrail crosses the lowest bend.",
+              "culture": "Asterwyn Orchard Vales; walkers share the path with farm workers, orchard carts on the nearby road and seasonal beasts passing through hedgerows.",
+              "notablesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "familiesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "organisationsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "gmContext": "An in-scene GM-authored place added without rewinding the world",
+              "noNPCConsent": true,
+              "noExtraPlayerResources": true
+            },
+            "foundingHash": "2d62b8b17d65d8c37719c63406c00932874937556d2dfd7b65a221a99c9907e9"
           }
         },
         "journeys": []
