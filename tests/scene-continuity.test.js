@@ -23,7 +23,7 @@ try{
   summary:'The traveller gave the bridge proverb but asked nothing in return.',
   continuity:[note('record','The player heard a local saying about the bridge.',witness)]};
  A.throws(()=>Continuity.preflight({...request,continuity:[
-  {...request.continuity[0],statement:'Magic power gained for free'}]}),
+  {...request.continuity[0],outcome:'Magic power gained for free'}]}),
   /Narrative fact needs stable ID|Narrative continuity/);
  // Invalid unsourced witnesses must never enter the save.
  A.throws(()=>Continuity.preflight({...request,continuity:[
