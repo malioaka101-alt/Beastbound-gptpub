@@ -344,6 +344,69 @@ function registerGM(s,p={}){
   noAssumedConsent:true,noFreeMoneyOrPower:true,
   usesExistingLivingPersonLedger:true};
 }
+// An established GM person already has the ORIGINAL independent career
+// engine, but cannot independently work until at least one real duty is
+// sourced. This records an observed professional possibility; it does not
+// perform work, guarantee a job, appoint a teacher or issue a wage.
+function authorWitnessedDuty(s,params={}){
+ const keys=['npcId','id','role','method','goal','domain','witness'];
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).sort().join('|')!==keys.sort().join('|'))
+  throw Error('A witnessed person duty needs only the existing person, genuine practical method, role, goal, domain and original scene quotation; no invented wage, power or outcome');
+ const {npcId,id,role,method,goal,domain,witness}=params;
+ const w=require('./simulation').peek(s),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null,
+  scene=s.chatRuntime?.scene||'',
+  day=Math.floor(s.world.minutes/DAY);
+ if(s.campaign?.openingState!=='authored'||!p||p.origin!==GM_ORIGIN||
+    !verify(w,p)||p.actorId!==npcId||
+    !scene.includes(p.name)||typeof witness!=='string'||
+    witness.length<24||!scene.includes(witness)||
+    !presence(w,npcId,s.world.location,day)||
+    s.encounter||s.battle)
+  throw Error('An actually introduced, personally present GM worker and original witnessed professional scene are required; no remote job or forced availability');
+ const result=Careers.authorDuty(w,p,{id,role,method,goal,domain,
+  effect:null,institutionId:null,day,witness});
+ return {...result,npcId:p.actorId,person:p.name,
+  originalCareerOwner:true,noCompletedWork:true,noEmployerOrTeachingLicence:true,
+  noNewMoneyOrTimeOrDice:true};
+}
+function retireWitnessedDuty(s,params={}){
+ const keys=['npcId','id','reason'];
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).sort().join('|')!==keys.sort().join('|'))
+  throw Error('Retire only an original known work duty with a genuinely witnessed change, not a chosen wage or personal outcome');
+ const {npcId,id,reason}=params,w=require('./simulation').peek(s),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null,
+  scene=s.chatRuntime?.scene||'',day=Math.floor(s.world.minutes/DAY);
+ if(s.campaign?.openingState!=='authored'||!p||p.origin!==GM_ORIGIN||
+    !verify(w,p)||p.actorId!==npcId||
+    !scene.includes(p.name)||typeof reason!=='string'||
+    reason.trim().length<20||!scene.includes(reason)||
+    s.encounter||s.battle)
+  throw Error('A real GM worker, unchanged original identity and directly established source for a later duty change are needed');
+ return {...Careers.retireDuty(w,p,{id,day,reason}),
+  npcId:p.actorId,noInventedDismissalOrWages:true,
+  noWorkOrTimeOrDice:true};
+}
+function witnessedDutyStatus(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).join('|')!=='npcId'||
+    typeof params.npcId!=='string')
+  throw Error('Inspect only the already known witnessed worker, not a new or remote workforce');
+ const w=require('./simulation').peek(s),id=params.npcId,
+  p=id.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[id.slice('emergent:'.length)]:null;
+ if(!p||p.origin!==GM_ORIGIN||!verify(w,p)||p.actorId!==id)
+  return {known:false};
+ return {known:true,npcId:p.actorId,name:p.name,
+  witnessedDuties:Careers.authoredDutyStatus(p),
+  noPrivateCompetenceOrNewWorkExposed:true,
+  noAutomaticEmploymentOrTeachingLicence:true};
+}
+
 function gmStatus(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
   Object.keys(p).some(k=>k!=='npcId'))throw Error('Only a known GM individual may be inspected');
@@ -938,7 +1001,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,registerGM,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
