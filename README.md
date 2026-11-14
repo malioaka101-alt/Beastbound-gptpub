@@ -6,6 +6,13 @@
 
 # Beastbound Realms — ChatGPT Project Text RPG
 
+## Starting World — public things characters grow up knowing
+
+The [Starting World gazetteer](docs/STARTING_WORLD_COMMON_KNOWLEDGE.md) is now the common-knowledge foundation of Beastbound: all six established continents, the existing 24 countries, familiar political and household names, important guilds and academies, ordinary professions, beast families, festivals, public history and **separate** human cultivation paths. It is a public view of the **existing living world**, not a separate new world, a compulsory origin story or free access to secrets and powers. The GM still authors each character's own starting circumstances.
+
+The engine exposes strict read-only `world.startingWorld({topic})` with `overview`, `continents`, `polities`, `families`, `institutions`, `systems`, `beasts`, `life`, `history` and `local`. Natural chat requests such as `starting world`, `world kingdoms`, `power systems` and `common beasts` show known setting facts **without rolling, advancing time or altering saves**, even before the GM authors a fresh opening. Local lore is hidden until that actual opening place is established. This is the *beginning knowledge* of a much deeper persistent world.
+
+
 ## Random or guided new campaign starts
 
 **Historical note (8 November 2026):** No campaign was active at that time. Always check the selected current save and the live Project-chat instructions. Only on an explicit new-game request, the GM can use scripts/new-campaign.js to roll a complete reproducible character or honour selectively chosen background details. The starting identity can have an ordinary newly generated family, a birth/ward connection to an existing historic or truly renowned house, a regional/institutional history, or a modest source-grounded informal association (one verified founder, no implied other members). These are backgrounds, **not free magical powers, inherited offices, titles or access**. The original 57-section Master Prompt and docs/CAMPAIGN_INITIALISATION_2026-11-08.md govern the initial scene. Home regions may be cross-continental; current mechanically playable locations remain the six Reedmarch sites.
