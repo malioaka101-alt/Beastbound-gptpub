@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 3951775931,
-  "rngState": 3951775931,
+  "rngState": 2987556565,
   "sequence": 0,
   "log": [
     {
@@ -130,10 +130,48 @@
         "arrivalKnown": true,
         "noAutomaticPermission": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:23",
+      "type": "roll",
+      "text": "🎲 Maddoc stone-skipping throw: d20 14 +2 = 16 vs DC 12 → success (+4)",
+      "details": {
+        "dice": [
+          14
+        ],
+        "roll": 14,
+        "modifier": 2,
+        "dc": 12,
+        "total": 16,
+        "margin": 4,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:25",
+      "type": "story",
+      "text": "Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.",
+      "details": {
+        "placeId": "tansyhook_crossing",
+        "startMinute": 503,
+        "endMinute": 505,
+        "skips": 3,
+        "roll": 14,
+        "modifier": 2,
+        "total": 16,
+        "dc": 12,
+        "noItemOrPrize": true,
+        "noOpponentRoll": true
+      }
     }
   ],
   "world": {
-    "minutes": 503,
+    "minutes": 505,
     "location": "tansyhook_crossing",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -616,7 +654,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 6,
+    "revision": 7,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -849,10 +887,86 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "stone_skip_first_maddoc_20261114_001": {
+        "revision": 7,
+        "mode": "rule",
+        "hash": "2358617308c5702f21b0beb8d9dd1146ca9589e67f4468bd87ba4f2cf064b59a",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:25",
+          "output": {
+            "rules": {
+              "skips": 3,
+              "check": {
+                "dice": [
+                  14
+                ],
+                "roll": 14,
+                "modifier": 2,
+                "dc": 12,
+                "total": 16,
+                "margin": 4,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              },
+              "elapsedMinutes": 2,
+              "comparison": {
+                "tessa": 3,
+                "bram": 4
+              },
+              "noPrize": true,
+              "noSkillAward": true,
+              "noNPCConsentInferred": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:23",
+              "type": "roll",
+              "text": "🎲 Maddoc stone-skipping throw: d20 14 +2 = 16 vs DC 12 → success (+4)",
+              "details": {
+                "dice": [
+                  14
+                ],
+                "roll": 14,
+                "modifier": 2,
+                "dc": 12,
+                "total": 16,
+                "margin": 4,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 1,
+              "time": "Day 1, 08:25",
+              "type": "story",
+              "text": "Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.",
+              "details": {
+                "placeId": "tansyhook_crossing",
+                "startMinute": 503,
+                "endMinute": 505,
+                "skips": 3,
+                "roll": 14,
+                "modifier": 2,
+                "total": 16,
+                "dc": 12,
+                "noItemOrPrize": true,
+                "noOpponentRoll": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Explore Tansyhook Crossing"
+      "Maddoc's first stone-skipping attempt with Tessa and Bram"
     ],
     "scene": "At 08:23 Maddoc arrived at Tansyhook Crossing from the Rillbend culvert, leaving the small moss-feathered seed-eating creature alone. Orchard lanes meet at a timber bridge over an irrigation channel beside a covered weigh-shed and fruit-cart layby. Workers tend carts while two local children contest stone-skipping by the railing. Maddoc has not approached or spoken to anyone here.",
     "journal": [
@@ -6536,6 +6650,22 @@
           }
         ]
       }
+    },
+    "casualGames": {
+      "stoneSkipping": [
+        {
+          "placeId": "tansyhook_crossing",
+          "startMinute": 503,
+          "endMinute": 505,
+          "skips": 3,
+          "roll": 14,
+          "modifier": 2,
+          "total": 16,
+          "dc": 12,
+          "noItemOrPrize": true,
+          "noOpponentRoll": true
+        }
+      ]
     }
   }
 }
