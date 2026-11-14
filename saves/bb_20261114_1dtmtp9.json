@@ -748,11 +748,31 @@
     "personality": {
       "traits": [
         "fiery",
-        "witty"
+        "witty",
+        "bold",
+        "curious",
+        "thoughtful",
+        "loyal",
+        "encouraging"
       ],
-      "speechStyle": "Quick with sharp, clever comebacks, playful teasing and pointed observations; spirited, bold and expressive when the moment calls for it.",
-      "application": "Shape the delivery and phrasing of dialogue the player supplies, and natural incidental speech resulting from the player's choices. Preserve the player's actual intent and decisions.",
-      "limits": "Do not invent the player's beliefs, hidden thoughts, emotional states, promises, major dialogue choices or consequential actions. Not every line needs a joke or angry outburst. Keep voice age-appropriate for a ten-year-old, capable of restraint and sincerity."
+      "speechStyle": "Expressive and confident, with cheeky humour, playful mischief and quick, sharp comebacks. He is capable of serious, precise explanation, tact and sincere kindness. Age-appropriate for ten; avoid making every line a joke.",
+      "interactionPatterns": [
+        "Playfully needles friends and enjoys banter without wanting to hurt them; he once coaxed Tessa and Bram into debating just to watch them argue.",
+        "Advocates for friends with specific evidence and logic, as when he spoke up for Tessa's potential to the instructor after watching her stone skipping.",
+        "Encourages others to speak for themselves rather than taking credit or replacing their judgement; he helped Tessa articulate the flaw she already spotted.",
+        "Shares discovery and ownership of research: works collaboratively, actively discusses what he reads, takes comprehensive notes, delegates explanation to Bram sometimes, and makes information accessible to Tessa.",
+        "Takes initiative without monopolising decisions: considered what Tessa and Bram both wanted to do, backed Tessa's training, and chose to explore Arcane first for Bram even though Soul interests him more.",
+        "Interested in power systems, compares foundations and limitations methodically, asks questions and looks beyond the first path presented.",
+        "Expressed a strong current interest in Soul Cultivation, but has not committed to a discipline or attained any power."
+      ],
+      "knowledgeFromPlay": [
+        "Personally studied introductory Meridian Cultivation with Bram: anatomy, 12 primary and eight extraordinary meridians, branch networks, 108 Gates, three Dantian centres, nine stages, practical foundation cautions and applications.",
+        "Personally studied introductory Arcane Circle Architecture with Bram: Mana Core and spell geometry, all nine Circles, design, stability, limits, risks and beast-ability analogues.",
+        "Personally studied introductory Soul Cultivation and Engineering with Bram: seven phases, spiritual perception, threading, resonance, higher architecture, legitimate applications, consent and limits.",
+        "This is introductory reading and handwritten shared notes, not practised magical ability, expert mastery or a mechanical skill award."
+      ],
+      "application": "Always include the player's meaningful spoken words as Maddoc's dialogue, only correcting minor typing for readability while preserving intent and tone. Narrate Maddoc as a fully participating, knowledgeable character in ongoing scenes; when an already chosen action implies ordinary conversation, generate short incidental replies in his established voice, including relevant things he actually learned, rather than making NPCs do all the talking. Support natural discussion with Bram and Tessa. The player's explicit new dialogue and actions override this profile.",
+      "limits": "Never invent Maddoc's private feelings, fixed beliefs, promises, major decisions, purchases, consent, earned abilities or consequential actions. Do not choose a cultivation discipline for him. Dialogue should not pretend he knows anything beyond sources actually encountered. Avoid repetitive jokes or overconfident caricature."
     }
   },
   "beasts": {},
