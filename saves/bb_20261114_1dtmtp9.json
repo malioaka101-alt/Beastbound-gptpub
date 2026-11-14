@@ -1042,7 +1042,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 29,
+    "revision": 30,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2277,13 +2277,27 @@
             }
           ]
         }
+      },
+      "maddoc_harness_review_1030_checkpoint_20261114_a2": {
+        "revision": 30,
+        "mode": "checkpoint",
+        "hash": "435cb94741ff6304bd640c71b970fcb4340a136086ee0124c8ccaa4913cb2c3e",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 10:30",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Hedra checking Maddoc's cleaned harnesses",
-      "Meet Bram and Tessa after household work"
+      "Hedra inspecting Maddoc's harness work",
+      "Bram and Tessa after work"
     ],
-    "scene": "Morning of 1 Nesting 1156 AC, 08:00: Maddoc wakes rested at his family cottage after successful Soul self-awareness practice the previous evening. He meets Hedra beside the homestead shed, where muddy harnesses, buckles and worn straps await sorting and cleaning. Hedra offered 2 Talons for a properly completed morning's work; the job has not yet been performed or paid. Bram and Tessa are to be met later if possible.",
+    "scene": "Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Maddoc spent morning checking buckles, cleaning muddy harnesses and sorting straps under Hedra. Everything is laid out for Hedra's final inspection. The offered 2 Talons have NOT been mechanically earned or paid; coins remain 0. Soul progress 2/100, stamina 36/36. Wants to meet Bram and Tessa afterward.",
     "journal": [
       {
         "day": 1,
@@ -2316,6 +2330,10 @@
       {
         "day": 2,
         "text": "After family supper, Maddoc practised Soul self-awareness 129 minutes until 21:00: d20 17+2=19 vs 14, +2 progress (2/100), -2 stamina. Slept 11h; woke 08:00, stamina restored 36/36. Hedra discussed 2 Talons for completed harness-cleaning and sorting work; no work or pay yet."
+      },
+      {
+        "day": 2,
+        "text": "Morning harness work scene: 150 real minutes passed from 08:00 to 10:30 via world.wait; this was not a work award or payout. Work remains subject to Hedra's approval, 2-Talon offer not paid."
       }
     ]
   },
