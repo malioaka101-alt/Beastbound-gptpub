@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 3951775931,
-  "rngState": 2987556565,
+  "rngState": 1155311121,
   "sequence": 0,
   "log": [
     {
@@ -337,10 +337,69 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Mossgate Common.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "mossgate_common",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "feeTalons": 0,
+        "startMinute": 849,
+        "timeDays": 0.16666666666666666,
+        "partTime": false
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 6 +2 = 8 vs DC 14 → failure (-6)",
+      "details": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 2,
+        "dc": 14,
+        "total": 8,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 18:09",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 0 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 0,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "theoreticalGuidance": null,
+        "location": "mossgate_common",
+        "elapsedMinutes": 240,
+        "staminaSpent": 2
+      }
     }
   ],
   "world": {
-    "minutes": 849,
+    "minutes": 1089,
     "location": "mossgate_common",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -368,7 +427,7 @@
     "path": "undecided",
     "health": 48,
     "maxHealth": 48,
-    "stamina": 36,
+    "stamina": 34,
     "maxStamina": 36,
     "mana": 24,
     "maxMana": 24,
@@ -844,7 +903,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 20,
+    "revision": 21,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1633,10 +1692,112 @@
             }
           ]
         }
+      },
+      "maddoc_first_soul_self_awareness_20261114_a2": {
+        "revision": 21,
+        "mode": "rule",
+        "hash": "ddfaf9aee459b63822aa5f3ff1088641bcca9ca3040d6a9ff0273570c69f356a",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 18:09",
+          "output": {
+            "rules": {
+              "system": "soul",
+              "target": "phase1",
+              "method": "self-awareness",
+              "check": {
+                "dice": [
+                  6
+                ],
+                "roll": 6,
+                "modifier": 2,
+                "dc": 14,
+                "total": 8,
+                "margin": -6,
+                "degree": "failure",
+                "success": false,
+                "progress": 0,
+                "naturalBonus": 0
+              },
+              "earned": 0,
+              "progress": 0,
+              "required": 100,
+              "complication": null,
+              "timeDays": 0.16666666666666666,
+              "elapsedMinutes": 240,
+              "staminaSpent": 2,
+              "feeTalons": 0,
+              "route": "independent",
+              "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+              "theoreticalGuidance": null
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 14:09",
+              "type": "world",
+              "text": "The practitioner begins genuine independent soul self-awareness work at Mossgate Common.",
+              "details": {
+                "origin": "verified-independent-discipline-practice",
+                "system": "soul",
+                "target": "phase1",
+                "method": "self-awareness",
+                "location": "mossgate_common",
+                "biome": "settlement",
+                "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 14,
+                "feeTalons": 0,
+                "startMinute": 849,
+                "timeDays": 0.16666666666666666,
+                "partTime": false
+              }
+            },
+            {
+              "day": 1,
+              "time": "Day 1, 14:09",
+              "type": "roll",
+              "text": "🎲 soul phase1 — self-awareness: d20 6 +2 = 8 vs DC 14 → failure (-6)",
+              "details": {
+                "dice": [
+                  6
+                ],
+                "roll": 6,
+                "modifier": 2,
+                "dc": 14,
+                "total": 8,
+                "margin": -6,
+                "degree": "failure",
+                "success": false,
+                "progress": 0,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 1,
+              "time": "Day 1, 18:09",
+              "type": "progress",
+              "text": "soul practice: self-awareness; 0 training points.",
+              "details": {
+                "system": "soul",
+                "target": "phase1",
+                "earned": 0,
+                "complication": null,
+                "route": "independent",
+                "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 14,
+                "theoreticalGuidance": null,
+                "location": "mossgate_common",
+                "elapsedMinutes": 240,
+                "staminaSpent": 2
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Three friends collect permitted windfall apples and eat by Mossgate green"
+      "Maddoc begins real Soul self-awareness practice alongside friends at Mossgate"
     ],
     "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
     "journal": [
@@ -1727,7 +1888,7 @@
         "defense": 10,
         "vigor": 0,
         "will": 2,
-        "stamina": 36,
+        "stamina": 34,
         "maxStamina": 36,
         "boxes": [
           3,
@@ -7398,6 +7559,35 @@
           "noOpponentRoll": true
         }
       ]
-    }
+    },
+    "disciplineTraining": {
+      "soul": {
+        "target": "phase1",
+        "points": 0,
+        "weeks": 0,
+        "methods": {
+          "self-awareness": 1
+        },
+        "cooldownUntil": 0,
+        "complications": [],
+        "history": [],
+        "sessions": 1,
+        "sessionMinutes": 240
+      }
+    },
+    "independentTraining": [
+      {
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "mossgate_common",
+        "startMinute": 849,
+        "days": 0.16666666666666666,
+        "minutes": 240,
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "eventIndex": 19,
+        "eventHash": "d5016b2563b4247e0e346ee1d8b17821d24e144d638cf9844ad675faf9e860c5"
+      }
+    ]
   }
 }
