@@ -90,8 +90,8 @@ A.equal(GM.sealed(tampered.beasts[b.id]),false);
 A.equal(GM.verify(tampered,tampered.beasts[b.id]),false);
 const tamperedBio=E.importGame(E.exportGame(s));
 tamperedBio.table.realm.speciesBiology.species[species.speciesId].bodyPlan='A totally unrelated animal';
-A.equal(GM.verify(tamperedBio,tamperedBio.beasts[b.id]),true,
- 'The witnessed originHash pins the originally established species; historical tamper is separately rejected by authoritative bestiary validation');
+A.equal(GM.verify(tamperedBio,tamperedBio.beasts[b.id]),false,
+ 'GM individual verification must reject altered species biology, not trust a stale source hash');
 A.throws(()=>require('../world/bestiary').bioValidate(tamperedBio.table.realm.speciesBiology),
  /silently rewritten/);
 const tmp=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-gm-wild-fixture-'));
