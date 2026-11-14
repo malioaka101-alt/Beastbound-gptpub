@@ -585,6 +585,11 @@ function validate(e,w=null){
     e.siteWork.some(x=>!verifySiteWork(e,x,w))||
     new Set(e.siteWork.map(x=>x.originalActionHash)).size!==e.siteWork.length))
   return false;
+ if(e.resourceOffers!==undefined&&
+   (!Array.isArray(e.resourceOffers)||e.resourceOffers.length>120||
+    e.resourceOffers.some(x=>!verifyResourceOffer(e,x,w))||
+    new Set(e.resourceOffers.map(x=>x.id)).size!==e.resourceOffers.length))
+  return false;
  if(e.coordinationReviews!==undefined&&!verifyCoordinationReviewHistory(e))
   return false;
  if(e.coordinationMandates!==undefined&&
@@ -1402,6 +1407,141 @@ function siteWorkStatus(w,groupId,{placeId}={}){
    noLegalRightToSiteOrFacilities:true,
    noExtraMoneyOrTrainingAward:true})),
   note:'Only the original independently reviewed limited shared work is recorded here. A site mention is not land ownership, building construction, school accreditation, staffed operation or authority to spend others’ resources.'};
+}
+
+/*
+ * #137 — a founder may offer THEIR OWN actually attested physical goods for
+ * possible group use at a genuinely established site. Neither the group nor
+ * any other member acquires property, access, custody, services or funds.
+ * Availability is computed against the original physical owner on inspection,
+ * never stored as a fabricated facility stock balance.
+ */
+const RESOURCE_OFFER='original-founder-owned-material-voluntary-site-use-v1';
+const RESOURCE_WITHDRAWAL='original-founder-material-site-use-withdrawal-v1';
+function verifyResourceOffer(e,row,w=null){
+ const q=row?.source,a=q?.asset,ap=a?.source,ev=q?.originalEvent,
+  d=ev?.details;
+ if(!q||row.origin!==RESOURCE_OFFER||
+  row.sourceHash!==hash(q)||q.origin!==RESOURCE_OFFER||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  row.assetId!==q.assetId||row.id!==q.id||
+  q.id!=='group_resource_'+hash({
+   groupId:e.id,assetId:q.assetId,place:q.place,
+   minute:q.minute,purpose:q.purpose}).slice(0,24)||
+  !a||a.id!==q.assetId||a.ownerId!=='player'||
+  a.hash!==hash(ap)||a.hash!==q.originalAssetHash||
+  ap?.origin!=='witnessed-existing-material-owner-and-stock-attestation-v1'||
+  a.ownerId!==ap.ownerId||a.item!==ap.item||
+  a.quantity!==ap.quantity||
+  ap.ownerName!==e.founder.name||
+  ap.ownerId!=='player'||
+  !['player-inventory','existing-authored-personal-tool',
+   'existing-purchased-mundane-equipment'].includes(ap.ownerKind)||
+  typeof ap.originalRoot!=='string'||ap.originalRoot.length!==64||
+  ap.noNewPhysicalStock!==true||
+  ap.noLegalTitleOrForcedConsent!==true||
+  ap.noCurrencyOrGuaranteedProduction!==true||
+  !Number.isInteger(ap.minute)||ap.minute<0||
+  !Number.isInteger(q.minute)||q.minute<ap.minute||
+  !Number.isInteger(q.day)||q.day!==Math.floor(q.minute/1440)||
+  q.day<e.foundedDay||q.quantity!==a.quantity||
+  typeof q.purpose!=='string'||q.purpose.trim().length<20||
+  q.purpose.length>500||
+  siteRegion(w,q.place,q.placeProof,q.minute)!==q.regionId||
+  Atlas.R[q.regionId]?.polity!==e.polity||
+  !ev||q.originalEventHash!==hash(ev)||ev.type!=='story'||
+  d?.origin!==RESOURCE_OFFER||d.groupId!==e.id||
+  d.assetId!==q.assetId||d.assetHash!==q.originalAssetHash||
+  d.item!==a.item||d.quantity!==a.quantity||
+  d.place!==q.place||d.minute!==q.minute||
+  d.purpose!==q.purpose||
+  d.owner!==e.founder.name||
+  d.noPhysicalTransfer!==true||d.noFacilityOrAuthorityGranted!==true||
+  q.noTransferOrNewItems!==true||
+  q.noPropertyTitleOrSiteAccess!==true||
+  q.noGuaranteedUseOrEmployeeWork!==true)
+  return false;
+ const end=row.ending;
+ if(end!==null&&end!==undefined){
+  const p=end.source;
+  if(!p||end.sourceHash!==hash(p)||
+   p.origin!==RESOURCE_WITHDRAWAL||
+   p.offerId!==row.id||p.groupId!==e.id||
+   p.originalOfferHash!==row.sourceHash||
+   p.founder!==e.founder.name||
+   !Number.isInteger(p.minute)||p.minute<q.minute||
+   p.day!==Math.floor(p.minute/1440)||
+   typeof p.reason!=='string'||p.reason.trim().length<12||
+   p.reason.length>500||
+   p.noResourceOrMoneyMoved!==true)
+   return false;
+ }
+ return true;
+}
+function retainFounderResourceOffer(w,groupId,{asset,place,placeProof,minute,purpose,
+ originalEvent}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration'||!asset||!originalEvent)
+  throw Error('An existing founded group, genuinely owned documented material and original player choice are required');
+ const regionId=siteRegion(w,place,placeProof,minute);
+ if(!regionId||Atlas.R[regionId]?.polity!==e.polity)
+  throw Error('A genuine established site in the group polity is required');
+ const existing=e.resourceOffers||[];
+ if(existing.length>=120||
+  existing.some(x=>x.assetId===asset.id&&x.source.place===place&&!x.ending))
+  throw Error('This original asset is already offered here or the original register is full');
+ const q={origin:RESOURCE_OFFER,groupId:e.id,
+  groupOriginHash:e.originHash,
+  assetId:asset.id,originalAssetHash:asset.hash,quantity:asset.quantity,
+  asset:structuredClone(asset),place,regionId,minute,
+  day:Math.floor(minute/1440),purpose,
+  ...(placeProof?{placeProof:structuredClone(placeProof)}:{}),
+  originalEvent:structuredClone(originalEvent),
+  originalEventHash:hash(originalEvent),
+  noTransferOrNewItems:true,noPropertyTitleOrSiteAccess:true,
+  noGuaranteedUseOrEmployeeWork:true};
+ q.id='group_resource_'+hash({
+  groupId:e.id,assetId:q.assetId,place:q.place,
+  minute:q.minute,purpose:q.purpose}).slice(0,24);
+ const row={origin:RESOURCE_OFFER,id:q.id,assetId:asset.id,
+  source:q,sourceHash:hash(q),ending:null};
+ if(!verifyResourceOffer(e,row,w))
+  throw Error('Real property and local volunteer offer do not share valid original provenance');
+ e.resourceOffers||=[];e.resourceOffers.push(row);
+ if(!validate(e,w)){e.resourceOffers.pop();
+  throw Error('Original voluntarily offered material cannot alter a real group registry');}
+ return {offered:true,id:row.id,groupId:e.id,assetId:asset.id,
+  place,item:asset.item,quantity:asset.quantity,
+  ownedBy:e.founder.name,notTransferred:true,
+  notBuildingOrGroupOwned:true,noAutomaticWorkerUse:true};
+}
+function withdrawFounderResourceOffer(w,groupId,{offerId,minute,reason}={}){
+ const e=lookup(w,groupId),row=e?.resourceOffers?.find(x=>x.id===offerId);
+ if(!e||e.origin!=='player-declaration'||!row||row.ending)
+  throw Error('Only an existing active founder-owned resource offer can be withdrawn');
+ const q={origin:RESOURCE_WITHDRAWAL,groupId:e.id,offerId:row.id,
+  originalOfferHash:row.sourceHash,founder:e.founder.name,minute,
+  day:Math.floor(minute/1440),reason,noResourceOrMoneyMoved:true};
+ row.ending={source:q,sourceHash:hash(q)};
+ if(!validate(e,w)){row.ending=null;
+  throw Error('A withdrawn availability offer must preserve original asset and site evidence');}
+ return {withdrawn:true,offerId,groupId:e.id,
+  originalOwnershipUnchanged:true,noMoneyOrTimeSpent:true};
+}
+function resourceOfferStatus(w,groupId,{placeId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')throw Error('An original founder-owned group is required');
+ if(placeId!==undefined&&typeof placeId!=='string')
+  throw Error('Only a real physical location may filter voluntary resource offers');
+ return (e.resourceOffers||[])
+  .filter(x=>placeId===undefined||x.source.place===placeId)
+  .map(x=>({id:x.id,assetId:x.assetId,item:x.source.asset.item,
+   quantityAtOriginalWitness:x.source.quantity,
+   place:x.source.place,purpose:x.source.purpose,
+   originalAssetSourceHash:x.source.originalAssetHash,
+   originalSiteFoundingHash:x.source.placeProof?.foundingHash??null,
+   withdrawn:!!x.ending,ownerName:e.founder.name,
+   noPropertyTransfer:true,noGuaranteedUse:true}));
 }
 
 function month(w,day,emit){
@@ -2858,4 +2998,6 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
  voluntaryTaskStatus,
  TREASURY_AUDIT,verifyTreasuryAudit,openTreasuryAudit,addTreasuryReceipt,
- treasuryAuditStatus,SITE_WORK,verifySiteWork,siteWorkStatus};
+ treasuryAuditStatus,SITE_WORK,verifySiteWork,siteWorkStatus,
+ RESOURCE_OFFER,RESOURCE_WITHDRAWAL,verifyResourceOffer,
+ retainFounderResourceOffer,withdrawFounderResourceOffer,resourceOfferStatus};

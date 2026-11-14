@@ -537,6 +537,9 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupTreasuryStatus':return EmergentGroups.treasuryStatus(s,params);
   case 'social.groupSiteWorkStatus':return EmergentGroups.siteWorkStatus(s,params);
+  case 'social.offerGroupOwnedResource':return EmergentGroups.offerOwnedResource(s,params);
+  case 'social.withdrawGroupResourceOffer':return EmergentGroups.withdrawResourceOffer(s,params);
+  case 'social.groupResourceSiteStatus':return EmergentGroups.resourceSiteStatus(s,params);
   case 'social.observeGroupRoleWork':return GroupInvitations.observeResponsibilityWork(s,params);
   case 'social.groupRoleWorkStatus':return GroupInvitations.responsibilityWorkStatus(s,params);
   case 'social.groupPurposeHistory':return EmergentGroups.purposeHistory(s,params);
