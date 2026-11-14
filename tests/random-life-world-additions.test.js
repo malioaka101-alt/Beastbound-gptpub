@@ -28,7 +28,7 @@ for(let seed=1;seed<=160;seed++){
  A.equal(state.player.humanEvolution.stage,0);
  A.equal(state.player.arcane.circles,0);
  A.equal(state.player.origin.stableTraits.length,0);
- A.equal(state.player.meridian.gatesOpened||0,0);
+ A.equal(state.player.meridian.stage,0);
  A.equal(record.noAutomaticBenefits,true);
  A.equal(record.noNewNpcConsent,true);
  A.equal(record.noLineagePowerGranted,true);
