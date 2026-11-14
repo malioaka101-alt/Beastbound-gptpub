@@ -156,7 +156,13 @@ function status(s,p={}){
   const effects=Object.values(h.events).filter(e=>e.visibility==='public')
    .flatMap(e=>e.effects.filter(x=>x.visibility==='public'&&x.targetType===p.targetType&&x.targetId===p.targetId)
     .map(x=>({eventId:e.id,era:e.era,dimension:x.dimension,change:x.change,continuity:x.continuity,precededBy:x.precededBy})));
-  return {targetType:p.targetType,targetId:p.targetId,name:found.name,effects};
+  // A guessed sequential GM person/group ID is not itself player-known.
+  // Public historical evidence may identify its actual subject; a hidden
+  // source or an event with only secret effects cannot be used to reveal it.
+  if(found.originHash!==null&&!effects.length)
+   return {targetType:p.targetType,targetId:p.targetId,known:false,effects:[]};
+  return {targetType:p.targetType,targetId:p.targetId,name:found.name,effects,
+   ...(found.originHash!==null?{known:true}:{})};
  }
  return {events:Object.values(h.events).filter(e=>e.visibility==='public').map(e=>publicEvent(e,h))};
 }
