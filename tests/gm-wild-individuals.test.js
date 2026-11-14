@@ -57,7 +57,22 @@ A.equal(b.hp,undefined,'No invented combat physiology');
 A.equal(b.energy,undefined,'No invented spell or physical energy profile');
 A.equal(b.condition,undefined,'Unobserved clinical condition cannot be presumed perfect');
 A.equal(b.sapience,undefined,'No invented cognitive classification');
+A.equal(b.evolutionStage,'Unclassified','An original current-form identity is not a rank, grade or proven path');
 A.equal(b.techniques,undefined,'No unearned combat techniques');
+// The SAME original evolution-branch source owner can inspect the individual,
+// but still demands the independent measured form, costs and requirements.
+// Its default result is rejection, never a new rank or automatic branch.
+A.throws(()=>Rules.act(s,{system:'evolution',operation:'authorBranch',
+ params:{beastId:b.id,branchId:'silverwing',
+ source:'Unverified future adaptation under research: the GM has not measured the individual physical prerequisites.',
+ parameters:{beastId:b.id,branchId:'silverwing'},
+ ecology:{},incompatibleWith:[]}}),/possible form needs authentic biological maturity/);
+A.equal(b.evolutionBranchAssessments,undefined);
+A.throws(()=>Rules.act(s,{system:'bond',operation:'register',
+ params:{beastId:b.id}}),/sapience not recorded/);
+A.throws(()=>Rules.act(s,{system:'combat',operation:'begin',
+ params:{beastId:b.id}}),/current unengaged, known beast encounter/);
+A.equal(s.player.partnerIds.length,0);
 A.equal(rule('gmWildStatus',{beastId:b.id}).individuals[0].visibleMarker,marker);
 const memory=rule('wildMemoriesStatus');
 A.ok(memory.knownIndividuals.some(x=>x.beastId===b.id&&
