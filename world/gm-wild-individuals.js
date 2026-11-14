@@ -21,6 +21,7 @@ function sealed(b){
  const life=b?.individualLife;
  if(!root||root.origin!==SOURCE||b.gmWild.seal!==hash(root)||
     root.id!==b.id||root.speciesId!==b.species||
+    b.evolutionStage!=='Unclassified'||
     !root.habitatAtWitness||
     !['forage','water','quality','pressure'].every(k=>
       integer(root.habitatAtWitness[k],0,100))||
