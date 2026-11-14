@@ -6,6 +6,7 @@
 const Atlas=require('./atlas');
 const Houses=require('./social-houses');
 const Bestiary=require('./bestiary');
+const Renown=require('./renown-and-practice');
 const Engine=require('../engine.js');
 const Realm=require('./simulation');
 const Gov=require('./government-offices');
@@ -132,6 +133,12 @@ const publicTrade=()=>Atlas.tradeRoutes.map(t=>({
  traditionalRoute:t.mode,usualTradeThemes:[t.exportA,t.exportB],
  noCurrentSafetyOrStockGuaranteed:true
 }));
+const famousHistory=()=>Renown.HISTORICAL_LEGACIES.map(x=>({
+ id:x.id,name:x.name,era:x.era,
+ publicAccount:x.history,publicLegacy:x.dailyLegacy,
+ attributionStatus:x.status,
+ noPersonallyVerifiedPower:true
+}));
 const history=()=>Atlas.history.map(x=>({
  era:x.era,publicText:x.event,period:x.period,
  interpretation:'A commonly taught chronology; witness-level details and differing cultural accounts require their original historical source.'
@@ -195,6 +202,7 @@ function status(s,p={}){
   familiarHouseNames:RECOGNISED_FAMILIES.map(id=>({
    name:Houses.byId[id].name,polity:Atlas.P[Houses.byId[id].polity].name})),
   commonBeastNames:familiarSpecies().map(x=>x.name),
+  famousHistoricalNames:famousHistory().map(x=>({name:x.name,era:x.era})),
   recognisedPaths:SYSTEMS.map(x=>x.name),
   familiarTopics:[...TOPICS],
   caution:'Fame and elementary knowledge vary by culture and upbringing. A world primer cannot impart every remote law, secret evolution, hidden creature, current ruler’s intentions or witnessed local event.'
@@ -203,6 +211,10 @@ function status(s,p={}){
  topic==='families'?{wellKnownHouses:RECOGNISED_FAMILIES.map(id=>familyView(Houses.byId[id])),
   note:'Other households and freely founded associations exist. One famous charter is not a binding power, job, marriage, bloodline or automatic player connection.'}:
  topic==='institutions'?{familiarInstitutions:RECOGNISED_INSTITUTIONS.map(id=>institutionView(Atlas.I[id])),
+  renownedPublicTraditions:Renown.RENOWNED.map(x=>({
+   id:x.id,institution:Atlas.I[x.institution].name,
+   publicStanding:x.standing,knownService:x.publicService,
+   noGrantedQualification:true})),
   note:'Many other institutions exist; named examples are not an exhaustive career or school catalogue.'}:
  topic==='systems'?{disciplines:SYSTEMS.map(x=>({...x})),
   independentHumanEvolution:'Changes to the human body, soul and Origin Pattern are distinct from discipline level, technical mastery and inherited traits.',
@@ -216,7 +228,7 @@ function status(s,p={}){
    culture:Atlas.C[x.culture]?.name||x.culture,
    typicalSeason:x.season,publicPurpose:x.purpose})),
   note:'Seasons and traditional festivals are common culture, not an automatically scheduled current scene or compulsory event.'}:
- topic==='history'?{commonHistory:history(),
+ topic==='history'?{commonHistory:history(),familiarHistoricalFigures:famousHistory(),
   note:'The broad eras are familiar; causes, viewpoints and disputed memories vary. No hidden causal-history entry is exposed.'}:
  {local:local(s)};
  return {...head,...result};
