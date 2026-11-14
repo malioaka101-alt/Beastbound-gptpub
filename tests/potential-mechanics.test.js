@@ -65,4 +65,24 @@ function fresh(seed){
  const saved=E.importGame(E.exportGame(s));
  A.equal(saved.player.capabilityProfile.potential.soulDepth.latent,1);
 }
-console.log('Personal potential affects real discipline practice but never gates a stage');
+{
+ const s=fresh(914005);
+ const apt=Potential.originStep(s,6);
+ A.equal(apt.dimension,'bloodlineExpression');
+ A.equal(Potential.matches(s,apt,'bloodlineExpression'),true);
+ A.equal(Potential.matches(s,{...apt,modifier:50},'bloodlineExpression'),false);
+ A.equal(Potential.matches(s,undefined,'bloodlineExpression'),true,
+  'old source-backed receipts without aptitude must remain replayable');
+}
+{
+ const P=require('../rules/progress');
+ const rec={name:'Rare test branch',kind:'rare',grade:5,
+  potential:0,gradeCeiling:0,blocked:false,documented:false,
+  specialConditionsMet:false,conditions:[],years:1,requiredYears:1,rate:1};
+ const ready=P.status(rec);
+ A.equal(ready.gate,true);
+ A.equal(ready.ready,true);
+ A.equal(ready.potentialNeverBlocksForm,true);
+ A.ok(ready.potentialStrain>0);
+}
+console.log('Potential modifies real checks and beast difficulty without stage caps');
