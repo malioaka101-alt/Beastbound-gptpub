@@ -7,6 +7,7 @@ const U=require('./unified'),Combat=require('./combat'),Build=require('./build')
 const Crypto=require('node:crypto');
 const SoulThreads=require('./soul-threading');
 const RiftAnchors=require('./rift-anchors');
+const LivedPlaces=require('../world/lived-places');
 const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
@@ -28,8 +29,13 @@ const SELF_SITES=Object.freeze({
  soul:EVERYWHERE,body:EVERYWHERE,rift:['ruins']
 });
 function independentSite(s,system,{shortSession=false}={}){
- const site=s.world?.location,loc=E.LOCATIONS[site];
- if(!loc||!SELF_SITES[system]?.includes(site))
+ const site=s.world?.location,loc=LivedPlaces.location(s,site);
+ // A GM-established settlement is as real as a fixed engine location.
+ // Ordinary self-awareness, breathing and core-theory practice can occur
+ // there; Rift sensing still needs an actual witnessed spatial anomaly.
+ const supported=Object.hasOwn(E.LOCATIONS,site)?SELF_SITES[system]?.includes(site):
+  loc?.sceneType==='settlement'&&['meridian','arcane','soul','body'].includes(system);
+ if(!loc||!supported)
   throw Error('This discipline requires a genuinely suitable existing practice environment; choose a different real location');
  if(s.battle||s.encounter)
   throw Error('An unresolved threat cannot be treated as an uneventful independent practice period');
@@ -40,8 +46,8 @@ function independentSite(s,system,{shortSession=false}={}){
   throw Error('Sixday independent practice with animal partners needs real separately funded and witnessed care');
  return {site,name:loc.name,biome:loc.biome};
 }
-function independentSource(system,method,location){
- const loc=E.LOCATIONS[location];
+function independentSource(s,system,method,location){
+ const loc=LivedPlaces.location(s,location);
  return 'Personal '+system+' '+method+' practice using the existing '+loc.name+
   ' environment and the practitioner\'s own recorded anatomy/energy';
 }
@@ -407,7 +413,7 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
   actualDC=dc+(self||short?2:0);
  if(s.player.coins<fee)throw Error('Cannot pay for the selected instruction and materials');
  const actualMinutes=short?minutes:6*1440;
- const learnedSource=self?independentSource(system,method,self.site):source;
+ const learnedSource=self?independentSource(s,system,method,self.site):source;
  const startMinute=s.world.minutes;
  if(self){
   C.event(s,'world','The practitioner begins genuine independent '+system+' '+method+' work at '+self.name+'.',{
@@ -494,7 +500,7 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
  const fee=self?0:(system==='arcane'?5:3);
  if(s.player.coins<fee)throw Error('Selected rite preparations and safeguards not funded');
  const actualDC=dc+2+(self?3:0);
- const riteSource=self?independentSource(system,target,self.site):source;
+ const riteSource=self?independentSource(s,system,target,self.site):source;
  if(self){
   C.event(s,'world','A self-directed '+system+' '+target+' breakthrough is attempted at '+self.name+' using the practised anatomy and accumulated training.',{
    origin:'verified-independent-breakthrough',system,target,
