@@ -569,6 +569,12 @@ function validate(e,w=null){
     e.internalRoles.some(x=>!verifyInternalRole(e,x,w))||
     new Set(e.internalRoles.map(x=>x.id)).size!==e.internalRoles.length))
   return false;
+ if(e.roleWork!==undefined&&
+   (!Array.isArray(e.roleWork)||e.roleWork.length>500||
+    e.roleWork.some(x=>!verifyRoleWork(e,x,w))||
+    new Set(e.roleWork.map(x=>x.id)).size!==e.roleWork.length||
+    new Set(e.roleWork.map(x=>x.workReceiptHash)).size!==e.roleWork.length))
+  return false;
  if(e.priorityWork!==undefined&&
    (!Array.isArray(e.priorityWork)||
     e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
@@ -2143,6 +2149,159 @@ function voluntaryRoleStatus(w,groupId,{day}={}){
 
 
 /*
+ * A PERSON'S existing independent work during an ALREADY CONSENTED group
+ * responsibility. This is an attribution of one real original career check,
+ * not a second roll, a payroll contract or guaranteed project completion.
+ *
+ * The local witnessed event, existing GM-place source, worker's original
+ * living-person shift and original work receipt travel together so the
+ * group's historical record survives rotating short scene/work journals.
+ */
+const ROLE_WORK='original-independent-person-work-during-voluntary-group-role-v1';
+function verifyRoleWork(e,row,w=null){
+ const q=row?.source,role=e.internalRoles?.find(x=>x.id===row?.roleId),
+  shift=q?.originalShift,event=q?.originalEvent,
+  r=q?.originalCareerReceipt,job=r?.source?.task,details=event?.details,
+  person=w?.emergentPeople?.people?.[q?.personId];
+ if(!q||row.origin!==ROLE_WORK||q.origin!==ROLE_WORK||
+  row.sourceHash!==hash(q)||row.id!==q.id||
+  row.roleId!==q.roleId||row.workReceiptHash!==q.workReceiptHash||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  q.id!=='role_work_'+hash({groupId:e.id,roleId:q.roleId,
+   receiptHash:q.workReceiptHash}).slice(0,24)||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  !role||!role.agreed||role.sourceHash!==q.originalRoleHash||
+  !verifyInternalRole(e,role,w)||
+  q.memberActorId!==role.memberActorId||
+  q.membershipSourceHash!==role.memberConsentHash||
+  typeof q.personId!=='string'||q.memberActorId!=='emergent:'+q.personId||
+  q.location!==role.source.place||
+  !Number.isInteger(q.day)||q.day<role.startDay||
+  q.day>role.untilDay||
+  !e.additionalMembers?.some(m=>m.actorId===q.memberActorId&&
+   m.hash===q.membershipSourceHash&&m.name===role.source.memberName&&
+   Number.isInteger(m.witness?.details?.day)&&
+   m.witness.details.day<=q.day&&
+   (m.active!==false||m.departure?.day>q.day))||
+  !shift||shift.source!=='emergent-local-work-presence-v1'||
+  shift.npcId!==q.memberActorId||shift.actorId!==q.memberActorId||
+  shift.personId!==q.personId||
+  shift.originHash!==q.personOriginHash||
+  shift.name!==role.source.memberName||
+  shift.location!==q.location||shift.fromDay>q.day||
+  shift.throughDay<q.day||
+  shift.throughDay-shift.fromDay!==5||
+  shift.scheduledAtDay!==shift.fromDay||
+  shift.hash!==hash(Object.fromEntries(
+   Object.entries(shift).filter(([k])=>k!=='hash')))||
+  !event||event.type!=='story'||hash(event)!==q.originalEventHash||
+  !details||details.origin!=='local-independent-person-work-witness-v1'||
+  details.npcId!==q.memberActorId||
+  details.name!==role.source.memberName||
+  details.location!==q.location||details.day!==q.day||
+  details.minutes!==30||details.freelyAgreed!==true||
+  details.presenceHash!==shift.hash||
+  details.personOriginHash!==q.personOriginHash||
+  details.localWorkSourceHash!==q.workReceiptHash||
+  !r||r.origin!=='independent-person-practical-work-v1'||
+  r.sourceHash!==q.workReceiptHash||
+  r.sourceHash!==hash(r.source)||
+  r.source.personId!==q.personId||
+  r.source.personOriginHash!==q.personOriginHash||
+  r.source.day!==q.day||
+  r.source.context!=='locally-witnessed-duty'||
+  !job||typeof job.authoredDutyId!=='string'||
+  r.source.outcome?.success!==Boolean(r.source.outcome.success)||
+  !Number.isInteger(r.source.roll)||r.source.roll<1||r.source.roll>20||
+  typeof job.method!=='string'||
+  details.observed?.work!==job.method||
+  details.observed?.goal!==job.goal||
+  details.observed?.visibleOutcome!==(r.source.outcome.success?
+   r.source.outcome.degree+' practical result':
+   'The task did not achieve its intended effect')||
+  q.noExtraCareerProgress!==true||
+  q.noGroupPayrollOrProperty!==true||
+  q.noAutomaticRoleCompletion!==true)
+  return false;
+ if(w){
+  const Careers=require('./person-careers');
+  if(!person||person.origin!=='gm-witnessed-lived-person-v1'||
+   person.id!==q.personId||person.actorId!==q.memberActorId||
+   person.originHash!==q.personOriginHash||
+   !Careers.verify(person)||!Array.isArray(person.career?.authoredDuties)||
+   !person.career.authoredDuties.some(d=>
+    d.id===job.authoredDutyId&&d.workProofHashes.includes(q.workReceiptHash)))
+   return false;
+  // An original duty receipt may later fall out of the worker's bounded
+  // work journal; the original authored duty still retains its hash.
+  const still=person.career.workReceipts.find(x=>x.sourceHash===q.workReceiptHash);
+  if(still&&JSON.stringify(still)!==JSON.stringify(r))return false;
+ }
+ return true;
+}
+function retainOriginalRoleWork(w,groupId,{roleId,npcId,shift,
+ event,workReceipt}={}){
+ const e=lookup(w,groupId),role=e?.internalRoles?.find(x=>x.id===roleId),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null;
+ if(!e||e.origin!=='player-declaration'||!role?.agreed||
+  role.memberActorId!==npcId||!p||
+  p.origin!=='gm-witnessed-lived-person-v1'||
+  !require('./person-careers').verify(p)||
+  !workReceipt||!event||!shift||
+  workReceipt.source?.task?.authoredDutyId===undefined)
+  throw Error('Only actually witnessed original independent GM-member professional work may be associated with a genuinely agreed group role');
+ const q={origin:ROLE_WORK,groupId:e.id,groupOriginHash:e.originHash,
+  roleId,originalRoleHash:role.sourceHash,
+  memberActorId:npcId,membershipSourceHash:role.memberConsentHash,
+  personId:p.id,personOriginHash:p.originHash,
+  location:role.source.place,day:workReceipt.source.day,
+  originalShift:structuredClone(shift),
+  originalEvent:structuredClone(event),originalEventHash:hash(event),
+  originalCareerReceipt:structuredClone(workReceipt),
+  workReceiptHash:workReceipt.sourceHash,
+  noExtraCareerProgress:true,noGroupPayrollOrProperty:true,
+  noAutomaticRoleCompletion:true};
+ q.id='role_work_'+hash({groupId:e.id,roleId,
+  receiptHash:workReceipt.sourceHash}).slice(0,24);
+ const row={id:q.id,origin:ROLE_WORK,roleId,
+  workReceiptHash:workReceipt.sourceHash,source:q,sourceHash:hash(q)};
+ e.roleWork||=[];
+ if(e.roleWork.length>=500||
+  e.roleWork.some(x=>x.id===row.id||
+   x.workReceiptHash===row.workReceiptHash))
+  throw Error('The original person work receipt cannot be attributed twice to this organisation');
+ if(!verifyRoleWork(e,row,w))
+  throw Error('The original work, independent consent and physical role site do not reconcile');
+ e.roleWork.push(row);
+ if(!validate(e,w)){
+  e.roleWork.pop();
+  throw Error('Original association integrity rejected a false professional role-work link');
+ }
+ return {groupId:e.id,roleId,serviceId:row.id,
+  observedOriginalWork:true,originalWorkHash:row.workReceiptHash,
+  noAdditionalRollOrTime:true,noAutomaticSalaryOrInstitutionalQualification:true};
+}
+function roleWorkStatus(w,groupId,{roleId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('Only a real founded voluntary association has witnessed role work');
+ if(roleId!==undefined&&typeof roleId!=='string')
+  throw Error('A responsibility filter must be a genuine existing role ID');
+ return {groupId:e.id,witnessedRoleWork:(e.roleWork||[])
+  .filter(x=>roleId===undefined||x.roleId===roleId)
+  .map(x=>({serviceId:x.id,roleId:x.roleId,
+   npcId:x.source.memberActorId,day:x.source.day,
+   placeId:x.source.location,
+   observed:structuredClone(x.source.originalEvent.details.observed),
+   originalWorkHash:x.workReceiptHash,
+   originalRoleHash:x.source.originalRoleHash,
+   noExtraMoneyOrWorkRoll:true,noAutomaticTrainingOrEmployment:true,
+   noProofOfSpecificRoleCompletion:true})),
+  note:'An actual independent professional worked at their agreed role site during its term. This does not prove they fulfilled a distinct group project, gained a teaching licence, drew a salary or transferred any facility.'};
+}
+
+/*
  * #18: optional advisory-priority attribution to ACTUAL original group work.
  * This does not award extra money, bind dissenters or resolve a second roll.
  * The original independent month work and its existing funds cost are the
@@ -2687,6 +2846,7 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INTERNAL_POSITION,considerInternalPosition,internalPositionStatus,
  INDEPENDENT_WORK_POSITION,reassessPublishedWork,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
+ ROLE_WORK,verifyRoleWork,retainOriginalRoleWork,roleWorkStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus,
  COORDINATION_REVIEW,COORDINATION_PURPOSE_REVIEW,
