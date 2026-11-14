@@ -43,8 +43,10 @@ const outcome=R.act(s,{system:'social',operation:'householdWork',
  params:{npcId:person.actorId,purpose}});
 A.equal(outcome.noUnverifiedMoney,true);
 A.equal(outcome.noAutomaticAgreement,true);
-A.equal(s.rngState,JSON.parse(original).rngState,
- 'Independent employer decision must not draw from player dice RNG');
+if(outcome.accepted)A.notEqual(s.rngState,JSON.parse(original).rngState,
+ 'The actual player Crafting check consumes exactly its original die');
+else A.equal(s.rngState,JSON.parse(original).rngState,
+ 'An independent employer refusal must not roll a player die');
 if(outcome.accepted){
  A.ok(outcome.check.roll>=1&&outcome.check.roll<=20);
  A.equal(outcome.check.success,true,'High saved practical skill makes this routine task reliable');
