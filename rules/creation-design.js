@@ -9,6 +9,16 @@ const E=require('../engine.js'),B=require('./build'),
  H=require('./unified');
 const ORIGIN='bounded-creation-concept-v1',MINUTES=35,STAMINA=1;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const MaterialDiscovery=require('./material-discovery');
+// Authenticated, reserved variants remain part of their original physical
+// stock; naming a novel material in a dossier cannot create that stock.
+function sourcedQuantity(s,id){
+ if(Object.hasOwn(E.RESOURCES,id)){
+  const amount=s.player?.inventory?.[id]??0;
+  return Number.isInteger(amount)&&amount>=0?amount:0;
+ }
+ return MaterialDiscovery.count(s,id);
+}
 // These are mechanism envelopes, NOT all possible reasons to invent things.
 // Unlisted effects need grounded research and an explicit new bounded adapter.
 const FUNCTIONS=Object.freeze({
@@ -148,10 +158,8 @@ function incompleteConcept(s,p){
  const scope={medium:p.medium,system:p.system,function:p.function,
   magnitude:p.magnitude,range:p.range,area:p.area,duration:p.duration,
   ...(p.target?{target:p.target}:{})};
- const missingMaterials=p.materials.filter(m=>
-  !Number.isInteger(s.player?.inventory?.[m.id])||
-  s.player.inventory[m.id]<m.quantity)
-  .map(m=>({id:m.id,need:m.quantity,recorded:s.player?.inventory?.[m.id]||0}));
+ const missingMaterials=p.materials.filter(m=>sourcedQuantity(s,m.id)<m.quantity)
+  .map(m=>({id:m.id,need:m.quantity,recorded:sourcedQuantity(s,m.id)}));
  const budget={
   grade:null,theoreticalDC:null,progressionTrack:null,
   nominalMaterialsPerSixdayTalons:null,researchLeadRankRequired:null,
@@ -221,13 +229,12 @@ function analysis(s,raw){
  if(p.medium!=='technique'&&p.medium!=='ritual'&&
   p.medium!=='aspect-form'&&p.materials.length===0)
   gaps.push('A tangible design needs a real bill of materials or explicitly established reusable facility');
- const missingMaterials=p.materials.filter(m=>
-  !Number.isInteger(s.player.inventory?.[m.id])||s.player.inventory[m.id]<m.quantity)
-  .map(m=>({id:m.id,need:m.quantity,recorded:s.player.inventory?.[m.id]||0}));
+ const missingMaterials=p.materials.filter(m=>sourcedQuantity(s,m.id)<m.quantity)
+  .map(m=>({id:m.id,need:m.quantity,recorded:sourcedQuantity(s,m.id)}));
  if(missingMaterials.length)gaps.push('Proposed inputs are not fully held or sourced; item material qualities are not inferred from their name or cost');
  const hasUnverifiedMaterials=p.materials.some(m=>
   !Object.hasOwn(E.RESOURCES,m.id)&&
-  !s.table?.materialRecords?.[m.id]?.verified);
+  !MaterialDiscovery.verified(s,m.id));
  if(hasUnverifiedMaterials)gaps.push('Novel material identities and grades require authenticated discovery and appraisal');
  let budget=null;
  if(p.system==='arcane'&&knownMechanism){
