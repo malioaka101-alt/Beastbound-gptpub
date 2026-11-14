@@ -88,7 +88,7 @@ A.equal(s.player.partnerIds.length,0);
 A.equal(s.rngState,playerRoll);
 const bondState=E.importGame(E.exportGame(s));
 const bond=R.act(bondState,{system:'bond',operation:'register',params:{beastId:b.id}});
-A.equal(bond.registered,true);
+A.equal(bond.recorded,true);
 A.equal(bondState.beasts[b.id].consent,undefined);
 A.equal(bondState.player.partnerIds.length,0);
 const beforeCombat=s.world.minutes;
