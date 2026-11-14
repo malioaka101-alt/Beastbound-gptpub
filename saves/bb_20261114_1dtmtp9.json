@@ -471,6 +471,15 @@
       "noUnearnedPowers": true,
       "noAutomaticNPCConsent": true,
       "noAutomaticOffice": true
+    },
+    "personality": {
+      "traits": [
+        "fiery",
+        "witty"
+      ],
+      "speechStyle": "Quick with sharp, clever comebacks, playful teasing and pointed observations; spirited, bold and expressive when the moment calls for it.",
+      "application": "Shape the delivery and phrasing of dialogue the player supplies, and natural incidental speech resulting from the player's choices. Preserve the player's actual intent and decisions.",
+      "limits": "Do not invent the player's beliefs, hidden thoughts, emotional states, promises, major dialogue choices or consequential actions. Not every line needs a joke or angry outburst. Keep voice age-appropriate for a ten-year-old, capable of restraint and sincerity."
     }
   },
   "beasts": {},
