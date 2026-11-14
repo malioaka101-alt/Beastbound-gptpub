@@ -49,6 +49,7 @@ const CivicPetitions=require('./civic-petitions');
 const PublicHearings=require('./public-hearings');
 const Mediation=require('./voluntary-mediation');
 const EmergentGroups=require('./emergent-groups');
+const StartingWorld=require('../world/starting-world');
 const GroupInvitations=require('./group-invitations');
 const Senses=require('./first-stage-senses');
 const RiftAnchors=require('./rift-anchors');
@@ -397,6 +398,7 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.domainForm':return require('./rift-boundary-domain').form(s,params);
   case 'world.realmInit':return {world:Realm.ensure(s).version,...Realm.synopsis(s)};
   case 'world.realmStatus':return Realm.publicStatus(s);
+  case 'world.startingWorld':return StartingWorld.status(s,params);
   case 'world.governmentStatus':return Realm.publicGovernment(s,params);
   case 'world.localRightsContext':return require('../world/government-offices').localRightsContext(s,params);
   case 'world.realmOverview':return Realm.synopsis(s);
