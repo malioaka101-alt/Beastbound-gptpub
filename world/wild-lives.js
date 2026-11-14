@@ -61,7 +61,11 @@ function ensure(s,b,ev){
   const life=b.individualLife,src=life?.source;
   if(life?.version!==1||life.beastId!==b.id||
    life.species!==b.species||!src||
-   ![SOURCE,'independent-mammal-birth-v1'].includes(src.origin)||
+   ![SOURCE,'independent-mammal-birth-v1',
+    require('./gm-wild-individuals').SOURCE].includes(src.origin)||
+   (src.origin===require('./gm-wild-individuals').SOURCE&&
+    (!require('./gm-wild-individuals').sealed(b)||
+     src.witnessHash!==b.gmWild.seal))||
    src.beastId!==b.id||src.species!==b.species||
    (src.origin==='independent-mammal-birth-v1'&&
     (!b.wildBirth||b.wildBirth.origin!==src.origin||
