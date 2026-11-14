@@ -616,7 +616,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 5,
+    "revision": 6,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -835,16 +835,34 @@
             }
           ]
         }
+      },
+      "tansyhook_scene_checkpoint_20261114_001": {
+        "revision": 6,
+        "mode": "checkpoint",
+        "hash": "186c2d8d4c94e13ac0d0476f946c01f61470d0ba06e7246ca7edc698b0acf1ab",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:23",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Explore Tansyhook Crossing and its orchard lanes"
+      "Explore Tansyhook Crossing"
     ],
-    "scene": "At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.",
+    "scene": "At 08:23 Maddoc arrived at Tansyhook Crossing from the Rillbend culvert, leaving the small moss-feathered seed-eating creature alone. Orchard lanes meet at a timber bridge over an irrigation channel beside a covered weigh-shed and fruit-cart layby. Workers tend carts while two local children contest stone-skipping by the railing. Maddoc has not approached or spoken to anyone here.",
     "journal": [
       {
         "day": 1,
         "text": "Maddoc said, 'Is arguing all you can do?' and began putting right the twisted harness. An ash-coated burden beast had a tight metal fitting rubbing its left shoulder raw. He loosened and straightened that strap; the animal remained at the trough and made no commitment to pull the cart. No new bond, injury, material or resources recorded."
+      },
+      {
+        "day": 1,
+        "text": "After leaving the small seed-eating creature beneath the Rillbend culvert, Maddoc walked 16 minutes to Tansyhook Crossing (08:23). No other outcomes, resource or relationship changes."
       }
     ]
   },
