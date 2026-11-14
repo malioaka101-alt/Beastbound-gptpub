@@ -408,6 +408,15 @@ function status(s,p={}){
    medium:x.envelope.medium,system:x.envelope.system,
    boundMechanism:x.envelope.function,effectGrade:x.envelope.effectGrade,
    gaps:x.gaps.slice(),status:x.status,prototypeId:x.prototypeId||null,
+   // The original dossier records the historic proposal; current actual
+   // custody is rechecked rather than treating a once-held sample as perpetual
+   // inventory or granting a craft route from historical material evidence.
+   currentMaterials:(x.proposal.materials||[]).map(m=>({
+    item:m.id,required:m.quantity,heldNow:sourcedQuantity(s,m.id),
+    identifiedOriginalMaterial:Object.hasOwn(E.RESOURCES,m.id)||
+      MaterialDiscovery.verified(s,m.id),
+    noGuaranteedCraftingEffect:true
+   })),
    ...(x.personalDevelopment?{personalExpression:{
     progress:x.personalDevelopment.progress,required:PERSONAL_REQUIRED,
     identityMilestone:x.personalDevelopment.identity?.milestone,
