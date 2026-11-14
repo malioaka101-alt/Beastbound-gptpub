@@ -164,6 +164,23 @@ The **Age of First Paths** associates the earliest roads with rifts and migrator
 
 These are broad historical anchors from the Atlas. An individual family, cultural group or archaeologist may disagree over motives and meaning. The original causal-history and research systems, not this schoolbook primer, decide what can actually be proved.
 
+### Names repeated in civic lessons, workshops and old songs
+
+These are **existing public historical legacies** from `world/renown-and-practice.js`, not newly invented active characters, confirmed magical champions or a list of universally famous ancestors.
+
+- **Ila the Floodgate Witness** — Estuary Wars testimony that river passage rights should survive political conflict; exact engineering and supposed supernatural feats are disputed.
+- **Sorin of the Cooling Hammers** — a forge-safety and worker-coalition exemplar of the Ash Years, not evidence of an unstoppable fire technique.
+- **Speaker Iri of the Open Refuge** — a remembered sea-person advocate of rescue without forced companionship, linked to the Longwinter Covenant.
+- **The First Many-Tracks Petitioner** — an ancient civic figure or title associated with the right to refuse a pact; original personal identity remains uncertain.
+- **The Unnamed Sealwall Keepers** — a collective of rift-survey and evacuation workers, remembered without a certified Realm Walking feat.
+- **The Waterkeeper of the First Cup** — a contested historic custodian of communal Sahriel water rights.
+- **The Unclosed Vigil of Starlens** — historical observatory witnesses whose aurora records became a lesson in careful evidence.
+- **The Shellsong Accord Speaker** — a treaty figure associated with nonhuman consent and separating rescue from ownership.
+
+Renowned institutions also have real public traditions, including Lumenfall's comparative research, Orchard College medicine, Gate Monastery's safe cultivation and rescue teaching, Forge University's arcane workshop craft, and auroral and rift-survey safety work. A school may be famous without being accessible or able to certify a particular technique to a stranger.
+
+
+
 ---
 
 ## 7. An ordinary beginning: the Reedmarch example
