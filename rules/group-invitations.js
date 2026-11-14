@@ -531,6 +531,7 @@ function studyWitnessedGroupMethod(s,p={}){
   teacherId:q.memberActorId,learner:s.player.name,
   skill:p.skill,focus:p.focus,masteryKey:mastery.id,
   masteryCheckHash:event.checkHash,earnedProgress:studied.earnedProgress,
+  masteryEvent:structuredClone(event),masteryEventHash:G.hash(event),
   fromMinute:began,throughMinute:s.world.minutes,
   noExtraTeacherRoll:true,noFreeRankOrTeachingLicence:true};
  row.study={source,sourceHash:G.hash(source)};
