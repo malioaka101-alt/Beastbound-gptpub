@@ -44,7 +44,7 @@ A.equal(b.combatAssessment,undefined);
 A.equal(GM.verify(s,b),true);
 A.throws(()=>act('gmWildEngage',{beastId:b.id}),/source-characterised/);
 const step=n=>{n=n>>>0;n^=n<<13;n^=n>>>17;n^=n<<5;return n>>>0||0x91e10da5;};
-const goodSeed=(()=>{for(let i=1;i<10000;i++)if(step(i)/4294967296>.82)return i;throw Error('independent source fixture');})();
+const goodSeed=(()=>{for(let i=0x80000000;i<0x80020000;i++)if(step(i)/4294967296>.82)return i;throw Error('independent source fixture');})();
 b.individualLife.rngState=goodSeed;
 A.equal(act('watchWildBeast',{beastId:b.id}).observed,true);
 A.equal(b.away,false);
