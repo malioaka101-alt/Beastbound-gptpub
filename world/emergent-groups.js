@@ -566,7 +566,7 @@ function validate(e,w=null){
    !verifyInternalPositionHistory(e)))return false;
  if(e.internalRoles!==undefined&&
    (!Array.isArray(e.internalRoles)||
-    e.internalRoles.some(x=>!verifyInternalRole(e,x))||
+    e.internalRoles.some(x=>!verifyInternalRole(e,x,w))||
     new Set(e.internalRoles.map(x=>x.id)).size!==e.internalRoles.length))
   return false;
  if(e.priorityWork!==undefined&&
@@ -2008,7 +2008,7 @@ function responsibilityChance(q){
  return clamp(.50+(q.groupSuccesses>q.groupFailures?.09:0)-
    (q.groupStatus==='inactive'?.16:0),.18,.76);
 }
-function verifyInternalRole(e,entry){
+function verifyInternalRole(e,entry,w=null){
  const q=entry?.source;
  if(!q||entry.origin!==INTERNAL_ROLE||
   entry.sourceHash!==hash(q)||q.origin!==INTERNAL_ROLE||
@@ -2029,7 +2029,9 @@ function verifyInternalRole(e,entry){
   !Number.isInteger(entry.untilDay)||entry.untilDay<entry.startDay||
   entry.untilDay>10000000||
   !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
-  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  siteRegion(w,q.place,q.placeProof,q.siteMinute??Number.MAX_SAFE_INTEGER)!==q.regionId||
+  (q.placeProof!==undefined&&(!Number.isInteger(q.siteMinute)||
+   q.siteMinute<0||Math.floor(q.siteMinute/1440)!==q.startDay))||
   typeof q.witness!=='string'||q.witness.trim().length<40||
   q.witness.length>590||
   q.requestingFounder!==e.founder.name||
@@ -2058,10 +2060,11 @@ function verifyInternalRole(e,entry){
 function proposeVoluntaryRole(w,params={}){
  if(!params||typeof params!=='object'||Array.isArray(params)||
    Object.keys(params).some(k=>!['id','groupId','memberActorId','title',
-    'scope','startDay','untilDay','regionId','place','witness'].includes(k)))
+    'scope','startDay','untilDay','regionId','place','witness',
+    'siteMinute','placeProof'].includes(k)))
   throw Error('A practical group responsibility cannot specify consent, command power, compulsory service or pay');
  const {id,groupId,memberActorId,title,scope,startDay,untilDay,
-  regionId,place,witness}=params;
+  regionId,place,witness,siteMinute,placeProof}=params;
  const e=lookup(w,groupId),reg=Atlas.R[regionId],
   member=e?.origin==='player-declaration'?
    e.additionalMembers.find(m=>m.actorId===memberActorId&&m.active!==false):null;
@@ -2070,7 +2073,9 @@ function proposeVoluntaryRole(w,params={}){
   People.resolve(w,member.witness.details.npcId,place,startDay):null;
  if(!e||!member||!person||person.actorId!==memberActorId||
   person.name!==member.name||!reg||reg.polity!==e.polity||
-  Atlas.LOCATION_REGION[place]!==regionId||
+  siteRegion(w,place,placeProof,siteMinute??Number.MAX_SAFE_INTEGER)!==regionId||
+  (placeProof!==undefined&&(!Number.isInteger(siteMinute)||
+   siteMinute<0||Math.floor(siteMinute/1440)!==startDay))||
   !Number.isInteger(startDay)||startDay<e.foundedDay||
   startDay>w.lastTickDay||
   !Number.isInteger(untilDay)||untilDay<startDay||
@@ -2088,6 +2093,7 @@ function proposeVoluntaryRole(w,params={}){
   memberActorId,memberConsentHash:member.hash,
   memberName:member.name,requestingFounder:e.founder.name,
   title,scope,startDay,untilDay,regionId,place,witness,
+  ...(placeProof?{siteMinute,placeProof:structuredClone(placeProof)}:{}),
   presentProof:person.presence?hash(person.presence):null,
   groupStatus:e.status,groupSuccesses:e.completedEfforts,
   groupFailures:e.failedEfforts};
@@ -2098,11 +2104,11 @@ function proposeVoluntaryRole(w,params={}){
  const entry={id,origin:INTERNAL_ROLE,memberActorId,
   memberConsentHash:member.hash,title,scope,startDay,untilDay,
   agreed,status:agreed?'agreed':'declined',source:q,sourceHash:hash(q)};
- if(!verifyInternalRole(e,entry))
+ if(!verifyInternalRole(e,entry,w))
   throw Error('A voluntary practical role failed its real independent choice proof');
  e.internalRoles||=[];
  e.internalRoles.push(entry);
- if(!validate(e))throw Error('An organisation cannot record false role consent');
+ if(!validate(e,w))throw Error('An organisation cannot record false role consent');
  record(ensure(w),e,startDay,'independent-practical-role-response',{
   sourceHash:entry.sourceHash,memberActorId,
   agreed,roleTitle:title,
