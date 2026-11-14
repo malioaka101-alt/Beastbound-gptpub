@@ -1,5 +1,7 @@
 # Beastbound — faster, safe private-chat turns (v1.0)
 
+**2026-11-14 implementation supplement:** For the new bounded sequential turn protocol, in-action pickup scenes, preflight scripts, verified local Node candidate runner and original source-funded ordinary family work, consult [FAST_TURN_UPGRADE.md](FAST_TURN_UPGRADE.md). The original one-roll, save-lease, NPC autonomy and living-world safeguards remain in force. A multi-action sequence is only available for the explicitly supported source-owned operations; a local checkout is never assumed to exist without verification.
+
 **Play remains inside the private ChatGPT Project. No site, hosting, plugin or paid tier required.** Faster does not mean unverified dice, fabricated outcomes or unsaved changes.
 
 ## Live-play speed priority — current instruction (7 November 2026)
