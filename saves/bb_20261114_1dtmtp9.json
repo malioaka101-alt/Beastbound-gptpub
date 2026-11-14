@@ -945,7 +945,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 23,
+    "revision": 24,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1938,12 +1938,27 @@
             }
           ]
         }
+      },
+      "maddoc_evening_home_checkpoint_20261114_a2": {
+        "revision": 24,
+        "mode": "checkpoint",
+        "hash": "e01638e1e7f5cfaee07871402c5d966ae9c6174e75ac0614e07261caef0f7086",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 18:51",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Return to Maddren homestead for the evening; meet friends tomorrow"
+      "Evening at Maddren Homestead",
+      "Meet Tessa and Bram tomorrow"
     ],
-    "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
+    "scene": "At 18:51 on 30 Seedwake 1156 AC, Maddoc returned to his family's cottage near Thistlebell Yard after spending the afternoon with Bram and Tessa at Mossgate. They ate permitted windfall apples, no stored provisions gained. Maddoc practised Soul self-awareness for 240 minutes: d20 6+2=8 vs DC14, failure, 0/100 progress, stamina 34/36. No power awakened. Bram favours Arcane; Tessa favours martial footwork. They plan to meet tomorrow.",
     "journal": [
       {
         "day": 1,
@@ -1964,6 +1979,10 @@
       {
         "day": 1,
         "text": "At 13:39 Maddoc and Bram completed reading and handwritten introductory notes for Arcane and Soul; no cultivation gain."
+      },
+      {
+        "day": 1,
+        "text": "After windfall apples, four-hour failed Soul practice and walk home, Maddoc is at home 18:51, stamina 34/36; friends plan tomorrow."
       }
     ]
   },
