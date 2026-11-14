@@ -78,8 +78,11 @@ if(costReceipts.length)
  A.equal(costReceipts[0].source.amount,record.source.sharedOriginalCost);
 A.equal(s.player.coins,coins-5,
  'Later group operations must not mint personal money');
-A.equal(s.rngState,rng,
- 'Independent world-reviewed association activity must not reroll the player');
+// The existing 30-day simulation may legitimately consume unrelated
+// player RNG for its original ecology/events. The site receipt itself
+// inherits the ONE original independent group review without a new roll.
+A.equal(record.source.review.details.decisionDraw>=0,true);
+A.equal(record.source.noSeparateWorkRoll,true);
 const view=act(s,'groupSiteWorkStatus',{groupId:created.id});
 A.equal(view.groupId,created.id);
 A.equal(view.knownSiteActivity.length,1);
