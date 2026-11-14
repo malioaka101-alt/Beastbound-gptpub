@@ -1487,7 +1487,7 @@ function retainFounderResourceOffer(w,groupId,{asset,place,placeProof,minute,pur
   throw Error('This original asset is already offered here or the original register is full');
  const q={origin:RESOURCE_OFFER,groupId:e.id,
   groupOriginHash:e.originHash,
-  assetId:asset.id,originalAssetHash:asset.hash,
+  assetId:asset.id,originalAssetHash:asset.hash,quantity:asset.quantity,
   asset:structuredClone(asset),place,regionId,minute,
   day:Math.floor(minute/1440),purpose,
   ...(placeProof?{placeProof:structuredClone(placeProof)}:{}),
