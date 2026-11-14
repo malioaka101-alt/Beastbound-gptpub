@@ -8,7 +8,9 @@ const good=(v,a=8,b=800)=>typeof v==='string'&&v.trim().length>=a&&v.trim().leng
 const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{2,69}$/.test(x);
 const num=(v,a,b)=>Number.isInteger(v)&&v>=a&&v<=b;
 function foundation(b){
- if(!b||!E.SPECIES[b.species])throw Error('A real previously established beast is required');
+ if(!b||!(E.SPECIES[b.species]||
+   b.gmWild&&require('./gm-wild-individuals').sealed(b)))
+  throw Error('A real source-witnessed beast is required');
  if(b.sapientLife){
   const Person=require('./sapient-beast-persons');
   if(!Person.verify(b))throw Error('Unverified sapient person history');
@@ -239,8 +241,10 @@ function status(s,{beastId}={}){
  const b=s.beasts?.[beastId];
  if(!b)return {known:false};
  const {life,kind}=foundation(b),r=life.individuality;
- if(kind==='wild'&&!life.witnessed?.length)
+ if(kind==='wild'&&!life.witnessed?.length&&!b.gmWild)
   return {known:false,note:'This animal has no personally witnessed identity'};
+ if(b.gmWild&&!require('./gm-wild-individuals').verify(s,b))
+  throw Error('The GM-established individual lacks verified species and first-sighting sources');
  if(!r)return {known:true,observations:[],techniques:[],
   note:'No personally witnessed distinct methods recorded'};
  if(!verify(b))throw Error('Individual beast memory failed source validation');
