@@ -333,8 +333,8 @@ function taskStatus(s,p={}){
  if(typeof p.groupId!=='string')
   throw Error('A real founded group ID is required for historical member tasks');
  const w=Realm.peek(s),e=G.lookup(w,p.groupId),
-  regionId=require('../world/atlas').LOCATION_REGION[s.world?.location],
-  here=require('../world/atlas').R[regionId]?.polity;
+  regionId=Places.location(s)?.regionId,
+  here=A.R[regionId]?.polity;
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||
   here!==e.polity)
