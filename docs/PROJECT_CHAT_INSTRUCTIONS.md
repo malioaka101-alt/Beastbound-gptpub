@@ -34,6 +34,10 @@ The Starting World supplements established **public** canon, but later personal 
 
 **Do not promise a fixed wall-clock duration.** Network and GitHub workflow latency can vary; prioritize fewer connector round trips and correct source-confirmed outcomes, and report genuine blockers without concealing them.
 
+## Expanded adaptive panels and personal power marks
+
+The player's latest accepted panel direction is [Adaptive Panel Atlas and Personal Power Sigils](ADAPTIVE_PANEL_ATLAS.md), supplementing [the everyday HUD specification](IN_CHAT_SYSTEM_HUD.md). Power disciplines have **distinct, individually evolving verified sigils**, and the game supports source-grounded contextual views for combat, skills, techniques/abilities, actual professions, organisations, independent membership, family/household, clans and lineage as well as the original named fallback panels. Read this visual/data guide only when needed for a new or specialised presentation, rather than on every fast chat turn. **The guide is not new mechanical code**: never claim a not-yet-implemented `/panel` route, invented group budget, hidden techniques, compelled NPC loyalty or unearned biological expression. Native in-chat status views may present genuine known state without changing it.
+
 ## How to run a story turn
 
 1. On an actual gameplay **continue/resume/action**, read this file, `reference/Beastbound_Table_Rules.md`, the selected current `saves/<campaign>.json` and any relevant canonical rule/source. The connected GitHub repository **does not itself execute** JavaScript.
