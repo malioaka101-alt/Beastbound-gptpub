@@ -47,8 +47,17 @@ function sealed(b){
      b.gmWild.verifiedCombatProfile!==true||b.gmWild.verifiedCognition!==true)||
     (life.lastEngagementSource!==undefined&&
      (life.lastEngagementHash!==hash(life.lastEngagementSource)||
+      life.lastEngagementSource.origin!==ENCOUNTER||
       life.lastEngagementSource.beastId!==b.id||
       life.lastEngagementSource.rootSeal!==b.gmWild.seal||
+      life.lastEngagementSource.profileHash!==b.gmWild.profile?.sourceHash||
+      !['stayed','withdrawn'].includes(life.lastEngagementSource.response)||
+      life.lastEngagementSource.location!==life.lastEngagementSource.originalWatch?.location||
+      life.lastEngagementSource.originalWatch?.type!=='witnessed-wildlife-routine'||
+      life.lastEngagementSource.originalWatch?.beastId!==b.id||
+      life.lastEngagementSource.originalWatch?.worldMinute!==life.lastEngagementSource.watchedAtMinute||
+      life.lastEngagementSource.watchHash!==hash(life.lastEngagementSource.originalWatch)||
+      life.lastEngagementSource.worldMinute<life.lastEngagementSource.watchedAtMinute||
       life.lastEngagedWatchMinute!==life.lastEngagementSource.watchedAtMinute)))
   return false;
  return true;
@@ -423,6 +432,7 @@ function engage(s,p={}){
  const record={origin:ENCOUNTER,beastId:b.id,rootSeal:b.gmWild.seal,
   profileHash:b.gmWild.profile.sourceHash,
   watchedAtMinute:last.worldMinute,watchHash:hash(last),
+  originalWatch:structuredClone(last),
   worldMinute:old,location:site.id,response:withdrawn?'withdrawn':'stayed',
   noForcedAffection:true,noInferredDangerOrDistance:true};
  life.lastEngagementSource=record;
