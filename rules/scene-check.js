@@ -15,12 +15,21 @@ const LOCAL_METHODS=Object.freeze({
  reading:{attribute:'wis',skill:'survival',minutes:10,label:'Read the visible local ground'}
 });
 function localSource(s,method){
- const loc=E.LOCATIONS[s.world.location],task=LOCAL_METHODS[method];
+ const Places=require('../world/lived-places'),siteId=s.world.location;
+ const loc=E.LOCATIONS[siteId]||Places.location(s,siteId),
+  task=LOCAL_METHODS[method];
+ // Reuse ONLY the already published bounded ordinary biome DCs.
+ // Novel climate, magical obstacles, bespoke terrain hazards and new skills
+ // remain GM-owned, unresolved until a real source-specific mechanism exists.
  if(!loc||!task||!Object.hasOwn(LOCAL_DC,loc.biome)||
     typeof loc.description!=='string'||loc.description.length<18)
-  throw Error('Only an established local physical scene and supported mundane approach can ground this check');
+  throw Error('Only an established local physical scene with an existing source-backed mundane terrain difficulty can ground this check');
+ const founding=E.LOCATIONS[siteId]?null:Places.originalSiteProof(s,siteId);
+ if(founding&&Places.verifiedSiteRegion(siteId,founding)!==loc.regionId)
+  throw Error('The GM-authored terrain must preserve its original physical founding source');
+ const original='Original established terrain at '+loc.name+': '+loc.description;
  return {loc,task,dc:LOCAL_DC[loc.biome],
-  source:'Original established terrain at '+loc.name+': '+loc.description,
+  source:original+(founding?' [GM original place '+founding.foundingHash+']':''),
   observed:loc.description+' Current visible weather: '+s.world.weather+'.'};
 }
 function prepare(s,p={}){
