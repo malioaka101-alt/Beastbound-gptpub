@@ -1,0 +1,13 @@
+{
+  "id": "maddoc_nine_meridian_stages_20261114_c1",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 10
+  },
+  "focus": [
+    "Maddoc and Bram have drafted their nine-stage Meridian reference sheet"
+  ]
+}
