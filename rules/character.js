@@ -55,6 +55,12 @@ function publicStatus(s){
  const potential=Object.fromEntries(Object.entries(x.potential).map(([key,v])=>[key,{
   score:v.latent,maximum:9,rating:Potential.BANDS[v.latent-1],
   trainingModifier:Potential.bonus(v.latent),
+  state:v.assessments.length?'provisionally assessed':'unassessed',
+  ...(v.assessments.length?{
+   latest:v.assessments.at(-1).reading,
+   confidence:v.assessments.at(-1).confidence,
+   source:v.assessments.at(-1).source
+  }:{}),
   assessment:v.assessments.length?{
    state:'provisionally assessed',latest:v.assessments.at(-1).reading,
    confidence:v.assessments.at(-1).confidence,source:v.assessments.at(-1).source
