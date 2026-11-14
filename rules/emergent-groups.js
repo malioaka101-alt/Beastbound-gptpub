@@ -5,7 +5,7 @@
 const E=require('../engine.js'),C=require('./core'),
  W=require('./world'),Health=require('./unified'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
- Groups=require('../world/emergent-groups');
+ Groups=require('../world/emergent-groups'),Places=require('../world/lived-places');
 const FOUNDTIME=25,WORKTIME=45;
 function fields(p,allowed,needed=allowed){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -19,10 +19,11 @@ function words(s,min,max,name){
   throw Error(name+' requires a readable '+min+'–'+max+' character description');
  return s.trim();
 }
+function polityAt(s){return Atlas.R[Places.location(s)?.regionId]?.polity||null;}
 function locale(s,minutes){
  if(!s.player||typeof s.player.name!=='string'||!s.player.name.trim())
   throw Error('An actually identified and consenting founding character is required');
- const pol=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+ const pol=polityAt(s);
  if(!pol)throw Error('The association must begin in a real visited place');
  if(s.battle||s.encounter)throw Error('An active immediate danger cannot be replaced with a witnessed quiet organisational action');
  const health=s.table?.combatants?.player;
@@ -125,7 +126,7 @@ function restatePurpose(s,p={}){
  const w=Realm.ensure(s),e=Groups.lookup(w,p.groupId);
  if(!e||e.origin!=='player-declaration'||
   e.founder.actorId!=='player'||e.founder.name!==s.player.name||
-  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world.location]]?.polity)
+  e.polity!==polityAt(s))
   throw Error('Only the actual locally present founder may change their own public declaration');
  const previous=Groups.currentPurpose(e);
  if(purpose===previous)
@@ -153,7 +154,7 @@ function purposeHistory(s,p={}){
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||
-  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity)
+  e.polity!==polityAt(s))
   throw Error('An actual local founder may inspect their own declaration history');
  return Groups.purposeHistoryStatus(w,e.id,{
   day:Math.floor(s.world.minutes/1440)});
@@ -216,7 +217,7 @@ function purposeResponses(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')throw Error('A true group ID is necessary');
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
-  polity=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+  polity=polityAt(s);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||e.polity!==polity)
   throw Error('Only the actual local founder knows their own personally witnessed discussion records');
@@ -228,7 +229,7 @@ function treasuryStatus(s,p={}){
  if(typeof p.groupId!=='string')
   throw Error('An existing voluntarily founded group ID is required for real fund records');
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
-  local=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+  local=polityAt(s);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||e.polity!==local)
   throw Error('Original association treasury records are private to its actual local founder');
