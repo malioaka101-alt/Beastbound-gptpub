@@ -57,7 +57,7 @@ A.equal(known.noItemCreated,true);
 A.equal(known.noTechniqueLearned,true);
 A.ok(known.gaps.some(x=>x.includes('physical prototype')));
 A.throws(()=>creation('prototype',{id:'design_1'}),
- /genuine preexisting design/);
+ /genuine originally sealed invention|preexisting design/);
 const originalDetails=creation('materialStatus',{materialId:inputs.materialId});
 A.equal(originalDetails.samples[0].currentStatus,'reserved');
 A.equal(originalDetails.samples[0].physicallyHeldUnits,1);
