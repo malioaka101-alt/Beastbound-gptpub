@@ -8,6 +8,7 @@ const Crypto=require('node:crypto');
 const SoulThreads=require('./soul-threading');
 const RiftAnchors=require('./rift-anchors');
 const LivedPlaces=require('../world/lived-places');
+const Potential=require('./potential-mechanics');
 const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
@@ -314,7 +315,10 @@ function status(s){
     seaReady?['independent']:
     arcaneTwo||arcaneThree||bodyThree||soulTwo||riftTwo?['independent']:[],
    independentAvailableAtCurrentSite:!!(target||gateAvailable||seaReady||arcaneTwo||arcaneThree||bodyThree||soulTwo||riftTwo)&&
-    SELF_SITES[system].includes(s.world.location),
+    (SELF_SITES[system].includes(s.world.location)||
+     (LivedPlaces.location(s)?.sceneType==='settlement'&&system!=='rift')),
+   potentialAptitude:Potential.discipline(s,system,target||'advanced',null),
+   potentialCannotBlockStage:true,
    independentPracticeFeeTalons:0,
    independentPracticeDC:pair?pair[1]+2:seaReady?21:arcaneThree?20:arcaneTwo?17:bodyThree?17:soulTwo?16:riftTwo?18:gateDC,
    independentBreakthroughExtraDC:target?3:null,
@@ -408,6 +412,7 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  // The old established sixday course retains its known tuition. A brief
  // practice visit or conversation is not automatically a purchased lesson
  // and cannot claim the course's preparatory advantage merely by naming it.
+ const aptitude=Potential.discipline(s,system,target,method);
  const [length,dc]=spec.tracks[target],
   fee=self||short?0:(partTime?1:2),
   actualDC=dc+(self||short?2:0);
@@ -436,8 +441,10 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
   if(s.table?.combatants?.player)
    s.table.combatants.player.stamina=s.player.stamina;
  }
- const check=C.check(s,{modifier:modifier(s,system)+(theory?.bonus||0),dc:actualDC,label:`${system} ${target} — ${method}`});
- const earned=check.progress*(partTime?0.5:1);record.points=cap(record.points+earned,0,length);
+ const check=C.check(s,{modifier:modifier(s,system)+aptitude.modifier+(theory?.bonus||0),dc:actualDC,label:`${system} ${target} — ${method}`});
+ // High aptitude improves useful progress after a genuine successful check.
+ // Low aptitude makes the check harder but never forbids reaching the target.
+ const earned=(check.progress+(check.success?Math.max(0,aptitude.modifier):0))*(partTime?0.5:1);record.points=cap(record.points+earned,0,length);
  if(short){
   record.sessions=(record.sessions||0)+1;
   record.sessionMinutes=(record.sessionMinutes||0)+minutes;
@@ -457,13 +464,13 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  U.sync(s,{source:'legacy'});
  C.event(s,'progress',`${system} practice: ${method}; ${earned} training points.`,{
   system,target,earned,complication,route,source:learnedSource,actualDC,
-  theoreticalGuidance:theory,location:s.world.location,
+  theoreticalGuidance:theory,potentialAptitude:aptitude,location:s.world.location,
   elapsedMinutes:actualMinutes,staminaSpent:fatigue
  });
  return {system,target,method,check,earned,progress:record.points,required:length,
   complication,timeDays:actualMinutes/1440,elapsedMinutes:actualMinutes,
   staminaSpent:fatigue,feeTalons:fee,route,source:learnedSource,
-  theoreticalGuidance:theory};
+  theoreticalGuidance:theory,potentialAptitude:aptitude};
 }
 function staminaGain(s,n){
  const c=s.table?.combatants?.player;if(!c)throw Error('Wound model required before changing body stamina');
@@ -499,17 +506,18 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
  if(system==='arcane'&&target==='core'&&s.player.arcane.circles!==0)throw Error('Mana Core condition inconsistent');
  const fee=self?0:(system==='arcane'?5:3);
  if(s.player.coins<fee)throw Error('Selected rite preparations and safeguards not funded');
+ const aptitude=Potential.discipline(s,system,target,null);
  const actualDC=dc+2+(self?3:0);
  const riteSource=self?independentSource(s,system,target,self.site):source;
  if(self){
   C.event(s,'world','A self-directed '+system+' '+target+' breakthrough is attempted at '+self.name+' using the practised anatomy and accumulated training.',{
    origin:'verified-independent-breakthrough',system,target,
    source:riteSource,location:self.site,startMinute:s.world.minutes,
-   feeTalons:0,actualDC,insightSpent
+   feeTalons:0,actualDC,insightSpent,potentialAptitude:aptitude
   });
  }
  s.player.coins-=fee;s.player.insightPoints-=insightSpent;
- const check=C.check(s,{modifier:modifier(s,system)+2*insightSpent+(theory?.bonus||0),dc:actualDC,
+ const check=C.check(s,{modifier:modifier(s,system)+aptitude.modifier+2*insightSpent+(theory?.bonus||0),dc:actualDC,
   label:`${system} ${target} breakthrough`});
  let outcome,change=null;
  if(check.success){
@@ -621,13 +629,14 @@ function gatePractice(s,params={}){
  if(stage.gate!==next||!Number.isInteger(stage.progress)||stage.progress<0||
    typeof stage.forced!=='boolean')
   throw Error('Unreconciled current Gate training');
- const actualSource=self?independentSource('meridian','gate-'+next,self.site):source;
+ const actualSource=self?independentSource(s,'meridian','gate-'+next,self.site):source;
  // The structural boundary is real: its check is harder, but does NOT
  // require a pre-selected true flag, universal price or specific teacher.
+ const aptitude=Potential.read(s,'gateStability');
  const actualDC=dc+(transition?3:0);
- const roll=C.check(s,{modifier:modifier(s,'meridian')+gradeBonus+(theory?.bonus||0),
+ const roll=C.check(s,{modifier:modifier(s,'meridian')+gradeBonus+aptitude.modifier+(theory?.bonus||0),
   dc:actualDC,label:'Gate '+next+' ('+band+(transition?', structural transition':'')+')'});
- let gain=roll.progress,severe=roll.degree==='severe failure'||(force&&roll.margin<=-5);
+ let gain=roll.progress+(roll.success?Math.max(0,aptitude.modifier):0),severe=roll.degree==='severe failure'||(force&&roll.margin<=-5);
  if(force){gain+=roll.success?2:1;stage.forced=true;}
  stage.progress+=gain;
  let deviation=null;
@@ -671,13 +680,13 @@ function gatePractice(s,params={}){
     gate:next,band,roll:roll.roll,opened,deviation,transition,
     route,source:actualSource,site:s.world.location,actualDC,
     compulsoryTeacher:false,tuitionTalons:0,
-    theoreticalGuidance:theory,practiceMinutes:minutes
+    theoreticalGuidance:theory,potentialAptitude:aptitude,practiceMinutes:minutes
    });
  return {gate:next,band,points:gain,required:pts,
   progress:opened?pts:stage.progress,opened,deviation,check:roll,
   route,source:actualSource,transition,actualDC,
   minutes,actualElapsedDays:minutes/1440,
-  tuitionTalons:0,theoreticalGuidance:theory};
+  tuitionTalons:0,theoreticalGuidance:theory,potentialAptitude:aptitude};
 }
 
 // Stage IV begins after the actual 108-Gate anatomy, not after a claimed
