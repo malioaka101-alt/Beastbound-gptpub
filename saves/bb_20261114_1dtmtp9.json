@@ -760,7 +760,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 14,
+    "revision": 15,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1353,12 +1353,27 @@
             }
           ]
         }
+      },
+      "maddoc_meridian_notes_checkpoint_20261114_a1": {
+        "revision": 15,
+        "mode": "checkpoint",
+        "hash": "81af3390364c3b6ebd6657cf622a75de1c8a04c6d12658130b5a63d3e5ae921d",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 11:04",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Complete introductory Meridian study with Bram; stage notes and applications"
+      "Compare the other power disciplines with Bram",
+      "Later check on Tessa at Mossgate practice yard"
     ],
-    "scene": "At 08:44, Maddoc reaches Mossgate Common with Tessa and Bram after an ordinary 19-minute walk from Tansyhook Crossing. He is seeking a library/reading room, a training ground or a beast-handling place. All three are visible around the village green: a slate-roofed reading house, a fenced practice yard with sand and posts, and a working beast-handling pen with troughs. No access, tuition, person consent or beast contact is established.",
+    "scene": "At 11:04 Maddoc and Bram are studying at Mossgate Reading House. They completed introductory Meridian reading together and wrote multiple practice-paper sheets about anatomy, Stages I-III, stages IV-IX and techniques. Paper, quill and ink were offered for use inside the house; taking sheets away has not been agreed. No cultivation or ability gained. Tessa was last seen seeking lessons at the practice yard; her current progress is unknown.",
     "journal": [
       {
         "day": 1,
@@ -1371,6 +1386,10 @@
       {
         "day": 1,
         "text": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common. He is looking for books, training, or beast handling. Arrival recorded at 08:44, without rolling or granting access."
+      },
+      {
+        "day": 1,
+        "text": "Maddoc and Bram complete introductory Meridian theory and handwritten notes at the reading house; time verified 11:04."
       }
     ]
   },
