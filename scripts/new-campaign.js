@@ -10,6 +10,7 @@ const Character=require('../rules/character');
 const Origins=require('./campaign-origins');
 const Age=require('./age-lived-history');
 const GmOpening=require('./gm-campaign-opening');
+const WorldAdditions=require('./random-life-world-additions');
 
 // Seeded cultural-name pools: identity is independent of the GM-authored opening.
 // Keep personal/family names plausible rather than automatically naming a PC
@@ -193,7 +194,7 @@ function create(options={}){
  state.log=[];state.sequence=0;
  state.chatRuntime={revision:0,applied:{},focus:[],scene:null};
  state.campaign={slug,version:2,startSeed:n,
-  characterSource:'engine.randomCharacter + engine.newGame + source-grounded seeded origins',
+  characterSource:'engine.randomCharacter + engine.newGame + seeded origins and compatible local-world additions',
   rolledBackground:base.background,rolledPath:base.path,
   startingLocation:null,openingState:'awaiting-gm',
   openingAuthorship:'GM writes scene and creates a real place when needed',
@@ -221,13 +222,14 @@ function create(options={}){
  state.campaign.startDate=date;
  state.log.push({day:1,time:E.clock(state),type:'world',
   text:'The public civil almanac dates '+dateView.absoluteDate+'.',details:null});
+ const worldAdditions=mode==='random'?WorldAdditions.install(state):null;
  if(opening)GmOpening.apply(state,opening);
  return {state,summary:{seed:n,slug,name,age,gender,
   appearance:state.player.appearance,
   attributes:{...state.player.attributes},
   background:state.player.background,path:state.player.path,
   location:state.campaign.startingLocation,family:state.player.family,
-  history:state.player.history,origin,livedYears:lived,
+  history:state.player.history,origin,worldAdditions,livedYears:lived,
   clock:E.clock(state),date:dateView.absoluteDate,
   openingState:state.campaign.openingState,
   focus:state.chatRuntime.focus,scene:state.chatRuntime.scene}};
