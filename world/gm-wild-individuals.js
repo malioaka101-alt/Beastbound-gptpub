@@ -292,7 +292,6 @@ function verifyProfile(s,b){
  if(!q||p.sourceHash!==hash(q)||q.origin!==PROFILE||
     q.beastId!==b.id||q.species!==b.species||
     q.firstWitnessSeal!==g.seal||q.speciesOriginHash!==bio?.originHash||
-    q.location!==g.originalPlace&&q.location!==b.location||
     !integer(q.worldMinute,g.source.minute,1000000000)||
     !text(q.witness,20,900)||!text(q.anatomicalBasis,40,1000)||
     !text(q.cognitionEvidence,30,900)||!text(q.welfareEvidence,30,900)||
