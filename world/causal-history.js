@@ -152,7 +152,13 @@ function status(s,p={}){
  }
  if(p.targetType!==undefined||p.targetId!==undefined){
   const found=subject(w,p.targetType,p.targetId);
-  if(!found)throw Error('A genuine source-verified historical subject is required');
+  if(!found){
+   // A missing GM person/place/group and a genuine but unpublished one
+   // must be indistinguishable to a player guessing sequential IDs.
+   if(['person','place','group'].includes(p.targetType))
+    return {targetType:p.targetType,targetId:p.targetId,known:false,effects:[]};
+   throw Error('A genuine source-verified historical subject is required');
+  }
   const effects=Object.values(h.events).filter(e=>e.visibility==='public')
    .flatMap(e=>e.effects.filter(x=>x.visibility==='public'&&x.targetType===p.targetType&&x.targetId===p.targetId)
     .map(x=>({eventId:e.id,era:e.era,dimension:x.dimension,change:x.change,continuity:x.continuity,precededBy:x.precededBy})));
