@@ -5,7 +5,7 @@
 const E=require('../engine.js'),C=require('./core'),
  W=require('./world'),Health=require('./unified'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
- Groups=require('../world/emergent-groups');
+ Groups=require('../world/emergent-groups'),Places=require('../world/lived-places');
 const FOUNDTIME=25,WORKTIME=45;
 function fields(p,allowed,needed=allowed){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -19,10 +19,11 @@ function words(s,min,max,name){
   throw Error(name+' requires a readable '+min+'–'+max+' character description');
  return s.trim();
 }
+function polityAt(s){return Atlas.R[Places.location(s)?.regionId]?.polity||null;}
 function locale(s,minutes){
  if(!s.player||typeof s.player.name!=='string'||!s.player.name.trim())
   throw Error('An actually identified and consenting founding character is required');
- const pol=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+ const pol=polityAt(s);
  if(!pol)throw Error('The association must begin in a real visited place');
  if(s.battle||s.encounter)throw Error('An active immediate danger cannot be replaced with a witnessed quiet organisational action');
  const health=s.table?.combatants?.player;
@@ -85,7 +86,9 @@ function contribute(s,p={}){
     !e.internalPriorities?.some(x=>x.id===priorityId&&x.supported&&
       x.day<=Math.floor(s.world.minutes/1440))))
   throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
- const old=s.world.minutes;
+ // The original lived-place witness is established BEFORE the work
+ // advances time; a location description alone proves no ownership.
+ const originalSite=Places.originalSiteProof(s),old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
  const priorPlayerCoins=s.player.coins,priorGroupFunds=e.funds,
   fundingDay=Math.floor(s.world.minutes/1440);
@@ -96,6 +99,8 @@ function contribute(s,p={}){
   origin:'actually-attempted-voluntary-group-work',
   groupId:e.id,activity,coins:money,minutes:WORKTIME,
   actor:s.player.name,location:s.world.location,
+  siteMinute:s.world.minutes,
+  ...(originalSite?{placeProof:originalSite}:{}),
   ...(priorityId!==undefined?{priorityId}:{}),
   successClaimAccepted:false,noAutomaticFollowers:true
  });
@@ -125,7 +130,7 @@ function restatePurpose(s,p={}){
  const w=Realm.ensure(s),e=Groups.lookup(w,p.groupId);
  if(!e||e.origin!=='player-declaration'||
   e.founder.actorId!=='player'||e.founder.name!==s.player.name||
-  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world.location]]?.polity)
+  e.polity!==polityAt(s))
   throw Error('Only the actual locally present founder may change their own public declaration');
  const previous=Groups.currentPurpose(e);
  if(purpose===previous)
@@ -153,7 +158,7 @@ function purposeHistory(s,p={}){
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||
-  e.polity!==Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity)
+  e.polity!==polityAt(s))
   throw Error('An actual local founder may inspect their own declaration history');
  return Groups.purposeHistoryStatus(w,e.id,{
   day:Math.floor(s.world.minutes/1440)});
@@ -216,7 +221,7 @@ function purposeResponses(s,p={}){
  fields(p,['groupId']);
  if(typeof p.groupId!=='string')throw Error('A true group ID is necessary');
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
-  polity=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+  polity=polityAt(s);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||e.polity!==polity)
   throw Error('Only the actual local founder knows their own personally witnessed discussion records');
@@ -228,14 +233,132 @@ function treasuryStatus(s,p={}){
  if(typeof p.groupId!=='string')
   throw Error('An existing voluntarily founded group ID is required for real fund records');
  const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
-  local=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity;
+  local=polityAt(s);
  if(!e||e.origin!=='player-declaration'||
   e.founder.name!==s.player?.name||e.polity!==local)
   throw Error('Original association treasury records are private to its actual local founder');
  return Groups.treasuryAuditStatus(w,e.id);
 }
+
+/*
+ * Original property stays in the owner's inventory. A founder may
+ * personally offer the use of their own genuinely attested finite goods
+ * at a real location. A recorded availability intention neither builds a
+ * facility nor transfers item custody to the association.
+ */
+function offerOwnedResource(s,p={}){
+ fields(p,['groupId','assetId','purpose']);
+ const purpose=words(p.purpose,20,500,'Practical resource-use purpose');
+ if(typeof p.groupId!=='string'||typeof p.assetId!=='string')
+  throw Error('A real association and original physically owned asset receipt are required');
+ if(s.encounter||s.battle)
+  throw Error('An unresolved immediate encounter cannot create a new physical availability arrangement');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
+  site=Places.location(s);
+ if(!e||e.origin!=='player-declaration'||e.founder.name!==s.player?.name||
+  !site||Atlas.R[site.regionId]?.polity!==e.polity)
+  throw Error('Only the actual local founding owner can make their own possessions available to this genuine group');
+ if(!require('./material-handoffs').verifyAssetAttestations(s))
+  throw Error('The existing physical ownership journal failed its original reconciliation');
+ const assets=s.table?.materialAssetAttestations||[],
+  asset=assets.find(x=>x.id===p.assetId&&x.ownerId==='player');
+ if(!asset||asset.source.ownerName!==s.player.name)
+  throw Error('Only an actually attested personally owned material asset can be voluntarily offered');
+ const stock=require('./material-handoffs').ownerStock(s,'player',asset.item);
+ if(stock.kind!==asset.source.ownerKind||
+    stock.originalRoot!==asset.source.originalRoot||
+    stock.count<asset.quantity)
+  throw Error('The owner must still physically have every proposed item at the same established site');
+ if((e.resourceOffers||[]).length>=120||
+   (e.resourceOffers||[]).some(x=>x.assetId===asset.id&&
+    x.source.place===site.id&&!x.ending))
+  throw Error('The same original asset is already offered at this site');
+ const now=s.world.minutes,originalSite=Places.originalSiteProof(s);
+ C.event(s,'story',s.player.name+' offers personally owned material for possible voluntary group use at '+site.name+
+  '. The objects remain theirs; no one else is obliged to use them.',{
+  origin:Groups.RESOURCE_OFFER,groupId:e.id,assetId:asset.id,
+  assetHash:asset.hash,item:asset.item,quantity:asset.quantity,
+  owner:s.player.name,place:site.id,minute:now,purpose,
+  noPhysicalTransfer:true,noFacilityOrAuthorityGranted:true
+ });
+ const r=Groups.retainFounderResourceOffer(w,e.id,{
+  asset,place:site.id,placeProof:originalSite,minute:now,purpose,
+  originalEvent:structuredClone(s.log.at(-1))});
+ return {...r,noTimeOrNewIndependentChoice:true};
+}
+function withdrawResourceOffer(s,p={}){
+ fields(p,['groupId','offerId','reason']);
+ if(typeof p.groupId!=='string'||typeof p.offerId!=='string')
+  throw Error('An original resource offer in a real voluntary association is required');
+ const reason=words(p.reason,12,500,'Reason for withdrawing personal resource availability');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
+  site=Places.location(s);
+ if(!e||e.origin!=='player-declaration'||e.founder.name!==s.player?.name||
+  !site||Atlas.R[site.regionId]?.polity!==e.polity)
+  throw Error('Only the actual locally known owner may withdraw their own volunteered resources');
+ const answer=Groups.withdrawFounderResourceOffer(w,e.id,{
+  offerId:p.offerId,minute:s.world.minutes,reason});
+ C.event(s,'story',s.player.name+' withdraws a personally owned resource-use offer without transferring any item.',{
+  origin:Groups.RESOURCE_WITHDRAWAL,groupId:e.id,offerId:p.offerId,
+  reason,minute:s.world.minutes,
+  noItemOrMoneyChanged:true,noCompelledWork:true});
+ return {...answer,noDiceOrTimeSpent:true};
+}
+function resourceSiteStatus(s,p={}){
+ fields(p,['groupId','placeId'],['groupId']);
+ if(typeof p.groupId!=='string')
+  throw Error('Inspect only a genuine known association, not an imaginary institution');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId),
+  location=p.placeId??s.world.location,site=Places.location(s,location);
+ if(!e||e.origin!=='player-declaration'||e.founder.name!==s.player?.name||
+  !site||Atlas.R[site.regionId]?.polity!==e.polity)
+  throw Error('An actual local founder may inspect only their source-known association and real location');
+ const Material=require('./material-handoffs');
+ if(!Material.verifyAssetAttestations(s))
+  throw Error('Original physical material observations cannot be trusted after alteration');
+ const offers=Groups.resourceOfferStatus(w,e.id,{placeId:location}),
+  originalAssets=s.table?.materialAssetAttestations||[];
+ const rows=offers.map(x=>{
+  const asset=originalAssets.find(a=>a.id===x.assetId&&
+   a.hash===x.originalAssetSourceHash&&a.ownerId==='player');
+  if(!asset)throw Error('A voluntary asset offer has lost its original physical stock/owner source');
+  let available=false;
+  if(!x.withdrawn&&s.world.location===location){
+   const stock=Material.ownerStock(s,'player',asset.item);
+   available=stock.originalRoot===asset.source.originalRoot&&
+    stock.kind===asset.source.ownerKind&&stock.count>=x.quantityAtOriginalWitness;
+  }
+  return {...x,physicallyAvailableHereNow:available,
+   ownerMustBePresentAndStillHoldGoods:true,
+   notInstalledOrGroupOwned:true,noIndependentUserConsentInferred:true};
+ });
+ const day=Math.floor(s.world.minutes/1440),
+  roles=Groups.voluntaryRoleStatus(w,e.id,{day})
+   .filter(r=>e.internalRoles.some(x=>x.id===r.id&&
+    x.source.place===location));
+ return {groupId:e.id,placeId:location,siteName:site.name,
+  siteSceneType:site.sceneType??null,
+  knownExistingLocationFacilityKinds:site.facilities||[],
+  facilitiesNotAssignedToGroup:true,
+  witnessedOriginalResourceOffers:rows,
+  independentSiteResponsibilities:roles,
+  reviewedOriginalSiteWork:Groups.siteWorkStatus(w,e.id,{placeId:location}).knownSiteActivity,
+  noNewAssetOrBuilding:true,noEmploymentOrQualificationGranted:true,
+  note:'Original owned physical goods may be offered here while their actual owner is present and still holding them. A named hall or Atlas facility is not group-owned, an accepted volunteer role is not a paid job, and reviewed group work is not proof of a constructed school or finished project.'};
+}
+
+function siteWorkStatus(s,p={}){
+ fields(p,['groupId','placeId'],['groupId']);
+ if(typeof p.groupId!=='string')
+  throw Error('Only an actual founded association may be inspected for site work');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
+ if(!e||e.origin!=='player-declaration'||
+    e.founder.name!==s.player?.name||e.polity!==polityAt(s))
+  throw Error('A founder may inspect only their own locally known association work; others’ private operating records are not a public registry');
+ return Groups.siteWorkStatus(w,e.id,{placeId:p.placeId});
+}
 function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus};
+module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus,siteWorkStatus,offerOwnedResource,withdrawResourceOffer,resourceSiteStatus};

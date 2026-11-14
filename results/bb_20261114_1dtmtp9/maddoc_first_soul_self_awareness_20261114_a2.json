@@ -1,0 +1,138 @@
+{
+  "id": "maddoc_first_soul_self_awareness_20261114_a2",
+  "ok": true,
+  "applied": true,
+  "revision": 21,
+  "stateHash": "3fef48c9b6ebeab38e6d74f5e09d17d8a529194e42197c9c5b055549826802bd",
+  "clock": "Day 1, 18:09",
+  "output": {
+    "rules": {
+      "system": "soul",
+      "target": "phase1",
+      "method": "self-awareness",
+      "check": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 2,
+        "dc": 14,
+        "total": 8,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      },
+      "earned": 0,
+      "progress": 0,
+      "required": 100,
+      "complication": null,
+      "timeDays": 0.16666666666666666,
+      "elapsedMinutes": 240,
+      "staminaSpent": 2,
+      "feeTalons": 0,
+      "route": "independent",
+      "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+      "theoreticalGuidance": null
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Mossgate Common.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "mossgate_common",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "feeTalons": 0,
+        "startMinute": 849,
+        "timeDays": 0.16666666666666666,
+        "partTime": false
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 6 +2 = 8 vs DC 14 → failure (-6)",
+      "details": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 2,
+        "dc": 14,
+        "total": 8,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 18:09",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 0 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 0,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "theoreticalGuidance": null,
+        "location": "mossgate_common",
+        "elapsedMinutes": 240,
+        "staminaSpent": 2
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 18:09 · Evening · Cool         ║\n║ Mossgate Common            0 S ║\n║ STA  █████████░          34/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Maddoc begins real Soul sel… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "18:09",
+    "daypart": "Evening",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 34,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Maddoc begins real Soul self-awareness practice alongside friends at Mossgate"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.\nPC: young learner, undecided; 0 S\nJOURNAL: A period of ordinary life passes at Mossgate Common. | The practitioner begins genuine independent soul self-awareness work at Mossgate Common. | soul practice: self-awareness; 0 training points.\nCURRENT: No opening hook"
+}

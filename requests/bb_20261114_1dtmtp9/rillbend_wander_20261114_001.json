@@ -1,0 +1,17 @@
+{
+  "id": "rillbend_wander_20261114_001",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "rillbend_orchard_path",
+    "minutes": 7,
+    "journey": "Maddoc left Thistlebell Yard through its open gate and followed the ordinary orchard footpath downhill beside the apple rows, reaching the shallow drainage rill and stone culvert without encountering an obstacle.",
+    "uncontested": true,
+    "means": "walking along the public orchard footpath"
+  },
+  "focus": [
+    "Explore the orchard path by the rill"
+  ]
+}

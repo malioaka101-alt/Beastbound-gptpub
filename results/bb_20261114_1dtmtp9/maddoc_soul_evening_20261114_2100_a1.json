@@ -1,0 +1,155 @@
+{
+  "id": "maddoc_soul_evening_20261114_2100_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 26,
+  "stateHash": "765e1d968e0d24be1e6f836fe832f2ca052802366560ceb931a8b01d508b70cb",
+  "clock": "Day 1, 21:00",
+  "output": {
+    "rules": {
+      "system": "soul",
+      "target": "phase1",
+      "method": "self-awareness",
+      "check": {
+        "dice": [
+          17
+        ],
+        "roll": 17,
+        "modifier": 2,
+        "dc": 14,
+        "total": 19,
+        "margin": 5,
+        "degree": "strong",
+        "success": true,
+        "progress": 2,
+        "naturalBonus": 0
+      },
+      "earned": 2,
+      "progress": 2,
+      "required": 100,
+      "complication": null,
+      "timeDays": 0.08958333333333333,
+      "elapsedMinutes": 129,
+      "staminaSpent": 2,
+      "feeTalons": 0,
+      "route": "independent",
+      "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+      "theoreticalGuidance": null,
+      "potentialAptitude": {
+        "dimension": "soulDepth",
+        "score": 4,
+        "modifier": 0,
+        "rating": "developing",
+        "available": true,
+        "noStageCap": true
+      }
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 18:51",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "maddren_homestead",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "feeTalons": 0,
+        "startMinute": 1131,
+        "timeDays": 0.08958333333333333,
+        "partTime": false
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 18:51",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 17 +2 = 19 vs DC 14 → strong (+5)",
+      "details": {
+        "dice": [
+          17
+        ],
+        "roll": 17,
+        "modifier": 2,
+        "dc": 14,
+        "total": 19,
+        "margin": 5,
+        "degree": "strong",
+        "success": true,
+        "progress": 2,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 21:00",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 2 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 2,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 14,
+        "theoreticalGuidance": null,
+        "potentialAptitude": {
+          "dimension": "soulDepth",
+          "score": 4,
+          "modifier": 0,
+          "rating": "developing",
+          "available": true,
+          "noStageCap": true
+        },
+        "location": "maddren_homestead",
+        "elapsedMinutes": 129,
+        "staminaSpent": 2
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 21:00 · Night · Cool           ║\n║ Maddren Homestead          0 S ║\n║ STA  █████████░          32/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Evening Soul self-awareness… ║\n║ ◆ Tomorrow: 08:00 harness wor… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "21:00",
+    "daypart": "Night",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 32,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Evening Soul self-awareness practice",
+      "Tomorrow: 08:00 harness work with Hedra"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.\nPC: young learner, undecided; 0 S\nJOURNAL: The documented journey from Mossgate Common reaches Maddren Homestead. | The practitioner begins genuine independent soul self-awareness work at Maddren Homestead. | soul practice: self-awareness; 2 training points.\nCURRENT: No opening hook"
+}

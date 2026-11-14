@@ -1,0 +1,19 @@
+{
+  "id": "maddren_homestead_20261114_a1",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "establishPlace",
+  "params": {
+    "placeId": "maddren_homestead",
+    "name": "Maddren Homestead",
+    "regionId": "orchard_vales",
+    "kind": "family cottage",
+    "sceneType": "settlement",
+    "description": "The Maddren family's modest cottage on a small orchard lane near Thistlebell Yard, with a simple gate, timber porch and practical storage for beast-handling work.",
+    "culture": "An ordinary working household in the Asterwyn Orchard Vales, with daily rhythms shaped by orchards and nearby beast-handling yards."
+  },
+  "focus": [
+    "Return home from Mossgate before nightfall"
+  ]
+}

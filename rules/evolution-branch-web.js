@@ -15,7 +15,9 @@ function branch(s,p={}){
   Object.keys(p).some(x=>!allowed.includes(x)))
   throw Error('Author a specific sourced branch without selecting outcome, dice, permission or instant form');
  const b=s.beasts?.[p.beastId],q=p.parameters,eco=p.ecology;
- if(!b||b.id!==p.beastId||!E.SPECIES[b.species]||
+ if(!b||b.id!==p.beastId||
+  !(E.SPECIES[b.species]||
+    b.gmWild&&require('../world/gm-wild-individuals').verify(s,b))||
   typeof b.evolutionStage!=='string'||!validId(p.branchId)||
   !q||typeof q!=='object'||Array.isArray(q)||
   q.beastId!==p.beastId||q.branchId!==p.branchId||

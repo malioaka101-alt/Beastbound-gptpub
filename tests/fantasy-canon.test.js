@@ -58,20 +58,23 @@ const blocked=P.evolutionEvent(z.s,z.r,sourceInput);
 eq(blocked.outcome,'stalled');ok(!z.r.evolved);ok(!JSON.stringify(blocked).includes('Unrevealed'));
 ok(!JSON.stringify(blocked).includes('sealed requirement'));ok(z.r.stalledUntilDay>E.day(z.s));
 assert.throws(()=>P.evolutionEvent(z.s,z.r,sourceInput),/later season/);assertions++;
-// Branch taxonomy and route exception must match Python reference §6.8.
+// Stage ceilings cannot come from potential; genuine conditions still matter.
 for(const kind of ['standard','environmental','dietary','bond-born']){
  const q=branch({kind,potential:2});eq(P.status(q.r).gate,true);
 }
 let special=branch({kind:'hidden',potential:2,grade:4,documented:true,
  conditions:[{label:'Fully mastered inherited skill',met:false,known:true}]});
 special.r.specialConditionsMet=true;
-eq(P.status(special.r).gate,false,'Unmet route conditions must not bypass potential');
+eq(P.status(special.r).gate,true,'Potential cannot close a branch');
+eq(P.status(special.r).ready,false,'An actual unmet known route condition still blocks it');
 special.r.conditions[0].met=true;
-eq(P.status(special.r).gate,true,'Completed documented route may bypass potential gate');
-// An absent potential gate must not roll or consume catalysts.
-z=branch();z.r.potential=2;const prior=z.s.rngState;
-const blockedPotential=P.evolutionEvent(z.s,z.r,sourceInput);
-eq(blockedPotential.rolled,false);eq(z.s.rngState,prior);
+eq(P.status(special.r).ready,true,'Genuine completion makes the branch ready');
+// Low potential now raises the real evolution check instead of prohibiting it.
+z=branch();z.r.potential=2;z.r.gradeCeiling=2;const prior=z.s.rngState;
+const lowPotential=P.evolutionEvent(z.s,z.r,sourceInput);
+ok(lowPotential.rolls.length===3);
+ok(z.s.rngState!==prior,'Eligible low-potential beast gets the real roll');
+eq(lowPotential.dc,24,'Bounded adaptation strain raises difficulty');
 // S2 requires guardian agreement; S3 must personally consent, even if beast.consent=true.
 z=branch({sapience:2});assert.throws(()=>P.evolutionEvent(z.s,z.r,sourceInput),/consent/);assertions++;
 z=branch({sapience:3});assert.throws(()=>P.evolutionEvent(z.s,z.r,sourceInput),/consent/);assertions++;

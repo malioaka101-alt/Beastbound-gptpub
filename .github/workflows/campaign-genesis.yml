@@ -1,0 +1,84 @@
+name: Beastbound Campaign Genesis
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'requests/campaign_setup/**'
+permissions:
+  contents: write
+concurrency:
+  group: beastbound-private-turns
+  cancel-in-progress: false
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate new lives and GM openings with the real engine
+        run: |
+          node <<'NODE'
+          'use strict';
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const Generator=require('./scripts/new-campaign.js');
+          const Opening=require('./scripts/gm-campaign-opening.js');
+          const E=require('./engine.js');
+          const root='requests/campaign_setup';
+          const legal=s=>typeof s==='string' && /^[a-z0-9][a-z0-9_-]{4,79}$/.test(s);
+          if(!fs.existsSync(root))process.exit(0);
+          for(const filename of fs.readdirSync(root).filter(n=>n.endsWith('.json')).sort()){
+            const id=filename.slice(0,-5);
+            if(!legal(id))continue;
+            const dest=path.join('results','campaign_setup',filename);
+            if(fs.existsSync(dest))continue;
+            try{
+              const r=JSON.parse(fs.readFileSync(path.join(root,filename),'utf8'));
+              if(r.id!==id||!legal(r.campaign)||!['new_campaign','gm_open'].includes(r.mode))
+                throw Error('Invalid campaign genesis request');
+              const save=path.join('saves',r.campaign+'.json');
+              let result;
+              if(r.mode==='new_campaign'){
+                if(fs.existsSync(save))throw Error('Campaign already exists; refused to reroll');
+                if(!Number.isInteger(r.age)||r.age<1||r.age>110)
+                  throw Error('Invalid starting age');
+                const seed=Generator.secureSeed();
+                const {state,summary}=Generator.create({slug:r.campaign,seed,age:r.age,mode:'random'});
+                fs.mkdirSync(path.dirname(save),{recursive:true});
+                fs.writeFileSync(save,E.exportGame(state)+'\n',{flag:'wx'});
+                result={id,ok:true,mode:r.mode,campaign:r.campaign,summary};
+              }else{
+                if(!fs.existsSync(save))throw Error('No character save exists yet');
+                const state=E.importGame(fs.readFileSync(save,'utf8'));
+                if(!r.opening||state.campaign?.openingState!=='awaiting-gm')
+                  throw Error('No valid first GM scene can be authored');
+                const opening=Opening.apply(state,r.opening);
+                fs.writeFileSync(save,E.exportGame(state)+'\n');
+                result={id,ok:true,mode:r.mode,campaign:r.campaign,opening,
+                  name:state.player.name,clock:E.clock(state)};
+              }
+              fs.mkdirSync(path.dirname(dest),{recursive:true});
+              fs.writeFileSync(dest,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+              console.log(id+': '+r.mode+' completed');
+            }catch(e){
+              fs.mkdirSync(path.dirname(dest),{recursive:true});
+              fs.writeFileSync(dest,JSON.stringify({id,ok:false,error:String(e.message||e).slice(0,250)},null,2)+'\n',{flag:'wx'});
+              console.error(id+': '+String(e.message||e));
+            }
+          }
+          NODE
+      - name: Commit new campaign save and verified result
+        run: |
+          git config user.name 'beastbound-turn-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add saves/ results/campaign_setup/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record verified Beastbound campaign genesis'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

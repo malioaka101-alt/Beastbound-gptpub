@@ -5,6 +5,7 @@ const crypto=require('node:crypto');
 const Core=require('./core');
 const Engine=require('../engine');
 const World=require('./world');
+const Potential=require('./potential-mechanics');
 const FACETS=Object.freeze({
  physical:{strength:'str',speed:'dex',agility:'dex',endurance:'con',durability:'con',reflexes:'dex',coordination:'dex',recovery:'con'},
  energetic:{capacity:'con',purity:'wis',pressureTolerance:'con',circulation:'wis',control:'wis',recovery:'con',conversionEfficiency:'int',energyPerception:'wis'},
@@ -49,10 +50,25 @@ function validate(x){
 function publicStatus(s){
  const x=s.player.capabilityProfile||make(s);validate(x);const domains={};
  for(const [domain,fields] of Object.entries(x.domains))domains[domain]=Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,v.current]));
- const potential=Object.fromEntries(Object.entries(x.potential).map(([key,v])=>[key,v.assessments.length?{
-  state:'provisionally assessed',latest:v.assessments.at(-1).reading,confidence:v.assessments.at(-1).confidence,source:v.assessments.at(-1).source
- }:{state:'unassessed'}]));
- return {attributes:{...s.player.attributes},domains,potential,source:'In-world capability profile; unmeasured potential is not zero and is never automatically disclosed'};
+ // The owner may inspect their own seeded potential. Other people's
+ // potentials remain unknown until earned assessment or consent.
+ const potential=Object.fromEntries(Object.entries(x.potential).map(([key,v])=>[key,{
+  score:v.latent,maximum:9,rating:Potential.BANDS[v.latent-1],
+  trainingModifier:Potential.bonus(v.latent),
+  state:v.assessments.length?'provisionally assessed':'unassessed',
+  ...(v.assessments.length?{
+   latest:v.assessments.at(-1).reading,
+   confidence:v.assessments.at(-1).confidence,
+   source:v.assessments.at(-1).source
+  }:{}),
+  assessment:v.assessments.length?{
+   state:'provisionally assessed',latest:v.assessments.at(-1).reading,
+   confidence:v.assessments.at(-1).confidence,source:v.assessments.at(-1).source
+  }:{state:'not formally assessed'},neverLimitsStage:true
+ }]));
+ return {attributes:{...s.player.attributes},domains,potential,
+  source:'Personal owner-only potential profile; unknown people require independent evidence',
+  potentialCapsStages:false};
 }
 const BANDS=['limited','limited','developing','developing','promising','promising','strong','exceptional','exceptional'];
 function assess(s,{dimension,source,facility,minutes=120}={}){

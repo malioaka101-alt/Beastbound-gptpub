@@ -4,7 +4,8 @@
 // never player-supplied outcomes. No species ability or human stage is free.
 const E=require('../engine.js'),C=require('./core'),W=require('./world'),
  U=require('./unified'),Combat=require('./combat'),
- Lineage=require('./beast-origin-lineage');
+ Lineage=require('./beast-origin-lineage'),
+ Potential=require('./potential-mechanics');
 const ORIGIN='source-earned-human-origin-integration-v1',
  AUTH='gm-attested-origin-material-rights-v1',
  STAGE='witnessed-human-origin-integration-stage-v1',
@@ -96,12 +97,15 @@ function stageWitness(s,index,id,step){
   throw Error('The actual individual human biological stage, independent failure, and metabolic load must be witnessed before a new check');
  return structuredClone(w);
 }
-function verifiedRoll(a,rule,q){
+function verifiedRoll(s,a,rule,q){
  if(!a||a.rollEvent?.type!=='roll'||a.rollEventHash!==hash(a.rollEvent)||
   hash(a.rollEvent.details)!==hash(a.check)||
   !integer(a.roll,1,20)||a.roll!==a.check?.roll||
   a.check.dc!==rule.dc+Math.min(4,q.integrationLoad)||
-  a.check.modifier!==a.attributeModifier+2*a.skillRank||
+  a.check.modifier!==a.attributeModifier+2*a.skillRank+
+   (a.potentialAptitude?.modifier||0)||
+  (a.potentialAptitude!==undefined&&
+   (!a.step||!Potential.matches(s,a.potentialAptitude,Potential.ORIGIN_STEPS[a.step])))||
   !integer(a.attributeScore,1,30)||!integer(a.skillRank,0,5)||
   a.attributeModifier!==Math.floor((a.attributeScore-10)/2)||
   a.check.naturalBonus!==C.naturalAdjustment(a.roll)||
@@ -136,7 +140,7 @@ function verifyRecord(s,r,q,seal){
     !integer(a.minute,last,s.world.minutes)||
     !integer(a.minutes,45,480)||a.minute+a.minutes>s.world.minutes||
     a.staminaSpent!==2||a.strainBefore!==strain||strain<=0||
-    !verifiedRoll(a,{dc:15},{integrationLoad:0})||
+    !verifiedRoll(s,a,{dc:15},{integrationLoad:0})||
     a.strainAfter!==(a.check.success?Math.max(0,strain-2):strain)||
     !a.witness||a.witnessHash!==hash(a.witness)||
     a.witness.details?.origin!==CARE||
@@ -157,7 +161,7 @@ function verifyRecord(s,r,q,seal){
    !integer(a.minutes,rule.minimum,480)||
    a.minute+a.minutes>s.world.minutes||
    a.staminaSpent!==rule.cost||
-   !verifiedRoll(a,rule,q)||
+   !verifiedRoll(s,a,rule,q)||
    !a.witness||a.witnessHash!==hash(a.witness)||
    a.witness.type!=='story'||
    a.witness.details?.origin!==STAGE||
@@ -306,10 +310,11 @@ function stage(s,p={}){
   'original '+rule.attribute,1,30),
  rank=C.int(ruleResource.skills?.[rule.skill]?.rank??0,
   'original '+rule.skill,0,5),mod=Math.floor((attr-10)/2);
+ const aptitude=Potential.originStep(s,step);
  const loadBefore=o.load,rejectionBefore=o.rejectionRisk||0,strainBefore=t?.strain||0;
  Lineage.archive(s,auth.source.witness);
  Lineage.archive(s,observed);
- const check=C.check(s,{modifier:mod+2*rank,
+ const check=C.check(s,{modifier:mod+2*rank+aptitude.modifier,
   dc:rule.dc+Math.min(4,q.integrationLoad),
   label:'Human Origin '+STEPS[step]+' — '+q.traitName.slice(0,24)});
  const rollEvent=structuredClone(s.log.at(-1));
@@ -339,7 +344,7 @@ function stage(s,p={}){
  s.table.combatants.player.stamina=ruleResource.stamina;
  const src={origin:ORIGIN,kind:'stage',sourceId:p.sourceId,
   step,minute:now,minutes,staminaSpent,attributeScore:attr,
-  attributeModifier:mod,skillRank:rank,
+  attributeModifier:mod,skillRank:rank,potentialAptitude:aptitude,
   witness:observed,witnessHash:wHash,check:structuredClone(check),
   rollEvent,rollEventHash:hash(rollEvent),roll:check.roll,success,
   strainBefore,strainAdded,strainAfter:Math.min(100,strainBefore+strainAdded),

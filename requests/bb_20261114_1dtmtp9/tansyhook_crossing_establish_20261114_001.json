@@ -1,0 +1,16 @@
+{
+  "id": "tansyhook_crossing_establish_20261114_001",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "establishPlace",
+  "params": {
+    "placeId": "tansyhook_crossing",
+    "name": "Tansyhook Crossing",
+    "regionId": "orchard_vales",
+    "kind": "orchard-road crossing",
+    "sceneType": "settlement",
+    "description": "A busy meeting of two public orchard lanes at a narrow timber bridge over an irrigation channel. A roofed weighing shed and fruit-cart layby stand beside the lane; the canal road continues downhill past hedge-grown orchards.",
+    "culture": "Orchard Vales in the Asterwyn Crown: family orchards, seasonal harvest work, draft-beast caravans and barges use the adjoining country roads."
+  }
+}

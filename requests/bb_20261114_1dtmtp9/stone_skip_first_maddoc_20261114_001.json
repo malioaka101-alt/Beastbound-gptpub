@@ -1,0 +1,11 @@
+{
+  "id": "stone_skip_first_maddoc_20261114_001",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "core",
+  "operation": "stoneSkip",
+  "params": {},
+  "focus": [
+    "Maddoc's first stone-skipping attempt with Tessa and Bram"
+  ]
+}

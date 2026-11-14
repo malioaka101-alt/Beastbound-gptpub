@@ -3,7 +3,8 @@
 // ecological map is *not* proof of an organ, a material licence or a power.
 // GM-authored source registry entries are not created by player rule calls.
 const Crypto=require('node:crypto'),E=require('../engine.js'),
- C=require('./core'),W=require('./world'),U=require('./unified');
+ C=require('./core'),W=require('./world'),U=require('./unified'),
+ Potential=require('./potential-mechanics');
 const ORIGIN='earned-individual-lineage-evidence-v1',
  SOURCE='gm-attested-specific-origin-pattern-source-v1',
  MAP='witnessed-specific-origin-trait-mapping-v1',
@@ -125,7 +126,10 @@ function verify(s){
     !integer(b.minute,last,s.world.minutes)||
     !integer(b.minutes,15,480)||b.minute+b.minutes>s.world.minutes||
     b.staminaSpent!==Math.ceil(b.minutes/120)||
-    !checkIntegrity(b)||b.check.dc!==15+Math.min(4,z.q.integrationLoad)||
+    !checkIntegrity(b)||
+    (b.potentialAptitude!==undefined&&
+     !Potential.matches(s,b.potentialAptitude,'bloodlineExpression'))||
+    b.check.dc!==15+Math.min(4,z.q.integrationLoad)||
     !b.witness||b.witnessHash!==hash(b.witness)||
     b.witness.details?.origin!==MAP||
     b.witness.details?.sourceId!==sourceId||
@@ -146,7 +150,10 @@ function verify(s){
      b.sourceId!==sourceId||!integer(b.minute,z.q.minute,s.world.minutes)||
      !integer(b.minutes,15,480)||b.minute+b.minutes>s.world.minutes||
      b.staminaSpent!==Math.ceil(b.minutes/120)||
-     !checkIntegrity(b)||!b.witness||
+     !checkIntegrity(b)||
+     (b.potentialAptitude!==undefined&&
+      !Potential.matches(s,b.potentialAptitude,Potential.ORIGIN_AXES[axis]))||
+     !b.witness||
      b.witnessHash!==hash(b.witness)||
      b.witness.details?.origin!==SCREEN||
      b.witness.details?.sourceId!==sourceId||
@@ -183,7 +190,8 @@ function map(s,p={}){
  if(!integer(s.player.stamina,staminaSpent,100000))
   throw Error('Actual physical stamina is needed to study this lineage');
  archive(s,q.observation);archive(s,seen);
- const start=s.world.minutes,check=C.check(s,{modifier:modifier(s,'int','research'),
+ const start=s.world.minutes,aptitude=Potential.read(s,'bloodlineExpression');
+ const check=C.check(s,{modifier:modifier(s,'int','research')+aptitude.modifier,
   dc:15+Math.min(4,q.integrationLoad),
   label:'Individual Origin Pattern mapping: '+q.traitName.slice(0,40)});
  const event=structuredClone(s.log.at(-1)),earned=check.success?check.progress:0;
@@ -191,7 +199,7 @@ function map(s,p={}){
   mapping:[],progress:0,complete:false,screens:{},results:{}};
  r.progress=Math.min(3,r.progress+earned);r.complete=r.progress>=3;
  const src={origin:ORIGIN,kind:'map',sourceId:p.sourceId,minute:start,minutes,
-  staminaSpent,witness:seen,witnessHash:wHash,
+  staminaSpent,witness:seen,witnessHash:wHash,potentialAptitude:aptitude,
   check:structuredClone(check),rollEvent:event,rollEventHash:hash(event),
   roll:check.roll,earned,progressAfter:r.progress};
  r.mapping.push({origin:ORIGIN,source:src,seal:hash(src)});
@@ -242,15 +250,17 @@ function screen(s,p={}){
  if(!integer(pchar.stamina,staminaSpent,100000))
   throw Error('Actual stamina is needed for lineage compatibility measurement');
  archive(s,q.observation);archive(s,seen);
- const method=METHODS[p.axis],start=s.world.minutes;
- const check=C.check(s,{modifier:modifier(s,method[0],method[1]),
+ const method=METHODS[p.axis],start=s.world.minutes,
+  aptitude=Potential.originAxis(s,p.axis);
+ const check=C.check(s,{modifier:modifier(s,method[0],method[1])+aptitude.modifier,
   dc:15+Math.min(4,q.integrationLoad)+Math.min(3,risk.length),
   label:'Original individual Origin '+p.axis+' compatibility'});
  const rollEvent=structuredClone(s.log.at(-1));
  const result=check.success?(risk.length?'caution':'promising'):'inconclusive';
  const src={origin:ORIGIN,kind:'screen',axis:p.axis,
   sourceId:p.sourceId,minute:start,minutes,staminaSpent,witness:seen,
-  witnessHash:wHash,check:structuredClone(check),rollEvent,
+  witnessHash:wHash,potentialAptitude:aptitude,
+  check:structuredClone(check),rollEvent,
   rollEventHash:hash(rollEvent),roll:check.roll,risks:risk,result};
  r.screens[p.axis]||=[];r.screens[p.axis].push({
   origin:ORIGIN,source:src,seal:hash(src)});

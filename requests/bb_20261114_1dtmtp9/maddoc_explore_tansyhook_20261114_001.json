@@ -1,0 +1,17 @@
+{
+  "id": "maddoc_explore_tansyhook_20261114_001",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "tansyhook_crossing",
+    "minutes": 16,
+    "journey": "Maddoc left the small moss-green feathered seed-eater undisturbed under the Rillbend culvert, climbed back onto the public footpath, and followed the orchard lanes across a quiet, uncomplicated stretch of the Vales to Tansyhook Crossing.",
+    "means": "walking",
+    "uncontested": true
+  },
+  "focus": [
+    "Explore Tansyhook Crossing and its orchard lanes"
+  ]
+}

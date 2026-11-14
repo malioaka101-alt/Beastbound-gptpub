@@ -64,6 +64,7 @@ const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
 const OriginRelatives=require('../world/origin-relatives');
+const HouseholdWork=require('./household-work');
 const LivedPlaces=require('../world/lived-places');
 const GmCampaignOpening=require('../scripts/gm-campaign-opening');
 const Cosmology=require('../world/cosmology-ledger');
@@ -190,6 +191,35 @@ function act(s,{system,operation,params={}}={}){
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
   case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
+  // A witnessed, informal orchard-game attempt: the GM established the
+  // place and instructions in play; the engine alone draws and records the
+  // player's die and derives a modest, visible physical outcome.
+  // This is not a rated competition, skill-award shortcut, or NPC contest.
+  case 'core.stoneSkip':{
+   if(Object.keys(params).length!==0)throw Error('A stone-skip throw takes no caller-selected modifier, result or target');
+   if(s.world.location!=='tansyhook_crossing'||s.battle||s.encounter)
+    throw Error('The witnessed stone-skipping scene at Tansyhook Crossing must be current and uncontested');
+   const dex=C.int(s.player.attributes.dex,'earned Dexterity',1,30);
+   const survival=C.int(s.player.skills.survival?.rank,'earned Survival rank',0,5);
+   const modifier=Math.floor((dex-10)/2)+survival*2;
+   const check=C.check(s,{modifier,dc:12,label:'Maddoc stone-skipping throw',risky:false});
+   const skips=check.total<8?0:check.total<11?1:check.total<15?2:check.total<19?3:check.total<23?4:5;
+   const beforeMinute=s.world.minutes;
+   E.advance(s,2);
+   W.finalizeTime(s,beforeMinute);
+   Unified.sync(s,{source:'legacy'});
+   s.table||={};s.table.casualGames||={};
+   s.table.casualGames.stoneSkipping||=[];
+   const attempt={placeId:'tansyhook_crossing',startMinute:beforeMinute,
+    endMinute:s.world.minutes,skips,roll:check.roll,modifier:check.modifier,
+    total:check.total,dc:check.dc, noItemOrPrize:true, noOpponentRoll:true};
+   s.table.casualGames.stoneSkipping.push(attempt);
+   if(s.table.casualGames.stoneSkipping.length>40)s.table.casualGames.stoneSkipping.shift();
+   C.event(s,'story','Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.',attempt);
+   return {skips,check,elapsedMinutes:2,comparison:{tessa:3,bram:4},
+    noPrize:true,noSkillAward:true, noNPCConsentInferred:true};
+  }
+
   case 'character.initialize':return {profileCreated:!!Character.ensure(s),attributesPreserved:true};
   case 'character.status':return Character.publicStatus(s);
   case 'character.assessPotential':return Character.assess(s,params);
@@ -437,6 +467,9 @@ function act(s,{system,operation,params={}}={}){
   case 'world.recordPlaceNote':return LivedPlaces.note(s,params);
   case 'world.travelTo':return LivedPlaces.travel(s,params);
   case 'world.observe':return Wildlife.observe(s,params);
+  case 'world.gmWildWitness':return require('../world/gm-wild-individuals').witnessed(s,params);
+  case 'world.gmWildStatus':return require('../world/gm-wild-individuals').status(s,params);
+  case 'world.sceneContinuityStatus':return require('../scripts/scene-continuity').status(s,params);
   case 'world.watchWildBeast':return WildLives.watch(s,params);
   case 'world.giveWildSpace':return WildLives.giveSpace(s,params);
   case 'world.offerWildFood':return WildLives.offerFood(s,params);
@@ -503,6 +536,12 @@ function act(s,{system,operation,params={}}={}){
   case 'social.status':return SocialFabric.status(s,params);
   case 'social.groupsStatus':return EmergentGroups.status(s,params);
   case 'social.groupTreasuryStatus':return EmergentGroups.treasuryStatus(s,params);
+  case 'social.groupSiteWorkStatus':return EmergentGroups.siteWorkStatus(s,params);
+  case 'social.offerGroupOwnedResource':return EmergentGroups.offerOwnedResource(s,params);
+  case 'social.withdrawGroupResourceOffer':return EmergentGroups.withdrawResourceOffer(s,params);
+  case 'social.groupResourceSiteStatus':return EmergentGroups.resourceSiteStatus(s,params);
+  case 'social.observeGroupRoleWork':return GroupInvitations.observeResponsibilityWork(s,params);
+  case 'social.groupRoleWorkStatus':return GroupInvitations.responsibilityWorkStatus(s,params);
   case 'social.groupPurposeHistory':return EmergentGroups.purposeHistory(s,params);
   case 'social.groupPurposeResponses':return EmergentGroups.purposeResponses(s,params);
   case 'social.discussGroupPurpose':return EmergentGroups.discussPurpose(s,params);
@@ -511,6 +550,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupTasksStatus':return GroupInvitations.taskStatus(s,params);
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
+  case 'social.householdWork':return HouseholdWork.perform(s,params);
+  case 'social.householdWorkStatus':return HouseholdWork.status(s);
   case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);
   case 'social.localPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
@@ -526,6 +567,11 @@ function act(s,{system,operation,params={}}={}){
   case 'social.witnessedPersonWorkStatus':return EmergentPeople.witnessedWorkStatus(s,params);
   case 'social.meetSapientBeast':return SapientBeasts.meet(s,params);
   case 'social.sapientBeastMemoriesStatus':return SapientBeasts.witnessedStatus(s,params);
+  case 'social.introduceWitnessedPerson':return EmergentPeople.registerGM(s,params);
+  case 'social.authorWitnessedPersonDuty':return EmergentPeople.authorWitnessedDuty(s,params);
+  case 'social.retireWitnessedPersonDuty':return EmergentPeople.retireWitnessedDuty(s,params);
+  case 'social.witnessedPersonDutiesStatus':return EmergentPeople.witnessedDutyStatus(s,params);
+  case 'social.witnessedPeopleStatus':return EmergentPeople.gmStatus(s,params);
   case 'social.speakLocalPerson':return EmergentPeople.meet(s,params);
   case 'social.metPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
@@ -534,6 +580,8 @@ function act(s,{system,operation,params={}}={}){
   }
   case 'social.inviteGroupMember':return GroupInvitations.invitation(s,params);
   case 'social.groupTaskRequest':return GroupInvitations.taskRequest(s,params);
+  case 'social.offerGroupResponsibility':return GroupInvitations.offerResponsibility(s,params);
+  case 'social.groupResponsibilitiesStatus':return GroupInvitations.responsibilityStatus(s,params);
   case 'social.coordinatorTaskRequest':return GroupInvitations.coordinatorTaskRequest(s,params);
   case 'social.formGroup':return EmergentGroups.form(s,params);
   case 'social.groupContribute':return EmergentGroups.contribute(s,params);

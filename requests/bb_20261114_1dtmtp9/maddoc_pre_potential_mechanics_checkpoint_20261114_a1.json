@@ -1,0 +1,11 @@
+{
+  "id": "maddoc_pre_potential_mechanics_checkpoint_20261114_a1",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "checkpoint",
+  "scene": "Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.",
+  "focus": [
+    "Respond to Hedra and Nessa at home",
+    "Meet Tessa and Bram tomorrow"
+  ],
+  "summary": "Safe checkpoint before potential mechanics implementation; Maddoc home at 18:51, stamina 34/36, no Soul progress."
+}

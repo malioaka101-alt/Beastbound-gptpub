@@ -539,7 +539,7 @@ function purposeResponseStatus(w,groupId,{day}={}){
   noMemberCompulsion:true,noMoneyOrCompletedWork:true};
 }
 
-function validate(e){
+function validate(e,w=null){
  if(!e||!(TYPES.has(e.origin)||ADAPTERS.has(e.origin))||!Atlas.P[e.polity]||
   !e.charter||e.charter.id!==e.id||e.charter.polity!==e.polity||
   !e.witness||hash(e.witness)!==e.originHash||
@@ -566,13 +566,29 @@ function validate(e){
    !verifyInternalPositionHistory(e)))return false;
  if(e.internalRoles!==undefined&&
    (!Array.isArray(e.internalRoles)||
-    e.internalRoles.some(x=>!verifyInternalRole(e,x))||
+    e.internalRoles.some(x=>!verifyInternalRole(e,x,w))||
     new Set(e.internalRoles.map(x=>x.id)).size!==e.internalRoles.length))
+  return false;
+ if(e.roleWork!==undefined&&
+   (!Array.isArray(e.roleWork)||e.roleWork.length>500||
+    e.roleWork.some(x=>!verifyRoleWork(e,x,w))||
+    new Set(e.roleWork.map(x=>x.id)).size!==e.roleWork.length||
+    new Set(e.roleWork.map(x=>x.workReceiptHash)).size!==e.roleWork.length))
   return false;
  if(e.priorityWork!==undefined&&
    (!Array.isArray(e.priorityWork)||
     e.priorityWork.some(x=>!verifyPriorityWork(e,x))||
     new Set(e.priorityWork.map(x=>x.originalActionHash)).size!==e.priorityWork.length))
+  return false;
+ if(e.siteWork!==undefined&&
+   (!Array.isArray(e.siteWork)||
+    e.siteWork.some(x=>!verifySiteWork(e,x,w))||
+    new Set(e.siteWork.map(x=>x.originalActionHash)).size!==e.siteWork.length))
+  return false;
+ if(e.resourceOffers!==undefined&&
+   (!Array.isArray(e.resourceOffers)||e.resourceOffers.length>120||
+    e.resourceOffers.some(x=>!verifyResourceOffer(e,x,w))||
+    new Set(e.resourceOffers.map(x=>x.id)).size!==e.resourceOffers.length))
   return false;
  if(e.coordinationReviews!==undefined&&!verifyCoordinationReviewHistory(e))
   return false;
@@ -634,11 +650,11 @@ function validate(e){
 function all(w,{publishedOnly=false,day=Infinity}={}){
  const saved=peek(w);
  return saved?Object.values(saved.entries).filter(e=>
-  validate(e)&&(!publishedOnly||e.releaseDay<=day)):[];
+  validate(e,w)&&(!publishedOnly||e.releaseDay<=day)):[];
 }
 function lookup(w,id,opts){
  const r=peek(w),e=r?.entries?.[id];
- if(!e||!validate(e))return null;
+ if(!e||!validate(e,w))return null;
  if(opts?.publishedOnly&&e.releaseDay>opts.day)return null;
  return e;
 }
@@ -937,7 +953,7 @@ function verifyVoluntaryTask(e,row){
   q.noCompulsoryWork!==true||q.noAutomaticPayOrStatus!==true||
   q.noNewWorkResult!==true||q.noNewGroupFundsSpent!==true||
   !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
-  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  require('./lived-places').verifiedSiteRegion(q.place,q.placeProof)!==q.regionId||
   q.npcId!==row.npcId||
   typeof q.memberName!=='string'||q.memberName.length<3||
   !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
@@ -1274,6 +1290,260 @@ function syncWorkerFounders(w,day,emit){
  }
  return added;
 }
+/*
+ * Original shared operating-site evidence, not a facility/property owner.
+ * This binds an ACTUAL funded-or-unfunded group-work attempt and its one
+ * original independent monthly result to the real established location
+ * where it was attempted. No second resolution, building, staff or revenue.
+ */
+const SITE_WORK='original-reviewed-association-established-place-work-v1';
+function siteRegion(w,placeId,proof,minute){
+ const Places=require('./lived-places');
+ const regionId=Places.verifiedSiteRegion(placeId,proof);
+ if(!regionId)return null;
+ if(proof!==undefined&&proof!==null){
+  if(proof.founding?.worldMinute>minute)return null;
+  if(w){
+   const p=w.livedPlaces?.places?.[placeId];
+   if(!p||!Places.verifyPlace(p)||
+      p.foundingHash!==proof.foundingHash||
+      p.regionId!==regionId||p.establishedMinute>minute)
+    return null;
+  }
+ }
+ return regionId;
+}
+function verifySiteWork(e,row,w=null){
+ const q=row?.source,a=q?.attempt,review=q?.review,
+  details=a?.witness?.details;
+ if(!q||row.origin!==SITE_WORK||q.origin!==SITE_WORK||
+  row.sourceHash!==hash(q)||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  q.attemptHash!==a?.hash||q.reviewHash!==review?.hash||
+  row.originalActionHash!==a?.hash||
+  row.id!=='site_work_'+hash({
+   groupId:e.id,actionHash:a?.hash,reviewHash:review?.hash}).slice(0,25)||
+  !a||a.hash!==hash(a.witness)||a.witness?.type!=='story'||
+  details?.origin!=='actually-attempted-voluntary-group-work'||
+  details.groupId!==e.id||details.actor!==e.founder?.name||
+  details.activity!==a.activity||
+  details.minutes!==45||a.minutes!==45||
+  !Number.isInteger(a.day)||a.day<e.foundedDay||
+  !Number.isInteger(a.amount)||a.amount<0||
+  details.coins!==a.amount||
+  !Number.isInteger(details.siteMinute)||details.siteMinute<0||
+  q.siteMinute!==details.siteMinute||
+  q.placeId!==details.location||
+  JSON.stringify(q.placeProof??null)!==JSON.stringify(details.placeProof??null)||
+  !Atlas.R[siteRegion(w,q.placeId,q.placeProof,q.siteMinute)]||
+  Atlas.R[siteRegion(w,q.placeId,q.placeProof,q.siteMinute)].polity!==e.polity||
+  !review||!['verified-limited-community-work',
+   'unverified-community-effort'].includes(review.kind)||
+  review.groupId!==e.id||review.originHash!==e.originHash||
+  !Number.isInteger(review.day)||review.day<a.day||
+  !Array.isArray(review.details?.originalActionHashes)||
+  !review.details.originalActionHashes.includes(a.hash)||
+  !Number.isInteger(review.details.actualEffortMinutes)||
+  review.details.actualEffortMinutes<a.minutes||
+  !Number.isInteger(review.details.actualFundsSpent)||
+  review.details.actualFundsSpent<0||
+  q.sharedOriginalCost!==review.details.actualFundsSpent||
+  q.originalResult!==review.kind||
+  typeof review.details.chance!=='number'||
+  review.details.chance<0||review.details.chance>1||
+  typeof review.details.decisionDraw!=='number'||
+  review.details.decisionDraw<0||review.details.decisionDraw>=1||
+  (review.kind==='verified-limited-community-work')!==
+   (review.details.decisionDraw<review.details.chance)||
+  q.noSeparateWorkRoll!==true||
+  q.noNewCashOrConstruction!==true||
+  q.noPropertyOrTeachingRights!==true)
+  return false;
+ const {hash:seal,notice,releaseDay,...body}=review;
+ return seal===hash(body);
+}
+function retainSiteWork(w,e,attempt,review){
+ const details=attempt?.witness?.details;
+ if(!Number.isInteger(details?.siteMinute))return null;
+ const regionId=siteRegion(w,details.location,details.placeProof,
+  details.siteMinute);
+ if(!regionId||Atlas.R[regionId]?.polity!==e.polity)
+  throw Error('An original established physical work location is required for association site evidence');
+ const q={origin:SITE_WORK,groupId:e.id,groupOriginHash:e.originHash,
+  placeId:details.location,siteMinute:details.siteMinute,
+  ...(details.placeProof?{placeProof:structuredClone(details.placeProof)}:{}),
+  attemptHash:attempt.hash,attempt:structuredClone(attempt),
+  reviewHash:review.hash,review:structuredClone(review),
+  originalResult:review.kind,sharedOriginalCost:review.details.actualFundsSpent,
+  noSeparateWorkRoll:true,noNewCashOrConstruction:true,
+  noPropertyOrTeachingRights:true};
+ const row={origin:SITE_WORK,id:'site_work_'+hash({
+  groupId:e.id,actionHash:attempt.hash,reviewHash:review.hash}).slice(0,25),
+  originalActionHash:attempt.hash,source:q,sourceHash:hash(q)};
+ if(!verifySiteWork(e,row,w))
+  throw Error('Association operating-site context lacks original independent work or place source');
+ e.siteWork||=[];
+ if(e.siteWork.some(x=>x.id===row.id||x.originalActionHash===row.originalActionHash))
+  throw Error('Original group operating-site work must not be counted twice');
+ e.siteWork.push(row);
+ return row;
+}
+function siteWorkStatus(w,groupId,{placeId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('A real founded voluntary association is required for personally known operating-site records');
+ if(placeId!==undefined&&typeof placeId!=='string')
+  throw Error('Only an existing actual place may filter a known group work record');
+ return {groupId:e.id,knownSiteActivity:(e.siteWork||[])
+  .filter(x=>placeId===undefined||x.source.placeId===placeId)
+  .map(x=>({id:x.id,placeId:x.source.placeId,
+   work:x.source.attempt.activity,dayOfReview:x.source.review.day,
+   originalResult:x.source.originalResult,
+   groupWideCostForSharedReview:x.source.sharedOriginalCost,
+   originalActionHash:x.originalActionHash,
+   originalReviewHash:x.source.reviewHash,
+   establishedSourceHash:x.source.placeProof?.foundingHash??null,
+   attemptedWorkNotSpecificConstruction:true,
+   noLegalRightToSiteOrFacilities:true,
+   noExtraMoneyOrTrainingAward:true})),
+  note:'Only the original independently reviewed limited shared work is recorded here. A site mention is not land ownership, building construction, school accreditation, staffed operation or authority to spend others’ resources.'};
+}
+
+/*
+ * #137 — a founder may offer THEIR OWN actually attested physical goods for
+ * possible group use at a genuinely established site. Neither the group nor
+ * any other member acquires property, access, custody, services or funds.
+ * Availability is computed against the original physical owner on inspection,
+ * never stored as a fabricated facility stock balance.
+ */
+const RESOURCE_OFFER='original-founder-owned-material-voluntary-site-use-v1';
+const RESOURCE_WITHDRAWAL='original-founder-material-site-use-withdrawal-v1';
+function verifyResourceOffer(e,row,w=null){
+ const q=row?.source,a=q?.asset,ap=a?.source,ev=q?.originalEvent,
+  d=ev?.details;
+ if(!q||row.origin!==RESOURCE_OFFER||
+  row.sourceHash!==hash(q)||q.origin!==RESOURCE_OFFER||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  row.assetId!==q.assetId||row.id!==q.id||
+  q.id!=='group_resource_'+hash({
+   groupId:e.id,assetId:q.assetId,place:q.place,
+   minute:q.minute,purpose:q.purpose}).slice(0,24)||
+  !a||a.id!==q.assetId||a.ownerId!=='player'||
+  a.hash!==hash(ap)||a.hash!==q.originalAssetHash||
+  ap?.origin!=='witnessed-existing-material-owner-and-stock-attestation-v1'||
+  a.ownerId!==ap.ownerId||a.item!==ap.item||
+  a.quantity!==ap.quantity||
+  ap.ownerName!==e.founder.name||
+  ap.ownerId!=='player'||
+  !['player-inventory','existing-authored-personal-tool',
+   'existing-purchased-mundane-equipment'].includes(ap.ownerKind)||
+  typeof ap.originalRoot!=='string'||ap.originalRoot.length!==64||
+  ap.noNewPhysicalStock!==true||
+  ap.noLegalTitleOrForcedConsent!==true||
+  ap.noCurrencyOrGuaranteedProduction!==true||
+  !Number.isInteger(ap.minute)||ap.minute<0||
+  !Number.isInteger(q.minute)||q.minute<ap.minute||
+  !Number.isInteger(q.day)||q.day!==Math.floor(q.minute/1440)||
+  q.day<e.foundedDay||q.quantity!==a.quantity||
+  typeof q.purpose!=='string'||q.purpose.trim().length<20||
+  q.purpose.length>500||
+  siteRegion(w,q.place,q.placeProof,q.minute)!==q.regionId||
+  Atlas.R[q.regionId]?.polity!==e.polity||
+  !ev||q.originalEventHash!==hash(ev)||ev.type!=='story'||
+  d?.origin!==RESOURCE_OFFER||d.groupId!==e.id||
+  d.assetId!==q.assetId||d.assetHash!==q.originalAssetHash||
+  d.item!==a.item||d.quantity!==a.quantity||
+  d.place!==q.place||d.minute!==q.minute||
+  d.purpose!==q.purpose||
+  d.owner!==e.founder.name||
+  d.noPhysicalTransfer!==true||d.noFacilityOrAuthorityGranted!==true||
+  q.noTransferOrNewItems!==true||
+  q.noPropertyTitleOrSiteAccess!==true||
+  q.noGuaranteedUseOrEmployeeWork!==true)
+  return false;
+ const end=row.ending;
+ if(end!==null&&end!==undefined){
+  const p=end.source;
+  if(!p||end.sourceHash!==hash(p)||
+   p.origin!==RESOURCE_WITHDRAWAL||
+   p.offerId!==row.id||p.groupId!==e.id||
+   p.originalOfferHash!==row.sourceHash||
+   p.founder!==e.founder.name||
+   !Number.isInteger(p.minute)||p.minute<q.minute||
+   p.day!==Math.floor(p.minute/1440)||
+   typeof p.reason!=='string'||p.reason.trim().length<12||
+   p.reason.length>500||
+   p.noResourceOrMoneyMoved!==true)
+   return false;
+ }
+ return true;
+}
+function retainFounderResourceOffer(w,groupId,{asset,place,placeProof,minute,purpose,
+ originalEvent}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration'||!asset||!originalEvent)
+  throw Error('An existing founded group, genuinely owned documented material and original player choice are required');
+ const regionId=siteRegion(w,place,placeProof,minute);
+ if(!regionId||Atlas.R[regionId]?.polity!==e.polity)
+  throw Error('A genuine established site in the group polity is required');
+ const existing=e.resourceOffers||[];
+ if(existing.length>=120||
+  existing.some(x=>x.assetId===asset.id&&x.source.place===place&&!x.ending))
+  throw Error('This original asset is already offered here or the original register is full');
+ const q={origin:RESOURCE_OFFER,groupId:e.id,
+  groupOriginHash:e.originHash,
+  assetId:asset.id,originalAssetHash:asset.hash,quantity:asset.quantity,
+  asset:structuredClone(asset),place,regionId,minute,
+  day:Math.floor(minute/1440),purpose,
+  ...(placeProof?{placeProof:structuredClone(placeProof)}:{}),
+  originalEvent:structuredClone(originalEvent),
+  originalEventHash:hash(originalEvent),
+  noTransferOrNewItems:true,noPropertyTitleOrSiteAccess:true,
+  noGuaranteedUseOrEmployeeWork:true};
+ q.id='group_resource_'+hash({
+  groupId:e.id,assetId:q.assetId,place:q.place,
+  minute:q.minute,purpose:q.purpose}).slice(0,24);
+ const row={origin:RESOURCE_OFFER,id:q.id,assetId:asset.id,
+  source:q,sourceHash:hash(q),ending:null};
+ if(!verifyResourceOffer(e,row,w))
+  throw Error('Real property and local volunteer offer do not share valid original provenance');
+ e.resourceOffers||=[];e.resourceOffers.push(row);
+ if(!validate(e,w)){e.resourceOffers.pop();
+  throw Error('Original voluntarily offered material cannot alter a real group registry');}
+ return {offered:true,id:row.id,groupId:e.id,assetId:asset.id,
+  place,item:asset.item,quantity:asset.quantity,
+  ownedBy:e.founder.name,notTransferred:true,
+  notBuildingOrGroupOwned:true,noAutomaticWorkerUse:true};
+}
+function withdrawFounderResourceOffer(w,groupId,{offerId,minute,reason}={}){
+ const e=lookup(w,groupId),row=e?.resourceOffers?.find(x=>x.id===offerId);
+ if(!e||e.origin!=='player-declaration'||!row||row.ending)
+  throw Error('Only an existing active founder-owned resource offer can be withdrawn');
+ const q={origin:RESOURCE_WITHDRAWAL,groupId:e.id,offerId:row.id,
+  originalOfferHash:row.sourceHash,founder:e.founder.name,minute,
+  day:Math.floor(minute/1440),reason,noResourceOrMoneyMoved:true};
+ row.ending={source:q,sourceHash:hash(q)};
+ if(!validate(e,w)){row.ending=null;
+  throw Error('A withdrawn availability offer must preserve original asset and site evidence');}
+ return {withdrawn:true,offerId,groupId:e.id,
+  originalOwnershipUnchanged:true,noMoneyOrTimeSpent:true};
+}
+function resourceOfferStatus(w,groupId,{placeId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')throw Error('An original founder-owned group is required');
+ if(placeId!==undefined&&typeof placeId!=='string')
+  throw Error('Only a real physical location may filter voluntary resource offers');
+ return (e.resourceOffers||[])
+  .filter(x=>placeId===undefined||x.source.place===placeId)
+  .map(x=>({id:x.id,assetId:x.assetId,item:x.source.asset.item,
+   quantityAtOriginalWitness:x.source.quantity,
+   place:x.source.place,purpose:x.source.purpose,
+   originalAssetSourceHash:x.source.originalAssetHash,
+   originalSiteFoundingHash:x.source.placeProof?.foundingHash??null,
+   withdrawn:!!x.ending,ownerName:e.founder.name,
+   noPropertyTransfer:true,noGuaranteedUse:true}));
+}
+
 function month(w,day,emit){
  const r=ensure(w);
  for(const e of all(w)){
@@ -1336,6 +1606,10 @@ function month(w,day,emit){
     before:available,
     proof:{originalReview:structuredClone(independentReview),
      originalReviewHash:independentReview.hash}});
+   // Retain location evidence from the one ORIGINAL world review. No
+   // second draw, expenditure or claimed facility construction.
+   for(const work of attempts)
+    retainSiteWork(w,e,work,independentReview);
    for(const work of attempts){
     if(work.priorityId===undefined)continue;
     const priority=e.internalPriorities.find(p=>p.id===work.priorityId);
@@ -1880,7 +2154,7 @@ function responsibilityChance(q){
  return clamp(.50+(q.groupSuccesses>q.groupFailures?.09:0)-
    (q.groupStatus==='inactive'?.16:0),.18,.76);
 }
-function verifyInternalRole(e,entry){
+function verifyInternalRole(e,entry,w=null){
  const q=entry?.source;
  if(!q||entry.origin!==INTERNAL_ROLE||
   entry.sourceHash!==hash(q)||q.origin!==INTERNAL_ROLE||
@@ -1901,7 +2175,9 @@ function verifyInternalRole(e,entry){
   !Number.isInteger(entry.untilDay)||entry.untilDay<entry.startDay||
   entry.untilDay>10000000||
   !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
-  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  siteRegion(w,q.place,q.placeProof,q.siteMinute??Number.MAX_SAFE_INTEGER)!==q.regionId||
+  (q.placeProof!==undefined&&(!Number.isInteger(q.siteMinute)||
+   q.siteMinute<0||Math.floor(q.siteMinute/1440)!==q.startDay))||
   typeof q.witness!=='string'||q.witness.trim().length<40||
   q.witness.length>590||
   q.requestingFounder!==e.founder.name||
@@ -1930,10 +2206,11 @@ function verifyInternalRole(e,entry){
 function proposeVoluntaryRole(w,params={}){
  if(!params||typeof params!=='object'||Array.isArray(params)||
    Object.keys(params).some(k=>!['id','groupId','memberActorId','title',
-    'scope','startDay','untilDay','regionId','place','witness'].includes(k)))
+    'scope','startDay','untilDay','regionId','place','witness',
+    'siteMinute','placeProof'].includes(k)))
   throw Error('A practical group responsibility cannot specify consent, command power, compulsory service or pay');
  const {id,groupId,memberActorId,title,scope,startDay,untilDay,
-  regionId,place,witness}=params;
+  regionId,place,witness,siteMinute,placeProof}=params;
  const e=lookup(w,groupId),reg=Atlas.R[regionId],
   member=e?.origin==='player-declaration'?
    e.additionalMembers.find(m=>m.actorId===memberActorId&&m.active!==false):null;
@@ -1942,7 +2219,9 @@ function proposeVoluntaryRole(w,params={}){
   People.resolve(w,member.witness.details.npcId,place,startDay):null;
  if(!e||!member||!person||person.actorId!==memberActorId||
   person.name!==member.name||!reg||reg.polity!==e.polity||
-  Atlas.LOCATION_REGION[place]!==regionId||
+  siteRegion(w,place,placeProof,siteMinute??Number.MAX_SAFE_INTEGER)!==regionId||
+  (placeProof!==undefined&&(!Number.isInteger(siteMinute)||
+   siteMinute<0||Math.floor(siteMinute/1440)!==startDay))||
   !Number.isInteger(startDay)||startDay<e.foundedDay||
   startDay>w.lastTickDay||
   !Number.isInteger(untilDay)||untilDay<startDay||
@@ -1960,6 +2239,7 @@ function proposeVoluntaryRole(w,params={}){
   memberActorId,memberConsentHash:member.hash,
   memberName:member.name,requestingFounder:e.founder.name,
   title,scope,startDay,untilDay,regionId,place,witness,
+  ...(placeProof?{siteMinute,placeProof:structuredClone(placeProof)}:{}),
   presentProof:person.presence?hash(person.presence):null,
   groupStatus:e.status,groupSuccesses:e.completedEfforts,
   groupFailures:e.failedEfforts};
@@ -1970,11 +2250,11 @@ function proposeVoluntaryRole(w,params={}){
  const entry={id,origin:INTERNAL_ROLE,memberActorId,
   memberConsentHash:member.hash,title,scope,startDay,untilDay,
   agreed,status:agreed?'agreed':'declined',source:q,sourceHash:hash(q)};
- if(!verifyInternalRole(e,entry))
+ if(!verifyInternalRole(e,entry,w))
   throw Error('A voluntary practical role failed its real independent choice proof');
  e.internalRoles||=[];
  e.internalRoles.push(entry);
- if(!validate(e))throw Error('An organisation cannot record false role consent');
+ if(!validate(e,w))throw Error('An organisation cannot record false role consent');
  record(ensure(w),e,startDay,'independent-practical-role-response',{
   sourceHash:entry.sourceHash,memberActorId,
   agreed,roleTitle:title,
@@ -2007,6 +2287,159 @@ function voluntaryRoleStatus(w,groupId,{day}={}){
  });
 }
 
+
+/*
+ * A PERSON'S existing independent work during an ALREADY CONSENTED group
+ * responsibility. This is an attribution of one real original career check,
+ * not a second roll, a payroll contract or guaranteed project completion.
+ *
+ * The local witnessed event, existing GM-place source, worker's original
+ * living-person shift and original work receipt travel together so the
+ * group's historical record survives rotating short scene/work journals.
+ */
+const ROLE_WORK='original-independent-person-work-during-voluntary-group-role-v1';
+function verifyRoleWork(e,row,w=null){
+ const q=row?.source,role=e.internalRoles?.find(x=>x.id===row?.roleId),
+  shift=q?.originalShift,event=q?.originalEvent,
+  r=q?.originalCareerReceipt,job=r?.source?.task,details=event?.details,
+  person=w?.emergentPeople?.people?.[q?.personId];
+ if(!q||row.origin!==ROLE_WORK||q.origin!==ROLE_WORK||
+  row.sourceHash!==hash(q)||row.id!==q.id||
+  row.roleId!==q.roleId||row.workReceiptHash!==q.workReceiptHash||
+  !/^[a-z][a-z0-9_-]{5,80}$/.test(row.id)||
+  q.id!=='role_work_'+hash({groupId:e.id,roleId:q.roleId,
+   receiptHash:q.workReceiptHash}).slice(0,24)||
+  q.groupId!==e.id||q.groupOriginHash!==e.originHash||
+  !role||!role.agreed||role.sourceHash!==q.originalRoleHash||
+  !verifyInternalRole(e,role,w)||
+  q.memberActorId!==role.memberActorId||
+  q.membershipSourceHash!==role.memberConsentHash||
+  typeof q.personId!=='string'||q.memberActorId!=='emergent:'+q.personId||
+  q.location!==role.source.place||
+  !Number.isInteger(q.day)||q.day<role.startDay||
+  q.day>role.untilDay||
+  !e.additionalMembers?.some(m=>m.actorId===q.memberActorId&&
+   m.hash===q.membershipSourceHash&&m.name===role.source.memberName&&
+   Number.isInteger(m.witness?.details?.day)&&
+   m.witness.details.day<=q.day&&
+   (m.active!==false||m.departure?.day>q.day))||
+  !shift||shift.source!=='emergent-local-work-presence-v1'||
+  shift.npcId!==q.memberActorId||shift.actorId!==q.memberActorId||
+  shift.personId!==q.personId||
+  shift.originHash!==q.personOriginHash||
+  shift.name!==role.source.memberName||
+  shift.location!==q.location||shift.fromDay>q.day||
+  shift.throughDay<q.day||
+  shift.throughDay-shift.fromDay!==5||
+  shift.scheduledAtDay!==shift.fromDay||
+  shift.hash!==hash(Object.fromEntries(
+   Object.entries(shift).filter(([k])=>k!=='hash')))||
+  !event||event.type!=='story'||hash(event)!==q.originalEventHash||
+  !details||details.origin!=='local-independent-person-work-witness-v1'||
+  details.npcId!==q.memberActorId||
+  details.name!==role.source.memberName||
+  details.location!==q.location||details.day!==q.day||
+  details.minutes!==30||details.freelyAgreed!==true||
+  details.presenceHash!==shift.hash||
+  details.personOriginHash!==q.personOriginHash||
+  details.localWorkSourceHash!==q.workReceiptHash||
+  !r||r.origin!=='source-verified-person-work-v1'||
+  r.sourceHash!==q.workReceiptHash||
+  r.sourceHash!==hash(r.source)||
+  r.source.personId!==q.personId||
+  r.source.personOriginHash!==q.personOriginHash||
+  r.source.day!==q.day||
+  r.source.context!=='locally-witnessed-duty'||
+  !job||typeof job.authoredDutyId!=='string'||
+  r.source.outcome?.success!==Boolean(r.source.outcome.success)||
+  !Number.isInteger(r.source.roll)||r.source.roll<1||r.source.roll>20||
+  typeof job.method!=='string'||
+  details.observed?.work!==job.method||
+  details.observed?.goal!==job.goal||
+  details.observed?.visibleOutcome!==(r.source.outcome.success?
+   r.source.outcome.degree+' practical result':
+   'The task did not achieve its intended effect')||
+  q.noExtraCareerProgress!==true||
+  q.noGroupPayrollOrProperty!==true||
+  q.noAutomaticRoleCompletion!==true)
+  return false;
+ if(w){
+  const Careers=require('./person-careers');
+  if(!person||person.origin!=='gm-witnessed-lived-person-v1'||
+   person.id!==q.personId||person.actorId!==q.memberActorId||
+   person.originHash!==q.personOriginHash||
+   !Careers.verify(person)||!Array.isArray(person.career?.authoredDuties)||
+   !person.career.authoredDuties.some(d=>
+    d.id===job.authoredDutyId&&d.workProofHashes.includes(q.workReceiptHash)))
+   return false;
+  // An original duty receipt may later fall out of the worker's bounded
+  // work journal; the original authored duty still retains its hash.
+  const still=person.career.workReceipts.find(x=>x.sourceHash===q.workReceiptHash);
+  if(still&&JSON.stringify(still)!==JSON.stringify(r))return false;
+ }
+ return true;
+}
+function retainOriginalRoleWork(w,groupId,{roleId,npcId,shift,
+ event,workReceipt}={}){
+ const e=lookup(w,groupId),role=e?.internalRoles?.find(x=>x.id===roleId),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null;
+ if(!e||e.origin!=='player-declaration'||!role?.agreed||
+  role.memberActorId!==npcId||!p||
+  p.origin!=='gm-witnessed-lived-person-v1'||
+  !require('./person-careers').verify(p)||
+  !workReceipt||!event||!shift||
+  workReceipt.source?.task?.authoredDutyId===undefined)
+  throw Error('Only actually witnessed original independent GM-member professional work may be associated with a genuinely agreed group role');
+ const q={origin:ROLE_WORK,groupId:e.id,groupOriginHash:e.originHash,
+  roleId,originalRoleHash:role.sourceHash,
+  memberActorId:npcId,membershipSourceHash:role.memberConsentHash,
+  personId:p.id,personOriginHash:p.originHash,
+  location:role.source.place,day:workReceipt.source.day,
+  originalShift:structuredClone(shift),
+  originalEvent:structuredClone(event),originalEventHash:hash(event),
+  originalCareerReceipt:structuredClone(workReceipt),
+  workReceiptHash:workReceipt.sourceHash,
+  noExtraCareerProgress:true,noGroupPayrollOrProperty:true,
+  noAutomaticRoleCompletion:true};
+ q.id='role_work_'+hash({groupId:e.id,roleId,
+  receiptHash:workReceipt.sourceHash}).slice(0,24);
+ const row={id:q.id,origin:ROLE_WORK,roleId,
+  workReceiptHash:workReceipt.sourceHash,source:q,sourceHash:hash(q)};
+ e.roleWork||=[];
+ if(e.roleWork.length>=500||
+  e.roleWork.some(x=>x.id===row.id||
+   x.workReceiptHash===row.workReceiptHash))
+  throw Error('The original person work receipt cannot be attributed twice to this organisation');
+ if(!verifyRoleWork(e,row,w))
+  throw Error('The original work, independent consent and physical role site do not reconcile');
+ e.roleWork.push(row);
+ if(!validate(e,w)){
+  e.roleWork.pop();
+  throw Error('Original association integrity rejected a false professional role-work link');
+ }
+ return {groupId:e.id,roleId,serviceId:row.id,
+  observedOriginalWork:true,originalWorkHash:row.workReceiptHash,
+  noAdditionalRollOrTime:true,noAutomaticSalaryOrInstitutionalQualification:true};
+}
+function roleWorkStatus(w,groupId,{roleId}={}){
+ const e=lookup(w,groupId);
+ if(!e||e.origin!=='player-declaration')
+  throw Error('Only a real founded voluntary association has witnessed role work');
+ if(roleId!==undefined&&typeof roleId!=='string')
+  throw Error('A responsibility filter must be a genuine existing role ID');
+ return {groupId:e.id,witnessedRoleWork:(e.roleWork||[])
+  .filter(x=>roleId===undefined||x.roleId===roleId)
+  .map(x=>({serviceId:x.id,roleId:x.roleId,
+   npcId:x.source.memberActorId,day:x.source.day,
+   placeId:x.source.location,
+   observed:structuredClone(x.source.originalEvent.details.observed),
+   originalWorkHash:x.workReceiptHash,
+   originalRoleHash:x.source.originalRoleHash,
+   noExtraMoneyOrWorkRoll:true,noAutomaticTrainingOrEmployment:true,
+   noProofOfSpecificRoleCompletion:true})),
+  note:'An actual independent professional worked at their agreed role site during its term. This does not prove they fulfilled a distinct group project, gained a teaching licence, drew a salary or transferred any facility.'};
+}
 
 /*
  * #18: optional advisory-priority attribution to ACTUAL original group work.
@@ -2524,7 +2957,7 @@ function offerCoordination(w,params={}){
 }
 
 function visible(s,w){
- const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
+ const id=Atlas.R[require('./lived-places').location(s)?.regionId]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
  const entries=all(w).filter(e=>e.polity===id&&
   (e.releaseDay<=day||e.origin==='player-declaration'&&
@@ -2553,6 +2986,7 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  INTERNAL_POSITION,considerInternalPosition,internalPositionStatus,
  INDEPENDENT_WORK_POSITION,reassessPublishedWork,
  INTERNAL_ROLE,proposeVoluntaryRole,voluntaryRoleStatus,
+ ROLE_WORK,verifyRoleWork,retainOriginalRoleWork,roleWorkStatus,
  PRIORITY_WORK,priorityWorkStatus,
  COORDINATION,offerCoordination,coordinatorStatus,
  COORDINATION_REVIEW,COORDINATION_PURPOSE_REVIEW,
@@ -2564,4 +2998,6 @@ module.exports={SOURCE_PLAYER,SOURCE_NPC,hash,seed,peek,ensure,validate,all,look
  recordVoluntaryTask,eligibleVoluntaryTask,retainOriginalTaskService,
  voluntaryTaskStatus,
  TREASURY_AUDIT,verifyTreasuryAudit,openTreasuryAudit,addTreasuryReceipt,
- treasuryAuditStatus};
+ treasuryAuditStatus,SITE_WORK,verifySiteWork,siteWorkStatus,
+ RESOURCE_OFFER,RESOURCE_WITHDRAWAL,verifyResourceOffer,
+ retainFounderResourceOffer,withdrawFounderResourceOffer,resourceOfferStatus};

@@ -1,0 +1,121 @@
+{
+  "id": "gen_20261114_age10_1dtmtp9",
+  "ok": true,
+  "mode": "new_campaign",
+  "campaign": "bb_20261114_1dtmtp9",
+  "summary": {
+    "seed": 3951775931,
+    "slug": "bb_20261114_1dtmtp9",
+    "name": "Maddoc Maddren",
+    "age": 10,
+    "gender": "male",
+    "appearance": "tall; light hair; amber eyes",
+    "attributes": {
+      "str": 13,
+      "dex": 10,
+      "con": 11,
+      "int": 16,
+      "wis": 15,
+      "cha": 8
+    },
+    "background": "young learner",
+    "path": "undecided",
+    "location": null,
+    "family": {
+      "household": "two guardians",
+      "siblings": 0,
+      "ties": "in regular correspondence",
+      "homeTrade": "beast handlers",
+      "members": [
+        {
+          "relation": "guardian",
+          "name": "Hedra Maddren"
+        },
+        {
+          "relation": "second guardian",
+          "name": "Nessa Maddren"
+        }
+      ],
+      "familyIdentity": {
+        "name": "Maddren household",
+        "firstGenerationKnown": true,
+        "regionId": "orchard_vales",
+        "communityDuty": "beast handlers",
+        "noHereditaryRank": true
+      }
+    },
+    "history": {
+      "upbringing": "A locally established, newly authored two guardians supported itself through beast handlers in Orchard Vales.",
+      "earlyWork": "Early life, family and community shape experience; an adult job or legal office is not presumed.",
+      "familySituation": "two guardians; in regular correspondence; no named dynasty, royal title or innate inherited power.",
+      "note": "These are the character’s known beginnings, not private motives, binding occupations, finances or future relationships.",
+      "ownOccupation": "no established adult occupation",
+      "lifeCircumstance": "household and community life",
+      "priorWorkYears": 0
+    },
+    "origin": {
+      "version": 1,
+      "seed": 3951775931,
+      "originKind": "new-family",
+      "birthRegionId": "orchard_vales",
+      "birthRegionName": "Orchard Vales",
+      "homePolity": "asterwyn",
+      "continent": "valedryn",
+      "openingRegionId": null,
+      "openingSite": null,
+      "travelBeforePlay": false,
+      "connection": {
+        "kind": "new-family",
+        "familyName": "Maddren household",
+        "regionId": "orchard_vales",
+        "source": "Seeded original household relationships"
+      },
+      "knownHouseholdMembers": [
+        {
+          "name": "Hedra Maddren",
+          "relation": "guardian"
+        },
+        {
+          "name": "Nessa Maddren",
+          "relation": "second guardian"
+        }
+      ],
+      "worldSource": "Authored Atlas and social-house history, or a seeded modest beginning",
+      "explicitOptions": [
+        "age",
+        "mode",
+        "seed"
+      ],
+      "noUnearnedPowers": true,
+      "noAutomaticNPCConsent": true,
+      "noAutomaticOffice": true
+    },
+    "livedYears": {
+      "source": "seeded-pre-game-lived-years-v1",
+      "age": 10,
+      "phase": "childhood",
+      "work": "no established adult occupation",
+      "workHistory": "Early life, family and community shape experience; an adult job or legal office is not presumed.",
+      "priorWorkYears": 0,
+      "ordinaryPractice": null,
+      "circumstance": "household and community life",
+      "personalGoal": null,
+      "fundsSource": "No assumed personally owned funds or business assets",
+      "funds": 0,
+      "nextBirthdayInDays": 134,
+      "distinctHistory": true,
+      "noFixedCareer": true,
+      "noFixedTemperament": true,
+      "noAutomaticAdultAuthority": true,
+      "noAutomaticRightsOrAffection": true,
+      "noInheritedPowers": true,
+      "noNPCConsent": true,
+      "seal": "75f3b5b02f0e2dd14cd68369cd003859d617f7ed94975f428709bcf71f6ad6e0"
+    },
+    "clock": "Day 1, 08:00",
+    "date": "30 Seedwake 1156 AC",
+    "openingState": "awaiting-gm",
+    "focus": [],
+    "scene": null
+  }
+}

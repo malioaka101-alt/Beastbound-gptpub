@@ -4,7 +4,7 @@
 // No compulsory family, teacher, caste, sex, magic rank or institutional place.
 const Crypto=require('node:crypto'),Atlas=require('./atlas'),
  Engine=require('../engine.js'),Careers=require('./person-careers');
-const ORIGIN='causal-world-person-v1',SHIFT='emergent-local-work-presence-v1';
+const ORIGIN='causal-world-person-v1',GM_ORIGIN='gm-witnessed-lived-person-v1',SHIFT='emergent-local-work-presence-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const clamp=(n,a=0,b=100)=>Math.min(b,Math.max(a,n));
 const DAY=1440,MINUTES=14;
@@ -203,10 +203,34 @@ function name(t,language,region){
   c=tails[Math.floor(draw(t)*tails.length)];
  return (a+b+c).replace(/^./,x=>x.toUpperCase());
 }
+function supportedSite(w,id,regionId){
+ const place=Engine.LOCATIONS[id];
+ if(place)return Atlas.LOCATION_REGION[id]===regionId;
+ const gm=w.livedPlaces?.places?.[id];
+ return !!(gm&&gm.regionId===regionId&&
+  require('./lived-places').verifyPlace(gm));
+}
+function gmFounding(w,p){
+ if(p.origin!==GM_ORIGIN)return true;
+ const b=p.birthSource;
+ return b.origin===GM_ORIGIN&&b.name===p.name&&
+  b.initialProfession===p.profession&&
+  b.purpose===p.purpose&&b.personality===p.personality&&
+  b.locationId===p.homeLocationId&&
+  supportedSite(w,b.locationId,b.regionId)&&
+  typeof b.background==='string'&&b.background.length>=15&&
+  typeof b.witness==='string'&&b.witness.length>=20&&
+  Number.isInteger(b.worldMinute)&&b.worldMinute>=0&&
+  b.worldMinute>=b.day*1440&&b.worldMinute<(b.day+1)*1440&&
+  p.birthSource.need==='gm-witnessed-occupation'&&
+  p.birthSource.nonAssumedConsent===true&&
+  p.birthSource.noInventedFundsOrRanks===true;
+}
 function verify(w,p){
- if(!p||p.origin!==ORIGIN||typeof p.id!=='string'||
+ if(!p||![ORIGIN,GM_ORIGIN].includes(p.origin)||typeof p.id!=='string'||
   p.actorId!=='emergent:'+p.id||p.originHash!==hash(p.birthSource)||
-  p.birthSource?.origin!==ORIGIN||p.birthSource?.id!==p.id||
+  p.birthSource?.origin!==p.origin||p.birthSource?.id!==p.id||
+  !gmFounding(w,p)||
   !Atlas.R[p.birthSource.regionId]||!Atlas.P[p.birthSource.polity]||
   Atlas.R[p.birthSource.regionId].polity!==p.birthSource.polity||
   !Number.isInteger(p.birthSource.day)||p.birthSource.day<0||
@@ -257,14 +281,163 @@ function make(w,t,day,d){
  if(t.history.length>120)t.history.shift();
  return p;
 }
+
+function registerGM(s,p={}){
+ const keys=['name','profession','purpose','personality','background','witness'];
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).sort().join('|')!==keys.sort().join('|'))
+  throw Error('A witnessed GM individual needs a name, profession, purpose, personality, background and actual scene basis; never chosen stats or consent');
+ const good=(x,min,max)=>typeof x==='string'&&x.trim().length>=min&&x.trim().length<=max;
+ if(!good(p.name,4,80)||!good(p.profession,5,120)||
+  !good(p.purpose,15,500)||!good(p.personality,4,160)||
+  !good(p.background,15,800)||!good(p.witness,20,800))
+  throw Error('A complete plausible witnessed individual biography and circumstance is required');
+ if(s.campaign?.openingState!=='authored'||!s.chatRuntime?.scene||
+  !s.chatRuntime.scene.toLowerCase().includes(p.name.trim().toLowerCase()))
+  throw Error('A GM individual can only be established after they were actually introduced in the current recorded scene');
+ if(s.encounter||s.battle)throw Error('A new unproven NPC identity cannot be inserted mid-encounter');
+ const site=require('./lived-places').location(s);
+ if(!site||!Atlas.R[site.regionId])
+  throw Error('A GM individual must be witnessed at a genuine established location');
+ const w=require('./simulation').ensure(s),t=ensure(w);
+ if(Object.values(t.people).some(x=>x.name.toLowerCase()===p.name.trim().toLowerCase()&&
+   x.regionId===site.regionId))
+  throw Error('An established individual with that identity already exists here');
+ const id='person_'+(++t.counter),day=Math.floor(s.world.minutes/1440),
+  polity=Atlas.R[site.regionId].polity,language=Atlas.P[polity].language;
+ const b={origin:GM_ORIGIN,id,regionId:site.regionId,polity,day,
+  worldMinute:s.world.minutes,locationId:site.id,name:p.name.trim(),
+  initialProfession:p.profession.trim(),purpose:p.purpose.trim(),
+  personality:p.personality.trim(),background:p.background.trim(),
+  witness:p.witness.trim(),language,need:'gm-witnessed-occupation',
+  nonAssumedKinship:true,nonAssumedConsent:true,
+  noInventedFundsOrRanks:true};
+ const sourceHash=hash(b);
+ const rngState=Crypto.createHash('sha256')
+  .update(w.worldSeed+'|'+id+'|'+sourceHash+'|life-v1').digest().readUInt32BE(0)||0x91e10da5;
+ const actor={id,actorId:'emergent:'+id,origin:GM_ORIGIN,
+  birthSource:b,originHash:sourceHash,
+  name:b.name,profession:b.initialProfession,purpose:b.purpose,
+  personality:b.personality,language,homeLocationId:b.locationId,
+  regionId:b.regionId,polity,status:'active',
+  ageBand:'not established',family:null,ancestry:null,inheritance:null,
+  practicedDisciplines:[],knownTechniques:[],
+  // An unknown GM-authored purse never becomes free tangible currency.
+  funds:0,cashScales:0,fatigue:0,competence:1,
+  rngState,lastTickDay:day,shift:null,
+  history:[{day,type:'gm-witnessed-life-start',regionId:b.regionId,
+   sourceHash,observed:true}]};
+ actor.career=Careers._debug.initial(actor);
+ actor.shift=shift(actor,day,w);
+ if(!actor.shift||!verify(w,actor))
+  throw Error('The new GM individual lacks a valid witnessed local life and independent schedule');
+ t.people[id]=actor;
+ t.history.push({day,kind:'gm-witnessed-emergence',personId:id,
+  originHash:sourceHash,regionId:b.regionId});
+ if(t.history.length>120)t.history.shift();
+ require('../rules/core').event(s,'story','A personally witnessed individual is recorded: '+actor.name,{
+  source:GM_ORIGIN,personId:id,actorId:actor.actorId,
+  sourceHash,location:site.id,noContractOrConsent:true,
+  noFreeRankOrGoods:true,noInventedBackstoryForOtherActors:true});
+ return {registered:true,npcId:actor.actorId,name:actor.name,
+  profession:actor.profession,location:site.id,day,
+  noAssumedConsent:true,noFreeMoneyOrPower:true,
+  usesExistingLivingPersonLedger:true};
+}
+// An established GM person already has the ORIGINAL independent career
+// engine, but cannot independently work until at least one real duty is
+// sourced. This records an observed professional possibility; it does not
+// perform work, guarantee a job, appoint a teacher or issue a wage.
+function authorWitnessedDuty(s,params={}){
+ const keys=['npcId','id','role','method','goal','domain','witness'];
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).sort().join('|')!==keys.sort().join('|'))
+  throw Error('A witnessed person duty needs only the existing person, genuine practical method, role, goal, domain and original scene quotation; no invented wage, power or outcome');
+ const {npcId,id,role,method,goal,domain,witness}=params;
+ const w=require('./simulation').peek(s),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null,
+  scene=s.chatRuntime?.scene||'',
+  day=Math.floor(s.world.minutes/DAY);
+ if(s.campaign?.openingState!=='authored'||!p||p.origin!==GM_ORIGIN||
+    !verify(w,p)||p.actorId!==npcId||
+    !scene.includes(p.name)||typeof witness!=='string'||
+    witness.length<24||!scene.includes(witness)||
+    !presence(w,npcId,s.world.location,day)||
+    s.encounter||s.battle)
+  throw Error('An actually introduced, personally present GM worker and original witnessed professional scene are required; no remote job or forced availability');
+ const result=Careers.authorDuty(w,p,{id,role,method,goal,domain,
+  effect:null,institutionId:null,day,witness});
+ return {...result,npcId:p.actorId,person:p.name,
+  originalCareerOwner:true,noCompletedWork:true,noEmployerOrTeachingLicence:true,
+  noNewMoneyOrTimeOrDice:true};
+}
+function retireWitnessedDuty(s,params={}){
+ const keys=['npcId','id','reason'];
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).sort().join('|')!==keys.sort().join('|'))
+  throw Error('Retire only an original known work duty with a genuinely witnessed change, not a chosen wage or personal outcome');
+ const {npcId,id,reason}=params,w=require('./simulation').peek(s),
+  p=typeof npcId==='string'&&npcId.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[npcId.slice('emergent:'.length)]:null,
+  scene=s.chatRuntime?.scene||'',day=Math.floor(s.world.minutes/DAY);
+ if(s.campaign?.openingState!=='authored'||!p||p.origin!==GM_ORIGIN||
+    !verify(w,p)||p.actorId!==npcId||
+    !scene.includes(p.name)||typeof reason!=='string'||
+    reason.trim().length<20||!scene.includes(reason)||
+    s.encounter||s.battle)
+  throw Error('A real GM worker, unchanged original identity and directly established source for a later duty change are needed');
+ return {...Careers.retireDuty(w,p,{id,day,reason}),
+  npcId:p.actorId,noInventedDismissalOrWages:true,
+  noWorkOrTimeOrDice:true};
+}
+function witnessedDutyStatus(s,params={}){
+ if(!params||typeof params!=='object'||Array.isArray(params)||
+    Object.keys(params).join('|')!=='npcId'||
+    typeof params.npcId!=='string')
+  throw Error('Inspect only the already known witnessed worker, not a new or remote workforce');
+ const w=require('./simulation').peek(s),id=params.npcId,
+  p=id.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[id.slice('emergent:'.length)]:null;
+ if(!p||p.origin!==GM_ORIGIN||!verify(w,p)||p.actorId!==id)
+  return {known:false};
+ return {known:true,npcId:p.actorId,name:p.name,
+  witnessedDuties:Careers.authoredDutyStatus(p),
+  noPrivateCompetenceOrNewWorkExposed:true,
+  noAutomaticEmploymentOrTeachingLicence:true};
+}
+
+function gmStatus(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+  Object.keys(p).some(k=>k!=='npcId'))throw Error('Only a known GM individual may be inspected');
+ const w=require('./simulation').peek(s),t=w.emergentPeople?.people||{};
+ const entries=Object.values(t).filter(q=>q.origin===GM_ORIGIN&&
+  (p.npcId===undefined||q.actorId===p.npcId));
+ if(p.npcId!==undefined&&!entries.length)return {known:false};
+ return {people:entries.map(q=>{
+  if(!verify(w,q))throw Error('GM individual source was altered');
+  const shift=presence(w,q.actorId,s.world.location,Math.floor(s.world.minutes/1440));
+  return {npcId:q.actorId,name:q.name,profession:q.profession,
+   personallyIntroducedAt:q.birthSource.locationId,
+   observedHere:!!shift,
+   noGuaranteedAvailabilityOrConsent:true};
+ })};
+}
+
 function siteFor(regionId){
  const reg=Atlas.R[regionId];
  if(!reg)return null;
  return (reg.loc||[]).find(loc=>
   Engine.LOCATIONS[loc]&&Atlas.LOCATION_REGION[loc]===regionId)||null;
 }
-function shift(p,day){
- const site=siteFor(p.regionId);
+function individualSite(w,p){
+ if(p.origin===GM_ORIGIN&&p.regionId===p.birthSource.regionId&&
+  supportedSite(w,p.homeLocationId,p.regionId))
+  return p.homeLocationId;
+ return siteFor(p.regionId);
+}
+function shift(p,day,w=null){
+ const site=w?individualSite(w,p):siteFor(p.regionId);
  if(!site||p.status!=='active')return null;
  const body={source:SHIFT,npcId:p.actorId,actorId:p.actorId,
   personId:p.id,name:p.name,profession:p.profession,polity:p.polity,
@@ -274,9 +447,10 @@ function shift(p,day){
 }
 function presence(w,id,location,day){
  if(typeof id!=='string'||!id.startsWith('emergent:')||
-  !Engine.LOCATIONS[location]||!Number.isInteger(day))return null;
+  !Number.isInteger(day))return null;
  const p=w.emergentPeople?.people?.[id.slice('emergent:'.length)];
- if(!verify(w,p)||p.actorId!==id||p.status!=='active')return null;
+ if(!verify(w,p)||p.actorId!==id||p.status!=='active'||
+  !supportedSite(w,location,p.regionId))return null;
  const sh=p.shift;
  if(!sh||sh.source!==SHIFT||sh.npcId!==id||
   sh.actorId!==id||sh.personId!==p.id||sh.name!==p.name||
@@ -285,7 +459,7 @@ function presence(w,id,location,day){
   sh.fromDay>day||sh.throughDay<day||
   sh.throughDay-sh.fromDay!==5||
   sh.scheduledAtDay!==sh.fromDay||sh.fromDay>p.lastTickDay||
-  siteFor(p.regionId)!==location)return null;
+  individualSite(w,p)!==location)return null;
  const {hash:seal,...body}=sh;
  return hash(body)===seal?structuredClone(sh):null;
 }
@@ -315,6 +489,11 @@ function live(w,p,day){
    const next=neighbors[Math.floor(draw(p)*neighbors.length)];
    p.regionId=next;p.status='relocated';choice='voluntarily-relocate';
   }else{p.funds=clamp(p.funds-2);choice='seek-safe-work';}
+ }else if(p.origin===GM_ORIGIN&&
+   !(p.career?.authoredDuties||[]).some(d=>d.status==='available'&&d.regionId===p.regionId)){
+  // GM-authored work is a possibility, not permission to give them a
+  // randomly chosen profession or unproved paid work on a time tick.
+  p.fatigue=clamp(p.fatigue-2);choice='independent-unverified-priorities';
  }else if(host.prosperity>40&&x<.72){
   // Work actually resolves against the local problem with the person's own
   // skill, potential and independent RNG. Simply reaching another sixday
@@ -329,7 +508,7 @@ function live(w,p,day){
  if(p.status==='relocated'&&choice!=='voluntarily-relocate')
   p.status='active';
  p.lastTickDay=day;
- p.shift=shift(p,day);
+ p.shift=shift(p,day,w);
  p.history.push({day,type:'independent-life',choice,
   regionId:p.regionId,
   ...(jobOutcome?{professionalWorkHash:jobOutcome.receiptHash,
@@ -363,7 +542,7 @@ function sixday(s,w,day){
    likelihood=clamp((d.kind==='habitat-care'?.87:.68)*
     (need/(need+local*.6)),.06,.92);
   if(draw(t)<likelihood){
-   const p=make(w,t,day,d);p.shift=shift(p,day);created=1;
+   const p=make(w,t,day,d);p.shift=shift(p,day,w);created=1;
   }
  }
  t.lastSixday=day;
@@ -384,7 +563,7 @@ function heardStatus(s,w){
 function localReply(s,p,question){
  const q=question.toLowerCase(),home=Atlas.R[p.birthSource.regionId],
   culture=Atlas.C[Atlas.P[p.birthSource.polity]?.culture],
-  loc=Engine.LOCATIONS[s.world.location];
+  loc=require('./lived-places').location(s);
  const voice={
   reserved:'I can tell you this much. ',
   curious:'What brought you to ask? ',
@@ -393,9 +572,11 @@ function localReply(s,p,question){
  }[p.personality]||'';
  const lowerFirst=x=>x[0].toLowerCase()+x.slice(1);
  if(/\b(?:road|roads|route|routes|path|paths|directions|where can i go)\b/.test(q))
-  return {kind:'public-routes',spoken:voice+'The known paths from '+
-   loc.name+' lead to '+loc.exits.map(id=>Engine.LOCATIONS[id].name).join(', ')+
-   '. A road is not a promise of safe passage.',
+  return {kind:'public-routes',spoken:voice+
+   (loc.exits?.length?'The known paths from '+loc.name+' lead to '+
+    loc.exits.map(id=>Engine.LOCATIONS[id]?.name).filter(Boolean).join(', ')+
+    '. A road is not a promise of safe passage.':
+    'I cannot substantiate a particular route out of '+loc.name+' yet.'),
    source:'Public routes of the currently witnessed local scene'};
  if(/\b(?:language|tongue|speech|dialect)\b/.test(q))
   return {kind:'individual-language',spoken:voice+
@@ -820,7 +1001,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,SHIFT,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};

@@ -1,0 +1,21 @@
+{
+  "id": "open_20261114_1dtmtp9",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "gm_open",
+  "opening": {
+    "place": {
+      "placeId": "thistlebell_yard",
+      "name": "Thistlebell Yard",
+      "regionId": "orchard_vales",
+      "description": "A shared beast-handling yard beside the orchard road, with timber harness rails, a public watering trough, fruit presses and a downhill track toward the grain-barge canal.",
+      "kind": "working community yard",
+      "sceneType": "settlement",
+      "culture": "Asterwyn vale-country; orchard work, ordinary beast care and grain-barge traffic shape the daily schedule."
+    },
+    "scene": "At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges.",
+    "focus": "A free morning at Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "hour": 8,
+    "minute": 0
+  }
+}

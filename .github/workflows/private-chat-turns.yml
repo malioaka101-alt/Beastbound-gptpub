@@ -24,6 +24,8 @@ jobs:
       # Full safety/mechanics tests run only on source-code changes in engine-tests.yml.
       # Per-turn re-running tests wasted Actions start-up and user wait time.
       - name: Process private turn requests once
+        env:
+          BB_CHANGED_ONLY: ${{ github.event_name == 'push' && '1' || '0' }}
         run: node scripts/process-pending.js
       - name: Checkpoint results to private repository
         run: |

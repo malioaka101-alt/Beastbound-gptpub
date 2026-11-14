@@ -102,8 +102,9 @@ function identity(w,id){
   source:'independent-professional-roster'};
 }
 function resolve(w,id,location,day){
- const n=identity(w,id);
- if(!n||!Number.isInteger(day)||!Engine.LOCATIONS[location])return null;
+ const n=identity(w,id),place=w.livedPlaces?.places?.[location];
+ if(!n||!Number.isInteger(day)||
+  !(Engine.LOCATIONS[location]||place&&require('./lived-places').verifyPlace(place)))return null;
  if(n.source==='engine-local-npc')
   return n.location===location?{...n,presence:null}:null;
  if(n.source==='seeded-independent-family-person'){

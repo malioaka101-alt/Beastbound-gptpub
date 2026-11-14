@@ -1,0 +1,16 @@
+{
+  "id": "orchard_path_establish_20261114_001",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "establishPlace",
+  "params": {
+    "placeId": "rillbend_orchard_path",
+    "name": "Rillbend Orchard Path",
+    "regionId": "orchard_vales",
+    "description": "A narrow public footpath beyond Thistlebell Yard, threading between old apple orchards and a shallow drainage rill. Moss-dark stone culverts carry rainwater beneath the trail; a wooden handrail crosses the lowest bend.",
+    "kind": "public orchard footpath",
+    "sceneType": "wilderness",
+    "culture": "Asterwyn Orchard Vales; walkers share the path with farm workers, orchard carts on the nearby road and seasonal beasts passing through hedgerows."
+  }
+}

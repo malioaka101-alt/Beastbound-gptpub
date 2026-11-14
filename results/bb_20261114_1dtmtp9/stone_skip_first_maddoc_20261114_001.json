@@ -1,0 +1,112 @@
+{
+  "id": "stone_skip_first_maddoc_20261114_001",
+  "ok": true,
+  "applied": true,
+  "revision": 7,
+  "stateHash": "14a04727159846695c15e9e7fb53d5291a29fecb9c6184c5e96d166dd32560f7",
+  "clock": "Day 1, 08:25",
+  "output": {
+    "rules": {
+      "skips": 3,
+      "check": {
+        "dice": [
+          14
+        ],
+        "roll": 14,
+        "modifier": 2,
+        "dc": 12,
+        "total": 16,
+        "margin": 4,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      },
+      "elapsedMinutes": 2,
+      "comparison": {
+        "tessa": 3,
+        "bram": 4
+      },
+      "noPrize": true,
+      "noSkillAward": true,
+      "noNPCConsentInferred": true
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:23",
+      "type": "roll",
+      "text": "🎲 Maddoc stone-skipping throw: d20 14 +2 = 16 vs DC 12 → success (+4)",
+      "details": {
+        "dice": [
+          14
+        ],
+        "roll": 14,
+        "modifier": 2,
+        "dc": 12,
+        "total": 16,
+        "margin": 4,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:25",
+      "type": "story",
+      "text": "Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.",
+      "details": {
+        "placeId": "tansyhook_crossing",
+        "startMinute": 503,
+        "endMinute": 505,
+        "skips": 3,
+        "roll": 14,
+        "modifier": 2,
+        "total": 16,
+        "dc": 12,
+        "noItemOrPrize": true,
+        "noOpponentRoll": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:25 · Morning · Cool         ║\n║ Tansyhook Crossing         0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Maddoc's first stone-skippi… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:25",
+    "daypart": "Morning",
+    "location": "Tansyhook Crossing",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Maddoc's first stone-skipping attempt with Tessa and Bram"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 08:23 Maddoc arrived at Tansyhook Crossing from the Rillbend culvert, leaving the small moss-feathered seed-eating creature alone. Orchard lanes meet at a timber bridge over an irrigation channel beside a covered weigh-shed and fruit-cart layby. Workers tend carts while two local children contest stone-skipping by the railing. Maddoc has not approached or spoken to anyone here.\nPC: young learner, undecided; 0 S\nJOURNAL: A place is established in the lived world: Tansyhook Crossing. | The documented journey from Rillbend Orchard Path reaches Tansyhook Crossing. | Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing.\nCURRENT: No opening hook"
+}

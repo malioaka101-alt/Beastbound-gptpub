@@ -1,0 +1,88 @@
+{
+  "id": "act_20261114_checkbeast_1dtmtp9",
+  "ok": true,
+  "applied": false,
+  "revision": 0,
+  "message": "The intention is open for GM adjudication against the actual local scene. No success, failure, die, item, time, relationship or power has been assigned; use an existing verified rule or narrate only an uncontested source-grounded observation.",
+  "output": {
+    "gmAdjudication": {
+      "intent": "Go over to the burden beast and check what is wrong, saying: Alright big guy let's see what's wrong while they just keep chirping.",
+      "status": "unresolved",
+      "location": "thistlebell_yard",
+      "scene": "Thistlebell Yard",
+      "visibleContext": {
+        "location": "thistlebell_yard",
+        "name": "Thistlebell Yard",
+        "description": "A shared beast-handling yard beside the orchard road, with timber harness rails, a public watering trough, fruit presses and a downhill track toward the grain-barge canal.",
+        "exits": [],
+        "culture": "Asterwyn vale-country; orchard work, ordinary beast care and grain-barge traffic shape the daily schedule.",
+        "establishedDetails": {
+          "id": "thistlebell_yard",
+          "name": "Thistlebell Yard",
+          "kind": "working community yard",
+          "sceneType": "settlement",
+          "regionId": "orchard_vales",
+          "region": "Orchard Vales",
+          "description": "A shared beast-handling yard beside the orchard road, with timber harness rails, a public watering trough, fruit presses and a downhill track toward the grain-barge canal.",
+          "culture": "Asterwyn vale-country; orchard work, ordinary beast care and grain-barge traffic shape the daily schedule.",
+          "knownNotables": [],
+          "knownFamilies": [],
+          "knownOrganisations": [],
+          "recordedDetails": [],
+          "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+        },
+        "nearbyPeople": [],
+        "publicGuildFieldBoard": false,
+        "knownRestSites": [],
+        "nearbyCreature": null,
+        "focus": [
+          "A free morning at Thistlebell Yard"
+        ],
+        "note": "A glance reveals local routes and actually established people, never hidden knowledge, free materials, willingness to tutor, creature capabilities or undiscovered events."
+      },
+      "noRollOccurred": true,
+      "noTimeElapsed": true,
+      "noItemsChanged": true,
+      "noOutcomeClaimed": true,
+      "requiresSourceBoundResolution": true
+    },
+    "message": "The intention is open for GM adjudication against the actual local scene. No success, failure, die, item, time, relationship or power has been assigned; use an existing verified rule or narrate only an uncontested source-grounded observation."
+  },
+  "stateHash": "95a147375d54207901efc153e4b1a967688140c433d05203e4137200c85c20ef",
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:00 · Morning · Cool         ║\n║ Thistlebell Yard           0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ A free morning at Thistlebe… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:00",
+    "daypart": "Morning",
+    "location": "Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "A free morning at Thistlebell Yard"
+    ],
+    "context": null
+  }
+}

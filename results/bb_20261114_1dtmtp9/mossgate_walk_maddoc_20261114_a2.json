@@ -1,0 +1,89 @@
+{
+  "id": "mossgate_walk_maddoc_20261114_a2",
+  "ok": true,
+  "applied": true,
+  "revision": 9,
+  "stateHash": "b63133ffce3e8c9cd2793d50a20a7f32c23e31ed02454a1598ba63a302e3fe4a",
+  "clock": "Day 1, 08:44",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Tansyhook Crossing",
+      "to": "Mossgate Common",
+      "location": "mossgate_common",
+      "elapsedMinutes": 19,
+      "clock": "Day 1, 08:44",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:44",
+      "type": "travel",
+      "text": "The documented journey from Tansyhook Crossing reaches Mossgate Common.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "tansyhook_crossing",
+        "to": "mossgate_common",
+        "startMinute": 505,
+        "elapsedMinutes": 19,
+        "describedRoute": "Maddoc led Tessa and Bram along the public orchard lane from Tansyhook Crossing, passing hedgerows, fruit carts and a gently climbing footbridge before reaching the village green of Mossgate Common. The ordinary walk posed no unresolved hazard.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 524,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:44 · Morning · Cool         ║\n║ Mossgate Common            0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Explore Mossgate Common's r… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:44",
+    "daypart": "Morning",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Explore Mossgate Common's reading room, training yard and beast pens"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 08:23 Maddoc arrived at Tansyhook Crossing from the Rillbend culvert, leaving the small moss-feathered seed-eating creature alone. Orchard lanes meet at a timber bridge over an irrigation channel beside a covered weigh-shed and fruit-cart layby. Workers tend carts while two local children contest stone-skipping by the railing. Maddoc has not approached or spoken to anyone here.\nPC: young learner, undecided; 0 S\nJOURNAL: Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing. | A place is established in the lived world: Mossgate Common. | The documented journey from Tansyhook Crossing reaches Mossgate Common.\nCURRENT: No opening hook"
+}

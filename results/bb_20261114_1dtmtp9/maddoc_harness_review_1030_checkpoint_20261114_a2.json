@@ -1,0 +1,51 @@
+{
+  "id": "maddoc_harness_review_1030_checkpoint_20261114_a2",
+  "ok": true,
+  "applied": true,
+  "revision": 30,
+  "stateHash": "ebe0ea40225a8d8453c6cdbf306db09ea0479be240f6cb0c8f23ade10d27483a",
+  "clock": "Day 2, 10:30",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 10:30 · Morning · Cool         ║\n║ Maddren Homestead          0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Hedra inspecting Maddoc's h… ║\n║ ◆ Bram and Tessa after work    ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "10:30",
+    "daypart": "Morning",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Hedra inspecting Maddoc's harness work",
+      "Bram and Tessa after work"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Maddoc spent morning checking buckles, cleaning muddy harnesses and sorting straps under Hedra. Everything is laid out for Hedra's final inspection. The offered 2 Talons have NOT been mechanically earned or paid; coins remain 0. Soul progress 2/100, stamina 36/36. Wants to meet Bram and Tessa afterward.\nPC: young learner, undecided; 0 S\nJOURNAL: March Council and reed-clan delegates meet. River-rights tension is manageable; their decisions are not controlled by the player. | The month closes; trade agreements and faction business continue independently. | A period of ordinary life passes at Maddren Homestead.\nCURRENT: No opening hook"
+}

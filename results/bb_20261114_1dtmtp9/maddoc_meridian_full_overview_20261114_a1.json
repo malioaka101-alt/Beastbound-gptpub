@@ -1,0 +1,78 @@
+{
+  "id": "maddoc_meridian_full_overview_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 14,
+  "stateHash": "72ee3f8c21bed55d97e09c254b5e8ef430324677a5b9c1042d57dd5b89641ea9",
+  "clock": "Day 1, 11:04",
+  "output": {
+    "rules": {
+      "waited": true,
+      "elapsedMinutes": 90,
+      "daysPassed": 0,
+      "location": "mossgate_common",
+      "clock": "Day 1, 11:04",
+      "sixdayTicks": [],
+      "monthTicks": [],
+      "noTrainingOrResearchAward": true,
+      "noAutomaticWagesOrContracts": true,
+      "lifeNeedsNotCertified": true,
+      "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 11:04",
+      "type": "story",
+      "text": "A period of ordinary life passes at Mossgate Common.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "mossgate_common",
+        "elapsedMinutes": 90,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 11:04 · Morning · Cool         ║\n║ Mossgate Common            0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Complete introductory Merid… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "11:04",
+    "daypart": "Morning",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Complete introductory Meridian study with Bram; stage notes and applications"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 08:44, Maddoc reaches Mossgate Common with Tessa and Bram after an ordinary 19-minute walk from Tansyhook Crossing. He is seeking a library/reading room, a training ground or a beast-handling place. All three are visible around the village green: a slate-roofed reading house, a fenced practice yard with sand and posts, and a working beast-handling pen with troughs. No access, tuition, person consent or beast contact is established.\nPC: young learner, undecided; 0 S\nJOURNAL: A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common.\nCURRENT: No opening hook"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "mossgate_walk_maddoc_20261114_a2",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "mossgate_common",
+    "minutes": 19,
+    "journey": "Maddoc led Tessa and Bram along the public orchard lane from Tansyhook Crossing, passing hedgerows, fruit carts and a gently climbing footbridge before reaching the village green of Mossgate Common. The ordinary walk posed no unresolved hazard.",
+    "means": "walking",
+    "uncontested": true
+  },
+  "focus": [
+    "Explore Mossgate Common's reading room, training yard and beast pens"
+  ]
+}

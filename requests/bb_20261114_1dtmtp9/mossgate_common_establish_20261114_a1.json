@@ -1,0 +1,16 @@
+{
+  "id": "mossgate_common_establish_20261114_a1",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "establishPlace",
+  "params": {
+    "placeId": "mossgate_common",
+    "name": "Mossgate Common",
+    "regionId": "orchard_vales",
+    "kind": "orchard hamlet common",
+    "sceneType": "settlement",
+    "description": "A small orchard hamlet green off the Tansyhook lane. A low slate-roofed reading house stands beside a public well; beyond the green is an enclosed practice yard with sand and training posts, and farther downwind are fenced beast-handling pens with water troughs.",
+    "culture": "An ordinary Asterwyn Orchard Vales hamlet serving orchard families, young learners, seasonal workers and licensed animal handlers. Buildings and paddocks are visible from public lanes; access, instruction, and beast welfare remain the responsibility of their actual caretakers."
+  }
+}

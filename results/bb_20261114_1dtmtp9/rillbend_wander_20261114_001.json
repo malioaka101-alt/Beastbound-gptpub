@@ -1,0 +1,89 @@
+{
+  "id": "rillbend_wander_20261114_001",
+  "ok": true,
+  "applied": true,
+  "revision": 3,
+  "stateHash": "a8ad806b16b567733a060072245cfb6ac010702720aa48d268c90641382c5d82",
+  "clock": "Day 1, 08:07",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Thistlebell Yard",
+      "to": "Rillbend Orchard Path",
+      "location": "rillbend_orchard_path",
+      "elapsedMinutes": 7,
+      "clock": "Day 1, 08:07",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:07",
+      "type": "travel",
+      "text": "The documented journey from Thistlebell Yard reaches Rillbend Orchard Path.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "thistlebell_yard",
+        "to": "rillbend_orchard_path",
+        "startMinute": 480,
+        "elapsedMinutes": 7,
+        "describedRoute": "Maddoc left Thistlebell Yard through its open gate and followed the ordinary orchard footpath downhill beside the apple rows, reaching the shallow drainage rill and stone culvert without encountering an obstacle.",
+        "means": "walking along the public orchard footpath",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 487,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:07 · Morning · Cool         ║\n║ Rillbend Orchard Path      0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Explore the orchard path by… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:07",
+    "daypart": "Morning",
+    "location": "Rillbend Orchard Path",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Explore the orchard path by the rill"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.\nPC: young learner, undecided; 0 S\nJOURNAL: At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges. | A place is established in the lived world: Rillbend Orchard Path. | The documented journey from Thistlebell Yard reaches Rillbend Orchard Path.\nCURRENT: No opening hook"
+}

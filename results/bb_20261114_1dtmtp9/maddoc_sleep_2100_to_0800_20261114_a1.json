@@ -1,0 +1,77 @@
+{
+  "id": "maddoc_sleep_2100_to_0800_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 27,
+  "stateHash": "563b4f64baf981bb1618da1025fd1ae44a3313228db09e27ccef009a3dedb059",
+  "clock": "Day 2, 08:00",
+  "output": {
+    "rules": {
+      "sleptHours": 11,
+      "dayBefore": 1,
+      "dayAfter": 2,
+      "wounds": [
+        0,
+        0,
+        0
+      ],
+      "stamina": 36,
+      "qi": 14,
+      "mana": 24
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 08:00",
+      "type": "world",
+      "text": "March Council and reed-clan delegates meet. River-rights tension is manageable; their decisions are not controlled by the player.",
+      "details": null
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 08:00",
+      "type": "world",
+      "text": "The month closes; trade agreements and faction business continue independently.",
+      "details": null
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 08:00 · Morning · Cool         ║\n║ Maddren Homestead          0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ 08:00: paid harness work wi… ║\n║ ◆ Meet Bram and Tessa afterwa… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "08:00",
+    "daypart": "Morning",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "08:00: paid harness work with Hedra",
+      "Meet Bram and Tessa afterward"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.\nPC: young learner, undecided; 0 S\nJOURNAL: soul practice: self-awareness; 2 training points. | March Council and reed-clan delegates meet. River-rights tension is manageable; their decisions are not controlled by the player. | The month closes; trade agreements and faction business continue independently.\nCURRENT: No opening hook"
+}
