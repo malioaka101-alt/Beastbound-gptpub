@@ -54,7 +54,7 @@ A.equal(convo.met,true);
 A.equal(convo.npcId,result.npcId);
 A.equal(typeof convo.spoke,'boolean','Independently free to answer or decline');
 const afterConvo=E.importGame(E.exportGame(restored));
-World.advance(afterConvo,6*1440);
+World.advance(afterConvo,6);
 const actor=Realm.peek(afterConvo).emergentPeople.people[person.id];
 A.equal(Person.verify(Realm.peek(afterConvo),actor),true);
 A.ok(actor.lastTickDay>=6,'Real sixday world updates preserve independent life');
