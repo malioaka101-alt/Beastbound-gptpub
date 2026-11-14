@@ -16,6 +16,7 @@ function scene(req){
     (!Array.isArray(req.focus)||req.focus.length>2||
      req.focus.some(x=>typeof x!=='string'||x.length>80)))
   throw Error('Focus needs at most two short strings');
+ require('./scene-continuity').preflight(req);
 }
 function validate(req){
  if(!req||typeof req!=='object'||Array.isArray(req)||!ID.test(req.id))
