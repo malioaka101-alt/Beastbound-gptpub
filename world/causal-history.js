@@ -22,6 +22,38 @@ function entity(type,value){
  if(type==='mythic-site')return require('./mythic').SITES.find(x=>x.id===value)?.name||null;
  return null;
 }
+// Original Atlas names remain fixed. A *saved* place, independent person or
+// voluntary association is resolved from its original source-owning ledger,
+// never added to Atlas or presumed to be a chartered institution.
+function subject(w,type,value){
+ const familiar=entity(type,value);
+ if(familiar)return {name:familiar,originHash:null};
+ if(!w||typeof value!=='string')return null;
+ if(type==='place'){
+  const p=w.livedPlaces?.places?.[value],Places=require('./lived-places');
+  return p&&Places.verifyPlace(p)?
+   {name:p.name,originHash:p.foundingHash}:null;
+ }
+ if(type==='person'){
+  if(!/^emergent:person_[0-9]+$/.test(value))return null;
+  const People=require('./emergent-people');
+  const p=w.emergentPeople?.people?.[value.slice('emergent:'.length)];
+  return p&&People.verify(w,p)&&p.actorId===value?
+   {name:p.birthSource.name,originHash:p.originHash}:null;
+ }
+ if(type==='group'){
+  const g=require('./emergent-groups').lookup(w,value);
+  return g&&typeof g.originHash==='string'?
+   {name:g.charter.name,originHash:g.originHash}:null;
+ }
+ return null;
+}
+function verifiedSubject(w,type,value,proof){
+ const found=subject(w,type,value);
+ return !!(found&&found.originHash=== (proof??null) &&
+  (found.originHash===null?proof===undefined:
+   typeof proof==='string'&&/^[a-f0-9]{64}$/.test(proof)));
+}
 function sealed(x,parts){return {...x,sourceHash:sha(x),...parts};}
 function example(eraId,era){
  const a=A.history.find(e=>e.era===era);
@@ -67,14 +99,18 @@ function childValid(r,eventId){
   !Number.isInteger(r.recordedMinute)||r.recordedMinute<0)return false;
  const {seal,...value}=r;return seal===sha(value);
 }
-function validate(h){
+function validate(h,w=null){
  if(!h||h.source!==SOURCE||h.version!==1||!h.events||Array.isArray(h.events))throw Error('Invalid saved historical state');
  for(const [k,e] of Object.entries(h.events)){
-  if(k!==e?.id||!originValid(e)||e.scopeType!==null&&!entity(e.scopeType,e.scopeId)||
+  if(k!==e?.id||!originValid(e)||
+   (e.scopeType===null?(e.scopeOriginHash!==undefined||e.scopeId!==null):
+    !verifiedSubject(w,e.scopeType,e.scopeId,e.scopeOriginHash))||
    !Array.isArray(e.interpretations)||!Array.isArray(e.effects)||
    e.interpretations.length>200||e.effects.length>200||
    e.interpretations.some(r=>!childValid(r,k)||!phrase(r.speaker,3,160)||!phrase(r.claim,15,900)||!phrase(r.basis,12,600))||
-   e.effects.some(r=>!childValid(r,k)||!entity(r.targetType,r.targetId)||!id(r.dimension)||
+   e.effects.some(r=>!childValid(r,k)||
+    !verifiedSubject(w,r.targetType,r.targetId,r.targetOriginHash)||
+    !id(r.dimension)||
     !phrase(r.change,15,900)||!phrase(r.continuity,12,850)||!phrase(r.basis,12,650))||
    e.causes.some(x=>!h.events[x]||x===k)||
    new Set(e.causes).size!==e.causes.length)throw Error('Historical source, cause, testimony or lasting effect has been altered');
@@ -99,7 +135,7 @@ function validate(h){
 function ensure(s){
  const w=require('./simulation').ensure(s);
  w.causalHistory||=seed();
- validate(w.causalHistory);
+ validate(w.causalHistory,w);
  return w.causalHistory;
 }
 function publicEvent(e,ledger){
@@ -109,17 +145,30 @@ function publicEvent(e,ledger){
 }
 function status(s,p={}){
  keys(p,[],['eventId','targetType','targetId']);
- const h=inspect(s);validate(h);
+ const w=s.table?.realm||null,h=inspect(s);validate(h,w);
  if(p.eventId!==undefined){
   const e=h.events[p.eventId];
   return e?.visibility==='public'?{known:true,event:publicEvent(e,h)}:{known:false};
  }
  if(p.targetType!==undefined||p.targetId!==undefined){
-  if(!entity(p.targetType,p.targetId))throw Error('An actual existing atlas subject is required for historical context');
+  const found=subject(w,p.targetType,p.targetId);
+  if(!found){
+   // A missing GM person/place/group and a genuine but unpublished one
+   // must be indistinguishable to a player guessing sequential IDs.
+   if(['person','place','group'].includes(p.targetType))
+    return {targetType:p.targetType,targetId:p.targetId,known:false,effects:[]};
+   throw Error('A genuine source-verified historical subject is required');
+  }
   const effects=Object.values(h.events).filter(e=>e.visibility==='public')
    .flatMap(e=>e.effects.filter(x=>x.visibility==='public'&&x.targetType===p.targetType&&x.targetId===p.targetId)
     .map(x=>({eventId:e.id,era:e.era,dimension:x.dimension,change:x.change,continuity:x.continuity,precededBy:x.precededBy})));
-  return {targetType:p.targetType,targetId:p.targetId,name:entity(p.targetType,p.targetId),effects};
+  // A guessed sequential GM person/group ID is not itself player-known.
+  // Public historical evidence may identify its actual subject; a hidden
+  // source or an event with only secret effects cannot be used to reveal it.
+  if(found.originHash!==null&&!effects.length)
+   return {targetType:p.targetType,targetId:p.targetId,known:false,effects:[]};
+  return {targetType:p.targetType,targetId:p.targetId,name:found.name,effects,
+   ...(found.originHash!==null?{known:true}:{})};
  }
  return {events:Object.values(h.events).filter(e=>e.visibility==='public').map(e=>publicEvent(e,h))};
 }
@@ -128,7 +177,7 @@ function recordEvent(s,p={}){
  if(!id(p.eventId)||!phrase(p.era,4,120)||!phrase(p.period,4,150)||
   !phrase(p.account,16,1200)||!phrase(p.basis,12,800)||!visibility.includes(p.visibility||'public')||
   !(p.year===undefined||Number.isInteger(p.year)&&p.year>=-100000&&p.year<=100000)||
-  p.scopeType!==undefined&&!entity(p.scopeType,p.scopeId)||
+  p.scopeType!==undefined&&!subject(s.table?.realm||null,p.scopeType,p.scopeId)||
   p.scopeId!==undefined&&p.scopeType===undefined)
   throw Error('A GM-authored event needs an established time, genuine context and source account');
  const causes=p.causes??[],h=ensure(s);
@@ -144,10 +193,12 @@ function recordEvent(s,p={}){
    Math.floor(s.world.minutes/1440)-anchor.atCompletedDay).year;
   if(year>worldYear)throw Error('A historical past event cannot be invented in the campaign future');
  }
+ const founded=p.scopeType===undefined?null:subject(s.table?.realm,p.scopeType,p.scopeId);
  const base={source:SOURCE,id:p.eventId,era:p.era.trim(),period:p.period.trim(),
   account:p.account.trim(),basis:p.basis.trim(),year,scopeType:p.scopeType??null,
   scopeId:p.scopeId??null,causes:[...causes],visibility:p.visibility||'public',
-  recordedMinute:s.world.minutes,originType:'gm'};
+  recordedMinute:s.world.minutes,originType:'gm',
+  ...(founded?.originHash?{scopeOriginHash:founded.originHash}:{})};
  h.events[p.eventId]=sealed(base,{interpretations:[],effects:[]});
  return {recorded:true,eventId:p.eventId,causes:causes.length,noResourcesAwarded:true};
 }
@@ -166,7 +217,7 @@ function interpret(s,p={}){
 }
 function effect(s,p={}){
  keys(p,['eventId','effectId','targetType','targetId','dimension','change','continuity','basis'],['visibility','precededBy']);
- if(!id(p.effectId)||!id(p.dimension)||!entity(p.targetType,p.targetId)||
+ if(!id(p.effectId)||!id(p.dimension)||!subject(s.table?.realm||null,p.targetType,p.targetId)||
   !phrase(p.change,15,900)||!phrase(p.continuity,12,850)||!phrase(p.basis,12,650)||
   !visibility.includes(p.visibility||'public'))throw Error('An effect needs a real existing place, institution, family, culture or polity and source');
  const h=ensure(s),e=h.events[p.eventId];if(!e)throw Error('Historical consequence needs an established actual cause');
@@ -174,8 +225,10 @@ function effect(s,p={}){
  if(e.effects.some(x=>x.id===p.effectId))throw Error('Original historical influence cannot be replaced');
  if(p.precededBy!==undefined&&!e.effects.some(x=>x.id===p.precededBy))
   throw Error('Changing an influence needs the previous saved effect');
+ const target=subject(s.table?.realm,p.targetType,p.targetId);
  const r={source:SOURCE,id:p.effectId,eventId:e.id,targetType:p.targetType,targetId:p.targetId,
-  targetName:entity(p.targetType,p.targetId),dimension:p.dimension,change:p.change.trim(),
+  targetName:target.name,...(target.originHash?{targetOriginHash:target.originHash}:{}),
+  dimension:p.dimension,change:p.change.trim(),
   continuity:p.continuity.trim(),basis:p.basis.trim(),precededBy:p.precededBy??null,
   visibility:p.visibility||'public',recordedMinute:s.world.minutes};
  e.effects.push({...r,seal:sha(r)});
