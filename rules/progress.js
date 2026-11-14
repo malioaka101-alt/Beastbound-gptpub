@@ -24,20 +24,25 @@ function status(r){
  const unmet=r.conditions.filter(x=>!x.met),unknown=unmet.filter(x=>!x.known).length;
  const maturityUnmet=r.years<r.requiredYears;
  const knownUnmet=unmet.filter(x=>x.known).length+(maturityUnmet?1:0);
- // A documented special route can bypass innate potential only after every
- // NON-TIME branch condition is actually met (System Additions §6.8).
- // The unfinished Maturity window still increases the event DC; it cannot
- // secretly be treated as a met catalyst or mastered ability.
+ // Potential never closes a valid evolution window. Low aptitude creates
+ // bounded adaptation strain on the actual rite, not a grade ceiling.
+ // Authentic condition, maturity, ecology and consent requirements remain.
  const byRoute=!!r.documented&&!!r.specialConditionsMet&&unmet.length===0;
  const ordinary=['normal','standard','environmental','dietary','bond-born'].includes(r.kind);
- const gate=ordinary||(r.kind==='rare'?r.potential>=4&&r.gradeCeiling>=4:r.potential>=5&&r.gradeCeiling>=5)||byRoute;
- const result={name:r.name,ready:!r.blocked&&!unknown&&!knownUnmet&&gate,knownUnmet,unknownUnmet:unknown,maturity:r.years,required:r.requiredYears,multiplier:r.rate,gate,documented:r.documented};
+ const threshold=r.kind==='rare'?4:5;
+ const potentialStrain=(ordinary||byRoute)?0:Math.min(4,
+  Math.max(0,threshold-r.potential)+Math.max(0,threshold-r.gradeCeiling));
+ const gate=true;
+ const result={name:r.name,ready:!r.blocked&&!unknown&&!knownUnmet,
+  knownUnmet,unknownUnmet:unknown,maturity:r.years,required:r.requiredYears,
+  multiplier:r.rate,gate,documented:r.documented,potentialStrain,
+  potentialNeverBlocksForm:true};
  return result;
 }
 function publicStatus(r){
  const st=status(r);
- // The true readiness flag also depends on sealed conditions, Potential and
- // special gate truth. Public status must report ONLY established known facts.
+ // Actual readiness depends on sealed source conditions and consent, never
+ // a potential ceiling. Public status shows only established known facts.
  return {name:st.name,knownConditionsMet:st.knownUnmet===0,
   knownUnmet:st.knownUnmet,maturity:st.maturity,required:st.required,
   multiplier:st.multiplier,documented:st.documented,
@@ -158,7 +163,6 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
  if(!verified||typeof verified.basis!=='string')throw Error('Evolution requires a precommitted, sourced Vigor/Will record');
  C.int(verified.vigor,'evolution Vigor modifier',-10,20);C.int(verified.will,'evolution Will modifier',-10,20);
  const gate=status(r);
- if(!gate.gate)return {outcome:'potential gate closed',rolled:false,noPowerGranted:true};
  if(!gate.unknownUnmet){
   validateFormProfile(r.formProfile,r.grade); // before catalysts, RNG or costs
   if(s.encounter?.beastId===b.id||s.battle?.enemyId===b.id)throw Error('Evolution cannot resolve during combat');
@@ -167,7 +171,7 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
  }
  const careBonus=evolutionCare(s,b,care);
  const kindBonus=r.kind==='hidden'&&r.documented?2:r.kind==='rare'?2:['hidden','legendary'].includes(r.kind)?4:0;
- const dc=10+2*r.grade+kindBonus+2*gate.knownUnmet;
+ const dc=10+2*r.grade+kindBonus+2*gate.knownUnmet+gate.potentialStrain;
  const trials=r.grade<=3?1:r.grade<=6?3:5;
  const needed=r.grade<=3?1:r.grade<=6?2:3;
  const bonus=verified.vigor+verified.will+(r.potential-3)+careBonus;
@@ -191,7 +195,8 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
   if(roll>=14&&roll<=16)r.blocked=true;
   if(roll>=17)r.pendingTransformation=condition+' — resolve injury/form using verified wound profile';
  }
- r.lastEvent={outcome,day:E.day(s),dc,trials,needed,successes,source:source.trim().slice(0,180),complication};
+ r.lastEvent={outcome,day:E.day(s),dc,trials,needed,successes,
+  potentialStrain:gate.potentialStrain,source:source.trim().slice(0,180),complication};
  C.event(s,'progress',`${b.name}: evolutionary transformation ${outcome}.`,{beastId:b.id,branchId:r.branchId,dc,successes,needed,outcome,complication});
  return {outcome,dc,successes,needed,rolls:results.map(x=>({roll:x.roll,total:x.total,degree:x.degree})),
   complication,confirmedForm:r.evolved?b.evolutionStage:null,formChange:r.evolved?r.appliedFormSummary:null,requiresFormProfile:false,
