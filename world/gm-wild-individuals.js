@@ -124,7 +124,10 @@ function witnessed(s,p={}){
   source:lifeSource,sourceHash:hash(lifeSource),
   rngState:rng,lastTickDay:Math.floor(s.world.minutes/DAY),
   lastWatchMinute:-INTERVAL,history:[],witnessed:[]};
- const b={id,name:root.marker,species:p.speciesId,relationship:'wild',
+ const b={id,name:root.marker,species:p.speciesId,
+  // The original current-form field, without claiming a measured Grade,
+  // matured stage, evolution ability or known transformation path.
+  evolutionStage:'Unclassified',relationship:'wild',
   owner:null,location:place.id,away:false,
   habitatExposure:{[place.id]:1},individualLife:life,
   // Their first visible presence is not a medical examination or a combat
