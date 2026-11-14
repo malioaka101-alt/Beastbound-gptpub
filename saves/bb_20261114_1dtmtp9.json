@@ -321,10 +321,26 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "story",
+      "text": "A period of ordinary life passes at Mossgate Common.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "mossgate_common",
+        "elapsedMinutes": 20,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
     }
   ],
   "world": {
-    "minutes": 829,
+    "minutes": 849,
     "location": "mossgate_common",
     "marketIndex": 0,
     "fenPressure": 3,
@@ -828,7 +844,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 19,
+    "revision": 20,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1575,10 +1591,52 @@
             }
           ]
         }
+      },
+      "maddoc_common_windfalls_lunch_20261114_a1": {
+        "revision": 20,
+        "mode": "rule",
+        "hash": "1c5bce3b031fd0b9ab81e8593ac1d7550dfef178c62d29bc5e6784a99bf0b975",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 14:09",
+          "output": {
+            "rules": {
+              "waited": true,
+              "elapsedMinutes": 20,
+              "daysPassed": 0,
+              "location": "mossgate_common",
+              "clock": "Day 1, 14:09",
+              "sixdayTicks": [],
+              "monthTicks": [],
+              "noTrainingOrResearchAward": true,
+              "noAutomaticWagesOrContracts": true,
+              "lifeNeedsNotCertified": true,
+              "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 14:09",
+              "type": "story",
+              "text": "A period of ordinary life passes at Mossgate Common.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "mossgate_common",
+                "elapsedMinutes": 20,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Find Tessa and look for food in Mossgate Common with Bram"
+      "Three friends collect permitted windfall apples and eat by Mossgate green"
     ],
     "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
     "journal": [

@@ -1,0 +1,78 @@
+{
+  "id": "maddoc_common_windfalls_lunch_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 20,
+  "stateHash": "7f97a4f49683b2fa02ed43b8d3405bd116d3a3f0db6658f2a701578f37fec7c2",
+  "clock": "Day 1, 14:09",
+  "output": {
+    "rules": {
+      "waited": true,
+      "elapsedMinutes": 20,
+      "daysPassed": 0,
+      "location": "mossgate_common",
+      "clock": "Day 1, 14:09",
+      "sixdayTicks": [],
+      "monthTicks": [],
+      "noTrainingOrResearchAward": true,
+      "noAutomaticWagesOrContracts": true,
+      "lifeNeedsNotCertified": true,
+      "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 14:09",
+      "type": "story",
+      "text": "A period of ordinary life passes at Mossgate Common.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "mossgate_common",
+        "elapsedMinutes": 20,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 14:09 · Afternoon · Cool       ║\n║ Mossgate Common            0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Three friends collect permi… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "14:09",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Three friends collect permitted windfall apples and eat by Mossgate green"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.\nPC: young learner, undecided; 0 S\nJOURNAL: A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common.\nCURRENT: No opening hook"
+}
