@@ -269,6 +269,10 @@ function offerOwnedResource(s,p={}){
     stock.originalRoot!==asset.source.originalRoot||
     stock.count<asset.quantity)
   throw Error('The owner must still physically have every proposed item at the same established site');
+ if((e.resourceOffers||[]).length>=120||
+   (e.resourceOffers||[]).some(x=>x.assetId===asset.id&&
+    x.source.place===site.id&&!x.ending))
+  throw Error('The same original asset is already offered at this site');
  const now=s.world.minutes,originalSite=Places.originalSiteProof(s);
  C.event(s,'story',s.player.name+' offers personally owned material for possible voluntary group use at '+site.name+
   '. The objects remain theirs; no one else is obliged to use them.',{
