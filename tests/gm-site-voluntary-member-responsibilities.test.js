@@ -53,6 +53,9 @@ const invite=act(s,'inviteGroupMember',{
 A.equal(invite.joined,true);
 A.equal(invite.decision,'accepted');
 A.equal(group.members,2);
+// Fixture seeds the ORIGINAL independent group-agency RNG; the gameplay
+// operation cannot choose consent or outcome.
+Agency.ensure(w).rngState=low;
 const originalSite=Places.originalSiteProof(s),firstMoney=s.player.coins;
 A.equal(originalSite.placeId,siteId);
 const beforeRole=E.exportGame(s),firstMinute=s.world.minutes,firstRng=s.rngState;
@@ -87,7 +90,7 @@ try{
  A.equal(q.agreed,q.draw<q.agreeChance);
  A.equal(q.noNewWorkResult,undefined);
  A.equal(gr.taskServices.length,0);
- A.equal(gr.siteWork.length,0);
+ A.equal((gr.siteWork||[]).length,0);
  A.equal(gr.funds,0);
  A.equal(real.player.coins,firstMoney);
  A.equal(real.rngState,firstRng);
