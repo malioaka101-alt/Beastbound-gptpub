@@ -86,7 +86,9 @@ function contribute(s,p={}){
     !e.internalPriorities?.some(x=>x.id===priorityId&&x.supported&&
       x.day<=Math.floor(s.world.minutes/1440))))
   throw Error('A priority link needs a real earlier source-supported member review; dissent is not a binding work order');
- const old=s.world.minutes;
+ // The original lived-place witness is established BEFORE the work
+ // advances time; a location description alone proves no ownership.
+ const originalSite=Places.originalSiteProof(s),old=s.world.minutes;
  E.advance(s,WORKTIME);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});
  const priorPlayerCoins=s.player.coins,priorGroupFunds=e.funds,
   fundingDay=Math.floor(s.world.minutes/1440);
@@ -97,6 +99,8 @@ function contribute(s,p={}){
   origin:'actually-attempted-voluntary-group-work',
   groupId:e.id,activity,coins:money,minutes:WORKTIME,
   actor:s.player.name,location:s.world.location,
+  siteMinute:s.world.minutes,
+  ...(originalSite?{placeProof:originalSite}:{}),
   ...(priorityId!==undefined?{priorityId}:{}),
   successClaimAccepted:false,noAutomaticFollowers:true
  });
