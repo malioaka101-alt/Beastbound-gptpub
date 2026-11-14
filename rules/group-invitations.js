@@ -5,7 +5,8 @@
 const E=require('../engine.js'),C=require('./core'),W=require('./world'),
  Health=require('./unified'),Realm=require('../world/simulation'),
  G=require('../world/emergent-groups'),Agency=require('../world/group-member-agency'),
- People=require('../world/person-presence'),A=require('../world/atlas');
+ People=require('../world/person-presence'),A=require('../world/atlas'),
+ Places=require('../world/lived-places');
 const MINUTES=18;
 function fields(p,allowed,needed=allowed){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -39,7 +40,7 @@ function invitation(s,p={}){
   throw Error('This person is already independently recorded as a member');
  if((existing.invitations||[]).some(x=>x.npcId===p.npcId&&x.day===day))
   throw Error('This individual has already answered an association invitation today; a different real discussion can continue without rerolling assent');
- const old=s.world.minutes;
+ const placeProof=Places.originalSiteProof(s),old=s.world.minutes;
  if(!People.resolve(original,p.npcId,s.world.location,
     Math.floor((old+MINUTES)/1440)))
   throw Error('The real person cannot remain physically available for the full proposed conversation');
@@ -62,6 +63,7 @@ function invitation(s,p={}){
    npcId:p.npcId,npcName:npc.name,actorId:npc.actorId,
    presence:npc.presence,
    location:s.world.location,day:now,minutes:MINUTES,
+   ...(placeProof?{placeProof}:{}),
    proposal,decision:decision.decision,
    personallyConsenting:decision.decision==='accepted',
    membershipScope:'nonexclusive voluntary membership',
@@ -142,7 +144,7 @@ function taskRequest(s,p={}){
   now=Math.floor(s.world.minutes/1440),
   member=e?.additionalMembers?.find(x=>
    x.actorId===m0.actorId&&x.hash===m0.hash&&x.active!==false),
-  regionId=require('../world/atlas').LOCATION_REGION[s.world.location];
+  regionId=Places.location(s)?.regionId,placeProof=Places.originalSiteProof(s);
  if(!e||!member||!regionId||
   require('../world/atlas').R[regionId]?.polity!==e.polity||
   p.untilDay<now||
@@ -170,6 +172,7 @@ function taskRequest(s,p={}){
   memberActorId:member.actorId,memberConsentHash:member.hash,
   memberName:member.name,npcId:p.npcId,
   place:s.world.location,regionId,day:now,
+  ...(placeProof?{placeProof}:{}),
   untilDay:p.untilDay,task,minutes:MINUTES,
   ...partial,acceptChance,draw,
   agencyBefore:before,agencyAfter:t.rngState,decision,
