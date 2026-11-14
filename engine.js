@@ -599,6 +599,10 @@
     s.researchProjects||={};s.documentedBranches||={};s.npcKnowledge||={};
     s.player.insightPoints??=0;s.player.fame??=0;s.player.family??=null;
     for(const b of Object.values(s.beasts)){
+      // A source-witnessed unfamiliar species has no measured health,
+      // grade, magical profile or form. Legacy defaults apply ONLY to
+      // original mechanically characterised creatures.
+      if(b.gmWild)continue;
       b.branchMaturity||={};b.ripeningBySeason||={};b.patternEchoByStage||={};
       b.condition??=100;
     }
