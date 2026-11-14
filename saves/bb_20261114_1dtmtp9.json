@@ -65,11 +65,35 @@
         "notAnNPCSpawn": true,
         "noItemsOrPowersCreated": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:07",
+      "type": "travel",
+      "text": "The documented journey from Thistlebell Yard reaches Rillbend Orchard Path.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "thistlebell_yard",
+        "to": "rillbend_orchard_path",
+        "startMinute": 480,
+        "elapsedMinutes": 7,
+        "describedRoute": "Maddoc left Thistlebell Yard through its open gate and followed the ordinary orchard footpath downhill beside the apple rows, reaching the shallow drainage rill and stone culvert without encountering an obstacle.",
+        "means": "walking along the public orchard footpath",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 487,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 480,
-    "location": "thistlebell_yard",
+    "minutes": 487,
+    "location": "rillbend_orchard_path",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -539,7 +563,8 @@
   "battle": null,
   "flags": {
     "visited": {
-      "thistlebell_yard": true
+      "thistlebell_yard": true,
+      "rillbend_orchard_path": true
     },
     "readIntro": false,
     "freeSourceSample": false,
@@ -549,7 +574,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 2,
+    "revision": 3,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -613,10 +638,63 @@
             }
           ]
         }
+      },
+      "rillbend_wander_20261114_001": {
+        "revision": 3,
+        "mode": "rule",
+        "hash": "105b87ba490b795e5100cb07575006a04fe8e251a9a83261ffd5efc2b861b886",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:07",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Thistlebell Yard",
+              "to": "Rillbend Orchard Path",
+              "location": "rillbend_orchard_path",
+              "elapsedMinutes": 7,
+              "clock": "Day 1, 08:07",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:07",
+              "type": "travel",
+              "text": "The documented journey from Thistlebell Yard reaches Rillbend Orchard Path.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "thistlebell_yard",
+                "to": "rillbend_orchard_path",
+                "startMinute": 480,
+                "elapsedMinutes": 7,
+                "describedRoute": "Maddoc left Thistlebell Yard through its open gate and followed the ordinary orchard footpath downhill beside the apple rows, reaching the shallow drainage rill and stone culvert without encountering an obstacle.",
+                "means": "walking along the public orchard footpath",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 487,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Attend to the burden beast's rubbed shoulder"
+      "Explore the orchard path by the rill"
     ],
     "scene": "At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.",
     "journal": [
@@ -6226,7 +6304,25 @@
             "foundingHash": "2d62b8b17d65d8c37719c63406c00932874937556d2dfd7b65a221a99c9907e9"
           }
         },
-        "journeys": []
+        "journeys": [
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "thistlebell_yard",
+            "to": "rillbend_orchard_path",
+            "startMinute": 480,
+            "elapsedMinutes": 7,
+            "describedRoute": "Maddoc left Thistlebell Yard through its open gate and followed the ordinary orchard footpath downhill beside the apple rows, reaching the shallow drainage rill and stone culvert without encountering an obstacle.",
+            "means": "walking along the public orchard footpath",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 487,
+            "hash": "23fd2bb41210b6c9fc55790d157d388397820afc8978a2131ac77e1f4bbfbc50"
+          }
+        ]
       }
     }
   }
