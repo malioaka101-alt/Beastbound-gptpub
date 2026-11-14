@@ -1,5 +1,7 @@
 # Beastbound — faster, safe private-chat turns (v1.0)
 
+**2026-11-14 implementation supplement:** For the new bounded sequential turn protocol, in-action pickup scenes, preflight scripts, verified local Node candidate runner and original source-funded ordinary family work, consult [FAST_TURN_UPGRADE.md](FAST_TURN_UPGRADE.md). The original one-roll, save-lease, NPC autonomy and living-world safeguards remain in force. A multi-action sequence is only available for the explicitly supported source-owned operations; a local checkout is never assumed to exist without verification.
+
 **Play remains inside the private ChatGPT Project. No site, hosting, plugin or paid tier required.** Faster does not mean unverified dice, fabricated outcomes or unsaved changes.
 
 ## Live-play speed priority — current instruction (7 November 2026)
@@ -42,3 +44,33 @@ Use `scripts/new-campaign.js`, which consumes **one** seed and derives a male ch
 ## Power checks after the v1.1 source audit
 
 Do not call `engine.dispatch('train meridian')` or the old `bridge.js act` directly; the protected `scripts/chat-turn.js` rejects prototype automatic cultivation/evolution. Use `mode:"rule"` operations: `character.status`, `character.initialize` (one-time profile migration), `character.assessPotential`, `discipline.status`, `discipline.practice`, `discipline.breakthrough`, `meridian.gatePractice`, and the strictly validated `evolution.event`. Because high stages are not yet implemented, treat them as research/roleplay goals, not a free upgrade. The signed GitHub checkpoint must still be verified before advancing gameplay.
+
+## Implementation extension — source-owned fast turns (14 November 2026)
+
+The following routes supplement, rather than replace, the original scene, economy, consent, calendar, training and world-tick owners.
+
+- **Preflight:** scripts/turn-preflight.js validates the request shape before GitHub submission. It catches unsafe IDs, scenes and sequences, but cannot know or predetermine a roll, agreement or consequence.
+- **Atomic pickup:** a consequential action can include a truthful scene (up to 450 characters), summary (up to 400) and two focus strings. The scene is saved together with the actual action, avoiding immediate extra checkpoints. Never write unverified success into a future pickup scene. Ordinary dialogue remains chat-native.
+- **Bounded sequences:** mode "sequence" accepts two to six original mode "rule" steps: discipline.practice, health.sleep, world.wait and social.householdWork. Each source owner resolves its original checks, resources, world ticks and independent choices once in order. The sequence persists in one outer save write; complications, dangerous failures, declined work or incapacity stop later steps, without erasing completed original actions. The proposed final scene is saved only if the whole sequence completes.
+- **Household paid work:** social.householdWork({npcId,purpose}) handles real home chores with independently established relatives and their own funds. The family member decides about helping or employing the player; an original Crafting check governs completion. Actual wages transfer only from available real employer funds after completed accepted work. Refusal, no funds, failed work and replays never create money. It is not a retroactive payment for a previously free world.wait scene. social.householdWorkStatus is read-only.
+- **Incremental request scans:** on push, GitHub Actions processes newly changed request files rather than scanning years of past results; manual workflow_dispatch still scans all pending requests for recovery.
+- **Verified local Node path:** scripts/verified-local-turn.js requires a complete clean Node 22 Git checkout and independently confirmed live source commit, original save GitHub blob SHA and raw save SHA-256. It runs one original turn on a disposable candidate and does not push to GitHub. The caller must recheck the remote source and save before uploading the candidate with the original save blob SHA as a lease. Do not reroll on a stale lease. If a full verified local source is unavailable, use the existing GitHub Actions route.
+
+Illustrative format only (not a playable campaign command):
+
+~~~json
+{
+  "id": "new_unique_example_sequence_0001",
+  "campaign": "new_independent_campaign",
+  "mode": "sequence",
+  "steps": [
+    {"mode":"rule","system":"discipline","operation":"practice",
+     "params":{"system":"soul","method":"self-awareness","minutes":120}},
+    {"mode":"rule","system":"health","operation":"sleep","params":{"hours":10}}
+  ],
+  "scene": "At home in the morning after a completed evening training and safe sleep.",
+  "focus": ["Morning household plans"]
+}
+~~~
+
+This adapter is not a universal story planner. Genuine new-world actions, NPC contracts, beast encounters, advanced training, and novel research continue using their own supported source or remain unresolved. Use the saved civil weekday label (such as Workday 1) in the approved HUD instead of relative Day N when the calendar already provides an anchored weekday.

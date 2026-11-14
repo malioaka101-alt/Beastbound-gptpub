@@ -64,6 +64,7 @@ const ResearchReplication=require('./research-replication');
 const IndividualInnovations=require('../world/independent-innovations');
 const EmergentHouseholds=require('../world/emergent-households');
 const OriginRelatives=require('../world/origin-relatives');
+const HouseholdWork=require('./household-work');
 const LivedPlaces=require('../world/lived-places');
 const GmCampaignOpening=require('../scripts/gm-campaign-opening');
 const Cosmology=require('../world/cosmology-ledger');
@@ -540,6 +541,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.groupTasksStatus':return GroupInvitations.taskStatus(s,params);
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
+  case 'social.householdWork':return HouseholdWork.perform(s,params);
+  case 'social.householdWorkStatus':return HouseholdWork.status(s);
   case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);
   case 'social.localPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
