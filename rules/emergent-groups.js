@@ -239,8 +239,18 @@ function treasuryStatus(s,p={}){
   throw Error('Original association treasury records are private to its actual local founder');
  return Groups.treasuryAuditStatus(w,e.id);
 }
+function siteWorkStatus(s,p={}){
+ fields(p,['groupId','placeId'],['groupId']);
+ if(typeof p.groupId!=='string')
+  throw Error('Only an actual founded association may be inspected for site work');
+ const w=Realm.peek(s),e=Groups.lookup(w,p.groupId);
+ if(!e||e.origin!=='player-declaration'||
+    e.founder.name!==s.player?.name||e.polity!==polityAt(s))
+  throw Error('A founder may inspect only their own locally known association work; others’ private operating records are not a public registry');
+ return Groups.siteWorkStatus(w,e.id,{placeId:p.placeId});
+}
 function status(s,p={}){
  fields(p,[],[]);
  return Realm.publicEmergentGroups(s);
 }
-module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus};
+module.exports={form,contribute,restatePurpose,purposeHistory,discussPurpose,purposeResponses,status,treasuryStatus,siteWorkStatus};
