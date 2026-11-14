@@ -20,14 +20,22 @@ function validSubject(q){
    q.kind==='narrative'?ident(q.id):refId(q.id));
 }
 function preflight(req){
- if(req.continuity===undefined)return;
+ if(req.gmWitness!==undefined&&!note(req.gmWitness,12,800))
+  throw Error('Private GM scene evidence must be a meaningful bounded source');
+ if(req.continuity===undefined){
+  if(req.gmWitness!==undefined)
+   throw Error('Private GM evidence is supported only alongside an actual GM-only continuity fact');
+  return;
+ }
  if(['status','sequence'].includes(req.mode))
   throw Error('Read-only and sequential turn requests cannot author narrative continuity');
  const entries=req.continuity;
  if(!Array.isArray(entries)||!entries.length||entries.length>8||
     !(req.scene?.trim()||req.summary?.trim()))
   throw Error('Narrative continuity belongs to an actually recorded scene or summary, up to eight meaningful facts');
- const witnessText=[req.scene,req.summary].filter(Boolean).join('\n');
+ const publicText=[req.scene,req.summary].filter(Boolean).join('\n');
+ if(req.gmWitness!==undefined&&!entries.some(p=>p?.visibility==='gm-only'))
+  throw Error('Private GM evidence cannot be attached to a public-only scene');
  const seen=new Set();
  for(const p of entries){
   if(!own(p,['id','action','subject','category','statement','witness','visibility','priorSeal'])||
@@ -35,7 +43,7 @@ function preflight(req){
     !validSubject(p.subject)||!note(p.category,3,60)||
     !note(p.statement,10,480)||!note(p.witness,12,350)||
     !['player-known','gm-only'].includes(p.visibility)||
-    !witnessText.includes(p.witness)||
+    !(p.visibility==='gm-only'?req.gmWitness:publicText)?.includes(p.witness)||
     (p.action==='record'&&p.priorSeal!==undefined)||
     (p.action!=='record'&&
      (typeof p.priorSeal!=='string'||!/^[0-9a-f]{64}$/.test(p.priorSeal)))||
@@ -125,7 +133,8 @@ function apply(s,req){
    existing.statement=source.statement;
    existing.status=p.action==='retire'?'retired':'active';
   }
-  out.push({id:p.id,head:row.seal,action:p.action});
+  out.push(p.visibility==='player-known'?
+   {id:p.id,head:row.seal,action:p.action}:{private:true});
  }
  verify(c);
  return {recorded:out.length,entries:out,
