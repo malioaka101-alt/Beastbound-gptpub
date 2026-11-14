@@ -480,11 +480,15 @@ function track(s,p={}){
   Object.keys(p).length!==1||typeof p.beastId!=='string')
   throw Error('Searching accepts only a previously witnessed individual beastId, never a chosen location, chance, animal reaction or search result');
  const id=p.beastId,b=s.beasts?.[id],life=b?.individualLife,
-  loc=E.LOCATIONS[s.world?.location];
- if(!b||!life||!life.witnessed?.length)
-  throw Error('Only a genuinely watched and remembered individual can be sought again');
+  gm=!!b?.gmWild,
+  loc=gm?require('./lived-places').location(s):E.LOCATIONS[s.world?.location];
+ if(!b||!life||(!life.witnessed?.length&&!gm))
+  throw Error('Only a genuinely witnessed and remembered individual can be sought again');
+ if(gm&&!require('./gm-wild-individuals').verify(s,b))
+  throw Error('This GM-beast sighting lacks its original species and local wildlife evidence');
  ensure(s,b,null);
- if(!loc||!Array.isArray(loc.spawns)||!loc.spawns.length)
+ if(!loc||(gm?(loc.biome==='settlement'||!loc.regionId):
+   (!Array.isArray(loc.spawns)||!loc.spawns.length)))
   throw Error('A real accessible outdoor wildlife habitat is required for a tracking search');
  if(s.battle||s.encounter)
   throw Error('Finish or safely leave the current encounter before searching for another individual');
@@ -519,7 +523,10 @@ function track(s,p={}){
  s.player.stamina=Math.max(0,s.player.stamina-TRACK_STAMINA);
  if(combatant){combatant.stamina=s.player.stamina;U.sync(s,{source:'wounds'});}
  const world=require('./simulation').ensure(s);
- const eco=biome(world,site);
+ const eco=gm?world.ecosystems?.[loc.regionId]:biome(world,site);
+ if(!eco||['forage','water','quality','pressure'].some(k=>
+   !Number.isFinite(eco[k])||eco[k]<0||eco[k]>100))
+  throw Error('A real saved regional habitat is needed to resolve tracking');
  const dc=eco.pressure>75||eco.quality<30?16:14,
   stat=C.int(s.player.attributes?.wis,'earned tracking Wisdom',1,30),
   skill=C.int(s.player.skills?.survival?.rank,'earned Survival ability',0,5);
@@ -531,8 +538,11 @@ function track(s,p={}){
   (eco.pressure>75?0.12:0)-
   (b.needs?.hunger>=65?0.10:0)-
   (b.needs?.fatigue>=65?0.10:0),0.12,0.72);
- const independentlyPresent=b.location===site&&loc.spawns.includes(b.species)&&
-  !b.injuries?.length&&b.condition>=45&&
+ const independentlyPresent=b.location===site&&
+  (gm?(b.gmWild.source.regionId===loc.regionId&&
+    !!world.ecosystems[loc.regionId]?.speciesWeb?.populations?.[b.species]?.index&&
+    eco.forage>0&&eco.water>0):
+    (loc.spawns.includes(b.species)&&!b.injuries?.length&&b.condition>=45))&&
   !/terrified|panicked|hostile|fleeing|desperate/i.test(String(b.mood||''))&&
   !['captured','forced','coerced','imprisoned'].includes(String(b.relationship).toLowerCase());
  // A search nowhere near the beast must not move its separate independent
@@ -555,14 +565,21 @@ function track(s,p={}){
   const threat=eco.pressure>93&&creatureResponse<.14;
   b.mood=mood;b.away=false;
   b.habitatExposure||={};b.habitatExposure[site]=1;
-  s.encounter={beastId:id,observed:false,approaches:0,
+  // A GM species without measured combat/cognition is still just a safe,
+  // distant *sighting*: it cannot become a combat or bond encounter.
+  if(!gm)s.encounter={beastId:id,observed:false,approaches:0,
    threat,distanceMetres};
-  const wording='You find a wild '+E.SPECIES[b.species].name+
-   ' near '+loc.name+'. It appears '+mood+
-   '. It has not agreed to approach or partner with you.';
-  C.event(s,'encounter',wording,{origin:SOURCE,
+  const wording=gm?
+   'You recognise '+b.gmWild.source.marker+' near '+loc.name+
+    ' at a distance; it has made no commitment to approach.':
+   'You find a wild '+E.SPECIES[b.species].name+
+    ' near '+loc.name+'. It appears '+mood+
+    '. It has not agreed to approach or partner with you.';
+  C.event(s,'encounter',wording,{origin:gm?
+   require('./gm-wild-individuals').SOURCE:SOURCE,
    beastId:id,species:b.species,location:site,mood,
-   distanceMetres,previouslyWitnessed:true});
+   distanceMetres,previouslyWitnessed:true,
+   ...(gm?{noCombatOrBondEncounter:true,firstSightingSeal:b.gmWild.seal}:{})});
   const ev=s.log.at(-1);
   const record={origin:'genuine-reencounter',beastId:id,
    location:site,worldMinute:s.world.minutes,distanceMetres,
@@ -578,7 +595,8 @@ function track(s,p={}){
   checkRollHash:rollHash,noAutomaticPartnership:true,
   noUnseenLocationDisclosure:true});
  return {searched:true,found,beastId:id,check,minutes:TRACK_MINUTES,
-  staminaSpent:TRACK_STAMINA,message,encounterContinues:found,
+  staminaSpent:TRACK_STAMINA,message,encounterContinues:found&&!gm,
+  ...(gm?{distantSightingOnly:found,noCombatOrBondEncounter:true}:{}),
   noGuaranteedReturn:true,noAutomaticBond:true,
   hiddenMovementNotRevealed:true};
 }
