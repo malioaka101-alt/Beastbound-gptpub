@@ -483,7 +483,8 @@ function track(s,p={}){
   gm=!!b?.gmWild,
   loc=gm?require('./lived-places').location(s):E.LOCATIONS[s.world?.location];
  if(!b||!life||(!life.witnessed?.length&&!gm))
-  throw Error('Only a genuinely witnessed and remembered individual can be sought again');
+  throw Error(gm?'Only a genuinely witnessed and remembered individual can be sought again':
+   'Only a genuinely watched and remembered individual can be sought again');
  if(gm&&!require('./gm-wild-individuals').verify(s,b))
   throw Error('This GM-beast sighting lacks its original species and local wildlife evidence');
  ensure(s,b,null);
