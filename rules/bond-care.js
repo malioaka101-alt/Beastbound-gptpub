@@ -11,7 +11,14 @@ const FEED_BY_DIET=Object.freeze({
  herbivore:Object.freeze(['marsh_reed'])
 });
 function feedingProfile(s,b){
- const species=E.SPECIES[b.species];
+ let species=E.SPECIES[b.species];
+ // A genuinely recorded GM species may use the SAME pre-existing safe
+ // diet/real inventory plan, but no inferred feed category or free ration.
+ if(!species&&b.gmWild&&require('../world/gm-wild-individuals').verify(s,b)){
+  const saved=s.table?.realm?.speciesBiology?.species?.[b.species];
+  if(saved?.originHash===b.gmWild.source.speciesOriginHash)
+   species={diet:saved.diet};
+ }
  if(!species)throw Error('Unrecognised beast species has no verified feeding model');
  const r=b.welfareCarePlan;
  // Preserve the one existing source-scoped prototype for ordinary fox-line
