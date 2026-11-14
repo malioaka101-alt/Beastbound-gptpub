@@ -2,7 +2,8 @@
 // #09 attaches genuine pairwork to the ONE original bond record.
 const Crypto=require('node:crypto'),E=require('../engine.js'),C=require('./core'),
  Bonds=require('./bonds'),Agency=require('./beast-agency'),
- Sapient=require('../world/sapient-beast-persons');
+ Sapient=require('../world/sapient-beast-persons'),
+ Potential=require('./potential-mechanics');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const SOURCE='actual-earned-partnership-synchronisation-v1',
  SCENE='witnessed-partner-practical-coordination-v1',
@@ -90,6 +91,8 @@ function verify(s,b,r){
    !integer(v.minute,minute)||!['exercise','stage','refinement','design','demonstration'].includes(v.kind))
    return false;
   if(v.kind==='exercise'){
+   if(v.potentialAptitude!==undefined&&
+      !Potential.matches(s,v.potentialAptitude,'synchronisation'))return false;
    if(!integer(v.target,1,10)||!v.witness||
     hash(v.witness)!==v.witnessHash||
     v.witness.details?.origin!==SCENE||
@@ -272,8 +275,9 @@ function train(s,p={}){
  }
  const dex=C.int(s.player.attributes.dex,'Dexterity',1,30),
   rank=C.int(s.player.skills?.beastcraft?.rank??0,'Beastcraft',0,5);
+ const aptitude=Potential.read(s,'synchronisation');
  const modifier=Math.floor((dex-10)/2)+2*rank+
-  Math.floor((r.coordination||0)/35);
+  Math.floor((r.coordination||0)/35)+aptitude.modifier;
  const check=C.check(s,{modifier,dc:11+2*target,
   label:'Independent pairwork '+NAMES[target-1]});
  const checkEvent=structuredClone(s.log.at(-1));
@@ -297,7 +301,7 @@ function train(s,p={}){
  append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
   witnessHash:proof.digest,decision:'accepted',choiceBasis:decision.basis,focus,
   humanCost,fatigueCost,energyCost,roll:check.roll,
-  checkEvent,checkHash,feedback,points,minutes});
+  potentialAptitude:aptitude,checkEvent,checkHash,feedback,points,minutes});
  const readiness=Bonds.syncReadiness(r,target);
  // Canonical Stage 9/10 have no numerical threshold: the original bond
  // deliberately requires a personally witnessed exceptional milestone.
