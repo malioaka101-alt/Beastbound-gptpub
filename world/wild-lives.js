@@ -108,6 +108,8 @@ function memory(life,event){
  life.history.push(event);if(life.history.length>24)life.history.shift();
 }
 function watch(s,p={}){
+ if(p&&Object.hasOwn(p,'beastId'))
+  return require('./gm-wild-individuals').watch(s,p);
  noParams(p);
  const {b,ev,encounter}=originalEncounter(s);
  const w=require('./simulation').ensure(s),eco=biome(w,s.world.location);
@@ -356,6 +358,7 @@ function sixday(s,days){
  for(const day of days){
   for(const b of Object.values(s.beasts||{})){
    const life=b?.individualLife;
+   if(b?.gmWild)continue; // Their source-verified noncombat life uses the same actual world tick below.
    if(!life||b.owner||s.player.partnerIds?.includes(b.id)||
     s.encounter?.beastId===b.id||
     b.relationship!=='wild')continue;
@@ -427,7 +430,8 @@ function sixday(s,days){
    updated++;
   }
  }
- return {updated};
+ const gm=require('./gm-wild-individuals').sixday(s,days);
+ return {updated:updated+gm.updated};
 }
 
 const TRACK_MINUTES=45,TRACK_STAMINA=3;
