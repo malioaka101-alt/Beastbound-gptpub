@@ -59,12 +59,20 @@ A.equal(b.condition,undefined,'Unobserved clinical condition cannot be presumed 
 A.equal(b.sapience,undefined,'No invented cognitive classification');
 A.equal(b.techniques,undefined,'No unearned combat techniques');
 A.equal(rule('gmWildStatus',{beastId:b.id}).individuals[0].visibleMarker,marker);
+const memory=rule('wildMemoriesStatus');
+A.ok(memory.knownIndividuals.some(x=>x.beastId===b.id&&
+ x.lastObservedAction==='original visual sighting only'&&
+ x.lastSeenLocation==='forest'&&x.currentlyPresent==='not established'),
+ 'Existing wildlife memory recognises the first personally witnessed GM beast');
+A.equal(rule('beastIndividualStatus',{beastId:b.id}).known,true,
+ 'Existing individual identity status recognises the documented first sighting');
 A.throws(()=>rule('gmWildWitness',observed),/cannot be manufactured twice/);
 A.throws(()=>rule('watchWildBeast',{beastId:b.id,forceFriendly:true}),/only the original creature/);
 const minutes=s.world.minutes,watch=rule('watchWildBeast',{beastId:b.id});
 A.equal(watch.observed,true);A.equal(s.world.minutes,minutes+12);
 A.equal(s.rngState,playerRng,'Beast alone makes its own behavioural decision');
 A.equal(b.individualLife.witnessed.length,1);
+A.ok(rule('wildMemoriesStatus').knownIndividuals.some(x=>x.beastId===b.id));
 if(!b.away)A.throws(()=>rule('watchWildBeast',{beastId:b.id}),/distinct later source-witnessed/);
 A.equal(watch.noContactOrBond,true);
 A.equal(s.player.partnerIds.length,0);
