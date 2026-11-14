@@ -185,11 +185,35 @@
         "notAnNPCSpawn": true,
         "noItemsOrPowersCreated": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:44",
+      "type": "travel",
+      "text": "The documented journey from Tansyhook Crossing reaches Mossgate Common.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "tansyhook_crossing",
+        "to": "mossgate_common",
+        "startMinute": 505,
+        "elapsedMinutes": 19,
+        "describedRoute": "Maddoc led Tessa and Bram along the public orchard lane from Tansyhook Crossing, passing hedgerows, fruit carts and a gently climbing footbridge before reaching the village green of Mossgate Common. The ordinary walk posed no unresolved hazard.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 524,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 505,
-    "location": "tansyhook_crossing",
+    "minutes": 524,
+    "location": "mossgate_common",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -661,7 +685,8 @@
     "visited": {
       "thistlebell_yard": true,
       "rillbend_orchard_path": true,
-      "tansyhook_crossing": true
+      "tansyhook_crossing": true,
+      "mossgate_common": true
     },
     "readIntro": false,
     "freeSourceSample": false,
@@ -671,7 +696,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 8,
+    "revision": 9,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1029,10 +1054,63 @@
             }
           ]
         }
+      },
+      "mossgate_walk_maddoc_20261114_a2": {
+        "revision": 9,
+        "mode": "rule",
+        "hash": "0f855d150cca6a7bb382940586e88e489619e01ac9921f868548d83783d47988",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:44",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Tansyhook Crossing",
+              "to": "Mossgate Common",
+              "location": "mossgate_common",
+              "elapsedMinutes": 19,
+              "clock": "Day 1, 08:44",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:44",
+              "type": "travel",
+              "text": "The documented journey from Tansyhook Crossing reaches Mossgate Common.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "tansyhook_crossing",
+                "to": "mossgate_common",
+                "startMinute": 505,
+                "elapsedMinutes": 19,
+                "describedRoute": "Maddoc led Tessa and Bram along the public orchard lane from Tansyhook Crossing, passing hedgerows, fruit carts and a gently climbing footbridge before reaching the village green of Mossgate Common. The ordinary walk posed no unresolved hazard.",
+                "means": "walking",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 524,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Maddoc's first stone-skipping attempt with Tessa and Bram"
+      "Explore Mossgate Common's reading room, training yard and beast pens"
     ],
     "scene": "At 08:23 Maddoc arrived at Tansyhook Crossing from the Rillbend culvert, leaving the small moss-feathered seed-eating creature alone. Orchard lanes meet at a timber bridge over an irrigation channel beside a covered weigh-shed and fruit-cart layby. Workers tend carts while two local children contest stone-skipping by the railing. Maddoc has not approached or spoken to anyone here.",
     "journal": [
@@ -6746,6 +6824,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 503,
             "hash": "9fb3d5d24df1c82fa75bebaa5e3c15e6cf38d712672b56293427a5d2c4836b71"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "tansyhook_crossing",
+            "to": "mossgate_common",
+            "startMinute": 505,
+            "elapsedMinutes": 19,
+            "describedRoute": "Maddoc led Tessa and Bram along the public orchard lane from Tansyhook Crossing, passing hedgerows, fruit carts and a gently climbing footbridge before reaching the village green of Mossgate Common. The ordinary walk posed no unresolved hazard.",
+            "means": "walking",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 524,
+            "hash": "3ae03ce1fbc1dccafd0b6aca519e838effd505b03c3e3aa1075f34c8d290a4fb"
           }
         ]
       }
