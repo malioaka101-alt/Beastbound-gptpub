@@ -80,8 +80,8 @@ try{
  // Player-known history survives the ordinary rolling scene journal.
  for(let i=0;i<35;i++){
   const r=Turn.execute(file,{id:'ordinary_scene_followup_'+String(i).padStart(3,'0'),
-   mode:'checkpoint',scene:'Another ordinary scene with no new verified lore.',
-   summary:'Ordinary scene passed without invented power or consent.'});
+   mode:'checkpoint',scene:'Ordinary scene '+i+' passes without new verified lore.',
+   summary:'Distinct witnessed ordinary scene '+i+' passed without invented power or consent.'});
   A.equal(r.applied,true);
  }
  const grown=state();
