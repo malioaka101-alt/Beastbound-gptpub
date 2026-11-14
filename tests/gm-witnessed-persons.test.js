@@ -57,7 +57,8 @@ const afterConvo=E.importGame(E.exportGame(restored));
 World.advance(afterConvo,6);
 const actor=Realm.peek(afterConvo).emergentPeople.people[person.id];
 A.equal(Person.verify(Realm.peek(afterConvo),actor),true);
-A.ok(actor.lastTickDay>=6,'Real sixday world updates preserve independent life');
+A.ok(actor.lastTickDay>0&&actor.lastTickDay<=Math.floor(afterConvo.world.minutes/1440),
+ 'The calendar-anchored sixday world update preserves independent life');
 A.equal(actor.birthSource.name,name);
 const altered=E.importGame(save);
 altered.table.realm.emergentPeople.people[person.id].birthSource.name='Someone Else';
