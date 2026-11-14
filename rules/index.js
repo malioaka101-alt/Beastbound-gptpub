@@ -352,6 +352,9 @@ function act(s,{system,operation,params={}}={}){
   case 'health.sleep':return Unified.sleep(s,params);
   case 'health.balm':return Unified.balm(s);
   case 'creation.evaluate':return Creation.evaluate(s,params);
+  case 'creation.appraiseSourcedMaterial':return require('./material-discovery').appraise(s,params);
+  case 'creation.releaseSourcedMaterial':return require('./material-discovery').release(s,params);
+  case 'creation.materialStatus':return require('./material-discovery').status(s,params);
   case 'creation.draft':return Creation.draft(s,params);
   case 'creation.status':return Creation.status(s,params);
   case 'creation.personalStatus':return Creation.personalStatus(s,params);
