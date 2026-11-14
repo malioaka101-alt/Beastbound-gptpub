@@ -937,7 +937,7 @@ function verifyVoluntaryTask(e,row){
   q.noCompulsoryWork!==true||q.noAutomaticPayOrStatus!==true||
   q.noNewWorkResult!==true||q.noNewGroupFundsSpent!==true||
   !Atlas.R[q.regionId]||Atlas.R[q.regionId].polity!==e.polity||
-  Atlas.LOCATION_REGION[q.place]!==q.regionId||
+  require('./lived-places').verifiedSiteRegion(q.place,q.placeProof)!==q.regionId||
   q.npcId!==row.npcId||
   typeof q.memberName!=='string'||q.memberName.length<3||
   !Number.isInteger(q.agencyBefore)||q.agencyBefore<1||
@@ -2524,7 +2524,7 @@ function offerCoordination(w,params={}){
 }
 
 function visible(s,w){
- const id=Atlas.R[Atlas.LOCATION_REGION[s.world?.location]]?.polity,
+ const id=Atlas.R[require('./lived-places').location(s)?.regionId]?.polity,
   day=Math.floor((s.world?.minutes||0)/1440),r=peek(w);
  const entries=all(w).filter(e=>e.polity===id&&
   (e.releaseDay<=day||e.origin==='player-declaration'&&
