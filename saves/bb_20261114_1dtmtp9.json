@@ -106,11 +106,35 @@
         "notAnNPCSpawn": true,
         "noItemsOrPowersCreated": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:23",
+      "type": "travel",
+      "text": "The documented journey from Rillbend Orchard Path reaches Tansyhook Crossing.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "rillbend_orchard_path",
+        "to": "tansyhook_crossing",
+        "startMinute": 487,
+        "elapsedMinutes": 16,
+        "describedRoute": "Maddoc left the small moss-green feathered seed-eater undisturbed under the Rillbend culvert, climbed back onto the public footpath, and followed the orchard lanes across a quiet, uncomplicated stretch of the Vales to Tansyhook Crossing.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 503,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 487,
-    "location": "rillbend_orchard_path",
+    "minutes": 503,
+    "location": "tansyhook_crossing",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -581,7 +605,8 @@
   "flags": {
     "visited": {
       "thistlebell_yard": true,
-      "rillbend_orchard_path": true
+      "rillbend_orchard_path": true,
+      "tansyhook_crossing": true
     },
     "readIntro": false,
     "freeSourceSample": false,
@@ -591,7 +616,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 4,
+    "revision": 5,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -757,10 +782,63 @@
             }
           ]
         }
+      },
+      "maddoc_explore_tansyhook_20261114_001": {
+        "revision": 5,
+        "mode": "rule",
+        "hash": "2bdbb5d3d8b3c06b385c9fbd717d7ddc8cba95bc88056f6cd3bf0bbd239e1185",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:23",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Rillbend Orchard Path",
+              "to": "Tansyhook Crossing",
+              "location": "tansyhook_crossing",
+              "elapsedMinutes": 16,
+              "clock": "Day 1, 08:23",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:23",
+              "type": "travel",
+              "text": "The documented journey from Rillbend Orchard Path reaches Tansyhook Crossing.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "rillbend_orchard_path",
+                "to": "tansyhook_crossing",
+                "startMinute": 487,
+                "elapsedMinutes": 16,
+                "describedRoute": "Maddoc left the small moss-green feathered seed-eater undisturbed under the Rillbend culvert, climbed back onto the public footpath, and followed the orchard lanes across a quiet, uncomplicated stretch of the Vales to Tansyhook Crossing.",
+                "means": "walking",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 503,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Explore the orchard path by the rill"
+      "Explore Tansyhook Crossing and its orchard lanes"
     ],
     "scene": "At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.",
     "journal": [
@@ -6420,6 +6498,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 487,
             "hash": "23fd2bb41210b6c9fc55790d157d388397820afc8978a2131ac77e1f4bbfbc50"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "rillbend_orchard_path",
+            "to": "tansyhook_crossing",
+            "startMinute": 487,
+            "elapsedMinutes": 16,
+            "describedRoute": "Maddoc left the small moss-green feathered seed-eater undisturbed under the Rillbend culvert, climbed back onto the public footpath, and followed the orchard lanes across a quiet, uncomplicated stretch of the Vales to Tansyhook Crossing.",
+            "means": "walking",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 503,
+            "hash": "9fb3d5d24df1c82fa75bebaa5e3c15e6cf38d712672b56293427a5d2c4836b71"
           }
         ]
       }

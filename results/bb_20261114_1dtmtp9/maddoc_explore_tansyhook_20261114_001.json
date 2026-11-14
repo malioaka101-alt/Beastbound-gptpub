@@ -1,0 +1,89 @@
+{
+  "id": "maddoc_explore_tansyhook_20261114_001",
+  "ok": true,
+  "applied": true,
+  "revision": 5,
+  "stateHash": "ae0b68f0f7034949dbeb26bd9412da687bd6c9ceff8218c5a43380e97726e136",
+  "clock": "Day 1, 08:23",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Rillbend Orchard Path",
+      "to": "Tansyhook Crossing",
+      "location": "tansyhook_crossing",
+      "elapsedMinutes": 16,
+      "clock": "Day 1, 08:23",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:23",
+      "type": "travel",
+      "text": "The documented journey from Rillbend Orchard Path reaches Tansyhook Crossing.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "rillbend_orchard_path",
+        "to": "tansyhook_crossing",
+        "startMinute": 487,
+        "elapsedMinutes": 16,
+        "describedRoute": "Maddoc left the small moss-green feathered seed-eater undisturbed under the Rillbend culvert, climbed back onto the public footpath, and followed the orchard lanes across a quiet, uncomplicated stretch of the Vales to Tansyhook Crossing.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 503,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:23 · Morning · Cool         ║\n║ Tansyhook Crossing         0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Explore Tansyhook Crossing … ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:23",
+    "daypart": "Morning",
+    "location": "Tansyhook Crossing",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Explore Tansyhook Crossing and its orchard lanes"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.\nPC: young learner, undecided; 0 S\nJOURNAL: The documented journey from Thistlebell Yard reaches Rillbend Orchard Path. | A place is established in the lived world: Tansyhook Crossing. | The documented journey from Rillbend Orchard Path reaches Tansyhook Crossing.\nCURRENT: No opening hook"
+}
