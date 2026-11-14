@@ -20,6 +20,10 @@ The foundational **Starting World** is an **initial common-knowledge layer over 
 
 The Starting World supplements established **public** canon, but later personal discoveries, witnessed threats, moving families, current markets, independent politics and creature whereabouts still require the real living world engine. No famous bloodline, renowned academy, commonly named monster or public tradition grants membership, a lawful rank, a technique, source materials, a guaranteed tutor or a beast's assent.
 
+## Random Life — age-only choice and source-grounded world additions (14 November 2026)
+
+When the player explicitly starts a Random Life, **they choose starting age alone**. Gender, name, appearance, homeland, family, household and other unspecified origin details derive from the original seeded generator. Compatible ordinary localities, customs and field-guide ecology may be introduced through the source-verified real-place registry, without replacing the known Atlas or forcing the GM's first scene. A new locality is a genuine saved place, **not** a guaranteed staffed facility, group-owned property, creature encounter, teaching appointment, formal rank or power. See [RANDOM_LIFE_WORLD_ADDITIONS.md](RANDOM_LIFE_WORLD_ADDITIONS.md). **All prior campaigns remain terminated. No new campaign exists until explicitly created.**
+
 ## Always-on fast-turn contract — default for every play session
 
 **Player direction (14 November 2026):** Keep real-world response latency low while preserving the original full living world, immersive prose, earned mechanics, independent choices and verified persistence. This contract is the default, not an optional cosmetic mode. Follow [FAST_TURNS.md](FAST_TURNS.md); it does not override the original Master Prompt, Table Rules, campaign save or a source-owned mechanical result.
