@@ -159,6 +159,8 @@ function watch(s,p={}){
     s.table.combatants.player.status!=='ok')
   throw Error('An incapacitated observer cannot safely watch wildlife');
  const life=b.individualLife;
+ if(life.witnessed.some(x=>x.type==='witnessed-wildlife-routine'))
+  throw Error('A distinct later source-witnessed re-encounter is needed; this one sighting cannot guarantee unlimited observations');
  if(s.world.minutes-life.lastWatchMinute<INTERVAL)
   throw Error('This animal needs a genuine interval between observations');
  const w=require('./simulation').ensure(s),
