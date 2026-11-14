@@ -27,3 +27,24 @@ mathematically impossible solely because of a potential ceiling.
 
 This design does not automatically award stages, techniques, skills, beast
 contracts, special ancestry, or biological adaptations.
+
+## Applied mechanical locations
+- Early Meridian, Arcane, Soul, Body and Rift practice and earned
+  breakthroughs use the relevant aptitude modifiers. A successful
+  session can gain extra progress; failure still grants nothing.
+- Each of the 108 Meridian Gate checks uses Gate Stability aptitude,
+  retaining individual gates, risk and quality.
+- Human Beast-Origin mapping, specialised compatibility screening
+  and stage-by-stage integration checks use appropriate potential
+  dimensions. New sealed receipts preserve the actual applied bonus.
+- Willing, source-witnessed partner synchronisation checks use the
+  human's Synchronisation aptitude as one modest factor. Beast
+  consent and independent choices cannot be bypassed.
+- Beast evolution potential and the older potential/grade-ceiling
+  fields now influence bounded evolution check difficulty rather
+  than preventing access to the next form.
+- Earlier source-valid receipts retain their earned results. All
+  values remain seeded rather than invented or rerolled.
+
+Low potential can NEVER exclude a stage, Circle, Gate, refinement
+cycle, phase, synchronisation stage or beast evolution form.
