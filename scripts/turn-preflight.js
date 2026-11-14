@@ -3,7 +3,7 @@
 // This does not calculate mechanics, author NPC consent or change a campaign.
 const ID=/^[a-z0-9][a-z0-9_-]{4,79}$/;
 const SAFE_SEQUENCE=new Set([
- 'discipline.practice','health.sleep','world.wait','social.householdWorkPerform'
+ 'discipline.practice','health.sleep','world.wait','social.householdWork'
 ]);
 function scene(req){
  if(req.scene!==undefined &&
