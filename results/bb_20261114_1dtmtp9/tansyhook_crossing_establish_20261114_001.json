@@ -1,0 +1,85 @@
+{
+  "id": "tansyhook_crossing_establish_20261114_001",
+  "ok": true,
+  "applied": true,
+  "revision": 4,
+  "stateHash": "a5446e19935c686d909037f57d1ff60b7e5f849089b6a2505e5977867493aa79",
+  "clock": "Day 1, 08:07",
+  "output": {
+    "rules": {
+      "established": true,
+      "place": {
+        "id": "tansyhook_crossing",
+        "name": "Tansyhook Crossing",
+        "kind": "orchard-road crossing",
+        "sceneType": "settlement",
+        "regionId": "orchard_vales",
+        "region": "Orchard Vales",
+        "description": "A busy meeting of two public orchard lanes at a narrow timber bridge over an irrigation channel. A roofed weighing shed and fruit-cart layby stand beside the lane; the canal road continues downhill past hedge-grown orchards.",
+        "culture": "Orchard Vales in the Asterwyn Crown: family orchards, seasonal harvest work, draft-beast caravans and barges use the adjoining country roads.",
+        "knownNotables": [],
+        "knownFamilies": [],
+        "knownOrganisations": [],
+        "recordedDetails": [],
+        "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+      },
+      "noFreeNPCOrItem": true
+    }
+  },
+  "events": [
+    {
+      "day": 1,
+      "time": "Day 1, 08:07",
+      "type": "world",
+      "text": "A place is established in the lived world: Tansyhook Crossing.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "tansyhook_crossing",
+        "regionId": "orchard_vales",
+        "establishedMinute": 487,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:07 · Morning · Cool         ║\n║ Rillbend Orchard Path      0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Explore the orchard path by… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:07",
+    "daypart": "Morning",
+    "location": "Rillbend Orchard Path",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Explore the orchard path by the rill"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Thistlebell Yard, Maddoc rebuked the arguing handlers, then approached the burden beast's twisted left-shoulder harness. Moving carefully, he freed the pinching strap and straightened it without removing the full harness. The beast held steady, flicked an ear and shifted weight more comfortably. The two handlers are now watching; the beast has not yet resumed hauling.\nPC: young learner, undecided; 0 S\nJOURNAL: A place is established in the lived world: Rillbend Orchard Path. | The documented journey from Thistlebell Yard reaches Rillbend Orchard Path. | A place is established in the lived world: Tansyhook Crossing.\nCURRENT: No opening hook"
+}

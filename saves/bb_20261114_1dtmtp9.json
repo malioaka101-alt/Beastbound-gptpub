@@ -89,6 +89,23 @@
         "arrivalKnown": true,
         "noAutomaticPermission": true
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:07",
+      "type": "world",
+      "text": "A place is established in the lived world: Tansyhook Crossing.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "tansyhook_crossing",
+        "regionId": "orchard_vales",
+        "establishedMinute": 487,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
     }
   ],
   "world": {
@@ -574,7 +591,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 3,
+    "revision": 4,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -687,6 +704,55 @@
                 "endMinute": 487,
                 "arrivalKnown": true,
                 "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
+      },
+      "tansyhook_crossing_establish_20261114_001": {
+        "revision": 4,
+        "mode": "rule",
+        "hash": "b860bbce6ba4a1ca69eae4b79ec8e97a685188bb961adebfc1092fc73fb00655",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 08:07",
+          "output": {
+            "rules": {
+              "established": true,
+              "place": {
+                "id": "tansyhook_crossing",
+                "name": "Tansyhook Crossing",
+                "kind": "orchard-road crossing",
+                "sceneType": "settlement",
+                "regionId": "orchard_vales",
+                "region": "Orchard Vales",
+                "description": "A busy meeting of two public orchard lanes at a narrow timber bridge over an irrigation channel. A roofed weighing shed and fruit-cart layby stand beside the lane; the canal road continues downhill past hedge-grown orchards.",
+                "culture": "Orchard Vales in the Asterwyn Crown: family orchards, seasonal harvest work, draft-beast caravans and barges use the adjoining country roads.",
+                "knownNotables": [],
+                "knownFamilies": [],
+                "knownOrganisations": [],
+                "recordedDetails": [],
+                "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+              },
+              "noFreeNPCOrItem": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 08:07",
+              "type": "world",
+              "text": "A place is established in the lived world: Tansyhook Crossing.",
+              "details": {
+                "source": "gm-authored-campaign-place-v1",
+                "placeId": "tansyhook_crossing",
+                "regionId": "orchard_vales",
+                "establishedMinute": 487,
+                "knownNotables": 0,
+                "knownFamilies": 0,
+                "knownOrganisations": 0,
+                "notAnNPCSpawn": true,
+                "noItemsOrPowersCreated": true
               }
             }
           ]
@@ -6302,6 +6368,39 @@
               "noExtraPlayerResources": true
             },
             "foundingHash": "2d62b8b17d65d8c37719c63406c00932874937556d2dfd7b65a221a99c9907e9"
+          },
+          "tansyhook_crossing": {
+            "source": "gm-authored-campaign-place-v1",
+            "id": "tansyhook_crossing",
+            "name": "Tansyhook Crossing",
+            "regionId": "orchard_vales",
+            "kind": "orchard-road crossing",
+            "sceneType": "settlement",
+            "description": "A busy meeting of two public orchard lanes at a narrow timber bridge over an irrigation channel. A roofed weighing shed and fruit-cart layby stand beside the lane; the canal road continues downhill past hedge-grown orchards.",
+            "culture": "Orchard Vales in the Asterwyn Crown: family orchards, seasonal harvest work, draft-beast caravans and barges use the adjoining country roads.",
+            "establishedMinute": 487,
+            "notables": [],
+            "families": [],
+            "organisations": [],
+            "notes": [],
+            "founding": {
+              "source": "gm-authored-campaign-place-v1",
+              "placeId": "tansyhook_crossing",
+              "regionId": "orchard_vales",
+              "worldMinute": 487,
+              "name": "Tansyhook Crossing",
+              "kind": "orchard-road crossing",
+              "sceneType": "settlement",
+              "description": "A busy meeting of two public orchard lanes at a narrow timber bridge over an irrigation channel. A roofed weighing shed and fruit-cart layby stand beside the lane; the canal road continues downhill past hedge-grown orchards.",
+              "culture": "Orchard Vales in the Asterwyn Crown: family orchards, seasonal harvest work, draft-beast caravans and barges use the adjoining country roads.",
+              "notablesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "familiesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "organisationsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "gmContext": "An in-scene GM-authored place added without rewinding the world",
+              "noNPCConsent": true,
+              "noExtraPlayerResources": true
+            },
+            "foundingHash": "cc32afad1a62f38d7aaa60f22d4777a6bc5ccfa71edf1be6cde41d180f231357"
           }
         },
         "journeys": [
