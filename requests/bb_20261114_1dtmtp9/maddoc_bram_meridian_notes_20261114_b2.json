@@ -1,0 +1,13 @@
+{
+  "id": "maddoc_bram_meridian_notes_20261114_b2",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 25
+  },
+  "focus": [
+    "Write Meridian study notes with Bram at Mossgate Reading House"
+  ]
+}
