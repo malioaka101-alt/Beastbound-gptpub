@@ -1,8 +1,0 @@
-{
-  "id": "ivar_capability_init_v11_20261106",
-  "campaign": "ivar_wick_ae69",
-  "mode": "rule",
-  "system": "character",
-  "operation": "initialize",
-  "params": {}
-}

@@ -1,9 +1,9 @@
 # Beastbound — In-chat fantasy system HUD (official, 6 November 2026)
 
 
-## Active-game state (8 November 2026)
+## Active-game state (14 November 2026)
 
-**There is no active campaign.** The user explicitly ended and reset Aerin's trial; old Aerin and independent Ivar examples lower in this file are **historical illustrations only**, not defaults. Never render any of their stats, dates, partners, families or powers as the current player state. Display a character panel only when a newly created and confirmed campaign save exists. For actual power sheets, use the new read-only `rules/power-overview.js` `power.status` and `/panel power`: skill ranks, physical stage, gates, Circles, cycles, Soul phases, Rift steps, Origin integration and human evolution are **not equivalent measurements**. Stage 0 must be described as preparatory/not-awakened, and an old foundation count or resource pool is not proof of a newer stage.
+**All previous campaigns were explicitly ended and their tracked live gameplay records deleted. No active/default campaign exists.** No former character, partnership, calendar or numeric values may be treated as current. Only display a real character panel after explicit new campaign creation and a newly verified save.
 
 ## Expanded panel atlas and personal sigils — latest player direction (14 November 2026)
 
@@ -42,7 +42,7 @@ For **every normal scene**, use a compact **in-chat styled fantasy system HUD** 
 ### Appearance
 
 - Mystical dark indigo/ink surface; antique-gold headings; teal/turquoise Qi and pale silver text; restrained runic ornaments ◈, ◇, ✧ and thin fine rules. Avoid generic business dashboards or clip-art.
-- Character-first plate: **the character from the actual active save** (currently Ivar Wick), path/discipline and relevant location; a small, faintly breathing path sigil.
+- Character-first plate: **the character from a verified newly authorised save**, path/discipline and relevant location; a small, faintly breathing path sigil.
 - Compact verified clock/date/weather and Talons, then **resource tracks** with numerals on the right. Include only pools the character actually has and needs to see. Show wound boxes and conditions only when relevant.
 - One short **World Thread** or comparable active scene section with the character's known local lead; partner section only when a real partner is present.
 - **Gentle continuous motion only:** subtle floating motes, a slow turning thin circle and a resource glint. No flashing, large perpetual cinematic effects or flashing text. Honour reduced-motion settings and mobile readability.
@@ -61,10 +61,6 @@ For verified evolution, cultivation breakthrough, awakened ability or similar me
 
 The 34-character examples in the Gallery and older Table Rules remain valid historical references for values, concise scene sections and text-only formatting. They are **not** the current default look.
 
-### Historic Aerin start example — NOT current default
+### Historical examples retired
 
-In the archived, separate Aerin campaign on saved Day 1 at 08:00, Aerin Marsh is at Morrowfen Crossing, with 52/52 stamina, 14/14 Qi, 85 Talons and the unsigned damaged reed-bank notice. No partner. This example does not advance or checkpoint the campaign. Other campaigns and subsequent scenes use their **own** verified saves.
-
-### Current new-campaign example (Ivar Wick)
-
-Ivar Wick is the active default, **male, age 24, apprentice background, partner path**, with a previously established fox partner named Nacre. His saved opening is **5 Leaffall 1153 AC, 08:30 at Lumenfall Annex** (relative simulation Day 1), near the interrupted healing ward. Use this only while the saved state remains unchanged; after any live turn fetch and use the latest save. The starting relationship is in this independently generated campaign, not borrowed from Aerin or Jory.
+Past named-character panels are retired and are not eligible as current saves, companions or narrative pickup scenes. Future panel demonstrations must use visibly hypothetical examples or a newly created, explicitly authorised campaign with verified source data.

@@ -1,9 +1,0 @@
-{
-  "id": "rt_01_status_20261107a",
-  "ok": true,
-  "applied": false,
-  "revision": 0,
-  "stateHash": "940584bb37d193ea139018044c4c179ee969b18d6b166e7c268d66720ef69e3f",
-  "panel": "╔═ ROUNDTRIP · DAY 1 ════════════╗\n║ 08:00 · Morning · cool         ║\n║ Morrowfen Crossing        85 T ║\n║ STA  ██████████          52/52 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Damaged reed-bank notice     ║\n╚════════════════════════════════╝",
-  "recap": "CAMPAIGN: Roundtrip Save Resume Fixture (seed 20261107)\nSCENE: Morrowfen Crossing, Day 1, 08:00\nPC: fieldworker, meridian; 85 T\nJOURNAL: A separate save-and-resume verification traveller arrives at Morrowfen Crossing. No live player campaign state or earned progression is part of this fixture. | Guild registrar Elira Moss has pinned three ordinary contracts to the public board. A lanternfen fox watches the traffic from a distant roof. | A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet.\nCURRENT: A damp field notice asks for volunteers to survey a damaged reed bank. Nobody has signed it yet."
-}

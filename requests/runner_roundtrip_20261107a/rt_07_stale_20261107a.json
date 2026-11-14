@@ -1,7 +1,0 @@
-{
-  "id": "rt_07_stale_20261107a",
-  "campaign": "runner_roundtrip_20261107a",
-  "mode": "act",
-  "action": "rest",
-  "expectedHash": "intentionally_stale_checkpoint_hash_no_match_20261107"
-}

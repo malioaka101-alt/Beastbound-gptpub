@@ -1,6 +1,6 @@
 > **Final foundation status — 14 November 2026:** **25/25 bounded Beastbound foundations accepted** following exact-head successful full regression and confirmed merge of PR #123. Read [the final handover](docs/FOUNDATION_FINAL_HANDOFF_2026-11-14.md), [the live Project-chat instructions](docs/PROJECT_CHAT_INSTRUCTIONS.md) and [the authoritative checklist](docs/MASTER_PROMPT_DEPTH_CHECKLIST.md). The connected **GitHub repository is public**; the ChatGPT Project RPG is private, but committed saves are not confidential storage. Three older experimental draft PRs (#28, #42 and #66) were closed without merge; their original branches and history remain recoverable. No character or campaign is active merely because a save file exists. No website or new hosting is required.
 
-> **Historical state — 8 November 2026:** This is the **public** `malioaka101-alt/Beastbound-gptpub` source repository for a **private ChatGPT Project RPG**. There is **no active campaign**. Aerin's concluded trial save and request/result artifacts have been deleted; never resume or recreate that trial by default. Start a fresh character only on the player's explicit request. Historical campaign and formerly private-repository references below document earlier development, not current operating instructions.
+> **Current campaign state — 14 November 2026:** At the player's request, **every prior Beastbound campaign has ended**; all tracked runtime saves and turn request/result records have been removed from the current branch. There is **no active/default campaign**. The engine, world, canon, rules, tests and panel designs remain intact. Older Git commits and separate branches retain their own history.
 
 > **Current power-system audit (v1.1):** `docs/SOURCE_TO_ENGINE_AUDIT_V11.md` is the honest section-by-section (all 57 Master Prompt sections + later additions) mechanical coverage ledger. `rules/character.js` supplies a four-domain seeded capability sheet and separately assessed potential; `rules/disciplines.js` supplies time/cost/risk-backed early discipline training and 108-Gate progression; `rules/progress.js` requires validated complete form profiles before successful beast evolution. Legacy shortcuts are blocked in private turns. **Full high-tier power and civilisation parity is not yet implemented.** Ivar's separate save is protected, and play remains in private Project chats.
 
@@ -43,7 +43,7 @@ The repository connection lets ChatGPT **read and write files**, but GitHub does
 
 - `engine.js`: deterministic JavaScript game rules and state transitions.
 - `bridge.js`: Node.js CLI for command-based state updates.
-- `saves/`: future campaign checkpoints, only after explicit creation. The historical Aerin trial save is deleted.
+- `saves/`: no tracked live campaign save exists; a new checkpoint requires explicit new-game creation.
 - `reference/`: unified master prompt and compiled house-rule additions; the Jory Larkin examples **do not** become Aerin's campaign history.
 - `docs/PROJECT_CHAT_INSTRUCTIONS.md`: run, resume, narrate and checkpoint in chats.
 - `tests/smoke.test.js` and GitHub Actions: engine checks only.

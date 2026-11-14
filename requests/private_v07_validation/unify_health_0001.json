@@ -1,8 +1,0 @@
-{
-  "id": "unify_health_0001",
-  "campaign": "private_v07_validation",
-  "mode": "rule",
-  "system": "health",
-  "operation": "ensurePlayer",
-  "params": {}
-}
