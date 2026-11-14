@@ -5,6 +5,8 @@ const E=require('../engine.js'), P=require('../panels.js'), Rules=require('../ru
 const Health=Rules.unified, Core=Rules.core;
 const PersonPresence=require('../world/person-presence');
 const LivedPlaces=require('../world/lived-places');
+const Preflight=require('./turn-preflight'),Pickup=require('./turn-scene');
+const Sequence=require('./turn-sequence');
 const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
 const legalId=x=>typeof x==='string' && /^[a-z0-9][a-z0-9_-]{4,79}$/.test(x);
 const recap=s=>s.chatRuntime?.scene ? E.recap(s).replace(/^SCENE:.*$/m,'SCENE: '+s.chatRuntime.scene) : E.recap(s);
@@ -354,8 +356,8 @@ function unresolvedSceneIntent(s,intent){
 }
 
 function execute(savePath, req) {
- if(!req || !legalId(req.id))throw Error('Invalid stable turn id');
- if(!['act','check','checkpoint','status','rule'].includes(req.mode))throw Error('Unsupported mode');
+ Preflight.validate(req);
+ if(req.mode==='sequence')return Sequence.run(savePath,req,{execute,hash});
  // GM-selected *source method*, never a result, DC, roll, reward or new
  // narration engine. Only the original already witnessed terrain check
  // owner may prepare a supported mundane uncertainty from a freeform act.
@@ -793,18 +795,17 @@ function execute(savePath, req) {
  } else if(req.mode==='check'){
    // The processor's validated campaign field addresses the save; it is not
    // a caller-selected check attribute, DC, modifier or rolled outcome.
-   if(Object.keys(req).some(k=>!['id','mode','campaign','checkId','expectedHash','focus'].includes(k)))
+   if(Object.keys(req).some(k=>!['id','mode','campaign','checkId','expectedHash','focus','scene','summary'].includes(k)))
      throw Error('A playable scene check takes only a precommitted checkId, not chosen DC, skill, modifier, time or outcome');
    response.check=Rules.act(s,{system:'core',operation:'check',params:{checkId:req.checkId}}).check;
 
  } else if(req.mode==='checkpoint'){
-   if(!req.scene || typeof req.scene!=='string' || req.scene.length>450)throw Error('A short scene pickup point is required');
-   s.chatRuntime.scene=req.scene;
-   if(req.focus){if(!Array.isArray(req.focus)||req.focus.length>2||req.focus.some(x=>typeof x!=='string'||x.length>80))throw Error('Invalid scene focus');s.chatRuntime.focus=req.focus;}
-   const summary=String(req.summary||'').slice(0,400);
-   if(summary){s.chatRuntime.journal ||= [];s.chatRuntime.journal.push({day:E.day(s),text:summary});s.chatRuntime.journal=s.chatRuntime.journal.slice(-30);}
+   Pickup.apply(s,req,E.day(s));
+   if(req.focus)s.chatRuntime.focus=req.focus;
    response.message='Scene checkpoint recorded';
  }
+ if(req.mode!=='checkpoint'&&(req.scene!==undefined||req.summary!==undefined))
+  Pickup.apply(s,req,E.day(s));
  // A GM method may never secretly reinterpret an already dispatched act,
  // create a bonus check after a purchase, or shadow an ordinary engine rule.
  // Fail before writing the transactional checkpoint in those cases.
