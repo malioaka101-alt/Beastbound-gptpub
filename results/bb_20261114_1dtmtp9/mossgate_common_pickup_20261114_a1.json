@@ -1,0 +1,50 @@
+{
+  "id": "mossgate_common_pickup_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 10,
+  "stateHash": "f40dfcef3aca9739b9f3c0de639daf93dda69dcb75b97f9293c81677c05f2791",
+  "clock": "Day 1, 08:44",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 08:44 · Morning · Cool         ║\n║ Mossgate Common            0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Explore the reading house, … ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "08:44",
+    "daypart": "Morning",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Explore the reading house, practice yard and beast pens at Mossgate Common"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 08:44, Maddoc reaches Mossgate Common with Tessa and Bram after an ordinary 19-minute walk from Tansyhook Crossing. He is seeking a library/reading room, a training ground or a beast-handling place. All three are visible around the village green: a slate-roofed reading house, a fenced practice yard with sand and posts, and a working beast-handling pen with troughs. No access, tuition, person consent or beast contact is established.\nPC: young learner, undecided; 0 S\nJOURNAL: Maddoc made one witnessed stone-skipping attempt at Tansyhook Crossing. | A place is established in the lived world: Mossgate Common. | The documented journey from Tansyhook Crossing reaches Mossgate Common.\nCURRENT: No opening hook"
+}
