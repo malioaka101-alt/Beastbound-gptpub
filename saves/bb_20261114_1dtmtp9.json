@@ -1026,7 +1026,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 27,
+    "revision": 28,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2205,13 +2205,27 @@
             }
           ]
         }
+      },
+      "maddoc_morning_harness_pickup_20261114_a1": {
+        "revision": 28,
+        "mode": "checkpoint",
+        "hash": "f5dc592be04b368fcca0df17bfb9b81cbbc0506c902adb9b3dc1cc336ee6846a",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 08:00",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "08:00: paid harness work with Hedra",
-      "Meet Bram and Tessa afterward"
+      "08:00: examine harness work with Hedra",
+      "Find Bram and Tessa afterward"
     ],
-    "scene": "Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.",
+    "scene": "Morning of 1 Nesting 1156 AC, 08:00: Maddoc wakes rested at his family cottage after successful Soul self-awareness practice the previous evening. He meets Hedra beside the homestead shed, where muddy harnesses, buckles and worn straps await sorting and cleaning. Hedra offered 2 Talons for a properly completed morning's work; the job has not yet been performed or paid. Bram and Tessa are to be met later if possible.",
     "journal": [
       {
         "day": 1,
@@ -2240,6 +2254,10 @@
       {
         "day": 1,
         "text": "Safe checkpoint before potential mechanics implementation; Maddoc home at 18:51, stamina 34/36, no Soul progress."
+      },
+      {
+        "day": 2,
+        "text": "After family supper, Maddoc practised Soul self-awareness 129 minutes until 21:00: d20 17+2=19 vs 14, +2 progress (2/100), -2 stamina. Slept 11h; woke 08:00, stamina restored 36/36. Hedra discussed 2 Talons for completed harness-cleaning and sorting work; no work or pay yet."
       }
     ]
   },
