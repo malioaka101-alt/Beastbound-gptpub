@@ -427,7 +427,7 @@ function live(w,p,day){
    p.regionId=next;p.status='relocated';choice='voluntarily-relocate';
   }else{p.funds=clamp(p.funds-2);choice='seek-safe-work';}
  }else if(p.origin===GM_ORIGIN&&
-   !(p.career?.authoredDuties||[]).some(d=>d.status==='available')){
+   !(p.career?.authoredDuties||[]).some(d=>d.status==='available'&&d.regionId===p.regionId)){
   // GM-authored work is a possibility, not permission to give them a
   // randomly chosen profession or unproved paid work on a time tick.
   p.fatigue=clamp(p.fatigue-2);choice='independent-unverified-priorities';
