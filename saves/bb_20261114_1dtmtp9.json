@@ -945,7 +945,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 24,
+    "revision": 25,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1952,13 +1952,27 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "maddoc_pre_potential_mechanics_checkpoint_20261114_a1": {
+        "revision": 25,
+        "mode": "checkpoint",
+        "hash": "dddb12d30f7be622d6cd76ad56c4d9929754fa198f7c6ffa97328d1b33a25422",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 18:51",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Evening at Maddren Homestead",
+      "Respond to Hedra and Nessa at home",
       "Meet Tessa and Bram tomorrow"
     ],
-    "scene": "At 18:51 on 30 Seedwake 1156 AC, Maddoc returned to his family's cottage near Thistlebell Yard after spending the afternoon with Bram and Tessa at Mossgate. They ate permitted windfall apples, no stored provisions gained. Maddoc practised Soul self-awareness for 240 minutes: d20 6+2=8 vs DC14, failure, 0/100 progress, stamina 34/36. No power awakened. Bram favours Arcane; Tessa favours martial footwork. They plan to meet tomorrow.",
+    "scene": "Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.",
     "journal": [
       {
         "day": 1,
@@ -1983,6 +1997,10 @@
       {
         "day": 1,
         "text": "After windfall apples, four-hour failed Soul practice and walk home, Maddoc is at home 18:51, stamina 34/36; friends plan tomorrow."
+      },
+      {
+        "day": 1,
+        "text": "Safe checkpoint before potential mechanics implementation; Maddoc home at 18:51, stamina 34/36, no Soul progress."
       }
     ]
   },

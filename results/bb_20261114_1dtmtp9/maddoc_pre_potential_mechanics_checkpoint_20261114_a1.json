@@ -1,0 +1,51 @@
+{
+  "id": "maddoc_pre_potential_mechanics_checkpoint_20261114_a1",
+  "ok": true,
+  "applied": true,
+  "revision": 25,
+  "stateHash": "107d520c4276f7a844f38341a99ec2d5b0111886f4d72ce1fa716a3353b2dd0f",
+  "clock": "Day 1, 18:51",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 18:51 · Evening · Cool         ║\n║ Maddren Homestead          0 S ║\n║ STA  █████████░          34/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Respond to Hedra and Nessa … ║\n║ ◆ Meet Tessa and Bram tomorrow ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "18:51",
+    "daypart": "Evening",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 34,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Respond to Hedra and Nessa at home",
+      "Meet Tessa and Bram tomorrow"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc returned to the Maddren homestead at 18:51 on 30 Seedwake 1156 AC. Hedra and Nessa are at home preparing supper and ask about his day. At Mossgate he ate windfall apples with Tessa and Bram, then made a four-hour Soul self-awareness practice attempt (d20 6+2=8 vs DC14): failure, no progress; stamina 34/36. He has studied introductory Meridian, Arcane and Soul theory, has no awakened discipline, and intends to meet his friends tomorrow.\nPC: young learner, undecided; 0 S\nJOURNAL: soul practice: self-awareness; 0 training points. | A place is established in the lived world: Maddren Homestead. | The documented journey from Mossgate Common reaches Maddren Homestead.\nCURRENT: No opening hook"
+}
