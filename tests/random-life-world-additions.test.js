@@ -40,6 +40,14 @@ for(let seed=1;seed<=160;seed++){
   const p=Places.get(state,record.locale.id);
   A.ok(p&&Places.verifyPlace(p));
   A.equal(p.founding.originSeeded,true);
+  const proof=Places.originalSiteProof(state,p.id);
+  A.equal(proof.foundingHash,p.foundingHash);
+  A.equal(Places.verifiedSiteRegion(p.id,proof),record.regionId,
+   'A genuine seeded hometown is a source-verified real site, not an invented encounter or ownership deed');
+  const forged=structuredClone(proof);
+  forged.founding.gmContext='An in-scene GM-authored place added without rewinding the world';
+  A.equal(Places.verifiedSiteRegion(p.id,forged),null,
+   'A seeded place cannot be reclassified as a played GM scene by altering its source');
   A.equal(p.regionId,record.regionId);
   A.equal(p.sceneType,'settlement');
   A.equal(state.world.location===p.id,false,'A new hometown is not a forced opening location');
