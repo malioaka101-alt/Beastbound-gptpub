@@ -55,6 +55,7 @@ A.equal(b.owner,null);A.equal(b.relationship,'wild');
 A.equal(b.level,undefined,'Unmeasured numeric grade and level must not appear');
 A.equal(b.hp,undefined,'No invented combat physiology');
 A.equal(b.energy,undefined,'No invented spell or physical energy profile');
+A.equal(b.condition,undefined,'Unobserved clinical condition cannot be presumed perfect');
 A.equal(b.sapience,undefined,'No invented cognitive classification');
 A.equal(b.techniques,undefined,'No unearned combat techniques');
 A.equal(rule('gmWildStatus',{beastId:b.id}).individuals[0].visibleMarker,marker);
@@ -74,6 +75,7 @@ A.equal(rule('beastIndividualObserve',{beastId:b.id,category:'patterned-flight',
 A.equal(Unique.verify(b),true);
 A.throws(()=>rule('beastTechniqueRecord',{beastId:b.id}),/unique technique needs/);
 const copy=E.importGame(E.exportGame(s));
+A.equal(copy.beasts[b.id].condition,undefined,'Save integration must not infer perfect condition');
 A.equal(GM.verify(copy,copy.beasts[b.id]),true);
 const finalRng=copy.rngState,oldMoney=copy.player.coins;
 Time.advance(copy,30);
