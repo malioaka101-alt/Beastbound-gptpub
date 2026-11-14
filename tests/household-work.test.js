@@ -8,7 +8,7 @@ function rollFrom(seed){
 function selectedRoll(wantHigh){
  for(let seed=1;seed<=100000;seed++){
   const roll=rollFrom(seed);
-  if(wantHigh?roll>=17:roll<=2)return seed;
+  if(wantHigh?roll===20:roll<=2)return seed;
  }
  throw Error('No deterministic test RNG seed found');
 }
