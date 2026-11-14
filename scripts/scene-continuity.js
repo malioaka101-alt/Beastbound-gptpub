@@ -7,6 +7,7 @@ const Crypto=require('node:crypto');
 const ORIGIN='gm-witnessed-narrative-continuity-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const ident=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{3,79}$/.test(x);
+const refId=x=>typeof x==='string'&&/^[a-z][a-z0-9_:-]{0,109}$/.test(x);
 const note=(x,a,b)=>typeof x==='string'&&x.trim().length>=a&&x.trim().length<=b;
 const own=(o,allowed)=>o&&typeof o==='object'&&!Array.isArray(o)&&
  Object.keys(o).every(k=>allowed.includes(k));
@@ -16,10 +17,7 @@ function validSubject(q){
   subjectKinds.includes(q.kind)&&typeof q.id==='string'&&
   (q.kind==='world'?q.id==='world':
    q.kind==='player'?q.id==='player':
-   q.kind==='person'?q.id.length>=2&&q.id.length<=100:
-   q.kind==='beast'?/^beast_[0-9]+$/.test(q.id):
-   q.kind==='place'?ident(q.id):q.kind==='group'?ident(q.id):
-   ident(q.id));
+   q.kind==='narrative'?ident(q.id):refId(q.id));
 }
 function preflight(req){
  if(req.continuity===undefined)return;
