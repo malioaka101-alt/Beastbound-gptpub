@@ -87,7 +87,14 @@ function location(s,placeId=s.world.location){
   culture:place.culture};
 }
 function establish(s,p={}){
- keys(p,['placeId','name','regionId','description'],['kind','sceneType','culture','notables','families','organisations']);
+ keys(p,['placeId','name','regionId','description'],['kind','sceneType','culture','notables','families','organisations','originSeeded']);
+ if(p.originSeeded!==undefined&&p.originSeeded!==true)
+  throw Error('An origin locality must be explicitly marked as seeded');
+ if(p.originSeeded===true&&(!s.campaign||
+  s.campaign.oldCampaignImported!==false||
+  s.campaign.openingState!=='awaiting-gm'||
+  s.chatRuntime?.revision!==0||s.flags?.openingAuthored===true))
+  throw Error('A seeded locality may only be recorded before the first played scene');
  const {placeId,regionId}=p;
  if(!id(placeId)||!Atlas.R[regionId]||!phrase(p.name,3,100)||
   !phrase(p.description,16,900)||
@@ -110,7 +117,10 @@ function establish(s,p={}){
   description:p.description.trim(),culture:(p.culture||'').trim(),
   notablesHash:hash(notables),familiesHash:hash(families),
   organisationsHash:hash(organisations),
-  gmContext:'An in-scene GM-authored place added without rewinding the world',
+  gmContext:p.originSeeded===true?
+   'An ordinary pre-existing locality generated at campaign creation, not a played scene':
+   'An in-scene GM-authored place added without rewinding the world',
+  ...(p.originSeeded===true?{originSeeded:true}:{}),
   noNPCConsent:true,noExtraPlayerResources:true};
  const place={source:SOURCE,id:placeId,name:p.name.trim(),regionId,
   kind:(p.kind||'settlement').trim(),sceneType:p.sceneType||'unknown',
@@ -121,7 +131,9 @@ function establish(s,p={}){
  if(!verifyPlace(place))throw Error('New place failed to preserve its authored provenance');
  l.places[placeId]=place;
  const Core=require('../rules/core');
- Core.event(s,'world','A place is established in the lived world: '+place.name+'.',{
+ Core.event(s,'world',(p.originSeeded===true?
+   'An existing local settlement enters this new character’s known background: ':
+   'A place is established in the lived world: ')+place.name+'.',{
   source:SOURCE,placeId,regionId,establishedMinute:now,
   knownNotables:notables.length,knownFamilies:families.length,
   knownOrganisations:organisations.length,
