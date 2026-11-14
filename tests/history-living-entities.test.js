@@ -36,6 +36,15 @@ const groupId=group.id,w=s.table.realm,person=w.emergentPeople.people[residentId
 A.ok(g&&place&&People.verify(w,person));
 A.equal(g.funds,0,'The authored group has no invented treasury');
 A.equal(person.cashScales,0,'The authored person has no invented income');
+// An arbitrary guessed ID cannot query private records through history
+// before any genuinely public historical source identifies that subject.
+for(const [type,id] of [
+ ['person',residentId],['group',groupId],['place',place.id]]){
+ const unknown=rule('world','historyStatus',{targetType:type,targetId:id});
+ A.equal(unknown.known,false);
+ A.equal(unknown.name,undefined);
+ A.deepEqual(unknown.effects,[]);
+}
 const beforeCoins=s.player.coins,beforeRng=s.rngState,beforeMinutes=s.world.minutes;
 const event={
  eventId:'river_path_inspection_remembered',
