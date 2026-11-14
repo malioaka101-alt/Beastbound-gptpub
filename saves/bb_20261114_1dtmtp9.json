@@ -792,7 +792,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 17,
+    "revision": 18,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1483,12 +1483,27 @@
             }
           ]
         }
+      },
+      "maddoc_arcane_soul_study_checkpoint_20261114_a2": {
+        "revision": 18,
+        "mode": "checkpoint",
+        "hash": "ca0c666587e66683c6899d6ba6a630319c84fc9b79bee2bde004ad20aa53cda1",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 13:39",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Maddoc and Bram study Arcane and Soul disciplines at the Mossgate Reading House"
+      "Review Arcane and Soul notes with Bram",
+      "Visit Tessa or continue at Mossgate"
     ],
-    "scene": "At 11:04 Maddoc and Bram are studying at Mossgate Reading House. They completed introductory Meridian reading together and wrote multiple practice-paper sheets about anatomy, Stages I-III, stages IV-IX and techniques. Paper, quill and ink were offered for use inside the house; taking sheets away has not been agreed. No cultivation or ability gained. Tessa was last seen seeking lessons at the practice yard; her current progress is unknown.",
+    "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
     "journal": [
       {
         "day": 1,
@@ -1505,6 +1520,10 @@
       {
         "day": 1,
         "text": "Maddoc and Bram complete introductory Meridian theory and handwritten notes at the reading house; time verified 11:04."
+      },
+      {
+        "day": 1,
+        "text": "At 13:39 Maddoc and Bram completed reading and handwritten introductory notes for Arcane and Soul; no cultivation gain."
       }
     ]
   },

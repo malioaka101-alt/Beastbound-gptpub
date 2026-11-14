@@ -1,0 +1,51 @@
+{
+  "id": "maddoc_arcane_soul_study_checkpoint_20261114_a2",
+  "ok": true,
+  "applied": true,
+  "revision": 18,
+  "stateHash": "6c4de94b75f0f3c610eafe0fbc9164c290d475b5e7a18d48b97d69f653096081",
+  "clock": "Day 1, 13:39",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 30 SEEDWAKE 1156 ════╗\n║ 13:39 · Afternoon · Cool       ║\n║ Mossgate Common            0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Review Arcane and Soul note… ║\n║ ◆ Visit Tessa or continue at … ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "30 Seedwake 1156 AC",
+      "label": "30 Seedwake 1156 AC",
+      "known": true,
+      "relativeDay": 1,
+      "weekday": "Hearthday"
+    },
+    "time": "13:39",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Review Arcane and Soul notes with Bram",
+      "Visit Tessa or continue at Mossgate"
+    ],
+    "context": null
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.\nPC: young learner, undecided; 0 S\nJOURNAL: A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common.\nCURRENT: No opening hook"
+}
