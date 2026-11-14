@@ -16,6 +16,43 @@ function roll(life){
  life.rngState=(x>>>0)||0x91e10da5;
  return life.rngState/4294967296;
 }
+// One original, non-binding first-approach witness belongs to the SAME
+// individual-wildlife life record. Recheck the sealed independent choice,
+// rather than trusting a caller-provided feeling or a later invented bond.
+const CONTACT='gm-wild-respectful-first-approach-v1';
+function nextRng(n){
+ let x=n>>>0;
+ if(!x)throw Error('Independent wildlife choice requires its own seeded RNG');
+ x^=x<<13;x^=x>>>17;x^=x<<5;
+ return (x>>>0)||0x91e10da5;
+}
+function verifyFirstApproach(b){
+ const contact=b?.individualLife?.firstApproach;
+ if(contact===undefined)return true; // Existing original animals and older saves.
+ const x=contact?.source,w=x?.watch,life=b.individualLife;
+ if(!x||contact.seal!==hash(x)||x.origin!==CONTACT||
+    x.beastId!==b.id||x.species!==b.species||
+    x.firstWitnessHash!==life.sourceHash||
+    !w||w.type!=='witnessed-wildlife-routine'||
+    w.beastId!==b.id||w.location!==x.location||
+    w.action==='withdraw'||!['forage','shelter','survey'].includes(w.action)||
+    x.watchHash!==hash(w)||
+    !integer(x.minute,0,1000000000)||
+    !integer(w.worldMinute,0,x.minute)||
+    x.minute-w.worldMinute>60||
+    !integer(x.rngBefore,1,0xffffffff)||
+    !integer(x.rngAfter,1,0xffffffff)||
+    x.rngAfter!==nextRng(x.rngBefore)||
+    !integer(x.ecology?.pressure,0,100)||
+    !integer(x.ecology?.quality,0,100)||
+    !['withdraw','remain-at-distance'].includes(x.reaction)||
+    x.noTouchOrContract!==true||
+    x.noSapienceOrPowerInference!==true)return false;
+ const risk=x.ecology.pressure>75||x.ecology.quality<30?
+  .75:w.action==='shelter'?.50:w.action==='forage'?.40:.28;
+ return x.reaction===(x.rngAfter/4294967296<risk?
+  'withdraw':'remain-at-distance');
+}
 function sealed(b){
  const root=b?.gmWild?.source;
  const life=b?.individualLife;
@@ -44,7 +81,7 @@ function sealed(b){
     b.gmWild.verifiedCombatProfile!==false||
     b.gmWild.verifiedCognition!==false)
   return false;
- return true;
+ return verifyFirstApproach(b);
 }
 function verify(s,b){
  if(!sealed(b))return false;
@@ -211,6 +248,77 @@ function watch(s,p={}){
   elapsedMinutes:MINUTES,animalWithdrew:b.away,
   noContactOrBond:true,noFreeIndividualSkills:true,noPlayerRoll:true};
 }
+// This is the first source-witnessed respectful approach, not an animal
+// training action. The GM has already witnessed a real individual and its
+// noninvasive behaviour. It chooses independently to stay or withdraw.
+// Neither outcome implies a contract, cognition grade, affection or permission.
+function firstApproach(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).length!==1||typeof p.beastId!=='string')
+  throw Error('Respectful first approach accepts only the previously witnessed beastId');
+ const b=s.beasts?.[p.beastId];
+ if(!b?.gmWild||!verify(s,b))
+  throw Error('Only a genuine GM-witnessed individual can be approached');
+ if(s.battle||s.encounter||b.away||
+    b.location!==s.world.location||
+    b.relationship!=='wild'||b.owner!==null||
+    s.player.partnerIds?.includes(b.id)||s.table?.bondRecords?.[b.id])
+  throw Error('A free, visible, unengaged wild individual must actually remain nearby');
+ if(s.table?.combatants?.player?.status&&
+    s.table.combatants.player.status!=='ok')
+  throw Error('An incapacitated person cannot approach an unfamiliar beast');
+ const life=b.individualLife;
+ if(life.firstApproach!==undefined)
+  throw Error('The first approach has already occurred; its decision cannot be rerolled');
+ const w=life.witnessed.at(-1),at=s.world.minutes,
+  place=Places.location(s);
+ if(!w||w.type!=='witnessed-wildlife-routine'||
+    w.action==='withdraw'||!['forage','shelter','survey'].includes(w.action)||
+    w.beastId!==b.id||w.location!==s.world.location||
+    !Number.isInteger(w.worldMinute)||w.worldMinute>at||
+    at-w.worldMinute>60||
+    !life.history.some(x=>x.type==='observed'&&
+      x.sourceHash===hash(w)&&x.observed===true)||
+    !place||place.regionId!==b.gmWild.source.regionId)
+  throw Error('A recent genuine safe-distance animal watch is required before an approach');
+ const eco=s.table?.realm?.ecosystems?.[place.regionId];
+ if(!eco||!integer(eco.pressure,0,100)||
+    !integer(eco.quality,0,100))
+  throw Error('A currently witnessed habitat is needed for independent wildlife choice');
+ const rngBefore=life.rngState;
+ const pick=roll(life),risk=eco.pressure>75||eco.quality<30?
+  .75:w.action==='shelter'?.50:w.action==='forage'?.40:.28;
+ const reaction=pick<risk?'withdraw':'remain-at-distance';
+ const description=reaction==='withdraw'?
+  'As you cautiously shorten the distance, the creature turns and slips back into cover.':
+  'At your cautious approach, the creature stays where it is, but makes no invitation to touch or follow.';
+ const source={origin:CONTACT,beastId:b.id,species:b.species,
+  firstWitnessHash:life.sourceHash,
+  watch:structuredClone(w),watchHash:hash(w),
+  location:s.world.location,minute:at,
+  ecology:{pressure:eco.pressure,quality:eco.quality},
+  rngBefore,rngAfter:life.rngState,reaction,
+  noTouchOrContract:true,noSapienceOrPowerInference:true};
+ life.firstApproach={source,seal:hash(source),description};
+ if(!verifyFirstApproach(b))
+  throw Error('Independent first approach decision lacked a verifiable original source');
+ if(reaction==='withdraw')b.away=true;
+ life.history.push({type:'witnessed-first-approach',
+  day:Math.floor(at/DAY),location:s.world.location,
+  sourceHash:life.firstApproach.seal,reaction,observed:true});
+ if(life.history.length>24)life.history.shift();
+ const C=require('../rules/core'),World=require('../rules/world'),
+  U=require('../rules/unified');
+ C.event(s,'beast',description,{origin:CONTACT,beastId:b.id,
+  firstApproachSeal:life.firstApproach.seal,reaction,
+  noTouchOrContract:true,noRelationshipAward:true});
+ E.advance(s,6);World.finalizeTime(s,at);U.sync(s,{source:'legacy'});
+ return {attempted:true,beastId:b.id,reaction,description,
+  elapsedMinutes:6,firstApproachRecorded:true,
+  noTrustAward:true,noBondOrContactGranted:true,
+  noGradeOrSapienceAward:true,noCombatOrEncounterCreated:true,
+  noPlayerRoll:true};
+}
 function sixday(s,days){
  if(!Array.isArray(days)||!days.length)return {updated:0};
  let updated=0;
@@ -253,11 +361,12 @@ function status(s,p={}){
   return {beastId:b.id,visibleMarker:b.gmWild.source.marker,
    originalObservation:b.gmWild.description,
    firstSeenPlace:b.gmWild.originalPlace,
-   lastPersonallyObserved:b.individualLife.witnessed.at(-1)?.description||
+   lastPersonallyObserved:b.individualLife.firstApproach?.description||
+    b.individualLife.witnessed.at(-1)?.description||
     'The original distant appearance only',
    noCurrentLocationOrIntentRevealed:true,
    noCompelledPartnership:true,
    noGrantedAbilityOrCombatGrade:true};
  })};
 }
-module.exports={SOURCE,hash,sealed,verify,witnessed,watch,sixday,status};
+module.exports={SOURCE,hash,sealed,verify,witnessed,watch,firstApproach,sixday,status};
