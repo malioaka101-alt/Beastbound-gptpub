@@ -2,6 +2,7 @@
 // Regression for GM-created people through the EXISTING independent citizen
 // life, physical presence and local-conversation ledger. Disposable only.
 const A=require('node:assert/strict'),E=require('../engine'),
+ FS=require('node:fs'),OS=require('node:os'),Path=require('node:path'),Turn=require('../scripts/chat-turn'),
  New=require('../scripts/new-campaign'),Opening=require('../scripts/gm-campaign-opening'),
  Person=require('../world/emergent-people'),Presence=require('../world/person-presence'),
  Realm=require('../world/simulation'),Rules=require('../rules'),World=require('../rules/world');
@@ -46,6 +47,18 @@ A.equal(report.people[0].observedHere,true);
 A.throws(()=>Rules.act(s,{system:'social',operation:'introduceWitnessedPerson',params:p}),
  /already exists here/);
 const save=E.exportGame(s),restored=E.importGame(save);
+const temp=FS.mkdtempSync(Path.join(OS.tmpdir(),'bb-gm-actor-test-'));
+try {
+ const file=Path.join(temp,'gm-citizen.json');
+ FS.writeFileSync(file,save+'\n');
+ const prior=FS.readFileSync(file,'utf8');
+ const read=Turn.execute(file,{id:'gm_person_status_20261114',
+  mode:'rule',system:'social',operation:'witnessedPeopleStatus',
+  params:{npcId:result.npcId}});
+ A.equal(read.ok,true);A.equal(read.applied,false,
+  'Reading known GM individuals cannot cost a turn or rewrite their life');
+ A.equal(FS.readFileSync(file,'utf8'),prior);
+} finally { FS.rmSync(temp,{recursive:true,force:true}); }
 A.equal(Person.verify(Realm.peek(restored),Realm.peek(restored).emergentPeople.people[person.id]),true);
 A.ok(Presence.localStatus(restored,Realm.peek(restored)).people.some(x=>x.npcId===result.npcId));
 const convo=Rules.act(restored,{system:'social',operation:'speakLocalPerson',
