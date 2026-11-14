@@ -396,6 +396,23 @@
         "elapsedMinutes": 240,
         "staminaSpent": 2
       }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 18:09",
+      "type": "world",
+      "text": "A place is established in the lived world: Maddren Homestead.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "maddren_homestead",
+        "regionId": "orchard_vales",
+        "establishedMinute": 1089,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
     }
   ],
   "world": {
@@ -903,7 +920,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 21,
+    "revision": 22,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -1794,10 +1811,59 @@
             }
           ]
         }
+      },
+      "maddren_homestead_20261114_a1": {
+        "revision": 22,
+        "mode": "rule",
+        "hash": "3ef725501e671c54a51accc768d40d75698dec6852a933155284f19828c06a93",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 1, 18:09",
+          "output": {
+            "rules": {
+              "established": true,
+              "place": {
+                "id": "maddren_homestead",
+                "name": "Maddren Homestead",
+                "kind": "family cottage",
+                "sceneType": "settlement",
+                "regionId": "orchard_vales",
+                "region": "Orchard Vales",
+                "description": "The Maddren family's modest cottage on a small orchard lane near Thistlebell Yard, with a simple gate, timber porch and practical storage for beast-handling work.",
+                "culture": "An ordinary working household in the Asterwyn Orchard Vales, with daily rhythms shaped by orchards and nearby beast-handling yards.",
+                "knownNotables": [],
+                "knownFamilies": [],
+                "knownOrganisations": [],
+                "recordedDetails": [],
+                "note": "Known descriptions and associations are not proof that a person is physically present, agrees to speak, has a resource or belongs to a group."
+              },
+              "noFreeNPCOrItem": true
+            }
+          },
+          "events": [
+            {
+              "day": 1,
+              "time": "Day 1, 18:09",
+              "type": "world",
+              "text": "A place is established in the lived world: Maddren Homestead.",
+              "details": {
+                "source": "gm-authored-campaign-place-v1",
+                "placeId": "maddren_homestead",
+                "regionId": "orchard_vales",
+                "establishedMinute": 1089,
+                "knownNotables": 0,
+                "knownFamilies": 0,
+                "knownOrganisations": 0,
+                "notAnNPCSpawn": true,
+                "noItemsOrPowersCreated": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Maddoc begins real Soul self-awareness practice alongside friends at Mossgate"
+      "Return home from Mossgate before nightfall"
     ],
     "scene": "At 13:39, Maddoc and Bram sit at Mossgate Reading House, having spent 150 minutes reading Arcane Circle Architecture and Soul Cultivation. They completed handwritten notes on all nine Circles and all seven Soul phases. New practice-paper sheets remain at the table; taking them away has not been agreed. No powers were awakened. Tessa is at the practice yard, her intervening activities unknown.",
     "journal": [
@@ -7487,6 +7553,39 @@
               "noExtraPlayerResources": true
             },
             "foundingHash": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663"
+          },
+          "maddren_homestead": {
+            "source": "gm-authored-campaign-place-v1",
+            "id": "maddren_homestead",
+            "name": "Maddren Homestead",
+            "regionId": "orchard_vales",
+            "kind": "family cottage",
+            "sceneType": "settlement",
+            "description": "The Maddren family's modest cottage on a small orchard lane near Thistlebell Yard, with a simple gate, timber porch and practical storage for beast-handling work.",
+            "culture": "An ordinary working household in the Asterwyn Orchard Vales, with daily rhythms shaped by orchards and nearby beast-handling yards.",
+            "establishedMinute": 1089,
+            "notables": [],
+            "families": [],
+            "organisations": [],
+            "notes": [],
+            "founding": {
+              "source": "gm-authored-campaign-place-v1",
+              "placeId": "maddren_homestead",
+              "regionId": "orchard_vales",
+              "worldMinute": 1089,
+              "name": "Maddren Homestead",
+              "kind": "family cottage",
+              "sceneType": "settlement",
+              "description": "The Maddren family's modest cottage on a small orchard lane near Thistlebell Yard, with a simple gate, timber porch and practical storage for beast-handling work.",
+              "culture": "An ordinary working household in the Asterwyn Orchard Vales, with daily rhythms shaped by orchards and nearby beast-handling yards.",
+              "notablesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "familiesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "organisationsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "gmContext": "An in-scene GM-authored place added without rewinding the world",
+              "noNPCConsent": true,
+              "noExtraPlayerResources": true
+            },
+            "foundingHash": "b727119ab682ec9091426f3a90bfde720484cebc22d21aea67e17975dc2c5236"
           }
         },
         "journeys": [
