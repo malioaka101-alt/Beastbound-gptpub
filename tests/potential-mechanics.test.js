@@ -5,7 +5,8 @@ const A=require('node:assert/strict'),E=require('../engine.js'),
  R=require('../rules'),Potential=require('../rules/potential-mechanics');
 function fresh(seed){
  const s=E.newGame({seed,name:'Potential Mechanics Fixture',path:'undecided'});
- R.unified.ensurePlayer(s);s.world.location='crossing';return s;
+ R.unified.ensurePlayer(s);R.character.ensure(s);
+ s.world.location='crossing';return s;
 }
 {
  const s=fresh(914001),before=E.exportGame(s),rng=s.rngState;
