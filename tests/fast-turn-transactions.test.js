@@ -9,6 +9,9 @@ try{
  const file=Path.join(dir,'save.json');
  const s=E.newGame({seed:761005,name:'Sequential Fixture',path:'soul'});
  R.unified.ensurePlayer(s);
+ // This disposable fixture has sufficient skill to avoid a random dangerous
+ // interruption; the separate partial-stop case tests interruption directly.
+ s.player.attributes.wis=30;s.player.skills.cultivation.rank=5;
  FS.writeFileSync(file,E.exportGame(s)+'\n');
  const old=FS.readFileSync(file,'utf8');
  const original=E.importGame(old);
