@@ -84,14 +84,17 @@ function perform(s,p={}){
   if(skill)practice=Practice.award(s,{skill:'crafting',check,risky:true});
   person.fatigue=Math.min(100,person.fatigue+2);
  }
+ // Seal the original transfer before unrelated future world ticks change
+ // the employer's finances; later independent earnings are separate events.
+ const immediateEmployerFunds=person.funds,immediatePlayerTalons=s.player.coins;
  E.advance(s,minutes);World.finalizeTime(s,now);U.sync(s,{source:'legacy'});
  const proof={origin:ORIGIN,actorId:person.actorId,name:person.name,
   actorSourceHash:person.sourceHash,location:s.world.location,
   day,startMinute:now,endMinute:s.world.minutes,
   task,accepted,independentRngBefore:originalRng,
   independentRngAfter:person.rngState,
-  employerFundsBefore:fundsBefore,employerFundsAfter:person.funds,
-  playerTalonsBefore:playerBefore,playerTalonsAfter:s.player.coins,
+  employerFundsBefore:fundsBefore,employerFundsAfter:immediateEmployerFunds,
+  playerTalonsBefore:playerBefore,playerTalonsAfter:immediatePlayerTalons,
   proposedPayTalons:proposedPay,paidTalons:paid,
   staminaBefore,staminaAfter:s.player.stamina,
   ...(check?{originalCheck:check}:{}),
