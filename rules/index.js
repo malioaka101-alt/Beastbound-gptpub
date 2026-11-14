@@ -558,6 +558,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.witnessedPersonWorkStatus':return EmergentPeople.witnessedWorkStatus(s,params);
   case 'social.meetSapientBeast':return SapientBeasts.meet(s,params);
   case 'social.sapientBeastMemoriesStatus':return SapientBeasts.witnessedStatus(s,params);
+  case 'social.introduceWitnessedPerson':return EmergentPeople.registerGM(s,params);
+  case 'social.witnessedPeopleStatus':return EmergentPeople.gmStatus(s,params);
   case 'social.speakLocalPerson':return EmergentPeople.meet(s,params);
   case 'social.metPeopleStatus':{
    if(!params||typeof params!=='object'||Array.isArray(params)||
