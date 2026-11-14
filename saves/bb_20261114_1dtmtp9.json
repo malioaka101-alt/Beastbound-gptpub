@@ -11,11 +11,48 @@
       "type": "world",
       "text": "The public civil almanac dates 30 Seedwake 1156 AC.",
       "details": null
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "world",
+      "text": "A place is established in the lived world: Thistlebell Yard.",
+      "details": {
+        "source": "gm-authored-campaign-place-v1",
+        "placeId": "thistlebell_yard",
+        "regionId": "orchard_vales",
+        "establishedMinute": 480,
+        "knownNotables": 0,
+        "knownFamilies": 0,
+        "knownOrganisations": 0,
+        "notAnNPCSpawn": true,
+        "noItemsOrPowersCreated": true
+      }
+    },
+    {
+      "day": 1,
+      "time": "Day 1, 08:00",
+      "type": "story",
+      "text": "At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges.",
+      "details": {
+        "source": "gm-authored-opening-scene-v1",
+        "openingId": "thistlebell_yard",
+        "regionId": "orchard_vales",
+        "focus": "A free morning at Thistlebell Yard",
+        "observedWeather": "Cool and clear, with thin mist between the orchard trees",
+        "civilTime": 480,
+        "age": 10,
+        "noImposedPersonality": true,
+        "noChosenFate": true,
+        "noFreeNPCAgreement": true,
+        "noNewPlayerAssets": true,
+        "firstSceneWrittenByGM": true
+      }
     }
   ],
   "world": {
     "minutes": 480,
-    "location": "crossing",
+    "location": "thistlebell_yard",
     "marketIndex": 0,
     "fenPressure": 3,
     "guildActivity": 0,
@@ -33,7 +70,7 @@
       "dayLength": 28,
       "competitionCycle": 7
     },
-    "weather": "cool, with drifting mist"
+    "weather": "Cool and clear, with thin mist between the orchard trees"
   },
   "player": {
     "name": "Maddoc Maddren",
@@ -406,8 +443,8 @@
       "birthRegionName": "Orchard Vales",
       "homePolity": "asterwyn",
       "continent": "valedryn",
-      "openingRegionId": null,
-      "openingSite": null,
+      "openingRegionId": "orchard_vales",
+      "openingSite": "thistlebell_yard",
       "travelBeforePlay": false,
       "connection": {
         "kind": "new-family",
@@ -475,10 +512,12 @@
   "encounter": null,
   "battle": null,
   "flags": {
-    "visited": {},
+    "visited": {
+      "thistlebell_yard": true
+    },
     "readIntro": false,
     "freeSourceSample": false,
-    "openingAuthored": false
+    "openingAuthored": true
   },
   "researchProjects": {},
   "documentedBranches": {},
@@ -486,8 +525,10 @@
   "chatRuntime": {
     "revision": 0,
     "applied": {},
-    "focus": [],
-    "scene": null
+    "focus": [
+      "A free morning at Thistlebell Yard"
+    ],
+    "scene": "At first bell, Thistlebell Yard is already awake. Barley carts creak along the orchard road; the smell of bruised apples drifts from the presses, and water beads on the harness rails. Ten-year-old Maddoc Maddren is beside the public trough, where an ash-coated burden beast has planted all four feet and refuses to move. Two adult handlers argue in low voices about whether it has been overworked. Neither reaches for the animal. Beyond the yard, canal bells sound for the morning barges."
   },
   "campaign": {
     "slug": "bb_20261114_1dtmtp9",
@@ -496,8 +537,8 @@
     "characterSource": "engine.randomCharacter + engine.newGame + source-grounded seeded origins",
     "rolledBackground": "young learner",
     "rolledPath": "undecided",
-    "startingLocation": null,
-    "openingState": "awaiting-gm",
+    "startingLocation": "thistlebell_yard",
+    "openingState": "authored",
     "openingAuthorship": "GM writes scene and creates a real place when needed",
     "requiresGmOpening": false,
     "identity": "independently generated human character",
@@ -511,8 +552,8 @@
       "birthRegionName": "Orchard Vales",
       "homePolity": "asterwyn",
       "continent": "valedryn",
-      "openingRegionId": null,
-      "openingSite": null,
+      "openingRegionId": "orchard_vales",
+      "openingSite": "thistlebell_yard",
       "travelBeforePlay": false,
       "connection": {
         "kind": "new-family",
@@ -6017,6 +6058,46 @@
             "history": []
           }
         }
+      },
+      "livedPlaces": {
+        "version": 1,
+        "source": "gm-authored-campaign-place-v1",
+        "places": {
+          "thistlebell_yard": {
+            "source": "gm-authored-campaign-place-v1",
+            "id": "thistlebell_yard",
+            "name": "Thistlebell Yard",
+            "regionId": "orchard_vales",
+            "kind": "working community yard",
+            "sceneType": "settlement",
+            "description": "A shared beast-handling yard beside the orchard road, with timber harness rails, a public watering trough, fruit presses and a downhill track toward the grain-barge canal.",
+            "culture": "Asterwyn vale-country; orchard work, ordinary beast care and grain-barge traffic shape the daily schedule.",
+            "establishedMinute": 480,
+            "notables": [],
+            "families": [],
+            "organisations": [],
+            "notes": [],
+            "founding": {
+              "source": "gm-authored-campaign-place-v1",
+              "placeId": "thistlebell_yard",
+              "regionId": "orchard_vales",
+              "worldMinute": 480,
+              "name": "Thistlebell Yard",
+              "kind": "working community yard",
+              "sceneType": "settlement",
+              "description": "A shared beast-handling yard beside the orchard road, with timber harness rails, a public watering trough, fruit presses and a downhill track toward the grain-barge canal.",
+              "culture": "Asterwyn vale-country; orchard work, ordinary beast care and grain-barge traffic shape the daily schedule.",
+              "notablesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "familiesHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "organisationsHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "gmContext": "An in-scene GM-authored place added without rewinding the world",
+              "noNPCConsent": true,
+              "noExtraPlayerResources": true
+            },
+            "foundingHash": "166bc0b066f9226d78ed6092695476303f9e3eb29963f6f4bdc863d0e70e2bbf"
+          }
+        },
+        "journeys": []
       }
     }
   }
