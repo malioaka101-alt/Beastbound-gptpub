@@ -2203,7 +2203,7 @@ function verifyRoleWork(e,row,w=null){
   details.presenceHash!==shift.hash||
   details.personOriginHash!==q.personOriginHash||
   details.localWorkSourceHash!==q.workReceiptHash||
-  !r||r.origin!=='independent-person-practical-work-v1'||
+  !r||r.origin!=='source-verified-person-work-v1'||
   r.sourceHash!==q.workReceiptHash||
   r.sourceHash!==hash(r.source)||
   r.source.personId!==q.personId||
