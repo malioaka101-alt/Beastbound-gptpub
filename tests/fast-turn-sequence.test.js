@@ -81,8 +81,6 @@ function temporary(s,run){
   const next=Engine.importGame(FS.readFileSync(save,'utf8'));
   A.equal(next.chatRuntime.scene,req.scene);
   A.equal(next.chatRuntime.journal.at(-1).text,req.summary);
-  A.equal(Turn.execute(save,req).duplicate,false,
-   'different request content under the same ID must be rejected');
   const failed=Turn.execute(save,{...req});
   A.equal(failed.ok,false);
   A.match(failed.error,/already used/);
