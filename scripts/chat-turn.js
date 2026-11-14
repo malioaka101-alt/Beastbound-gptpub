@@ -336,6 +336,14 @@ function unresolvedSceneIntent(s,intent){
 function execute(savePath, req) {
  if(!req || !legalId(req.id))throw Error('Invalid stable turn id');
  if(!['act','check','checkpoint','status','rule'].includes(req.mode))throw Error('Unsupported mode');
+ // GM-selected *source method*, never a result, DC, roll, reward or new
+ // narration engine. Only the original already witnessed terrain check
+ // owner may prepare a supported mundane uncertainty from a freeform act.
+ if(req.gmSceneCheckMethod!==undefined&&
+    (req.mode!=='act'||!['footing','reading'].includes(req.gmSceneCheckMethod)||
+     Object.keys(req).some(k=>!['id','mode','campaign','action',
+       'gmSceneCheckMethod','expectedHash','focus'].includes(k))))
+   throw Error('GM terrain handoff accepts only an existing footing/reading method, with no caller-selected difficulty, roll, resources or outcome');
  const saved=fs.readFileSync(savePath,'utf8'),preHash=hash(saved);
  const s=E.importGame(saved);
  const runtime=s.chatRuntime||(s.chatRuntime={revision:0,applied:{},focus:[]});
@@ -394,6 +402,8 @@ function execute(savePath, req) {
  // merely for a harmless look, menu or self-status.
  if(req.mode==='act'&&typeof req.action==='string'){
   const reading=nonConsequentialAction(s,req.action.trim().toLowerCase());
+  if(reading&&req.gmSceneCheckMethod!==undefined)
+   throw Error('A read-only observation cannot become a new scene check just by requesting one');
   if(reading)return {id:req.id,ok:true,applied:false,revision:runtime.revision,
    stateHash:preHash,output:reading,message:reading.message,panel:P.core(E.importGame(saved)),hud:P.hudData(E.importGame(saved)),
    recap:recap(s)};
@@ -731,7 +741,24 @@ function execute(savePath, req) {
      // intention goes back to the narrator with the real current scene.
      // Trivial warranted actions may be narrated without a roll; genuine
      // uncertain tasks need an already source-committed check/operation.
-     Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
+     if(req.gmSceneCheckMethod!==undefined){
+       // Only the GM's interpretation of the original full intention is
+       // passed forward; SceneCheck itself establishes the actual actor
+       // attributes, physical place, known terrain, time and difficulty.
+       // Preparation makes no die and changes no material or relationship.
+       response.sceneCheckPreparation=Rules.act(s,{system:'core',
+         operation:'prepareSceneCheck',
+         params:{intent:req.action.trim(),method:req.gmSceneCheckMethod}});
+       response.gmAdjudication={
+         intent:req.action.trim(),status:'source-check-prepared',
+         sourceOwner:'core.prepareSceneCheck',
+         checkId:response.sceneCheckPreparation.checkId,
+         noRollOccurred:true,noTimeElapsed:true,noOutcomeClaimed:true,
+         requiresOriginalCheck:true,
+         note:'The GM must resolve this precommitted check exactly once, then narrate only its supported terrain consequence. No other objective result has been granted.'
+       };
+       response.message='The original local terrain check is prepared for a single verified resolution; the attempted outcome is not yet established.';
+     }else Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
    }
 
  } else if(req.mode==='rule'){
@@ -756,6 +783,11 @@ function execute(savePath, req) {
    if(summary){s.chatRuntime.journal ||= [];s.chatRuntime.journal.push({day:E.day(s),text:summary});s.chatRuntime.journal=s.chatRuntime.journal.slice(-30);}
    response.message='Scene checkpoint recorded';
  }
+ // A GM method may never secretly reinterpret an already dispatched act,
+ // create a bonus check after a purchase, or shadow an ordinary engine rule.
+ // Fail before writing the transactional checkpoint in those cases.
+ if(req.gmSceneCheckMethod!==undefined&&!response.sceneCheckPreparation)
+   throw Error('GM scene-check preparation is available only for an otherwise unresolved freeform act');
  if(ok && req.focus && req.mode!=='checkpoint'){if(!Array.isArray(req.focus)||req.focus.length>2||req.focus.some(x=>typeof x!=='string'||x.length>80))throw Error('Invalid focus');s.chatRuntime.focus=req.focus;}
  // Advance off-screen agendas for ALL time-consuming chat actions, not only
  // explicit world.advance. The calendar ledger deduplicates existing ticks.
