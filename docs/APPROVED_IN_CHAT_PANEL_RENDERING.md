@@ -15,6 +15,8 @@ The default is the earlier approved **dark-fantasy, manhwa-inspired Beastbound s
 - **Motion:** optional micro-glow or low-frequency light sweep on a thin frame; motion never mandatory, never used as proof of advancement. Respect `prefers-reduced-motion`; a static version must look *complete*.
 - **Density:** narrow, phone-friendly, typically **identity + date/location + one/two resource tracks + one scene thread**. Keep the dark artistic skin while remaining fast and unobtrusive. This is not a license to display a huge cinematic panel every dialogue turn.
 
+**Reusable implementation (15 November 2026):** `panels.inChatHtml(state)` renders a static, escaped, responsive ink/antique-gold window from the same `hudData(state)` as the engine; its CSS is in `ui/beastbound-window.js`. For in-chat scenes that need a panel, this is the source template, not hand-built neutral cards. `tests/gm-compliance-guard.test.js` checks read-only rendering, escaping, the skin and the absence of generic-card substitutes. Pure dialogue may omit a panel rather than violate the style.
+
 ## Presentation pipeline (mandatory before composing a scene)
 
 1. Read only needed verified game context: from the latest current save or prior confirmed result, use `panels.hudData(state)` / `hud` plus source-known scene; never transcribe historical example numbers. The runtime HUD includes read-only `presentation.skin='beastbound-ink-gold-manhwa-v1'`, `presentation.variant` and this contract path.

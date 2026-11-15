@@ -4,6 +4,10 @@
 
 **Beastbound is a lived-in fantasy world first**, with the verified engine supporting its independent people, ecology, myth, choice and consequences—not replacing the world's story with menus or mechanical checklists.
 
+## Executable GM compliance and approved panel — 15 November 2026
+
+[GM Compliance Gate](GM_COMPLIANCE_GATE.md) is now the permanent high-priority *silent* fast-turn screen: preserve exact player speech, family canon and NPC source knowledge; distinguish unknown presence from proven absence; do not force a job, breakfast question or scripted menu. For a consequential authored fact, optional typed `gmAssertions` rejects unsupported claims **before** the original roll. Use `world.gmComplianceStatus` only when already verified scene context is insufficient; no per-dialogue GitHub call. The standard fantasy display is `panels.inChatHtml` based on real HUD data, never a neutral card. This does not mechanically certify arbitrary ChatGPT prose.
+
 ## Mandatory NPC-knowledge and family-identity gate — 15 November 2026
 
 Before **every** NPC sentence, apply [NPC Knowledge and Family Continuity](NPC_KNOWLEDGE_FAMILY_CONTINUITY.md): distinguish actual world truth, what the player knows, what **this specific NPC** has genuinely witnessed or learned, and what remains unknown. No omniscient NPC comments about private family work, allowances, cultivation or past conversations; no invented messenger or retroactive knowledge. A player's arrival **never** automatically places friends at the destination or gives them off-screen achievements. Hypotheses must sound like hypotheses, not facts. This is a **silent source check**, not a new GitHub call for ordinary dialogue.

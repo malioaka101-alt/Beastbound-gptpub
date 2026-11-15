@@ -63,6 +63,10 @@ Required composition: a **dark ink/indigo system window framed with thin antique
 ## New independent campaign
 
 Use `scripts/new-campaign.js`, which consumes **one** seed and derives a male character's background/path/family with `engine.randomCharacter()` and `engine.newGame()`, then selects one of five already playable non-Morrowfen opening locations. It establishes wounds and the Living Realms state at the relative opening Day 1, **and anchors an actual seeded civil calendar date** before play begins; the world clock then advances named days and months normally. Every start has a unique save and date provenance. **It does not delete or overwrite** a different campaign. No previous campaign save remains in the live `saves/` directory; never revive a retired campaign.
+## Reusable scene-compliance gate (15 November 2026)
+
+Follow [GM Compliance Gate](GM_COMPLIANCE_GATE.md). Ordinary chat and known facts stay tool-free; do not inject fake NPC presence, retroactive secrets, invented note custody or a breakfast/work menu. Exact player dialogue should appear in quotes. When an original source-backed fact requires an engine request, optional `gmAssertions` can reject unsupported provenance before dice. A read-only `world.gmComplianceStatus` is available when source context is uncertain and `world.gmSceneAudit` can check typed claims without mutating game state. Approved panel HTML is generated from `panels.inChatHtml(state)`, never recoded as a generic grey HUD.
+
 ## Power checks after the v1.1 source audit
 
 Do not call `engine.dispatch('train meridian')` or the old `bridge.js act` directly; the protected `scripts/chat-turn.js` rejects prototype automatic cultivation/evolution. Use `mode:"rule"` operations: `character.status`, `character.initialize` (one-time profile migration), `character.assessPotential`, `discipline.status`, `discipline.practice`, `discipline.breakthrough`, `meridian.gatePractice`, and the strictly validated `evolution.event`. Because high stages are not yet implemented, treat them as research/roleplay goals, not a free upgrade. The signed GitHub checkpoint must still be verified before advancing gameplay.

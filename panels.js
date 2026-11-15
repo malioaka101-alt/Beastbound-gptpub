@@ -396,4 +396,8 @@ function full(state,name){
  }
  return close(lines);
 }
-module.exports={WIDTH,core,full,hudData,characterData,clip:limit,bar,pair,section,row,top};
+function inChatHtml(state){
+ // Only the real read-only HUD may drive the reusable approved fantasy skin.
+ return require('./ui/beastbound-window').render(hudData(state));
+}
+module.exports={WIDTH,core,full,hudData,inChatHtml,characterData,clip:limit,bar,pair,section,row,top};

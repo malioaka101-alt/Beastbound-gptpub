@@ -1,0 +1,31 @@
+name: Beastbound GM Compliance Safety
+on:
+  pull_request:
+    paths:
+      - 'scripts/gm-compliance.js'
+      - 'scripts/chat-turn.js'
+      - 'scripts/turn-sequence.js'
+      - 'scripts/turn-preflight.js'
+      - 'panels.js'
+      - 'ui/beastbound-window.js'
+      - 'rules/index.js'
+      - 'tests/gm-compliance-guard.test.js'
+      - '.github/workflows/gm-compliance-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gm-compliance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate GM source proof, voices, safety and fantasy panel
+        run: |
+          node tests/gm-compliance-guard.test.js
+          node tests/dynamic-hud-identity.test.js
+          node tests/scene-continuity.test.js
+          node tests/lived-places-and-travel.test.js

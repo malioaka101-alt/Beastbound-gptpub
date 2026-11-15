@@ -21,6 +21,9 @@ function run(savePath,req,{execute,hash}){
  }
  if(req.expectedHash&&req.expectedHash!==preHash)return {id:req.id,ok:false,
   applied:false,error:'Stale checkpoint; reload before processing this turn',stateHash:preHash};
+ // Review source-backed scene assertions before any stage consumes an original die.
+ if(req.gmAssertions!==undefined)
+  require('./gm-compliance').assert(initial,req.gmAssertions,{scene:req.scene});
  const directory=FS.mkdtempSync(Path.join(OS.tmpdir(),'beastbound-sequence-'));
  const temporary=Path.join(directory,'candidate.json'),completed=[];
  let stopped=null;

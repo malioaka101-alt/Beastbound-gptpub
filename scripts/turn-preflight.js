@@ -17,6 +17,10 @@ function scene(req){
      req.focus.some(x=>typeof x!=='string'||x.length>80)))
   throw Error('Focus needs at most two short strings');
  require('./scene-continuity').preflight(req);
+ if(req.gmAssertions!==undefined){
+  if(req.mode==='status')throw Error('A read-only status cannot establish GM scene claims');
+  require('./gm-compliance').validateAssertions(req.gmAssertions);
+ }
 }
 function validate(req){
  if(!req||typeof req!=='object'||Array.isArray(req)||!ID.test(req.id))
@@ -29,7 +33,7 @@ function validate(req){
  if(req.mode==='checkpoint'&&req.scene===undefined)
   throw Error('A checkpoint needs its actual pickup scene');
  if(req.mode!=='sequence')return req;
- const allowed=new Set(['id','campaign','mode','steps','expectedHash','scene','summary','focus']);
+ const allowed=new Set(['id','campaign','mode','steps','expectedHash','scene','summary','focus','gmAssertions']);
  if(Object.keys(req).some(x=>!allowed.has(x)))
   throw Error('A sequence cannot select dice, outcomes, bonus time or arbitrary rules');
  if(req.id.length>66)throw Error('Sequence turn ID is too long to derive stable substep IDs');
