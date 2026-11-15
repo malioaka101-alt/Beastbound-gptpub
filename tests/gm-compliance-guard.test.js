@@ -14,6 +14,14 @@ const s=game(),old=E.exportGame(s),hud=Panels.hudData(s);
  A.equal(brief.location,s.world.location);
  A.equal(brief.player.name,s.player.name);
  A.equal(brief.knownFamily.length,0,'A new engine-only save cannot invent a family');
+ A.match(brief.boundaries.unlistedPerson,/not proof of absence|not a veto/i,
+  'A missing formal presence witness cannot forbid ordinary GM-authored people');
+ A.match(brief.boundaries.searches,/neither summons them/i,
+  'Looking for a person must never conjure that specific person');
+ A.match(brief.boundaries.firstContact,/no automatic mechanical presence/i,
+  'GM narration cannot forge source-owned presence or consent');
+ A.equal(brief.presentPeople.some(x=>x.npcId==='notable:remote_scholar'),false,
+  'The read-only brief does not add unregistered people');
  A.equal(E.exportGame(s),old,'GM briefing never moves clock, hidden lives or dice');
  const real=GM.audit(s,{assertions:[
   {type:'npc-present',npcId:'elira'},
@@ -140,6 +148,11 @@ if(FS.existsSync(live)){
   kinship:'mother'}]}).clear,true);
  A.equal(GM.audit(m,{assertions:[{type:'relationship',npcId:hedra.npcId,
   kinship:'aunt'}]}).clear,false);
+ const nessa=snapshot.knownFamily.find(x=>x.name==='Nessa Maddren');
+ A.ok(nessa);
+ A.equal(GM.audit(m,{assertions:[{type:'relationship',npcId:nessa.npcId,
+  kinship:'father'}]}).clear,true,
+  'The latest verified Maddoc continuity establishes his father, not a guessed relation');
  A.equal(GM.audit(m,{assertions:[{type:'npc-present',npcId:hedra.npcId}]}).clear,
   false,'A relative is not automatically present at the start of the day');
  A.equal(GM.audit(m,{assertions:[{type:'player-has-item',itemId:'meridian_notes'}]}).clear,false);
