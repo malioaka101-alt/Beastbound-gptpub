@@ -1,0 +1,25 @@
+{
+  "id": "maddoc_nessa_father_confirmed_20261115_02",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "checkpoint",
+  "scene": "At Maddren Homestead at 07:00, Maddoc is looking for his parents near the orchard-side work area. Player-confirmed family clarification: Nessa Maddren is Maddoc's father; Hedra is his mother. This establishes kinship only, not either parent's location, actions or reply.",
+  "summary": "Player-confirmed kinship: Nessa Maddren is Maddoc's father and Hedra Maddren is his mother. Their original second-guardian and guardian roles remain mechanically intact. Neither parent's physical presence nor any paid work is presumed.",
+  "focus": [
+    "Looking for mother Hedra and father Nessa at Maddren Homestead",
+    "Parent identities clarified; current whereabouts unverified"
+  ],
+  "continuity": [
+    {
+      "id": "maddoc_nessa_is_father",
+      "action": "record",
+      "subject": {
+        "kind": "person",
+        "id": "origin-kin:kin_2"
+      },
+      "category": "family-relationship",
+      "statement": "Nessa Maddren is Maddoc Maddren's father as confirmed by the player. The original 'second guardian' role remains a household responsibility rather than proof of his physical location or decisions.",
+      "witness": "Nessa Maddren is Maddoc's father",
+      "visibility": "player-known"
+    }
+  ]
+}
