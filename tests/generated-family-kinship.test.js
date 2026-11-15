@@ -97,4 +97,29 @@ A.ok(adultRelatives>0&&siblings>0);
   A.equal(m.relation,m.householdRole);
  }
 }
+// A player-confirmed statement can be shown alongside, but may not
+// mutate, the original source-proven NPC family identity.
+{
+ const Scene=require('../scripts/scene-continuity');
+ let s;
+ for(let seed=1;seed<=100;seed++){
+  const candidate=fresh(600000+seed,10);
+  if(candidate.player.family.members[0]?.kinship==='mother'){
+   s=candidate;break;
+  }
+ }
+ A.ok(s,'A mother household is a reachable seeded starting relationship');
+ const p=Realm.peek(s).originKin.people.kin_1,before=p.sourceHash;
+ const fact=s.player.family.members[0].name+' is my mother.';
+ const statement=s.player.family.members[0].name+
+  ' is the player character’s mother by explicit player confirmation.';
+ Scene.apply(s,{id:'confirmed_family_kinship_001',mode:'checkpoint',
+  scene:'The player confirms: '+fact,
+  continuity:[{id:'confirmed_mother_relation',action:'record',
+   subject:{kind:'person',id:p.actorId},category:'family-relationship',
+   statement,witness:fact,visibility:'player-known'}]});
+ A.equal(Kin.status(s).relatives[0].confirmedRelationship,statement);
+ A.equal(p.sourceHash,before,'Clarification cannot rewrite source-sealed ancestry');
+ A.equal(Kin.verify(Realm.peek(s),p),true);
+}
 console.log('Seeded family kinship: specific named ties, independent household roles, source integrity, older-save compatibility and age-coherent families');
