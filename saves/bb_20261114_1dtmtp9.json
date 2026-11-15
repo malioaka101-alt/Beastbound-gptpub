@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 3951775931,
-  "rngState": 2869901729,
+  "rngState": 423052081,
   "sequence": 0,
   "log": [
     {
@@ -1104,11 +1104,11 @@
     }
   ],
   "world": {
-    "minutes": 2760,
+    "minutes": 3300,
     "location": "maddren_homestead",
-    "marketIndex": -1,
-    "fenPressure": 2,
-    "guildActivity": 1,
+    "marketIndex": 0,
+    "fenPressure": 1,
+    "guildActivity": 2,
     "faction": {
       "naturalists": 0,
       "academy": 0,
@@ -1132,7 +1132,7 @@
     "path": "undecided",
     "health": 48,
     "maxHealth": 48,
-    "stamina": 29,
+    "stamina": 36,
     "maxStamina": 36,
     "mana": 24,
     "maxMana": 24,
@@ -1611,7 +1611,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 48,
+    "revision": 49,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4683,13 +4683,38 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "maddoc_sleep_ready_for_work_20261115_01": {
+        "revision": 49,
+        "mode": "rule",
+        "hash": "15fffdf2164e07cf7ef5d04d8352dcf09ed581d80d5c809521ce9adfe11006b6",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 07:00",
+          "output": {
+            "rules": {
+              "sleptHours": 9,
+              "dayBefore": 2,
+              "dayAfter": 3,
+              "wounds": [
+                0,
+                0,
+                0
+              ],
+              "stamina": 36,
+              "qi": 14,
+              "mana": 24
+            }
+          },
+          "events": []
+        }
       }
     },
     "focus": [
-      "At home at 22:00; Soul notes only",
-      "Soul Phase I progress 6/100; next choice is Maddoc's"
+      "Morning at Maddren Homestead, ready for household work",
+      "Hedra is Maddoc's mother; new work or payment must be genuinely agreed"
     ],
-    "scene": "At 22:00 at Maddren Homestead, Maddoc has finished two verified independent Soul self-awareness sessions around the household evening meal. He reviewed his own handwritten Soul notes; Tessa keeps the Meridian notes from yesterday and Bram keeps the Arcane notes. The earlier pickup depicting all three physical note sets at home was mistaken. The original practice results, time, possessions and personal learned theory remain unchanged.",
+    "scene": "Maddoc sleeps in his family home after finishing Soul self-awareness at 22:00. At 07:00 the next morning he wakes at Maddren Homestead ready for another ordinary day of household work. No work, employer agreement, meal, wages, or advancement is assumed to have occurred overnight.",
     "journal": [
       {
         "day": 1,
@@ -4782,6 +4807,10 @@
       {
         "day": 2,
         "text": "Correct the physical handwritten note ownership from yesterday's Mossgate reading-house study: Tessa Meridian, Bram Arcane, Maddoc Soul. Distinguish knowledge learned together from personally held notes. No rewind of rolls or time."
+      },
+      {
+        "day": 3,
+        "text": "Maddoc goes to bed for nine hours at Maddren Homestead, waking at 07:00 ready to approach his mother's ordinary household work tomorrow."
       }
     ],
     "continuity": {
@@ -4924,7 +4953,7 @@
         "defense": 10,
         "vigor": 0,
         "will": 2,
-        "stamina": 29,
+        "stamina": 36,
         "maxStamina": 36,
         "boxes": [
           3,
