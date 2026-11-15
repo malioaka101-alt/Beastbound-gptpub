@@ -93,6 +93,36 @@ const fighter=Realm.peek(afterSave).emergentPeople.people[t.npcId.slice(9)];
 A.deepEqual(mage.practicedDisciplines,[]);A.deepEqual(fighter.practicedDisciplines,[]);
 A.deepEqual(mage.knownTechniques,[]);A.deepEqual(fighter.knownTechniques,[]);
 A.equal(s.player.coins,afterSave.player.coins);
+// A genuinely met working adult can take an evidenced original duty even
+// between sixday boundaries. Future work, if chosen, remains Career-owned.
+const jobWitness='Caro Valeweaver checks actual worn harness fittings near the orchard shed with her own tools.';
+s.chatRuntime.scene=jobWitness;
+const caretaker=R.act(s,{system:'social',operation:'introduceWitnessedPerson',params:{
+ name:'Caro Valeweaver',profession:'Independent harness repair worker',
+ purpose:'Repair weathered beast harness fittings for ordinary orchard safety and her own livelihood.',
+ personality:'Methodical, self-directed and protective of animals near the working yard.',
+ background:'An independent local repair worker with her own practical work routines and responsibilities.',
+ witness:jobWitness}});
+A.equal(caretaker.registered,true);
+const original=R.act(s,{system:'social',operation:'authorWitnessedPersonDuty',params:{
+ npcId:caretaker.npcId,id:'local_harness_upkeep',role:'Independent orchard harness maintenance worker',
+ method:'harness-repair',goal:'Maintain worn carrying-harness fittings to reduce ordinary handling accidents.',
+ domain:'trade',witness:jobWitness}});
+A.equal(original.available,true,'Real witnessed duties can be authored on ordinary days');
+const jobActor=Realm.peek(s).emergentPeople.people[caretaker.npcId.slice(9)];
+A.equal(jobActor.career.authoredDuties.length,1);
+A.equal(jobActor.cashScales,0,'A possible job is not a cash payment');
+const jobLife=R.act(s,{system:'social',operation:'establishIndependentLife',params:{
+ actorId:caretaker.npcId,interests:['livelihood','craft','community'],
+ motivation:'Caro balances her repair work with her private life and community obligations.',
+ witness:jobWitness}});
+A.equal(jobLife.established,true);
+const pastCount=jobActor.career.workCount;
+World.advance(s,7);
+const working=Realm.peek(s).emergentPeople.people[caretaker.npcId.slice(9)];
+A.ok(working.career.workCount>=pastCount,
+ 'Original career work, when independently selected, must retain its own receipts');
+A.equal(working.cashScales,0,'No invented cash wages from ordinary activity');
 A.throws(()=>R.act(s,{system:'social',operation:'introduceWitnessedPerson',
  params:make('Fake Person','Unverified worker','A full-time dream of magical rank without evidence.',
  'No legitimate observed personality.',
