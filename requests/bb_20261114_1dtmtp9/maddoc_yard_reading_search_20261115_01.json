@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_yard_reading_search_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 12
+  },
+  "scene": "Maddoc has walked from Mossgate Common's green to its enclosed practice yard looking for Tessa, then crossed to the slate-roofed reading house looking for Bram. Neither friend has been positively sighted during this brief inspection. He is beside the reading house, still in Mossgate Common.",
+  "summary": "Maddoc checked the training yard for Tessa, then the reading house for Bram, without assuming their presence or knowledge of his private activities.",
+  "focus": [
+    "By Mossgate reading house after checking both places",
+    "Neither Tessa nor Bram positively sighted; further inquiries possible"
+  ]
+}
