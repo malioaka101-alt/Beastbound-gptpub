@@ -14,6 +14,14 @@ const s=game(),old=E.exportGame(s),hud=Panels.hudData(s);
  A.equal(brief.location,s.world.location);
  A.equal(brief.player.name,s.player.name);
  A.equal(brief.knownFamily.length,0,'A new engine-only save cannot invent a family');
+ A.match(brief.boundaries.unlistedPerson,/not proof of absence|not a veto/i,
+  'A missing formal presence witness cannot forbid ordinary GM-authored people');
+ A.match(brief.boundaries.searches,/neither summons them/i,
+  'Looking for a person must never conjure that specific person');
+ A.match(brief.boundaries.firstContact,/no automatic mechanical presence/i,
+  'GM narration cannot forge source-owned presence or consent');
+ A.equal(brief.presentPeople.some(x=>x.npcId==='notable:remote_scholar'),false,
+  'The read-only brief does not add unregistered people');
  A.equal(E.exportGame(s),old,'GM briefing never moves clock, hidden lives or dice');
  const real=GM.audit(s,{assertions:[
   {type:'npc-present',npcId:'elira'},
@@ -140,6 +148,11 @@ if(FS.existsSync(live)){
   kinship:'mother'}]}).clear,true);
  A.equal(GM.audit(m,{assertions:[{type:'relationship',npcId:hedra.npcId,
   kinship:'aunt'}]}).clear,false);
+ const nessa=snapshot.knownFamily.find(x=>x.name==='Nessa Maddren');
+ A.ok(nessa);
+ A.equal(GM.audit(m,{assertions:[{type:'relationship',npcId:nessa.npcId,
+  kinship:'father'}]}).clear,true,
+  'The latest verified Maddoc continuity establishes his father, not a guessed relation');
  A.equal(GM.audit(m,{assertions:[{type:'npc-present',npcId:hedra.npcId}]}).clear,
   false,'A relative is not automatically present at the start of the day');
  A.equal(GM.audit(m,{assertions:[{type:'player-has-item',itemId:'meridian_notes'}]}).clear,false);
@@ -147,4 +160,22 @@ if(FS.existsSync(live)){
   factId:'bram_s_private_secrets'}]}).clear,false);
  A.equal(FS.readFileSync(live,'utf8'),original,'The live campaign is never edited by compliance tests');
 }
-console.log('GM compliance: non-mutating source brief, NPC presence and secret-knowledge proof, verified mother relation, notebook custody, exact player speech, fail-closed pre-roll audit and real ink-gold HUD PASS');
+{
+ const root=Path.join(__dirname,'..');
+ const gate=FS.readFileSync(Path.join(root,'docs','GM_COMPLIANCE_GATE.md'),'utf8');
+ const boundary=FS.readFileSync(Path.join(root,'docs','GM_NARRATIVE_AND_ENGINE_BOUNDARY.md'),'utf8');
+ const fast=FS.readFileSync(Path.join(root,'docs','FAST_TURNS.md'),'utf8');
+ A.match(gate,/Looking for Hedra does not summon Hedra/i,
+  'The GM compliance policy must reject search-caused convenient appearances');
+ A.match(gate,/An empty presence roster is not proof of an empty world/i,
+  'The GM must not equate a partial roster with the whole population');
+ A.match(gate,/a formal rule rejects an encounter lacking its required witness/i,
+  'Formal source-owned mechanical evidence must not be bypassed');
+ A.match(boundary,/Searching does not make them appear|Seeking someone does not make them appear|Seeking someone does not make them appear|Seeking someone does \*\*not\*\*/i,
+  'The GM/engine boundary must reject summoning a searched-for target');
+ A.match(boundary,/mechanically established locations/i,
+  'Prior authoritative NPC movement records cannot be overwritten');
+ A.match(fast,/never route normal dialogue through .world.wait. in a loop/i,
+  'An elapsed-time mechanic must not be mistaken for an NPC-search generator');
+}
+console.log('GM compliance: ordinary-world authority and no-convenient-spawn policy, source-owned consequences, identity/knowledge proof, real HUD, preservation and read-only checks PASS');

@@ -1,7 +1,9 @@
 'use strict';
 // Beastbound source-bound GM briefing and optional structured fact guard.
 // Pure and read-only: no progression, actor decisions, dice or save mutation.
-// Arbitrary prose is not mechanically provable: unverifiable claims fail closed.
+// Arbitrary prose is not mechanically provable: PRE-EXISTING claims for formal
+// source-owned mechanics fail closed. GM-authored ordinary scene introductions
+// are not validated or forbidden by this read-only inspector.
 const Presence=require('../world/person-presence');
 const Kin=require('../world/origin-relatives');
 const Realm=require('../world/simulation');
@@ -69,7 +71,7 @@ function brief(s,params={}){
  const nearby=queried?v.present.filter(p=>p.npcId===queried):v.present;
  const knownFamily=queried?v.relatives.filter(p=>p.npcId===queried):v.relatives;
  return {
-  authority:'current verified save; never an independent actor decision',
+  authority:'current verified save for prior mechanical facts; ordinary new encounters are GM-authored, not confirmed or vetoed by this roster',
   location:v.locationId,clock:v.hud.time,date:v.hud.date,
   player:{name:v.hud.name,age:v.hud.identity.age,
    resources:v.hud.resources,coins:v.hud.coins},
@@ -83,7 +85,9 @@ function brief(s,params={}){
   panel:{skin:v.hud.presentation.skin,variant:v.hud.presentation.variant,
    approvedRenderer:'panels.inChatHtml',contract:v.hud.presentation.contract},
   boundaries:{
-   unlistedPerson:'not confirmed here; never automatically absent',
+   unlistedPerson:'not already witnessed here; not proof of absence and not a veto on plausible new ordinary GM-authored encounters',
+   searches:'the player looking for a person neither summons them nor proves all neighbours absent',
+   firstContact:'record a genuine new witnessed introduction at meaningful checkpoint; no automatic mechanical presence, knowledge or consent',
    householdRole:'guardian does not establish mother, aunt or biological kinship',
    npcSecrets:'a nearby NPC knows no private fact by proximity alone',
    books:'a studied subject is not proof that its physical notes are held',
@@ -102,8 +106,8 @@ function audit(s,params={}){
   let verified=false,reason='no source-backed evidence established';
   if(c.type==='npc-present'){
    verified=v.present.some(p=>p.npcId===c.npcId);
-   reason=verified?'physically verified in the exact current scene':
-    'presence not confirmed here; do not invent arrival or infer absence';
+   reason=verified?'previously recorded physical presence verified for a formal source-owned claim':
+    'no previously recorded source-owned presence; this audit is NOT a veto on a new credible GM-authored ordinary scene encounter, nor proof of absence';
   }else if(c.type==='relationship'){
    const f=v.relatives.find(r=>r.npcId===c.npcId);
    const special=f?.confirmedRelationship||'';
