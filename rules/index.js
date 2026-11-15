@@ -74,6 +74,7 @@ const CreationPrototype=require('./creation-prototype');
 const RankDepth=require('./rank-depth');
 const Lifepath=require('./mastery-lifepath');
 const EmergentPeople=require('../world/emergent-people');
+const IndependentLives=require('../world/independent-person-lives');
 const SapientBeasts=require('../world/sapient-beast-persons');
 // Bond events are historical claims, not free-repeatable resource operations.
 // They can only consume an already-recorded witnessed incident in the save.
@@ -581,6 +582,8 @@ function act(s,{system,operation,params={}}={}){
   case 'social.meetSapientBeast':return SapientBeasts.meet(s,params);
   case 'social.sapientBeastMemoriesStatus':return SapientBeasts.witnessedStatus(s,params);
   case 'social.introduceWitnessedPerson':return EmergentPeople.registerGM(s,params);
+  case 'social.establishIndependentLife':return IndependentLives.enroll(s,params);
+  case 'social.independentLifeStatus':return IndependentLives.status(s,params);
   case 'social.authorWitnessedPersonDuty':return EmergentPeople.authorWitnessedDuty(s,params);
   case 'social.retireWitnessedPersonDuty':return EmergentPeople.retireWitnessedDuty(s,params);
   case 'social.witnessedPersonDutiesStatus':return EmergentPeople.witnessedDutyStatus(s,params);
