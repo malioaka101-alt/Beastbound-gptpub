@@ -17,6 +17,41 @@ const GmOpening=require('./gm-campaign-opening');
 const GIVEN_NAMES=['Aldren','Bastian','Bennet','Caelan','Cedric','Cyran','Darric','Davin','Eamon','Edrin','Emric','Farren','Galen','Gerrit','Hadren','Hollis','Ilan','Iver','Joren','Joric','Kellan','Kerrin','Leoric','Lucan','Maddoc','Merren','Nolan','Oren','Perrin','Roric','Savin','Sethren','Tavren','Tomas','Varen','Weylan','Yoren'];
 const FAMILY_NAMES=['Aldwyne','Beller','Caddis','Carrow','Dalmere','Dennet','Ellery','Farrow','Fellin','Garrick','Gell','Harker','Hollan','Kestrel','Larkin','Lennox','Maddren','Merrit','Norrin','Orwell','Pell','Rennet','Sayer','Selwick','Tollen','Varrick','Vell','Warran','Weller','Wyst'];
 const RELATIVE_GIVEN=['Adela','Alys','Beren','Corvin','Della','Emmen','Etta','Fenna','Garren','Hedra','Hestin','Iona','Jerrit','Kessa','Lorra','Merren','Nessa','Orlan','Ressa','Selda','Tolan','Vera'];
+
+const FEMININE_RELATIVE_GIVEN=['Adela','Alys','Della','Etta','Fenna','Hedra','Iona','Kessa','Lorra','Nessa','Ressa','Selda','Vera'];
+const MASCULINE_RELATIVE_GIVEN=['Beren','Corvin','Emmen','Garren','Hestin','Jerrit','Merren','Orlan','Tolan'];
+// Childhood household *responsibility* and the actual family connection
+// are separate facts. These are seeded pre-game relationships, not a ruling
+// about biological inheritance, current guardianship, loyalty or residence.
+const CHILDHOOD_KINSHIP=Object.freeze({
+ 'two guardians':[
+  ['mother','father'],['mother','mother'],['father','father'],
+  ['adoptive mother','adoptive father'],['adoptive mother','adoptive mother'],
+  ['mother','grandmother'],['father','grandfather'],['aunt','uncle'],
+  ['grandmother','grandfather'],['mother','aunt'],['father','uncle'],
+  ['parent','grandparent']
+ ],
+ 'single guardian':[
+  ['mother'],['father'],['adoptive mother'],['adoptive father'],
+  ['grandmother'],['grandfather'],['aunt'],['uncle'],['parent']
+ ],
+ 'extended family':[
+  ['mother'],['father'],['grandmother'],['grandfather'],['aunt'],['uncle']
+ ],
+ 'foster household':[['foster mother'],['foster father'],['foster parent']]
+});
+const LATER_LIFE_KINSHIP=Object.freeze([
+ ['adult daughter','adult son'],['adult son','adult niece'],
+ ['adult nephew','adult cousin'],['younger sister','adult niece'],
+ ['younger brother','adult nephew'],['adult cousin','adult daughter']
+]);
+function relativeNamePool(kinship){
+ if(/(?:mother|grandmother|aunt|daughter|niece|sister)$/.test(kinship))
+  return FEMININE_RELATIVE_GIVEN;
+ if(/(?:father|grandfather|uncle|son|nephew|brother)$/.test(kinship))
+  return MASCULINE_RELATIVE_GIVEN;
+ return RELATIVE_GIVEN;
+}
 const BACKGROUND_LIFE={
  apprentice:'Learned by assisting working hands and keeping track of tasks that others rarely noticed.',
  fieldworker:'Spent seasons travelling practical routes and noting where soil, water and animals changed the work.',
@@ -41,35 +76,47 @@ function generatedIdentity(seed,base,age){
   return (x^(x>>>16))>>>0;};
  const surname=pick(FAMILY_NAMES,h(2)),given=pick(GIVEN_NAMES,h(1));
  const family=structuredClone(base.family);
+ // A very young child cannot be the only adult in an 'independent' home.
+ // The original random category is redirected to an ordinary foster home.
+ if(age<16&&family.household==='independent household')
+  family.household='foster household';
  const members=[],n=family.household==='two guardians'?2:
   family.household==='independent household'?0:1;
- for(let i=0;i<n;i++)members.push({
-  // The recorded childhood household is not proof that a much older
-  // character still has living guardians. Their living named relatives
-  // can be younger adult kin instead.
-  relation:age>=55?(i===0?'adult relative':'younger relative'):
-   i===0?'guardian':'second guardian',
-  name:pick(RELATIVE_GIVEN,h(10+i*7))+' '+surname
- });
- if(family.household==='extended family')members.push({
-  relation:age>=55?'adult cousin':'older relative',name:pick(RELATIVE_GIVEN,h(32))+' '+surname
- });
- for(let i=0;i<family.siblings;i++){
-  let person=pick(RELATIVE_GIVEN,h(50+i*11));
-  if(members.some(x=>x.name===person+' '+surname))
-   person=pick(RELATIVE_GIVEN,h(55+i*13));
-  members.push({relation:'sibling',name:person+' '+surname});
+ let primary=[];
+ if(age>=55){
+  // The old childhood household category is historical: do not assert that
+  // an older adult's childhood guardians remain living or present today.
+  primary=LATER_LIFE_KINSHIP[h(80)%LATER_LIFE_KINSHIP.length].slice(0,n);
+ }else if(n){
+  const templates=CHILDHOOD_KINSHIP[family.household];
+  if(!templates)throw Error('Unsupported generated childhood household');
+  primary=templates[h(81)%templates.length];
  }
- // Do not silently assign two different known relatives the same full name.
- const seen=new Set();
- for(const member of members){
-  let i=0;
-  while(seen.has(member.name)&&i<RELATIVE_GIVEN.length){
-   const next=pick(RELATIVE_GIVEN,(h(70+i*19)+i)%RELATIVE_GIVEN.length);
-   member.name=next+' '+surname;i++;
+ const reserve=(kinship,role,index)=>{
+  const pool=relativeNamePool(kinship);
+  // Deterministic collision avoidance within a name pool, no runtime RNG.
+  const used=new Set(members.map(m=>m.name));
+  let name=null;
+  for(let attempt=0;attempt<pool.length;attempt++){
+   const candidate=pool[(h(index+attempt*19)+attempt)%pool.length]+' '+surname;
+   if(!used.has(candidate)){name=candidate;break;}
   }
-  if(seen.has(member.name))throw Error('Unable to make distinct relative names');
-  seen.add(member.name);
+  if(!name)throw Error('Unable to make distinct relative names');
+  members.push({name,relation:role,householdRole:role,kinship});
+ };
+ for(let i=0;i<n;i++)
+  reserve(primary[i],age>=55?(i===0?'adult relative':'younger relative'):
+   i===0?'guardian':'second guardian',10+i*7);
+ if(family.household==='extended family'){
+  const choices=age>=55?['adult cousin','younger sister','younger brother']:
+   ['grandmother','grandfather','aunt','uncle'];
+  const available=choices.filter(k=>!primary.includes(k));
+  reserve(available[h(32)%available.length],
+   age>=55?'adult cousin':'older relative',32);
+ }
+ for(let i=0;i<family.siblings;i++){
+  const kinship=pick(['brother','sister','sibling'],h(50+i*11));
+  reserve(kinship,'sibling',50+i*11);
  }
  family.members=members;
  const history={
