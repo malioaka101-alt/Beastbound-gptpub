@@ -248,4 +248,23 @@ function perform(s,p={}){
    intent:a.intent,noAutomaticMovement:true,noUnknownDiscoveries:true,
    noAutomaticAgreement:true,noGrantedItems:true}: {})};
 }
-module.exports={perform,prepare};
+// Fast path for a real *ordinary local terrain* attempt. This is the same
+// original source-owned preparation followed by the same one-use resolution,
+// with no intervening player decision, RNG shortcut or second GitHub request.
+// The GM quote is validated against the PREEXISTING scene before preparation.
+// A failed ruling/unsupported method never records a synthetic scene witness.
+function resolveLocal(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).some(k=>!['intent','method','gmRuling'].includes(k)))
+  throw Error('One-step local check accepts only its real intent, mundane method and optional sourced GM ruling');
+ if(p.gmRuling!==undefined)
+  GM.witness(s,p.gmRuling,{allowNoRoll:true});
+ const prepared=prepare(s,{intent:p.intent,method:p.method});
+ const check=perform(s,{checkId:prepared.checkId,
+  ...(p.gmRuling===undefined?{}:{gmRuling:p.gmRuling})});
+ return {prepared:{checkId:prepared.checkId,baseDC:prepared.baseDC,
+    method:prepared.method,sourceBound:true},
+   check,oneOriginalWitness:true,oneOriginalResolution:true,
+   noExtraCheckOrElapsedTime:true};
+}
+module.exports={perform,prepare,resolveLocal};
