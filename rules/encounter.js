@@ -51,7 +51,7 @@ const COVER=Object.freeze({
  ruins:{kind:'ward-stone masonry',source:'Engine-established ward-stone masonry at Riftglass Outpost'}
 });
 function inspectCover(s,fight){
- const loc=E.LOCATIONS[s.world?.location];
+ const loc=E.LOCATIONS[s.world?.location]||require('../world/lived-places').location(s);
  if(!loc||fight.terrain!==loc.biome)
   throw Error('Combat terrain no longer matches the independently established local scene');
  const held=fight.playerCover;
@@ -69,7 +69,7 @@ function inspectCover(s,fight){
 function sceneStatus(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
   throw Error('Combat scene status is a read-only view; no caller-selected cover or enemy plans');
- const fight=s.battle,loc=E.LOCATIONS[s.world?.location];
+ const fight=s.battle,loc=E.LOCATIONS[s.world?.location]||require('../world/lived-places').location(s);
  if(!fight)return {active:false,location:loc?.name||'Unknown'};
  const held=inspectCover(s,fight),space=inspectSpace(s,fight);
  return {active:true,round:fight.round,location:loc.name,terrain:fight.terrain,
@@ -100,7 +100,9 @@ function begin(s,p={}){
  const linked=H.ensureBeast(s,p);
  const enemy=s.table.combatants[linked.id];enemy.attackModifier=p.attack;enemy.damage=p.damage;
  enemy.source=p.source.slice(0,180);
- s.battle={mode:'wounds-v1',enemyId:linked.id,beastId:p.beastId,round:1,terrain:E.LOCATIONS[s.world.location].biome,
+ const site=require('../world/lived-places').location(s);
+ if(!site)throw Error('Combat must occur at an established physical site');
+ s.battle={mode:'wounds-v1',enemyId:linked.id,beastId:p.beastId,round:1,terrain:site.biome,
    objective:'survive, negotiate, restrain or disengage',startedAt:E.clock(s),
    ...(space?{originalSpace:space}:{})};
  s.encounter=null;

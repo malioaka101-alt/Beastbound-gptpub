@@ -40,9 +40,25 @@ function sealed(b){
     !integer(life.lastTickDay,life.source.initialDay,10000000)||
     !Array.isArray(life.history)||!Array.isArray(life.witnessed)||
     !Number.isInteger(life.lastWatchMinute)||
-    b.relationship!=='wild'||b.owner!==null||
-    b.gmWild.verifiedCombatProfile!==false||
-    b.gmWild.verifiedCognition!==false)
+    !['wild','reciprocal partner','former partner'].includes(b.relationship)||
+    b.owner!==null||
+    (b.gmWild.profile===undefined?
+     b.gmWild.verifiedCombatProfile!==false||b.gmWild.verifiedCognition!==false:
+     b.gmWild.verifiedCombatProfile!==true||b.gmWild.verifiedCognition!==true)||
+    (life.lastEngagementSource!==undefined&&
+     (life.lastEngagementHash!==hash(life.lastEngagementSource)||
+      life.lastEngagementSource.origin!==ENCOUNTER||
+      life.lastEngagementSource.beastId!==b.id||
+      life.lastEngagementSource.rootSeal!==b.gmWild.seal||
+      life.lastEngagementSource.profileHash!==b.gmWild.profile?.sourceHash||
+      !['stayed','withdrawn'].includes(life.lastEngagementSource.response)||
+      life.lastEngagementSource.location!==life.lastEngagementSource.originalWatch?.location||
+      life.lastEngagementSource.originalWatch?.type!=='witnessed-wildlife-routine'||
+      life.lastEngagementSource.originalWatch?.beastId!==b.id||
+      life.lastEngagementSource.originalWatch?.worldMinute!==life.lastEngagementSource.watchedAtMinute||
+      life.lastEngagementSource.watchHash!==hash(life.lastEngagementSource.originalWatch)||
+      life.lastEngagementSource.worldMinute<life.lastEngagementSource.watchedAtMinute||
+      life.lastEngagedWatchMinute!==life.lastEngagementSource.watchedAtMinute)))
   return false;
  return true;
 }
@@ -56,6 +72,10 @@ function verify(s,b){
  if(!species)return false;
  const {originHash,observations,...originalBiology}=species;
  if(hash(originalBiology)!==originHash)return false;
+ if(!verifyProfile(s,b))return false;
+ if(b.relationship==='reciprocal partner'&&
+    (!b.consent||!s.player?.partnerIds?.includes(b.id)||
+      !s.table?.bondRecords?.[b.id]?.contract))return false;
  return !!(population&&originalPlace&&
    root.regionId===originalPlace.regionId&&
    species.originHash===root.speciesOriginHash&&
@@ -156,6 +176,7 @@ function watch(s,p={}){
   throw Error('GM wildlife observation names only the original creature; it cannot select behaviour or outcomes');
  const b=s.beasts?.[p.beastId];
  if(!b?.gmWild||!verify(s,b))throw Error('Only a source-witnessed GM individual may be observed');
+ if(b.gmWild.profile&&b.sapience>=3)throw Error('Sapient individual interactions require actual personhood and dialogue evidence, not an animal routine');
  if(s.battle||s.encounter||b.away||
     b.location!==s.world.location)
   throw Error('The original visible beast is no longer safely available for non-invasive observation');
@@ -216,7 +237,8 @@ function sixday(s,days){
  let updated=0;
  for(const day of days){
   for(const b of Object.values(s.beasts||{})){
-   if(!b?.gmWild||b.owner!==null||b.relationship!=='wild')continue;
+   if(!b?.gmWild||b.owner!==null||b.relationship!=='wild'||
+      s.encounter?.beastId===b.id||s.battle?.beastId===b.id)continue;
    if(!verify(s,b))throw Error('GM individual wildlife source became unverified before sixday life');
    const life=b.individualLife;
    if(day<=life.lastTickDay)continue;
@@ -260,4 +282,176 @@ function status(s,p={}){
    noGrantedAbilityOrCombatGrade:true};
  })};
 }
-module.exports={SOURCE,hash,sealed,verify,witnessed,watch,sixday,status};
+
+/*
+ * The GM may author a mechanically measured individual ONLY after a real,
+ * independently observed wild life and matching source biology. This records
+ * a separate immutable assessment inside the ORIGINAL beast object.
+ * It grants no ability, Grade, partnership, encounter or voluntary response.
+ */
+const PROFILE='gm-witnessed-individual-biophysical-assessment-v1';
+const ENCOUNTER='gm-witnessed-existing-beast-encounter-v1';
+function verifyProfile(s,b){
+ const g=b?.gmWild,p=g?.profile;
+ if(p===undefined)return g?.verifiedCombatProfile===false&&
+   g?.verifiedCognition===false&&b?.combatAssessment===undefined&&
+   b?.sapience===undefined;
+ const q=p?.source,a=b.combatAssessment,obs=q?.individualObservation,
+  bio=s.table?.realm?.speciesBiology?.species?.[b.species];
+ if(!q||p.sourceHash!==hash(q)||q.origin!==PROFILE||
+    q.beastId!==b.id||q.species!==b.species||
+    q.firstWitnessSeal!==g.seal||q.speciesOriginHash!==bio?.originHash||
+    !integer(q.worldMinute,g.source.minute,1000000000)||
+    !text(q.witness,20,900)||!text(q.anatomicalBasis,40,1000)||
+    !text(q.cognitionEvidence,30,900)||!text(q.welfareEvidence,30,900)||
+    !obs||obs.type!=='witnessed-wildlife-routine'||
+    obs.beastId!==b.id||obs.location!==q.location||
+    obs.worldMinute>q.worldMinute||q.observationHash!==hash(obs)||
+    !integer(q.sapience,0,5)||q.stats?.sapience!==q.sapience||
+    !integer(q.condition,0,100)||!integer(q.hunger,0,100)||
+    !integer(q.fatigue,0,100)||g.verifiedCombatProfile!==true||
+    g.verifiedCognition!==true||b.sapience!==q.sapience||
+    !a||a.gmSourceHash!==p.sourceHash||
+    a.beastId!==b.id||a.species!==b.species||
+    a.evolutionStage!==q.evolutionStage||
+    a.sapience!==q.sapience||
+    a.worldMinute!==q.worldMinute||
+    a.source!==q.anatomicalBasis||
+    hash(a.stats)!==hash(q.stats)||hash(a.behavior)!==hash(q.behavior))
+  return false;
+ try{
+  const C=require('../rules/core'),Combat=require('../rules/combat'),
+   Agency=require('../rules/combat-agency');
+  for(const [k,lo,hi] of [
+   ['toughness',0,100],['defense',1,100],['stamina',0,10000],
+   ['vigor',-10,50],['will',-10,50],['offM',0,10],['durM',0,10],
+   ['sapience',0,5],['attack',-20,50],['damage',0,100]
+  ])C.int(q.stats[k],k,lo,hi);
+  if(Object.keys(q.stats).sort().join('|')!==
+    ['toughness','defense','stamina','vigor','will','offM','durM',
+     'sapience','attack','damage','boxes'].sort().join('|'))return false;
+  Combat.makeCombatant({name:b.name,...q.stats});
+  const behaviour=Agency.verify({behavior:q.behavior});
+  if(q.sapience<=2&&behaviour.canCommunicate)return false;
+ }catch(_){return false;}
+ return true;
+}
+function characterise(s,p={}){
+ const required=['beastId','witness','anatomicalBasis','cognitionEvidence',
+  'welfareEvidence','sapience','condition','hunger','fatigue','stats','behavior'];
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).sort().join('|')!==required.sort().join('|'))
+  throw Error('An individual measured profile needs original anatomy, cognition, welfare, real observed scene and combat evidence; no ranks or outcomes');
+ const b=s.beasts?.[p.beastId],site=Places.location(s),scene=s.chatRuntime?.scene;
+ if(!b?.gmWild||b.gmWild.profile||!verify(s,b)||
+    b.away||!site||b.location!==site.id||
+    s.battle||s.encounter||
+    !text(scene,20,2500)||!scene.includes(p.witness)||
+    !scene.includes(b.gmWild.source.marker)||
+    !text(p.anatomicalBasis,40,1000)||
+    !text(p.cognitionEvidence,30,900)||
+    !text(p.welfareEvidence,30,900))
+  throw Error('The original living beast must still be present after an independently witnessed observation and a genuine local anatomy and cognition scene');
+ const last=b.individualLife.witnessed.at(-1),bio=s.table.realm.speciesBiology.species[b.species];
+ if(!last||last.type!=='witnessed-wildlife-routine'||
+    last.beastId!==b.id||last.location!==site.id||
+    last.action==='withdraw'||last.worldMinute>s.world.minutes||
+    s.world.minutes-last.worldMinute>6*1440||
+    !bio||bio.originHash!==b.gmWild.source.speciesOriginHash)
+  throw Error('Only recent, unchanged individual wildlife evidence and genuine original species biology can support assessment');
+ const stats=structuredClone(p.stats),behavior=structuredClone(p.behavior);
+ const {sapience,condition,hunger,fatigue}=p;
+ if(!integer(sapience,0,5)||!integer(condition,0,100)||
+    !integer(hunger,0,100)||!integer(fatigue,0,100)||
+    !stats||stats.sapience!==sapience)
+  throw Error('Genuinely measured cognition and welfare must agree with the same individual profile');
+ const C=require('../rules/core'),Combat=require('../rules/combat'),
+  Agency=require('../rules/combat-agency');
+ for(const [k,lo,hi] of [
+  ['toughness',0,100],['defense',1,100],['stamina',0,10000],
+  ['vigor',-10,50],['will',-10,50],['offM',0,10],['durM',0,10],
+  ['sapience',0,5],['attack',-20,50],['damage',0,100]
+ ])C.int(stats[k],k,lo,hi);
+ if(Object.keys(stats).sort().join('|')!==
+  ['toughness','defense','stamina','vigor','will','offM','durM',
+   'sapience','attack','damage','boxes'].sort().join('|'))
+  throw Error('The measured source profile cannot add arbitrary combat effects or powers');
+ Combat.makeCombatant({name:b.name,...stats});
+ const temperament=Agency.verify({behavior});
+ if(sapience<=2&&temperament.canCommunicate)
+  throw Error('An unknown animal cannot gain a spoken negotiation channel from an assessment label');
+ const q={origin:PROFILE,beastId:b.id,species:b.species,
+  evolutionStage:b.evolutionStage,firstWitnessSeal:b.gmWild.seal,
+  speciesOriginHash:bio.originHash,location:site.id,
+  worldMinute:s.world.minutes,witness:p.witness,
+  anatomicalBasis:p.anatomicalBasis,cognitionEvidence:p.cognitionEvidence,
+  welfareEvidence:p.welfareEvidence,
+  individualObservation:structuredClone(last),
+  observationHash:hash(last),sapience,condition,hunger,fatigue,
+  stats,behavior};
+ const assessment={source:q,sourceHash:hash(q)};
+ b.gmWild.profile=assessment;
+ b.gmWild.verifiedCombatProfile=true;b.gmWild.verifiedCognition=true;
+ b.sapience=sapience;b.condition=condition;
+ b.needs={hunger,fatigue};
+ b.mood=last.action==='forage'?'foraging':
+  last.action==='shelter'?'reserved':'watchful';
+ b.combatAssessment={beastId:b.id,species:b.species,
+  evolutionStage:b.evolutionStage,sapience,worldMinute:s.world.minutes,
+  source:p.anatomicalBasis,stats,behavior,used:false,
+  gmSourceHash:assessment.sourceHash};
+ if(!verify(s,b))
+  throw Error('The original beast and immutable anatomical assessment could not be reconciled');
+ return {assessed:true,beastId:b.id,originalBiologyVerified:true,
+  physicalProfileRecorded:true,cognitionRecorded:true,
+  noGradeOrTechniqueGranted:true,noBondOrConsentGranted:true,
+  noEncounterOrAttackCreated:true,noPlayerRoll:true};
+}
+// A player's later approach does not manufacture another beast or guarantee
+// a meeting. The original individual makes one independent choice from its
+// existing wildlife RNG. No imagined exact range, danger, contract or skill.
+function engage(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+   Object.keys(p).join('|')!=='beastId'||
+   typeof p.beastId!=='string')
+  throw Error('Approach only an original currently observed individual, never a selected reaction or combat outcome');
+ const b=s.beasts?.[p.beastId],site=Places.location(s),last=b?.individualLife?.witnessed?.at(-1);
+ if(!b?.gmWild?.profile||!verify(s,b)||!site||
+    b.location!==site.id||b.away||
+    !last||last.type!=='witnessed-wildlife-routine'||
+    last.location!==site.id||last.action==='withdraw'||
+    b.individualLife.lastEngagedWatchMinute===last.worldMinute||
+    s.encounter||s.battle||
+    (s.table?.combatants?.player?.status&&
+     s.table.combatants.player.status!=='ok'))
+  throw Error('Only a newly witnessed, freely present, source-characterised wild beast may be approached; an older sighting cannot be rerolled');
+ if(b.sapience>=3)
+  throw Error('An independent sapient beast person requires their actual social contact and negotiation source, not an animal-approach shortcut');
+ const life=b.individualLife,old=s.world.minutes,
+  choice=roll(life),withdrawn=choice<.22;
+ const record={origin:ENCOUNTER,beastId:b.id,rootSeal:b.gmWild.seal,
+  profileHash:b.gmWild.profile.sourceHash,
+  watchedAtMinute:last.worldMinute,watchHash:hash(last),
+  originalWatch:structuredClone(last),
+  worldMinute:old,location:site.id,response:withdrawn?'withdrawn':'stayed',
+  noForcedAffection:true,noInferredDangerOrDistance:true};
+ life.lastEngagementSource=record;
+ life.lastEngagementHash=hash(record);
+ life.lastEngagedWatchMinute=last.worldMinute;
+ if(withdrawn)b.away=true;
+ else s.encounter={beastId:b.id,observed:true,approaches:0,
+  threat:false,origin:ENCOUNTER};
+ const C=require('../rules/core');
+ C.event(s,'encounter',withdrawn?
+  b.name+' turns away from the attempted approach and withdraws independently.':
+  b.name+' stays within the observed surroundings as you approach; no trust or cooperation is implied.',{
+   ...record,sourceHash:life.lastEngagementHash,
+   noContractOrBond:true,noCombatOrGradeGranted:true});
+ E.advance(s,8);require('../rules/world').finalizeTime(s,old);
+ require('../rules/unified').sync(s,{source:'legacy'});
+ return {approached:true,beastId:b.id,encounterOpen:!withdrawn,
+  beastWithdrew:withdrawn,minutes:8,noPlayerDice:true,
+  noForcedReactionOrPartnership:true,distanceUnmeasured:true};
+}
+
+module.exports={SOURCE,hash,sealed,verify,witnessed,watch,sixday,status,verifyProfile,characterise,engage};

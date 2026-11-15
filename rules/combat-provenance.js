@@ -9,6 +9,13 @@ function begin(s,p={}){
  const id=p.beastId,b=s.beasts?.[id];
  if(typeof id!=='string'||!b||s.encounter?.beastId!==id||s.battle)
   throw Error('A current unengaged, known beast encounter is required');
+ // GM-created wildlife must carry its immutable original biology and
+ // observed individual combat assessment, not merely a mutable stats object.
+ if(b.gmWild&&
+    (!require('../world/gm-wild-individuals').verify(s,b)||
+     !b.gmWild.profile||
+     b.combatAssessment?.gmSourceHash!==b.gmWild.profile.sourceHash))
+  throw Error('The GM wild individual needs an original source-verified anatomical combat assessment');
  const a=b.combatAssessment;
  if(!a||a.used||a.beastId!==id||a.species!==b.species||
     a.evolutionStage!==b.evolutionStage||a.sapience!==b.sapience||

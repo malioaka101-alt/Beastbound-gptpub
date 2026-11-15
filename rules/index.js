@@ -468,6 +468,8 @@ function act(s,{system,operation,params={}}={}){
   case 'world.travelTo':return LivedPlaces.travel(s,params);
   case 'world.observe':return Wildlife.observe(s,params);
   case 'world.gmWildWitness':return require('../world/gm-wild-individuals').witnessed(s,params);
+  case 'world.gmWildCharacterise':return require('../world/gm-wild-individuals').characterise(s,params);
+  case 'world.gmWildEngage':return require('../world/gm-wild-individuals').engage(s,params);
   case 'world.gmWildStatus':return require('../world/gm-wild-individuals').status(s,params);
   case 'world.sceneContinuityStatus':return require('../scripts/scene-continuity').status(s,params);
   case 'world.watchWildBeast':return WildLives.watch(s,params);
