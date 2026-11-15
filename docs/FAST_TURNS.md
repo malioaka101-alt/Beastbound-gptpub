@@ -12,6 +12,8 @@
 
 **Guardian family allowance continuity:** an originally agreed small allowance may be settled by the guardian's source-witnessed final review through `social.settleGuardianAllowance` when its original receipt, physical recheck, verified concurrent effort and actual guardian funds satisfy [guardian follow-through](GUARDIAN_ALLOWANCE_FOLLOWTHROUGH.md). It is **one mechanical request**, no second check, no rerolled work, no additional time or needless follow-up checkpoint. Do not narrate received money until that exact request is verified.
 
+**Ordinary encounter clarification:** A roster is evidence of an existing recorded NPC's co-presence, not a complete census of all ordinary people a GM may introduce. Use plausible independent routines to adjudicate search, knocking, conversations and newly witnessed appearances. Searching does not summon a target; empty lists do not empty the village. Preserve existing identity and schedule constraints and checkpoint meaningful new facts. Never route normal dialogue through `world.wait` in a loop to see whether an NPC materializes; use the engine once for actual elapsed time or source-owned outcomes, including formal consent, work, money, training and travel. An elapsed-time result proves no NPC sighting by itself.
+
 ## Minimal GitHub round trips — November 2026 optimization
 
 A real 15 November chat-turn workflow completed from GitHub event creation to workflow completion in about **12 seconds**; its original engine execution took less than one second. The measured overhead was Actions scheduling, checkout/setup and Git operations, not skill checks or world simulation. Never promise this as a fixed turnaround time.
