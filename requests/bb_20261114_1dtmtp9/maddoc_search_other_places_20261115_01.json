@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_search_other_places_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 10
+  },
+  "scene": "Maddoc has searched the public well, the lanes bordering Mossgate Common, and the public-facing side of the fenced beast-handling pens after finding neither Tessa at the practice yard nor Bram at the reading house. He has no verified sighting of either friend and is now beside the pens near the lane; no private enclosure was entered.",
+  "summary": "Maddoc checked other accessible corners of Mossgate Common for Bram and Tessa, without establishing their location or entering caretaker-controlled pens.",
+  "focus": [
+    "Beside Mossgate's beast-handling pens, outside the fence",
+    "Ask a nearby local if either friend has been seen"
+  ]
+}
