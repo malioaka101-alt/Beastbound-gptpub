@@ -79,13 +79,22 @@ function disciplinePractice(s,{system,method,record,baseDC,independent=false,sho
  // Practice does not automatically grant skill ranks or power. Existing
  // owner-written, sustained method records can lower the *difficulty* of
  // continuing the same target; stage transitions start a fresh record.
- const count=record.methods?.[method]||0;
- const minutes=record.sessionMinutes||0;
+ const witnessed=(s.table?.independentTraining||[]).filter(x=>
+  x?.system===system&&x.target===record.target&&x.method===method&&
+  Number.isInteger(x.minutes)&&x.minutes>=15&&x.minutes<=480&&
+  Number.isInteger(x.startMinute)&&x.startMinute>=0&&
+  x.startMinute<s.world.minutes&&
+  typeof x.eventHash==='string'&&/^[a-f0-9]{64}$/.test(x.eventHash));
+ const minutes=witnessed.reduce((sum,x)=>sum+x.minutes,0);
+ // Both the original stage's method counter and individual witnessed
+ // independent-session records must agree. Lifetime totals from a preceding
+ // stage or from a DIFFERENT method never buy the next check an easier DC.
+ const count=Math.min(record.methods?.[method]||0,witnessed.length);
  const familiarity=count>=6&&minutes>=960?-2:
   count>=2&&minutes>=240?-1:0;
  if(familiarity)factors.push({id:'earned-method-familiarity',delta:familiarity,
-  evidence:count+' recorded '+system+' '+method+
-   ' session(s) and '+minutes+' total actual practice minutes on this training target'});
+  evidence:count+' original '+system+' '+method+
+   ' sessions and '+minutes+' witnessed minutes for the current '+record.target+' training target'});
  const tired=fatigue(s);
  if(tired)factors.push({id:'real-fatigue',delta:tired,
   evidence:'Current recorded Stamina is '+s.player.stamina+'/'+s.player.maxStamina});
