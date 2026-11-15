@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_wider_mossgate_search_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 15
+  },
+  "scene": "After checking the pens and village lanes, Maddoc continues a wider pedestrian search along the publicly accessible orchard-side edge of Mossgate, glancing down the paths back toward Tansyhook and the side of the common. Neither Bram nor Tessa has been positively encountered. He remains on a public lane near the orchard-side edge of Mossgate Common.",
+  "summary": "Maddoc continued looking for Bram and Tessa along the public orchard-edge lanes, still without verified contact. No private yards or pens entered.",
+  "focus": [
+    "Looking for Bram and Tessa around Mossgate's orchard-side lanes",
+    "Both friends' whereabouts still unconfirmed"
+  ]
+}
