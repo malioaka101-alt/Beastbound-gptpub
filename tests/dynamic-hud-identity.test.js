@@ -15,6 +15,11 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
   one:{seenAtMinute:485},two:{seenAtMinute:485}
  }}};
  const hud=P.hudData(legacy),identity=P.characterData(legacy);
+ A.equal(hud.presentation.skin,'beastbound-ink-gold-manhwa-v1');
+ A.equal(hud.presentation.variant,'core');
+ A.equal(hud.presentation.density,'compact');
+ A.equal(hud.presentation.contract,'docs/APPROVED_IN_CHAT_PANEL_RENDERING.md');
+ A.equal(hud.presentation.mechanicalAuthority,false);
  A.equal(hud.name,'Legacy Example');
  A.equal(hud.identity.age,36);
  A.equal(hud.identity.background,'fieldworker');
@@ -118,6 +123,10 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  sight.beasts.observed_one={id:'observed_one',name:'Passing Hare',
   species:'stonehare',owner:null,energy:6,maxEnergy:13,relationship:'wild'};
  const view=P.hudData(sight);
+ A.equal(view.presentation.variant,'beast-encounter');
+ const active=E.importGame(before);
+ active.battle={mode:'wounds-v1',beastId:'observed_one'};
+ A.equal(P.hudData(active).presentation.variant,'combat');
  A.equal(view.context.kind,'beast');
  A.equal(view.context.title,'Passing Hare');
  A.ok(!JSON.stringify(view).includes('relationship'));
@@ -148,6 +157,8 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
   const status=Turn.execute(path,{id:'hud_read_only_001',mode:'status'});
   A.equal(status.ok,true);A.equal(status.applied,false);
   A.equal(status.hud.date.absolute,Realm.calendar(x.state).absoluteDate);
+  A.equal(status.hud.presentation.skin,'beastbound-ink-gold-manhwa-v1');
+  A.equal(status.hud.presentation.variant,'core');
   A.equal(status.hud.name,x.state.player.name);
   A.equal(FS.readFileSync(path,'utf8'),before);
   const look=Turn.execute(path,{id:'hud_look_001',mode:'act',action:'look'});
@@ -160,9 +171,10 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
   const loaded=E.importGame(FS.readFileSync(path,'utf8'));
   A.equal(wait.hud.date.absolute,Realm.calendar(loaded).absoluteDate);
   A.equal(wait.hud.date.relativeDay,2);
+  A.equal(wait.hud.presentation.skin,'beastbound-ink-gold-manhwa-v1');
   A.equal(wait.hud.name,loaded.player.name);
   A.equal(Turn.execute(path,{id:'hud_next_day_001',mode:'rule',
    system:'world',operation:'wait',params:{minutes:1440}}).recovered,true);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
-console.log('Dynamic HUD and identity passed: older unknown civil date is honest; 100 new seeded personal/family histories, true date, situational sections and file-backed current state');
+console.log('Approved fantasy skin, read-only panel family and dynamic HUD identity passed: older unknown civil date is honest; 100 new seeded personal/family histories, true date, situational sections and file-backed current state');
