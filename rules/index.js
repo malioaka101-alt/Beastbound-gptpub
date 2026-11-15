@@ -191,6 +191,7 @@ function act(s,{system,operation,params={}}={}){
  switch(`${system}.${operation}`){
   case 'core.check':return {check:SceneCheck.perform(s,params)};
   case 'core.prepareSceneCheck':return SceneCheck.prepare(s,params);
+   case 'core.localCheck':return SceneCheck.resolveLocal(s,params);
   // A witnessed, informal orchard-game attempt: the GM established the
   // place and instructions in play; the engine alone draws and records the
   // player's die and derives a modest, visible physical outcome.
