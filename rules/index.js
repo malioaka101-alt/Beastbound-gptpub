@@ -556,6 +556,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
   case 'social.householdWork':return HouseholdWork.perform(s,params);
+  case 'social.settleGuardianAllowance':return HouseholdWork.settleGuardianAllowance(s,params);
    case 'social.householdWorkDifficulty':return HouseholdWork.difficultyPreview(s,params);
   case 'social.householdWorkStatus':return HouseholdWork.status(s);
   case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);

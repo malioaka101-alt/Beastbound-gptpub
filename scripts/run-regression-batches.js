@@ -11,6 +11,7 @@ const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const dir=path.join(root,'tests');
 const priority=[
+ 'guardian-allowance-followthrough.test.js',
  'atomic-local-scene-turn.test.js',
  'gm-contextual-dc-adjudication.test.js',
  'group-purpose-sustained-independent-departure.test.js',
