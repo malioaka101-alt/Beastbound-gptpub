@@ -61,10 +61,17 @@ function addDate(date,days){
 function dateText(date){validateDate(date);
  return `${date.month===13?'Concord Day '+date.day:date.day+' '+MONTHS[date.month-1]} ${date.year} AC`;
 }
+// Traditional Aldmere sixday names, spoken throughout the civil calendar.
+// Every 30-day month comprises five full sixdays. The five intercalary
+// Concord Days keep their own festival designation and do not move the
+// sixday ticks or their original source-owned scheduling rules.
+const SIXDAY_NAMES=Object.freeze([
+ 'Dawnday','Rootday','Forgeday','Wayday','Marketday','Hearthday'
+]);
 function dateWeekday(date){
  validateDate(date);
  if(date.month===13)return 'Concord Day';
- return (date.day%6===0)?'Hearthday':`Workday ${1+(date.day-1)%6}`;
+ return SIXDAY_NAMES[(date.day-1)%6];
 }
 function coinText(scales){
  if(!Number.isInteger(scales))throw Error('Money must be integer scales');
