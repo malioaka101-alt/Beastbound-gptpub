@@ -4,6 +4,7 @@
 const Crypto=require('node:crypto');
 const E=require('../engine.js'),C=require('./core'),W=require('./world'),Health=require('./unified'),Practice=require('./earned-practice');
 const digest=e=>Crypto.createHash('sha256').update(JSON.stringify(e)).digest('hex');
+const GM=require('./gm-contextual-dc');
 
 // This is a small GM-to-engine bridge for *existing, visible* local terrain.
 // Natural-language intent is a note, NOT mechanical authority or evidence.
@@ -73,14 +74,19 @@ function prepare(s,p={}){
   observationEvent:structuredClone(event),used:false
  };
  return {prepared:true,checkId,method:p.method,
-  observed:loc.description,challenge:task.label,
+  observed:loc.description,challenge:task.label,baseDC:dc,
+  preview:{baseDC:dc,attribute:task.attribute,skill:task.skill,
+   worldMinute:s.world.minutes,location:s.world.location,
+   scene:s.chatRuntime?.scene||null,weather:s.world.weather,
+   note:'The GM may cite genuine context for one bounded DC adjustment, or recognize a guaranteed/physically impossible mundane action without rolling'},
   noRollYet:true,noTimeSpentYet:true,noExtraSourceClaim:true,
   scope:'Only this visible terrain; success cannot award movement, discoveries, property, supernatural abilities, or consent',
   nextAction:'Resolve the original source-bound checkId once if the GM determines genuine uncertainty'};
 }
 function perform(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
-    Object.keys(p).length!==1||typeof p.checkId!=='string')
+    Object.keys(p).some(k=>!['checkId','gmRuling'].includes(k))||
+    typeof p.checkId!=='string')
   throw Error('A witnessed scene check accepts only its established checkId');
  const id=p.checkId;
  if(!/^[a-z0-9][a-z0-9_-]{4,79}$/.test(id))
@@ -149,6 +155,38 @@ function perform(s,p={}){
      scene.details?.biome!==loc.biome)
    throw Error('Engine habitat survey is not consistent with its witnessed local environment');
  }
+ // The precommitted physical check is immutable. Only mundane, witnessed
+ // local terrain supports GM adjudication; ecological and specialist checks
+ // never accept this bypass or a caller-selected difficulty.
+ if(p.gmRuling!==undefined&&a.origin!=='engine-local-scene')
+  throw Error('GM terrain ruling cannot replace ecological or specialist checks');
+ const ruling=p.gmRuling===undefined?null:
+  GM.witness(s,p.gmRuling,{allowNoRoll:true});
+ const difficulty=ruling?.kind==='adjust'?
+  GM.adjust(s,{baseDC:a.dc,dc:a.dc,factors:[]},p.gmRuling,
+   {owner:'core.sceneCheck',min:5,max:30}):
+  {baseDC:a.dc,dc:a.dc,netAdjustment:0,factors:[],sourceBound:true};
+ if(ruling&&ruling.kind!=='adjust'){
+  // Guaranteed ordinary acts and impossible attempts never consume a die,
+  // earn practice or automatically grant movement, loot, consent or power.
+  s.table.sceneCheckEventsUsed||={};
+  s.table.sceneCheckEventsUsed[a.eventHash]=id;
+  a.used=true;a.checkedAtMinute=s.world.minutes;
+  a.gmRuling=ruling;
+  const spent=ruling.kind==='routine'?a.minutes:0;
+  if(spent){const old=s.world.minutes;E.advance(s,spent);W.finalizeTime(s,old);Health.sync(s,{source:'legacy'});}
+  C.event(s,'story',ruling.kind==='routine'?
+   'The established unopposed mundane task needs no die.':
+   'The locally witnessed physical attempt is impossible using this ordinary method.',
+   {origin:'gm-local-mundane-adjudication',checkId:id,ruling,
+    noDice:true,noReward:true,noSupernaturalBypass:true});
+  return {verifiedSceneCheck:id,gmRuling:ruling,baselineDC:a.dc,
+   resolution:ruling.kind,success:ruling.kind==='routine',noRoll:true,
+   elapsedMinutes:spent,progress:0,practiceAwarded:0,
+   noAutomaticMovement:true,noGrantedItems:true,
+   noUnknownDiscoveries:true,noAutomaticAgreement:true,
+   noSkillProgress:true,noPowerProgress:true};
+ }
  const baseModifier=Math.floor((score-10)/2)+rank*2+a.extra;
  // A separately witnessed original body specialisation can contribute only
  // to the existing, prepared local footing task. It does not choose the DC,
@@ -161,7 +199,8 @@ function perform(s,p={}){
   throw Error('Two different physiological Origin/Body sources cannot stack on one original terrain challenge');
  const modifier=baseModifier+physiology.bonus+humanOrigin.bonus;
  // All provenance and actor checks precede dice, time or evidence mutation.
- const check=C.check(s,{modifier,dc:a.dc,label:a.label,risky:a.risky});
+ const check=C.check(s,{modifier,dc:difficulty.dc,label:a.label,risky:a.risky});
+ if(ruling)a.gmRuling=ruling;
  s.table.sceneCheckEventsUsed||={};
  s.table.sceneCheckEventsUsed[a.eventHash]=id;
  a.used=true;a.checkedAtMinute=s.world.minutes;
@@ -202,6 +241,7 @@ function perform(s,p={}){
  W.finalizeTime(s,old);
  Health.sync(s,{source:'legacy'});
  return {...check,...practice,verifiedSceneCheck:id,elapsedMinutes:a.minutes,
+  difficulty:structuredClone(difficulty),
   ...(tissueUse?{actualPhysiologicalSupport:tissueUse}:{}),
   ...(humanOriginUse?{actualOriginLineageSupport:humanOriginUse}:{}),
   ...(a.origin==='engine-local-scene'?{scope:'visible-local-terrain-only',
