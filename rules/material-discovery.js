@@ -12,6 +12,8 @@ const MINUTES=45,RETURN_MINUTES=5,STAMINA=2,DC=12;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const text=(x,lo,hi)=>typeof x==='string'&&x.trim()===x&&
  x.length>=lo&&x.length<=hi&&!/[\u0000-\u001f]/.test(x);
+const sceneText=(x,lo,hi)=>typeof x==='string'&&x.trim().length>=lo&&
+ x.length<=hi&&!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(x);
 const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_]{3,60}$/.test(x);
 const own=x=>x&&typeof x==='object'&&!Array.isArray(x);
 
@@ -46,7 +48,7 @@ function attemptValid(s,a){
     q.origin!==ORIGIN||!id(q.materialId)||
     Object.hasOwn(E.RESOURCES,q.materialId)||
     !text(q.name,4,100)||!text(q.visibleBasis,30,600)||
-    !text(q.originalScene,25,1800)||!q.originalScene.toLowerCase().includes(q.name.toLowerCase())||
+    !sceneText(q.originalScene,25,4000)||!q.originalScene.toLowerCase().includes(q.name.toLowerCase())||
     q.character!==s.player?.name||!Places.location(s,q.location)||
     !Number.isInteger(q.startMinute)||q.startMinute<0||
     q.finishMinute-q.startMinute!==MINUTES||
@@ -136,7 +138,7 @@ function appraise(s,p={}){
     s.table.combatants.player.status!=='ok')
   throw Error('Physical appraisal requires a safe conscious work session');
  const scene=s.chatRuntime?.scene,site=Places.location(s);
- if(!site||!text(scene,25,1800)||
+ if(!site||!sceneText(scene,25,4000)||
     !scene.toLowerCase().includes(p.name.toLowerCase()))
   throw Error('The named physical distinction must already be visible in the actual local GM scene');
  if(!verify(s))throw Error('Original material sources were altered');
