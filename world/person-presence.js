@@ -101,7 +101,7 @@ function identity(w,id){
   polity:n.polity,institution:n.institution,
   source:'independent-professional-roster'};
 }
-function resolve(w,id,location,day){
+function resolve(w,id,location,day,minute){
  const n=identity(w,id),place=w.livedPlaces?.places?.[location];
  if(!n||!Number.isInteger(day)||
   !(Engine.LOCATIONS[location]||place&&require('./lived-places').verifyPlace(place)))return null;
@@ -112,7 +112,7 @@ function resolve(w,id,location,day){
   return shift?{...n,location,presence:shift}:null;
  }
  if(n.source==='independently-generated-lived-person'){
-  const shift=Emergent.presence(w,id,location,day);
+  const shift=Emergent.presence(w,id,location,day,minute);
   return shift?{...n,location,presence:shift}:null;
  }
  const shift=w.personPresence?.roster?.[id.slice(8)];
@@ -146,10 +146,10 @@ function localStatus(s,w){
   .map(p=>p.actorId).filter(id=>resolve(w,id,location,day)):[];
  const localResidents=require('./settlement-foundations').localPeople(s,w);
  const created=Object.values(w.emergentPeople?.people||{})
-  .map(p=>p.actorId).filter(id=>resolve(w,id,location,day));
+  .map(p=>p.actorId).filter(id=>resolve(w,id,location,day,minute));
  return {location,day:day+1,
   people:[...native,...visiting,...kin,...created].map(id=>{
-   const n=resolve(w,id,location,day);
+   const n=resolve(w,id,location,day,minute);
    return {npcId:id,name:n.name,profession:n.profession,
     actuallyPresent:true,meetingIsNotAssent:true};
   }).concat(localResidents),
