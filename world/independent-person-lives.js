@@ -28,7 +28,14 @@ function initialRng(actor,profile){return Crypto.createHash('sha256').update(
 function verifyEntry(w,q){
  if(!q||q.origin!==ORIGIN||!token(q.id)||q.actorId!=='emergent:'+q.id||
    q.identityHash!==q.foundationHash||!Array.isArray(q.interests)||!q.interests.length||
-   q.interests.length>6||!q.interests.every(x=>trackKinds.has(x))||
+   q.interests.length>12||!q.interests.every(x=>trackKinds.has(x))||
+   new Set(q.interests).size!==q.interests.length||
+   !Array.isArray(q.discoveries)||q.discoveries.length>12||
+   q.discoveries.some(e=>!e||e.seal!==hash(e.source)||
+    e.source.origin!=='independent-interest-discovery-v1'||
+    e.source.actorId!==q.actorId||
+    !trackKinds.has(e.source.track)||!positive(e.source.day)||
+    e.source.day<=q.introducedDay||e.source.day>q.lastDay)||
    !q.interests.includes(q.focus)||!positive(q.introducedDay)||
    !positive(q.lastDay)||q.lastDay<q.introducedDay||
    !positive(q.rngState)||!q.rngState||!positive(q.fatigue)||q.fatigue>100||
@@ -47,6 +54,8 @@ function verifyEntry(w,q){
     !positive(e.source.rngBefore)||!e.source.rngBefore||
     e.source.rngAfter!==rngNext(rngNext(rngNext(e.source.rngBefore)))))
    return false;
+ const expected=[...q.interestsAtIntroduction,...q.discoveries.map(e=>e.source.track)];
+ if(JSON.stringify(expected)!==JSON.stringify(q.interests))return false;
  const actor=w.emergentPeople?.people?.[q.id];
  return !!actor&&People.verify(w,actor)&&actor.originHash===q.identityHash;
 }
@@ -79,7 +88,7 @@ function enroll(s,p={}){
   identityHash:actor.originHash,foundationHash:actor.originHash,
   interests:p.interests.slice(),interestsAtIntroduction:p.interests.slice(),
   focus:p.interests[0],introducedDay:now,lastDay:now,metrics:{},
-  fatigue:0,history:[],source,sourceHash:hash(source),
+  fatigue:0,history:[],discoveries:[],source,sourceHash:hash(source),
   rngState:initialRng(actor,source)};
  if(!verifyEntry(w,q))throw Error('Independent character foundation failed source integrity');
  t.people[id]=q;
@@ -99,7 +108,28 @@ function daily(w,q,day){
  let action,focus=q.focus,improved=0,reason;
  if(needsRest||a<.16){action='rest';q.fatigue=Math.max(0,q.fatigue-16);reason='personal recovery';}
  else if(a<.25){action='friends';q.fatigue=Math.max(0,q.fatigue-5);reason='personal relationships or private interests';}
- else if(a<.34){action='explore';q.fatigue=Math.min(100,q.fatigue+2);reason='curiosity and ordinary errands';}
+ else if(a<.34){
+  action='explore';q.fatigue=Math.min(100,q.fatigue+2);
+  reason='curiosity and ordinary errands';
+  // An independent discovery may broaden a person's interests without
+  // imposing a career, a master, or supernatural knowledge. Ordinary
+  // community opportunities are not guaranteed or player-directed.
+  if(c<.22&&q.interests.length<12){
+   const publicPursuits=['craft','academic','beast-care','community',
+    'exploration','livelihood','martial','meridian','arcane','soul'];
+   const possibilities=publicPursuits.filter(x=>!q.interests.includes(x));
+   if(possibilities.length){
+    const discovered=possibilities[Math.floor(b*possibilities.length)];
+    const source={origin:'independent-interest-discovery-v1',
+     actorId:q.actorId,day,track:discovered,
+     reason:'Independent curiosity about an ordinary publicly discussed pursuit',
+     noTeacherOrPowerAward:true};
+    q.discoveries.push({source,seal:hash(source)});
+    q.interests.push(discovered);
+    reason='independently became curious about '+discovered;
+   }
+  }
+ }
  else if(a<.43){action='local-chores';q.fatigue=Math.min(100,q.fatigue+3);reason='ordinary household and community responsibilities';}
  else if(a<.53){
   if(b<.38){action='seek-work';focus='livelihood';
@@ -156,6 +186,7 @@ function status(s,p={}){
   const person=w.emergentPeople.people[q.id];
   return {actorId:q.actorId,name:person.name,interests:q.interests,
    focus:q.focus,asOfDay:q.lastDay,ordinaryPracticeIndicators:{...q.metrics},
+   discoveredInterests:q.discoveries.map(e=>({day:e.source.day,interest:e.source.track})),
    recentActivities:q.history.slice(-8).map(r=>({day:r.source.day,
     activity:r.source.action,focus:r.source.focus,technicalFamiliarity:r.source.improved})),
    actualCultivationUnverified:true,noAutomaticEarningsOrContract:true,
