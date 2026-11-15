@@ -81,7 +81,7 @@ for(const kind of ['routine','impossible']){
  A.throws(()=>R.act(story(E.newGame({seed:835238,name:'Forbidden Automatic Soul'})),
   {system:'discipline',operation:'practice',
    params:{...input,gmContext:{...assessment('routine'),kind:'routine'}}}),
-  /requires an honest original roll/);
+  /No-roll adjudication is only allowed/);
 }
 function homestead(){
  for(let seed=836100;seed<836160;seed++){
@@ -124,7 +124,7 @@ function homestead(){
  const old=E.exportGame(fresh.s);
  A.throws(()=>R.act(fresh.s,{system:'social',operation:'householdWork',
   params:{npcId:fresh.person.actorId,purpose:p.purpose,gmContext:assessment('routine')}}),
-  /requires an honest original roll/);
+  /No-roll adjudication is only allowed/);
  A.equal(E.exportGame(fresh.s),old);
 }
 {
