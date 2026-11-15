@@ -1,0 +1,17 @@
+{
+  "id": "maddoc_harness_guided_householdwork_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "householdWork",
+  "params": {
+    "npcId": "origin-kin:kin_1",
+    "purpose": "Complete ordinary harness upkeep with Hedra: use her demonstrated bending-and-tension check to identify loose stitching, sort unsafe straps for repair, and refit sound buckles."
+  },
+  "scene": "Workday 1 at Maddren Homestead. Maddoc has brought the harness buckles and stitching to Hedra Maddren for independent review after using her demonstrated inspection method. Whether the job was agreed, its quality, elapsed time and any wages must come only from the recorded household-work result; Bram and Tessa are people he hopes to meet afterward.",
+  "focus": [
+    "Hedra's verdict on harness upkeep",
+    "Find Bram and Tessa afterward"
+  ],
+  "summary": "Maddoc tried to apply Hedra Maddren's observed stitch and buckle checks to remaining ordinary harness upkeep. Actual acceptance, Crafting roll, time and payment belong only to the original household-work receipt."
+}
