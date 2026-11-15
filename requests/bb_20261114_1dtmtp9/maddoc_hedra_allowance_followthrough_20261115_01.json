@@ -1,0 +1,17 @@
+{
+  "id": "maddoc_hedra_allowance_followthrough_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "settleGuardianAllowance",
+  "params": {
+    "npcId": "origin-kin:kin_1",
+    "sourceQuote": "slowly re-examined the previously sorted harnesses"
+  },
+  "scene": "At Maddren Homestead, Hedra Maddren has finished reviewing Maddoc's corrected harness sorting. She has no further strap checks for him; the original family allowance is being settled through its existing source. Bram and Tessa are still to be met.",
+  "summary": "Hedra recognises Maddoc's additional two hours rechecking harnesses. Original failed Crafting check remains unchanged. The existing 2-Talon family allowance settles only through the one verified guardian transfer; no second job or roll.",
+  "focus": [
+    "Find Bram and Tessa",
+    "Decide where to go next"
+  ]
+}
