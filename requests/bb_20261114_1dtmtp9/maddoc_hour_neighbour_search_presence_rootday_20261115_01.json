@@ -1,0 +1,8 @@
+{
+  "id": "maddoc_hour_neighbour_search_presence_rootday_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "localPeopleStatus",
+  "params": {}
+}
