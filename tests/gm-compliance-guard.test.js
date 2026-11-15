@@ -4,7 +4,8 @@ const A=require('node:assert/strict'),FS=require('node:fs'),OS=require('node:os'
  Path=require('node:path'),E=require('../engine'),Rules=require('../rules'),
  GM=require('../scripts/gm-compliance'),Panels=require('../panels'),
  Turn=require('../scripts/chat-turn'),Continuity=require('../scripts/scene-continuity');
-const game=()=>E.newGame({name:'Continuity Witness',seed:461893});
+const game=()=>{const s=E.newGame({name:'Continuity Witness',seed:461893});
+ s.chatRuntime={revision:0,applied:{},focus:[]};return s;};
 const s=game(),old=E.exportGame(s),hud=Panels.hudData(s);
 {
  const brief=GM.brief(s),view=Rules.act(s,{system:'world',operation:'gmComplianceStatus',params:{}});
