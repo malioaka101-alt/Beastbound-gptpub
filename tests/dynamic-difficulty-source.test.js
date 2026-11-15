@@ -38,17 +38,31 @@ function character(){
  A.equal(dc.dc,14,'Existing early independent practice base difficulty retained');
  A.equal(dc.factors.filter(x=>x.id==='independent-or-brief-route').length,1,
   'Short independent sessions cannot stack the same +2 surcharge');
- A.equal(D.disciplinePractice(s,{system:'soul',method:'self-awareness',
-  record:{methods:{'self-awareness':2},sessionMinutes:240},
-  baseDC:12,short:true,independent:true}).dc,13,
-  'Real continuing method familiarity changes resistance');
- A.equal(D.disciplinePractice(s,{system:'soul',method:'self-awareness',
-  record:{methods:{'self-awareness':6},sessionMinutes:960},
+ const trained=character();
+ trained.player.attributes.wis=30;
+ trained.player.skills.cultivation.rank=5;
+ for(let i=0;i<2;i++)R.act(trained,{system:'discipline',operation:'practice',
+  params:{system:'soul',method:'self-awareness',minutes:120}});
+ const trainedRecord=trained.table.disciplineTraining.soul;
+ A.equal(D.disciplinePractice(trained,{system:'soul',method:'self-awareness',
+  record:trainedRecord,baseDC:12,short:true,independent:true}).dc,13,
+  'Original earned same-method minutes change future resistance');
+ for(let i=0;i<4;i++)R.act(trained,{system:'discipline',operation:'practice',
+  params:{system:'soul',method:'self-awareness',minutes:180}});
+ A.equal(D.disciplinePractice(trained,{system:'soul',method:'self-awareness',
+  record:trained.table.disciplineTraining.soul,
   baseDC:12,short:true,independent:true}).dc,12);
- A.equal(D.disciplinePractice(s,{system:'soul',method:'identity-ward',
-  record:{methods:{'self-awareness':9},sessionMinutes:1200},
+ A.equal(D.disciplinePractice(trained,{system:'soul',method:'identity-ward',
+  record:trained.table.disciplineTraining.soul,
   baseDC:12,short:true,independent:true}).dc,14,
-  'Experience from a different method must not transfer as an automatic discount');
+  'Training another method must not transfer an automatic discount');
+ const future=structuredClone(trained);
+ future.table.disciplineTraining.soul.target='phase2';
+ future.table.disciplineTraining.soul.methods={'self-awareness':6};
+ A.equal(D.disciplinePractice(future,{system:'soul',method:'self-awareness',
+  record:future.table.disciplineTraining.soul,
+  baseDC:12,short:true,independent:true}).dc,14,
+  'Witnessed previous-stage sessions must not grant future-stage discounts');
  const drained=structuredClone(s);
  drained.player.stamina=1;
  A.equal(D.disciplinePractice(drained,{system:'soul',method:'self-awareness',
