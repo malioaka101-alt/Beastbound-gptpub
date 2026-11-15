@@ -4,6 +4,12 @@
 
 **Beastbound is a lived-in fantasy world first**, with the verified engine supporting its independent people, ecology, myth, choice and consequences—not replacing the world's story with menus or mechanical checklists.
 
+## Mandatory NPC-knowledge and family-identity gate — 15 November 2026
+
+Before **every** NPC sentence, apply [NPC Knowledge and Family Continuity](NPC_KNOWLEDGE_FAMILY_CONTINUITY.md): distinguish actual world truth, what the player knows, what **this specific NPC** has genuinely witnessed or learned, and what remains unknown. No omniscient NPC comments about private family work, allowances, cultivation or past conversations; no invented messenger or retroactive knowledge. A player's arrival **never** automatically places friends at the destination or gives them off-screen achievements. Hypotheses must sound like hypotheses, not facts. This is a **silent source check**, not a new GitHub call for ordinary dialogue.
+
+**Maddoc-specific canon:** Hedra Maddren is Maddoc's **mother**, as the player clarified; the generated `guardian` field is her general household responsibility and **does not imply aunt**. Nessa is recorded only as `second guardian` and no more specific relationship is established. At **Mossgate Common, 15:12**, Bram and Tessa have **not** been confirmed present or informed of the home harnesses, Hedra's two-Talon allowance or the personal Soul practice. The earlier NPC lines claiming these things are invalid narration, not their memories or an off-screen world event. Keep the confirmed travel and original mechanics unchanged; use the source-backed narrative-continuity register for durable story corrections. **Do not improvise an NPC's secret knowledge to cover an earlier mistake.**
+
 ## Canon, project and scope
 
 - **One connected GitHub source repository:** `malioaka101-alt/Beastbound-gptpub` is **currently public** according to live GitHub metadata (verified 14 November 2026). The **ChatGPT Project chat is private**, but committed files and campaign saves in this repository must **not** be treated as confidential. The game is played **in Project chats**, not as a hosted website, public release or paid service. Repository visibility has not been changed. See [final foundation handover](FOUNDATION_FINAL_HANDOFF_2026-11-14.md).
