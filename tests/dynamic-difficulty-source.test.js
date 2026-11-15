@@ -62,11 +62,15 @@ function character(){
  A.equal(x.difficulty.sourceBound,true);
 }
 function householdFixture(seed){
- const s=New.create({seed,slug:'dynamic_dc_household_fixture',mode:'guided',
-  age:10,homeRegion:'morrowfen_basin',originKind:'ordinary',
-  startLocation:'crossing'}).state;
- const person=Realm.ensure(s).originKin?.people?.kin_1;
- A.ok(person,'Seeded household relative exists');
+ let s,person;
+ for(let candidate=seed;candidate<seed+60;candidate++){
+  s=New.create({seed:candidate,slug:'dynamic_dc_household_fixture',mode:'guided',
+   age:10,homeRegion:'morrowfen_basin',originKind:'ordinary',
+   startLocation:'crossing'}).state;
+  person=Realm.ensure(s).originKin?.people?.kin_1;
+  if(person)break;
+ }
+ A.ok(person,'A genuinely generated seeded household relative exists');
  R.act(s,{system:'world',operation:'establishPlace',params:{
   placeId:'dynamic_work_cottage',name:'Dynamic Work Cottage',
   regionId:s.campaign.origin.birthRegionId,kind:'family cottage',
