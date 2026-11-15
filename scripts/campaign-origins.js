@@ -196,6 +196,10 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
   history.upbringing='An ordinary '+f.homeTrade+' household in '+region.name+
    '; '+Atlas.P[region.polity].customs;
  }
+ // Seeded known relationships, not guesses from a 'guardian' label.
+ if(f.members.some(m=>m.kinship))
+  history.familySituation+='; known family ties: '+f.members.
+   map(m=>m.name+' ('+m.kinship+')').join(', ');
  if(!history.earlyWork)history.earlyWork='Early work and study in '+base.background+'; no invented professional qualification or supernatural rank.';
  if(options.goal!==undefined)history.personalGoal=textField(options.goal,'Personal goal',240);
  if(options.role!==undefined)history.ownOccupation=textField(options.role,'Occupation',100);
@@ -206,7 +210,8 @@ function prepare(seed,base,identity,options={},startLocation='crossing'){
   openingRegionId:options.gmOpening?startRegion.id:null,
   openingSite:options.gmOpening?startLocation:null,
   travelBeforePlay:options.gmOpening?region.polity!==startRegion.polity:false,
-  connection,knownHouseholdMembers:f.members.map(m=>({name:m.name,relation:m.relation})),
+  connection,knownHouseholdMembers:f.members.map(m=>({name:m.name,relation:m.relation,
+   kinship:m.kinship,householdRole:m.householdRole})),
   worldSource:'Authored Atlas and social-house history, or a seeded modest beginning',
   explicitOptions:Object.keys(options).filter(k=>!['slug'].includes(k)).sort(),
   noUnearnedPowers:true,noAutomaticNPCConsent:true,noAutomaticOffice:true};
