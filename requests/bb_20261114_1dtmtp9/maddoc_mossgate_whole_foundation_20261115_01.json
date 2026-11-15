@@ -1,0 +1,11 @@
+{
+  "id": "maddoc_mossgate_whole_foundation_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "foundSettlement",
+  "params": {
+    "placeId": "mossgate_common"
+  },
+  "expectedHash": "575c81fc77fb7d8eb22563dd0a8657721db01f32e6b5041f217359f89ed5c210"
+}
