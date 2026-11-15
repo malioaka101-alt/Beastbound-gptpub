@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_return_to_common_for_soul_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "visitSettlementSite",
+  "params": {
+    "siteId": "common"
+  },
+  "scene": "Maddoc gives up looking for Bram and Tessa today and returns along Mossgate's public orchard path to the village green where he undertook Soul self-awareness practice yesterday. He prepares to practise alone, intending to walk home before evening.",
+  "summary": "Maddoc says he will see his friends tomorrow and returns to yesterday's Mossgate Common practice place.",
+  "focus": [
+    "Practise independent Soul self-awareness while daylight lasts",
+    "Leave enough time for the verified 42-minute walk home"
+  ]
+}
