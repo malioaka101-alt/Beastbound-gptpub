@@ -152,6 +152,108 @@ function difficultyPreview(s,p={}){
   noDieRolled:true,noConsentAssumed:true,noWagesPromised:true,
   gmNext:'Cite an existing scene/place/weather quote and contextual reason if a real adjustment is warranted; the original rule still rolls independently'};
 }
+// A guardian's modest *originally promised allowance* is not an employer's
+// contract or an excuse to roll the same failed shift again. A failure at
+// first inspection can be corrected by genuinely witnessed follow-through.
+// Only the guardian can settle their original accepted offer, using real
+// funds, after the GM has actually witnessed enough correction in the scene.
+const ALLOWANCE_ORIGIN='guardian-household-followthrough-allowance-v1';
+function settleGuardianAllowance(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).sort().join('|')!=='npcId|sourceQuote'||
+    typeof p.npcId!=='string'||typeof p.sourceQuote!=='string'||
+    p.sourceQuote.trim().length<24||p.sourceQuote.length>180)
+  throw Error('Guardian allowance needs the original present guardian and a genuine saved-scene correction quote, not an amount, reward or result');
+ if(s.battle||s.encounter)
+  throw Error('Cannot settle an ordinary family allowance during combat or an active encounter');
+ const {person}=context(s,p.npcId);
+ if(!/\b(?:parent|guardian|mother|father)\b/i.test(person.relation||''))
+  throw Error('An agreed family allowance follow-through must be settled by an actual guardian');
+ const scene=s.chatRuntime?.scene||'',quote=p.sourceQuote.trim();
+ if(!scene.toLowerCase().includes(quote.toLowerCase()))
+  throw Error('A real GM-witnessed correction must already be in the saved scene');
+ const ledger=s.table?.householdWork;
+ if(!ledger||ledger.version!==1||!Array.isArray(ledger.records)||
+    ledger.records.some(x=>!x||x.origin!==ORIGIN||x.hash!==hash(x.proof)))
+  throw Error('The original household work and its receipt must be verified');
+ const today=Math.floor(s.world.minutes/DAY);
+ const eligible=ledger.records.filter(x=>{
+  const w=x.proof;
+  return w.actorId===person.actorId&&w.day===today&&
+   w.accepted===true&&w.paidTalons===0&&
+   w.originalCheck?.success===false&&
+   Number.isInteger(w.proposedPayTalons)&&w.proposedPayTalons>=1&&
+   w.proposedPayTalons<=2&&w.location===s.world.location&&
+   w.endMinute<=s.world.minutes&&
+   s.world.minutes-w.endMinute<=DAY;
+ });
+ if(eligible.length!==1)
+  throw Error('No single previously accepted, unfinished guardian allowance from this day is pending');
+ const prior=eligible[0],work=prior.proof;
+ // This is the supporting post-inspection *correction*, not a second shift
+ // or skill check. The GM-authored current scene names the actual task
+ // object and a physical recheck; an unrelated day of Soul practice alone
+ // cannot create a household payment.
+ const task=work.task.toLowerCase();
+ const nouns=['harness','strap','buckle','stitch','leather','orchard','garden','clean','repair'];
+ const witnessNouns=nouns.filter(n=>task.includes(n)&&quote.toLowerCase().includes(n));
+ if(!witnessNouns.length||!/\b(?:re.examined|re.checked|reworked|corrected|sorted|repaired|checked|finished|redone)\b/i.test(quote))
+  throw Error('The original unfinished family task needs a personally witnessed corrective recheck in this scene');
+ const works=(s.table?.independentTraining||[]).filter(t=>
+  t&&t.location===work.location&&Number.isInteger(t.startMinute)&&
+  Number.isInteger(t.minutes)&&t.minutes>=90&&
+  t.startMinute>=work.endMinute&&t.startMinute+t.minutes<=s.world.minutes&&
+  Number.isInteger(t.eventIndex)&&t.eventIndex>=0&&
+  typeof t.eventHash==='string'&&
+  hash(s.log?.[t.eventIndex])===t.eventHash&&
+  s.log[t.eventIndex]?.details?.partTime===true);
+ if(works.length!==1)
+  throw Error('A genuinely elapsed corrective period alongside separately verified part-time practice is required for this original follow-through');
+ const priorSettlements=ledger.allowanceSettlements||[];
+ if(!Array.isArray(priorSettlements)||priorSettlements.some(x=>
+    !x||x.origin!==ALLOWANCE_ORIGIN||x.hash!==hash(x.proof)))
+  throw Error('Original guardian allowance settlement ledger was altered');
+ if(priorSettlements.some(x=>x.proof.originalReceiptHash===prior.hash))
+  throw Error('This guardian has already settled the original family allowance');
+ const amount=work.proposedPayTalons;
+ const sourceBefore=Core.int(person.funds,'guardian actual finite Talons',0,100);
+ const playerBefore=Core.int(s.player.coins,'player actual finite Talons',0,100000000);
+ if(sourceBefore<amount)
+  throw Error('The guardian no longer has the actual Talons for the promised family allowance');
+ if(!Core.conservedTransfer({sourceBefore,sourceAfter:sourceBefore-amount,
+   targetBefore:playerBefore,targetAfter:playerBefore+amount,
+   amount,maxBalance:100000000}))
+  throw Error('A guardian allowance must conserve the same actual family funds');
+ // This is the GM's now-witnessed guardian approval of the original offered
+ // pocket money for finishing the corrected family task. It is NOT a
+ // reroll, skill reward, automatic pay from a company, or a new contract.
+ person.funds-=amount;s.player.coins+=amount;
+ const receiptProof={origin:ALLOWANCE_ORIGIN,actorId:person.actorId,
+  actorName:person.name,actorSourceHash:person.sourceHash,
+  originalReceiptHash:prior.hash,originalCheck:work.originalCheck,
+  originalOfferTalons:amount,originalOutcomePreserved:true,
+  timeAtFinalReview:s.world.minutes,placeId:s.world.location,
+  sceneHash:hash(scene),correctiveQuote:quote,
+  correctionRecordHash:works[0].eventHash,
+  guardianFundsBefore:sourceBefore,guardianFundsAfter:person.funds,
+  childTalonsBefore:playerBefore,childTalonsAfter:s.player.coins,
+  paidTalons:amount,allowanceNotWages:true,noExtraCheck:true,
+  noSkillOrSoulProgress:true,noForcedNewContract:true};
+ const receipt={origin:ALLOWANCE_ORIGIN,proof:receiptProof,hash:hash(receiptProof)};
+ ledger.allowanceSettlements=priorSettlements;
+ ledger.allowanceSettlements.push(receipt);
+ U.sync(s,{source:'legacy'});
+ Core.event(s,'story',person.name+' acknowledges the finished correction and gives the originally offered family allowance.',{
+  origin:ALLOWANCE_ORIGIN,actorId:person.actorId,
+  originalReceiptHash:prior.hash,settlementHash:receipt.hash,
+  amount,guardianFundsConserved:true,noSecondRoll:true,noExtraWork:true});
+ return {settled:true,guardian:person.name,amountTalons:amount,
+   originalOfferTalons:amount,guardianFundsRemaining:person.funds,
+   playerTalons:s.player.coins,originalCheck:work.originalCheck,
+   originalCheckNotRerolled:true,correctiveMinutes:works[0].minutes,
+   elapsedMinutes:0,noExtraPractice:true,noNewJob:true,
+   note:'A guardian gives the previously promised modest allowance after reviewing the genuine corrected household help; not commercial wage payment or a new Crafting result'};
+}
 function status(s){
  const rows=s.table?.householdWork?.records||[];
  return {personallyWitnessedJobs:rows.slice(-24).map(x=>({
@@ -163,4 +265,4 @@ function status(s){
   atMinute:x.proof.endMinute
  })),note:'Only independently agreed and actually resolved household tasks appear here.'};
 }
-module.exports={perform,status,difficultyPreview,ORIGIN};
+module.exports={perform,status,difficultyPreview,settleGuardianAllowance,ORIGIN,ALLOWANCE_ORIGIN};
