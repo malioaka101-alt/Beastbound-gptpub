@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_hour_neighbour_search_rootday_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 60
+  },
+  "scene": "Rootday, 2 Nesting 1156 AC. Starting at 07:18, Maddoc leaves the unanswered neighbouring cottage door and spends an hour following the public homestead boundary lane and nearby homes, looking for his parents Hedra Maddren and Nessa Maddren. Whenever he encounters an actually present neighbour, he attempts to ask whether they have seen either parent. Do not assert that any neighbour was encountered or that anyone answered, or locate Hedra/Nessa, without source-backed NPC presence and independently witnessed knowledge.",
+  "summary": "An hour of ordinary searching for Maddoc's parents along nearby homestead paths and looking to ask neighbours. No automatic NPC encounter, witnessed answer or located parent follows solely from the elapsed time.",
+  "focus": [
+    "Still searching for Hedra and Nessa",
+    "Ask actually met neighbours whether they saw either parent"
+  ]
+}
