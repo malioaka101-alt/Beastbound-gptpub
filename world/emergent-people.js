@@ -224,7 +224,9 @@ function gmFounding(w,p){
   b.worldMinute>=b.day*1440&&b.worldMinute<(b.day+1)*1440&&
   p.birthSource.need==='gm-witnessed-occupation'&&
   p.birthSource.nonAssumedConsent===true&&
-  p.birthSource.noInventedFundsOrRanks===true;
+  p.birthSource.noInventedFundsOrRanks===true&&
+  (b.witnessedJourneyHash===undefined||
+   /^[a-f0-9]{64}$/.test(b.witnessedJourneyHash));
 }
 function verify(w,p){
  if(!p||![ORIGIN,GM_ORIGIN].includes(p.origin)||typeof p.id!=='string'||
@@ -284,8 +286,11 @@ function make(w,t,day,d){
 
 function registerGM(s,p={}){
  const keys=['name','profession','purpose','personality','background','witness'];
+ const historic=['witnessedPlaceId','witnessedMinute'];
+ const supplied=Object.keys(p||{}).sort().join('|');
  if(!p||typeof p!=='object'||Array.isArray(p)||
-  Object.keys(p).sort().join('|')!==keys.sort().join('|'))
+  (supplied!==keys.sort().join('|')&&
+   supplied!==[...keys,...historic].sort().join('|')))
   throw Error('A witnessed GM individual needs a name, profession, purpose, personality, background and actual scene basis; never chosen stats or consent');
  const good=(x,min,max)=>typeof x==='string'&&x.trim().length>=min&&x.trim().length<=max;
  if(!good(p.name,4,80)||!good(p.profession,5,120)||
@@ -293,20 +298,39 @@ function registerGM(s,p={}){
   !good(p.background,15,800)||!good(p.witness,20,800))
   throw Error('A complete plausible witnessed individual biography and circumstance is required');
  if(s.campaign?.openingState!=='authored'||!s.chatRuntime?.scene||
-  !s.chatRuntime.scene.toLowerCase().includes(p.name.trim().toLowerCase()))
+  !(s.chatRuntime.scene.toLowerCase().includes(p.name.trim().toLowerCase())||
+    s.chatRuntime.scene.includes(p.witness.trim())))
   throw Error('A GM individual can only be established after they were actually introduced in the current recorded scene');
  if(s.encounter||s.battle)throw Error('A new unproven NPC identity cannot be inserted mid-encounter');
- const site=require('./lived-places').location(s);
- if(!site||!Atlas.R[site.regionId])
+ const current=require('./lived-places').location(s);
+ if(!current||!Atlas.R[current.regionId])
   throw Error('A GM individual must be witnessed at a genuine established location');
  const w=require('./simulation').ensure(s),t=ensure(w);
+ let site=current,at=s.world.minutes,witnessedJourneyHash;
+ if(p.witnessedPlaceId!==undefined){
+   // A recent scene can be checkpointed after the player has physically
+   // departed. Require the exact already-recorded journey, not GM teleport.
+   if(typeof p.witnessedPlaceId!=='string'||
+     !Number.isInteger(p.witnessedMinute)||p.witnessedMinute<0||
+     Math.floor(p.witnessedMinute/DAY)!==Math.floor(at/DAY))
+     throw Error('Past witnessed introduction needs an exact same-day time and place');
+   const prior=require('./lived-places').location(s,p.witnessedPlaceId);
+   const journey=w.livedPlaces?.journeys?.find(j=>
+     j.from===p.witnessedPlaceId&&j.to===s.world.location&&
+     j.startMinute===p.witnessedMinute&&j.endMinute===at&&
+     j.hazardsAlreadyResolved===true);
+   if(!prior||!journey||prior.regionId!==current.regionId)
+     throw Error('A past local encounter must be anchored to the original completed journey');
+   site=prior;at=p.witnessedMinute;witnessedJourneyHash=journey.hash;
+ }
  if(Object.values(t.people).some(x=>x.name.toLowerCase()===p.name.trim().toLowerCase()&&
    x.regionId===site.regionId))
   throw Error('An established individual with that identity already exists here');
- const id='person_'+(++t.counter),day=Math.floor(s.world.minutes/1440),
+ const id='person_'+(++t.counter),day=Math.floor(at/DAY),
   polity=Atlas.R[site.regionId].polity,language=Atlas.P[polity].language;
  const b={origin:GM_ORIGIN,id,regionId:site.regionId,polity,day,
-  worldMinute:s.world.minutes,locationId:site.id,name:p.name.trim(),
+  worldMinute:at,locationId:site.id,name:p.name.trim(),
+  ...(witnessedJourneyHash?{witnessedJourneyHash}:{}),
   initialProfession:p.profession.trim(),purpose:p.purpose.trim(),
   personality:p.personality.trim(),background:p.background.trim(),
   witness:p.witness.trim(),language,need:'gm-witnessed-occupation',
@@ -445,6 +469,18 @@ function shift(p,day,w=null){
   scheduledAtDay:day,fromDay:day,throughDay:day+5};
  return {...body,hash:hash(body)};
 }
+// A witnessed introduction establishes an individual, not a permanent fixture.
+// Later attendance is stable per person/day, not rerolled when Maddoc visits.
+function gmOnSite(p,day){
+ if(day===p.birthSource.day)return true;
+ if(day<p.birthSource.day)return false;
+ const digest=Crypto.createHash('sha256').update(
+  p.originHash+'|'+day+'|ordinary-local-attendance-v1').digest();
+ const n=digest.readUInt32BE(0)/4294967296;
+ // Workplaces are visited more often than incidental sites, but never always.
+ const livelihood=/handler|worker|craft|surveyor|farmer|repair/i.test(p.profession);
+ return n<(livelihood?.57:.42);
+}
 function presence(w,id,location,day){
  if(typeof id!=='string'||!id.startsWith('emergent:')||
   !Number.isInteger(day))return null;
@@ -452,6 +488,7 @@ function presence(w,id,location,day){
  if(!verify(w,p)||p.actorId!==id||p.status!=='active'||
   !supportedSite(w,location,p.regionId))return null;
  const sh=p.shift;
+ if(p.origin===GM_ORIGIN&&!gmOnSite(p,day))return null;
  if(!sh||sh.source!==SHIFT||sh.npcId!==id||
   sh.actorId!==id||sh.personId!==p.id||sh.name!==p.name||
   sh.profession!==p.profession||sh.originHash!==p.originHash||
