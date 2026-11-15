@@ -1,0 +1,97 @@
+{
+  "id": "maddoc_seek_bram_tessa_mossgate_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 35,
+  "stateHash": "0dde94b08b8b9f3e0f4b4d3023ebabfc89903513574aec094777356d3ff7402a",
+  "clock": "Day 2, 15:12",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Maddren Homestead",
+      "to": "Mossgate Common",
+      "location": "mossgate_common",
+      "elapsedMinutes": 42,
+      "clock": "Day 2, 15:12",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 15:12",
+      "type": "travel",
+      "text": "The documented journey from Maddren Homestead reaches Mossgate Common.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "maddren_homestead",
+        "to": "mossgate_common",
+        "startMinute": 2310,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc leaves the Maddren family homestead after Hedra has given him his promised allowance, walking back along the previously travelled ordinary orchard lanes past Thistlebell Yard and Tansyhook Crossing toward the familiar Mossgate Common. The same pedestrian route was travelled the other way yesterday in 42 minutes; the daylight lane is clear and no new travel obstacle is established.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 2352,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:12 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Look for Bram and Tessa nea… ║\n║ ◆ Catch up on their day if th… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:12",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Look for Bram and Tessa near Mossgate Common",
+      "Catch up on their day if they are available"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Mossgate Common, Maddoc arrives from the Maddren Homestead by the known orchard-road route. He looks around the hamlet green and the nearby practice yard for his friends Bram and Tessa, wanting to hear what they have been doing while he was helping Hedra. This arrival does not itself require or guarantee that either friend is present, willing to talk, or has gained a skill or item.\nPC: young learner, undecided; 2 T\nJOURNAL: soul practice: self-awareness; 0 training points. | Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance. | The documented journey from Maddren Homestead reaches Mossgate Common.\nCURRENT: No opening hook"
+}

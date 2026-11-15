@@ -652,11 +652,35 @@
         "noSecondRoll": true,
         "noExtraWork": true
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 15:12",
+      "type": "travel",
+      "text": "The documented journey from Maddren Homestead reaches Mossgate Common.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "maddren_homestead",
+        "to": "mossgate_common",
+        "startMinute": 2310,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc leaves the Maddren family homestead after Hedra has given him his promised allowance, walking back along the previously travelled ordinary orchard lanes past Thistlebell Yard and Tansyhook Crossing toward the familiar Mossgate Common. The same pedestrian route was travelled the other way yesterday in 42 minutes; the daylight lane is clear and no new travel obstacle is established.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 2352,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 2310,
-    "location": "maddren_homestead",
+    "minutes": 2352,
+    "location": "mossgate_common",
     "marketIndex": -1,
     "fenPressure": 2,
     "guildActivity": 1,
@@ -1162,7 +1186,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 34,
+    "revision": 35,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2682,13 +2706,66 @@
             }
           ]
         }
+      },
+      "maddoc_seek_bram_tessa_mossgate_20261115_01": {
+        "revision": 35,
+        "mode": "rule",
+        "hash": "4833e6a19a64472049f496659f55216b71c9ec9d877d9599aaae15f270672642",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 15:12",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Maddren Homestead",
+              "to": "Mossgate Common",
+              "location": "mossgate_common",
+              "elapsedMinutes": 42,
+              "clock": "Day 2, 15:12",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 15:12",
+              "type": "travel",
+              "text": "The documented journey from Maddren Homestead reaches Mossgate Common.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "maddren_homestead",
+                "to": "mossgate_common",
+                "startMinute": 2310,
+                "elapsedMinutes": 42,
+                "describedRoute": "Maddoc leaves the Maddren family homestead after Hedra has given him his promised allowance, walking back along the previously travelled ordinary orchard lanes past Thistlebell Yard and Tansyhook Crossing toward the familiar Mossgate Common. The same pedestrian route was travelled the other way yesterday in 42 minutes; the daylight lane is clear and no new travel obstacle is established.",
+                "means": "walking",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 2352,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Find Bram and Tessa",
-      "Decide where to go next"
+      "Look for Bram and Tessa near Mossgate Common",
+      "Catch up on their day if they are available"
     ],
-    "scene": "At Maddren Homestead, Hedra Maddren has finished reviewing Maddoc's corrected harness sorting. She has no further strap checks for him; the original family allowance is being settled through its existing source. Bram and Tessa are still to be met.",
+    "scene": "At Mossgate Common, Maddoc arrives from the Maddren Homestead by the known orchard-road route. He looks around the hamlet green and the nearby practice yard for his friends Bram and Tessa, wanting to hear what they have been doing while he was helping Hedra. This arrival does not itself require or guarantee that either friend is present, willing to talk, or has gained a skill or item.",
     "journal": [
       {
         "day": 1,
@@ -2741,6 +2818,10 @@
       {
         "day": 2,
         "text": "Hedra recognises Maddoc's additional two hours rechecking harnesses. Original failed Crafting check remains unchanged. The existing 2-Talon family allowance settles only through the one verified guardian transfer; no second job or roll."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc travels the established familiar orchard-lane route from his homestead to Mossgate Common (42 verified journey minutes), hoping to meet Bram and Tessa and catch up on their own day; no automatic NPC attendance, gains or rewards."
       }
     ]
   },
@@ -8705,6 +8786,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 1131,
             "hash": "44a68bfda308e21de1ebb228f1c00c48c8537d731a41bf75cf1bad3dbc1ba89e"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "maddren_homestead",
+            "to": "mossgate_common",
+            "startMinute": 2310,
+            "elapsedMinutes": 42,
+            "describedRoute": "Maddoc leaves the Maddren family homestead after Hedra has given him his promised allowance, walking back along the previously travelled ordinary orchard lanes past Thistlebell Yard and Tansyhook Crossing toward the familiar Mossgate Common. The same pedestrian route was travelled the other way yesterday in 42 minutes; the daylight lane is clear and no new travel obstacle is established.",
+            "means": "walking",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 2352,
+            "hash": "2f3dcfcc7c4d1400f908764edb9041ee5ea13551e2928410a3bcbe2035a30683"
           }
         ]
       },
