@@ -8,6 +8,8 @@
 
 **GM adjudication extension (15 November 2026):** follow [GM Contextual Difficulty](GM_CONTEXTUAL_DIFFICULTY.md). Read-only original baseline previews are available for household work and early discipline practice; they are **optional** when the verified baseline is already available. A sourced GM adjustment goes inside the **one eventual engine action** and is recorded before the single die, not through a second speculative roll. Pure dialogue, obvious physical facts, guaranteed mundane acts and impossibilities need no invented d20. Specialist source owners, costs, independent actors and saved continuity remain authoritative. The approved fantasy panel design stays unchanged.
 
+**Guardian family allowance continuity:** an originally agreed small allowance may be settled by the guardian's source-witnessed final review through `social.settleGuardianAllowance` when its original receipt, physical recheck, verified concurrent effort and actual guardian funds satisfy [guardian follow-through](GUARDIAN_ALLOWANCE_FOLLOWTHROUGH.md). It is **one mechanical request**, no second check, no rerolled work, no additional time or needless follow-up checkpoint. Do not narrate received money until that exact request is verified.
+
 ## Minimal GitHub round trips — November 2026 optimization
 
 A real 15 November chat-turn workflow completed from GitHub event creation to workflow completion in about **12 seconds**; its original engine execution took less than one second. The measured overhead was Actions scheduling, checkout/setup and Git operations, not skill checks or world simulation. Never promise this as a fixed turnaround time.
