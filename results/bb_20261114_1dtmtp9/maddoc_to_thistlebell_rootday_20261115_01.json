@@ -1,0 +1,97 @@
+{
+  "id": "maddoc_to_thistlebell_rootday_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 54,
+  "stateHash": "5052e4ec1fcd953f44126ef9a7f635ea7eebe73fd426066b6efb7a208aa8f2b7",
+  "clock": "Day 3, 08:30",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Maddren Homestead",
+      "to": "Thistlebell Yard",
+      "location": "thistlebell_yard",
+      "elapsedMinutes": 12,
+      "clock": "Day 3, 08:30",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "travel",
+      "text": "The documented journey from Maddren Homestead reaches Thistlebell Yard.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "maddren_homestead",
+        "to": "thistlebell_yard",
+        "startMinute": 3378,
+        "elapsedMinutes": 12,
+        "describedRoute": "Maddoc leaves a neighbour on the orchard boundary lane after thanking her and walks the familiar nearby orchard road from Maddren Homestead to the shared Thistlebell Yard, keeping to the public route in clear morning weather.",
+        "means": "walking along the public orchard road",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 3390,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 2 NESTING 1156 ══════╗\n║ 08:30 · Morning · Cool         ║\n║ Thistlebell Yard           2 T ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ At Thistlebell Yard to ask … ║\n║ ◆ Maddoc has openly said he w… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "2 Nesting 1156 AC",
+      "label": "2 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 3,
+      "weekday": "Rootday"
+    },
+    "time": "08:30",
+    "daypart": "Morning",
+    "location": "Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "At Thistlebell Yard to ask about Hedra and Nessa",
+      "Maddoc has openly said he wants to be a Soul cultivator"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Rootday, 2 Nesting 1156 AC, 08:30. Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard. He hopes to ask after his parents, Hedra and Nessa, but their whereabouts and any yard worker's answer remain unconfirmed.\nPC: young learner, undecided; 2 T\nJOURNAL: A period of ordinary life passes at Maddren Homestead. | A period of ordinary life passes at Maddren Homestead. | The documented journey from Maddren Homestead reaches Thistlebell Yard.\nCURRENT: No opening hook"
+}

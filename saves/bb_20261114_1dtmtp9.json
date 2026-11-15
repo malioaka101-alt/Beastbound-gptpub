@@ -1149,11 +1149,35 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "travel",
+      "text": "The documented journey from Maddren Homestead reaches Thistlebell Yard.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "maddren_homestead",
+        "to": "thistlebell_yard",
+        "startMinute": 3378,
+        "elapsedMinutes": 12,
+        "describedRoute": "Maddoc leaves a neighbour on the orchard boundary lane after thanking her and walks the familiar nearby orchard road from Maddren Homestead to the shared Thistlebell Yard, keeping to the public route in clear morning weather.",
+        "means": "walking along the public orchard road",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 3390,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 3378,
-    "location": "maddren_homestead",
+    "minutes": 3390,
+    "location": "thistlebell_yard",
     "marketIndex": 0,
     "fenPressure": 1,
     "guildActivity": 2,
@@ -1659,7 +1683,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 53,
+    "revision": 54,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4908,13 +4932,66 @@
             }
           ]
         }
+      },
+      "maddoc_to_thistlebell_rootday_20261115_01": {
+        "revision": 54,
+        "mode": "rule",
+        "hash": "aa63940112d3a2898b2bad8d2f5088dc773d2ad08f589d5a735346a3716b4ccc",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Maddren Homestead",
+              "to": "Thistlebell Yard",
+              "location": "thistlebell_yard",
+              "elapsedMinutes": 12,
+              "clock": "Day 3, 08:30",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:30",
+              "type": "travel",
+              "text": "The documented journey from Maddren Homestead reaches Thistlebell Yard.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "maddren_homestead",
+                "to": "thistlebell_yard",
+                "startMinute": 3378,
+                "elapsedMinutes": 12,
+                "describedRoute": "Maddoc leaves a neighbour on the orchard boundary lane after thanking her and walks the familiar nearby orchard road from Maddren Homestead to the shared Thistlebell Yard, keeping to the public route in clear morning weather.",
+                "means": "walking along the public orchard road",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 3390,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Still searching for Hedra and Nessa",
-      "Ask actually met neighbours whether they saw either parent"
+      "At Thistlebell Yard to ask about Hedra and Nessa",
+      "Maddoc has openly said he wants to be a Soul cultivator"
     ],
-    "scene": "Rootday morning. From 07:18, Maddoc leaves the unanswered neighbouring cottage and searches the homestead boundary and nearby lanes for an hour. He tries to ask any encountered neighbours whether they have seen Hedra or Nessa. No neighbour, answer, or parent location is assumed without source evidence.",
+    "scene": "Rootday, 2 Nesting 1156 AC, 08:30. Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard. He hopes to ask after his parents, Hedra and Nessa, but their whereabouts and any yard worker's answer remain unconfirmed.",
     "journal": [
       {
         "day": 1,
@@ -5027,6 +5104,10 @@
       {
         "day": 3,
         "text": "An hour of ordinary searching for Maddoc's parents along neighbouring paths, looking for people to ask; no invented responses or discovered locations."
+      },
+      {
+        "day": 3,
+        "text": "Maddoc told an older neighbour his name and ambition to cultivate Soul; she suggested asking at Thistlebell Yard. He walked there without assuming his parents or anyone else is present."
       }
     ],
     "continuity": {
@@ -11133,6 +11214,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 2516,
             "hash": "c2daa151bc76102204bc8049c9079a7173170f0db04cc4d28cffe0c16ba845d2"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "maddren_homestead",
+            "to": "thistlebell_yard",
+            "startMinute": 3378,
+            "elapsedMinutes": 12,
+            "describedRoute": "Maddoc leaves a neighbour on the orchard boundary lane after thanking her and walks the familiar nearby orchard road from Maddren Homestead to the shared Thistlebell Yard, keeping to the public route in clear morning weather.",
+            "means": "walking along the public orchard road",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 3390,
+            "hash": "dd9ba07079a6772ba52744b7cf11b615bb161ae8a5a59309f49611a0fdc381b8"
           }
         ]
       },
