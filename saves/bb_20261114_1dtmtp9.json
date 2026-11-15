@@ -1611,7 +1611,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 49,
+    "revision": 50,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4708,13 +4708,39 @@
           },
           "events": []
         }
+      },
+      "maddoc_nessa_father_confirmed_20261115_02": {
+        "revision": 50,
+        "mode": "checkpoint",
+        "hash": "597fdef7588b6cc4d4d8b5e8e0a70d5a6ee7c34ce6242b252e5c8673d22999e3",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 07:00",
+          "output": {
+            "continuity": {
+              "recorded": 1,
+              "entries": [
+                {
+                  "id": "maddoc_nessa_is_father",
+                  "head": "a0cc627d8ff50be3fa4329de4550e98b814c994ea1ca7b15a3aa1977ef1107f9",
+                  "action": "record"
+                }
+              ],
+              "storyOnly": true,
+              "noMechanicalAgreementOrAbilityGranted": true
+            },
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Morning at Maddren Homestead, ready for household work",
-      "Hedra is Maddoc's mother; new work or payment must be genuinely agreed"
+      "Looking for mother Hedra and father Nessa at Maddren Homestead",
+      "Parent identities clarified; current whereabouts unverified"
     ],
-    "scene": "Maddoc sleeps in his family home after finishing Soul self-awareness at 22:00. At 07:00 the next morning he wakes at Maddren Homestead ready for another ordinary day of household work. No work, employer agreement, meal, wages, or advancement is assumed to have occurred overnight.",
+    "scene": "At Maddren Homestead at 07:00, Maddoc is looking for his parents near the orchard-side work area. Player-confirmed family clarification: Nessa Maddren is Maddoc's father; Hedra is his mother. This establishes kinship only, not either parent's location, actions or reply.",
     "journal": [
       {
         "day": 1,
@@ -4811,6 +4837,10 @@
       {
         "day": 3,
         "text": "Maddoc goes to bed for nine hours at Maddren Homestead, waking at 07:00 ready to approach his mother's ordinary household work tomorrow."
+      },
+      {
+        "day": 3,
+        "text": "Player-confirmed kinship: Nessa Maddren is Maddoc's father and Hedra Maddren is his mother. Their original second-guardian and guardian roles remain mechanically intact. Neither parent's physical presence nor any paid work is presumed."
       }
     ],
     "continuity": {
@@ -4882,6 +4912,40 @@
                 "previousSeal": null
               },
               "seal": "0864ea0f99289a2a577639138b5a5c6c4a4ab3c7eaa4cd0d27967c041647b5db"
+            }
+          ]
+        },
+        "maddoc_nessa_is_father": {
+          "id": "maddoc_nessa_is_father",
+          "subject": {
+            "kind": "person",
+            "id": "origin-kin:kin_2"
+          },
+          "category": "family-relationship",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "Nessa Maddren is Maddoc Maddren's father as confirmed by the player. The original 'second guardian' role remains a household responsibility rather than proof of his physical location or decisions.",
+          "head": "a0cc627d8ff50be3fa4329de4550e98b814c994ea1ca7b15a3aa1977ef1107f9",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_nessa_is_father",
+                "action": "record",
+                "subject": {
+                  "kind": "person",
+                  "id": "origin-kin:kin_2"
+                },
+                "category": "family-relationship",
+                "statement": "Nessa Maddren is Maddoc Maddren's father as confirmed by the player. The original 'second guardian' role remains a household responsibility rather than proof of his physical location or decisions.",
+                "witness": "Nessa Maddren is Maddoc's father",
+                "visibility": "player-known",
+                "minute": 3300,
+                "day": 3,
+                "turnId": "maddoc_nessa_father_confirmed_20261115_02",
+                "previousSeal": null
+              },
+              "seal": "a0cc627d8ff50be3fa4329de4550e98b814c994ea1ca7b15a3aa1977ef1107f9"
             }
           ]
         }

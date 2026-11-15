@@ -1,0 +1,70 @@
+{
+  "id": "maddoc_nessa_father_confirmed_20261115_02",
+  "ok": true,
+  "applied": true,
+  "revision": 50,
+  "stateHash": "63852d60b19a05a173b3457558577eb67fd445b6a6445088c02a4ddde5f16cf6",
+  "clock": "Day 3, 07:00",
+  "output": {
+    "continuity": {
+      "recorded": 1,
+      "entries": [
+        {
+          "id": "maddoc_nessa_is_father",
+          "head": "a0cc627d8ff50be3fa4329de4550e98b814c994ea1ca7b15a3aa1977ef1107f9",
+          "action": "record"
+        }
+      ],
+      "storyOnly": true,
+      "noMechanicalAgreementOrAbilityGranted": true
+    },
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 2 NESTING 1156 ══════╗\n║ 07:00 · Morning · Cool         ║\n║ Maddren Homestead          2 T ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Looking for mother Hedra an… ║\n║ ◆ Parent identities clarified… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "2 Nesting 1156 AC",
+      "label": "2 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 3,
+      "weekday": "Workday 2"
+    },
+    "time": "07:00",
+    "daypart": "Morning",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Looking for mother Hedra and father Nessa at Maddren Homestead",
+      "Parent identities clarified; current whereabouts unverified"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Maddren Homestead at 07:00, Maddoc is looking for his parents near the orchard-side work area. Player-confirmed family clarification: Nessa Maddren is Maddoc's father; Hedra is his mother. This establishes kinship only, not either parent's location, actions or reply.\nPC: young learner, undecided; 2 T\nJOURNAL: A period of ordinary life passes at Maddren Homestead. | The practitioner begins genuine independent soul self-awareness work at Maddren Homestead. | soul practice: self-awareness; 1 training points.\nCURRENT: No opening hook"
+}
