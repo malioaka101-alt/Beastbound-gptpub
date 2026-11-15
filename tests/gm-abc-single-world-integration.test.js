@@ -13,7 +13,8 @@ const s=New.create({seed:29873,slug:'disposable_gm_abc_single_save',
 const social=(op,params={})=>R.act(s,{system:'social',operation:op,params});
 const world=(op,params={})=>R.act(s,{system:'world',operation:op,params});
 const creation=(op,params={})=>R.act(s,{system:'creation',operation:op,params});
-const baselineCoins=s.player.coins,baselineStock=s.player.inventory.clean_rations;
+const baselineCoins=s.player.coins,baselineStock=s.player.inventory.clean_rations,
+ baselinePartners=[...(s.player.partnerIds||[])];
 // 3C: an existing personally held ration supports a real observed variant
 // with exactly one original appraisal. This is not an extra physical good.
 const owned=social('documentOwnedMaterial',{ownerId:'player',
@@ -82,7 +83,7 @@ b.individualLife.rngState=0xffffffff; // independent withdrawal fixture
 const approach=world('gmWildEngage',{beastId:b.id});
 A.equal(approach.beastWithdrew,true);
 A.equal(s.encounter,null);
-A.equal(s.player.partnerIds.length,0);
+A.deepEqual(s.player.partnerIds,baselinePartners);
 A.equal(b.consent,undefined);
 A.equal(GM.verify(s,b),true);
 // 3B: the independently real teacher must consent to membership, then the
@@ -145,5 +146,5 @@ A.equal(Groups.validate(Groups.lookup(saved.table.realm,group.id),
 A.equal(Material.verify(saved),true);
 A.equal(GM.verify(saved,saved.beasts[b.id]),true);
 A.equal(saved.table.materialRecords[sample.materialId].status,'released');
-A.equal(saved.player.partnerIds.length,0);
+A.deepEqual(saved.player.partnerIds,baselinePartners);
 console.log('Single-world GM field integration: real owned material identity, one independently living beast, willing teacher and original learner practice coexist in one saved world; no extra goods, funds, ranks or forced consent');
