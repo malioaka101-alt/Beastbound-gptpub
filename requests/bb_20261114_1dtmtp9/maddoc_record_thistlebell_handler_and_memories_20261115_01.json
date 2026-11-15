@@ -1,0 +1,47 @@
+{
+  "id": "maddoc_record_thistlebell_handler_and_memories_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "introduceWitnessedPerson",
+  "params": {
+    "name": "Darron Pike",
+    "profession": "Beast-handling yard worker",
+    "purpose": "Check carrying harnesses and keep ordinary shared yard duties safe for animals, handlers and visitors.",
+    "personality": "Broad-humoured, patient and teasing, attentive to animals and straightforward about what he has not seen.",
+    "background": "A regular worker at Thistlebell Yard in Orchard Vales, with his own professional obligations and independent local life.",
+    "witness": "a broad-shouldered handler checked a pack beast's harness"
+  },
+  "scene": "At 08:30 in Thistlebell Yard, Maddoc is talking to a regular beast handler. The older neighbour heard Maddoc say he wanted to become a Soul cultivator. The yard handler heard Maddoc joke about a secret sibling while seeking Hedra and Nessa. Neither parent has been located. The worker suggested asking other handlers; neither acquaintance has told Maddoc a given name.",
+  "summary": "Maddoc has met an older neighbour by his family's lane and a worker at Thistlebell Yard. Both are real independent locals, not guaranteed on future visits; each heard only their own conversation. Their personal names have not been spoken to Maddoc.",
+  "focus": [
+    "At Thistlebell Yard; ask other handlers about parents",
+    "Minor locals may remember Maddoc but are not guaranteed present"
+  ],
+  "continuity": [
+    {
+      "id": "maddoc_neighbour_soul_ambition_0830",
+      "action": "record",
+      "subject": {
+        "kind": "person",
+        "id": "emergent:person_2"
+      },
+      "category": "npc-knowledge",
+      "statement": "The older orchard-lane neighbour heard Maddoc introduce himself, ask after Hedra and Nessa, and say he wanted to become a Soul cultivator. She had not seen the parents and suggested the yard.",
+      "witness": "The older neighbour heard Maddoc say he wanted to become a Soul cultivator",
+      "visibility": "player-known"
+    },
+    {
+      "id": "maddoc_handler_secret_sibling_joke_0830",
+      "action": "record",
+      "subject": {
+        "kind": "person",
+        "id": "emergent:person_3"
+      },
+      "category": "npc-knowledge",
+      "statement": "The Thistlebell handler heard Maddoc joke about the possibility of a secret sibling while searching for Hedra and Nessa. He had not seen the parents that morning and suggested asking other handlers.",
+      "witness": "The yard handler heard Maddoc joke about a secret sibling while seeking Hedra and Nessa",
+      "visibility": "player-known"
+    }
+  ]
+}
