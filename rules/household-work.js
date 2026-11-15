@@ -52,6 +52,8 @@ function perform(s,p={}){
  const now=s.world.minutes,day=Math.floor(now/DAY),clock=now%DAY;
  if(clock<7*60||clock>16*60)
   throw Error('The family member must be available during an actual ordinary work period');
+ const difficulty=GM.adjust(s,Difficulty.householdWork(s,{person,approach}),
+  p.gmContext,{owner:'social.householdWork',min:8,max:18});
  s.table||={};s.table.householdWork||={version:1,records:[]};
  const ledger=s.table.householdWork;
  if(ledger.version!==1||!Array.isArray(ledger.records)||
@@ -61,8 +63,6 @@ function perform(s,p={}){
   throw Error('This family member has already considered one household job this day');
  if(s.player.stamina<3||s.table.combatants?.player?.stamina<3)
   throw Error('Routine physical work requires genuine available Stamina');
- const difficulty=GM.adjust(s,Difficulty.householdWork(s,{person,approach}),
-  p.gmContext,{owner:'social.householdWork',min:8,max:18});
  const fundsBefore=Core.int(person.funds,'original family funds',0,100),
    playerBefore=Core.int(s.player.coins,'original player Talons',0,100000000),
    staminaBefore=s.player.stamina,originalRng=person.rngState;
