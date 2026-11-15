@@ -24,8 +24,8 @@ function witness(s,input,{allowNoRoll=false}={}){
   throw Error('GM contextual ruling needs a real scene quote and specific pre-roll explanation, never a chosen DC or outcome');
  if(input.kind==='adjust'){
   if(!Number.isInteger(input.adjustment)||input.adjustment===0||
-     Math.abs(input.adjustment)>5)
-   throw Error('GM may change the original owner DC by at most five points, not choose a final DC');
+     Math.abs(input.adjustment)>4)
+   throw Error('GM may change the original owner DC by at most four points, not choose a final DC');
  }else if(!allowNoRoll||input.adjustment!==undefined)
   throw Error('No-roll adjudication is only allowed for actually witnessed mundane checks, with no numeric adjustment');
  const text=sourceText(s,input.source);
