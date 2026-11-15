@@ -481,4 +481,72 @@ function responsibilityWorkStatus(s,p={}){
  return G.roleWorkStatus(w,e.id,{roleId:p.roleId});
 }
 
-module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus,offerResponsibility,responsibilityStatus,observeResponsibilityWork,responsibilityWorkStatus};
+
+/*
+ * A founder can study a genuinely demonstrated ordinary professional method
+ * at the real group's site. This is a witnessed independent learner practice
+ * using the ORIGINAL mastery d20, not an extra teacher roll or a college
+ * accreditation. The instructor already voluntarily worked and succeeded.
+ */
+function studyWitnessedGroupMethod(s,p={}){
+ fields(p,['groupId','serviceId','skill','focus','minutes'],
+  ['groupId','serviceId','skill','focus']);
+ const Mastery=require('./mastery-lifepath'),Careers=require('../world/person-careers');
+ const w=Realm.peek(s),e=G.lookup(w,p.groupId),
+  row=e?.roleWork?.find(x=>x.id===p.serviceId),q=row?.source,
+  role=e?.internalRoles?.find(x=>x.id===q?.roleId),
+  site=Places.location(s),day=Math.floor(s.world.minutes/1440),
+  teacher=q?.memberActorId?.startsWith('emergent:')?
+   w?.emergentPeople?.people?.[q.personId]:null,
+  job=q?.originalCareerReceipt?.source?.task,
+  duty=teacher?.career?.authoredDuties?.find(d=>d.id===job?.authoredDutyId);
+ if(!e||e.origin!=='player-declaration'||
+   e.founder.name!==s.player?.name||!site||
+   site.id!==q?.location||A.R[site.regionId]?.polity!==e.polity||
+   !row||row.study!==undefined||!G.verifyRoleWork(e,row,w)||
+   !role?.agreed||!q||q.day!==day||
+   !teacher||!Careers.verify(teacher)||
+   !job||q.originalCareerReceipt.source.outcome?.success!==true||
+   !duty||duty.method!==job.method||duty.method!==p.skill||
+   duty.domain!=='education'||
+   !/teach|instruct|guide|demonstrat|mentor|coach/i.test(
+    duty.role+' '+duty.goal)||
+   typeof p.skill!=='string'||!Object.hasOwn(s.player.skills||{},p.skill))
+  throw Error('Study needs this site, a recent genuinely successful original educational duty, and an unused consented member-work witness; no assumed teacher, facility or curriculum');
+ // The worker's original demonstration exists already. A different
+ // session or remote scholar cannot be manufactured by the study request.
+ const work=q.originalCareerReceipt.source;
+ const practice={path:'profession',skill:p.skill,
+  focus:p.focus,minutes:p.minutes??60};
+ Mastery.validateAction(s,practice); // No teacher/resource mutation on invalid work.
+ const began=s.world.minutes;
+ const studied=Mastery.practice(s,practice); // Exactly ONE original learner check.
+ const mastery=Mastery.current(s,'profession',p.skill),
+  event=mastery.record?.events?.at(-1);
+ if(!event||event.fromMinute!==began||!event.checkHash)
+  throw Error('The original learner mastery did not produce its actual source receipt');
+ const source={origin:'witnessed-original-group-method-study-v1',
+  groupId:e.id,serviceId:row.id,roleId:role.id,
+  originalRoleHash:role.sourceHash,originalWorkHash:row.workReceiptHash,
+  teacherId:q.memberActorId,learner:s.player.name,
+  skill:p.skill,focus:p.focus,masteryKey:mastery.id,
+  masteryCheckHash:event.checkHash,earnedProgress:studied.earnedProgress,
+  masteryEvent:structuredClone(event),masteryEventHash:G.hash(event),
+  fromMinute:began,throughMinute:s.world.minutes,
+  noExtraTeacherRoll:true,noFreeRankOrTeachingLicence:true};
+ row.study={source,sourceHash:G.hash(source)};
+ if(!G.verifyRoleWork(e,row,Realm.peek(s)))
+  throw Error('The original group work and learner practice sources did not reconcile');
+ C.event(s,'progress','You practise the observed '+p.skill+
+  ' method at '+site.name+' after its genuine local demonstration.',{
+   origin:source.origin,groupId:e.id,serviceId:row.id,
+   teacherId:q.memberActorId,originalWorkHash:row.workReceiptHash,
+   masteryCheckHash:event.checkHash,noAdditionalTeacherRoll:true,
+   noTeachingLicenceOrInstitutionalPay:true});
+ return {...studied,groupId:e.id,serviceId:row.id,
+  teacherId:q.memberActorId,originalWorkHash:row.workReceiptHash,
+  witnessedStudy:true,noExtraTeacherRollOrWage:true,
+  noAutomaticSkillRankOrAcademyAccreditation:true};
+}
+
+module.exports={invitation,status,taskRequest,coordinatorTaskRequest,taskStatus,offerResponsibility,responsibilityStatus,observeResponsibilityWork,responsibilityWorkStatus,studyWitnessedGroupMethod};

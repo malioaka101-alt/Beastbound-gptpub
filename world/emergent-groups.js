@@ -2223,6 +2223,41 @@ function verifyRoleWork(e,row,w=null){
   q.noGroupPayrollOrProperty!==true||
   q.noAutomaticRoleCompletion!==true)
   return false;
+
+ // A documented study uses this original successful career receipt as
+ // evidence; it does not rerun the worker, award an institutional rank,
+ // or rewrite the group's signed work record.
+ if(row.study!==undefined){
+  const t=row.study,m=t?.source;
+  if(!t||!m||t.sourceHash!==hash(m)||
+    m.origin!=='witnessed-original-group-method-study-v1'||
+    m.groupId!==e.id||m.serviceId!==row.id||
+    m.roleId!==row.roleId||m.originalRoleHash!==q.originalRoleHash||
+    m.originalWorkHash!==row.workReceiptHash||
+    m.teacherId!==q.memberActorId||m.learner!==e.founder.name||
+    m.skill!==job?.method||
+    !m.masteryEvent||m.masteryEventHash!==hash(m.masteryEvent)||
+    m.masteryEvent.checkHash!==m.masteryCheckHash||
+    m.masteryEvent.fromMinute!==m.fromMinute||
+    m.masteryEvent.focus!==m.focus||
+    m.masteryEvent.earned!==m.earnedProgress||
+    !Number.isInteger(m.masteryEvent.day)||
+    m.masteryEvent.day!==Math.floor(m.fromMinute/1440)||
+    typeof m.focus!=='string'||
+    m.focus.length<3||m.focus.length>100||
+    typeof m.masteryKey!=='string'||m.masteryKey.length>160||
+    typeof m.masteryCheckHash!=='string'||
+    !/^[a-f0-9]{64}$/.test(m.masteryCheckHash)||
+    !Number.isInteger(m.earnedProgress)||m.earnedProgress<0||
+    !Number.isInteger(m.fromMinute)||m.fromMinute<0||
+    !Number.isInteger(m.throughMinute)||
+    m.throughMinute-m.fromMinute<15||
+    m.throughMinute-m.fromMinute>480||
+    Math.floor(m.fromMinute/1440)!==q.day||
+    m.noExtraTeacherRoll!==true||
+    m.noFreeRankOrTeachingLicence!==true||
+    r.source.outcome?.success!==true)return false;
+ }
  if(w){
   const Careers=require('./person-careers');
   if(!person||person.origin!=='gm-witnessed-lived-person-v1'||
@@ -2297,7 +2332,11 @@ function roleWorkStatus(w,groupId,{roleId}={}){
    originalWorkHash:x.workReceiptHash,
    originalRoleHash:x.source.originalRoleHash,
    noExtraMoneyOrWorkRoll:true,noAutomaticTrainingOrEmployment:true,
-   noProofOfSpecificRoleCompletion:true})),
+   noProofOfSpecificRoleCompletion:true,
+   ...(x.study?{studiedMethod:{skill:x.study.source.skill,
+    focus:x.study.source.focus,masteryCheckHash:x.study.source.masteryCheckHash,
+    earnedProgress:x.study.source.earnedProgress,
+    noAutomaticLicence:true}}:{})})),
   note:'An actual independent professional worked at their agreed role site during its term. This does not prove they fulfilled a distinct group project, gained a teaching licence, drew a salary or transferred any facility.'};
 }
 
