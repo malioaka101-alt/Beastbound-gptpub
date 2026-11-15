@@ -55,7 +55,8 @@ function populate(seed=701910){
  A.ok(arrived.arrived);
  A.equal(Presence.localStatus(one,Realm.peek(one)).people.filter(x=>x.npcId.startsWith('settlement:')).length,0,
   'Village arrival is not proof of standing in every house or workshop');
- A.equal(Rules.act(one,{system:'world',operation:'visitSettlementSite',params:{siteId:'handling_pens'}}).alreadyHere,undefined);
+ A.throws(()=>Rules.act(one,{system:'world',operation:'visitSettlementSite',params:{siteId:'handling_pens'}}),/not an accessible/);
+ A.equal(Rules.act(one,{system:'world',operation:'visitSettlementSite',params:{siteId:'market_lane'}}).arrived,true);
  A.throws(()=>Rules.act(one,{system:'world',operation:'visitSettlementSite',params:{siteId:'storage'}}),/not an accessible/);
  A.throws(()=>Rules.act(one,{system:'world',operation:'visitSettlementSite',params:{siteId:'made_up_shed'}}),/not an accessible/);
  const current=E.exportGame(one);
