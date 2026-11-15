@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 3951775931,
-  "rngState": 3728048908,
+  "rngState": 2869901729,
   "sequence": 0,
   "log": [
     {
@@ -871,10 +871,240 @@
         "arrivalKnown": true,
         "noAutomaticPermission": true
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 17:56",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "maddren_homestead",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "feeTalons": 0,
+        "startMinute": 2516,
+        "timeDays": 0.034027777777777775,
+        "partTime": false
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 17:56",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 13 +2 = 15 vs DC 13 → success (+2)",
+      "details": {
+        "dice": [
+          13
+        ],
+        "roll": 13,
+        "modifier": 2,
+        "dc": 13,
+        "total": 15,
+        "margin": 2,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 18:45",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 1 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 1,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "theoreticalGuidance": null,
+        "potentialAptitude": {
+          "dimension": "soulDepth",
+          "score": 4,
+          "modifier": 0,
+          "rating": "developing",
+          "available": true,
+          "noStageCap": true
+        },
+        "location": "maddren_homestead",
+        "elapsedMinutes": 49,
+        "staminaSpent": 1
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 19:15",
+      "type": "story",
+      "text": "A period of ordinary life passes at Maddren Homestead.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "maddren_homestead",
+        "elapsedMinutes": 30,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 19:15",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "maddren_homestead",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "feeTalons": 0,
+        "startMinute": 2595,
+        "timeDays": 0.11458333333333333,
+        "partTime": false
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 19:15",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 14 +2 = 16 vs DC 13 → success (+3)",
+      "details": {
+        "dice": [
+          14
+        ],
+        "roll": 14,
+        "modifier": 2,
+        "dc": 13,
+        "total": 16,
+        "margin": 3,
+        "degree": "success",
+        "success": true,
+        "progress": 1,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 22:00",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 1 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 1,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "theoreticalGuidance": null,
+        "potentialAptitude": {
+          "dimension": "soulDepth",
+          "score": 4,
+          "modifier": 0,
+          "rating": "developing",
+          "available": true,
+          "noStageCap": true
+        },
+        "location": "maddren_homestead",
+        "elapsedMinutes": 165,
+        "staminaSpent": 2
+      }
     }
   ],
   "world": {
-    "minutes": 2516,
+    "minutes": 2760,
     "location": "maddren_homestead",
     "marketIndex": -1,
     "fenPressure": 2,
@@ -902,7 +1132,7 @@
     "path": "undecided",
     "health": 48,
     "maxHealth": 48,
-    "stamina": 32,
+    "stamina": 29,
     "maxStamina": 36,
     "mana": 24,
     "maxMana": 24,
@@ -1381,7 +1611,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 43,
+    "revision": 47,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -3400,13 +3630,1052 @@
             }
           ]
         }
+      },
+      "maddoc_evening_notes_dinner_soul_20261115_01_s1": {
+        "revision": 44,
+        "mode": "rule",
+        "hash": "c608b0526fe6a20a3dd3549f0a782073bcd3c02512f7644bfe01b6e578eeb2b3",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 18:45",
+          "output": {
+            "rules": {
+              "system": "soul",
+              "target": "phase1",
+              "method": "self-awareness",
+              "check": {
+                "dice": [
+                  13
+                ],
+                "roll": 13,
+                "modifier": 2,
+                "dc": 13,
+                "total": 15,
+                "margin": 2,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              },
+              "earned": 1,
+              "progress": 5,
+              "required": 100,
+              "complication": null,
+              "difficulty": {
+                "baseDC": 12,
+                "dc": 13,
+                "netAdjustment": 1,
+                "factors": [
+                  {
+                    "id": "independent-or-brief-route",
+                    "delta": 2,
+                    "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                  },
+                  {
+                    "id": "earned-method-familiarity",
+                    "delta": -1,
+                    "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                  }
+                ],
+                "capApplied": false,
+                "sourceBound": true,
+                "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+              },
+              "timeDays": 0.034027777777777775,
+              "elapsedMinutes": 49,
+              "staminaSpent": 1,
+              "feeTalons": 0,
+              "route": "independent",
+              "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+              "theoreticalGuidance": null,
+              "potentialAptitude": {
+                "dimension": "soulDepth",
+                "score": 4,
+                "modifier": 0,
+                "rating": "developing",
+                "available": true,
+                "noStageCap": true
+              }
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 17:56",
+              "type": "world",
+              "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+              "details": {
+                "origin": "verified-independent-discipline-practice",
+                "system": "soul",
+                "target": "phase1",
+                "method": "self-awareness",
+                "location": "maddren_homestead",
+                "biome": "settlement",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "feeTalons": 0,
+                "startMinute": 2516,
+                "timeDays": 0.034027777777777775,
+                "partTime": false
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 17:56",
+              "type": "roll",
+              "text": "🎲 soul phase1 — self-awareness: d20 13 +2 = 15 vs DC 13 → success (+2)",
+              "details": {
+                "dice": [
+                  13
+                ],
+                "roll": 13,
+                "modifier": 2,
+                "dc": 13,
+                "total": 15,
+                "margin": 2,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 18:45",
+              "type": "progress",
+              "text": "soul practice: self-awareness; 1 training points.",
+              "details": {
+                "system": "soul",
+                "target": "phase1",
+                "earned": 1,
+                "complication": null,
+                "route": "independent",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "theoreticalGuidance": null,
+                "potentialAptitude": {
+                  "dimension": "soulDepth",
+                  "score": 4,
+                  "modifier": 0,
+                  "rating": "developing",
+                  "available": true,
+                  "noStageCap": true
+                },
+                "location": "maddren_homestead",
+                "elapsedMinutes": 49,
+                "staminaSpent": 1
+              }
+            }
+          ]
+        }
+      },
+      "maddoc_evening_notes_dinner_soul_20261115_01_s2": {
+        "revision": 45,
+        "mode": "rule",
+        "hash": "561031779f8c781a8f27e7c9547cbf6ad281894b993cdca8f06bca8310089a6b",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 19:15",
+          "output": {
+            "rules": {
+              "waited": true,
+              "elapsedMinutes": 30,
+              "daysPassed": 0,
+              "location": "maddren_homestead",
+              "clock": "Day 2, 19:15",
+              "sixdayTicks": [],
+              "monthTicks": [],
+              "noTrainingOrResearchAward": true,
+              "noAutomaticWagesOrContracts": true,
+              "lifeNeedsNotCertified": true,
+              "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "story",
+              "text": "A period of ordinary life passes at Maddren Homestead.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "maddren_homestead",
+                "elapsedMinutes": 30,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
+      },
+      "maddoc_evening_notes_dinner_soul_20261115_01_s3": {
+        "revision": 46,
+        "mode": "rule",
+        "hash": "65968cb091673f409324638d6aadcbdcce29a7a1fd8301477c027beb3b08dbf1",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 22:00",
+          "output": {
+            "rules": {
+              "system": "soul",
+              "target": "phase1",
+              "method": "self-awareness",
+              "check": {
+                "dice": [
+                  14
+                ],
+                "roll": 14,
+                "modifier": 2,
+                "dc": 13,
+                "total": 16,
+                "margin": 3,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              },
+              "earned": 1,
+              "progress": 6,
+              "required": 100,
+              "complication": null,
+              "difficulty": {
+                "baseDC": 12,
+                "dc": 13,
+                "netAdjustment": 1,
+                "factors": [
+                  {
+                    "id": "independent-or-brief-route",
+                    "delta": 2,
+                    "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                  },
+                  {
+                    "id": "earned-method-familiarity",
+                    "delta": -1,
+                    "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                  }
+                ],
+                "capApplied": false,
+                "sourceBound": true,
+                "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+              },
+              "timeDays": 0.11458333333333333,
+              "elapsedMinutes": 165,
+              "staminaSpent": 2,
+              "feeTalons": 0,
+              "route": "independent",
+              "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+              "theoreticalGuidance": null,
+              "potentialAptitude": {
+                "dimension": "soulDepth",
+                "score": 4,
+                "modifier": 0,
+                "rating": "developing",
+                "available": true,
+                "noStageCap": true
+              }
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "world",
+              "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+              "details": {
+                "origin": "verified-independent-discipline-practice",
+                "system": "soul",
+                "target": "phase1",
+                "method": "self-awareness",
+                "location": "maddren_homestead",
+                "biome": "settlement",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "feeTalons": 0,
+                "startMinute": 2595,
+                "timeDays": 0.11458333333333333,
+                "partTime": false
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "roll",
+              "text": "🎲 soul phase1 — self-awareness: d20 14 +2 = 16 vs DC 13 → success (+3)",
+              "details": {
+                "dice": [
+                  14
+                ],
+                "roll": 14,
+                "modifier": 2,
+                "dc": 13,
+                "total": 16,
+                "margin": 3,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 22:00",
+              "type": "progress",
+              "text": "soul practice: self-awareness; 1 training points.",
+              "details": {
+                "system": "soul",
+                "target": "phase1",
+                "earned": 1,
+                "complication": null,
+                "route": "independent",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "theoreticalGuidance": null,
+                "potentialAptitude": {
+                  "dimension": "soulDepth",
+                  "score": 4,
+                  "modifier": 0,
+                  "rating": "developing",
+                  "available": true,
+                  "noStageCap": true
+                },
+                "location": "maddren_homestead",
+                "elapsedMinutes": 165,
+                "staminaSpent": 2
+              }
+            }
+          ]
+        }
+      },
+      "maddoc_evening_notes_dinner_soul_20261115_01": {
+        "revision": 47,
+        "mode": "sequence",
+        "hash": "00f6795ada5c6da2ab0ab13b4274a576595d4ed447764f17716901adbfbb8c1c",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 22:00",
+          "output": {
+            "sequence": {
+              "completed": true,
+              "steps": [
+                {
+                  "index": 1,
+                  "mode": "rule",
+                  "system": "discipline",
+                  "operation": "practice",
+                  "clock": "Day 2, 18:45",
+                  "output": {
+                    "rules": {
+                      "system": "soul",
+                      "target": "phase1",
+                      "method": "self-awareness",
+                      "check": {
+                        "dice": [
+                          13
+                        ],
+                        "roll": 13,
+                        "modifier": 2,
+                        "dc": 13,
+                        "total": 15,
+                        "margin": 2,
+                        "degree": "success",
+                        "success": true,
+                        "progress": 1,
+                        "naturalBonus": 0
+                      },
+                      "earned": 1,
+                      "progress": 5,
+                      "required": 100,
+                      "complication": null,
+                      "difficulty": {
+                        "baseDC": 12,
+                        "dc": 13,
+                        "netAdjustment": 1,
+                        "factors": [
+                          {
+                            "id": "independent-or-brief-route",
+                            "delta": 2,
+                            "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                          },
+                          {
+                            "id": "earned-method-familiarity",
+                            "delta": -1,
+                            "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                          }
+                        ],
+                        "capApplied": false,
+                        "sourceBound": true,
+                        "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                      },
+                      "timeDays": 0.034027777777777775,
+                      "elapsedMinutes": 49,
+                      "staminaSpent": 1,
+                      "feeTalons": 0,
+                      "route": "independent",
+                      "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                      "theoreticalGuidance": null,
+                      "potentialAptitude": {
+                        "dimension": "soulDepth",
+                        "score": 4,
+                        "modifier": 0,
+                        "rating": "developing",
+                        "available": true,
+                        "noStageCap": true
+                      }
+                    }
+                  },
+                  "events": [
+                    {
+                      "day": 2,
+                      "time": "Day 2, 17:56",
+                      "type": "world",
+                      "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+                      "details": {
+                        "origin": "verified-independent-discipline-practice",
+                        "system": "soul",
+                        "target": "phase1",
+                        "method": "self-awareness",
+                        "location": "maddren_homestead",
+                        "biome": "settlement",
+                        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                        "actualDC": 13,
+                        "difficulty": {
+                          "baseDC": 12,
+                          "dc": 13,
+                          "netAdjustment": 1,
+                          "factors": [
+                            {
+                              "id": "independent-or-brief-route",
+                              "delta": 2,
+                              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                            },
+                            {
+                              "id": "earned-method-familiarity",
+                              "delta": -1,
+                              "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                            }
+                          ],
+                          "capApplied": false,
+                          "sourceBound": true,
+                          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                        },
+                        "feeTalons": 0,
+                        "startMinute": 2516,
+                        "timeDays": 0.034027777777777775,
+                        "partTime": false
+                      }
+                    },
+                    {
+                      "day": 2,
+                      "time": "Day 2, 17:56",
+                      "type": "roll",
+                      "text": "🎲 soul phase1 — self-awareness: d20 13 +2 = 15 vs DC 13 → success (+2)",
+                      "details": {
+                        "dice": [
+                          13
+                        ],
+                        "roll": 13,
+                        "modifier": 2,
+                        "dc": 13,
+                        "total": 15,
+                        "margin": 2,
+                        "degree": "success",
+                        "success": true,
+                        "progress": 1,
+                        "naturalBonus": 0
+                      }
+                    },
+                    {
+                      "day": 2,
+                      "time": "Day 2, 18:45",
+                      "type": "progress",
+                      "text": "soul practice: self-awareness; 1 training points.",
+                      "details": {
+                        "system": "soul",
+                        "target": "phase1",
+                        "earned": 1,
+                        "complication": null,
+                        "route": "independent",
+                        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                        "actualDC": 13,
+                        "difficulty": {
+                          "baseDC": 12,
+                          "dc": 13,
+                          "netAdjustment": 1,
+                          "factors": [
+                            {
+                              "id": "independent-or-brief-route",
+                              "delta": 2,
+                              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                            },
+                            {
+                              "id": "earned-method-familiarity",
+                              "delta": -1,
+                              "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                            }
+                          ],
+                          "capApplied": false,
+                          "sourceBound": true,
+                          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                        },
+                        "theoreticalGuidance": null,
+                        "potentialAptitude": {
+                          "dimension": "soulDepth",
+                          "score": 4,
+                          "modifier": 0,
+                          "rating": "developing",
+                          "available": true,
+                          "noStageCap": true
+                        },
+                        "location": "maddren_homestead",
+                        "elapsedMinutes": 49,
+                        "staminaSpent": 1
+                      }
+                    }
+                  ]
+                },
+                {
+                  "index": 2,
+                  "mode": "rule",
+                  "system": "world",
+                  "operation": "wait",
+                  "clock": "Day 2, 19:15",
+                  "output": {
+                    "rules": {
+                      "waited": true,
+                      "elapsedMinutes": 30,
+                      "daysPassed": 0,
+                      "location": "maddren_homestead",
+                      "clock": "Day 2, 19:15",
+                      "sixdayTicks": [],
+                      "monthTicks": [],
+                      "noTrainingOrResearchAward": true,
+                      "noAutomaticWagesOrContracts": true,
+                      "lifeNeedsNotCertified": true,
+                      "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+                    }
+                  },
+                  "events": [
+                    {
+                      "day": 2,
+                      "time": "Day 2, 19:15",
+                      "type": "story",
+                      "text": "A period of ordinary life passes at Maddren Homestead.",
+                      "details": {
+                        "origin": "gm-judged-ordinary-time",
+                        "location": "maddren_homestead",
+                        "elapsedMinutes": 30,
+                        "daysPassed": 0,
+                        "noResearchOrWorkProgress": true,
+                        "noAutomaticWages": true,
+                        "noAutomaticAgreement": true,
+                        "lifeNeedsRequireActualContext": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "index": 3,
+                  "mode": "rule",
+                  "system": "discipline",
+                  "operation": "practice",
+                  "clock": "Day 2, 22:00",
+                  "output": {
+                    "rules": {
+                      "system": "soul",
+                      "target": "phase1",
+                      "method": "self-awareness",
+                      "check": {
+                        "dice": [
+                          14
+                        ],
+                        "roll": 14,
+                        "modifier": 2,
+                        "dc": 13,
+                        "total": 16,
+                        "margin": 3,
+                        "degree": "success",
+                        "success": true,
+                        "progress": 1,
+                        "naturalBonus": 0
+                      },
+                      "earned": 1,
+                      "progress": 6,
+                      "required": 100,
+                      "complication": null,
+                      "difficulty": {
+                        "baseDC": 12,
+                        "dc": 13,
+                        "netAdjustment": 1,
+                        "factors": [
+                          {
+                            "id": "independent-or-brief-route",
+                            "delta": 2,
+                            "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                          },
+                          {
+                            "id": "earned-method-familiarity",
+                            "delta": -1,
+                            "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                          }
+                        ],
+                        "capApplied": false,
+                        "sourceBound": true,
+                        "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                      },
+                      "timeDays": 0.11458333333333333,
+                      "elapsedMinutes": 165,
+                      "staminaSpent": 2,
+                      "feeTalons": 0,
+                      "route": "independent",
+                      "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                      "theoreticalGuidance": null,
+                      "potentialAptitude": {
+                        "dimension": "soulDepth",
+                        "score": 4,
+                        "modifier": 0,
+                        "rating": "developing",
+                        "available": true,
+                        "noStageCap": true
+                      }
+                    }
+                  },
+                  "events": [
+                    {
+                      "day": 2,
+                      "time": "Day 2, 19:15",
+                      "type": "world",
+                      "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+                      "details": {
+                        "origin": "verified-independent-discipline-practice",
+                        "system": "soul",
+                        "target": "phase1",
+                        "method": "self-awareness",
+                        "location": "maddren_homestead",
+                        "biome": "settlement",
+                        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                        "actualDC": 13,
+                        "difficulty": {
+                          "baseDC": 12,
+                          "dc": 13,
+                          "netAdjustment": 1,
+                          "factors": [
+                            {
+                              "id": "independent-or-brief-route",
+                              "delta": 2,
+                              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                            },
+                            {
+                              "id": "earned-method-familiarity",
+                              "delta": -1,
+                              "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                            }
+                          ],
+                          "capApplied": false,
+                          "sourceBound": true,
+                          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                        },
+                        "feeTalons": 0,
+                        "startMinute": 2595,
+                        "timeDays": 0.11458333333333333,
+                        "partTime": false
+                      }
+                    },
+                    {
+                      "day": 2,
+                      "time": "Day 2, 19:15",
+                      "type": "roll",
+                      "text": "🎲 soul phase1 — self-awareness: d20 14 +2 = 16 vs DC 13 → success (+3)",
+                      "details": {
+                        "dice": [
+                          14
+                        ],
+                        "roll": 14,
+                        "modifier": 2,
+                        "dc": 13,
+                        "total": 16,
+                        "margin": 3,
+                        "degree": "success",
+                        "success": true,
+                        "progress": 1,
+                        "naturalBonus": 0
+                      }
+                    },
+                    {
+                      "day": 2,
+                      "time": "Day 2, 22:00",
+                      "type": "progress",
+                      "text": "soul practice: self-awareness; 1 training points.",
+                      "details": {
+                        "system": "soul",
+                        "target": "phase1",
+                        "earned": 1,
+                        "complication": null,
+                        "route": "independent",
+                        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                        "actualDC": 13,
+                        "difficulty": {
+                          "baseDC": 12,
+                          "dc": 13,
+                          "netAdjustment": 1,
+                          "factors": [
+                            {
+                              "id": "independent-or-brief-route",
+                              "delta": 2,
+                              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                            },
+                            {
+                              "id": "earned-method-familiarity",
+                              "delta": -1,
+                              "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                            }
+                          ],
+                          "capApplied": false,
+                          "sourceBound": true,
+                          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                        },
+                        "theoreticalGuidance": null,
+                        "potentialAptitude": {
+                          "dimension": "soulDepth",
+                          "score": 4,
+                          "modifier": 0,
+                          "rating": "developing",
+                          "available": true,
+                          "noStageCap": true
+                        },
+                        "location": "maddren_homestead",
+                        "elapsedMinutes": 165,
+                        "staminaSpent": 2
+                      }
+                    }
+                  ]
+                }
+              ],
+              "note": "Each step used its own real rule and original roll; an interruption prevents later steps."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 17:56",
+              "type": "world",
+              "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+              "details": {
+                "origin": "verified-independent-discipline-practice",
+                "system": "soul",
+                "target": "phase1",
+                "method": "self-awareness",
+                "location": "maddren_homestead",
+                "biome": "settlement",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "feeTalons": 0,
+                "startMinute": 2516,
+                "timeDays": 0.034027777777777775,
+                "partTime": false
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 17:56",
+              "type": "roll",
+              "text": "🎲 soul phase1 — self-awareness: d20 13 +2 = 15 vs DC 13 → success (+2)",
+              "details": {
+                "dice": [
+                  13
+                ],
+                "roll": 13,
+                "modifier": 2,
+                "dc": 13,
+                "total": 15,
+                "margin": 2,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 18:45",
+              "type": "progress",
+              "text": "soul practice: self-awareness; 1 training points.",
+              "details": {
+                "system": "soul",
+                "target": "phase1",
+                "earned": 1,
+                "complication": null,
+                "route": "independent",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "4 original soul self-awareness sessions and 574 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "theoreticalGuidance": null,
+                "potentialAptitude": {
+                  "dimension": "soulDepth",
+                  "score": 4,
+                  "modifier": 0,
+                  "rating": "developing",
+                  "available": true,
+                  "noStageCap": true
+                },
+                "location": "maddren_homestead",
+                "elapsedMinutes": 49,
+                "staminaSpent": 1
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "story",
+              "text": "A period of ordinary life passes at Maddren Homestead.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "maddren_homestead",
+                "elapsedMinutes": 30,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "world",
+              "text": "The practitioner begins genuine independent soul self-awareness work at Maddren Homestead.",
+              "details": {
+                "origin": "verified-independent-discipline-practice",
+                "system": "soul",
+                "target": "phase1",
+                "method": "self-awareness",
+                "location": "maddren_homestead",
+                "biome": "settlement",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "feeTalons": 0,
+                "startMinute": 2595,
+                "timeDays": 0.11458333333333333,
+                "partTime": false
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 19:15",
+              "type": "roll",
+              "text": "🎲 soul phase1 — self-awareness: d20 14 +2 = 16 vs DC 13 → success (+3)",
+              "details": {
+                "dice": [
+                  14
+                ],
+                "roll": 14,
+                "modifier": 2,
+                "dc": 13,
+                "total": 16,
+                "margin": 3,
+                "degree": "success",
+                "success": true,
+                "progress": 1,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 22:00",
+              "type": "progress",
+              "text": "soul practice: self-awareness; 1 training points.",
+              "details": {
+                "system": "soul",
+                "target": "phase1",
+                "earned": 1,
+                "complication": null,
+                "route": "independent",
+                "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+                "actualDC": 13,
+                "difficulty": {
+                  "baseDC": 12,
+                  "dc": 13,
+                  "netAdjustment": 1,
+                  "factors": [
+                    {
+                      "id": "independent-or-brief-route",
+                      "delta": 2,
+                      "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+                    },
+                    {
+                      "id": "earned-method-familiarity",
+                      "delta": -1,
+                      "evidence": "5 original soul self-awareness sessions and 623 witnessed minutes for the current phase1 training target"
+                    }
+                  ],
+                  "capApplied": false,
+                  "sourceBound": true,
+                  "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+                },
+                "theoreticalGuidance": null,
+                "potentialAptitude": {
+                  "dimension": "soulDepth",
+                  "score": 4,
+                  "modifier": 0,
+                  "rating": "developing",
+                  "available": true,
+                  "noStageCap": true
+                },
+                "location": "maddren_homestead",
+                "elapsedMinutes": 165,
+                "staminaSpent": 2
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Home at Maddren Homestead after Soul practice",
-      "Bram and Tessa may be sought tomorrow; their plans unknown"
+      "At home at 22:00 after evening reading, dinner and Soul self-awareness",
+      "Choose whether to sleep, speak with family or do something else"
     ],
-    "scene": "Maddoc reaches the Maddren Homestead by the familiar orchard lane at 17:56 after 85 minutes of successful independent Soul self-awareness at Mossgate. His friends Bram and Tessa were not located today; their whereabouts tomorrow are unknown. He has returned before evening becomes late.",
+    "scene": "At 22:00, Maddoc is at the Maddren Homestead after an early-evening Soul self-awareness practice session with his introductory handwritten Meridian, Arcane and Soul notes at hand, a half-hour household dinner interval, and a later independent Soul self-awareness session. Dinner is a narrated ordinary household meal, not a verified provision or healing reward. Training outcomes are exactly those recorded by the engine.",
     "journal": [
       {
         "day": 1,
@@ -3491,6 +4760,10 @@
       {
         "day": 2,
         "text": "Maddoc ends his search for Bram and Tessa, completes a verified 85-minute Soul self-awareness session (+2 phase1 progress), and walks his familiar 42-minute route home before evening."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc revisits his introductory notes alongside two real independent Soul self-awareness training sessions, separated by an ordinary household dinner interval; he stops at 22:00."
       }
     ],
     "continuity": {
@@ -3633,7 +4906,7 @@
         "defense": 10,
         "vigor": 0,
         "will": 2,
-        "stamina": 32,
+        "stamina": 29,
         "maxStamina": 36,
         "boxes": [
           3,
@@ -15183,16 +16456,16 @@
     "disciplineTraining": {
       "soul": {
         "target": "phase1",
-        "points": 4,
+        "points": 6,
         "weeks": 0,
         "methods": {
-          "self-awareness": 4
+          "self-awareness": 6
         },
         "cooldownUntil": 0,
         "complications": [],
         "history": [],
-        "sessions": 4,
-        "sessionMinutes": 574
+        "sessions": 6,
+        "sessionMinutes": 788
       }
     },
     "independentTraining": [
@@ -15243,6 +16516,30 @@
         "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
         "eventIndex": 41,
         "eventHash": "7b2e5a3b4821edd71db35ef3ecfffda653b898065d48c0888548e91fe8384fc1"
+      },
+      {
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "maddren_homestead",
+        "startMinute": 2516,
+        "days": 0.034027777777777775,
+        "minutes": 49,
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "eventIndex": 45,
+        "eventHash": "0fbe403035d30bb30220501b14bd8d907f69732ca90dd74bae0e5e413000fb72"
+      },
+      {
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "maddren_homestead",
+        "startMinute": 2595,
+        "days": 0.11458333333333333,
+        "minutes": 165,
+        "source": "Personal soul self-awareness practice using the existing Maddren Homestead environment and the practitioner's own recorded anatomy/energy",
+        "eventIndex": 49,
+        "eventHash": "2e8ad758523bd22b13ae63b7b441e4e28e506e9bb007dcb5e7dcf1d6fe0676b9"
       }
     ],
     "calendar": {
