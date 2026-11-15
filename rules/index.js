@@ -471,6 +471,7 @@ function act(s,{system,operation,params={}}={}){
   case 'world.foundSettlement':return require('../world/settlement-foundations').found(s,params);
   case 'world.settlementStatus':return require('../world/settlement-foundations').status(s,params);
   case 'world.visitSettlementSite':return require('../world/settlement-foundations').visit(s,params);
+  case 'social.speakSettlementResident':return require('../world/settlement-foundations').speak(s,params);
   case 'world.establishPlace':return LivedPlaces.establish(s,params);
   case 'world.recordPlaceNote':return LivedPlaces.note(s,params);
   case 'world.travelTo':return LivedPlaces.travel(s,params);
