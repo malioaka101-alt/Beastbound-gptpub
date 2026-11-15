@@ -676,10 +676,26 @@
         "arrivalKnown": true,
         "noAutomaticPermission": true
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 15:24",
+      "type": "story",
+      "text": "A period of ordinary life passes at Mossgate Common.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "mossgate_common",
+        "elapsedMinutes": 12,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
     }
   ],
   "world": {
-    "minutes": 2352,
+    "minutes": 2364,
     "location": "mossgate_common",
     "marketIndex": -1,
     "fenPressure": 2,
@@ -1186,7 +1202,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 36,
+    "revision": 37,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2790,13 +2806,55 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "maddoc_yard_reading_search_20261115_01": {
+        "revision": 37,
+        "mode": "rule",
+        "hash": "08203b0c8a99b1aed2cded3419d2a580646248948425316c2a90bcd2483e48a1",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 15:24",
+          "output": {
+            "rules": {
+              "waited": true,
+              "elapsedMinutes": 12,
+              "daysPassed": 0,
+              "location": "mossgate_common",
+              "clock": "Day 2, 15:24",
+              "sixdayTicks": [],
+              "monthTicks": [],
+              "noTrainingOrResearchAward": true,
+              "noAutomaticWagesOrContracts": true,
+              "lifeNeedsNotCertified": true,
+              "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 15:24",
+              "type": "story",
+              "text": "A period of ordinary life passes at Mossgate Common.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "mossgate_common",
+                "elapsedMinutes": 12,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Look for Bram and Tessa; presence not yet established",
-      "Talk naturally if either friend is genuinely encountered"
+      "By Mossgate reading house after checking both places",
+      "Neither Tessa nor Bram positively sighted; further inquiries possible"
     ],
-    "scene": "Maddoc stands at Mossgate Common at 15:12 after his verified walk from home, seeking Bram and Tessa. Neither friend's current whereabouts or activities have been established by the journey. The earlier alleged meeting and references to his private work were mistaken GM dialogue, not verified events.",
+    "scene": "Maddoc has walked from Mossgate Common's green to its enclosed practice yard looking for Tessa, then crossed to the slate-roofed reading house looking for Bram. Neither friend has been positively sighted during this brief inspection. He is beside the reading house, still in Mossgate Common.",
     "journal": [
       {
         "day": 1,
@@ -2857,6 +2915,10 @@
       {
         "day": 2,
         "text": "Player-confirmed canon: Hedra Maddren is Maddoc's mother; original guardian role remains valid. Bram and Tessa are not yet confirmed present at Mossgate Common, nor do they automatically know Maddoc's private harness work, 2-Talon family allowance or Soul practice. The earlier unsupported reunion dialogue is not canon."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc checked the training yard for Tessa, then the reading house for Bram, without assuming their presence or knowledge of his private activities."
       }
     ],
     "continuity": {

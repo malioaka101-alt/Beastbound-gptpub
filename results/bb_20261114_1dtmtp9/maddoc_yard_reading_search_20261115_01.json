@@ -1,0 +1,86 @@
+{
+  "id": "maddoc_yard_reading_search_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 37,
+  "stateHash": "77d560a6badd6fc6a2044303d4eff3f96a9978478dca8fe77f90d4a808f26a7b",
+  "clock": "Day 2, 15:24",
+  "output": {
+    "rules": {
+      "waited": true,
+      "elapsedMinutes": 12,
+      "daysPassed": 0,
+      "location": "mossgate_common",
+      "clock": "Day 2, 15:24",
+      "sixdayTicks": [],
+      "monthTicks": [],
+      "noTrainingOrResearchAward": true,
+      "noAutomaticWagesOrContracts": true,
+      "lifeNeedsNotCertified": true,
+      "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 15:24",
+      "type": "story",
+      "text": "A period of ordinary life passes at Mossgate Common.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "mossgate_common",
+        "elapsedMinutes": 12,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:24 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ By Mossgate reading house a… ║\n║ ◆ Neither Tessa nor Bram posi… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:24",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "By Mossgate reading house after checking both places",
+      "Neither Tessa nor Bram positively sighted; further inquiries possible"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc has walked from Mossgate Common's green to its enclosed practice yard looking for Tessa, then crossed to the slate-roofed reading house looking for Bram. Neither friend has been positively sighted during this brief inspection. He is beside the reading house, still in Mossgate Common.\nPC: young learner, undecided; 2 T\nJOURNAL: Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance. | The documented journey from Maddren Homestead reaches Mossgate Common. | A period of ordinary life passes at Mossgate Common.\nCURRENT: No opening hook"
+}
