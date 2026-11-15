@@ -9,7 +9,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),OS=require('node:os'
 const name='Silver-Striped Ration';
 const s=New.create({seed:921559,slug:'ordinary_novel_material_integration',
  mode:'gm',age:16,gmOpening:{locationId:'crossing',
- scene:'On a clean table, a Silver-Striped Ration shows a distinctive bright streak in its ordinary grain casing while the inventor examines it.',
+ scene:'On a clean table, a Silver-Striped Ration shows a distinctive bright streak in its ordinary grain casing.\nThe inventor examines it without claiming any magical effect.',
  focus:'An ordinary physical material examination',
  weather:'Cool riverside morning air',hour:10,minute:0}}).state;
 const social=(operation,params={})=>R.act(s,{system:'social',operation,params});
