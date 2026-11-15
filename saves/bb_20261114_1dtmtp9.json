@@ -1189,6 +1189,22 @@
         "noFreeRankOrGoods": true,
         "noInventedBackstoryForOtherActors": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "story",
+      "text": "A personally witnessed individual is recorded: Darron Pike",
+      "details": {
+        "source": "gm-witnessed-lived-person-v1",
+        "personId": "person_3",
+        "actorId": "emergent:person_3",
+        "sourceHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+        "location": "thistlebell_yard",
+        "noContractOrConsent": true,
+        "noFreeRankOrGoods": true,
+        "noInventedBackstoryForOtherActors": true
+      }
     }
   ],
   "world": {
@@ -1699,7 +1715,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 55,
+    "revision": 56,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -5041,18 +5057,71 @@
             }
           ]
         }
+      },
+      "maddoc_record_thistlebell_handler_and_memories_20261115_01": {
+        "revision": 56,
+        "mode": "rule",
+        "hash": "99ee6790197f83af8f0a6d05490e63372ac93bbefd6bffa8aa8e99c9daab697b",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "registered": true,
+              "npcId": "emergent:person_3",
+              "name": "Darron Pike",
+              "profession": "Beast-handling yard worker",
+              "location": "thistlebell_yard",
+              "day": 2,
+              "noAssumedConsent": true,
+              "noFreeMoneyOrPower": true,
+              "usesExistingLivingPersonLedger": true
+            },
+            "continuity": {
+              "recorded": 2,
+              "entries": [
+                {
+                  "id": "maddoc_neighbour_soul_ambition_0830",
+                  "head": "aacef0f19f64522b028d0731b87044f2615ad5b3a7a813537e3598d7d7649594",
+                  "action": "record"
+                },
+                {
+                  "id": "maddoc_handler_secret_sibling_joke_0830",
+                  "head": "54499955942baaa6c2497f60c741fd008b02b040cd66420d1898913860a17395",
+                  "action": "record"
+                }
+              ],
+              "storyOnly": true,
+              "noMechanicalAgreementOrAbilityGranted": true
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:30",
+              "type": "story",
+              "text": "A personally witnessed individual is recorded: Darron Pike",
+              "details": {
+                "source": "gm-witnessed-lived-person-v1",
+                "personId": "person_3",
+                "actorId": "emergent:person_3",
+                "sourceHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+                "location": "thistlebell_yard",
+                "noContractOrConsent": true,
+                "noFreeRankOrGoods": true,
+                "noInventedBackstoryForOtherActors": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "At Thistlebell Yard to find Hedra and Nessa",
-      "Two minor local acquaintances are becoming persistent people"
+      "At Thistlebell Yard; ask other handlers about parents",
+      "Minor locals may remember Maddoc but are not guaranteed present"
     ],
-    "scene": "Rootday 08:30 at Thistlebell Yard. Earlier, an older orchard-lane neighbour tending a feed basket told Maddoc she hadn't seen Hedra or Nessa and suggested this yard. Here, a broad-shouldered handler checked a pack beast's harness and joked with Maddoc about his wish for a secret sibling. He hadn't seen either parent that morning; he suggested asking other handlers. Neither local's given name has been spoken to Maddoc.",
+    "scene": "At 08:30 in Thistlebell Yard, Maddoc is talking to a regular beast handler. The older neighbour heard Maddoc say he wanted to become a Soul cultivator. The yard handler heard Maddoc joke about a secret sibling while seeking Hedra and Nessa. Neither parent has been located. The worker suggested asking other handlers; neither acquaintance has told Maddoc a given name.",
     "journal": [
-      {
-        "day": 1,
-        "text": "Maddoc said, 'Is arguing all you can do?' and began putting right the twisted harness. An ash-coated burden beast had a tight metal fitting rubbing its left shoulder raw. He loosened and straightened that strap; the animal remained at the trough and made no commitment to pull the cart. No new bond, injury, material or resources recorded."
-      },
       {
         "day": 1,
         "text": "After leaving the small seed-eating creature beneath the Rillbend culvert, Maddoc walked 16 minutes to Tansyhook Crossing (08:23). No other outcomes, resource or relationship changes."
@@ -5168,6 +5237,10 @@
       {
         "day": 3,
         "text": "An older neighbour by Maddren Homestead met Maddoc, heard his name and Soul ambition, and suggested asking at Thistlebell; she did not know either parent's whereabouts. At the yard a handler chatted with Maddoc and advised asking other handlers. Neither NPC's given name is yet known to Maddoc."
+      },
+      {
+        "day": 3,
+        "text": "Maddoc has met an older neighbour by his family's lane and a worker at Thistlebell Yard. Both are real independent locals, not guaranteed on future visits; each heard only their own conversation. Their personal names have not been spoken to Maddoc."
       }
     ],
     "continuity": {
@@ -5273,6 +5346,74 @@
                 "previousSeal": null
               },
               "seal": "a0cc627d8ff50be3fa4329de4550e98b814c994ea1ca7b15a3aa1977ef1107f9"
+            }
+          ]
+        },
+        "maddoc_neighbour_soul_ambition_0830": {
+          "id": "maddoc_neighbour_soul_ambition_0830",
+          "subject": {
+            "kind": "person",
+            "id": "emergent:person_2"
+          },
+          "category": "npc-knowledge",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "The older orchard-lane neighbour heard Maddoc introduce himself, ask after Hedra and Nessa, and say he wanted to become a Soul cultivator. She had not seen the parents and suggested the yard.",
+          "head": "aacef0f19f64522b028d0731b87044f2615ad5b3a7a813537e3598d7d7649594",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_neighbour_soul_ambition_0830",
+                "action": "record",
+                "subject": {
+                  "kind": "person",
+                  "id": "emergent:person_2"
+                },
+                "category": "npc-knowledge",
+                "statement": "The older orchard-lane neighbour heard Maddoc introduce himself, ask after Hedra and Nessa, and say he wanted to become a Soul cultivator. She had not seen the parents and suggested the yard.",
+                "witness": "The older neighbour heard Maddoc say he wanted to become a Soul cultivator",
+                "visibility": "player-known",
+                "minute": 3390,
+                "day": 3,
+                "turnId": "maddoc_record_thistlebell_handler_and_memories_20261115_01",
+                "previousSeal": null
+              },
+              "seal": "aacef0f19f64522b028d0731b87044f2615ad5b3a7a813537e3598d7d7649594"
+            }
+          ]
+        },
+        "maddoc_handler_secret_sibling_joke_0830": {
+          "id": "maddoc_handler_secret_sibling_joke_0830",
+          "subject": {
+            "kind": "person",
+            "id": "emergent:person_3"
+          },
+          "category": "npc-knowledge",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "The Thistlebell handler heard Maddoc joke about the possibility of a secret sibling while searching for Hedra and Nessa. He had not seen the parents that morning and suggested asking other handlers.",
+          "head": "54499955942baaa6c2497f60c741fd008b02b040cd66420d1898913860a17395",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_handler_secret_sibling_joke_0830",
+                "action": "record",
+                "subject": {
+                  "kind": "person",
+                  "id": "emergent:person_3"
+                },
+                "category": "npc-knowledge",
+                "statement": "The Thistlebell handler heard Maddoc joke about the possibility of a secret sibling while searching for Hedra and Nessa. He had not seen the parents that morning and suggested asking other handlers.",
+                "witness": "The yard handler heard Maddoc joke about a secret sibling while seeking Hedra and Nessa",
+                "visibility": "player-known",
+                "minute": 3390,
+                "day": 3,
+                "turnId": "maddoc_record_thistlebell_handler_and_memories_20261115_01",
+                "previousSeal": null
+              },
+              "seal": "54499955942baaa6c2497f60c741fd008b02b040cd66420d1898913860a17395"
             }
           ]
         }
@@ -11740,7 +11881,7 @@
       "emergentPeople": {
         "version": 1,
         "rngState": 3825077450,
-        "counter": 2,
+        "counter": 3,
         "lastSixday": 1,
         "people": {
           "person_1": {
@@ -11932,6 +12073,109 @@
               "supernaturalSystemRanks": {},
               "knownTechniques": []
             }
+          },
+          "person_3": {
+            "id": "person_3",
+            "actorId": "emergent:person_3",
+            "origin": "gm-witnessed-lived-person-v1",
+            "birthSource": {
+              "origin": "gm-witnessed-lived-person-v1",
+              "id": "person_3",
+              "regionId": "orchard_vales",
+              "polity": "asterwyn",
+              "day": 2,
+              "worldMinute": 3390,
+              "locationId": "thistlebell_yard",
+              "name": "Darron Pike",
+              "initialProfession": "Beast-handling yard worker",
+              "purpose": "Check carrying harnesses and keep ordinary shared yard duties safe for animals, handlers and visitors.",
+              "personality": "Broad-humoured, patient and teasing, attentive to animals and straightforward about what he has not seen.",
+              "background": "A regular worker at Thistlebell Yard in Orchard Vales, with his own professional obligations and independent local life.",
+              "witness": "a broad-shouldered handler checked a pack beast's harness",
+              "language": "Vale Common",
+              "need": "gm-witnessed-occupation",
+              "nonAssumedKinship": true,
+              "nonAssumedConsent": true,
+              "noInventedFundsOrRanks": true
+            },
+            "originHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+            "name": "Darron Pike",
+            "profession": "Beast-handling yard worker",
+            "purpose": "Check carrying harnesses and keep ordinary shared yard duties safe for animals, handlers and visitors.",
+            "personality": "Broad-humoured, patient and teasing, attentive to animals and straightforward about what he has not seen.",
+            "language": "Vale Common",
+            "homeLocationId": "thistlebell_yard",
+            "regionId": "orchard_vales",
+            "polity": "asterwyn",
+            "status": "active",
+            "ageBand": "not established",
+            "family": null,
+            "ancestry": null,
+            "inheritance": null,
+            "practicedDisciplines": [],
+            "knownTechniques": [],
+            "funds": 0,
+            "cashScales": 0,
+            "fatigue": 0,
+            "competence": 1,
+            "rngState": 3563871534,
+            "lastTickDay": 2,
+            "shift": {
+              "source": "emergent-local-work-presence-v1",
+              "npcId": "emergent:person_3",
+              "actorId": "emergent:person_3",
+              "personId": "person_3",
+              "name": "Darron Pike",
+              "profession": "Beast-handling yard worker",
+              "polity": "asterwyn",
+              "originHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+              "location": "thistlebell_yard",
+              "scheduledAtDay": 2,
+              "fromDay": 2,
+              "throughDay": 7,
+              "hash": "48543ac1b315e7da9fcd96a0a8a9626ab424ef69cc7785367a6200667c6d83b6"
+            },
+            "history": [
+              {
+                "day": 2,
+                "type": "gm-witnessed-life-start",
+                "regionId": "orchard_vales",
+                "sourceHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+                "observed": true
+              }
+            ],
+            "career": {
+              "version": 1,
+              "origin": "independent-person-earned-profession-v1",
+              "source": {
+                "origin": "independent-person-earned-profession-v1",
+                "personId": "person_3",
+                "actorId": "emergent:person_3",
+                "personOriginHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+                "professionAtOrigin": "Beast-handling yard worker",
+                "nativeRegion": "orchard_vales",
+                "nonHereditaryEstimate": true
+              },
+              "sourceHash": "1e59ecfc5bd00ae194d1c0f979d74cd29464743b2699ea8baff86a46695dece6",
+              "aptitude": 7,
+              "skillPoints": 0,
+              "competenceRank": 0,
+              "demonstratedMethods": {},
+              "qualityPoints": 0,
+              "workCount": 0,
+              "successes": 0,
+              "promotions": [],
+              "workReceipts": [],
+              "authoredDuties": [],
+              "attestations": [],
+              "workOffers": [],
+              "peerGuidance": [],
+              "tradePayments": [],
+              "safetyIncidents": [],
+              "recognizedLicence": null,
+              "supernaturalSystemRanks": {},
+              "knownTechniques": []
+            }
           }
         },
         "history": [
@@ -11947,6 +12191,13 @@
             "kind": "gm-witnessed-emergence",
             "personId": "person_2",
             "originHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+            "regionId": "orchard_vales"
+          },
+          {
+            "day": 2,
+            "kind": "gm-witnessed-emergence",
+            "personId": "person_3",
+            "originHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
             "regionId": "orchard_vales"
           }
         ]
