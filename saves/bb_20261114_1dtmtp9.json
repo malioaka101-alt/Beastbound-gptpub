@@ -847,11 +847,35 @@
         "elapsedMinutes": 85,
         "staminaSpent": 1
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 17:56",
+      "type": "travel",
+      "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "mossgate_common",
+        "to": "maddren_homestead",
+        "startMinute": 2474,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc leaves the familiar Mossgate village green at 17:14 after verified Soul self-awareness practice, walking the established 42-minute orchard-lane route past Tansyhook Crossing and Thistlebell Yard to Maddren Homestead in the remaining daylight, without new hazards.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 2516,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
     }
   ],
   "world": {
-    "minutes": 2474,
-    "location": "mossgate_common",
+    "minutes": 2516,
+    "location": "maddren_homestead",
     "marketIndex": -1,
     "fenPressure": 2,
     "guildActivity": 1,
@@ -1357,7 +1381,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 42,
+    "revision": 43,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -3323,13 +3347,66 @@
             }
           ]
         }
+      },
+      "maddoc_after_soul_home_20261115_01": {
+        "revision": 43,
+        "mode": "rule",
+        "hash": "dbaf4ab27b8800806560ee2c5c8244d5e5afd4acf99d78e1323df53496a65786",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 17:56",
+          "output": {
+            "rules": {
+              "arrived": true,
+              "from": "Mossgate Common",
+              "to": "Maddren Homestead",
+              "location": "maddren_homestead",
+              "elapsedMinutes": 42,
+              "clock": "Day 2, 17:56",
+              "worldTicks": {
+                "sixdayTicks": [],
+                "monthTicks": [],
+                "publicAgendas": []
+              },
+              "noMoneyOrSuppliesGranted": true,
+              "noUnresolvedHazardsResolved": true,
+              "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 17:56",
+              "type": "travel",
+              "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+              "details": {
+                "source": "gm-judged-campaign-journey-v1",
+                "from": "mossgate_common",
+                "to": "maddren_homestead",
+                "startMinute": 2474,
+                "elapsedMinutes": 42,
+                "describedRoute": "Maddoc leaves the familiar Mossgate village green at 17:14 after verified Soul self-awareness practice, walking the established 42-minute orchard-lane route past Tansyhook Crossing and Thistlebell Yard to Maddren Homestead in the remaining daylight, without new hazards.",
+                "means": "walking",
+                "fromRegion": "orchard_vales",
+                "toRegion": "orchard_vales",
+                "hazardsAlreadyResolved": true,
+                "notAnNPCArrival": true,
+                "noAutomaticTreasure": true,
+                "noUnverifiedFareOrProvisioning": true,
+                "endMinute": 2516,
+                "arrivalKnown": true,
+                "noAutomaticPermission": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Finish the current verified Soul self-awareness training",
-      "Return to Maddren Homestead by the orchard lane before evening"
+      "Home at Maddren Homestead after Soul practice",
+      "Bram and Tessa may be sought tomorrow; their plans unknown"
     ],
-    "scene": "Maddoc settles at the familiar public green in Mossgate Common for a solo Soul self-awareness practice session. He intends to finish in time for the established 42-minute walk to Maddren Homestead before evening.",
+    "scene": "Maddoc reaches the Maddren Homestead by the familiar orchard lane at 17:56 after 85 minutes of successful independent Soul self-awareness at Mossgate. His friends Bram and Tessa were not located today; their whereabouts tomorrow are unknown. He has returned before evening becomes late.",
     "journal": [
       {
         "day": 1,
@@ -3410,6 +3487,10 @@
       {
         "day": 2,
         "text": "Maddoc chooses genuine independent Soul self-awareness practice at Mossgate after giving up his search for Bram and Tessa today."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc ends his search for Bram and Tessa, completes a verified 85-minute Soul self-awareness session (+2 phase1 progress), and walks his familiar 42-minute route home before evening."
       }
     ],
     "continuity": {
@@ -9465,6 +9546,23 @@
             "noUnverifiedFareOrProvisioning": true,
             "endMinute": 2352,
             "hash": "2f3dcfcc7c4d1400f908764edb9041ee5ea13551e2928410a3bcbe2035a30683"
+          },
+          {
+            "source": "gm-judged-campaign-journey-v1",
+            "from": "mossgate_common",
+            "to": "maddren_homestead",
+            "startMinute": 2474,
+            "elapsedMinutes": 42,
+            "describedRoute": "Maddoc leaves the familiar Mossgate village green at 17:14 after verified Soul self-awareness practice, walking the established 42-minute orchard-lane route past Tansyhook Crossing and Thistlebell Yard to Maddren Homestead in the remaining daylight, without new hazards.",
+            "means": "walking",
+            "fromRegion": "orchard_vales",
+            "toRegion": "orchard_vales",
+            "hazardsAlreadyResolved": true,
+            "notAnNPCArrival": true,
+            "noAutomaticTreasure": true,
+            "noUnverifiedFareOrProvisioning": true,
+            "endMinute": 2516,
+            "hash": "c2daa151bc76102204bc8049c9079a7173170f0db04cc4d28cffe0c16ba845d2"
           }
         ]
       },

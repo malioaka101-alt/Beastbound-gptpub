@@ -1,0 +1,97 @@
+{
+  "id": "maddoc_after_soul_home_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 43,
+  "stateHash": "3cf8ac9d48c46332ba8102d4f9848efa5c7831bf2f717d3985bf3f2d202bbbe8",
+  "clock": "Day 2, 17:56",
+  "output": {
+    "rules": {
+      "arrived": true,
+      "from": "Mossgate Common",
+      "to": "Maddren Homestead",
+      "location": "maddren_homestead",
+      "elapsedMinutes": 42,
+      "clock": "Day 2, 17:56",
+      "worldTicks": {
+        "sixdayTicks": [],
+        "monthTicks": [],
+        "publicAgendas": []
+      },
+      "noMoneyOrSuppliesGranted": true,
+      "noUnresolvedHazardsResolved": true,
+      "note": "Travel records a GM-judged completed journey. Multi-day food, sleep, exposure, fare, dependents and beast-partner care need established circumstances and relevant mechanisms; this operation does not certify or manufacture them."
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 17:56",
+      "type": "travel",
+      "text": "The documented journey from Mossgate Common reaches Maddren Homestead.",
+      "details": {
+        "source": "gm-judged-campaign-journey-v1",
+        "from": "mossgate_common",
+        "to": "maddren_homestead",
+        "startMinute": 2474,
+        "elapsedMinutes": 42,
+        "describedRoute": "Maddoc leaves the familiar Mossgate village green at 17:14 after verified Soul self-awareness practice, walking the established 42-minute orchard-lane route past Tansyhook Crossing and Thistlebell Yard to Maddren Homestead in the remaining daylight, without new hazards.",
+        "means": "walking",
+        "fromRegion": "orchard_vales",
+        "toRegion": "orchard_vales",
+        "hazardsAlreadyResolved": true,
+        "notAnNPCArrival": true,
+        "noAutomaticTreasure": true,
+        "noUnverifiedFareOrProvisioning": true,
+        "endMinute": 2516,
+        "arrivalKnown": true,
+        "noAutomaticPermission": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 17:56 · Evening · Cool         ║\n║ Maddren Homestead          2 T ║\n║ STA  █████████░          32/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Home at Maddren Homestead a… ║\n║ ◆ Bram and Tessa may be sough… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "17:56",
+    "daypart": "Evening",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 32,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Home at Maddren Homestead after Soul practice",
+      "Bram and Tessa may be sought tomorrow; their plans unknown"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc reaches the Maddren Homestead by the familiar orchard lane at 17:56 after 85 minutes of successful independent Soul self-awareness at Mossgate. His friends Bram and Tessa were not located today; their whereabouts tomorrow are unknown. He has returned before evening becomes late.\nPC: young learner, undecided; 2 T\nJOURNAL: The practitioner begins genuine independent soul self-awareness work at Mossgate Common. | soul practice: self-awareness; 2 training points. | The documented journey from Mossgate Common reaches Maddren Homestead.\nCURRENT: No opening hook"
+}
