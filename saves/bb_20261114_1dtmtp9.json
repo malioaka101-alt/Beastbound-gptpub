@@ -1173,6 +1173,22 @@
         "arrivalKnown": true,
         "noAutomaticPermission": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "story",
+      "text": "A personally witnessed individual is recorded: Mira Fenlow",
+      "details": {
+        "source": "gm-witnessed-lived-person-v1",
+        "personId": "person_2",
+        "actorId": "emergent:person_2",
+        "sourceHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+        "location": "maddren_homestead",
+        "noContractOrConsent": true,
+        "noFreeRankOrGoods": true,
+        "noInventedBackstoryForOtherActors": true
+      }
     }
   ],
   "world": {
@@ -1683,7 +1699,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 54,
+    "revision": 55,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4985,13 +5001,53 @@
             }
           ]
         }
+      },
+      "maddoc_record_minor_neighbour_20261115_01": {
+        "revision": 55,
+        "mode": "rule",
+        "hash": "1a98350d1810d6da111b2dae3306c612008ecd036e73430a2d71ddd76997fc34",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "registered": true,
+              "npcId": "emergent:person_2",
+              "name": "Mira Fenlow",
+              "profession": "Orchard-lane small-animal keeper",
+              "location": "maddren_homestead",
+              "day": 2,
+              "noAssumedConsent": true,
+              "noFreeMoneyOrPower": true,
+              "usesExistingLivingPersonLedger": true
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:30",
+              "type": "story",
+              "text": "A personally witnessed individual is recorded: Mira Fenlow",
+              "details": {
+                "source": "gm-witnessed-lived-person-v1",
+                "personId": "person_2",
+                "actorId": "emergent:person_2",
+                "sourceHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+                "location": "maddren_homestead",
+                "noContractOrConsent": true,
+                "noFreeRankOrGoods": true,
+                "noInventedBackstoryForOtherActors": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "At Thistlebell Yard to ask about Hedra and Nessa",
-      "Maddoc has openly said he wants to be a Soul cultivator"
+      "At Thistlebell Yard to find Hedra and Nessa",
+      "Two minor local acquaintances are becoming persistent people"
     ],
-    "scene": "Rootday, 2 Nesting 1156 AC, 08:30. Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard. He hopes to ask after his parents, Hedra and Nessa, but their whereabouts and any yard worker's answer remain unconfirmed.",
+    "scene": "Rootday 08:30 at Thistlebell Yard. Earlier, an older orchard-lane neighbour tending a feed basket told Maddoc she hadn't seen Hedra or Nessa and suggested this yard. Here, a broad-shouldered handler checked a pack beast's harness and joked with Maddoc about his wish for a secret sibling. He hadn't seen either parent that morning; he suggested asking other handlers. Neither local's given name has been spoken to Maddoc.",
     "journal": [
       {
         "day": 1,
@@ -5108,6 +5164,10 @@
       {
         "day": 3,
         "text": "Maddoc told an older neighbour his name and ambition to cultivate Soul; she suggested asking at Thistlebell Yard. He walked there without assuming his parents or anyone else is present."
+      },
+      {
+        "day": 3,
+        "text": "An older neighbour by Maddren Homestead met Maddoc, heard his name and Soul ambition, and suggested asking at Thistlebell; she did not know either parent's whereabouts. At the yard a handler chatted with Maddoc and advised asking other handlers. Neither NPC's given name is yet known to Maddoc."
       }
     ],
     "continuity": {
@@ -11680,7 +11740,7 @@
       "emergentPeople": {
         "version": 1,
         "rngState": 3825077450,
-        "counter": 1,
+        "counter": 2,
         "lastSixday": 1,
         "people": {
           "person_1": {
@@ -11768,6 +11828,110 @@
               "supernaturalSystemRanks": {},
               "knownTechniques": []
             }
+          },
+          "person_2": {
+            "id": "person_2",
+            "actorId": "emergent:person_2",
+            "origin": "gm-witnessed-lived-person-v1",
+            "birthSource": {
+              "origin": "gm-witnessed-lived-person-v1",
+              "id": "person_2",
+              "regionId": "orchard_vales",
+              "polity": "asterwyn",
+              "day": 2,
+              "worldMinute": 3378,
+              "locationId": "maddren_homestead",
+              "name": "Mira Fenlow",
+              "witnessedJourneyHash": "dd9ba07079a6772ba52744b7cf11b615bb161ae8a5a59309f49611a0fdc381b8",
+              "initialProfession": "Orchard-lane small-animal keeper",
+              "purpose": "Care for her own small animals and household garden while keeping ordinary errands and independent priorities.",
+              "personality": "Practical, perceptive and gently humorous, but not eager to claim knowledge she does not have.",
+              "background": "An older resident near Maddren Homestead who tends animals beside a cottage lane; no invented relatives, secrets, or resources.",
+              "witness": "Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard.",
+              "language": "Vale Common",
+              "need": "gm-witnessed-occupation",
+              "nonAssumedKinship": true,
+              "nonAssumedConsent": true,
+              "noInventedFundsOrRanks": true
+            },
+            "originHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+            "name": "Mira Fenlow",
+            "profession": "Orchard-lane small-animal keeper",
+            "purpose": "Care for her own small animals and household garden while keeping ordinary errands and independent priorities.",
+            "personality": "Practical, perceptive and gently humorous, but not eager to claim knowledge she does not have.",
+            "language": "Vale Common",
+            "homeLocationId": "maddren_homestead",
+            "regionId": "orchard_vales",
+            "polity": "asterwyn",
+            "status": "active",
+            "ageBand": "not established",
+            "family": null,
+            "ancestry": null,
+            "inheritance": null,
+            "practicedDisciplines": [],
+            "knownTechniques": [],
+            "funds": 0,
+            "cashScales": 0,
+            "fatigue": 0,
+            "competence": 1,
+            "rngState": 1731800389,
+            "lastTickDay": 2,
+            "shift": {
+              "source": "emergent-local-work-presence-v1",
+              "npcId": "emergent:person_2",
+              "actorId": "emergent:person_2",
+              "personId": "person_2",
+              "name": "Mira Fenlow",
+              "profession": "Orchard-lane small-animal keeper",
+              "polity": "asterwyn",
+              "originHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+              "location": "maddren_homestead",
+              "scheduledAtDay": 2,
+              "fromDay": 2,
+              "throughDay": 7,
+              "hash": "06b0b49c800ba02f1db6797d40d221370b994782d212dac711c87a8f1b02e068"
+            },
+            "history": [
+              {
+                "day": 2,
+                "type": "gm-witnessed-life-start",
+                "regionId": "orchard_vales",
+                "sourceHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+                "observed": true
+              }
+            ],
+            "career": {
+              "version": 1,
+              "origin": "independent-person-earned-profession-v1",
+              "source": {
+                "origin": "independent-person-earned-profession-v1",
+                "personId": "person_2",
+                "actorId": "emergent:person_2",
+                "personOriginHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+                "professionAtOrigin": "Orchard-lane small-animal keeper",
+                "nativeRegion": "orchard_vales",
+                "nonHereditaryEstimate": true
+              },
+              "sourceHash": "5ffec1aa4caae2415428ad051d28252a1eac414f9be9292bc16d9d385c857eab",
+              "aptitude": 4,
+              "skillPoints": 0,
+              "competenceRank": 0,
+              "demonstratedMethods": {},
+              "qualityPoints": 0,
+              "workCount": 0,
+              "successes": 0,
+              "promotions": [],
+              "workReceipts": [],
+              "authoredDuties": [],
+              "attestations": [],
+              "workOffers": [],
+              "peerGuidance": [],
+              "tradePayments": [],
+              "safetyIncidents": [],
+              "recognizedLicence": null,
+              "supernaturalSystemRanks": {},
+              "knownTechniques": []
+            }
           }
         },
         "history": [
@@ -11777,6 +11941,13 @@
             "personId": "person_1",
             "originHash": "d2c4d29b1dc4dbc240575d84537187eefc9fe0ca1a94c1bb324b27a03afecac4",
             "regionId": "many_nest"
+          },
+          {
+            "day": 2,
+            "kind": "gm-witnessed-emergence",
+            "personId": "person_2",
+            "originHash": "a7ca653888afc33d52cd2c0ed8236c671e5bc5583282da7d9becf23ce3bd6288",
+            "regionId": "orchard_vales"
           }
         ]
       },
