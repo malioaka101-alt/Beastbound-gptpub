@@ -54,3 +54,59 @@ For data visibility and implemented/only-designed special panels, refer to `ADAP
 - `tests/dynamic-hud-identity.test.js` checks that the skin and core/encounter/combat variants are present and stable on seeded saves, and that obtaining panels does not alter the save.
 - A passing JS regression only confirms the **data contract**; it cannot prove the ChatGPT client actually displayed gold ink correctly. The GM must apply this visual rendering contract in the chat. **Appearance is verified by the player's on-screen experience**, not by an engine test.
 - If speed or native UI limitations recur, shorten *content or decoration*, **not** the identifiable fantasy visual family. Do not silently substitute the previously rejected generic card.
+
+
+## Reference compact window (visual sketch, not real state)
+
+The following self-contained **display-only** HTML/CSS is a reusable reference for the core window. It is intentionally small and isolated so a ChatGPT in-chat visualization can adopt the appearance without creating a website, independent renderer, interactive controls, external assets or new game data. Replace bracketed labels with **escaped source-owned, player-known** values from the HUD and current scene. No visual element computes a resource value or resolves dice.
+
+\`\`\`html
+<style>
+.bb-window{--gold:#c59e64;--soft:#e8dfce;--dim:#a9b4c6;--qi:#6dd1c9;
+ box-sizing:border-box;position:relative;overflow:hidden;isolation:isolate;
+ width:100%;max-width:530px;color:var(--soft);
+ background:radial-gradient(ellipse at 82% -22%,#263650 0,transparent 53%),
+ linear-gradient(155deg,#192338 0%,#10182b 40%,#090e1c 100%);
+ border:1px solid #a58450;border-radius:9px;
+ box-shadow:inset 0 0 0 3px #101829,inset 0 0 0 4px #6e5436,0 6px 24px #02061050;
+ padding:20px 22px 15px;font:14px/1.45 Georgia,serif}
+.bb-window::before{content:"";position:absolute;pointer-events:none;inset:9px;
+ border:1px solid #a5845036;border-radius:4px}
+.bb-crown{display:flex;justify-content:space-between;align-items:center;
+ color:var(--gold);font:600 10px/1.2 system-ui,sans-serif;
+ letter-spacing:.22em;text-transform:uppercase}
+.bb-crown .bb-orn{font:24px/1 Georgia,serif;opacity:.8}
+.bb-hero{margin:10px 0 8px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.bb-name{font-size:24px;line-height:1.1;font-weight:600;color:#f1e6ce}
+.bb-date{font:12px/1.3 system-ui,sans-serif;color:#cbb899;text-align:right}
+.bb-muted{font:12px/1.5 system-ui,sans-serif;color:var(--dim)}
+.bb-rule{height:1px;margin:13px 0;background:linear-gradient(90deg,transparent,#ae8c56,transparent)}
+.bb-track-label{display:flex;justify-content:space-between;gap:10px;
+ margin-bottom:5px;font:600 10px/1.2 system-ui,sans-serif;
+ letter-spacing:.12em;color:#e2d5bd}
+.bb-track{height:5px;border-radius:5px;background:#243348;overflow:hidden}
+.bb-track>span{display:block;height:100%;
+ background:linear-gradient(90deg,#a97d45,#efcb84);width:var(--fill,0%)}
+.bb-thread-label{color:var(--gold);font:600 10px/1.2 system-ui,sans-serif;letter-spacing:.15em}
+.bb-thread{margin-top:5px;color:var(--soft);font-size:13px;line-height:1.45}
+.bb-window.bb-combat{--gold:#d1a078}
+.bb-window.bb-beast{--gold:#aeccb6}
+@media(max-width:420px){.bb-window{padding:16px 17px}.bb-name{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.bb-window *{animation:none!important;transition:none!important}}
+</style>
+<section class="bb-window" aria-label="Beastbound verified character status">
+ <div class="bb-crown"><span>◇ BEASTBOUND · SYSTEM RECORD</span><span class="bb-orn">✧</span></div>
+ <div class="bb-hero"><strong class="bb-name">[Verified character name]</strong>
+  <span class="bb-date">[Verified civil date and time]</span></div>
+ <div class="bb-muted">[Actual role/path if meaningful] · [True place/weather] · [Actual purse]</div>
+ <div class="bb-rule"></div>
+ <div class="bb-track-label"><span>STAMINA</span><span>[Current / maximum]</span></div>
+ <div class="bb-track" role="img" aria-label="[Verified stamina current of maximum]">
+  <span style="--fill:[verified bounded percent]%"></span></div>
+ <div class="bb-rule"></div>
+ <div class="bb-thread-label">◈ CURRENT THREAD</div>
+ <div class="bb-thread">[One known immediate scene thread]</div>
+</section>
+\`\`\`
+
+The *example markup is not a campaign checkpoint or a literal static HUD to reuse forever*. This is a visual guide for faithful in-chat rendering, with **live values coming from \`panels.hudData\`**. An actual game panel should hide empty information, compute bar fraction from the real numerator/denominator only for display, and omit a second resource if none is relevant. User action remains ordinary freeform chat.
