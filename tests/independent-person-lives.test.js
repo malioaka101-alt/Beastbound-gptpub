@@ -26,7 +26,7 @@ const moved=R.act(s,{system:'world',operation:'travelTo',params:{
  uncontested:true}});
 A.equal(moved.arrived,true);
 const witness='Maddoc personally met Tessa and Bram at the community green, and both spoke about the lessons they wanted to explore.';
-s.chatRuntime.journal.push({day:1,text:witness});
+(s.chatRuntime.journal||=([])).push({day:1,text:witness});
 const returnHome=R.act(s,{system:'world',operation:'travelTo',params:{
  destinationId:'peer_test_home',minutes:15,
  journey:'Maddoc returned by the safe public orchard lane without claiming either friend travelled with him.',
