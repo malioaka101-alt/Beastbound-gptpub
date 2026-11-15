@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_search_homestead_neighbors_rootday_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 10
+  },
+  "scene": "Maddoc secures the orchard gate and continues searching around the remaining homestead outbuildings and along the boundary lane for his mother Hedra and father Nessa. He watches for any passing neighbours and would ask them if they know where his parents are. No neighbour or parent has been witnessed in the present scene, so no encounter, response, discovery, permission, wage or agreement is asserted.",
+  "summary": "Ten ordinary minutes pass while Maddoc searches the homestead grounds for his parents and looks for neighbours. The local presence ledger at 07:00 established no person present; no conversation or location discovery is assumed.",
+  "focus": [
+    "Looking for Hedra and Nessa around Maddren Homestead",
+    "Ask any actually encountered neighbour whether they have seen his parents"
+  ]
+}
