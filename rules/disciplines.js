@@ -10,6 +10,7 @@ const RiftAnchors=require('./rift-anchors');
 const LivedPlaces=require('../world/lived-places');
 const Potential=require('./potential-mechanics');
 const Difficulty=require('./dynamic-difficulty');
+const GM=require('./gm-contextual-dc');
 const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
@@ -384,7 +385,38 @@ function status(s){
  return {systems,note:'Independent earned skills, physical Gates and Arcane Circles are different structures. No teacher, fee, elapsed age or preselected result unlocks a power.'};
 }
 function modifier(s,system){const sp=KEYS[system];const rank=s.player.skills?.[sp.skill]?.rank||0;return Math.floor((s.player.attributes[sp.attribute]-10)/2)+2*rank;}
-function practice(s,{system,method,partTime=false,source,route=source===undefined?'independent':'established',guidanceId,minutes}={}){
+// A GM can examine the engine's actual baseline and own factors BEFORE any
+// roleplay-sensitive judgment. No dice, training, time or hidden source claims.
+function difficultyPreview(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).some(k=>!['system','method','minutes','route','partTime'].includes(k)))
+  throw Error('Discipline preview accepts the actual system, method, session length and route only');
+ const {system,method,minutes,route='independent',partTime=false}=p;
+ if(!KEYS[system])throw Error('Unknown discipline');
+ const target=currentTarget(s,system);
+ if(!target||!methodsFor(system,target).includes(method))
+  throw Error('Requested method is not available for the actual discipline stage');
+ if(!['established','independent'].includes(route)||typeof partTime!=='boolean')
+  throw Error('Original practice route and part-time intent required');
+ if(minutes!==undefined)C.int(minutes,'actual practice minutes',15,480);
+ const independent=route==='independent';
+ if(independent)independentSite(s,system,{shortSession:minutes!==undefined});
+ else if(!permitted(s,system))throw Error('No established practice location');
+ const recorded=s.table?.disciplineTraining?.[system],
+  record=recorded||{target,methods:{},sessionMinutes:0};
+ if(record.target!==target)throw Error('Training stage ledger mismatch');
+ const dc=Difficulty.disciplinePractice(s,{system,method,record,
+   baseDC:KEYS[system].tracks[target][1],independent,
+   short:minutes!==undefined});
+ return {owner:'discipline.practice',system,target,method,route,partTime,
+   baseDC:dc.baseDC,computedDC:dc.dc,factors:dc.factors,
+   actualMinutes:minutes===undefined?8640:minutes,
+   estimatedStaminaCost:minutes===undefined?null:Math.ceil(minutes/120),
+   witnessedScene:s.chatRuntime?.scene||null,
+   noRollOccurred:true,noProgressGranted:true,
+   note:'The original stage, anatomy, prerequisites, resources and earned practice still govern; a GM may cite actual scene context when resolving the future single original check'};
+}
+function practice(s,{system,method,partTime=false,source,route=source===undefined?'independent':'established',guidanceId,minutes,gmContext}={}){
  // Legacy callers still choose a sixday course by omitting minutes. A
  // deliberate 15–480-minute attempt is equally real: actual effort, fatigue,
  // proof and engine roll determine progress, not an imposed school calendar.
@@ -416,8 +448,9 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  const aptitude=Potential.discipline(s,system,target,method);
  const [length,dc]=spec.tracks[target],
   fee=self||short?0:(partTime?1:2),
-  difficulty=Difficulty.disciplinePractice(s,{
+  difficulty=GM.adjust(s,Difficulty.disciplinePractice(s,{
    system,method,record,baseDC:dc,independent:!!self,short}),
+   gmContext,{owner:'discipline.practice',min:5,max:35}),
   actualDC=difficulty.dc;
  if(s.player.coins<fee)throw Error('Cannot pay for the selected instruction and materials');
  const actualMinutes=short?minutes:6*1440;
@@ -1249,4 +1282,4 @@ function organWork(s,params={}){
   noMandatoryTeacher:true,noAutomaticOtherPower:true};
 }
 
-module.exports={KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
+module.exports={difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};

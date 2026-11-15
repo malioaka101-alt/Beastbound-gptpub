@@ -7,6 +7,7 @@ const Core=require('./core'),World=require('./world'),U=require('./unified');
 const Practice=require('./earned-practice'),Realm=require('../world/simulation');
 const Kin=require('../world/origin-relatives'),Places=require('../world/lived-places');
 const Difficulty=require('./dynamic-difficulty');
+const GM=require('./gm-contextual-dc');
 const ORIGIN='witnessed-voluntary-household-work-v1',DAY=1440;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function draw(p){
@@ -34,7 +35,7 @@ function context(s,npcId){
 }
 function perform(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
-    Object.keys(p).some(k=>!['npcId','purpose','approach'].includes(k))||
+    Object.keys(p).some(k=>!['npcId','purpose','approach','gmContext'].includes(k))||
     typeof p.npcId!=='string'||
     typeof p.purpose!=='string'||p.purpose.trim().length<15||
     p.purpose.length>220)
@@ -51,6 +52,8 @@ function perform(s,p={}){
  const now=s.world.minutes,day=Math.floor(now/DAY),clock=now%DAY;
  if(clock<7*60||clock>16*60)
   throw Error('The family member must be available during an actual ordinary work period');
+ const difficulty=GM.adjust(s,Difficulty.householdWork(s,{person,approach}),
+  p.gmContext,{owner:'social.householdWork',min:8,max:18});
  s.table||={};s.table.householdWork||={version:1,records:[]};
  const ledger=s.table.householdWork;
  if(ledger.version!==1||!Array.isArray(ledger.records)||
@@ -60,7 +63,6 @@ function perform(s,p={}){
   throw Error('This family member has already considered one household job this day');
  if(s.player.stamina<3||s.table.combatants?.player?.stamina<3)
   throw Error('Routine physical work requires genuine available Stamina');
- const difficulty=Difficulty.householdWork(s,{person,approach});
  const fundsBefore=Core.int(person.funds,'original family funds',0,100),
    playerBefore=Core.int(s.player.coins,'original player Talons',0,100000000),
    staminaBefore=s.player.stamina,originalRng=person.rngState;
@@ -124,6 +126,32 @@ function perform(s,p={}){
   employerFundsRemaining:person.funds,playerTalons:s.player.coins,
   noAutomaticAgreement:true,noUnverifiedMoney:true};
 }
+// Optional GM-facing preview: purely read-only, no acceptance, die or wages.
+function difficultyPreview(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    Object.keys(p).some(k=>!['npcId','purpose','approach'].includes(k))||
+    typeof p.npcId!=='string'||
+    typeof p.purpose!=='string'||p.purpose.trim().length<15||
+    p.purpose.length>220)
+  throw Error('Work difficulty preview must name the real relative, practical task and optional actual approach');
+ const {person,place}=context(s,p.npcId);
+ const approach=p.approach===undefined?'standard':p.approach;
+ if(!Difficulty.WORK_APPROACHES[approach])
+  throw Error('Unsupported household approach');
+ const difficulty=Difficulty.householdWork(s,{person,approach});
+ const modifier=Math.floor((Core.int(s.player.attributes.dex,'Dexterity',1,30)-10)/2)+
+   2*Core.int(s.player.skills?.crafting?.rank??0,'Crafting rank',0,5);
+ const today=Math.floor(s.world.minutes/DAY);
+ return {owner:'social.householdWork',task:p.purpose.trim(),approach,
+  place:place.name,baseDC:difficulty.baseDC,computedDC:difficulty.dc,
+  factors:difficulty.factors,minutes:difficulty.minutes,
+  staminaCost:difficulty.staminaCost,modifier,
+  alreadyConsideredToday:(s.table?.householdWork?.records||[])
+   .some(x=>x?.proof?.actorId===person.actorId&&x.proof.day===today),
+  currentScene:s.chatRuntime?.scene||null,
+  noDieRolled:true,noConsentAssumed:true,noWagesPromised:true,
+  gmNext:'Cite an existing scene/place/weather quote and contextual reason if a real adjustment is warranted; the original rule still rolls independently'};
+}
 function status(s){
  const rows=s.table?.householdWork?.records||[];
  return {personallyWitnessedJobs:rows.slice(-24).map(x=>({
@@ -135,4 +163,4 @@ function status(s){
   atMinute:x.proof.endMinute
  })),note:'Only independently agreed and actually resolved household tasks appear here.'};
 }
-module.exports={perform,status,ORIGIN};
+module.exports={perform,status,difficultyPreview,ORIGIN};

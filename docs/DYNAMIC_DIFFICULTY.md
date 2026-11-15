@@ -2,6 +2,8 @@
 
 **Canonical authority:** the original `reference/Beastbound_Realms_Unified_Master_Prompt.md` §45 establishes the d20 formula and illustrative DC scale. Difficulty is the resistance of the *actual task* under its *actual conditions*, not an arbitrary GM number, a player-selected challenge, a source of free rewards, or a universal progression ladder. Existing profession, discipline, social autonomy, anatomy, ecology and time rules still own their actions.
 
+**Later GM adjudication supplement:** [GM Contextual Difficulty](GM_CONTEXTUAL_DIFFICULTY.md) lets the narrator cite a real, saved scene/place/weather fact and apply one modest bounded judgment *before* the source-owner check. This preserves original owner baselines and all automatic factors; a genuine routine or impossible mundane task does not need a roll. No specialized or economic outcome can be invented through a GM adjustment. This supersedes older blanket wording that the GM can never make an appropriately grounded situational DC judgment.
+
 ## Difficulty is decided before the die
 
 1. **Feasibility:** automatic ordinary facts need no check. A genuinely impossible act cannot be made possible by a natural 20. Keep unimplemented or materially unknown original mechanisms unresolved rather than creating a DC for them.

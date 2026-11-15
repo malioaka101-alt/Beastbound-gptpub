@@ -20,6 +20,10 @@ The foundational **Starting World** is an **initial common-knowledge layer over 
 
 The Starting World supplements established **public** canon, but later personal discoveries, witnessed threats, moving families, current markets, independent politics and creature whereabouts still require the real living world engine. No famous bloodline, renowned academy, commonly named monster or public tradition grants membership, a lawful rank, a technique, source materials, a guaranteed tutor or a beast's assent.
 
+## GM contextual adjudication — original Master Prompt §45
+
+Use [the GM contextual difficulty contract](GM_CONTEXTUAL_DIFFICULTY.md): the GM interprets the real task and its witnessed conditions, previews the original owner DC when useful, records one reasoned −4…+4 adjustment linked to existing scene/place/weather evidence **before** the engine rolls, and keeps one authentic original roll and recorded receipt. An actually ordinary/guaranteed or impossible mundane act should not be rolled; the committed no-roll route is narrowly available for prepared original local terrain checks, not paid work, growth, combat, creatures, consent or specialist systems. **Never confuse a GM's interpretation with free items, ranks, wages or forced NPC compliance.** Engine-produced current baseline and explicit conditions are authority; no caller DC. Reuse verified baselines without an extra preview network call in fast play.
+
 ## Source-bound dynamic difficulty — new verified owner implementation
 
 Use [the live dynamic DC policy](DYNAMIC_DIFFICULTY.md) for source-bound **ordinary household work** and **early discipline practice**. Never allow a caller to submit a chosen DC or claim free bonuses from unverified rhetoric. Original owners determine baselines; verified preparation costs, current Stamina, and source-authenticated earned practice can adjust DC. The roll and its breakdown must come from the original engine; do not re-roll or retroactively change earlier results. Other specialized systems keep their established DC owner until individually integrated. Approved fantasy panels remain unchanged.
