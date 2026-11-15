@@ -1,0 +1,28 @@
+name: Beastbound Settlement Foundation Safety
+on:
+  pull_request:
+    paths:
+      - 'world/settlement-foundations.js'
+      - 'world/lived-places.js'
+      - 'world/person-presence.js'
+      - 'world/simulation.js'
+      - 'rules/index.js'
+      - 'scripts/chat-turn.js'
+      - 'tests/settlement-foundations.test.js'
+      - '.github/workflows/settlement-foundations-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  settlement-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove whole settlements, resident privacy, world ticks and save compatibility
+        run: |
+          node tests/settlement-foundations.test.js
+          node tests/lived-places-and-travel.test.js
