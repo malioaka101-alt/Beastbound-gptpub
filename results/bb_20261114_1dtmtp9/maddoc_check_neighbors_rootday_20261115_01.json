@@ -1,0 +1,59 @@
+{
+  "id": "maddoc_check_neighbors_rootday_20261115_01",
+  "ok": true,
+  "applied": false,
+  "revision": 50,
+  "stateHash": "63852d60b19a05a173b3457558577eb67fd445b6a6445088c02a4ddde5f16cf6",
+  "output": {
+    "rules": {
+      "location": "maddren_homestead",
+      "day": 3,
+      "people": [],
+      "note": "Only people established at this actual scene appear. Public fame, a family name or a remote professional directory does not establish physical presence or permission to join."
+    }
+  },
+  "panel": "╔═ MADDOC · 2 NESTING 1156 ══════╗\n║ 07:00 · Morning · Cool         ║\n║ Maddren Homestead          2 T ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Looking for mother Hedra an… ║\n║ ◆ Parent identities clarified… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "2 Nesting 1156 AC",
+      "label": "2 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 3,
+      "weekday": "Rootday"
+    },
+    "time": "07:00",
+    "daypart": "Morning",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Looking for mother Hedra and father Nessa at Maddren Homestead",
+      "Parent identities clarified; current whereabouts unverified"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  }
+}
