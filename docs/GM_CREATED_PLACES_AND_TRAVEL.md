@@ -2,6 +2,10 @@
 
 **Living-world foundation, 8 November 2026.** This adapts the existing public engine to the user's clarified design. The game remains a **private natural-language ChatGPT text RPG**. The original Master Prompt (§§2, 5, 39–45, 54–57), already witnessed campaign facts and Table Rules govern the world. No new campaign has been started.
 
+## Whole-settlement correction — 15 November 2026
+
+The later verified implementation is [Persistent Settlement Foundations](PERSISTENT_SETTLEMENT_FOUNDATIONS.md): establishing a **whole** hamlet/village/town now also creates its complete saved locality, household and resident foundation immediately. The earlier text below describes the older limited location/travel bridge, not the current standard for settlements. An ordinary workyard or one home remains a single place and must not silently become a town. Exploration reveals the world; it no longer creates each neighbourhood only when visited.
+
 ## Where the world lives
 
 The Master Prompt asks for a coherent background of continents, regions, cultures and institutions **before** play; it does **not** require every hamlet, shop, camp, district or building to be individually listed or traversable at creation. The current `world/atlas.js` is the broad civilisational foundation. **The Game Master creates local places, scene prose, culture, atmosphere, people and history as the story naturally encounters them.** The engine's duty is to preserve these facts in the actual save and apply the existing clock, resources, source rules, NPC autonomy and consequences.
