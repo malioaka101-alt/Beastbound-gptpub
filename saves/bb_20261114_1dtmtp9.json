@@ -1133,10 +1133,26 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:18",
+      "type": "story",
+      "text": "A period of ordinary life passes at Maddren Homestead.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "maddren_homestead",
+        "elapsedMinutes": 60,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
     }
   ],
   "world": {
-    "minutes": 3318,
+    "minutes": 3378,
     "location": "maddren_homestead",
     "marketIndex": 0,
     "fenPressure": 1,
@@ -1643,7 +1659,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 52,
+    "revision": 53,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4850,13 +4866,55 @@
             }
           ]
         }
+      },
+      "maddoc_hour_neighbour_search_rootday_20261115_02": {
+        "revision": 53,
+        "mode": "rule",
+        "hash": "31ff72617d5e78aab7ab7ed11a0d05c72364cdef9d6009b9601657853836fb44",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:18",
+          "output": {
+            "rules": {
+              "waited": true,
+              "elapsedMinutes": 60,
+              "daysPassed": 0,
+              "location": "maddren_homestead",
+              "clock": "Day 3, 08:18",
+              "sixdayTicks": [],
+              "monthTicks": [],
+              "noTrainingOrResearchAward": true,
+              "noAutomaticWagesOrContracts": true,
+              "lifeNeedsNotCertified": true,
+              "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:18",
+              "type": "story",
+              "text": "A period of ordinary life passes at Maddren Homestead.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "maddren_homestead",
+                "elapsedMinutes": 60,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "At a neighbour's entrance, seeking Hedra and Nessa",
-      "Awaiting a real encounter; no answer presumed"
+      "Still searching for Hedra and Nessa",
+      "Ask actually met neighbours whether they saw either parent"
     ],
-    "scene": "On Rootday morning Maddoc continues along the boundary lane of Maddren Homestead to the closest neighbouring property's entrance, keeping an eye out for a resident. He calls at the gate or front door and asks whether anyone has seen Hedra Maddren or Nessa Maddren. At this stage the source has not established a specific neighbour as present or a witnessed answer, so no named neighbour, response, or parent's location is invented.",
+    "scene": "Rootday morning. From 07:18, Maddoc leaves the unanswered neighbouring cottage and searches the homestead boundary and nearby lanes for an hour. He tries to ask any encountered neighbours whether they have seen Hedra or Nessa. No neighbour, answer, or parent location is assumed without source evidence.",
     "journal": [
       {
         "day": 1,
@@ -4965,6 +5023,10 @@
       {
         "day": 3,
         "text": "Eight minutes of ordinary searching and walking to a neighbouring property. An attempted inquiry is made, but no answer or confirmed presence is asserted without a witnessed person."
+      },
+      {
+        "day": 3,
+        "text": "An hour of ordinary searching for Maddoc's parents along neighbouring paths, looking for people to ask; no invented responses or discovered locations."
       }
     ],
     "continuity": {
