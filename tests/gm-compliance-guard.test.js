@@ -53,6 +53,17 @@ const s=game(),old=E.exportGame(s),hud=Panels.hudData(s);
  A.equal(GM.audit(s,{assertions:[
   {type:'npc-knows',npcId:'otto',factId:'elira_sourced_charter_knowledge'}
  ]}).clear,false,'One actor does not inherit another actor’s knowledge');
+ const hiddenWitness='A private GM-only record says Elira overheard a confidential household detail.';
+ Continuity.apply(s,{id:'gm_private_knowledge_461893',mode:'checkpoint',
+  scene:'The public scene does not reveal private information.',
+  gmWitness:hiddenWitness,
+  continuity:[{id:'elira_private_gm_only',action:'record',
+   subject:{kind:'person',id:'elira'},category:'npc-knowledge',
+   statement:'Elira once heard an unconfirmed confidential household detail.',
+   witness:hiddenWitness,visibility:'gm-only'}]});
+ A.equal(GM.audit(s,{assertions:[
+  {type:'npc-knows',npcId:'elira',factId:'elira_private_gm_only'}
+ ]}).clear,false,'A GM-only record is not a player-facing knowledge reveal');
 }
 {
  const html=Panels.inChatHtml(s);
@@ -90,6 +101,13 @@ const s=game(),old=E.exportGame(s),hud=Panels.hudData(s);
    gmAssertions:[{type:'player-has-item',itemId:'arcane_notes'}]};
   A.throws(()=>Turn.execute(file,falseRoll),/GM compliance gate rejected/,
    'Unsupported narration must fail before any original roll');
+  A.equal(FS.readFileSync(file,'utf8'),initial);
+  const badSequence={id:'gm_invalid_sequence_461893',mode:'sequence',
+   steps:[{mode:'rule',system:'world',operation:'wait',params:{minutes:10}},
+    {mode:'rule',system:'health',operation:'sleep',params:{hours:8}}],
+   gmAssertions:[{type:'npc-present',npcId:'notable:remote_scholar'}]};
+  A.throws(()=>Turn.execute(file,badSequence),/GM compliance gate rejected/,
+   'A sequence must fail before even its first original action');
   A.equal(FS.readFileSync(file,'utf8'),initial);
   const spoken='Time for work again';
   const verified={id:'gm_player_speech_461893',mode:'checkpoint',
