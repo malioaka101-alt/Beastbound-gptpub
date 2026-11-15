@@ -9,6 +9,7 @@ const SoulThreads=require('./soul-threading');
 const RiftAnchors=require('./rift-anchors');
 const LivedPlaces=require('../world/lived-places');
 const Potential=require('./potential-mechanics');
+const Difficulty=require('./dynamic-difficulty');
 const KEYS={
  meridian:{skill:'cultivation',attribute:'wis',focus:['breath','tissue','circulation'],tracks:{foundation:[40,12],awakening:[72,13]}},
  arcane:{skill:'arcana',attribute:'int',focus:['mana-attunement','core-geometry','formulae'],tracks:{core:[40,12],circle1:[100,12]}},
@@ -415,7 +416,9 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  const aptitude=Potential.discipline(s,system,target,method);
  const [length,dc]=spec.tracks[target],
   fee=self||short?0:(partTime?1:2),
-  actualDC=dc+(self||short?2:0);
+  difficulty=Difficulty.disciplinePractice(s,{
+   system,method,record,baseDC:dc,independent:!!self,short}),
+  actualDC=difficulty.dc;
  if(s.player.coins<fee)throw Error('Cannot pay for the selected instruction and materials');
  const actualMinutes=short?minutes:6*1440;
  const learnedSource=self?independentSource(s,system,method,self.site):source;
@@ -424,7 +427,7 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
   C.event(s,'world','The practitioner begins genuine independent '+system+' '+method+' work at '+self.name+'.',{
    origin:'verified-independent-discipline-practice',system,target,method,
    location:self.site,biome:self.biome,source:learnedSource,
-   actualDC,feeTalons:0,startMinute,timeDays:actualMinutes/1440,partTime
+   actualDC,difficulty,feeTalons:0,startMinute,timeDays:actualMinutes/1440,partTime
   });
   s.table||={};s.table.independentTraining||=[];
   s.table.independentTraining.push({
@@ -463,12 +466,12 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  else W.advance(s,6);
  U.sync(s,{source:'legacy'});
  C.event(s,'progress',`${system} practice: ${method}; ${earned} training points.`,{
-  system,target,earned,complication,route,source:learnedSource,actualDC,
+  system,target,earned,complication,route,source:learnedSource,actualDC,difficulty,
   theoreticalGuidance:theory,potentialAptitude:aptitude,location:s.world.location,
   elapsedMinutes:actualMinutes,staminaSpent:fatigue
  });
  return {system,target,method,check,earned,progress:record.points,required:length,
-  complication,timeDays:actualMinutes/1440,elapsedMinutes:actualMinutes,
+  complication,difficulty,timeDays:actualMinutes/1440,elapsedMinutes:actualMinutes,
   staminaSpent:fatigue,feeTalons:fee,route,source:learnedSource,
   theoreticalGuidance:theory,potentialAptitude:aptitude};
 }
