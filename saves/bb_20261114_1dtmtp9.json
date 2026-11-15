@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "engineVersion": "0.3.0",
   "seed": 3951775931,
-  "rngState": 863266655,
+  "rngState": 1281673872,
   "sequence": 0,
   "log": [
     {
@@ -534,10 +534,45 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 10:30",
+      "type": "roll",
+      "text": "🎲 Ordinary household work — Complete ordinary harness upkeep with Hedra: : d20 6 +0 = 6 vs DC 12 → failure (-6)",
+      "details": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 0,
+        "dc": 12,
+        "total": 6,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 12:30",
+      "type": "story",
+      "text": "Hedra Maddren inspects the attempted household work; no wages are awarded for unfinished work.",
+      "details": {
+        "origin": "witnessed-voluntary-household-work-v1",
+        "receiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+        "actorId": "origin-kin:kin_1",
+        "minutes": 120,
+        "accepted": true,
+        "paidTalons": 0,
+        "sourceFundsChanged": false
+      }
     }
   ],
   "world": {
-    "minutes": 2070,
+    "minutes": 2190,
     "location": "maddren_homestead",
     "marketIndex": -1,
     "fenPressure": 2,
@@ -565,7 +600,7 @@
     "path": "undecided",
     "health": 48,
     "maxHealth": 48,
-    "stamina": 36,
+    "stamina": 34,
     "maxStamina": 36,
     "mana": 24,
     "maxMana": 24,
@@ -607,7 +642,9 @@
       },
       "crafting": {
         "rank": 0,
-        "xp": 0
+        "xp": 1,
+        "ppPeriod": 0,
+        "ppThisSixday": 1
       },
       "combat": {
         "rank": 0,
@@ -1042,7 +1079,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 31,
+    "revision": 32,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2305,13 +2342,95 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "maddoc_harness_guided_householdwork_20261115_01": {
+        "revision": 32,
+        "mode": "rule",
+        "hash": "985e0f5269c999a45b2442d4528182e261ea414673c56bdf967910b8631c80fe",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 12:30",
+          "output": {
+            "rules": {
+              "task": "Complete ordinary harness upkeep with Hedra: use her demonstrated bending-and-tension check to identify loose stitching, sort unsafe straps for repair, and refit sound buckles.",
+              "employer": "Hedra Maddren",
+              "accepted": true,
+              "check": {
+                "dice": [
+                  6
+                ],
+                "roll": 6,
+                "modifier": 0,
+                "dc": 12,
+                "total": 6,
+                "margin": -6,
+                "degree": "failure",
+                "success": false,
+                "progress": 0,
+                "naturalBonus": 0
+              },
+              "practice": {
+                "practiceSkill": "crafting",
+                "ppAwarded": 1,
+                "skillRankBefore": 0,
+                "skillRankAfter": 0,
+                "noExtraRoll": true
+              },
+              "minutes": 120,
+              "staminaSpent": 2,
+              "promisedTalons": 2,
+              "paidTalons": 0,
+              "employerFundsRemaining": 18,
+              "playerTalons": 0,
+              "noAutomaticAgreement": true,
+              "noUnverifiedMoney": true
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 10:30",
+              "type": "roll",
+              "text": "🎲 Ordinary household work — Complete ordinary harness upkeep with Hedra: : d20 6 +0 = 6 vs DC 12 → failure (-6)",
+              "details": {
+                "dice": [
+                  6
+                ],
+                "roll": 6,
+                "modifier": 0,
+                "dc": 12,
+                "total": 6,
+                "margin": -6,
+                "degree": "failure",
+                "success": false,
+                "progress": 0,
+                "naturalBonus": 0
+              }
+            },
+            {
+              "day": 2,
+              "time": "Day 2, 12:30",
+              "type": "story",
+              "text": "Hedra Maddren inspects the attempted household work; no wages are awarded for unfinished work.",
+              "details": {
+                "origin": "witnessed-voluntary-household-work-v1",
+                "receiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+                "actorId": "origin-kin:kin_1",
+                "minutes": 120,
+                "accepted": true,
+                "paidTalons": 0,
+                "sourceFundsChanged": false
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Check remaining harness stitching with Hedra",
-      "Meet Bram and Tessa after the work"
+      "Hedra's verdict on harness upkeep",
+      "Find Bram and Tessa afterward"
     ],
-    "scene": "Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Hedra Maddren is physically present beside Maddoc at the harness workbench, demonstrating how to bend straps and inspect uneven stitches under light tension. Maddoc noticed a narrow gap beside a buckle and is applying her advice to the remaining straps. The earlier 150 minutes of waiting earned no work result; the offered 2 Talons remain unpaid.",
+    "scene": "Workday 1 at Maddren Homestead. Maddoc has brought the harness buckles and stitching to Hedra Maddren for independent review after using her demonstrated inspection method. Whether the job was agreed, its quality, elapsed time and any wages must come only from the recorded household-work result; Bram and Tessa are people he hopes to meet afterward.",
     "journal": [
       {
         "day": 1,
@@ -2352,6 +2471,10 @@
       {
         "day": 2,
         "text": "Maddoc observed a visibly uneven stitch under tension and listened to Hedra Maddren's practical buckle-and-stitch inspection advice; ordinary coaching only, with no roll, payment, or guaranteed quality."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc tried to apply Hedra Maddren's observed stitch and buckle checks to remaining ordinary harness upkeep. Actual acceptance, Crafting roll, time and payment belong only to the original household-work receipt."
       }
     ]
   },
@@ -2420,7 +2543,7 @@
         "defense": 10,
         "vigor": 0,
         "will": 2,
-        "stamina": 36,
+        "stamina": 34,
         "maxStamina": 36,
         "boxes": [
           3,
@@ -8000,8 +8123,8 @@
             "status": "active",
             "temperament": "reserved",
             "funds": 18,
-            "fatigue": 9,
-            "rngState": 1912484659,
+            "fatigue": 11,
+            "rngState": 1150883615,
             "lastSixday": 1,
             "shift": null,
             "history": [
@@ -11367,6 +11490,53 @@
       ],
       "months": [
         1
+      ]
+    },
+    "householdWork": {
+      "version": 1,
+      "records": [
+        {
+          "origin": "witnessed-voluntary-household-work-v1",
+          "proof": {
+            "origin": "witnessed-voluntary-household-work-v1",
+            "actorId": "origin-kin:kin_1",
+            "name": "Hedra Maddren",
+            "actorSourceHash": "47a1e896762be8c204cd2d0a187ee75da16f9487834791711bdec65fd91091fa",
+            "location": "maddren_homestead",
+            "day": 1,
+            "startMinute": 2070,
+            "endMinute": 2190,
+            "task": "Complete ordinary harness upkeep with Hedra: use her demonstrated bending-and-tension check to identify loose stitching, sort unsafe straps for repair, and refit sound buckles.",
+            "accepted": true,
+            "independentRngBefore": 1912484659,
+            "independentRngAfter": 1150883615,
+            "employerFundsBefore": 18,
+            "employerFundsAfter": 18,
+            "playerTalonsBefore": 0,
+            "playerTalonsAfter": 0,
+            "proposedPayTalons": 2,
+            "paidTalons": 0,
+            "staminaBefore": 36,
+            "staminaAfter": 34,
+            "originalCheck": {
+              "dice": [
+                6
+              ],
+              "roll": 6,
+              "modifier": 0,
+              "dc": 12,
+              "total": 6,
+              "margin": -6,
+              "degree": "failure",
+              "success": false,
+              "progress": 0,
+              "naturalBonus": 0
+            },
+            "noGuaranteedContract": true,
+            "noForcedConsent": true
+          },
+          "hash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446"
+        }
       ]
     }
   }

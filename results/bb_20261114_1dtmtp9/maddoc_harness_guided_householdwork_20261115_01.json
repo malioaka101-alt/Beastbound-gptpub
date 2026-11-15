@@ -1,0 +1,126 @@
+{
+  "id": "maddoc_harness_guided_householdwork_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 32,
+  "stateHash": "9d89172de788e17bd4f5db1bb7ac75680ff44c263a28881461cfc9150f776394",
+  "clock": "Day 2, 12:30",
+  "output": {
+    "rules": {
+      "task": "Complete ordinary harness upkeep with Hedra: use her demonstrated bending-and-tension check to identify loose stitching, sort unsafe straps for repair, and refit sound buckles.",
+      "employer": "Hedra Maddren",
+      "accepted": true,
+      "check": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 0,
+        "dc": 12,
+        "total": 6,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      },
+      "practice": {
+        "practiceSkill": "crafting",
+        "ppAwarded": 1,
+        "skillRankBefore": 0,
+        "skillRankAfter": 0,
+        "noExtraRoll": true
+      },
+      "minutes": 120,
+      "staminaSpent": 2,
+      "promisedTalons": 2,
+      "paidTalons": 0,
+      "employerFundsRemaining": 18,
+      "playerTalons": 0,
+      "noAutomaticAgreement": true,
+      "noUnverifiedMoney": true
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 10:30",
+      "type": "roll",
+      "text": "🎲 Ordinary household work — Complete ordinary harness upkeep with Hedra: : d20 6 +0 = 6 vs DC 12 → failure (-6)",
+      "details": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 0,
+        "dc": 12,
+        "total": 6,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 12:30",
+      "type": "story",
+      "text": "Hedra Maddren inspects the attempted household work; no wages are awarded for unfinished work.",
+      "details": {
+        "origin": "witnessed-voluntary-household-work-v1",
+        "receiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+        "actorId": "origin-kin:kin_1",
+        "minutes": 120,
+        "accepted": true,
+        "paidTalons": 0,
+        "sourceFundsChanged": false
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 12:30 · Afternoon · Cool       ║\n║ Maddren Homestead          0 S ║\n║ STA  █████████░          34/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Hedra's verdict on harness … ║\n║ ◆ Find Bram and Tessa afterwa… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "12:30",
+    "daypart": "Afternoon",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 34,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Hedra's verdict on harness upkeep",
+      "Find Bram and Tessa afterward"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Workday 1 at Maddren Homestead. Maddoc has brought the harness buckles and stitching to Hedra Maddren for independent review after using her demonstrated inspection method. Whether the job was agreed, its quality, elapsed time and any wages must come only from the recorded household-work result; Bram and Tessa are people he hopes to meet afterward.\nPC: young learner, undecided; 0 S\nJOURNAL: The month closes; trade agreements and faction business continue independently. | A period of ordinary life passes at Maddren Homestead. | Hedra Maddren inspects the attempted household work; no wages are awarded for unfinished work.\nCURRENT: No opening hook"
+}
