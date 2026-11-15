@@ -1,0 +1,75 @@
+{
+  "id": "maddoc_family_npc_knowledge_correction_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 36,
+  "stateHash": "0bbe527ea65976a25c21385c37b350c3db913b45da21fe33818c28aeac674c12",
+  "clock": "Day 2, 15:12",
+  "output": {
+    "continuity": {
+      "recorded": 2,
+      "entries": [
+        {
+          "id": "maddoc_hedra_is_mother",
+          "head": "82950a94b0a367bbedeba03ba212c8580b82b93b5a17ae61371545d82364d931",
+          "action": "record"
+        },
+        {
+          "id": "maddoc_friends_location_unconfirmed",
+          "head": "0864ea0f99289a2a577639138b5a5c6c4a4ab3c7eaa4cd0d27967c041647b5db",
+          "action": "record"
+        }
+      ],
+      "storyOnly": true,
+      "noMechanicalAgreementOrAbilityGranted": true
+    },
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:12 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Look for Bram and Tessa; pr… ║\n║ ◆ Talk naturally if either fr… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:12",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Look for Bram and Tessa; presence not yet established",
+      "Talk naturally if either friend is genuinely encountered"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc stands at Mossgate Common at 15:12 after his verified walk from home, seeking Bram and Tessa. Neither friend's current whereabouts or activities have been established by the journey. The earlier alleged meeting and references to his private work were mistaken GM dialogue, not verified events.\nPC: young learner, undecided; 2 T\nJOURNAL: soul practice: self-awareness; 0 training points. | Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance. | The documented journey from Maddren Homestead reaches Mossgate Common.\nCURRENT: No opening hook"
+}

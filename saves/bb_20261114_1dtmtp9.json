@@ -1186,7 +1186,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 35,
+    "revision": 36,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2759,13 +2759,44 @@
             }
           ]
         }
+      },
+      "maddoc_family_npc_knowledge_correction_20261115_01": {
+        "revision": 36,
+        "mode": "checkpoint",
+        "hash": "c6844a710b059f80b60c89b8d0c9e69bd81a2c971e8d98265b05a27fa5b1ba2f",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 15:12",
+          "output": {
+            "continuity": {
+              "recorded": 2,
+              "entries": [
+                {
+                  "id": "maddoc_hedra_is_mother",
+                  "head": "82950a94b0a367bbedeba03ba212c8580b82b93b5a17ae61371545d82364d931",
+                  "action": "record"
+                },
+                {
+                  "id": "maddoc_friends_location_unconfirmed",
+                  "head": "0864ea0f99289a2a577639138b5a5c6c4a4ab3c7eaa4cd0d27967c041647b5db",
+                  "action": "record"
+                }
+              ],
+              "storyOnly": true,
+              "noMechanicalAgreementOrAbilityGranted": true
+            },
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Look for Bram and Tessa near Mossgate Common",
-      "Catch up on their day if they are available"
+      "Look for Bram and Tessa; presence not yet established",
+      "Talk naturally if either friend is genuinely encountered"
     ],
-    "scene": "At Mossgate Common, Maddoc arrives from the Maddren Homestead by the known orchard-road route. He looks around the hamlet green and the nearby practice yard for his friends Bram and Tessa, wanting to hear what they have been doing while he was helping Hedra. This arrival does not itself require or guarantee that either friend is present, willing to talk, or has gained a skill or item.",
+    "scene": "Maddoc stands at Mossgate Common at 15:12 after his verified walk from home, seeking Bram and Tessa. Neither friend's current whereabouts or activities have been established by the journey. The earlier alleged meeting and references to his private work were mistaken GM dialogue, not verified events.",
     "journal": [
       {
         "day": 1,
@@ -2822,8 +2853,86 @@
       {
         "day": 2,
         "text": "Maddoc travels the established familiar orchard-lane route from his homestead to Mossgate Common (42 verified journey minutes), hoping to meet Bram and Tessa and catch up on their own day; no automatic NPC attendance, gains or rewards."
+      },
+      {
+        "day": 2,
+        "text": "Player-confirmed canon: Hedra Maddren is Maddoc's mother; original guardian role remains valid. Bram and Tessa are not yet confirmed present at Mossgate Common, nor do they automatically know Maddoc's private harness work, 2-Talon family allowance or Soul practice. The earlier unsupported reunion dialogue is not canon."
       }
-    ]
+    ],
+    "continuity": {
+      "origin": "gm-witnessed-narrative-continuity-v1",
+      "version": 1,
+      "facts": {
+        "maddoc_hedra_is_mother": {
+          "id": "maddoc_hedra_is_mother",
+          "subject": {
+            "kind": "person",
+            "id": "origin-kin:kin_1"
+          },
+          "category": "family-relationship",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "Hedra Maddren is Maddoc Maddren's mother by explicit player clarification. The independent origin's guardian label remains a household role; no specific kinship is inferred for Nessa beyond second guardian.",
+          "head": "82950a94b0a367bbedeba03ba212c8580b82b93b5a17ae61371545d82364d931",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_hedra_is_mother",
+                "action": "record",
+                "subject": {
+                  "kind": "person",
+                  "id": "origin-kin:kin_1"
+                },
+                "category": "family-relationship",
+                "statement": "Hedra Maddren is Maddoc Maddren's mother by explicit player clarification. The independent origin's guardian label remains a household role; no specific kinship is inferred for Nessa beyond second guardian.",
+                "witness": "Hedra Maddren is Maddoc's mother",
+                "visibility": "player-known",
+                "minute": 2352,
+                "day": 2,
+                "turnId": "maddoc_family_npc_knowledge_correction_20261115_01",
+                "previousSeal": null
+              },
+              "seal": "82950a94b0a367bbedeba03ba212c8580b82b93b5a17ae61371545d82364d931"
+            }
+          ]
+        },
+        "maddoc_friends_location_unconfirmed": {
+          "id": "maddoc_friends_location_unconfirmed",
+          "subject": {
+            "kind": "narrative",
+            "id": "mossgate_friends"
+          },
+          "category": "npc-knowledge-boundary",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "At 15:12 at Mossgate Common, Maddoc is seeking Bram and Tessa, but their physical presence and recent activities have not been established. Neither has been shown to know his private harness help, Hedra's allowance, or personal Soul practice. Prior invented dialogue is non-canon.",
+          "head": "0864ea0f99289a2a577639138b5a5c6c4a4ab3c7eaa4cd0d27967c041647b5db",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_friends_location_unconfirmed",
+                "action": "record",
+                "subject": {
+                  "kind": "narrative",
+                  "id": "mossgate_friends"
+                },
+                "category": "npc-knowledge-boundary",
+                "statement": "At 15:12 at Mossgate Common, Maddoc is seeking Bram and Tessa, but their physical presence and recent activities have not been established. Neither has been shown to know his private harness help, Hedra's allowance, or personal Soul practice. Prior invented dialogue is non-canon.",
+                "witness": "Bram and Tessa are not yet confirmed present",
+                "visibility": "player-known",
+                "minute": 2352,
+                "day": 2,
+                "turnId": "maddoc_family_npc_knowledge_correction_20261115_01",
+                "previousSeal": null
+              },
+              "seal": "0864ea0f99289a2a577639138b5a5c6c4a4ab3c7eaa4cd0d27967c041647b5db"
+            }
+          ]
+        }
+      }
+    }
   },
   "campaign": {
     "slug": "bb_20261114_1dtmtp9",
