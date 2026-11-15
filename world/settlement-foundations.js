@@ -197,6 +197,8 @@ function verify(place,record){
   record.founding.households!==record.whole.households.length||
   record.founding.residents!==record.whole.residents.length||
   !Array.isArray(record.live?.history)||!Array.isArray(record.live?.conversations)||
+  record.live.conversations.length>80||
+  record.live.conversations.some(x=>{const {hash:seal,...rest}=x;return seal!==hash(rest);})||
   !Array.isArray(record.playerObservedSites)||
   !Number.isInteger(record.live?.lastSixday)||
   !Number.isInteger(record.live?.waterCondition)||
@@ -212,8 +214,12 @@ function verify(place,record){
    return false;
   previous=h.hash;
  }
+ const final=record.live.history.at(-1);
  return record.live.history.length===0||
-  (record.live.lastWitnessHash===previous);
+  (record.live.lastWitnessHash===previous&&
+   record.live.waterCondition===final.water&&
+   record.live.roadCondition===final.road&&
+   record.live.localWorkPressure===final.work);
 }
 function get(s,placeId){
  const r=peek(s)?.records?.[placeId];if(!r)return null;
@@ -221,7 +227,9 @@ function get(s,placeId){
  if(!verify(place,r))throw Error('Saved settlement foundation has lost its source-sealed identity');
  return r;
 }
-function found(s,{placeId}={}){
+function found(s,params={}){
+ if(!shape(params,['placeId']))throw Error('A settlement foundation cannot choose outcomes or additional effects');
+ const {placeId}=params;
  if(!id(placeId))throw Error('A named previously founded settlement place is required');
  const Places=require('./lived-places'),place=Places.get(s,placeId);
  if(!isSettlement(place))throw Error('This place has not been established as a whole village, hamlet, town or city');
@@ -280,7 +288,9 @@ function localPeople(s,w){
   actuallyPresent:true,meetingIsNotAssent:true,
   siteId:site,origin:'persistent-settlement-resident'}));
 }
-function status(s,{placeId}={}){
+function status(s,params={}){
+ if(!shape(params,['placeId']))throw Error('Settlement status accepts only a saved place identifier');
+ const {placeId}=params;
  const idToSee=placeId||s.world.location,r=get(s,idToSee);
  if(!r)return {founded:false,placeId:idToSee,
   note:'No persisted settlement foundation has yet been established at this site.'};
@@ -290,12 +300,14 @@ function status(s,{placeId}={}){
   centre:require('./lived-places').get(s,idToSee).name,
   placeId:idToSee,region:Atlas.R[r.whole.regionId].name,
   knownLandmarks:visible.map(x=>({id:x.id,name:x.name,access:x.access})),
-  currentSite:here?(s.chatRuntime?.settlementSite||'common'):null,
+  currentSite:here?(s.chatRuntime?.settlementSite||null):null,
   ...(here?{locallyObservedPeople:localPeople(s,require('./simulation').peek(s)).map(x=>({
    npcId:x.npcId,name:x.name,profession:x.profession}))}:{}),
   note:'Only established personally discoverable details are shown. Private residences, full household rosters, off-screen routines and individual concerns remain hidden.'};
 }
-function visit(s,{siteId}={}){
+function visit(s,params={}){
+ if(!shape(params,['siteId']))throw Error('Local journeys cannot choose money, presence or arbitrary time');
+ const {siteId}=params;
  if(typeof siteId!=='string')throw Error('Name an actual local settlement site');
  const r=get(s,s.world.location);
  if(!r)throw Error('The current location has no persisted settlement to explore');
@@ -361,7 +373,9 @@ function tick(w,day){
   r.live.lastSixday=day;r.live.lastWitnessHash=entry.hash;
  }
 }
-function speak(s,{npcId,question}={}){
+function speak(s,params={}){
+ if(!shape(params,['npcId','question']))throw Error('A conversation cannot select NPC consent or answers');
+ const {npcId,question}=params;
  if(typeof npcId!=='string'||typeof question!=='string'||
     question.trim().length<3||question.length>400)
   throw Error('Speak to one actually encountered settlement resident with a genuine question');
