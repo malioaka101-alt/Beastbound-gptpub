@@ -1,0 +1,25 @@
+name: Beastbound Named Sixday Calendar
+on:
+  pull_request:
+    paths:
+      - 'rules/world.js'
+      - 'reference/Beastbound_Table_Rules.md'
+      - 'docs/FAST_TURNS.md'
+      - 'tests/named-sixday-calendar.test.js'
+      - '.github/workflows/named-sixday-calendar.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  named-sixday:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert named weekdays and preserved world simulation
+        run: |
+          node tests/named-sixday-calendar.test.js
+          node tests/dynamic-hud-identity.test.js

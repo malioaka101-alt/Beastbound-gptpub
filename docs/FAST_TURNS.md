@@ -99,4 +99,4 @@ Illustrative format only (not a playable campaign command):
 }
 ~~~
 
-This adapter is not a universal story planner. Genuine new-world actions, NPC contracts, beast encounters, advanced training, and novel research continue using their own supported source or remain unresolved. Use the saved civil weekday label (such as Workday 1) in the approved HUD instead of relative Day N when the calendar already provides an anchored weekday.
+This adapter is not a universal story planner. Genuine new-world actions, NPC contracts, beast encounters, advanced training, and novel research continue using their own supported source or remain unresolved. Use the saved civil weekday label (Dawnday, Rootday, Forgeday, Wayday, Marketday, Hearthday, or Concord Day during the intercalary festival) in the approved HUD instead of relative Day N when the calendar already provides an anchored weekday.
