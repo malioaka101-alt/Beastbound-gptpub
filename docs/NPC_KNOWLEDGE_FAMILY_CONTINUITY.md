@@ -11,6 +11,12 @@
 
 Before putting a private fact into dialogue, the GM must privately answer: **Exactly how could this particular speaker have learned this fact before this line?** Valid channels: they were there; the player or a known intermediary told them; it is genuine public knowledge; or the person plainly **asks/guesses without asserting it as fact**. No channel => do not put the claim in the dialogue. Even an innocent-seeming question such as *"Did your mother pay you for the harnesses?"* leaks knowledge of both the private job and the allowance.
 
+## Specific family ties in new character creation
+
+New campaigns generate **both** a `kinship` (mother, father, aunt, grandfather, adoptive parent, foster parent, sibling, adult relative, and so on, as appropriate to the seeded household) and a separate `householdRole` (guardian, second guardian, sibling or another recorded family responsibility). These details are copied into the player's family, starting origin, personal history and individually source-sealed NPC origin, and the family-status view shows the specific kinship first. No name alone is evidence of parentage, bloodline, legal inheritance, present consent, a living former guardian, or a guaranteed shared residence.
+
+For compatibility, `family.members[].relation` and the original NPC `relation` still store the legacy household-role identifier; **do not interpret that legacy identifier as the precise kinship**. In a newly generated character use `kinship` for normal dialogue and `householdRole` for household mechanics. In older saves, `kinship` may be absent; **do not seed it retroactively or rewrite signed origin actors**. An explicit player-confirmed relationship in the narrative continuity register overrides the generic role for that campaign. Maddoc's existing confirmed mother relationship is preserved exactly without rerolling Nessa's unknown kinship.
+
 ## Family relation vs household role
 
 A saved **guardian** or **second guardian** label identifies a responsibility/household role, not a claim that the person is an aunt, uncle, biological parent, foster parent, employer, or any other more-specific relationship. A later *explicit player correction of an ordinary relationship* is **campaign canon**; record it using the original `scripts/scene-continuity.js` witness/continuity facility rather than rewriting source-hashed independent origin records.
