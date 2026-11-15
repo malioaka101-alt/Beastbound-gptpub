@@ -95,7 +95,7 @@ function generatedIdentity(seed,base,age){
  const reserve=(kinship,role,index)=>{
   const pool=relativeNamePool(kinship);
   // Deterministic collision avoidance within a name pool, no runtime RNG.
-  const used=new Set(members.map(m=>m.name));
+  const used=new Set([given+' '+surname,...members.map(m=>m.name)]);
   let name=null;
   for(let attempt=0;attempt<pool.length;attempt++){
    const candidate=pool[(h(index+attempt*19)+attempt)%pool.length]+' '+surname;
