@@ -91,8 +91,8 @@ function setup(){
   A.equal(replay.recovered,true);
   A.deepEqual(replay.output,r.output);
   A.equal(FS.readFileSync(save,'utf8'),next);
-  const noOtherId=Turn.execute(save,{...request,id:'guardian_repeated_869111'});
-  A.equal(noOtherId.ok,false);
+  A.throws(()=>Turn.execute(save,{...request,id:'guardian_repeated_869111'}),
+   /already settled/);
   A.equal(FS.readFileSync(save,'utf8'),next);
  }finally{FS.rmSync(dir,{recursive:true,force:true});}
 }
