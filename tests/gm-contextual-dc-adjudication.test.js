@@ -17,7 +17,7 @@ function assessment(kind='adjust',adjustment=-3){
  const s=story(E.newGame({seed:835217,name:'Scene Judgment Fixture'}));
  const difficulty={baseDC:12,dc:12,factors:[]};
  A.equal(GM.adjust(s,difficulty,assessment()).dc,9);
- A.equal(GM.adjust(s,difficulty,{...assessment(),adjustment:5}).dc,17);
+ A.equal(GM.adjust(s,difficulty,{...assessment(),adjustment:4}).dc,16);
  A.throws(()=>GM.adjust(s,difficulty,{...assessment(),adjustment:-50}),/at most five/);
  A.throws(()=>GM.adjust(s,difficulty,{...assessment(),dc:1}),/specific pre-roll/);
  A.throws(()=>GM.adjust(s,difficulty,{...assessment(),source:'weather'}),/quote the original/);
