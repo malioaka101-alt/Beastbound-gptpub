@@ -279,6 +279,7 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
+   case 'discipline.practiceDifficulty':return Disciplines.difficultyPreview(s,params);
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
   case 'body.organStatus':return Disciplines.organStatus(s);
   case 'body.organWork':return Disciplines.organWork(s,params);
@@ -554,6 +555,7 @@ function act(s,{system,operation,params={}}={}){
   case 'social.personContext':return knownPersonContext(s,params);
   case 'social.originRelativesStatus':return OriginRelatives.status(s,params);
   case 'social.householdWork':return HouseholdWork.perform(s,params);
+   case 'social.householdWorkDifficulty':return HouseholdWork.difficultyPreview(s,params);
   case 'social.householdWorkStatus':return HouseholdWork.status(s);
   case 'social.speakOriginRelative':return OriginRelatives.talk(s,params);
   case 'social.localPeopleStatus':{
