@@ -440,7 +440,7 @@ function gmStatus(s,p={}){
  if(p.npcId!==undefined&&!entries.length)return {known:false};
  return {people:entries.map(q=>{
   if(!verify(w,q))throw Error('GM individual source was altered');
-  const shift=presence(w,q.actorId,s.world.location,Math.floor(s.world.minutes/1440));
+  const shift=presence(w,q.actorId,s.world.location,Math.floor(s.world.minutes/1440),s.world.minutes%DAY);
   return {npcId:q.actorId,name:q.name,profession:q.profession,
    personallyIntroducedAt:q.birthSource.locationId,
    observedHere:!!shift,
@@ -481,14 +481,15 @@ function gmOnSite(p,day){
  const livelihood=/handler|worker|craft|surveyor|farmer|repair/i.test(p.profession);
  return n<(livelihood?.57:.42);
 }
-function presence(w,id,location,day){
+function presence(w,id,location,day,minute){
  if(typeof id!=='string'||!id.startsWith('emergent:')||
   !Number.isInteger(day))return null;
  const p=w.emergentPeople?.people?.[id.slice('emergent:'.length)];
  if(!verify(w,p)||p.actorId!==id||p.status!=='active'||
   !supportedSite(w,location,p.regionId))return null;
  const sh=p.shift;
- if(p.origin===GM_ORIGIN&&!gmOnSite(p,day))return null;
+ if(p.origin===GM_ORIGIN&&(!gmOnSite(p,day)||
+  minute!==undefined&&(minute<8*60||minute>=18*60)))return null;
  if(!sh||sh.source!==SHIFT||sh.npcId!==id||
   sh.actorId!==id||sh.personId!==p.id||sh.name!==p.name||
   sh.profession!==p.profession||sh.originHash!==p.originHash||
@@ -650,7 +651,7 @@ function meet(s,params={}){
  if(s.table?.combatants?.player?.status&&s.table.combatants.player.status!=='ok')
   throw Error('An incapacitated character cannot hold this conversation');
  const w=require('./simulation').peek(s),now=Math.floor(s.world.minutes/DAY),
-  sh=presence(w,params.npcId,s.world.location,now),
+  sh=presence(w,params.npcId,s.world.location,now,s.world.minutes%DAY),
   p=w.emergentPeople?.people?.[params.npcId.slice(9)];
  if(!sh||!p||!verify(w,p))
   throw Error('That person is not independently witnessed as available at the current scene');
