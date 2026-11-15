@@ -42,14 +42,14 @@ The original discipline and stage choose the base DC and allowed method. A short
 | Source-based factor | DC change | Evidence |
 |---|---:|---|
 | Short or independent session | +2 | Existing original route restriction |
-| At least two recorded same-method sessions **and** at least 240 actual short-session minutes on the current training stage | −1 | Original method and elapsed-session ledger |
-| At least six recorded same-method sessions **and** at least 960 actual short-session minutes | −2 *instead of* −1 | Same original ledger |
+| At least two recorded same-method sessions **and** at least 240 originally witnessed independent-practice minutes for that same method and current stage | −1 | Original current-stage method counter and same-method independent-session receipts |
+| At least six recorded same-method sessions **and** at least 960 originally witnessed independent-practice minutes for that same method and current stage | −2 *instead of* −1 | Same current-stage method and independent-session receipts |
 | Below half Stamina | +2 | Original recorded current and maximum Stamina |
 | Below one-quarter Stamina | +3 *instead of* +2 | Original stamina ledger |
 
-Practice DC remains within 5–35 for the currently supported early training stages. The learning discount does **not** change stage, grant Soul reserves, advance the underlying training track, grant rank, bypass an anatomical requirement, establish a tutor, or select a more favourable die. Skill and aptitude modifiers remain independent of this resistance calculation. Part-time practice continues to scale earned progress, not to substitute for an additional DC reduction.
+Practice DC remains within 5–35 for the currently supported early training stages. Earlier stages and different methods cannot supply the familiarity discount. The learning discount does **not** change stage, grant Soul reserves, advance the underlying training track, grant rank, bypass an anatomical requirement, establish a tutor, or select a more favourable die. Skill and aptitude modifiers remain independent of this resistance calculation. Part-time practice continues to scale earned progress, not to substitute for an additional DC reduction.
 
-For Maddoc, the saved Soul self-awareness record includes 2 method sessions and 369 verified session minutes, so **a future attempt** could receive the −1 familiarity factor, subject to actual current conditions. This does not change any previous result or guarantee future progress.
+For Maddoc, the current saved Soul self-awareness record includes 3 method sessions and 489 genuine independent-practice minutes, so **a future attempt** could receive the −1 familiarity factor, subject to actual current conditions. This does not change any previous result or guarantee future progress.
 
 ## Boundaries and next integration areas
 
