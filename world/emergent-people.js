@@ -225,6 +225,10 @@ function gmFounding(w,p){
   p.birthSource.need==='gm-witnessed-occupation'&&
   p.birthSource.nonAssumedConsent===true&&
   p.birthSource.noInventedFundsOrRanks===true&&
+  (b.historicalJournal===undefined||
+   (typeof b.historicalJournal==='string'&&b.historicalJournal.length>=24&&
+    Number.isInteger(b.historicalJournalDay)&&b.historicalJournalDay>=0&&
+    b.historicalJournalDay<b.day&&b.retroactiveProgressDenied===true))&&
   (b.witnessedJourneyHash===undefined||
    /^[a-f0-9]{64}$/.test(b.witnessedJourneyHash));
 }
@@ -287,18 +291,26 @@ function make(w,t,day,d){
 function registerGM(s,p={}){
  const keys=['name','profession','purpose','personality','background','witness'];
  const historic=['witnessedPlaceId','witnessedMinute'];
+ const prior=['journalWitness','historicalPlaceId'];
  const supplied=Object.keys(p||{}).sort().join('|');
  if(!p||typeof p!=='object'||Array.isArray(p)||
   (supplied!==keys.sort().join('|')&&
-   supplied!==[...keys,...historic].sort().join('|')))
+   supplied!==[...keys,...historic].sort().join('|')&&
+   supplied!==[...keys,...prior].sort().join('|')))
   throw Error('A witnessed GM individual needs a name, profession, purpose, personality, background and actual scene basis; never chosen stats or consent');
  const good=(x,min,max)=>typeof x==='string'&&x.trim().length>=min&&x.trim().length<=max;
  if(!good(p.name,4,80)||!good(p.profession,5,120)||
   !good(p.purpose,15,500)||!good(p.personality,4,160)||
   !good(p.background,15,800)||!good(p.witness,20,800))
   throw Error('A complete plausible witnessed individual biography and circumstance is required');
+ const historical=p.journalWitness!==undefined;
+ const journal=s.chatRuntime?.journal?.find(entry=>
+  historical&&typeof p.journalWitness==='string'&&
+  entry.text.includes(p.journalWitness)&&
+  entry.text.toLowerCase().includes(p.name.toLowerCase()));
  if(s.campaign?.openingState!=='authored'||!s.chatRuntime?.scene||
-  !(s.chatRuntime.scene.toLowerCase().includes(p.name.trim().toLowerCase())||
+  !(journal||
+    s.chatRuntime.scene.toLowerCase().includes(p.name.trim().toLowerCase())||
     s.chatRuntime.scene.includes(p.witness.trim())))
   throw Error('A GM individual can only be established after they were actually introduced in the current recorded scene');
  if(s.encounter||s.battle)throw Error('A new unproven NPC identity cannot be inserted mid-encounter');
@@ -307,6 +319,18 @@ function registerGM(s,p={}){
   throw Error('A GM individual must be witnessed at a genuine established location');
  const w=require('./simulation').ensure(s),t=ensure(w);
  let site=current,at=s.world.minutes,witnessedJourneyHash;
+ if(historical){
+  const original=s.table?.realm?.livedPlaces?.places?.[p.historicalPlaceId];
+  const travelled=s.table?.realm?.livedPlaces?.journeys?.some(j=>
+   j.to===p.historicalPlaceId&&
+   Math.floor(j.endMinute/DAY)===journal?.day-1);
+  if(!journal||!original||!require('./lived-places').verifyPlace(original)||
+   !travelled||original.regionId!==current.regionId||
+   !Number.isInteger(journal.day)||journal.day<1||
+   journal.day-1>=Math.floor(at/DAY))
+   throw Error('Earlier acquaintance requires a real dated player journal and original travelled place');
+  site=original;
+ }
  if(p.witnessedPlaceId!==undefined){
    // A recent scene can be checkpointed after the player has physically
    // departed. Require the exact already-recorded journey, not GM teleport.
@@ -331,6 +355,8 @@ function registerGM(s,p={}){
  const b={origin:GM_ORIGIN,id,regionId:site.regionId,polity,day,
   worldMinute:at,locationId:site.id,name:p.name.trim(),
   ...(witnessedJourneyHash?{witnessedJourneyHash}:{}),
+  ...(historical?{historicalJournal:p.journalWitness,
+   historicalJournalDay:journal.day-1,retroactiveProgressDenied:true}:{}),
   initialProfession:p.profession.trim(),purpose:p.purpose.trim(),
   personality:p.personality.trim(),background:p.background.trim(),
   witness:p.witness.trim(),language,need:'gm-witnessed-occupation',
@@ -472,7 +498,7 @@ function shift(p,day,w=null){
 // A witnessed introduction establishes an individual, not a permanent fixture.
 // Later attendance is stable per person/day, not rerolled when Maddoc visits.
 function gmOnSite(p,day){
- if(day===p.birthSource.day)return true;
+ if(day===p.birthSource.day)return p.birthSource.historicalJournal===undefined;
  if(day<p.birthSource.day)return false;
  const digest=Crypto.createHash('sha256').update(
   p.originHash+'|'+day+'|ordinary-local-attendance-v1').digest();
