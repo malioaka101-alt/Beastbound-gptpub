@@ -415,7 +415,8 @@ function execute(savePath, req) {
  // prepared plans never creates a turn receipt or commits incidental state.
  if(req.mode==='rule'&&['research.designPlansStatus',
    'world.localResearchStatus','world.localInnovationsStatus',
-   'world.localHouseholdsStatus','world.startingWorld'].includes(req.system+'.'+req.operation)){
+   'world.localHouseholdsStatus','world.startingWorld',
+   'social.householdWorkDifficulty','discipline.practiceDifficulty'].includes(req.system+'.'+req.operation)){
    const viewed=Rules.act(s,req);
    return {id:req.id,ok:true,applied:false,revision:runtime.revision,
     stateHash:preHash,output:{rules:viewed},
@@ -795,9 +796,10 @@ function execute(savePath, req) {
  } else if(req.mode==='check'){
    // The processor's validated campaign field addresses the save; it is not
    // a caller-selected check attribute, DC, modifier or rolled outcome.
-   if(Object.keys(req).some(k=>!['id','mode','campaign','checkId','expectedHash','focus','scene','summary'].includes(k)))
+   if(Object.keys(req).some(k=>!['id','mode','campaign','checkId','gmRuling','expectedHash','focus','scene','summary'].includes(k)))
      throw Error('A playable scene check takes only a precommitted checkId, not chosen DC, skill, modifier, time or outcome');
-   response.check=Rules.act(s,{system:'core',operation:'check',params:{checkId:req.checkId}}).check;
+   response.check=Rules.act(s,{system:'core',operation:'check',params:{checkId:req.checkId,
+      ...(req.gmRuling===undefined?{}:{gmRuling:req.gmRuling})}}).check;
 
  } else if(req.mode==='checkpoint'){
    const continuity=Pickup.apply(s,req,E.day(s));
