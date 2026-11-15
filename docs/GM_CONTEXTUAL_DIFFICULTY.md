@@ -21,7 +21,7 @@ A source owner computes the actual baseline and existing factors before the roll
 |---|---|---|
 | Household work | `social.householdWorkDifficulty` | `social.householdWork` |
 | Early stage/discipline training | `discipline.practiceDifficulty` | `discipline.practice` |
-| Witnessed local terrain | `core.prepareSceneCheck` returns `baseDC` and original scene witness | `core.check` on that `checkId` |
+| Witnessed local terrain | `core.prepareSceneCheck` returns `baseDC` and original scene witness | `core.check` on that `checkId`; **or `core.localCheck`** to prepare and resolve atomically when no player decision intervenes |
 
 Preview is an **optional convenience**, not another required network call for every action. When the original baseline is already known and source-verified, the GM can put the contextual ruling in the **same final action request**. No new tool calls are needed for ordinary dialogue.
 
