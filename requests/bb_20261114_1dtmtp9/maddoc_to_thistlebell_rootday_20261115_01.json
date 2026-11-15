@@ -1,0 +1,20 @@
+{
+  "id": "maddoc_to_thistlebell_rootday_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "thistlebell_yard",
+    "minutes": 12,
+    "journey": "Maddoc leaves a neighbour on the orchard boundary lane after thanking her and walks the familiar nearby orchard road from Maddren Homestead to the shared Thistlebell Yard, keeping to the public route in clear morning weather.",
+    "uncontested": true,
+    "means": "walking along the public orchard road"
+  },
+  "scene": "Rootday, 2 Nesting 1156 AC, 08:30. Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard. He hopes to ask after his parents, Hedra and Nessa, but their whereabouts and any yard worker's answer remain unconfirmed.",
+  "summary": "Maddoc told an older neighbour his name and ambition to cultivate Soul; she suggested asking at Thistlebell Yard. He walked there without assuming his parents or anyone else is present.",
+  "focus": [
+    "At Thistlebell Yard to ask about Hedra and Nessa",
+    "Maddoc has openly said he wants to be a Soul cultivator"
+  ]
+}
