@@ -1117,10 +1117,26 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 07:18",
+      "type": "story",
+      "text": "A period of ordinary life passes at Maddren Homestead.",
+      "details": {
+        "origin": "gm-judged-ordinary-time",
+        "location": "maddren_homestead",
+        "elapsedMinutes": 8,
+        "daysPassed": 0,
+        "noResearchOrWorkProgress": true,
+        "noAutomaticWages": true,
+        "noAutomaticAgreement": true,
+        "lifeNeedsRequireActualContext": true
+      }
     }
   ],
   "world": {
-    "minutes": 3310,
+    "minutes": 3318,
     "location": "maddren_homestead",
     "marketIndex": 0,
     "fenPressure": 1,
@@ -1627,7 +1643,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 51,
+    "revision": 52,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -4792,13 +4808,55 @@
             }
           ]
         }
+      },
+      "maddoc_neighbor_door_search_rootday_20261115_02": {
+        "revision": 52,
+        "mode": "rule",
+        "hash": "cca1f7bb237696429f88bc613a2ecb8b11a04bbd5caf19a3d9a68b9e225a86a5",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 07:18",
+          "output": {
+            "rules": {
+              "waited": true,
+              "elapsedMinutes": 8,
+              "daysPassed": 0,
+              "location": "maddren_homestead",
+              "clock": "Day 3, 07:18",
+              "sixdayTicks": [],
+              "monthTicks": [],
+              "noTrainingOrResearchAward": true,
+              "noAutomaticWagesOrContracts": true,
+              "lifeNeedsNotCertified": true,
+              "note": "This is a GM-selected scene interval, not a mandated duration or proof of food, shelter, employment, study progress, care or uninterrupted safety. The original world/calendar progresses independently."
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 07:18",
+              "type": "story",
+              "text": "A period of ordinary life passes at Maddren Homestead.",
+              "details": {
+                "origin": "gm-judged-ordinary-time",
+                "location": "maddren_homestead",
+                "elapsedMinutes": 8,
+                "daysPassed": 0,
+                "noResearchOrWorkProgress": true,
+                "noAutomaticWages": true,
+                "noAutomaticAgreement": true,
+                "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Looking for Hedra and Nessa around Maddren Homestead",
-      "Ask any actually encountered neighbour whether they have seen his parents"
+      "At a neighbour's entrance, seeking Hedra and Nessa",
+      "Awaiting a real encounter; no answer presumed"
     ],
-    "scene": "Maddoc secures the orchard gate and continues searching around the remaining homestead outbuildings and along the boundary lane for his mother Hedra and father Nessa. He watches for any passing neighbours and would ask them if they know where his parents are. No neighbour or parent has been witnessed in the present scene, so no encounter, response, discovery, permission, wage or agreement is asserted.",
+    "scene": "On Rootday morning Maddoc continues along the boundary lane of Maddren Homestead to the closest neighbouring property's entrance, keeping an eye out for a resident. He calls at the gate or front door and asks whether anyone has seen Hedra Maddren or Nessa Maddren. At this stage the source has not established a specific neighbour as present or a witnessed answer, so no named neighbour, response, or parent's location is invented.",
     "journal": [
       {
         "day": 1,
@@ -4903,6 +4961,10 @@
       {
         "day": 3,
         "text": "Ten ordinary minutes pass while Maddoc searches the homestead grounds for his parents and looks for neighbours. The local presence ledger at 07:00 established no person present; no conversation or location discovery is assumed."
+      },
+      {
+        "day": 3,
+        "text": "Eight minutes of ordinary searching and walking to a neighbouring property. An attempted inquiry is made, but no answer or confirmed presence is asserted without a witnessed person."
       }
     ],
     "continuity": {
