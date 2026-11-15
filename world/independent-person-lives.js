@@ -45,7 +45,7 @@ function verifyEntry(w,q){
     e.source.day>q.lastDay||!ordinaryActions.has(e.source.action)||
     !trackKinds.has(e.source.focus)||e.source.identityHash!==q.identityHash||
     !positive(e.source.rngBefore)||!e.source.rngBefore||
-    e.source.rngAfter!==rngNext(e.source.rngBefore)))
+    e.source.rngAfter!==rngNext(rngNext(rngNext(e.source.rngBefore)))))
    return false;
  const actor=w.emergentPeople?.people?.[q.id];
  return !!actor&&People.verify(w,actor)&&actor.originHash===q.identityHash;
