@@ -183,7 +183,16 @@ function hudData(state){
   time:time(s),daypart:daypart(hour),location:loc,
   weather:s.world.weather||'Unknown',coins:p.coins,
   currency:E.money(p.coins),resources,conditions,partners,
-  focus,context};
+  focus,context,
+  // Read-only UI contract: a response must render the approved ink-and-gold
+  // Beastbound fantasy window, not a generic neutral information card.
+  // The selected family is situational; no stage, sigil, rank or game action
+  // is manufactured by these presentation-only strings.
+  presentation:{skin:'beastbound-ink-gold-manhwa-v1',
+    variant:s.battle?'combat':s.encounter?'beast-encounter':'core',
+    density:'compact',
+    contract:'docs/APPROVED_IN_CHAT_PANEL_RENDERING.md',
+    mechanicalAuthority:false}};
 }
 function core(state,extra=[]){
  const s=E.importGame(state),p=s.player;
