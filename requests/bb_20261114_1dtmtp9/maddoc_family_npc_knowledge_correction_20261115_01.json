@@ -1,0 +1,37 @@
+{
+  "id": "maddoc_family_npc_knowledge_correction_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "checkpoint",
+  "scene": "Maddoc stands at Mossgate Common at 15:12 after his verified walk from home, seeking Bram and Tessa. Neither friend's current whereabouts or activities have been established by the journey. The earlier alleged meeting and references to his private work were mistaken GM dialogue, not verified events.",
+  "summary": "Player-confirmed canon: Hedra Maddren is Maddoc's mother; original guardian role remains valid. Bram and Tessa are not yet confirmed present at Mossgate Common, nor do they automatically know Maddoc's private harness work, 2-Talon family allowance or Soul practice. The earlier unsupported reunion dialogue is not canon.",
+  "focus": [
+    "Look for Bram and Tessa; presence not yet established",
+    "Talk naturally if either friend is genuinely encountered"
+  ],
+  "continuity": [
+    {
+      "id": "maddoc_hedra_is_mother",
+      "action": "record",
+      "subject": {
+        "kind": "person",
+        "id": "origin-kin:kin_1"
+      },
+      "category": "family-relationship",
+      "statement": "Hedra Maddren is Maddoc Maddren's mother by explicit player clarification. The independent origin's guardian label remains a household role; no specific kinship is inferred for Nessa beyond second guardian.",
+      "witness": "Hedra Maddren is Maddoc's mother",
+      "visibility": "player-known"
+    },
+    {
+      "id": "maddoc_friends_location_unconfirmed",
+      "action": "record",
+      "subject": {
+        "kind": "narrative",
+        "id": "mossgate_friends"
+      },
+      "category": "npc-knowledge-boundary",
+      "statement": "At 15:12 at Mossgate Common, Maddoc is seeking Bram and Tessa, but their physical presence and recent activities have not been established. Neither has been shown to know his private harness help, Hedra's allowance, or personal Soul practice. Prior invented dialogue is non-canon.",
+      "witness": "Bram and Tessa are not yet confirmed present",
+      "visibility": "player-known"
+    }
+  ]
+}
