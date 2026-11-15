@@ -160,4 +160,22 @@ if(FS.existsSync(live)){
   factId:'bram_s_private_secrets'}]}).clear,false);
  A.equal(FS.readFileSync(live,'utf8'),original,'The live campaign is never edited by compliance tests');
 }
-console.log('GM compliance: non-mutating source brief, NPC presence and secret-knowledge proof, verified mother relation, notebook custody, exact player speech, fail-closed pre-roll audit and real ink-gold HUD PASS');
+{
+ const root=Path.join(__dirname,'..');
+ const gate=FS.readFileSync(Path.join(root,'docs','GM_COMPLIANCE_GATE.md'),'utf8');
+ const boundary=FS.readFileSync(Path.join(root,'docs','GM_NARRATIVE_AND_ENGINE_BOUNDARY.md'),'utf8');
+ const fast=FS.readFileSync(Path.join(root,'docs','FAST_TURNS.md'),'utf8');
+ A.match(gate,/Looking for Hedra does not summon Hedra/i,
+  'The GM compliance policy must reject search-caused convenient appearances');
+ A.match(gate,/An empty presence roster is not proof of an empty world/i,
+  'The GM must not equate a partial roster with the whole population');
+ A.match(gate,/a formal rule rejects an encounter lacking its required witness/i,
+  'Formal source-owned mechanical evidence must not be bypassed');
+ A.match(boundary,/Searching does not make them appear|Seeking someone does not make them appear|Seeking someone does not make them appear|Seeking someone does \*\*not\*\*/i,
+  'The GM/engine boundary must reject summoning a searched-for target');
+ A.match(boundary,/mechanically established locations/i,
+  'Prior authoritative NPC movement records cannot be overwritten');
+ A.match(fast,/never route normal dialogue through .world.wait. in a loop/i,
+  'An elapsed-time mechanic must not be mistaken for an NPC-search generator');
+}
+console.log('GM compliance: ordinary-world authority and no-convenient-spawn policy, source-owned consequences, identity/knowledge proof, real HUD, preservation and read-only checks PASS');
