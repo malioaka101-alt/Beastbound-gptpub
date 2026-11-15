@@ -1,0 +1,52 @@
+{
+  "id": "speed_readonly_probe_20261115_1209_01",
+  "ok": true,
+  "applied": false,
+  "revision": 35,
+  "stateHash": "0dde94b08b8b9f3e0f4b4d3023ebabfc89903513574aec094777356d3ff7402a",
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:12 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Look for Bram and Tessa nea… ║\n║ ◆ Catch up on their day if th… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:12",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Look for Bram and Tessa near Mossgate Common",
+      "Catch up on their day if they are available"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Mossgate Common, Maddoc arrives from the Maddren Homestead by the known orchard-road route. He looks around the hamlet green and the nearby practice yard for his friends Bram and Tessa, wanting to hear what they have been doing while he was helping Hedra. This arrival does not itself require or guarantee that either friend is present, willing to talk, or has gained a skill or item.\nPC: young learner, undecided; 2 T\nJOURNAL: soul practice: self-awareness; 0 training points. | Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance. | The documented journey from Maddren Homestead reaches Mossgate Common.\nCURRENT: No opening hook"
+}
