@@ -417,7 +417,7 @@ function authorWitnessedDuty(s,params={}){
     s.encounter||s.battle)
   throw Error('An actually introduced, personally present GM worker and original witnessed professional scene are required; no remote job or forced availability');
  const result=Careers.authorDuty(w,p,{id,role,method,goal,domain,
-  effect:null,institutionId:null,day,witness});
+  effect:null,institutionId:null,day,witness,observedSceneDay:day});
  return {...result,npcId:p.actorId,person:p.name,
   originalCareerOwner:true,noCompletedWork:true,noEmployerOrTeachingLicence:true,
   noNewMoneyOrTimeOrDice:true};
