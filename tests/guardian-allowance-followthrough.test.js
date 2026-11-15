@@ -7,7 +7,7 @@ const New=require('../scripts/new-campaign'),Realm=require('../world/simulation'
 const quote='slowly re-examined the previously sorted harnesses';
 const task='Complete ordinary harness upkeep: identify unsafe stitching, sort damaged straps and refit ordinary buckles';
 function setup(){
- for(let seed=869110;seed<869200;seed++){
+ for(let seed=700800;seed<701400;seed++){
   const s=New.create({seed,slug:'guardian_allowance_fixture',mode:'guided',
     age:10,homeRegion:'morrowfen_basin',originKind:'ordinary',
     startLocation:'crossing'}).state;
@@ -21,6 +21,7 @@ function setup(){
    culture:'Household beast-handling and informal guardian allowances for honest help.'}});
   s.world.location='original_family_allowance_home';
   s.chatRuntime.scene=guardian.name+' is present at the family cottage, demonstrating ordinary harness inspection.';
+  s.player.attributes.dex=1;
   const shift=R.act(s,{system:'social',operation:'householdWork',
    params:{npcId:guardian.actorId,purpose:task}});
   if(!shift.accepted||shift.check?.success)continue;
