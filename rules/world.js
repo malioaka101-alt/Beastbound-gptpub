@@ -27,13 +27,16 @@ function finalizeTime(s,oldMinutes){
  t.calendar.sixdays.push(...weeks);t.calendar.months.push(...months);
  const agendas=Agendas.tick(s,weeks,months);
  const realm=Realm.tick(s,weeks,months);
+ // Source-established people choose their own daily lives even before a
+ // sixday completes. Only completed real days count; never on mere queries.
+ const individuals=require('../world/independent-person-lives').tick(s,before,after);
  // Evolved individuals respond to the SAME actual sixday environment,
  // without inventing a second calendar or species population.
  require('./evolution-branch-web').sixday(s,weeks);
  const lifeAge=require('../scripts/age-lived-history').sync(s);
  return {sixdayTicks:weeks,monthTicks:months,publicAgendas:agendas.visible,
   ...(lifeAge.changed?{birthday:lifeAge.to}:{}),
-  worldSimulation:{sixdays:realm.sixdays,months:realm.months,localNews:realm.publicNotices}};
+  worldSimulation:{sixdays:realm.sixdays,months:realm.months,localNews:realm.publicNotices},independentLives:individuals};
 }
 function advance(s,days){int(days,'days',0,10000);const oldMinutes=s.world.minutes;E.advance(s,days*1440);
  const ticks=finalizeTime(s,oldMinutes);
