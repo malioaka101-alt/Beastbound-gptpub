@@ -1,0 +1,222 @@
+{
+  "id": "maddoc_soul_awareness_common_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 42,
+  "stateHash": "cc7f245f28ecec4f02b432fd0d521efe66cc974d1df8c00ae65f5b432b329e05",
+  "clock": "Day 2, 17:14",
+  "output": {
+    "rules": {
+      "system": "soul",
+      "target": "phase1",
+      "method": "self-awareness",
+      "check": {
+        "dice": [
+          18
+        ],
+        "roll": 18,
+        "modifier": 2,
+        "dc": 13,
+        "total": 20,
+        "margin": 7,
+        "degree": "strong",
+        "success": true,
+        "progress": 2,
+        "naturalBonus": 0
+      },
+      "earned": 2,
+      "progress": 4,
+      "required": 100,
+      "complication": null,
+      "difficulty": {
+        "baseDC": 12,
+        "dc": 13,
+        "netAdjustment": 1,
+        "factors": [
+          {
+            "id": "independent-or-brief-route",
+            "delta": 2,
+            "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+          },
+          {
+            "id": "earned-method-familiarity",
+            "delta": -1,
+            "evidence": "3 original soul self-awareness sessions and 489 witnessed minutes for the current phase1 training target"
+          }
+        ],
+        "capApplied": false,
+        "sourceBound": true,
+        "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+      },
+      "timeDays": 0.059027777777777776,
+      "elapsedMinutes": 85,
+      "staminaSpent": 1,
+      "feeTalons": 0,
+      "route": "independent",
+      "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+      "theoreticalGuidance": null,
+      "potentialAptitude": {
+        "dimension": "soulDepth",
+        "score": 4,
+        "modifier": 0,
+        "rating": "developing",
+        "available": true,
+        "noStageCap": true
+      }
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 15:49",
+      "type": "world",
+      "text": "The practitioner begins genuine independent soul self-awareness work at Mossgate Common.",
+      "details": {
+        "origin": "verified-independent-discipline-practice",
+        "system": "soul",
+        "target": "phase1",
+        "method": "self-awareness",
+        "location": "mossgate_common",
+        "biome": "settlement",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "3 original soul self-awareness sessions and 489 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "feeTalons": 0,
+        "startMinute": 2389,
+        "timeDays": 0.059027777777777776,
+        "partTime": false
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 15:49",
+      "type": "roll",
+      "text": "🎲 soul phase1 — self-awareness: d20 18 +2 = 20 vs DC 13 → strong (+7)",
+      "details": {
+        "dice": [
+          18
+        ],
+        "roll": 18,
+        "modifier": 2,
+        "dc": 13,
+        "total": 20,
+        "margin": 7,
+        "degree": "strong",
+        "success": true,
+        "progress": 2,
+        "naturalBonus": 0
+      }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 17:14",
+      "type": "progress",
+      "text": "soul practice: self-awareness; 2 training points.",
+      "details": {
+        "system": "soul",
+        "target": "phase1",
+        "earned": 2,
+        "complication": null,
+        "route": "independent",
+        "source": "Personal soul self-awareness practice using the existing Mossgate Common environment and the practitioner's own recorded anatomy/energy",
+        "actualDC": 13,
+        "difficulty": {
+          "baseDC": 12,
+          "dc": 13,
+          "netAdjustment": 1,
+          "factors": [
+            {
+              "id": "independent-or-brief-route",
+              "delta": 2,
+              "evidence": "Original discipline rule: independent or brief personal sessions add +2 DC"
+            },
+            {
+              "id": "earned-method-familiarity",
+              "delta": -1,
+              "evidence": "3 original soul self-awareness sessions and 489 witnessed minutes for the current phase1 training target"
+            }
+          ],
+          "capApplied": false,
+          "sourceBound": true,
+          "note": "DC is selected by the source owner and paid-for circumstances, not by a caller-selected DC or arbitrary narrative bonus"
+        },
+        "theoreticalGuidance": null,
+        "potentialAptitude": {
+          "dimension": "soulDepth",
+          "score": 4,
+          "modifier": 0,
+          "rating": "developing",
+          "available": true,
+          "noStageCap": true
+        },
+        "location": "mossgate_common",
+        "elapsedMinutes": 85,
+        "staminaSpent": 1
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 17:14 · Evening · Cool         ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          32/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Finish the current verified… ║\n║ ◆ Return to Maddren Homestead… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "17:14",
+    "daypart": "Evening",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 32,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Finish the current verified Soul self-awareness training",
+      "Return to Maddren Homestead by the orchard lane before evening"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc settles at the familiar public green in Mossgate Common for a solo Soul self-awareness practice session. He intends to finish in time for the established 42-minute walk to Maddren Homestead before evening.\nPC: young learner, undecided; 2 T\nJOURNAL: A persistent settlement foundation is established: Mossgate. | The practitioner begins genuine independent soul self-awareness work at Mossgate Common. | soul practice: self-awareness; 2 training points.\nCURRENT: No opening hook"
+}
