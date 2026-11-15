@@ -20,6 +20,10 @@ The foundational **Starting World** is an **initial common-knowledge layer over 
 
 The Starting World supplements established **public** canon, but later personal discoveries, witnessed threats, moving families, current markets, independent politics and creature whereabouts still require the real living world engine. No famous bloodline, renowned academy, commonly named monster or public tradition grants membership, a lawful rank, a technique, source materials, a guaranteed tutor or a beast's assent.
 
+## Source-bound dynamic difficulty — new verified owner implementation
+
+Use [the live dynamic DC policy](DYNAMIC_DIFFICULTY.md) for source-bound **ordinary household work** and **early discipline practice**. Never allow a caller to submit a chosen DC or claim free bonuses from unverified rhetoric. Original owners determine baselines; verified preparation costs, current Stamina, and source-authenticated earned practice can adjust DC. The roll and its breakdown must come from the original engine; do not re-roll or retroactively change earlier results. Other specialized systems keep their established DC owner until individually integrated. Approved fantasy panels remain unchanged.
+
 ## Always-on fast-turn contract — default for every play session
 
 **Player direction (14 November 2026):** Keep real-world response latency low while preserving the original full living world, immersive prose, earned mechanics, independent choices and verified persistence. This contract is the default, not an optional cosmetic mode. Follow [FAST_TURNS.md](FAST_TURNS.md); it does not override the original Master Prompt, Table Rules, campaign save or a source-owned mechanical result.
