@@ -1,0 +1,62 @@
+{
+  "id": "maddoc_return_to_common_for_soul_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 41,
+  "stateHash": "54752d10a8acf9c42a649591551bf795a8b958428be0b3b857e93af1c505c5b3",
+  "clock": "Day 2, 15:49",
+  "output": {
+    "rules": {
+      "alreadyHere": true,
+      "time": 0,
+      "siteId": "common",
+      "people": []
+    }
+  },
+  "events": [],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:49 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Practise independent Soul s… ║\n║ ◆ Leave enough time for the v… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:49",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Practise independent Soul self-awareness while daylight lasts",
+      "Leave enough time for the verified 42-minute walk home"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Maddoc gives up looking for Bram and Tessa today and returns along Mossgate's public orchard path to the village green where he undertook Soul self-awareness practice yesterday. He prepares to practise alone, intending to walk home before evening.\nPC: young learner, undecided; 2 T\nJOURNAL: A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common. | A persistent settlement foundation is established: Mossgate.\nCURRENT: No opening hook"
+}

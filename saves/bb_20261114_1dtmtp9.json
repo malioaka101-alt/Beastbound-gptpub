@@ -1250,7 +1250,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 40,
+    "revision": 41,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -3020,13 +3020,31 @@
             }
           ]
         }
+      },
+      "maddoc_return_to_common_for_soul_20261115_01": {
+        "revision": 41,
+        "mode": "rule",
+        "hash": "268949b88a30ce0655fc793653bec9ed1a39d3e3b594e68475feb9ec339ccf5d",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 15:49",
+          "output": {
+            "rules": {
+              "alreadyHere": true,
+              "time": 0,
+              "siteId": "common",
+              "people": []
+            }
+          },
+          "events": []
+        }
       }
     },
     "focus": [
-      "Looking for Bram and Tessa around Mossgate's orchard-side lanes",
-      "Both friends' whereabouts still unconfirmed"
+      "Practise independent Soul self-awareness while daylight lasts",
+      "Leave enough time for the verified 42-minute walk home"
     ],
-    "scene": "After checking the pens and village lanes, Maddoc continues a wider pedestrian search along the publicly accessible orchard-side edge of Mossgate, glancing down the paths back toward Tansyhook and the side of the common. Neither Bram nor Tessa has been positively encountered. He remains on a public lane near the orchard-side edge of Mossgate Common.",
+    "scene": "Maddoc gives up looking for Bram and Tessa today and returns along Mossgate's public orchard path to the village green where he undertook Soul self-awareness practice yesterday. He prepares to practise alone, intending to walk home before evening.",
     "journal": [
       {
         "day": 1,
@@ -3099,6 +3117,10 @@
       {
         "day": 2,
         "text": "Maddoc continued looking for Bram and Tessa along the public orchard-edge lanes, still without verified contact. No private yards or pens entered."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc says he will see his friends tomorrow and returns to yesterday's Mossgate Common practice place."
       }
     ],
     "continuity": {
