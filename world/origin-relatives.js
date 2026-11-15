@@ -40,6 +40,10 @@ function verify(w,p){
   src.playerName!==t.ownerName||src.campaignSeed!==t.seed||
   src.regionId!==t.homeRegionId||!Atlas.R[src.regionId]||
   src.name!==p.name||src.relation!==p.relation||
+  src.kinship!==p.kinship||src.householdRole!==p.householdRole||
+  (src.kinship!==undefined&&
+   (typeof src.kinship!=='string'||src.kinship.length<3||
+    src.kinship.length>50||src.householdRole!==src.relation))||
   p.sourceHash!==hash(src)||
   !['active','unavailable'].includes(p.status)||
   !Number.isInteger(p.lastSixday)||p.lastSixday<0||
@@ -95,12 +99,15 @@ function install(s,w){
   const id='kin_'+(i+1),actorId='origin-kin:'+id,
    source={origin:ORIGIN,id,actorId,campaignSeed:seed,
     playerName:s.player.name,name:m.name,relation:m.relation,
+    ...(m.kinship?{kinship:m.kinship,householdRole:m.householdRole}:{}),
     regionId:home,houseId:family.house?.id||null,
     homeTrade:family.homeTrade||'ordinary household work',
     establishedAtDay:0,noPresumedAdultAge:true,
     noAutomaticInheritance:true};
   const p={id,actorId,origin:ORIGIN,source,sourceHash:hash(source),
-   name:m.name,relation:m.relation,regionId:home,
+   name:m.name,relation:m.relation,
+   ...(m.kinship?{kinship:m.kinship,householdRole:m.householdRole}:{}),
+   regionId:home,
    status:'active',temperament:['reserved','practical','curious','self-directed'][
     seedNumber(seed+'|'+id+'|temperament')%4],
    funds:8+seedNumber(seed+'|'+id+'|funds')%19,
@@ -170,6 +177,7 @@ function identity(w,id){
  const t=ensure(w),p=t?.people?.[id?.slice('origin-kin:'.length)];
  if(!p||p.actorId!==id||!verify(w,p))return null;
  return {id:p.actorId,actorId:p.actorId,name:p.name,
+  kinship:p.kinship||null,householdRole:p.householdRole||p.relation,
   profession:p.source.homeTrade,goal:'independent personal responsibilities',
   topic:'ordinary work and known family background',
   polity:Atlas.R[p.regionId].polity,source:'seeded-independent-family-person'};
@@ -179,6 +187,14 @@ function status(s,p={}){
   throw Error('Known starting family status accepts no invented present person or hidden query');
  const t=ensure(s.table?.realm||{}),owned=s.player.family?.members||[],
   heard=s.table?.originKinConversations?.records||[];
+ // A witnessed player correction can clarify a legacy guardian label.
+ // Report the original statement; do not rewrite signed founding records or
+ // guess a kinship by parsing free text.
+ const continuity=s.chatRuntime?.continuity;
+ require('../scripts/scene-continuity').verify(continuity);
+ const confirmed=Object.values(continuity?.facts||{}).filter(f=>
+  f.status==='active'&&f.visibility==='player-known'&&
+  f.category==='family-relationship'&&f.subject?.kind==='person');
  if(t&&(t.ownerName!==s.player.name||
   t.seed!==s.campaign?.startSeed||
   t.homeRegionId!==s.player.startingContext?.birthRegionId||
@@ -187,13 +203,18 @@ function status(s,p={}){
  if(t)for(const [i,member] of owned.entries()){
   const person=t.people['kin_'+(i+1)];
   if(!person||!verify(s.table.realm,person)||
-   person.name!==member.name||person.relation!==member.relation)
+   person.name!==member.name||person.relation!==member.relation||
+   person.kinship!==member.kinship||
+   person.householdRole!==member.householdRole)
    throw Error('A claimed known relative no longer matches their saved individual origin');
  }
  if(!Array.isArray(heard))throw Error('Personal family recollections need a valid saved ledger');
  return {home:Atlas.R[s.player.startingContext?.birthRegionId]?.name||null,
   relatives:owned.map((x,i)=>({npcId:t?'origin-kin:kin_'+(i+1):null,
-   name:x.name,relation:x.relation,
+   name:x.name,relation:x.kinship||x.relation,
+   kinship:x.kinship||null,householdRole:x.householdRole||x.relation,
+   confirmedRelationship:confirmed.find(f=>
+    f.subject.id==='origin-kin:kin_'+(i+1))?.statement||null,
    lastPersonallyHeard:heard.filter(v=>v.npcId==='origin-kin:kin_'+(i+1))
     .at(-1)?.heard||null})),
   note:t?'Known family identity is not current location, current consent, affection, pay, private thoughts or a magical birthright. Only personally witnessed conversation is added.':
