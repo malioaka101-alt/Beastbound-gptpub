@@ -70,7 +70,7 @@ function generate(place,w){
    settlementName:nameFor(place),settlementKind:place.kind,
    createdMinute:place.establishedMinute,
    originatingPolity:region.polity,culture:polity.culture,
-   regionEcology:region.biome,tradeGoods:[...region.goods]},
+   regionEcology:region.biome,tradeGoods:[...(region.goods||[])]},
   planSeed=hash(root),n=21+Math.floor(unit(planSeed+':count')*13),
   sites=physicalSites(place,region),households=[],residents=[];
  for(let i=0;i<n;i++){
@@ -101,8 +101,8 @@ function generate(place,w){
  }
  const whole={schema:1,name:nameFor(place),kind:place.kind,
   regionId:region.id,polityId:region.polity,culture:polity.culture,
-  environmentalContext:{biome:region.biome,knownResources:[...region.goods],
-   existingOrchards:region.id==='orchard_vales',naturalRisks:[...region.dangers]},
+  environmentalContext:{biome:region.biome,knownResources:[...(region.goods||[])],
+   existingOrchards:region.id==='orchard_vales',naturalRisks:[...(region.dangers||[])]},
   townPlan:{districts:[{id:'central',purpose:'commons and learning'},
     {id:'homes',purpose:'residences and gardens'},
     {id:'trade',purpose:'trading and repairs'},
@@ -115,7 +115,7 @@ function generate(place,w){
   civic:{polity:polity.name,rightsContext:polity.rights,
    assemblySiteId:'meeting',custom:'Household discussion and shared maintenance of the public common',
    authority:'local practical assembly; no unearned national office or rank'},
-  economy:{regionGoods:[...region.goods],connections:[...SOURCES],
+  economy:{regionGoods:[...(region.goods||[])],connections:[...SOURCES],
    workplaceSiteIds:['market_lane','workshops','training_yard','storage'],
    noFictionalTradableStock:true,independentFromPlayer:true},
   households,residents};
@@ -204,7 +204,10 @@ function scheduledSite(r,person,day,minute){
     person.profession.includes('grain')?'storage':
     person.profession.includes('produce')?'market_lane':'edge';
  const activity=r.live.agents[person.id];
- if(activity?.day===day&&activity.atHome)return person.dwellingId;
+ const independentHome=activity?.day===day?activity.atHome:
+   unit([r.foundingHash,person.id,day,'daily-independent-choice'])<
+   (person.temperament==='independent'?.13:.06)+(r.live.localWorkPressure>65?.12:0);
+ if(independentHome)return person.dwellingId;
  if(hour>=8+early&&hour<16+early)return site;
  return hour<18?'common':'cottages';
 }
