@@ -11,6 +11,9 @@ on:
       - 'rules/index.js'
       - 'tests/gm-compliance-guard.test.js'
       - 'tests/gm-minor-local-acquaintances.test.js'
+      - 'tests/independent-person-lives.test.js'
+      - 'world/independent-person-lives.js'
+      - 'rules/world.js'
       - 'world/emergent-people.js'
       - 'world/person-presence.js'
       - '.github/workflows/gm-compliance-tests.yml'
@@ -30,6 +33,7 @@ jobs:
         run: |
           node tests/gm-compliance-guard.test.js
           node tests/gm-minor-local-acquaintances.test.js
+          node tests/independent-person-lives.test.js
           node tests/gm-witnessed-persons.test.js
           node tests/dynamic-hud-identity.test.js
           node tests/scene-continuity.test.js
