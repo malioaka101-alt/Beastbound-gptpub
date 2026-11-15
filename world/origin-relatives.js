@@ -187,6 +187,14 @@ function status(s,p={}){
   throw Error('Known starting family status accepts no invented present person or hidden query');
  const t=ensure(s.table?.realm||{}),owned=s.player.family?.members||[],
   heard=s.table?.originKinConversations?.records||[];
+ // A witnessed player correction can clarify a legacy guardian label.
+ // Report the original statement; do not rewrite signed founding records or
+ // guess a kinship by parsing free text.
+ const continuity=s.chatRuntime?.continuity;
+ require('../scripts/scene-continuity').verify(continuity);
+ const confirmed=Object.values(continuity?.facts||{}).filter(f=>
+  f.status==='active'&&f.visibility==='player-known'&&
+  f.category==='family-relationship'&&f.subject?.kind==='person');
  if(t&&(t.ownerName!==s.player.name||
   t.seed!==s.campaign?.startSeed||
   t.homeRegionId!==s.player.startingContext?.birthRegionId||
@@ -205,6 +213,8 @@ function status(s,p={}){
   relatives:owned.map((x,i)=>({npcId:t?'origin-kin:kin_'+(i+1):null,
    name:x.name,relation:x.kinship||x.relation,
    kinship:x.kinship||null,householdRole:x.householdRole||x.relation,
+   confirmedRelationship:confirmed.find(f=>
+    f.subject.id==='origin-kin:kin_'+(i+1))?.statement||null,
    lastPersonallyHeard:heard.filter(v=>v.npcId==='origin-kin:kin_'+(i+1))
     .at(-1)?.heard||null})),
   note:t?'Known family identity is not current location, current consent, affection, pay, private thoughts or a magical birthright. Only personally witnessed conversation is added.':
