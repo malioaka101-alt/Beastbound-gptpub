@@ -681,14 +681,16 @@ function execute(savePath, req) {
         inquiry=question||'Could we talk about the work you do here?';
        const people=PersonPresence.localStatus(s,Rules.realm.peek(s)).people.filter(p=>
         (p.npcId.startsWith('emergent:')||
-         p.npcId.startsWith('origin-kin:'))&&
+         p.npcId.startsWith('origin-kin:')||
+         p.npcId.startsWith('settlement:'))&&
         (p.name.toLowerCase()===named||
          (named.length>=4&&p.name.toLowerCase().startsWith(named))));
        if(people.length!==1)
         throw Error('A single established NPC name or actually present person is required for a witnessed conversation');
        response.npc=Rules.act(s,{system:'social',
         operation:people[0].npcId.startsWith('origin-kin:')?
-         'speakOriginRelative':'speakLocalPerson',
+         'speakOriginRelative':people[0].npcId.startsWith('settlement:')?
+         'speakSettlementResident':'speakLocalPerson',
         params:{npcId:people[0].npcId,question:inquiry}});
        response.message=response.npc.message;
      }
