@@ -1,0 +1,58 @@
+{
+  "id": "maddoc_correct_note_possession_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 48,
+  "stateHash": "2296c3a1bba71459bb032b80dbdfc828d073f8937d4bf722120c4412c4cea7c0",
+  "clock": "Day 2, 22:00",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 22:00 · Night · Cool           ║\n║ Maddren Homestead          2 T ║\n║ STA  ████████░░          29/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ At home at 22:00; Soul note… ║\n║ ◆ Soul Phase I progress 6/100… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "22:00",
+    "daypart": "Night",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 29,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "At home at 22:00; Soul notes only",
+      "Soul Phase I progress 6/100; next choice is Maddoc's"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At 22:00 at Maddren Homestead, Maddoc has finished two verified independent Soul self-awareness sessions around the household evening meal. He reviewed his own handwritten Soul notes; Tessa keeps the Meridian notes from yesterday and Bram keeps the Arcane notes. The earlier pickup depicting all three physical note sets at home was mistaken. The original practice results, time, possessions and personal learned theory remain unchanged.\nPC: young learner, undecided; 2 T\nJOURNAL: A period of ordinary life passes at Maddren Homestead. | The practitioner begins genuine independent soul self-awareness work at Maddren Homestead. | soul practice: self-awareness; 1 training points.\nCURRENT: No opening hook"
+}
