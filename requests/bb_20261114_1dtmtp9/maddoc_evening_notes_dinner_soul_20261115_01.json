@@ -1,0 +1,41 @@
+{
+  "id": "maddoc_evening_notes_dinner_soul_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "sequence",
+  "steps": [
+    {
+      "mode": "rule",
+      "system": "discipline",
+      "operation": "practice",
+      "params": {
+        "system": "soul",
+        "method": "self-awareness",
+        "minutes": 49
+      }
+    },
+    {
+      "mode": "rule",
+      "system": "world",
+      "operation": "wait",
+      "params": {
+        "minutes": 30
+      }
+    },
+    {
+      "mode": "rule",
+      "system": "discipline",
+      "operation": "practice",
+      "params": {
+        "system": "soul",
+        "method": "self-awareness",
+        "minutes": 165
+      }
+    }
+  ],
+  "scene": "At 22:00, Maddoc is at the Maddren Homestead after an early-evening Soul self-awareness practice session with his introductory handwritten Meridian, Arcane and Soul notes at hand, a half-hour household dinner interval, and a later independent Soul self-awareness session. Dinner is a narrated ordinary household meal, not a verified provision or healing reward. Training outcomes are exactly those recorded by the engine.",
+  "summary": "Maddoc revisits his introductory notes alongside two real independent Soul self-awareness training sessions, separated by an ordinary household dinner interval; he stops at 22:00.",
+  "focus": [
+    "At home at 22:00 after evening reading, dinner and Soul self-awareness",
+    "Choose whether to sleep, speak with family or do something else"
+  ]
+}
