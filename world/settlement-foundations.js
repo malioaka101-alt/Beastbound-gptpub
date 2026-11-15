@@ -12,7 +12,39 @@ const GIVEN=['Elin','Sella','Orren','Jessa','Dara','Corin','Fenna','Lorin','Mael
 const FAMILIES=['Appleford','Briarwell','Rowanbank','Willowmere','Stonecress','Wrenfall','Ashgrove','Fallow','Mossell','Dawnmere','Turnleaf','Goldreed','Birchrun','Cresswater','Sedgewick','Highbough','Vale','Farbrook','Oathwood','Larkmere','Wheatley','Cloverrun','Harth','Selden','Orchard','Amberwick','Rillcross','Flintmere','Alderby','Fenward','Bellweather','Whitethorn','Dunrow','Barley','Merrow','Rookford','Hazelbrook','Oakwhistle','Bramblewick','Ravenhay'];
 const TASKS=['orchard tending','produce and preserves','repair and carpentry','beast welfare and handling','reading and records','medicinal herb work','grain carrying','water and drainage','teaching and practical instruction','smallholding','cart repair','cloth and mending'];
 const MOTIVES=['keep a reliable livelihood','protect family time','improve a practical method','learn a better trade','avoid unnecessary debt','maintain the shared paths','care for an older relative','help preserve the orchard soil'];
-const SOURCES=['seasonal orchard yields','local smallholding work','regional barge and road trade'];
+const REGIONAL_WORK={
+ wetland:['reed gathering','raised-path maintenance','canal freight','fishing and water stewardship','flood warnings'],
+ alpine:['stone-path repairs','pack-beast care','cliff rescue preparation','cold-weather provisions','highland herb work'],
+ desert:['cistern maintenance','irrigated garden work','caravan loading','shade cloth making','desert beast watering'],
+ coast:['net making','harbour maintenance','fish preservation','coastal freight','tide-watch duty'],
+ steppe:['herd feed and grazing','wind shelter repairs','caravan provision work','grazing-rights records','grassland water care'],
+ plateau:['terrace garden work','stonebridge maintenance','pack transport','mountain water collection','cliff path repairs'],
+ forest:['orchard tending','produce and preserves','hedge maintenance','forest herb work','woodland trail tending']
+};
+function jobsFor(region){
+ const known=REGIONAL_WORK[region.biome]||REGIONAL_WORK.forest;
+ return [...TASKS.filter(x=>!/orchard|produce and preserves|grain carrying/.test(x)),
+   ...known,...(region.goods||[]).slice(0,3).map(x=>x+' handling')];
+}
+function surnamesFor(region){
+ if(region.biome==='forest'||region.id==='orchard_vales')return FAMILIES;
+ const stems={
+  wetland:['Reed','Rill','Sedge','Fen','Moss','Marsh','Tide','Willow','Brook','Rush'],
+  alpine:['Stone','Cliff','Pine','Frost','Snow','Crag','Slate','Peak','Birch','Ridge'],
+  desert:['Sahar','Nadir','Tamar','Mir','Asar','Halin','Qari','Taz','Vela','Rani'],
+  coast:['Salt','Pearl','Tide','Wave','Wake','Harbour','Reef','Coral','Shell','Spray'],
+  steppe:['Wind','Grass','Sky','Horizon','Herd','Wheat','Cloud','Ridge','Sun','Ash'],
+  plateau:['Stone','Wind','High','Terrace','Cliff','Peak','Sky','Glass','Cloud','Vale']
+ }[region.biome]||['River','Plain','Vale','Stone','Hearth','Willow','Ash','Bright','Oak','Glen'];
+ return Array.from({length:40},(_,i)=>stems[i%stems.length]+
+   ['ward','mere','well','cross'][Math.floor(i/stems.length)%4]);
+}
+function localConnections(region){
+ const resources=region.goods||[];
+ return ['local '+(resources[0]||'food')+' work',
+   'regional '+(resources[1]||'materials')+' exchange',
+   'road, trail or water routes grounded in the surrounding region'];
+}
 const id=v=>typeof v==='string'&&/^[a-z][a-z0-9_-]{3,63}$/.test(v);
 const shape=(p,keys)=>p&&typeof p==='object'&&!Array.isArray(p)&&
   Object.keys(p).every(k=>keys.includes(k));
@@ -34,18 +66,41 @@ function nameFor(place){
    place.name.replace(/\s+(common|green|square)$/i,''):place.name;
 }
 function physicalSites(place,regional){
- const orch=regional.biome==='forest'||regional.id==='orchard_vales';
+ const orch=regional.biome==='forest'||regional.id==='orchard_vales',
+  coastal=regional.biome==='coast',dry=regional.biome==='desert',
+  wetlands=regional.biome==='wetland',high=regional.biome==='alpine',
+  nomad=regional.biome==='steppe';
+ const centreName=orch?'Village green and public well':
+   wetlands?'Raised common and public water access':
+   dry?'Shaded gathering courtyard and cistern':
+   coastal?'Harbour square and shared water access':
+   nomad?'Open gathering circle and well':
+   high?'Stone common and snowmelt water': 'Public common and water access';
+ const trading=coastal?'Harbour trade lane and landing':
+   dry?'Caravan exchange and market shade':
+   wetlands?'Raised trading walk and boat landing':
+   nomad?'Caravan trade circle':'Roadside exchange and produce stalls';
+ const homes=wetlands?'Raised houses and family walks':
+   dry?'Courtyard homes and shaded lanes':
+   nomad?'Family homes and seasonal shelter ground':
+   coastal?'Family homes along the quay road':'Household lanes and cottages';
+ const outer=orch?'Orchard and hedgerow boundary paths':
+   wetlands?'Reed margin and watercourse paths':
+   dry?'Sheltered paths towards the drylands':
+   coastal?'Tidal edge and shore paths':
+   high?'High slope and pack-road paths':
+   nomad?'Grazing-edge and caravan paths':'Field and regional boundary paths';
  const publicSites=[
-  ['common',orch?'Village green and public well':'Central public square','central','public',true],
+  ['common',centreName,'central','public',true],
   ['reading_house','Reading house and shared records','central','public',/reading house/i.test(place.description)],
   ['training_yard','Enclosed practical training yard','work','supervised',/practice yard|training/i.test(place.description)],
   ['handling_pens','Fenced beast-handling pens and troughs','work','restricted',/beast-handling pens/i.test(place.description)],
-  ['market_lane','Roadside exchange and produce stalls','trade','public',true],
+  ['market_lane',trading,'trade','public',true],
   ['workshops','Repair and craft workshops','trade','public',false],
   ['storage','Grain and winter-provision stores','work','restricted',false],
-  ['cottages','Household lanes and cottages','homes','public',true],
-  ['edge','Orchard and hedgerow boundary paths','edge','public',true],
-  ['water','Drainage and watering infrastructure','edge','public',true],
+  ['cottages',homes,'homes','public',true],
+  ['edge',outer,'edge','public',true],
+  ['water',dry?'Cistern channels and water access':coastal?'Tide drains and water conduits':'Drainage and watering infrastructure','edge','public',true],
   ['meeting','Shared local meeting room','central','public',false]
  ];
  return publicSites.map(([id,name,district,access,priorKnown])=>({
@@ -74,17 +129,21 @@ function generate(place,w){
   planSeed=hash(root),n=21+Math.floor(unit(planSeed+':count')*13),
   sites=physicalSites(place,region),households=[],residents=[];
  for(let i=0;i<n;i++){
-  const h='household_'+(i+1),surname=FAMILIES[(i+Math.floor(unit(planSeed+':family-offset')*FAMILIES.length))%FAMILIES.length],
+  const familyNames=surnamesFor(region),h='household_'+(i+1),surname=familyNames[(i+Math.floor(unit(planSeed+':family-offset')*familyNames.length))%familyNames.length],
    home='dwelling_'+(i+1),size=2+Math.floor(unit(planSeed+':size:'+i)*4),
-   profession=pick(TASKS,[planSeed,h,'trade']),
-   adults=size<4?1:2,personIds=[];
+   profession=pick(jobsFor(region),[planSeed,h,'trade']),
+   adults=size<4?1:2,personIds=[],usedGiven=new Set();
   for(let j=0;j<size;j++){
    const personId='resident_'+(i+1)+'_'+(j+1),
-    given=pick(GIVEN,[planSeed,h,j,'given']),
+    initial=Math.floor(unit([planSeed,h,j,'given'])*GIVEN.length);
+   let k=initial;
+   while(usedGiven.has(GIVEN[k]))k=(k+1)%GIVEN.length;
+   const given=GIVEN[k];usedGiven.add(given);
+   const
     ageBand=j<adults?'adult':(j===size-1&&size>4?'elder':'child'),
     role=j===0?'householder':j<adults?'adult relative':ageBand==='elder'?'older relative':'dependent child',
     task=ageBand==='child'?'young learner':j===1&&adults>1?
-      pick(TASKS,[planSeed,personId,'own-work']):profession;
+      pick(jobsFor(region),[planSeed,personId,'own-work']):profession;
    residents.push({id:personId,actorId:'settlement:'+place.id+':'+personId,
     name:given+' '+surname,ageBand,householdId:h,householdRole:role,
     dwellingId:home,profession:task,
@@ -115,7 +174,7 @@ function generate(place,w){
   civic:{polity:polity.name,rightsContext:polity.rights,
    assemblySiteId:'meeting',custom:'Household discussion and shared maintenance of the public common',
    authority:'local practical assembly; no unearned national office or rank'},
-  economy:{regionGoods:[...(region.goods||[])],connections:[...SOURCES],
+  economy:{regionGoods:[...(region.goods||[])],connections:localConnections(region),
    workplaceSiteIds:['market_lane','workshops','training_yard','storage'],
    noFictionalTradableStock:true,independentFromPlayer:true},
   households,residents};
