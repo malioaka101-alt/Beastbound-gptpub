@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_neighbor_door_search_rootday_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "wait",
+  "params": {
+    "minutes": 8
+  },
+  "scene": "On Rootday morning Maddoc continues along the boundary lane of Maddren Homestead to the closest neighbouring property's entrance, keeping an eye out for a resident. He calls at the gate or front door and asks whether anyone has seen Hedra Maddren or Nessa Maddren. At this stage the source has not established a specific neighbour as present or a witnessed answer, so no named neighbour, response, or parent's location is invented.",
+  "summary": "Eight minutes of ordinary searching and walking to a neighbouring property. An attempted inquiry is made, but no answer or confirmed presence is asserted without a witnessed person.",
+  "focus": [
+    "At a neighbouring property's entrance, seeking someone who might know where Hedra and Nessa are",
+    "Do not assume a neighbour's presence or knowledge before a confirmed encounter"
+  ]
+}
