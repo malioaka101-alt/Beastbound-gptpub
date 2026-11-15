@@ -1,9 +1,13 @@
 # Beastbound — In-chat fantasy system HUD (official, 6 November 2026)
 
 
-## Active-game state (14 November 2026)
+## Latest player correction — approved fantasy windows, not generic cards (15 November 2026)
 
-**All previous campaigns were explicitly ended and their tracked live gameplay records deleted. No active/default campaign exists.** No former character, partnership, calendar or numeric values may be treated as current. Only display a real character panel after explicit new campaign creation and a newly verified save.
+**Mandatory reference: [Approved in-chat panel rendering](APPROVED_IN_CHAT_PANEL_RENDERING.md).** The player again rejected a neutral, generic boxed status card. The previously approved **ink-indigo, antique-gold, subtly runic, manhwa-inspired Beastbound system window** is the default, including its compact everyday version. A generic native card with a `◈ BEASTBOUND` heading, ordinary 2×2 stat grid and no actual dark-fantasy visual frame is **not** the approved design. Compact refers to **information density**, never permission to replace the visual identity. When native chat elements cannot achieve the distinctive frame, use a small **display-only styled in-chat window** rather than a neutral substitute; 34-character ASCII is last resort. Follow the complete panel atlas for combat, techniques, beast profiles, professions, organisations, family, clan and evolving earned personal sigils.
+
+## Current saved campaign (verified 15 November 2026)
+
+The old campaigns ended on 14 November and must not be restored. A **separate, newly started campaign now exists** at `saves/bb_20261114_1dtmtp9.json`, with player **Maddoc Maddren**; the player explicitly resumed this campaign on 15 November. Always read the latest GitHub file and use its real current character/calendar/pickup facts; do not hardcode these values into panels or treat this status note as a second save.
 
 ## Expanded panel atlas and personal sigils — latest player direction (14 November 2026)
 
@@ -17,7 +21,7 @@ Normal scene rhythm: living scene first; the compact player-known plate follows,
 
 ## Everyday adaptive HUD v2 — new source-backed data flow (8 November 2026)
 
-**One dynamic HUD, not a handcrafted panel per turn.** The engine's `panels.hudData(savedState)` returns a small **structured, player-known view model** directly from the actual campaign save. `scripts/chat-turn.js` now includes `hud` beside the original historical `panel` fallback on status, inspection, read-only and applied turns. The Project GM should use **one native, responsive in-chat fantasy-styled layout** with this data (no repeated CSS-heavy AppBlock), usually a small dark/antique gold plate. Show the scene in natural prose first; the interface should never supplant the scene. `panels.characterData(savedState)` is the source for a detailed character/family view or new-character introduction.
+**One dynamic HUD, not a handcrafted panel per turn.** The read-only view now includes `presentation` metadata identifying the approved fantasy skin and the current core/encounter/combat panel family; the client must render the visual design, not display this metadata verbatim.  The engine's `panels.hudData(savedState)` returns a small **structured, player-known view model** directly from the actual campaign save. `scripts/chat-turn.js` now includes `hud` beside the original historical `panel` fallback on status, inspection, read-only and applied turns. The Project GM should use **one native, responsive in-chat fantasy-styled layout** with this data (no repeated CSS-heavy AppBlock), usually a small dark/antique gold plate. Show the scene in natural prose first; the interface should never supplant the scene. `panels.characterData(savedState)` is the source for a detailed character/family view or new-character introduction.
 
 **The core everyday display should give:**
 

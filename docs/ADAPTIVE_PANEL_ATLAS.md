@@ -2,6 +2,10 @@
 
 **Player-approved direction:** The living world must support beautiful native in-chat fantasy panels for personal powers, techniques, professions, combat, households, clans, family legacies, membership and player-founded organisations. A store panel is only one possible economic form, never the substitute for any of those social systems. This is a presentation/authoring specification, not a claim that all detailed panels are implemented in `panels.js` today.
 
+## Visual invariant — player correction 15 November 2026
+
+Read [APPROVED_IN_CHAT_PANEL_RENDERING.md](APPROVED_IN_CHAT_PANEL_RENDERING.md) before rendering any named panel. All panels use the previously approved **midnight ink/indigo, antique-gold, faint-runic system-window frame**. Its small everyday core, encounter, combat, family, skills and professional variants must all remain recognisably Beastbound. The native-compact preference concerns **density**, not permission to replace the fantasy frame with a generic grey/white rounded status card or 2×2 statistic tiles. A lightweight styled display-only in-chat panel is preferable to a neutral native approximation. Original save/engine data, source-known fields and actual consent/ranks remain the sole content authority.
+
 ## Authority and interaction model
 
 - Source order remains the original Unified Master Prompt, established campaign facts, Table Rules, source-owned verified mechanics and later explicit player visual preferences. This file extends `IN_CHAT_SYSTEM_HUD.md` and `POWER_SYSTEM_PRESENTATION.md` without changing mechanics, inventing source states, granting membership, renown, ranks, techniques or rights.

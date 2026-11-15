@@ -1,5 +1,7 @@
 # Beastbound — Official power and awakening presentation (v0.8)
 
+**Latest appearance contract (15 November 2026):** [APPROVED_IN_CHAT_PANEL_RENDERING.md](APPROVED_IN_CHAT_PANEL_RENDERING.md) forbids replacing the approved ink-and-gold fantasy window with a plain neutral status card, including for everyday play. A compact display-only styled visualization may be necessary when native chat cards cannot deliver the aesthetic; this does not replace the actual engine or a verified milestone.
+
 ## Purpose
 
 **This is the accepted visual direction for the PRIVATE ChatGPT Project text RPG.** The player's later, explicit preference makes ordinary status a **compact, gently animated fantasy system HUD** rendered directly in chat (see `docs/IN_CHAT_SYSTEM_HUD.md`), not the former 34-character ASCII box. The 34-character version is only an accessibility/text-only fallback. Major power changes have a more elaborate **ceremonial system-reveal sequence**. Neither presentation creates game mechanics.
