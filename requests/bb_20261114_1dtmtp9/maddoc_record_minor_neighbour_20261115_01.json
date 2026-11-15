@@ -1,0 +1,23 @@
+{
+  "id": "maddoc_record_minor_neighbour_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "introduceWitnessedPerson",
+  "params": {
+    "name": "Mira Fenlow",
+    "profession": "Orchard-lane small-animal keeper",
+    "purpose": "Care for her own small animals and household garden while keeping ordinary errands and independent priorities.",
+    "personality": "Practical, perceptive and gently humorous, but not eager to claim knowledge she does not have.",
+    "background": "An older resident near Maddren Homestead who tends animals beside a cottage lane; no invented relatives, secrets, or resources.",
+    "witness": "Maddoc has thanked an older neighbour and walked from the Maddren Homestead boundary lane to Thistlebell Yard.",
+    "witnessedPlaceId": "maddren_homestead",
+    "witnessedMinute": 3378
+  },
+  "scene": "Rootday 08:30 at Thistlebell Yard. Earlier, an older orchard-lane neighbour tending a feed basket told Maddoc she hadn't seen Hedra or Nessa and suggested this yard. Here, a broad-shouldered handler checked a pack beast's harness and joked with Maddoc about his wish for a secret sibling. He hadn't seen either parent that morning; he suggested asking other handlers. Neither local's given name has been spoken to Maddoc.",
+  "summary": "An older neighbour by Maddren Homestead met Maddoc, heard his name and Soul ambition, and suggested asking at Thistlebell; she did not know either parent's whereabouts. At the yard a handler chatted with Maddoc and advised asking other handlers. Neither NPC's given name is yet known to Maddoc.",
+  "focus": [
+    "At Thistlebell Yard to find Hedra and Nessa",
+    "Two minor local acquaintances are becoming persistent people"
+  ]
+}
