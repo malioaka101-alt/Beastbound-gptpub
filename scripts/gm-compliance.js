@@ -117,8 +117,8 @@ function audit(s,params={}){
    const f=s.chatRuntime?.continuity?.facts?.[c.factId];
    verified=!!f&&f.status==='active'&&f.category==='npc-knowledge'&&
     f.subject?.kind==='person'&&f.subject.id===c.npcId&&
-    (f.visibility==='player-known'||f.visibility==='gm-only')&&
-    !!Presence.identity(v===undefined?{}:Realm.peek(s),c.npcId);
+    f.visibility==='player-known'&&
+    !!Presence.identity(Realm.peek(s),c.npcId);
    reason=verified?'individual source-sealed knowledge fact':
     'no individual witnessed or learned knowledge; public fame is not private knowledge';
   }else if(c.type==='player-has-item'){
