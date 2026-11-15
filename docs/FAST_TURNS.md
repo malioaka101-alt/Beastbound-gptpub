@@ -6,6 +6,8 @@
 
 **Play remains inside the private ChatGPT Project. No site, hosting, plugin or paid tier required.** Faster does not mean unverified dice, fabricated outcomes or unsaved changes.
 
+**GM adjudication extension (15 November 2026):** follow [GM Contextual Difficulty](GM_CONTEXTUAL_DIFFICULTY.md). Read-only original baseline previews are available for household work and early discipline practice; they are **optional** when the verified baseline is already available. A sourced GM adjustment goes inside the **one eventual engine action** and is recorded before the single die, not through a second speculative roll. Pure dialogue, obvious physical facts, guaranteed mundane acts and impossibilities need no invented d20. Specialist source owners, costs, independent actors and saved continuity remain authoritative. The approved fantasy panel design stays unchanged.
+
 ## Live-play speed priority — current instruction (7 November 2026)
 
 **Goal: short, responsive in-chat turns while retaining honest source-backed outcomes.** The in-chat GM should not use the GitHub turn processor for ordinary prose or for rereading information already present in the latest verified save/result. Read the authoritative Project instructions, Table Rules and latest campaign save **together in one parallel connector batch** where required, rather than serial calls and repeated full-document analysis. Reuse those already-verified instructions within this chat unless they change. After an applied turn, use the returned verified mechanical output immediately; don't redundantly query the same status.
