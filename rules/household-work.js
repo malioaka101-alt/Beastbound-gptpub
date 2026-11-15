@@ -6,6 +6,7 @@ const Crypto=require('node:crypto'),E=require('../engine');
 const Core=require('./core'),World=require('./world'),U=require('./unified');
 const Practice=require('./earned-practice'),Realm=require('../world/simulation');
 const Kin=require('../world/origin-relatives'),Places=require('../world/lived-places');
+const Difficulty=require('./dynamic-difficulty');
 const ORIGIN='witnessed-voluntary-household-work-v1',DAY=1440;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function draw(p){
@@ -33,11 +34,15 @@ function context(s,npcId){
 }
 function perform(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
-    Object.keys(p).sort().join('|')!=='npcId|purpose'||
+    Object.keys(p).some(k=>!['npcId','purpose','approach'].includes(k))||
+    typeof p.npcId!=='string'||
     typeof p.purpose!=='string'||p.purpose.trim().length<15||
     p.purpose.length>220)
   throw Error('Name a witnessed family member and a real practical household task, not pay or outcome');
- const {person,place}=context(s,p.npcId),task=p.purpose.trim();
+ const {person,place}=context(s,p.npcId),task=p.purpose.trim(),
+   approach=p.approach===undefined?'standard':p.approach;
+ if(typeof approach!=='string'||!Difficulty.WORK_APPROACHES[approach])
+  throw Error('Household work approach must be standard, careful or rushed');
  if(/\b(?:steal|fight|attack|poison|hunt|capture|tame|bond|evolve|awaken|spell|dangerous|illegal)\b/i.test(task))
   throw Error('Dangerous or specialist work requires its actual owner and cannot be priced as a routine household chore');
  if(s.battle||s.encounter||s.table?.combatants?.player?.status!=='ok'&&
@@ -55,6 +60,7 @@ function perform(s,p={}){
   throw Error('This family member has already considered one household job this day');
  if(s.player.stamina<3||s.table.combatants?.player?.stamina<3)
   throw Error('Routine physical work requires genuine available Stamina');
+ const difficulty=Difficulty.householdWork(s,{person,approach});
  const fundsBefore=Core.int(person.funds,'original family funds',0,100),
    playerBefore=Core.int(s.player.coins,'original player Talons',0,100000000),
    staminaBefore=s.player.stamina,originalRng=person.rngState;
@@ -64,7 +70,7 @@ function perform(s,p={}){
    draw(person)<(person.temperament==='reserved'?.68:.86);
  let check=null,practice=null,spent=0,paid=0,minutes=5;
  if(accepted){
-  minutes=120;spent=2;
+  minutes=difficulty.minutes;spent=difficulty.staminaCost;
   const skill=s.player.skills?.crafting;
   const attribute=Core.int(s.player.attributes.dex,'actual Dexterity',1,30);
   const modifier=Math.floor((attribute-10)/2)+
@@ -72,7 +78,8 @@ function perform(s,p={}){
   // Only simple ordinary chores: no client-selected DC or effect.
   s.player.stamina-=spent;
   if(s.table.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
-  check=Core.check(s,{modifier,dc:12,label:'Ordinary household work — '+task.slice(0,45),risky:false});
+  check=Core.check(s,{modifier,dc:difficulty.dc,
+   label:'Ordinary household work — '+task.slice(0,45),risky:false});
   paid=check.success?proposedPay:0;
   if(paid){
    if(!Core.conservedTransfer({sourceBefore:fundsBefore,sourceAfter:fundsBefore-paid,
@@ -82,7 +89,7 @@ function perform(s,p={}){
    person.funds-=paid;s.player.coins+=paid;
   }
   if(skill)practice=Practice.award(s,{skill:'crafting',check,risky:true});
-  person.fatigue=Math.min(100,person.fatigue+2);
+  person.fatigue=Math.min(100,person.fatigue+spent);
  }
  // Seal the original transfer before unrelated future world ticks change
  // the employer's finances; later independent earnings are separate events.
@@ -91,7 +98,8 @@ function perform(s,p={}){
  const proof={origin:ORIGIN,actorId:person.actorId,name:person.name,
   actorSourceHash:person.sourceHash,location:s.world.location,
   day,startMinute:now,endMinute:s.world.minutes,
-  task,accepted,independentRngBefore:originalRng,
+  task,approach,accepted,
+  ...(accepted?{difficulty}:{}),independentRngBefore:originalRng,
   independentRngAfter:person.rngState,
   employerFundsBefore:fundsBefore,employerFundsAfter:immediateEmployerFunds,
   playerTalonsBefore:playerBefore,playerTalonsAfter:immediatePlayerTalons,
@@ -107,7 +115,8 @@ function perform(s,p={}){
   person.name+' independently declines the household work request.',{
    origin:ORIGIN,receiptHash:receipt.hash,actorId:person.actorId,
    minutes,accepted,paidTalons:paid,sourceFundsChanged:paid>0});
- return {task,employer:person.name,accepted,
+ return {task,approach,employer:person.name,accepted,
+  ...(accepted?{difficulty}:{}),
   ...(check?{check}:{}),
   ...(practice?{practice}:{}),
   minutes,staminaSpent:spent,
@@ -119,6 +128,8 @@ function status(s){
  const rows=s.table?.householdWork?.records||[];
  return {personallyWitnessedJobs:rows.slice(-24).map(x=>({
   name:x.proof.name,task:x.proof.task,accepted:x.proof.accepted,
+  approach:x.proof.approach||'standard',
+  ...(x.proof.difficulty?{difficulty:x.proof.difficulty}:{}),
   workedMinutes:x.proof.endMinute-x.proof.startMinute,
   paidTalons:x.proof.paidTalons,
   atMinute:x.proof.endMinute
