@@ -1,0 +1,58 @@
+{
+  "id": "maddoc_harness_inspection_witness_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 31,
+  "stateHash": "67b94bc6192ab856776344c381d6e14208791f977b62ff75541021f5a56d541c",
+  "clock": "Day 2, 10:30",
+  "output": {
+    "message": "Scene checkpoint recorded"
+  },
+  "events": [],
+  "message": "Scene checkpoint recorded",
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 10:30 · Morning · Cool         ║\n║ Maddren Homestead          0 S ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Check remaining harness sti… ║\n║ ◆ Meet Bram and Tessa after t… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "10:30",
+    "daypart": "Morning",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 0,
+    "currency": "0 S",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Check remaining harness stitching with Hedra",
+      "Meet Bram and Tessa after the work"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Hedra Maddren is physically present beside Maddoc at the harness workbench, demonstrating how to bend straps and inspect uneven stitches under light tension. Maddoc noticed a narrow gap beside a buckle and is applying her advice to the remaining straps. The earlier 150 minutes of waiting earned no work result; the offered 2 Talons remain unpaid.\nPC: young learner, undecided; 0 S\nJOURNAL: March Council and reed-clan delegates meet. River-rights tension is manageable; their decisions are not controlled by the player. | The month closes; trade agreements and faction business continue independently. | A period of ordinary life passes at Maddren Homestead.\nCURRENT: No opening hook"
+}

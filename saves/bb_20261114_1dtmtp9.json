@@ -1042,7 +1042,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 30,
+    "revision": 31,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2291,13 +2291,27 @@
           "events": [],
           "message": "Scene checkpoint recorded"
         }
+      },
+      "maddoc_harness_inspection_witness_20261115_01": {
+        "revision": 31,
+        "mode": "checkpoint",
+        "hash": "f29ea993ebd336233640717413e3dc2f41f256d575da5efa1b4ab75439efcdf3",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 10:30",
+          "output": {
+            "message": "Scene checkpoint recorded"
+          },
+          "events": [],
+          "message": "Scene checkpoint recorded"
+        }
       }
     },
     "focus": [
-      "Hedra inspecting Maddoc's harness work",
-      "Bram and Tessa after work"
+      "Check remaining harness stitching with Hedra",
+      "Meet Bram and Tessa after the work"
     ],
-    "scene": "Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Maddoc spent morning checking buckles, cleaning muddy harnesses and sorting straps under Hedra. Everything is laid out for Hedra's final inspection. The offered 2 Talons have NOT been mechanically earned or paid; coins remain 0. Soul progress 2/100, stamina 36/36. Wants to meet Bram and Tessa afterward.",
+    "scene": "Workday 1, 1 Nesting 1156 AC, 10:30, Maddren Homestead. Hedra Maddren is physically present beside Maddoc at the harness workbench, demonstrating how to bend straps and inspect uneven stitches under light tension. Maddoc noticed a narrow gap beside a buckle and is applying her advice to the remaining straps. The earlier 150 minutes of waiting earned no work result; the offered 2 Talons remain unpaid.",
     "journal": [
       {
         "day": 1,
@@ -2334,6 +2348,10 @@
       {
         "day": 2,
         "text": "Morning harness work scene: 150 real minutes passed from 08:00 to 10:30 via world.wait; this was not a work award or payout. Work remains subject to Hedra's approval, 2-Talon offer not paid."
+      },
+      {
+        "day": 2,
+        "text": "Maddoc observed a visibly uneven stitch under tension and listened to Hedra Maddren's practical buckle-and-stitch inspection advice; ordinary coaching only, with no roll, payment, or guaranteed quality."
       }
     ]
   },
