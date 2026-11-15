@@ -34,6 +34,13 @@ jobs:
           git add saves/ results/
           if ! git diff --cached --quiet; then
             git commit -m 'Checkpoint private Beastbound chat turn results'
-            git pull --rebase origin main
-            git push origin HEAD:main
+            # Most turn runs are the only writer: one direct push avoids an
+            # unnecessary pre-push GitHub fetch/rebase round trip.
+            # A concurrent main update still goes through the original safe
+            # rebase path. Never rerun the already resolved dice.
+            if ! git push origin HEAD:main; then
+              echo "::notice::Remote main advanced; reconciling original turn result"
+              git pull --rebase origin main
+              git push origin HEAD:main
+            fi
           fi
