@@ -7,6 +7,7 @@ const ResearchPublications=require('./research-publications');
 const IndividualInnovations=require('./independent-innovations');
 const EmergentHouseholds=require('./emergent-households');
 const OriginRelatives=require('./origin-relatives');
+const SettlementFoundations=require('./settlement-foundations');
 const Cosmology=require('./cosmology-ledger');
 const CausalHistory=require('./causal-history');
 const EcologicalWebs=require('./ecological-webs');
@@ -1143,6 +1144,7 @@ function tick(s,weekDays=[],monthDays=[]){
    // anywhere in the known simulated geography, without player observation.
    // Their independent decisions are dated and source-bound.
    EmergentPeople.sixday(s,w,day);
+   SettlementFoundations.tick(w,day);
    // Real residents independently choose whether to POST a local interest
    // in genuine regional goods. No new sales, wages, items, or world RNG.
    require('./independent-regional-demand').sixday(w,day);

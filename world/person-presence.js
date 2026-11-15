@@ -144,6 +144,7 @@ function localStatus(s,w){
   'notable:'+id).filter(id=>resolve(w,id,location,day));
  const kin=ordinaryDayShift?Object.values(w.originKin?.people||{})
   .map(p=>p.actorId).filter(id=>resolve(w,id,location,day)):[];
+ const localResidents=require('./settlement-foundations').localPeople(s,w);
  const created=Object.values(w.emergentPeople?.people||{})
   .map(p=>p.actorId).filter(id=>resolve(w,id,location,day));
  return {location,day:day+1,
@@ -151,7 +152,7 @@ function localStatus(s,w){
    const n=resolve(w,id,location,day);
    return {npcId:id,name:n.name,profession:n.profession,
     actuallyPresent:true,meetingIsNotAssent:true};
-  }),
+  }).concat(localResidents),
   note:'Only people established at this actual scene appear. Public fame, a family name or a remote professional directory does not establish physical presence or permission to join.'};
 }
 module.exports={SOURCE,EMERGENT_SOURCE:Emergent.SHIFT,hash,seed,ensure,plan,verified,identity,resolve,proof,localStatus};

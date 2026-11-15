@@ -163,6 +163,8 @@ function establish(s,p={}){
   knownNotables:notables.length,knownFamilies:families.length,
   knownOrganisations:organisations.length,
   notAnNPCSpawn:true,noItemsOrPowersCreated:true});
+ // Every real town/hamlet receives its complete settlement foundation now.
+ require('./settlement-foundations').onPlaceEstablished(s,place);
  return {established:true,place:publicPlace(place),noFreeNPCOrItem:true};
 }
 function publicPlace(p){
@@ -252,6 +254,7 @@ function travel(s,p={}){
  // established transactions or checks; a route description awards none.
  const E=require('../engine.js');
  s.world.location=p.destinationId;
+ if(s.chatRuntime)delete s.chatRuntime.settlementSite;
  if(p.arrivalWeather)s.world.weather=p.arrivalWeather.trim();
  s.flags.visited[p.destinationId]=true;
  E.advance(s,p.minutes);
