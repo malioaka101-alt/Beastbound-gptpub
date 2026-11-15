@@ -60,7 +60,7 @@ For data visibility and implemented/only-designed special panels, refer to `ADAP
 
 The following self-contained **display-only** HTML/CSS is a reusable reference for the core window. It is intentionally small and isolated so a ChatGPT in-chat visualization can adopt the appearance without creating a website, independent renderer, interactive controls, external assets or new game data. Replace bracketed labels with **escaped source-owned, player-known** values from the HUD and current scene. No visual element computes a resource value or resolves dice.
 
-\`\`\`html
+```html
 <style>
 .bb-window{--gold:#c59e64;--soft:#e8dfce;--dim:#a9b4c6;--qi:#6dd1c9;
  box-sizing:border-box;position:relative;overflow:hidden;isolation:isolate;
@@ -107,6 +107,6 @@ The following self-contained **display-only** HTML/CSS is a reusable reference f
  <div class="bb-thread-label">◈ CURRENT THREAD</div>
  <div class="bb-thread">[One known immediate scene thread]</div>
 </section>
-\`\`\`
+```
 
-The *example markup is not a campaign checkpoint or a literal static HUD to reuse forever*. This is a visual guide for faithful in-chat rendering, with **live values coming from \`panels.hudData\`**. An actual game panel should hide empty information, compute bar fraction from the real numerator/denominator only for display, and omit a second resource if none is relevant. User action remains ordinary freeform chat.
+The *example markup is not a campaign checkpoint or a literal static HUD to reuse forever*. This is a visual guide for faithful in-chat rendering, with **live values coming from `panels.hudData`**. An actual game panel should hide empty information, compute bar fraction from the real numerator/denominator only for display, and omit a second resource if none is relevant. User action remains ordinary freeform chat.
