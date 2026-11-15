@@ -724,6 +724,22 @@
         "noAutomaticAgreement": true,
         "lifeNeedsRequireActualContext": true
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 15:49",
+      "type": "world",
+      "text": "A persistent settlement foundation is established: Mossgate.",
+      "details": {
+        "source": "causal-persistent-settlement-foundation-v1",
+        "placeId": "mossgate_common",
+        "foundingHash": "8c30049d8e58b4bfa7851bd950dc536e58178243020f3de81131bde7c4e3d3f7",
+        "households": 28,
+        "residents": 100,
+        "noPlayerResources": true,
+        "noNPCContactOrConsent": true,
+        "noTimeElapsed": true
+      }
     }
   ],
   "world": {
@@ -1234,7 +1250,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 39,
+    "revision": 40,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2960,6 +2976,46 @@
                 "noAutomaticWages": true,
                 "noAutomaticAgreement": true,
                 "lifeNeedsRequireActualContext": true
+              }
+            }
+          ]
+        }
+      },
+      "maddoc_mossgate_whole_foundation_20261115_01": {
+        "revision": 40,
+        "mode": "rule",
+        "hash": "f39cb80a74eb1f752e3afd3ee64760ffa707e10bd78c82315ccb90a2020c779e",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 15:49",
+          "output": {
+            "rules": {
+              "founded": true,
+              "placeId": "mossgate_common",
+              "name": "Mossgate",
+              "households": 28,
+              "residentCount": 100,
+              "sites": 11,
+              "noPlayerReward": true,
+              "noNPCSightings": true,
+              "note": "The entire local foundation is persisted. An unvisited building or resident is not automatically known or present."
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 15:49",
+              "type": "world",
+              "text": "A persistent settlement foundation is established: Mossgate.",
+              "details": {
+                "source": "causal-persistent-settlement-foundation-v1",
+                "placeId": "mossgate_common",
+                "foundingHash": "8c30049d8e58b4bfa7851bd950dc536e58178243020f3de81131bde7c4e3d3f7",
+                "households": 28,
+                "residents": 100,
+                "noPlayerResources": true,
+                "noNPCContactOrConsent": true,
+                "noTimeElapsed": true
               }
             }
           ]
@@ -12084,6 +12140,2619 @@
           }
         ],
         "counter": 7
+      },
+      "settlementFoundations": {
+        "version": 1,
+        "source": "causal-persistent-settlement-foundation-v1",
+        "records": {
+          "mossgate_common": {
+            "version": 1,
+            "source": "causal-persistent-settlement-foundation-v1",
+            "placeId": "mossgate_common",
+            "founding": {
+              "source": "causal-persistent-settlement-foundation-v1",
+              "worldSeed": 1975265538,
+              "placeId": "mossgate_common",
+              "placeFoundingHash": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+              "regionId": "orchard_vales",
+              "settlementName": "Mossgate",
+              "settlementKind": "orchard hamlet common",
+              "createdMinute": 505,
+              "originatingPolity": "asterwyn",
+              "culture": "vale",
+              "regionEcology": "forest",
+              "tradeGoods": [
+                "grain",
+                "herbs"
+              ],
+              "wholeHash": "6c1c9c2b57c2aaa788d190c72633eb0da0d8c62533c6eaaf91fef10f61262de0",
+              "households": 28,
+              "residents": 100
+            },
+            "foundingHash": "8c30049d8e58b4bfa7851bd950dc536e58178243020f3de81131bde7c4e3d3f7",
+            "whole": {
+              "schema": 1,
+              "name": "Mossgate",
+              "kind": "orchard hamlet common",
+              "regionId": "orchard_vales",
+              "polityId": "asterwyn",
+              "culture": "vale",
+              "environmentalContext": {
+                "biome": "forest",
+                "knownResources": [
+                  "grain",
+                  "herbs"
+                ],
+                "existingOrchards": true,
+                "naturalRisks": [
+                  "crop blight"
+                ]
+              },
+              "townPlan": {
+                "districts": [
+                  {
+                    "id": "central",
+                    "purpose": "commons and learning"
+                  },
+                  {
+                    "id": "homes",
+                    "purpose": "residences and gardens"
+                  },
+                  {
+                    "id": "trade",
+                    "purpose": "trading and repairs"
+                  },
+                  {
+                    "id": "work",
+                    "purpose": "handling and food storage"
+                  },
+                  {
+                    "id": "edge",
+                    "purpose": "orchards and water"
+                  }
+                ],
+                "sites": [
+                  {
+                    "id": "common",
+                    "name": "Village green and public well",
+                    "district": "central",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "reading_house",
+                      "market_lane",
+                      "cottages",
+                      "training_yard"
+                    ]
+                  },
+                  {
+                    "id": "reading_house",
+                    "name": "Reading house and shared records",
+                    "district": "central",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "common",
+                      "meeting"
+                    ]
+                  },
+                  {
+                    "id": "training_yard",
+                    "name": "Enclosed practical training yard",
+                    "district": "work",
+                    "access": "supervised",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "common",
+                      "handling_pens",
+                      "storage"
+                    ]
+                  },
+                  {
+                    "id": "handling_pens",
+                    "name": "Fenced beast-handling pens and troughs",
+                    "district": "work",
+                    "access": "restricted",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "training_yard",
+                      "edge"
+                    ]
+                  },
+                  {
+                    "id": "market_lane",
+                    "name": "Roadside exchange and produce stalls",
+                    "district": "trade",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "common",
+                      "workshops",
+                      "storage"
+                    ]
+                  },
+                  {
+                    "id": "workshops",
+                    "name": "Repair and craft workshops",
+                    "district": "trade",
+                    "access": "public",
+                    "priorKnown": false,
+                    "independentUse": true,
+                    "existingSceneWitness": null,
+                    "routes": [
+                      "market_lane",
+                      "storage"
+                    ]
+                  },
+                  {
+                    "id": "storage",
+                    "name": "Grain and winter-provision stores",
+                    "district": "work",
+                    "access": "restricted",
+                    "priorKnown": false,
+                    "independentUse": true,
+                    "existingSceneWitness": null,
+                    "routes": [
+                      "market_lane",
+                      "training_yard"
+                    ]
+                  },
+                  {
+                    "id": "cottages",
+                    "name": "Household lanes and cottages",
+                    "district": "homes",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "common",
+                      "edge",
+                      "water"
+                    ]
+                  },
+                  {
+                    "id": "edge",
+                    "name": "Orchard and hedgerow boundary paths",
+                    "district": "edge",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "cottages",
+                      "handling_pens",
+                      "water"
+                    ]
+                  },
+                  {
+                    "id": "water",
+                    "name": "Drainage and watering infrastructure",
+                    "district": "edge",
+                    "access": "public",
+                    "priorKnown": true,
+                    "independentUse": true,
+                    "existingSceneWitness": "0c28890987789d962d7cc670cc015db1d9f77049d35178beab654e4bb9f62663",
+                    "routes": [
+                      "edge",
+                      "cottages"
+                    ]
+                  },
+                  {
+                    "id": "meeting",
+                    "name": "Shared local meeting room",
+                    "district": "central",
+                    "access": "public",
+                    "priorKnown": false,
+                    "independentUse": true,
+                    "existingSceneWitness": null,
+                    "routes": [
+                      "reading_house"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "from": "common",
+                    "to": "reading_house",
+                    "walkable": true
+                  },
+                  {
+                    "from": "common",
+                    "to": "market_lane",
+                    "walkable": true
+                  },
+                  {
+                    "from": "common",
+                    "to": "cottages",
+                    "walkable": true
+                  },
+                  {
+                    "from": "common",
+                    "to": "training_yard",
+                    "walkable": true
+                  },
+                  {
+                    "from": "handling_pens",
+                    "to": "training_yard",
+                    "walkable": true
+                  },
+                  {
+                    "from": "market_lane",
+                    "to": "workshops",
+                    "walkable": true
+                  },
+                  {
+                    "from": "market_lane",
+                    "to": "storage",
+                    "walkable": true
+                  },
+                  {
+                    "from": "storage",
+                    "to": "training_yard",
+                    "walkable": true
+                  },
+                  {
+                    "from": "cottages",
+                    "to": "edge",
+                    "walkable": true
+                  },
+                  {
+                    "from": "cottages",
+                    "to": "water",
+                    "walkable": true
+                  },
+                  {
+                    "from": "edge",
+                    "to": "handling_pens",
+                    "walkable": true
+                  },
+                  {
+                    "from": "edge",
+                    "to": "water",
+                    "walkable": true
+                  },
+                  {
+                    "from": "meeting",
+                    "to": "reading_house",
+                    "walkable": true
+                  }
+                ],
+                "dwellings": [
+                  {
+                    "id": "dwelling_1",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_1",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_2",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_2",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_3",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_3",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_4",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_4",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_5",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_5",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_6",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_6",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_7",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_7",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_8",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_8",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_9",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_9",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_10",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_10",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_11",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_11",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_12",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_12",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_13",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_13",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_14",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_14",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_15",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_15",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_16",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_16",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_17",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_17",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_18",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_18",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_19",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_19",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_20",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_20",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_21",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_21",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_22",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_22",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_23",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_23",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_24",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_24",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_25",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_25",
+                    "district": "edge"
+                  },
+                  {
+                    "id": "dwelling_26",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_26",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_27",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_27",
+                    "district": "homes"
+                  },
+                  {
+                    "id": "dwelling_28",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true,
+                    "householdId": "household_28",
+                    "district": "homes"
+                  }
+                ],
+                "publicWater": [
+                  "common",
+                  "water"
+                ],
+                "accessRules": "Households and animal enclosures retain their own access and welfare rules"
+              },
+              "civic": {
+                "polity": "Asterwyn Crown",
+                "rightsContext": "licensed guardianship",
+                "assemblySiteId": "meeting",
+                "custom": "Household discussion and shared maintenance of the public common",
+                "authority": "local practical assembly; no unearned national office or rank"
+              },
+              "economy": {
+                "regionGoods": [
+                  "grain",
+                  "herbs"
+                ],
+                "connections": [
+                  "local grain work",
+                  "regional herbs exchange",
+                  "road, trail or water routes grounded in the surrounding region"
+                ],
+                "workplaceSiteIds": [
+                  "market_lane",
+                  "workshops",
+                  "training_yard",
+                  "storage"
+                ],
+                "noFictionalTradableStock": true,
+                "independentFromPlayer": true
+              },
+              "households": [
+                {
+                  "id": "household_1",
+                  "name": "Barley household",
+                  "dwellingId": "dwelling_1",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_1_1",
+                    "resident_1_2",
+                    "resident_1_3"
+                  ],
+                  "livelihood": "cart repair",
+                  "residence": {
+                    "id": "dwelling_1",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_2",
+                  "name": "Merrow household",
+                  "dwellingId": "dwelling_2",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_2_1",
+                    "resident_2_2"
+                  ],
+                  "livelihood": "teaching and practical instruction",
+                  "residence": {
+                    "id": "dwelling_2",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_3",
+                  "name": "Rookford household",
+                  "dwellingId": "dwelling_3",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_3_1",
+                    "resident_3_2",
+                    "resident_3_3",
+                    "resident_3_4"
+                  ],
+                  "livelihood": "hedge maintenance",
+                  "residence": {
+                    "id": "dwelling_3",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_4",
+                  "name": "Hazelbrook household",
+                  "dwellingId": "dwelling_4",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_4_1",
+                    "resident_4_2",
+                    "resident_4_3"
+                  ],
+                  "livelihood": "orchard tending",
+                  "residence": {
+                    "id": "dwelling_4",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_5",
+                  "name": "Oakwhistle household",
+                  "dwellingId": "dwelling_5",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_5_1",
+                    "resident_5_2",
+                    "resident_5_3"
+                  ],
+                  "livelihood": "repair and carpentry",
+                  "residence": {
+                    "id": "dwelling_5",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_6",
+                  "name": "Bramblewick household",
+                  "dwellingId": "dwelling_6",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_6_1",
+                    "resident_6_2"
+                  ],
+                  "livelihood": "repair and carpentry",
+                  "residence": {
+                    "id": "dwelling_6",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_7",
+                  "name": "Ravenhay household",
+                  "dwellingId": "dwelling_7",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_7_1",
+                    "resident_7_2"
+                  ],
+                  "livelihood": "water and drainage",
+                  "residence": {
+                    "id": "dwelling_7",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_8",
+                  "name": "Appleford household",
+                  "dwellingId": "dwelling_8",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_8_1",
+                    "resident_8_2",
+                    "resident_8_3",
+                    "resident_8_4",
+                    "resident_8_5"
+                  ],
+                  "livelihood": "medicinal herb work",
+                  "residence": {
+                    "id": "dwelling_8",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_9",
+                  "name": "Briarwell household",
+                  "dwellingId": "dwelling_9",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_9_1",
+                    "resident_9_2",
+                    "resident_9_3",
+                    "resident_9_4",
+                    "resident_9_5"
+                  ],
+                  "livelihood": "herbs handling",
+                  "residence": {
+                    "id": "dwelling_9",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_10",
+                  "name": "Rowanbank household",
+                  "dwellingId": "dwelling_10",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_10_1",
+                    "resident_10_2",
+                    "resident_10_3"
+                  ],
+                  "livelihood": "hedge maintenance",
+                  "residence": {
+                    "id": "dwelling_10",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_11",
+                  "name": "Willowmere household",
+                  "dwellingId": "dwelling_11",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_11_1",
+                    "resident_11_2"
+                  ],
+                  "livelihood": "grain handling",
+                  "residence": {
+                    "id": "dwelling_11",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_12",
+                  "name": "Stonecress household",
+                  "dwellingId": "dwelling_12",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_12_1",
+                    "resident_12_2",
+                    "resident_12_3"
+                  ],
+                  "livelihood": "beast welfare and handling",
+                  "residence": {
+                    "id": "dwelling_12",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_13",
+                  "name": "Wrenfall household",
+                  "dwellingId": "dwelling_13",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_13_1",
+                    "resident_13_2"
+                  ],
+                  "livelihood": "herbs handling",
+                  "residence": {
+                    "id": "dwelling_13",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_14",
+                  "name": "Ashgrove household",
+                  "dwellingId": "dwelling_14",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_14_1",
+                    "resident_14_2",
+                    "resident_14_3",
+                    "resident_14_4",
+                    "resident_14_5"
+                  ],
+                  "livelihood": "grain handling",
+                  "residence": {
+                    "id": "dwelling_14",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_15",
+                  "name": "Fallow household",
+                  "dwellingId": "dwelling_15",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_15_1",
+                    "resident_15_2",
+                    "resident_15_3",
+                    "resident_15_4"
+                  ],
+                  "livelihood": "woodland trail tending",
+                  "residence": {
+                    "id": "dwelling_15",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_16",
+                  "name": "Mossell household",
+                  "dwellingId": "dwelling_16",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_16_1",
+                    "resident_16_2",
+                    "resident_16_3",
+                    "resident_16_4",
+                    "resident_16_5"
+                  ],
+                  "livelihood": "cloth and mending",
+                  "residence": {
+                    "id": "dwelling_16",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_17",
+                  "name": "Dawnmere household",
+                  "dwellingId": "dwelling_17",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_17_1",
+                    "resident_17_2",
+                    "resident_17_3",
+                    "resident_17_4",
+                    "resident_17_5"
+                  ],
+                  "livelihood": "smallholding",
+                  "residence": {
+                    "id": "dwelling_17",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_18",
+                  "name": "Turnleaf household",
+                  "dwellingId": "dwelling_18",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_18_1",
+                    "resident_18_2"
+                  ],
+                  "livelihood": "repair and carpentry",
+                  "residence": {
+                    "id": "dwelling_18",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_19",
+                  "name": "Goldreed household",
+                  "dwellingId": "dwelling_19",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_19_1",
+                    "resident_19_2",
+                    "resident_19_3",
+                    "resident_19_4",
+                    "resident_19_5"
+                  ],
+                  "livelihood": "beast welfare and handling",
+                  "residence": {
+                    "id": "dwelling_19",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_20",
+                  "name": "Birchrun household",
+                  "dwellingId": "dwelling_20",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_20_1",
+                    "resident_20_2",
+                    "resident_20_3",
+                    "resident_20_4"
+                  ],
+                  "livelihood": "herbs handling",
+                  "residence": {
+                    "id": "dwelling_20",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_21",
+                  "name": "Cresswater household",
+                  "dwellingId": "dwelling_21",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_21_1",
+                    "resident_21_2",
+                    "resident_21_3",
+                    "resident_21_4"
+                  ],
+                  "livelihood": "herbs handling",
+                  "residence": {
+                    "id": "dwelling_21",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_22",
+                  "name": "Sedgewick household",
+                  "dwellingId": "dwelling_22",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_22_1",
+                    "resident_22_2",
+                    "resident_22_3"
+                  ],
+                  "livelihood": "cart repair",
+                  "residence": {
+                    "id": "dwelling_22",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_23",
+                  "name": "Highbough household",
+                  "dwellingId": "dwelling_23",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_23_1",
+                    "resident_23_2",
+                    "resident_23_3",
+                    "resident_23_4"
+                  ],
+                  "livelihood": "smallholding",
+                  "residence": {
+                    "id": "dwelling_23",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_24",
+                  "name": "Vale household",
+                  "dwellingId": "dwelling_24",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_24_1",
+                    "resident_24_2",
+                    "resident_24_3",
+                    "resident_24_4",
+                    "resident_24_5"
+                  ],
+                  "livelihood": "cloth and mending",
+                  "residence": {
+                    "id": "dwelling_24",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_25",
+                  "name": "Farbrook household",
+                  "dwellingId": "dwelling_25",
+                  "district": "edge",
+                  "memberIds": [
+                    "resident_25_1",
+                    "resident_25_2",
+                    "resident_25_3",
+                    "resident_25_4",
+                    "resident_25_5"
+                  ],
+                  "livelihood": "forest herb work",
+                  "residence": {
+                    "id": "dwelling_25",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_26",
+                  "name": "Oathwood household",
+                  "dwellingId": "dwelling_26",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_26_1",
+                    "resident_26_2"
+                  ],
+                  "livelihood": "grain handling",
+                  "residence": {
+                    "id": "dwelling_26",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_27",
+                  "name": "Larkmere household",
+                  "dwellingId": "dwelling_27",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_27_1",
+                    "resident_27_2",
+                    "resident_27_3",
+                    "resident_27_4",
+                    "resident_27_5"
+                  ],
+                  "livelihood": "medicinal herb work",
+                  "residence": {
+                    "id": "dwelling_27",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                },
+                {
+                  "id": "household_28",
+                  "name": "Wheatley household",
+                  "dwellingId": "dwelling_28",
+                  "district": "homes",
+                  "memberIds": [
+                    "resident_28_1",
+                    "resident_28_2",
+                    "resident_28_3"
+                  ],
+                  "livelihood": "smallholding",
+                  "residence": {
+                    "id": "dwelling_28",
+                    "kind": "private dwelling",
+                    "access": "private",
+                    "builtIntoNeighbourhood": true
+                  },
+                  "noInheritedTitle": true
+                }
+              ],
+              "residents": [
+                {
+                  "id": "resident_1_1",
+                  "actorId": "settlement:mossgate_common:resident_1_1",
+                  "name": "Lenna Barley",
+                  "ageBand": "adult",
+                  "householdId": "household_1",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_1",
+                  "profession": "cart repair",
+                  "temperament": "practical",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_1_2",
+                  "actorId": "settlement:mossgate_common:resident_1_2",
+                  "name": "Keir Barley",
+                  "ageBand": "child",
+                  "householdId": "household_1",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_1",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_1_3",
+                  "actorId": "settlement:mossgate_common:resident_1_3",
+                  "name": "Fenna Barley",
+                  "ageBand": "child",
+                  "householdId": "household_1",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_1",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_2_1",
+                  "actorId": "settlement:mossgate_common:resident_2_1",
+                  "name": "Elin Merrow",
+                  "ageBand": "adult",
+                  "householdId": "household_2",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_2",
+                  "profession": "teaching and practical instruction",
+                  "temperament": "sociable",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_2_2",
+                  "actorId": "settlement:mossgate_common:resident_2_2",
+                  "name": "Willa Merrow",
+                  "ageBand": "child",
+                  "householdId": "household_2",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_2",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_3_1",
+                  "actorId": "settlement:mossgate_common:resident_3_1",
+                  "name": "Willa Rookford",
+                  "ageBand": "adult",
+                  "householdId": "household_3",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_3",
+                  "profession": "hedge maintenance",
+                  "temperament": "reserved",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_3_2",
+                  "actorId": "settlement:mossgate_common:resident_3_2",
+                  "name": "Brynn Rookford",
+                  "ageBand": "adult",
+                  "householdId": "household_3",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_3",
+                  "profession": "hedge maintenance",
+                  "temperament": "independent",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_3_3",
+                  "actorId": "settlement:mossgate_common:resident_3_3",
+                  "name": "Fenna Rookford",
+                  "ageBand": "child",
+                  "householdId": "household_3",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_3",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "learn a better trade",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_3_4",
+                  "actorId": "settlement:mossgate_common:resident_3_4",
+                  "name": "Aila Rookford",
+                  "ageBand": "child",
+                  "householdId": "household_3",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_3",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "learn a better trade",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_4_1",
+                  "actorId": "settlement:mossgate_common:resident_4_1",
+                  "name": "Sella Hazelbrook",
+                  "ageBand": "adult",
+                  "householdId": "household_4",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_4",
+                  "profession": "orchard tending",
+                  "temperament": "practical",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_4_2",
+                  "actorId": "settlement:mossgate_common:resident_4_2",
+                  "name": "Keir Hazelbrook",
+                  "ageBand": "child",
+                  "householdId": "household_4",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_4",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_4_3",
+                  "actorId": "settlement:mossgate_common:resident_4_3",
+                  "name": "Tarin Hazelbrook",
+                  "ageBand": "child",
+                  "householdId": "household_4",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_4",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_5_1",
+                  "actorId": "settlement:mossgate_common:resident_5_1",
+                  "name": "Brynn Oakwhistle",
+                  "ageBand": "adult",
+                  "householdId": "household_5",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_5",
+                  "profession": "repair and carpentry",
+                  "temperament": "independent",
+                  "concern": "learn a better trade",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_5_2",
+                  "actorId": "settlement:mossgate_common:resident_5_2",
+                  "name": "Orren Oakwhistle",
+                  "ageBand": "child",
+                  "householdId": "household_5",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_5",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_5_3",
+                  "actorId": "settlement:mossgate_common:resident_5_3",
+                  "name": "Sella Oakwhistle",
+                  "ageBand": "child",
+                  "householdId": "household_5",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_5",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_6_1",
+                  "actorId": "settlement:mossgate_common:resident_6_1",
+                  "name": "Aila Bramblewick",
+                  "ageBand": "adult",
+                  "householdId": "household_6",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_6",
+                  "profession": "repair and carpentry",
+                  "temperament": "independent",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_6_2",
+                  "actorId": "settlement:mossgate_common:resident_6_2",
+                  "name": "Corin Bramblewick",
+                  "ageBand": "child",
+                  "householdId": "household_6",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_6",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "protect family time",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_7_1",
+                  "actorId": "settlement:mossgate_common:resident_7_1",
+                  "name": "Neris Ravenhay",
+                  "ageBand": "adult",
+                  "householdId": "household_7",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_7",
+                  "profession": "water and drainage",
+                  "temperament": "independent",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_7_2",
+                  "actorId": "settlement:mossgate_common:resident_7_2",
+                  "name": "Ossa Ravenhay",
+                  "ageBand": "child",
+                  "householdId": "household_7",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_7",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_8_1",
+                  "actorId": "settlement:mossgate_common:resident_8_1",
+                  "name": "Aila Appleford",
+                  "ageBand": "adult",
+                  "householdId": "household_8",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_8",
+                  "profession": "medicinal herb work",
+                  "temperament": "sociable",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_8_2",
+                  "actorId": "settlement:mossgate_common:resident_8_2",
+                  "name": "Hale Appleford",
+                  "ageBand": "adult",
+                  "householdId": "household_8",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_8",
+                  "profession": "beast welfare and handling",
+                  "temperament": "reserved",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_8_3",
+                  "actorId": "settlement:mossgate_common:resident_8_3",
+                  "name": "Hedwyn Appleford",
+                  "ageBand": "child",
+                  "householdId": "household_8",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_8",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_8_4",
+                  "actorId": "settlement:mossgate_common:resident_8_4",
+                  "name": "Jessa Appleford",
+                  "ageBand": "child",
+                  "householdId": "household_8",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_8",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "learn a better trade",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_8_5",
+                  "actorId": "settlement:mossgate_common:resident_8_5",
+                  "name": "Keir Appleford",
+                  "ageBand": "elder",
+                  "householdId": "household_8",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_8",
+                  "profession": "medicinal herb work",
+                  "temperament": "sociable",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_9_1",
+                  "actorId": "settlement:mossgate_common:resident_9_1",
+                  "name": "Miran Briarwell",
+                  "ageBand": "adult",
+                  "householdId": "household_9",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_9",
+                  "profession": "herbs handling",
+                  "temperament": "practical",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_9_2",
+                  "actorId": "settlement:mossgate_common:resident_9_2",
+                  "name": "Keir Briarwell",
+                  "ageBand": "adult",
+                  "householdId": "household_9",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_9",
+                  "profession": "grain handling",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_9_3",
+                  "actorId": "settlement:mossgate_common:resident_9_3",
+                  "name": "Orren Briarwell",
+                  "ageBand": "child",
+                  "householdId": "household_9",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_9",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_9_4",
+                  "actorId": "settlement:mossgate_common:resident_9_4",
+                  "name": "Edda Briarwell",
+                  "ageBand": "child",
+                  "householdId": "household_9",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_9",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_9_5",
+                  "actorId": "settlement:mossgate_common:resident_9_5",
+                  "name": "Rill Briarwell",
+                  "ageBand": "elder",
+                  "householdId": "household_9",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_9",
+                  "profession": "herbs handling",
+                  "temperament": "independent",
+                  "concern": "learn a better trade",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_10_1",
+                  "actorId": "settlement:mossgate_common:resident_10_1",
+                  "name": "Hedwyn Rowanbank",
+                  "ageBand": "adult",
+                  "householdId": "household_10",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_10",
+                  "profession": "hedge maintenance",
+                  "temperament": "sociable",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_10_2",
+                  "actorId": "settlement:mossgate_common:resident_10_2",
+                  "name": "Nell Rowanbank",
+                  "ageBand": "child",
+                  "householdId": "household_10",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_10",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "protect family time",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_10_3",
+                  "actorId": "settlement:mossgate_common:resident_10_3",
+                  "name": "Iona Rowanbank",
+                  "ageBand": "child",
+                  "householdId": "household_10",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_10",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_11_1",
+                  "actorId": "settlement:mossgate_common:resident_11_1",
+                  "name": "Kellan Willowmere",
+                  "ageBand": "adult",
+                  "householdId": "household_11",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_11",
+                  "profession": "grain handling",
+                  "temperament": "reserved",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_11_2",
+                  "actorId": "settlement:mossgate_common:resident_11_2",
+                  "name": "Hale Willowmere",
+                  "ageBand": "child",
+                  "householdId": "household_11",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_11",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_12_1",
+                  "actorId": "settlement:mossgate_common:resident_12_1",
+                  "name": "Tavin Stonecress",
+                  "ageBand": "adult",
+                  "householdId": "household_12",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_12",
+                  "profession": "beast welfare and handling",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_12_2",
+                  "actorId": "settlement:mossgate_common:resident_12_2",
+                  "name": "Olen Stonecress",
+                  "ageBand": "child",
+                  "householdId": "household_12",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_12",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_12_3",
+                  "actorId": "settlement:mossgate_common:resident_12_3",
+                  "name": "Brynn Stonecress",
+                  "ageBand": "child",
+                  "householdId": "household_12",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_12",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_13_1",
+                  "actorId": "settlement:mossgate_common:resident_13_1",
+                  "name": "Nell Wrenfall",
+                  "ageBand": "adult",
+                  "householdId": "household_13",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_13",
+                  "profession": "herbs handling",
+                  "temperament": "practical",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_13_2",
+                  "actorId": "settlement:mossgate_common:resident_13_2",
+                  "name": "Olen Wrenfall",
+                  "ageBand": "child",
+                  "householdId": "household_13",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_13",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "protect family time",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_14_1",
+                  "actorId": "settlement:mossgate_common:resident_14_1",
+                  "name": "Hedwyn Ashgrove",
+                  "ageBand": "adult",
+                  "householdId": "household_14",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_14",
+                  "profession": "grain handling",
+                  "temperament": "sociable",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_14_2",
+                  "actorId": "settlement:mossgate_common:resident_14_2",
+                  "name": "Ren Ashgrove",
+                  "ageBand": "adult",
+                  "householdId": "household_14",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_14",
+                  "profession": "beast welfare and handling",
+                  "temperament": "practical",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_14_3",
+                  "actorId": "settlement:mossgate_common:resident_14_3",
+                  "name": "Rinna Ashgrove",
+                  "ageBand": "child",
+                  "householdId": "household_14",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_14",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "care for an older relative",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_14_4",
+                  "actorId": "settlement:mossgate_common:resident_14_4",
+                  "name": "Jessa Ashgrove",
+                  "ageBand": "child",
+                  "householdId": "household_14",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_14",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "learn a better trade",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_14_5",
+                  "actorId": "settlement:mossgate_common:resident_14_5",
+                  "name": "Brynn Ashgrove",
+                  "ageBand": "elder",
+                  "householdId": "household_14",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_14",
+                  "profession": "grain handling",
+                  "temperament": "practical",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_15_1",
+                  "actorId": "settlement:mossgate_common:resident_15_1",
+                  "name": "Orren Fallow",
+                  "ageBand": "adult",
+                  "householdId": "household_15",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_15",
+                  "profession": "woodland trail tending",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_15_2",
+                  "actorId": "settlement:mossgate_common:resident_15_2",
+                  "name": "Nila Fallow",
+                  "ageBand": "adult",
+                  "householdId": "household_15",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_15",
+                  "profession": "woodland trail tending",
+                  "temperament": "practical",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_15_3",
+                  "actorId": "settlement:mossgate_common:resident_15_3",
+                  "name": "Rinna Fallow",
+                  "ageBand": "child",
+                  "householdId": "household_15",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_15",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_15_4",
+                  "actorId": "settlement:mossgate_common:resident_15_4",
+                  "name": "Neris Fallow",
+                  "ageBand": "child",
+                  "householdId": "household_15",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_15",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_16_1",
+                  "actorId": "settlement:mossgate_common:resident_16_1",
+                  "name": "Sella Mossell",
+                  "ageBand": "adult",
+                  "householdId": "household_16",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_16",
+                  "profession": "cloth and mending",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_16_2",
+                  "actorId": "settlement:mossgate_common:resident_16_2",
+                  "name": "Maela Mossell",
+                  "ageBand": "adult",
+                  "householdId": "household_16",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_16",
+                  "profession": "cart repair",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_16_3",
+                  "actorId": "settlement:mossgate_common:resident_16_3",
+                  "name": "Kellan Mossell",
+                  "ageBand": "child",
+                  "householdId": "household_16",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_16",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_16_4",
+                  "actorId": "settlement:mossgate_common:resident_16_4",
+                  "name": "Rill Mossell",
+                  "ageBand": "child",
+                  "householdId": "household_16",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_16",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_16_5",
+                  "actorId": "settlement:mossgate_common:resident_16_5",
+                  "name": "Aven Mossell",
+                  "ageBand": "elder",
+                  "householdId": "household_16",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_16",
+                  "profession": "cloth and mending",
+                  "temperament": "sociable",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_17_1",
+                  "actorId": "settlement:mossgate_common:resident_17_1",
+                  "name": "Roswen Dawnmere",
+                  "ageBand": "adult",
+                  "householdId": "household_17",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_17",
+                  "profession": "smallholding",
+                  "temperament": "reserved",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_17_2",
+                  "actorId": "settlement:mossgate_common:resident_17_2",
+                  "name": "Ren Dawnmere",
+                  "ageBand": "adult",
+                  "householdId": "household_17",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_17",
+                  "profession": "woodland trail tending",
+                  "temperament": "reserved",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_17_3",
+                  "actorId": "settlement:mossgate_common:resident_17_3",
+                  "name": "Orren Dawnmere",
+                  "ageBand": "child",
+                  "householdId": "household_17",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_17",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_17_4",
+                  "actorId": "settlement:mossgate_common:resident_17_4",
+                  "name": "Ossa Dawnmere",
+                  "ageBand": "child",
+                  "householdId": "household_17",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_17",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_17_5",
+                  "actorId": "settlement:mossgate_common:resident_17_5",
+                  "name": "Keir Dawnmere",
+                  "ageBand": "elder",
+                  "householdId": "household_17",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_17",
+                  "profession": "smallholding",
+                  "temperament": "reserved",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_18_1",
+                  "actorId": "settlement:mossgate_common:resident_18_1",
+                  "name": "Loma Turnleaf",
+                  "ageBand": "adult",
+                  "householdId": "household_18",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_18",
+                  "profession": "repair and carpentry",
+                  "temperament": "sociable",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_18_2",
+                  "actorId": "settlement:mossgate_common:resident_18_2",
+                  "name": "Nila Turnleaf",
+                  "ageBand": "child",
+                  "householdId": "household_18",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_18",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_19_1",
+                  "actorId": "settlement:mossgate_common:resident_19_1",
+                  "name": "Soren Goldreed",
+                  "ageBand": "adult",
+                  "householdId": "household_19",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_19",
+                  "profession": "beast welfare and handling",
+                  "temperament": "independent",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_19_2",
+                  "actorId": "settlement:mossgate_common:resident_19_2",
+                  "name": "Loma Goldreed",
+                  "ageBand": "adult",
+                  "householdId": "household_19",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_19",
+                  "profession": "medicinal herb work",
+                  "temperament": "sociable",
+                  "concern": "protect family time",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_19_3",
+                  "actorId": "settlement:mossgate_common:resident_19_3",
+                  "name": "Rinna Goldreed",
+                  "ageBand": "child",
+                  "householdId": "household_19",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_19",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_19_4",
+                  "actorId": "settlement:mossgate_common:resident_19_4",
+                  "name": "Fara Goldreed",
+                  "ageBand": "child",
+                  "householdId": "household_19",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_19",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_19_5",
+                  "actorId": "settlement:mossgate_common:resident_19_5",
+                  "name": "Vela Goldreed",
+                  "ageBand": "elder",
+                  "householdId": "household_19",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_19",
+                  "profession": "beast welfare and handling",
+                  "temperament": "sociable",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_20_1",
+                  "actorId": "settlement:mossgate_common:resident_20_1",
+                  "name": "Loma Birchrun",
+                  "ageBand": "adult",
+                  "householdId": "household_20",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_20",
+                  "profession": "herbs handling",
+                  "temperament": "reserved",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_20_2",
+                  "actorId": "settlement:mossgate_common:resident_20_2",
+                  "name": "Hale Birchrun",
+                  "ageBand": "adult",
+                  "householdId": "household_20",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_20",
+                  "profession": "woodland trail tending",
+                  "temperament": "reserved",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_20_3",
+                  "actorId": "settlement:mossgate_common:resident_20_3",
+                  "name": "Neris Birchrun",
+                  "ageBand": "child",
+                  "householdId": "household_20",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_20",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "learn a better trade",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_20_4",
+                  "actorId": "settlement:mossgate_common:resident_20_4",
+                  "name": "Aila Birchrun",
+                  "ageBand": "child",
+                  "householdId": "household_20",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_20",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_21_1",
+                  "actorId": "settlement:mossgate_common:resident_21_1",
+                  "name": "Dara Cresswater",
+                  "ageBand": "adult",
+                  "householdId": "household_21",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_21",
+                  "profession": "herbs handling",
+                  "temperament": "sociable",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_21_2",
+                  "actorId": "settlement:mossgate_common:resident_21_2",
+                  "name": "Kellan Cresswater",
+                  "ageBand": "adult",
+                  "householdId": "household_21",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_21",
+                  "profession": "cart repair",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_21_3",
+                  "actorId": "settlement:mossgate_common:resident_21_3",
+                  "name": "Tavin Cresswater",
+                  "ageBand": "child",
+                  "householdId": "household_21",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_21",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_21_4",
+                  "actorId": "settlement:mossgate_common:resident_21_4",
+                  "name": "Vela Cresswater",
+                  "ageBand": "child",
+                  "householdId": "household_21",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_21",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_22_1",
+                  "actorId": "settlement:mossgate_common:resident_22_1",
+                  "name": "Aila Sedgewick",
+                  "ageBand": "adult",
+                  "householdId": "household_22",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_22",
+                  "profession": "cart repair",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_22_2",
+                  "actorId": "settlement:mossgate_common:resident_22_2",
+                  "name": "Willa Sedgewick",
+                  "ageBand": "child",
+                  "householdId": "household_22",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_22",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_22_3",
+                  "actorId": "settlement:mossgate_common:resident_22_3",
+                  "name": "Corin Sedgewick",
+                  "ageBand": "child",
+                  "householdId": "household_22",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_22",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_23_1",
+                  "actorId": "settlement:mossgate_common:resident_23_1",
+                  "name": "Nila Highbough",
+                  "ageBand": "adult",
+                  "householdId": "household_23",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_23",
+                  "profession": "smallholding",
+                  "temperament": "practical",
+                  "concern": "improve a practical method",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_23_2",
+                  "actorId": "settlement:mossgate_common:resident_23_2",
+                  "name": "Loma Highbough",
+                  "ageBand": "adult",
+                  "householdId": "household_23",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_23",
+                  "profession": "orchard tending",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_23_3",
+                  "actorId": "settlement:mossgate_common:resident_23_3",
+                  "name": "Aven Highbough",
+                  "ageBand": "child",
+                  "householdId": "household_23",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_23",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "avoid unnecessary debt",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_23_4",
+                  "actorId": "settlement:mossgate_common:resident_23_4",
+                  "name": "Perrin Highbough",
+                  "ageBand": "child",
+                  "householdId": "household_23",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_23",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "protect family time",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_24_1",
+                  "actorId": "settlement:mossgate_common:resident_24_1",
+                  "name": "Edda Vale",
+                  "ageBand": "adult",
+                  "householdId": "household_24",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_24",
+                  "profession": "cloth and mending",
+                  "temperament": "independent",
+                  "concern": "protect family time",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_24_2",
+                  "actorId": "settlement:mossgate_common:resident_24_2",
+                  "name": "Iona Vale",
+                  "ageBand": "adult",
+                  "householdId": "household_24",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_24",
+                  "profession": "cloth and mending",
+                  "temperament": "practical",
+                  "concern": "protect family time",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_24_3",
+                  "actorId": "settlement:mossgate_common:resident_24_3",
+                  "name": "Jessa Vale",
+                  "ageBand": "child",
+                  "householdId": "household_24",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_24",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_24_4",
+                  "actorId": "settlement:mossgate_common:resident_24_4",
+                  "name": "Nila Vale",
+                  "ageBand": "child",
+                  "householdId": "household_24",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_24",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "keep a reliable livelihood",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_24_5",
+                  "actorId": "settlement:mossgate_common:resident_24_5",
+                  "name": "Dara Vale",
+                  "ageBand": "elder",
+                  "householdId": "household_24",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_24",
+                  "profession": "cloth and mending",
+                  "temperament": "independent",
+                  "concern": "learn a better trade",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_25_1",
+                  "actorId": "settlement:mossgate_common:resident_25_1",
+                  "name": "Merek Farbrook",
+                  "ageBand": "adult",
+                  "householdId": "household_25",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_25",
+                  "profession": "forest herb work",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_25_2",
+                  "actorId": "settlement:mossgate_common:resident_25_2",
+                  "name": "Tavin Farbrook",
+                  "ageBand": "adult",
+                  "householdId": "household_25",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_25",
+                  "profession": "woodland trail tending",
+                  "temperament": "reserved",
+                  "concern": "care for an older relative",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_25_3",
+                  "actorId": "settlement:mossgate_common:resident_25_3",
+                  "name": "Fara Farbrook",
+                  "ageBand": "child",
+                  "householdId": "household_25",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_25",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "improve a practical method",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_25_4",
+                  "actorId": "settlement:mossgate_common:resident_25_4",
+                  "name": "Rill Farbrook",
+                  "ageBand": "child",
+                  "householdId": "household_25",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_25",
+                  "profession": "young learner",
+                  "temperament": "practical",
+                  "concern": "care for an older relative",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_25_5",
+                  "actorId": "settlement:mossgate_common:resident_25_5",
+                  "name": "Keir Farbrook",
+                  "ageBand": "elder",
+                  "householdId": "household_25",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_25",
+                  "profession": "forest herb work",
+                  "temperament": "reserved",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_26_1",
+                  "actorId": "settlement:mossgate_common:resident_26_1",
+                  "name": "Hedwyn Oathwood",
+                  "ageBand": "adult",
+                  "householdId": "household_26",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_26",
+                  "profession": "grain handling",
+                  "temperament": "reserved",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_26_2",
+                  "actorId": "settlement:mossgate_common:resident_26_2",
+                  "name": "Vela Oathwood",
+                  "ageBand": "child",
+                  "householdId": "household_26",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_26",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_27_1",
+                  "actorId": "settlement:mossgate_common:resident_27_1",
+                  "name": "Dara Larkmere",
+                  "ageBand": "adult",
+                  "householdId": "household_27",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_27",
+                  "profession": "medicinal herb work",
+                  "temperament": "independent",
+                  "concern": "care for an older relative",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_27_2",
+                  "actorId": "settlement:mossgate_common:resident_27_2",
+                  "name": "Merek Larkmere",
+                  "ageBand": "adult",
+                  "householdId": "household_27",
+                  "householdRole": "adult relative",
+                  "dwellingId": "dwelling_27",
+                  "profession": "orchard tending",
+                  "temperament": "practical",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_27_3",
+                  "actorId": "settlement:mossgate_common:resident_27_3",
+                  "name": "Olen Larkmere",
+                  "ageBand": "child",
+                  "householdId": "household_27",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_27",
+                  "profession": "young learner",
+                  "temperament": "sociable",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_27_4",
+                  "actorId": "settlement:mossgate_common:resident_27_4",
+                  "name": "Brynn Larkmere",
+                  "ageBand": "child",
+                  "householdId": "household_27",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_27",
+                  "profession": "young learner",
+                  "temperament": "independent",
+                  "concern": "learn a better trade",
+                  "dayPattern": "early",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_27_5",
+                  "actorId": "settlement:mossgate_common:resident_27_5",
+                  "name": "Miran Larkmere",
+                  "ageBand": "elder",
+                  "householdId": "household_27",
+                  "householdRole": "older relative",
+                  "dwellingId": "dwelling_27",
+                  "profession": "medicinal herb work",
+                  "temperament": "sociable",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_28_1",
+                  "actorId": "settlement:mossgate_common:resident_28_1",
+                  "name": "Roswen Wheatley",
+                  "ageBand": "adult",
+                  "householdId": "household_28",
+                  "householdRole": "householder",
+                  "dwellingId": "dwelling_28",
+                  "profession": "smallholding",
+                  "temperament": "reserved",
+                  "concern": "improve a practical method",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_28_2",
+                  "actorId": "settlement:mossgate_common:resident_28_2",
+                  "name": "Rill Wheatley",
+                  "ageBand": "child",
+                  "householdId": "household_28",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_28",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "help preserve the orchard soil",
+                  "dayPattern": "ordinary",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                },
+                {
+                  "id": "resident_28_3",
+                  "actorId": "settlement:mossgate_common:resident_28_3",
+                  "name": "Lysa Wheatley",
+                  "ageBand": "child",
+                  "householdId": "household_28",
+                  "householdRole": "dependent child",
+                  "dwellingId": "dwelling_28",
+                  "profession": "young learner",
+                  "temperament": "reserved",
+                  "concern": "maintain the shared paths",
+                  "dayPattern": "late",
+                  "noInferredWillingness": true,
+                  "notAutomaticallyKnown": true
+                }
+              ]
+            },
+            "live": {
+              "lastSixday": 0,
+              "waterCondition": 75,
+              "roadCondition": 75,
+              "localWorkPressure": 30,
+              "lastWitnessHash": null,
+              "historyAnchor": "8c30049d8e58b4bfa7851bd950dc536e58178243020f3de81131bde7c4e3d3f7",
+              "history": [],
+              "agents": {},
+              "conversations": []
+            },
+            "playerObservedSites": []
+          }
+        }
       }
     },
     "casualGames": {

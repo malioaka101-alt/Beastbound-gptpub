@@ -1,0 +1,84 @@
+{
+  "id": "maddoc_mossgate_whole_foundation_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 40,
+  "stateHash": "26695c6a45b6570d34b06bb85db9886ca95bbd4167599457f61c882b478d8c84",
+  "clock": "Day 2, 15:49",
+  "output": {
+    "rules": {
+      "founded": true,
+      "placeId": "mossgate_common",
+      "name": "Mossgate",
+      "households": 28,
+      "residentCount": 100,
+      "sites": 11,
+      "noPlayerReward": true,
+      "noNPCSightings": true,
+      "note": "The entire local foundation is persisted. An unvisited building or resident is not automatically known or present."
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 15:49",
+      "type": "world",
+      "text": "A persistent settlement foundation is established: Mossgate.",
+      "details": {
+        "source": "causal-persistent-settlement-foundation-v1",
+        "placeId": "mossgate_common",
+        "foundingHash": "8c30049d8e58b4bfa7851bd950dc536e58178243020f3de81131bde7c4e3d3f7",
+        "households": 28,
+        "residents": 100,
+        "noPlayerResources": true,
+        "noNPCContactOrConsent": true,
+        "noTimeElapsed": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 15:49 · Afternoon · Cool       ║\n║ Mossgate Common            2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Looking for Bram and Tessa … ║\n║ ◆ Both friends' whereabouts s… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "15:49",
+    "daypart": "Afternoon",
+    "location": "Mossgate Common",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Looking for Bram and Tessa around Mossgate's orchard-side lanes",
+      "Both friends' whereabouts still unconfirmed"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: After checking the pens and village lanes, Maddoc continues a wider pedestrian search along the publicly accessible orchard-side edge of Mossgate, glancing down the paths back toward Tansyhook and the side of the common. Neither Bram nor Tessa has been positively encountered. He remains on a public lane near the orchard-side edge of Mossgate Common.\nPC: young learner, undecided; 2 T\nJOURNAL: A period of ordinary life passes at Mossgate Common. | A period of ordinary life passes at Mossgate Common. | A persistent settlement foundation is established: Mossgate.\nCURRENT: No opening hook"
+}
