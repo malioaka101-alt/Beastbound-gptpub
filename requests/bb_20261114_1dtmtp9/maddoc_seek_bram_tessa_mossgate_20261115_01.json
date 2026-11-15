@@ -1,0 +1,20 @@
+{
+  "id": "maddoc_seek_bram_tessa_mossgate_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "mossgate_common",
+    "minutes": 42,
+    "means": "walking",
+    "uncontested": true,
+    "journey": "Maddoc leaves the Maddren family homestead after Hedra has given him his promised allowance, walking back along the previously travelled ordinary orchard lanes past Thistlebell Yard and Tansyhook Crossing toward the familiar Mossgate Common. The same pedestrian route was travelled the other way yesterday in 42 minutes; the daylight lane is clear and no new travel obstacle is established."
+  },
+  "scene": "At Mossgate Common, Maddoc arrives from the Maddren Homestead by the known orchard-road route. He looks around the hamlet green and the nearby practice yard for his friends Bram and Tessa, wanting to hear what they have been doing while he was helping Hedra. This arrival does not itself require or guarantee that either friend is present, willing to talk, or has gained a skill or item.",
+  "summary": "Maddoc travels the established familiar orchard-lane route from his homestead to Mossgate Common (42 verified journey minutes), hoping to meet Bram and Tessa and catch up on their own day; no automatic NPC attendance, gains or rewards.",
+  "focus": [
+    "Look for Bram and Tessa near Mossgate Common",
+    "Catch up on their day if they are available"
+  ]
+}
