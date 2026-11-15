@@ -180,11 +180,12 @@ function verifyDuty(p,d){
  return true;
 }
 function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
- institutionId=null,day,witness}={}){
+ institutionId=null,day,witness,observedSceneDay=null}={}){
  const c=ensure(p);
  if(c.authoredDuties===undefined)c.authoredDuties=[]; // Backfill prior valid lives.
  if(!w||!w.ecosystems?.[p.regionId]||!w.countries?.[p.polity]||
-   !Number.isInteger(day)||day<p.birthSource.day||day>w.lastTickDay||
+   !Number.isInteger(day)||day<p.birthSource.day||
+  (day>w.lastTickDay&&observedSceneDay!==day)||
    !Array.isArray(c.authoredDuties)||c.authoredDuties.some(d=>d.id===id)||
    typeof witness!=='string'||witness.trim().length<24||
    (institutionId!==null&&(!Atlas.I[institutionId]||
