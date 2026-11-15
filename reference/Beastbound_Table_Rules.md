@@ -14,6 +14,8 @@
 
 > **Playability refinement — 7 November 2026:** Early disciplinary practice now allows real short sessions of 15–480 minutes (Stamina/time/check), independently by default when no external source is named. An actual witnessed theory explanation can help an appropriate personal check, including Second Circle structural design. Credible expertise can cover more than one subject, without the source having any practised magical stage. It does not compel an NPC's continuing teaching, imply automatic advancement, or remove bodily, energetic, social and ecological limits. See `docs/OPTIONAL_TEACHING_AND_THEORY.md`.
 
+> **Player's exact spoken dialogue (15 November 2026 reaffirmation):** Every line the player speaks in quotation marks (or otherwise clearly as character speech) **must appear directly and recognisably in the next in-world scene as that character's dialogue**, not be skipped, summarized or replaced by GM-authored lines. Preserve the intended exact words, with only minimal unobtrusive spelling/punctuation correction when necessary. Never invent the player's thoughts, feelings, extra dialogue, decisions or consent. Independent NPC/beast responses remain authored by the GM; mechanical changes still require the actual engine. This is mandatory during FAST TURN and ordinary play alike.
+
 ## Contents
 1. Panels
 2. Table preferences
