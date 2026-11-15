@@ -1,0 +1,101 @@
+{
+  "id": "maddoc_hedra_allowance_followthrough_20261115_01",
+  "ok": true,
+  "applied": true,
+  "revision": 34,
+  "stateHash": "865cd6ec24b0cd727b51231791cb50145f4461571eca4bbac0bed5180aa984b1",
+  "clock": "Day 2, 14:30",
+  "output": {
+    "rules": {
+      "settled": true,
+      "guardian": "Hedra Maddren",
+      "amountTalons": 2,
+      "originalOfferTalons": 2,
+      "guardianFundsRemaining": 16,
+      "playerTalons": 2,
+      "originalCheck": {
+        "dice": [
+          6
+        ],
+        "roll": 6,
+        "modifier": 0,
+        "dc": 12,
+        "total": 6,
+        "margin": -6,
+        "degree": "failure",
+        "success": false,
+        "progress": 0,
+        "naturalBonus": 0
+      },
+      "originalCheckNotRerolled": true,
+      "correctiveMinutes": 120,
+      "elapsedMinutes": 0,
+      "noExtraPractice": true,
+      "noNewJob": true,
+      "note": "A guardian gives the previously promised modest allowance after reviewing the genuine corrected household help; not commercial wage payment or a new Crafting result"
+    }
+  },
+  "events": [
+    {
+      "day": 2,
+      "time": "Day 2, 14:30",
+      "type": "story",
+      "text": "Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance.",
+      "details": {
+        "origin": "guardian-household-followthrough-allowance-v1",
+        "actorId": "origin-kin:kin_1",
+        "originalReceiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+        "settlementHash": "bb48a404b4dc01ac964a8256d9975150a23d56f132b19d963ec7d8c4dd2a6944",
+        "amount": 2,
+        "guardianFundsConserved": true,
+        "noSecondRoll": true,
+        "noExtraWork": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 1 NESTING 1156 ══════╗\n║ 14:30 · Afternoon · Cool       ║\n║ Maddren Homestead          2 T ║\n║ STA  █████████░          33/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Find Bram and Tessa          ║\n║ ◆ Decide where to go next      ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "1 Nesting 1156 AC",
+      "label": "1 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 2,
+      "weekday": "Workday 1"
+    },
+    "time": "14:30",
+    "daypart": "Afternoon",
+    "location": "Maddren Homestead",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 33,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Find Bram and Tessa",
+      "Decide where to go next"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: At Maddren Homestead, Hedra Maddren has finished reviewing Maddoc's corrected harness sorting. She has no further strap checks for him; the original family allowance is being settled through its existing source. Bram and Tessa are still to be met.\nPC: young learner, undecided; 2 T\nJOURNAL: The practitioner begins genuine independent soul self-awareness work at Maddren Homestead. | soul practice: self-awareness; 0 training points. | Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance.\nCURRENT: No opening hook"
+}

@@ -636,6 +636,22 @@
         "elapsedMinutes": 120,
         "staminaSpent": 1
       }
+    },
+    {
+      "day": 2,
+      "time": "Day 2, 14:30",
+      "type": "story",
+      "text": "Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance.",
+      "details": {
+        "origin": "guardian-household-followthrough-allowance-v1",
+        "actorId": "origin-kin:kin_1",
+        "originalReceiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+        "settlementHash": "bb48a404b4dc01ac964a8256d9975150a23d56f132b19d963ec7d8c4dd2a6944",
+        "amount": 2,
+        "guardianFundsConserved": true,
+        "noSecondRoll": true,
+        "noExtraWork": true
+      }
     }
   ],
   "world": {
@@ -673,7 +689,7 @@
     "maxMana": 24,
     "qi": 14,
     "maxQi": 14,
-    "coins": 0,
+    "coins": 2,
     "attributes": {
       "str": 13,
       "dex": 10,
@@ -1146,7 +1162,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 33,
+    "revision": 34,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -2609,13 +2625,70 @@
             }
           ]
         }
+      },
+      "maddoc_hedra_allowance_followthrough_20261115_01": {
+        "revision": 34,
+        "mode": "rule",
+        "hash": "704c3a472057b1d67777703c22ab19828178197177c37c1df0a428c0d380930f",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 2, 14:30",
+          "output": {
+            "rules": {
+              "settled": true,
+              "guardian": "Hedra Maddren",
+              "amountTalons": 2,
+              "originalOfferTalons": 2,
+              "guardianFundsRemaining": 16,
+              "playerTalons": 2,
+              "originalCheck": {
+                "dice": [
+                  6
+                ],
+                "roll": 6,
+                "modifier": 0,
+                "dc": 12,
+                "total": 6,
+                "margin": -6,
+                "degree": "failure",
+                "success": false,
+                "progress": 0,
+                "naturalBonus": 0
+              },
+              "originalCheckNotRerolled": true,
+              "correctiveMinutes": 120,
+              "elapsedMinutes": 0,
+              "noExtraPractice": true,
+              "noNewJob": true,
+              "note": "A guardian gives the previously promised modest allowance after reviewing the genuine corrected household help; not commercial wage payment or a new Crafting result"
+            }
+          },
+          "events": [
+            {
+              "day": 2,
+              "time": "Day 2, 14:30",
+              "type": "story",
+              "text": "Hedra Maddren acknowledges the finished correction and gives the originally offered family allowance.",
+              "details": {
+                "origin": "guardian-household-followthrough-allowance-v1",
+                "actorId": "origin-kin:kin_1",
+                "originalReceiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+                "settlementHash": "bb48a404b4dc01ac964a8256d9975150a23d56f132b19d963ec7d8c4dd2a6944",
+                "amount": 2,
+                "guardianFundsConserved": true,
+                "noSecondRoll": true,
+                "noExtraWork": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Ask Hedra to inspect the carefully checked harnesses",
-      "Find Bram and Tessa after finishing chores"
+      "Find Bram and Tessa",
+      "Decide where to go next"
     ],
-    "scene": "Workday 1 at Maddren Homestead. Maddoc has slowly re-examined the previously sorted harnesses while attempting part-time Soul self-awareness through noticing his breathing, hands, the leather under tension and wandering attention. Hedra Maddren is the guardian asked to review the work; no final harness approval or payment is presumed. Bram and Tessa are still to be met.",
+    "scene": "At Maddren Homestead, Hedra Maddren has finished reviewing Maddoc's corrected harness sorting. She has no further strap checks for him; the original family allowance is being settled through its existing source. Bram and Tessa are still to be met.",
     "journal": [
       {
         "day": 1,
@@ -2664,6 +2737,10 @@
       {
         "day": 2,
         "text": "Maddoc attempted 120 minutes of genuinely part-time independent Soul self-awareness while carefully revisiting harness stitching and buckles. The soul check alone governs actual progress; harness quality, guardian acceptance and wages remain unverified."
+      },
+      {
+        "day": 2,
+        "text": "Hedra recognises Maddoc's additional two hours rechecking harnesses. Original failed Crafting check remains unchanged. The existing 2-Talon family allowance settles only through the one verified guardian transfer; no second job or roll."
       }
     ]
   },
@@ -8311,7 +8388,7 @@
             "regionId": "orchard_vales",
             "status": "active",
             "temperament": "reserved",
-            "funds": 18,
+            "funds": 16,
             "fatigue": 11,
             "rngState": 1150883615,
             "lastSixday": 1,
@@ -11737,6 +11814,49 @@
             "noForcedConsent": true
           },
           "hash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446"
+        }
+      ],
+      "allowanceSettlements": [
+        {
+          "origin": "guardian-household-followthrough-allowance-v1",
+          "proof": {
+            "origin": "guardian-household-followthrough-allowance-v1",
+            "actorId": "origin-kin:kin_1",
+            "actorName": "Hedra Maddren",
+            "actorSourceHash": "47a1e896762be8c204cd2d0a187ee75da16f9487834791711bdec65fd91091fa",
+            "originalReceiptHash": "ede46ced674138fd86180974826606b3c4933a5a0c6174fb0b9272947a1da446",
+            "originalCheck": {
+              "dice": [
+                6
+              ],
+              "roll": 6,
+              "modifier": 0,
+              "dc": 12,
+              "total": 6,
+              "margin": -6,
+              "degree": "failure",
+              "success": false,
+              "progress": 0,
+              "naturalBonus": 0
+            },
+            "originalOfferTalons": 2,
+            "originalOutcomePreserved": true,
+            "timeAtFinalReview": 2310,
+            "placeId": "maddren_homestead",
+            "sceneHash": "6eff36c9d2870298ba4a6aec048c3b29a242630034fc22c10f0c6e45602c8516",
+            "correctiveQuote": "slowly re-examined the previously sorted harnesses",
+            "correctionRecordHash": "80596fcb451fce2ea300f0ab02e3609796547a4925e2cbe72fafc2f2a6070762",
+            "guardianFundsBefore": 18,
+            "guardianFundsAfter": 16,
+            "childTalonsBefore": 0,
+            "childTalonsAfter": 2,
+            "paidTalons": 2,
+            "allowanceNotWages": true,
+            "noExtraCheck": true,
+            "noSkillOrSoulProgress": true,
+            "noForcedNewContract": true
+          },
+          "hash": "bb48a404b4dc01ac964a8256d9975150a23d56f132b19d963ec7d8c4dd2a6944"
         }
       ]
     }
