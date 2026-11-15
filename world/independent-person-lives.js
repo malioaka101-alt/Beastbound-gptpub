@@ -12,7 +12,7 @@ const positive=x=>Number.isInteger(x)&&x>=0;
 const token=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{3,69}$/.test(x);
 const subject=x=>typeof x==='string'&&x.trim().length>=15&&x.length<=500;
 const trackKinds=new Set(['martial','meridian','arcane','soul','body','rift','beast-care','craft','academic','community','livelihood','exploration']);
-const ordinaryActions=new Set(['practice','study','local-chores','job-preparation','friends','rest','explore','change-focus']);
+const ordinaryActions=new Set(['practice','study','local-chores','seek-work','job-preparation','friends','rest','explore','change-focus']);
 function ensure(w){
  if(!w.independentPersonLives)w.independentPersonLives={version:1,origin:ORIGIN,people:{}};
  const t=w.independentPersonLives;
@@ -101,10 +101,16 @@ function daily(w,q,day){
  else if(a<.25){action='friends';q.fatigue=Math.max(0,q.fatigue-5);reason='personal relationships or private interests';}
  else if(a<.34){action='explore';q.fatigue=Math.min(100,q.fatigue+2);reason='curiosity and ordinary errands';}
  else if(a<.43){action='local-chores';q.fatigue=Math.min(100,q.fatigue+3);reason='ordinary household and community responsibilities';}
- else if(a<.53){action='change-focus';focus=candidates[Math.floor(b*candidates.length)];
+ else if(a<.53){
+  if(b<.38){action='seek-work';focus='livelihood';
+   reason='independently seeking ordinary work or an apprenticeship, with no accepted offer or earnings presumed';}
+  else {action='change-focus';focus=candidates[Math.floor(b*candidates.length)];
    q.focus=focus;reason='changing personal priorities';}
+ }
  else if((work||offered)&&a<.67){action='job-preparation';focus='livelihood';
    reason='preparing for a genuinely recorded work opportunity, not assuming paid employment';}
+ else if(a<.62&&b<.42){action='seek-work';focus='livelihood';
+   reason='independently considering local chores, apprenticeships or paid work without assuming any offer or wage';}
  else {
   focus=candidates[Math.floor(b*candidates.length)];
   if(c<.38){action='study';reason='private theory and preparation';}
