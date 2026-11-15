@@ -1,0 +1,20 @@
+{
+  "id": "maddoc_after_soul_home_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "world",
+  "operation": "travelTo",
+  "params": {
+    "destinationId": "maddren_homestead",
+    "minutes": 42,
+    "journey": "Maddoc leaves the familiar Mossgate village green at 17:14 after verified Soul self-awareness practice, walking the established 42-minute orchard-lane route past Tansyhook Crossing and Thistlebell Yard to Maddren Homestead in the remaining daylight, without new hazards.",
+    "means": "walking",
+    "uncontested": true
+  },
+  "scene": "Maddoc reaches the Maddren Homestead by the familiar orchard lane at 17:56 after 85 minutes of successful independent Soul self-awareness at Mossgate. His friends Bram and Tessa were not located today; their whereabouts tomorrow are unknown. He has returned before evening becomes late.",
+  "summary": "Maddoc ends his search for Bram and Tessa, completes a verified 85-minute Soul self-awareness session (+2 phase1 progress), and walks his familiar 42-minute route home before evening.",
+  "focus": [
+    "Home at Maddren Homestead after Soul practice",
+    "Bram and Tessa may be sought tomorrow; their plans unknown"
+  ]
+}
