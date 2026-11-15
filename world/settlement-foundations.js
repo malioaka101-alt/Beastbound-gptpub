@@ -124,7 +124,7 @@ function generate(place,w){
  const record={version:1,source:SOURCE,placeId:place.id,founding,
   foundingHash:hash(founding),whole,live:{lastSixday:Math.floor(place.establishedMinute/1440),
    waterCondition:75,roadCondition:75,localWorkPressure:30,lastWitnessHash:null,
-   history:[],agents:{}},playerObservedSites:[]};
+   historyAnchor:hash(founding),history:[],agents:{},conversations:[]},playerObservedSites:[]};
  if(!verify(place,record))throw Error('Generated settlement failed its original source proof');
  return record;
 }
@@ -137,14 +137,15 @@ function verify(place,record){
   record.founding.wholeHash!==hash(record.whole)||
   record.founding.households!==record.whole.households.length||
   record.founding.residents!==record.whole.residents.length||
-  !Array.isArray(record.live?.history)||!Array.isArray(record.playerObservedSites)||
+  !Array.isArray(record.live?.history)||!Array.isArray(record.live?.conversations)||
+  !Array.isArray(record.playerObservedSites)||
   !Number.isInteger(record.live?.lastSixday)||
   !Number.isInteger(record.live?.waterCondition)||
   !Number.isInteger(record.live?.roadCondition)||
   !Number.isInteger(record.live?.localWorkPressure)||
   record.live.history.length>90||
   record.playerObservedSites.some(x=>!record.whole.townPlan.sites.some(y=>y.id===x)))return false;
- let previous=record.foundingHash;
+ let previous=record.live.historyAnchor||record.foundingHash;
  for(const h of record.live.history){
   if(!h||h.previous!==previous||h.hash!==hash({
    previous:h.previous,day:h.day,water:h.water,road:h.road,
@@ -292,8 +293,46 @@ function tick(w,day){
    eco:{forage,quality},prosperity,agencyHash};
   const entry={...witness,hash:hash(witness)};
   r.live.history.push(entry);
-  if(r.live.history.length>90)r.live.history.shift();
+  if(r.live.history.length>90){
+   const evicted=r.live.history.shift();r.live.historyAnchor=evicted.hash;
+  }
   r.live.lastSixday=day;r.live.lastWitnessHash=entry.hash;
  }
 }
-module.exports={SOURCE,isSettlement,ensure,peek,verify,get,found,onPlaceEstablished,status,visit,localPeople,tick};
+function speak(s,{npcId,question}={}){
+ if(typeof npcId!=='string'||typeof question!=='string'||
+    question.trim().length<3||question.length>400)
+  throw Error('Speak to one actually encountered settlement resident with a genuine question');
+ const r=get(s,s.world.location);
+ if(!r)throw Error('No established settlement resident is present here');
+ const w=require('./simulation').peek(s),
+   candidate=localPeople(s,w).find(x=>x.npcId===npcId),
+   person=r.whole.residents.find(x=>x.actorId===npcId);
+ if(!candidate||!person)
+  throw Error('A named independent resident must be genuinely present at this exact site');
+ if(s.encounter||s.battle)throw Error('An immediate encounter prevents ordinary conversation');
+ const day=Math.floor(s.world.minutes/1440),start=s.world.minutes,
+  willing=unit([r.foundingHash,npcId,start,'own-choice'])<
+   (person.temperament==='sociable'?.78:person.temperament==='reserved'?.43:.63),
+  aboutFriends=/\b(bram|tessa)\b/i.test(question),
+  aboutProfession=/\b(work|job|do here|occupation|livelihood)\b/i.test(question),
+  heard=!willing?'Sorry, I have things to attend to just now.':
+    aboutFriends?'I cannot tell you where they are.':
+    aboutProfession?'I usually work with '+person.profession+'.':
+    'I can speak about the ordinary life here, but I cannot promise an answer to that.',
+  duration=willing?8:3;
+ require('../engine').advance(s,duration);
+ require('../rules/world').finalizeTime(s,start);
+ require('../rules/unified').sync(s,{source:'legacy'});
+ const receipt={personId:person.id,npcId,day,worldMinute:start,
+   question:question.trim(),heard,willing,siteId:s.chatRuntime?.settlementSite,
+   noRemoteKnowledge:true,noCompelledCooperation:true};
+ r.live.conversations.push({...receipt,hash:hash(receipt)});
+ if(r.live.conversations.length>80)r.live.conversations.shift();
+ require('../rules/core').event(s,'story',
+  person.name+(willing?' answers a question.':' declines to speak.'),{
+   source:SOURCE,...receipt,conversationHash:hash(receipt)});
+ return {spoken:willing,name:person.name,npcId,heard,minutes:duration,
+  noOtherPersonWhereaboutsInferred:true,noAutomaticAid:true};
+}
+module.exports={SOURCE,isSettlement,ensure,peek,verify,get,found,onPlaceEstablished,status,visit,speak,localPeople,tick};
