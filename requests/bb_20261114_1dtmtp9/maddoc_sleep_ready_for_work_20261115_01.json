@@ -1,0 +1,16 @@
+{
+  "id": "maddoc_sleep_ready_for_work_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "health",
+  "operation": "sleep",
+  "params": {
+    "hours": 9
+  },
+  "scene": "Maddoc sleeps in his family home after finishing Soul self-awareness at 22:00. At 07:00 the next morning he wakes at Maddren Homestead ready for another ordinary day of household work. No work, employer agreement, meal, wages, or advancement is assumed to have occurred overnight.",
+  "summary": "Maddoc goes to bed for nine hours at Maddren Homestead, waking at 07:00 ready to approach his mother's ordinary household work tomorrow.",
+  "focus": [
+    "Morning at Maddren Homestead, ready for household work",
+    "Hedra is Maddoc's mother; new work or payment must be genuinely agreed"
+  ]
+}
