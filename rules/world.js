@@ -61,10 +61,16 @@ function addDate(date,days){
 function dateText(date){validateDate(date);
  return `${date.month===13?'Concord Day '+date.day:date.day+' '+MONTHS[date.month-1]} ${date.year} AC`;
 }
+// Standard seven-day civil weekday names, independent of original sixday
+// settlement/economy ticks. The almanac's fixed civil epoch starts Monday,
+// 1 Deepfrost, 1 AC. Five Concord Days count as calendar days too.
+// Keep this pure and deterministic; historical save dates are untouched.
+const CIVIL_WEEKDAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 function dateWeekday(date){
  validateDate(date);
- if(date.month===13)return 'Concord Day';
- return (date.day%6===0)?'Hearthday':`Workday ${1+(date.day-1)%6}`;
+ const elapsed=(date.year-1)*365+
+  (date.month===13?360+date.day-1:(date.month-1)*30+date.day-1);
+ return CIVIL_WEEKDAYS[elapsed%7];
 }
 function coinText(scales){
  if(!Number.isInteger(scales))throw Error('Money must be integer scales');
