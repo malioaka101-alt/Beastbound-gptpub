@@ -467,6 +467,8 @@ function act(s,{system,operation,params={}}={}){
   case 'world.cosmologyObserveBoundary':return Cosmology.observeBoundary(s,params);
   case 'world.cosmologyBoundaryStatus':return Cosmology.boundaryStatus(s,params);
   case 'world.authorOpening':return GmCampaignOpening.apply(s,params);
+  case 'world.gmComplianceStatus':return require('../scripts/gm-compliance').brief(s,params);
+  case 'world.gmSceneAudit':return require('../scripts/gm-compliance').audit(s,params);
   case 'world.placeStatus':return LivedPlaces.status(s,params);
   case 'world.foundSettlement':return require('../world/settlement-foundations').found(s,params);
   case 'world.settlementStatus':return require('../world/settlement-foundations').status(s,params);
