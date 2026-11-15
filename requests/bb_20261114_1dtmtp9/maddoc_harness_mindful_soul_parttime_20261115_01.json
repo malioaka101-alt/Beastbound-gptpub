@@ -1,0 +1,20 @@
+{
+  "id": "maddoc_harness_mindful_soul_parttime_20261115_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "discipline",
+  "operation": "practice",
+  "params": {
+    "system": "soul",
+    "method": "self-awareness",
+    "partTime": true,
+    "minutes": 120,
+    "route": "independent"
+  },
+  "scene": "Workday 1 at Maddren Homestead. Maddoc has slowly re-examined the previously sorted harnesses while attempting part-time Soul self-awareness through noticing his breathing, hands, the leather under tension and wandering attention. Hedra Maddren is the guardian asked to review the work; no final harness approval or payment is presumed. Bram and Tessa are still to be met.",
+  "focus": [
+    "Ask Hedra to inspect the carefully checked harnesses",
+    "Find Bram and Tessa after finishing chores"
+  ],
+  "summary": "Maddoc attempted 120 minutes of genuinely part-time independent Soul self-awareness while carefully revisiting harness stitching and buckles. The soul check alone governs actual progress; harness quality, guardian acceptance and wages remain unverified."
+}
