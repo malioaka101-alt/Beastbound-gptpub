@@ -23,7 +23,7 @@ function localSource(s,method){
  // remain GM-owned, unresolved until a real source-specific mechanism exists.
  if(!loc||!task||!Object.hasOwn(LOCAL_DC,loc.biome)||
     typeof loc.description!=='string'||loc.description.length<18)
-  throw Error('Only an established local physical scene with an existing source-backed mundane terrain difficulty can ground this check');
+  throw Error('Only an established local physical scene and supported mundane approach with existing source-backed terrain difficulty can ground this check');
  const founding=E.LOCATIONS[siteId]?null:Places.originalSiteProof(s,siteId);
  if(founding&&Places.verifiedSiteRegion(siteId,founding)!==loc.regionId)
   throw Error('The GM-authored terrain must preserve its original physical founding source');
