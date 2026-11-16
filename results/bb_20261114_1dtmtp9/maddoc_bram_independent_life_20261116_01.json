@@ -1,0 +1,73 @@
+{
+  "id": "maddoc_bram_independent_life_20261116_01",
+  "ok": true,
+  "applied": true,
+  "revision": 60,
+  "stateHash": "e542f8e7a5b903c6121d7ca728eaffa4e58869a205ae53eca7cc3ffe6d4c4ade",
+  "clock": "Day 3, 08:30",
+  "output": {
+    "rules": {
+      "established": true,
+      "actorId": "emergent:person_5",
+      "name": "Bram",
+      "interests": [
+        "arcane",
+        "academic",
+        "craft",
+        "livelihood",
+        "community",
+        "exploration"
+      ],
+      "focus": "arcane",
+      "day": 2,
+      "noAutomaticRankOrJob": true,
+      "noHistoricalProgressInvented": true
+    }
+  },
+  "events": [],
+  "panel": "╔═ MADDOC · 2 NESTING 1156 ══════╗\n║ 08:30 · Morning · Cool         ║\n║ Thistlebell Yard           2 T ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Still searching for Hedra a… ║\n║ ◆ Tessa and Bram both possess… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "2 Nesting 1156 AC",
+      "label": "2 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 3,
+      "weekday": "Rootday"
+    },
+    "time": "08:30",
+    "daypart": "Morning",
+    "location": "Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Still searching for Hedra and Nessa at Thistlebell Yard",
+      "Tessa and Bram both possess independent daily life systems"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Rootday 08:30 at Thistlebell Yard. Maddoc remains in conversation with a handler about his parents. Bram, an earlier friend from Mossgate Common, has his own independent interests, beginning with introductory Arcane study and personal academic curiosity. Neither Bram nor Tessa has been found here, and no hidden off-screen advancement is presumed.\nPC: young learner, undecided; 2 T\nJOURNAL: A personally witnessed individual is recorded: Darron Pike | A personally witnessed individual is recorded: Tessa | A personally witnessed individual is recorded: Bram\nCURRENT: No opening hook"
+}

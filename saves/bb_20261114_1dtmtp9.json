@@ -1747,7 +1747,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 59,
+    "revision": 60,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -5267,18 +5267,43 @@
           },
           "events": []
         }
+      },
+      "maddoc_bram_independent_life_20261116_01": {
+        "revision": 60,
+        "mode": "rule",
+        "hash": "ce1144b2c9c54997f6053b66b3deecae3b12db33705b079a1ee24bbd72cab106",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "established": true,
+              "actorId": "emergent:person_5",
+              "name": "Bram",
+              "interests": [
+                "arcane",
+                "academic",
+                "craft",
+                "livelihood",
+                "community",
+                "exploration"
+              ],
+              "focus": "arcane",
+              "day": 2,
+              "noAutomaticRankOrJob": true,
+              "noHistoricalProgressInvented": true
+            }
+          },
+          "events": []
+        }
       }
     },
     "focus": [
-      "Continue inquiry at Thistlebell Yard",
-      "Bram and Tessa choose their own independent activities"
+      "Still searching for Hedra and Nessa at Thistlebell Yard",
+      "Tessa and Bram both possess independent daily life systems"
     ],
-    "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc is still speaking with a handler about Hedra and Nessa. Tessa, a friend he earlier encountered, has her own independent interests: martial training begun at the village practice yard and her own Meridian studies. No prior training result is fabricated; Tessa is not presently confirmed here.",
+    "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc remains in conversation with a handler about his parents. Bram, an earlier friend from Mossgate Common, has his own independent interests, beginning with introductory Arcane study and personal academic curiosity. Neither Bram nor Tessa has been found here, and no hidden off-screen advancement is presumed.",
     "journal": [
-      {
-        "day": 1,
-        "text": "At 13:39 Maddoc and Bram completed reading and handwritten introductory notes for Arcane and Soul; no cultivation gain."
-      },
       {
         "day": 1,
         "text": "After windfall apples, four-hour failed Soul practice and walk home, Maddoc is at home 18:51, stamina 34/36; friends plan tomorrow."
@@ -5394,6 +5419,10 @@
       {
         "day": 3,
         "text": "Tessa's independent daily personal choices are now source-linked to her existing actor identity. No unearned powers, profession, wages or physical presence were granted."
+      },
+      {
+        "day": 3,
+        "text": "Bram now has a separate engine-backed daily life, with independently chosen Arcane-study and ordinary work, social, exploration and recovery possibilities. His earlier note-taking does not grant unearned spell circles or ranks."
       }
     ],
     "continuity": {
@@ -17719,6 +17748,56 @@
             },
             "sourceHash": "988e7d5669a86a294443975d1bb1f8f023387dd43232a336f1bc27de44bfc005",
             "rngState": 1524501960
+          },
+          "person_5": {
+            "origin": "independent-person-daily-life-v1",
+            "id": "person_5",
+            "actorId": "emergent:person_5",
+            "identityHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+            "foundationHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+            "interests": [
+              "arcane",
+              "academic",
+              "craft",
+              "livelihood",
+              "community",
+              "exploration"
+            ],
+            "interestsAtIntroduction": [
+              "arcane",
+              "academic",
+              "craft",
+              "livelihood",
+              "community",
+              "exploration"
+            ],
+            "focus": "arcane",
+            "introducedDay": 2,
+            "lastDay": 2,
+            "metrics": {},
+            "fatigue": 0,
+            "history": [],
+            "discoveries": [],
+            "source": {
+              "origin": "independent-person-daily-life-v1",
+              "actorId": "emergent:person_5",
+              "identityHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+              "startedDay": 2,
+              "interests": [
+                "arcane",
+                "academic",
+                "craft",
+                "livelihood",
+                "community",
+                "exploration"
+              ],
+              "motivation": "Bram has learned introductory Arcane theory and maintains his own notes, but is free to pursue research, practical skills, work interests, friendships and other independent responsibilities beyond cultivation.",
+              "witness": "Bram is an earlier genuinely encountered friend and Arcane-study note holder.",
+              "noPreexistingTrainingAward": true,
+              "noAutomaticWorkContract": true
+            },
+            "sourceHash": "fdc4e8e29ed7ec86dc7cb48c1621f332be52436574c0d810972085fd9127ec43",
+            "rngState": 2083662842
           }
         }
       }
