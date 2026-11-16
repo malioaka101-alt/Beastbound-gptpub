@@ -1205,6 +1205,22 @@
         "noFreeRankOrGoods": true,
         "noInventedBackstoryForOtherActors": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "story",
+      "text": "A personally witnessed individual is recorded: Tessa",
+      "details": {
+        "source": "gm-witnessed-lived-person-v1",
+        "personId": "person_4",
+        "actorId": "emergent:person_4",
+        "sourceHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+        "location": "mossgate_common",
+        "noContractOrConsent": true,
+        "noFreeRankOrGoods": true,
+        "noInventedBackstoryForOtherActors": true
+      }
     }
   ],
   "world": {
@@ -1715,7 +1731,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 56,
+    "revision": 57,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -5114,18 +5130,66 @@
             }
           ]
         }
+      },
+      "maddoc_independent_tessa_original_peer_20261116_01": {
+        "revision": 57,
+        "mode": "rule",
+        "hash": "782917620832589f09c7964d2f81c4793e4b4e3818501dffbea18192cb8ced82",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "registered": true,
+              "npcId": "emergent:person_4",
+              "name": "Tessa",
+              "profession": "Young martial and Meridian learner",
+              "location": "mossgate_common",
+              "day": 2,
+              "noAssumedConsent": true,
+              "noFreeMoneyOrPower": true,
+              "usesExistingLivingPersonLedger": true
+            },
+            "continuity": {
+              "recorded": 1,
+              "entries": [
+                {
+                  "id": "maddoc_tessa_martial_training_started",
+                  "head": "7be464c490b980ec395392a823a29b99415f0750b35a7eec6b634e59cae340dc",
+                  "action": "record"
+                }
+              ],
+              "storyOnly": true,
+              "noMechanicalAgreementOrAbilityGranted": true
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:30",
+              "type": "story",
+              "text": "A personally witnessed individual is recorded: Tessa",
+              "details": {
+                "source": "gm-witnessed-lived-person-v1",
+                "personId": "person_4",
+                "actorId": "emergent:person_4",
+                "sourceHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+                "location": "mossgate_common",
+                "noContractOrConsent": true,
+                "noFreeRankOrGoods": true,
+                "noInventedBackstoryForOtherActors": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "At Thistlebell Yard; ask other handlers about parents",
-      "Minor locals may remember Maddoc but are not guaranteed present"
+      "Still at Thistlebell Yard to ask after Hedra and Nessa",
+      "Tessa and Bram remain independent with unknown current locations"
     ],
-    "scene": "At 08:30 in Thistlebell Yard, Maddoc is talking to a regular beast handler. The older neighbour heard Maddoc say he wanted to become a Soul cultivator. The yard handler heard Maddoc joke about a secret sibling while seeking Hedra and Nessa. Neither parent has been located. The worker suggested asking other handlers; neither acquaintance has told Maddoc a given name.",
+    "scene": "At Thistlebell Yard at 08:30 Rootday, Maddoc continues talking with the local beast handler. Tessa and Bram are his real acquaintances from an earlier witnessed day at Mossgate Common; neither is presently located or summoned. Player-confirmed: Tessa began martial training at the village training ground, and she holds her own Meridian notes. No retrospective practice results or magic progress are granted.",
     "journal": [
-      {
-        "day": 1,
-        "text": "After leaving the small seed-eating creature beneath the Rillbend culvert, Maddoc walked 16 minutes to Tansyhook Crossing (08:23). No other outcomes, resource or relationship changes."
-      },
       {
         "day": 1,
         "text": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common. He is looking for books, training, or beast handling. Arrival recorded at 08:44, without rolling or granting access."
@@ -5241,6 +5305,10 @@
       {
         "day": 3,
         "text": "Maddoc has met an older neighbour by his family's lane and a worker at Thistlebell Yard. Both are real independent locals, not guaranteed on future visits; each heard only their own conversation. Their personal names have not been spoken to Maddoc."
+      },
+      {
+        "day": 3,
+        "text": "Player-confirmed history: Tessa began martial training at the village ground and keeps her own Meridian notes. Maddoc has met Tessa previously at Mossgate; Tessa's present whereabouts and any earned cultivation results are not established."
       }
     ],
     "continuity": {
@@ -5414,6 +5482,40 @@
                 "previousSeal": null
               },
               "seal": "54499955942baaa6c2497f60c741fd008b02b040cd66420d1898913860a17395"
+            }
+          ]
+        },
+        "maddoc_tessa_martial_training_started": {
+          "id": "maddoc_tessa_martial_training_started",
+          "subject": {
+            "kind": "narrative",
+            "id": "tessa_martial_early_training"
+          },
+          "category": "witnessed-history",
+          "visibility": "player-known",
+          "status": "active",
+          "statement": "The player confirmed Tessa had already started martial training at the village training ground. This is a real established activity, but no historical training check, power rank, numeric ability gain or physical co-presence at Thistlebell is implied.",
+          "head": "7be464c490b980ec395392a823a29b99415f0750b35a7eec6b634e59cae340dc",
+          "history": [
+            {
+              "source": {
+                "origin": "gm-witnessed-narrative-continuity-v1",
+                "id": "maddoc_tessa_martial_training_started",
+                "action": "record",
+                "subject": {
+                  "kind": "narrative",
+                  "id": "tessa_martial_early_training"
+                },
+                "category": "witnessed-history",
+                "statement": "The player confirmed Tessa had already started martial training at the village training ground. This is a real established activity, but no historical training check, power rank, numeric ability gain or physical co-presence at Thistlebell is implied.",
+                "witness": "Tessa began martial training at the village training ground",
+                "visibility": "player-known",
+                "minute": 3390,
+                "day": 3,
+                "turnId": "maddoc_independent_tessa_original_peer_20261116_01",
+                "previousSeal": null
+              },
+              "seal": "7be464c490b980ec395392a823a29b99415f0750b35a7eec6b634e59cae340dc"
             }
           ]
         }
@@ -11881,7 +11983,7 @@
       "emergentPeople": {
         "version": 1,
         "rngState": 3825077450,
-        "counter": 3,
+        "counter": 4,
         "lastSixday": 1,
         "people": {
           "person_1": {
@@ -12176,6 +12278,112 @@
               "supernaturalSystemRanks": {},
               "knownTechniques": []
             }
+          },
+          "person_4": {
+            "id": "person_4",
+            "actorId": "emergent:person_4",
+            "origin": "gm-witnessed-lived-person-v1",
+            "birthSource": {
+              "origin": "gm-witnessed-lived-person-v1",
+              "id": "person_4",
+              "regionId": "orchard_vales",
+              "polity": "asterwyn",
+              "day": 2,
+              "worldMinute": 3390,
+              "locationId": "mossgate_common",
+              "name": "Tessa",
+              "historicalJournal": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common.",
+              "historicalJournalDay": 0,
+              "retroactiveProgressDenied": true,
+              "initialProfession": "Young martial and Meridian learner",
+              "purpose": "Explore supervised martial training and Meridian foundations while retaining her own childhood, friendships and freely chosen priorities.",
+              "personality": "Persistent, direct and quick to challenge ideas with practical evidence; values thinking and speaking for herself.",
+              "background": "Maddoc's established young friend from Orchard Vales, who began martial training at the village ground and maintains her own Meridian study notes. No demonstrated magical stage or job is assumed.",
+              "witness": "Tessa and Bram were personally met by Maddoc and travelled with him to Mossgate Common in a previously verified scene.",
+              "language": "Vale Common",
+              "need": "gm-witnessed-occupation",
+              "nonAssumedKinship": true,
+              "nonAssumedConsent": true,
+              "noInventedFundsOrRanks": true
+            },
+            "originHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+            "name": "Tessa",
+            "profession": "Young martial and Meridian learner",
+            "purpose": "Explore supervised martial training and Meridian foundations while retaining her own childhood, friendships and freely chosen priorities.",
+            "personality": "Persistent, direct and quick to challenge ideas with practical evidence; values thinking and speaking for herself.",
+            "language": "Vale Common",
+            "homeLocationId": "mossgate_common",
+            "regionId": "orchard_vales",
+            "polity": "asterwyn",
+            "status": "active",
+            "ageBand": "not established",
+            "family": null,
+            "ancestry": null,
+            "inheritance": null,
+            "practicedDisciplines": [],
+            "knownTechniques": [],
+            "funds": 0,
+            "cashScales": 0,
+            "fatigue": 0,
+            "competence": 1,
+            "rngState": 1954695053,
+            "lastTickDay": 2,
+            "shift": {
+              "source": "emergent-local-work-presence-v1",
+              "npcId": "emergent:person_4",
+              "actorId": "emergent:person_4",
+              "personId": "person_4",
+              "name": "Tessa",
+              "profession": "Young martial and Meridian learner",
+              "polity": "asterwyn",
+              "originHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+              "location": "mossgate_common",
+              "scheduledAtDay": 2,
+              "fromDay": 2,
+              "throughDay": 7,
+              "hash": "f363098fe31f92192ea80893330b591db35552e09077344feb64c1532ca98c7f"
+            },
+            "history": [
+              {
+                "day": 2,
+                "type": "gm-witnessed-life-start",
+                "regionId": "orchard_vales",
+                "sourceHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+                "observed": true
+              }
+            ],
+            "career": {
+              "version": 1,
+              "origin": "independent-person-earned-profession-v1",
+              "source": {
+                "origin": "independent-person-earned-profession-v1",
+                "personId": "person_4",
+                "actorId": "emergent:person_4",
+                "personOriginHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+                "professionAtOrigin": "Young martial and Meridian learner",
+                "nativeRegion": "orchard_vales",
+                "nonHereditaryEstimate": true
+              },
+              "sourceHash": "fe6249aa517ed2e4adc59e23575af123dca4844cf2295d23c886bb67ad6a13f5",
+              "aptitude": 1,
+              "skillPoints": 0,
+              "competenceRank": 0,
+              "demonstratedMethods": {},
+              "qualityPoints": 0,
+              "workCount": 0,
+              "successes": 0,
+              "promotions": [],
+              "workReceipts": [],
+              "authoredDuties": [],
+              "attestations": [],
+              "workOffers": [],
+              "peerGuidance": [],
+              "tradePayments": [],
+              "safetyIncidents": [],
+              "recognizedLicence": null,
+              "supernaturalSystemRanks": {},
+              "knownTechniques": []
+            }
           }
         },
         "history": [
@@ -12198,6 +12406,13 @@
             "kind": "gm-witnessed-emergence",
             "personId": "person_3",
             "originHash": "95ccae872674fcca7aacd06ea46d33200f0a1d30100992ff05718291ee839f8b",
+            "regionId": "orchard_vales"
+          },
+          {
+            "day": 2,
+            "kind": "gm-witnessed-emergence",
+            "personId": "person_4",
+            "originHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
             "regionId": "orchard_vales"
           }
         ]
