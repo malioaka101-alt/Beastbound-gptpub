@@ -1,0 +1,23 @@
+{
+  "id": "maddoc_independent_bram_original_peer_20261116_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "introduceWitnessedPerson",
+  "params": {
+    "name": "Bram",
+    "profession": "Young Arcane and academic learner",
+    "purpose": "Study the foundations of Arcane Circle design, ask questions and pursue independent learning while keeping his own friends and priorities.",
+    "personality": "Inquisitive and patient with technical explanations; willing to disagree thoughtfully and approach difficult ideas with curiosity.",
+    "background": "Maddoc's young friend from Orchard Vales. Their introductory studies covered Meridian, Arcane and Soul concepts. Bram keeps his own Arcane notes, with no assumed practical magic, job or new off-screen achievement.",
+    "witness": "Bram and Tessa were personally met by Maddoc and walked together to Mossgate Common in a previously verified scene.",
+    "journalWitness": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common.",
+    "historicalPlaceId": "mossgate_common"
+  },
+  "scene": "Rootday 08:30 at Thistlebell Yard: Maddoc continues speaking with a local beast handler about searching for Hedra and Nessa. Earlier acquaintances Tessa and Bram have independently recorded identities; neither is confirmed at Thistlebell or Mossgate today. Bram shared introductory Meridian, Arcane and Soul reading with Maddoc and retains his own Arcane notes. No private off-screen training gains are assumed.",
+  "summary": "Bram is an earlier genuinely encountered friend and Arcane-study note holder. He remains an independent person; his current location, private work and achieved magical advancement have not been established.",
+  "focus": [
+    "Still at Thistlebell Yard, searching for Hedra and Nessa",
+    "Bram and Tessa retain independent lives rather than guaranteed player encounters"
+  ]
+}
