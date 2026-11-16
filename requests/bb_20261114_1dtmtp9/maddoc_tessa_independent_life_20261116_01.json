@@ -1,0 +1,26 @@
+{
+  "id": "maddoc_tessa_independent_life_20261116_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "establishIndependentLife",
+  "params": {
+    "actorId": "emergent:person_4",
+    "interests": [
+      "martial",
+      "meridian",
+      "community",
+      "livelihood",
+      "craft",
+      "beast-care"
+    ],
+    "motivation": "Tessa has begun training at the practical martial yard and has her own Meridian notes, but remains a young person with friends, interests, responsibilities and the freedom to pursue jobs, other learning or rest as she chooses.",
+    "witness": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common."
+  },
+  "scene": "Rootday 08:30, Thistlebell Yard. Maddoc is talking to a handler and looking for his parents. Tessa is a real independently living earlier friend, who already began training at the martial yard and holds her own Meridian notes. The engine now tracks her own private daily choices, without guaranteed presence, backdated experience, forced training, wages or magical advancement.",
+  "summary": "Tessa now has an individually seeded independent daily life. Her known martial practice and Meridian interest are recorded but carry no invented prior rolls or progress; she may pursue other work, learning or social priorities.",
+  "focus": [
+    "Ask other Thistlebell handlers about Hedra and Nessa",
+    "Bram and Tessa have independent priorities, not forced current presence"
+  ]
+}
