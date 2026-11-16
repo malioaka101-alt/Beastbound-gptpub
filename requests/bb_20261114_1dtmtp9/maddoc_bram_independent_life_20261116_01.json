@@ -1,0 +1,26 @@
+{
+  "id": "maddoc_bram_independent_life_20261116_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "establishIndependentLife",
+  "params": {
+    "actorId": "emergent:person_5",
+    "interests": [
+      "arcane",
+      "academic",
+      "craft",
+      "livelihood",
+      "community",
+      "exploration"
+    ],
+    "motivation": "Bram has learned introductory Arcane theory and maintains his own notes, but is free to pursue research, practical skills, work interests, friendships and other independent responsibilities beyond cultivation.",
+    "witness": "Bram is an earlier genuinely encountered friend and Arcane-study note holder."
+  },
+  "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc remains in conversation with a handler about his parents. Bram, an earlier friend from Mossgate Common, has his own independent interests, beginning with introductory Arcane study and personal academic curiosity. Neither Bram nor Tessa has been found here, and no hidden off-screen advancement is presumed.",
+  "summary": "Bram now has a separate engine-backed daily life, with independently chosen Arcane-study and ordinary work, social, exploration and recovery possibilities. His earlier note-taking does not grant unearned spell circles or ranks.",
+  "focus": [
+    "Still searching for Hedra and Nessa at Thistlebell Yard",
+    "Tessa and Bram both possess independent daily life systems"
+  ]
+}
