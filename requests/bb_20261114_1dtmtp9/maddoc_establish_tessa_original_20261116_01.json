@@ -1,0 +1,23 @@
+{
+  "id": "maddoc_establish_tessa_original_20261116_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "introduceWitnessedPerson",
+  "params": {
+    "name": "Tessa",
+    "profession": "Young martial training-ground learner",
+    "purpose": "Develop her own martial training through the local practice ground, explore Meridian foundations and decide her goals independently.",
+    "personality": "Determined, independently minded, observant and willing to defend her reasoning; friendly with Maddoc and Bram but not a follower.",
+    "background": "A young local friend whom Maddoc encountered with Bram. She has begun martial training at the practice ground and studied introductory Meridian material; no mechanical proficiency or rank is presumed.",
+    "witness": "Maddoc and Tessa previously travelled together to Mossgate Common and studied while their personal interests began taking shape.",
+    "journalWitness": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common.",
+    "historicalPlaceId": "mossgate_common"
+  },
+  "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc is speaking with the handler after searching for his parents. Tessa is a previously met local friend, who began martial training and kept Meridian notes; her current whereabouts and recent progress are unknown. Bram is an earlier friend who studied Arcane. Neither friend is asserted present at this yard.",
+  "summary": "Register Tessa's established past acquaintance identity only. Her previously witnessed Mossgate visit and player-confirmed start of martial training inform her interests, but no rank, session result, presence, wage or hidden knowledge is awarded. Maddoc remains with the Thistlebell handler at 08:30.",
+  "focus": [
+    "Search for parents at Thistlebell Yard",
+    "Tessa and Bram live independent lives without being summoned"
+  ]
+}
