@@ -138,3 +138,57 @@ A.throws(()=>R.act(s,{system:'social',operation:'introduceWitnessedPerson',
  'This person has not appeared in the actual journal or played world.')}),
  /earlier|actually introduced/);
 console.log('Independent characters: historical witness, no forced reunion, own daily training/study/work/social/rest decisions, source checks, untouched magic and safe save replay PASS');
+
+
+// Population regression: many independently sourced minor locals in one
+// settlement must not collide, leak private lives, create powers or change
+// the player on registration. This is disposable test state, not a save edit.
+const bulkStart=s.world.minutes,coinsBefore=s.player.coins;
+const added=[];
+for(let i=0;i<40;i++){
+ const name='Local Resident '+String(i+1).padStart(2,'0');
+ const witness=name+' was personally encountered at the homestead during ordinary daily neighbourhood activity.';
+ s.chatRuntime.scene=witness;
+ const created=R.act(s,{system:'social',operation:'introduceWitnessedPerson',params:{
+  name,profession:'Independent orchard community worker',
+  purpose:'Carry out ordinary local responsibilities and pursue a personal life outside the player story.',
+  personality:'Self-directed, practical and differently occupied from other local residents.',
+  background:'A local adult with ordinary community obligations, private social ties and independent routines.',
+  witness
+ }});
+ A.equal(created.registered,true);
+ const lived=R.act(s,{system:'social',operation:'establishIndependentLife',params:{
+  actorId:created.npcId,interests:['community','craft','livelihood'],
+  motivation:'This neighbour maintains an independent balance of livelihood, private priorities and friendships.',
+  witness
+ }});
+ A.equal(lived.established,true);
+ added.push(created.npcId);
+}
+A.equal(new Set(added).size,40,'Many NPCs must retain distinct identities');
+A.equal(s.world.minutes,bulkStart,'NPC registration does not consume player time');
+A.equal(s.player.coins,coinsBefore,'NPC registration does not spend or award player money');
+const countBefore=Object.keys(Realm.peek(s).independentPersonLives.people).length;
+A.ok(countBefore>=43,'Existing friends and worker remain alongside the additional locals');
+World.advance(s,30);
+const advanced=Realm.peek(s);
+for(const actorId of added){
+ const id=actorId.slice('emergent:'.length),person=advanced.emergentPeople.people[id],
+  life=advanced.independentPersonLives.people[id];
+ A.ok(person&&life,'Each individually witnessed NPC remains in the ledger');
+ A.equal(Person.verify(advanced,person),true);
+ A.equal(Lives.verifyEntry(advanced,life),true);
+ A.equal(life.lastDay,Math.floor(s.world.minutes/1440));
+ A.ok(life.history.length>0,'Every NPC received independent daily activity');
+ A.deepEqual(person.practicedDisciplines,[],'Ordinary practice must not grant magical ranks');
+ A.deepEqual(person.knownTechniques,[],'Ordinary learning does not award techniques');
+ A.equal(person.cashScales,0,'Independent activity does not mint wages');
+}
+const restored=E.importGame(E.exportGame(s));
+const persisted=Realm.peek(restored);
+A.equal(Object.keys(persisted.independentPersonLives.people).length,countBefore);
+A.equal(new Set(added.map(id=>persisted.emergentPeople.people[id.slice(9)]?.actorId)).size,40);
+A.ok(added.every(id=>Lives.verifyEntry(persisted,persisted.independentPersonLives.people[id.slice(9)])),
+ 'All independently living NPC records survive exact save roundtrip');
+A.equal(restored.player.coins,s.player.coins);
+console.log('40 additional witnessed independent NPCs: distinct IDs, 30-day autonomy, no unearned awards, save roundtrip PASS');
