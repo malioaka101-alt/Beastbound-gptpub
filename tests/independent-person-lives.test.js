@@ -166,6 +166,7 @@ for(let i=0;i<40;i++){
  added.push(created.npcId);
 }
 A.equal(new Set(added).size,40,'Many NPCs must retain distinct identities');
+A.equal(new Set(added.map(id=>id.slice(9))).size,40,'Registry keys must not collide');
 A.equal(s.world.minutes,bulkStart,'NPC registration does not consume player time');
 A.equal(s.player.coins,coinsBefore,'NPC registration does not spend or award player money');
 const countBefore=Object.keys(Realm.peek(s).independentPersonLives.people).length;
