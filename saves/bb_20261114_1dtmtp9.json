@@ -1221,6 +1221,22 @@
         "noFreeRankOrGoods": true,
         "noInventedBackstoryForOtherActors": true
       }
+    },
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "story",
+      "text": "A personally witnessed individual is recorded: Bram",
+      "details": {
+        "source": "gm-witnessed-lived-person-v1",
+        "personId": "person_5",
+        "actorId": "emergent:person_5",
+        "sourceHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+        "location": "mossgate_common",
+        "noContractOrConsent": true,
+        "noFreeRankOrGoods": true,
+        "noInventedBackstoryForOtherActors": true
+      }
     }
   ],
   "world": {
@@ -1731,7 +1747,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 57,
+    "revision": 58,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -5182,18 +5198,54 @@
             }
           ]
         }
+      },
+      "maddoc_independent_bram_original_peer_20261116_01": {
+        "revision": 58,
+        "mode": "rule",
+        "hash": "96b8e813d2212cc77a99a5b76695a9fa20c7d5af8eeff730df089253a02dcc10",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "registered": true,
+              "npcId": "emergent:person_5",
+              "name": "Bram",
+              "profession": "Young Arcane and academic learner",
+              "location": "mossgate_common",
+              "day": 2,
+              "noAssumedConsent": true,
+              "noFreeMoneyOrPower": true,
+              "usesExistingLivingPersonLedger": true
+            }
+          },
+          "events": [
+            {
+              "day": 3,
+              "time": "Day 3, 08:30",
+              "type": "story",
+              "text": "A personally witnessed individual is recorded: Bram",
+              "details": {
+                "source": "gm-witnessed-lived-person-v1",
+                "personId": "person_5",
+                "actorId": "emergent:person_5",
+                "sourceHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+                "location": "mossgate_common",
+                "noContractOrConsent": true,
+                "noFreeRankOrGoods": true,
+                "noInventedBackstoryForOtherActors": true
+              }
+            }
+          ]
+        }
       }
     },
     "focus": [
-      "Still at Thistlebell Yard to ask after Hedra and Nessa",
-      "Tessa and Bram remain independent with unknown current locations"
+      "Still at Thistlebell Yard, searching for Hedra and Nessa",
+      "Bram and Tessa retain independent lives rather than guaranteed player encounters"
     ],
-    "scene": "At Thistlebell Yard at 08:30 Rootday, Maddoc continues talking with the local beast handler. Tessa and Bram are his real acquaintances from an earlier witnessed day at Mossgate Common; neither is presently located or summoned. Player-confirmed: Tessa began martial training at the village training ground, and she holds her own Meridian notes. No retrospective practice results or magic progress are granted.",
+    "scene": "Rootday 08:30 at Thistlebell Yard: Maddoc continues speaking with a local beast handler about searching for Hedra and Nessa. Earlier acquaintances Tessa and Bram have independently recorded identities; neither is confirmed at Thistlebell or Mossgate today. Bram shared introductory Meridian, Arcane and Soul reading with Maddoc and retains his own Arcane notes. No private off-screen training gains are assumed.",
     "journal": [
-      {
-        "day": 1,
-        "text": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common. He is looking for books, training, or beast handling. Arrival recorded at 08:44, without rolling or granting access."
-      },
       {
         "day": 1,
         "text": "Maddoc and Bram complete introductory Meridian theory and handwritten notes at the reading house; time verified 11:04."
@@ -5309,6 +5361,10 @@
       {
         "day": 3,
         "text": "Player-confirmed history: Tessa began martial training at the village ground and keeps her own Meridian notes. Maddoc has met Tessa previously at Mossgate; Tessa's present whereabouts and any earned cultivation results are not established."
+      },
+      {
+        "day": 3,
+        "text": "Bram is an earlier genuinely encountered friend and Arcane-study note holder. He remains an independent person; his current location, private work and achieved magical advancement have not been established."
       }
     ],
     "continuity": {
@@ -11983,7 +12039,7 @@
       "emergentPeople": {
         "version": 1,
         "rngState": 3825077450,
-        "counter": 4,
+        "counter": 5,
         "lastSixday": 1,
         "people": {
           "person_1": {
@@ -12384,6 +12440,112 @@
               "supernaturalSystemRanks": {},
               "knownTechniques": []
             }
+          },
+          "person_5": {
+            "id": "person_5",
+            "actorId": "emergent:person_5",
+            "origin": "gm-witnessed-lived-person-v1",
+            "birthSource": {
+              "origin": "gm-witnessed-lived-person-v1",
+              "id": "person_5",
+              "regionId": "orchard_vales",
+              "polity": "asterwyn",
+              "day": 2,
+              "worldMinute": 3390,
+              "locationId": "mossgate_common",
+              "name": "Bram",
+              "historicalJournal": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common.",
+              "historicalJournalDay": 0,
+              "retroactiveProgressDenied": true,
+              "initialProfession": "Young Arcane and academic learner",
+              "purpose": "Study the foundations of Arcane Circle design, ask questions and pursue independent learning while keeping his own friends and priorities.",
+              "personality": "Inquisitive and patient with technical explanations; willing to disagree thoughtfully and approach difficult ideas with curiosity.",
+              "background": "Maddoc's young friend from Orchard Vales. Their introductory studies covered Meridian, Arcane and Soul concepts. Bram keeps his own Arcane notes, with no assumed practical magic, job or new off-screen achievement.",
+              "witness": "Bram and Tessa were personally met by Maddoc and walked together to Mossgate Common in a previously verified scene.",
+              "language": "Vale Common",
+              "need": "gm-witnessed-occupation",
+              "nonAssumedKinship": true,
+              "nonAssumedConsent": true,
+              "noInventedFundsOrRanks": true
+            },
+            "originHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+            "name": "Bram",
+            "profession": "Young Arcane and academic learner",
+            "purpose": "Study the foundations of Arcane Circle design, ask questions and pursue independent learning while keeping his own friends and priorities.",
+            "personality": "Inquisitive and patient with technical explanations; willing to disagree thoughtfully and approach difficult ideas with curiosity.",
+            "language": "Vale Common",
+            "homeLocationId": "mossgate_common",
+            "regionId": "orchard_vales",
+            "polity": "asterwyn",
+            "status": "active",
+            "ageBand": "not established",
+            "family": null,
+            "ancestry": null,
+            "inheritance": null,
+            "practicedDisciplines": [],
+            "knownTechniques": [],
+            "funds": 0,
+            "cashScales": 0,
+            "fatigue": 0,
+            "competence": 1,
+            "rngState": 2297068820,
+            "lastTickDay": 2,
+            "shift": {
+              "source": "emergent-local-work-presence-v1",
+              "npcId": "emergent:person_5",
+              "actorId": "emergent:person_5",
+              "personId": "person_5",
+              "name": "Bram",
+              "profession": "Young Arcane and academic learner",
+              "polity": "asterwyn",
+              "originHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+              "location": "mossgate_common",
+              "scheduledAtDay": 2,
+              "fromDay": 2,
+              "throughDay": 7,
+              "hash": "a78f9c8df4d2170ef1cc76414208e38648243f27b7b58e3a644850a90a384293"
+            },
+            "history": [
+              {
+                "day": 2,
+                "type": "gm-witnessed-life-start",
+                "regionId": "orchard_vales",
+                "sourceHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+                "observed": true
+              }
+            ],
+            "career": {
+              "version": 1,
+              "origin": "independent-person-earned-profession-v1",
+              "source": {
+                "origin": "independent-person-earned-profession-v1",
+                "personId": "person_5",
+                "actorId": "emergent:person_5",
+                "personOriginHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+                "professionAtOrigin": "Young Arcane and academic learner",
+                "nativeRegion": "orchard_vales",
+                "nonHereditaryEstimate": true
+              },
+              "sourceHash": "b444013626bb232790646b6936ddf01a2613766c72ad21eeb51fb64e6e84ccff",
+              "aptitude": 1,
+              "skillPoints": 0,
+              "competenceRank": 0,
+              "demonstratedMethods": {},
+              "qualityPoints": 0,
+              "workCount": 0,
+              "successes": 0,
+              "promotions": [],
+              "workReceipts": [],
+              "authoredDuties": [],
+              "attestations": [],
+              "workOffers": [],
+              "peerGuidance": [],
+              "tradePayments": [],
+              "safetyIncidents": [],
+              "recognizedLicence": null,
+              "supernaturalSystemRanks": {},
+              "knownTechniques": []
+            }
           }
         },
         "history": [
@@ -12413,6 +12575,13 @@
             "kind": "gm-witnessed-emergence",
             "personId": "person_4",
             "originHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+            "regionId": "orchard_vales"
+          },
+          {
+            "day": 2,
+            "kind": "gm-witnessed-emergence",
+            "personId": "person_5",
+            "originHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
             "regionId": "orchard_vales"
           }
         ]

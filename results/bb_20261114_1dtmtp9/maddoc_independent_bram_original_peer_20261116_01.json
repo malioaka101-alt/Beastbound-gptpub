@@ -1,0 +1,84 @@
+{
+  "id": "maddoc_independent_bram_original_peer_20261116_01",
+  "ok": true,
+  "applied": true,
+  "revision": 58,
+  "stateHash": "57447555385cb90a74ae0a671911bcaaf1b90fafc28a9b7f86e6e36230826745",
+  "clock": "Day 3, 08:30",
+  "output": {
+    "rules": {
+      "registered": true,
+      "npcId": "emergent:person_5",
+      "name": "Bram",
+      "profession": "Young Arcane and academic learner",
+      "location": "mossgate_common",
+      "day": 2,
+      "noAssumedConsent": true,
+      "noFreeMoneyOrPower": true,
+      "usesExistingLivingPersonLedger": true
+    }
+  },
+  "events": [
+    {
+      "day": 3,
+      "time": "Day 3, 08:30",
+      "type": "story",
+      "text": "A personally witnessed individual is recorded: Bram",
+      "details": {
+        "source": "gm-witnessed-lived-person-v1",
+        "personId": "person_5",
+        "actorId": "emergent:person_5",
+        "sourceHash": "ea3e3227189b6355fd1f1458d4aedcc61ed080b0b08b72102c08ef99880a7b0c",
+        "location": "mossgate_common",
+        "noContractOrConsent": true,
+        "noFreeRankOrGoods": true,
+        "noInventedBackstoryForOtherActors": true
+      }
+    }
+  ],
+  "panel": "╔═ MADDOC · 2 NESTING 1156 ══════╗\n║ 08:30 · Morning · Cool         ║\n║ Thistlebell Yard           2 T ║\n║ STA  ██████████          36/36 ║\n║ QI   ██████████          14/14 ║\n╟─ NOW ──────────────────────────╢\n║ ◆ Still at Thistlebell Yard, … ║\n║ ◆ Bram and Tessa retain indep… ║\n╚════════════════════════════════╝",
+  "hud": {
+    "name": "Maddoc Maddren",
+    "identity": {
+      "age": 10,
+      "background": "young learner",
+      "path": "undecided"
+    },
+    "date": {
+      "absolute": "2 Nesting 1156 AC",
+      "label": "2 Nesting 1156 AC",
+      "known": true,
+      "relativeDay": 3,
+      "weekday": "Rootday"
+    },
+    "time": "08:30",
+    "daypart": "Morning",
+    "location": "Thistlebell Yard",
+    "weather": "Cool and clear, with thin mist between the orchard trees",
+    "coins": 2,
+    "currency": "2 T",
+    "resources": [
+      {
+        "key": "stamina",
+        "label": "Stamina",
+        "current": 36,
+        "max": 36
+      }
+    ],
+    "conditions": [],
+    "partners": [],
+    "focus": [
+      "Still at Thistlebell Yard, searching for Hedra and Nessa",
+      "Bram and Tessa retain independent lives rather than guaranteed player encounters"
+    ],
+    "context": null,
+    "presentation": {
+      "skin": "beastbound-ink-gold-manhwa-v1",
+      "variant": "core",
+      "density": "compact",
+      "contract": "docs/APPROVED_IN_CHAT_PANEL_RENDERING.md",
+      "mechanicalAuthority": false
+    }
+  },
+  "recap": "CAMPAIGN: Maddoc Maddren (seed 3951775931)\nSCENE: Rootday 08:30 at Thistlebell Yard: Maddoc continues speaking with a local beast handler about searching for Hedra and Nessa. Earlier acquaintances Tessa and Bram have independently recorded identities; neither is confirmed at Thistlebell or Mossgate today. Bram shared introductory Meridian, Arcane and Soul reading with Maddoc and retains his own Arcane notes. No private off-screen training gains are assumed.\nPC: young learner, undecided; 2 T\nJOURNAL: A personally witnessed individual is recorded: Darron Pike | A personally witnessed individual is recorded: Tessa | A personally witnessed individual is recorded: Bram\nCURRENT: No opening hook"
+}
