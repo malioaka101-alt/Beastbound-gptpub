@@ -1,0 +1,37 @@
+{
+  "id": "maddoc_independent_tessa_original_peer_20261116_01",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "introduceWitnessedPerson",
+  "params": {
+    "name": "Tessa",
+    "profession": "Young martial and Meridian learner",
+    "purpose": "Explore supervised martial training and Meridian foundations while retaining her own childhood, friendships and freely chosen priorities.",
+    "personality": "Persistent, direct and quick to challenge ideas with practical evidence; values thinking and speaking for herself.",
+    "background": "Maddoc's established young friend from Orchard Vales, who began martial training at the village ground and maintains her own Meridian study notes. No demonstrated magical stage or job is assumed.",
+    "witness": "Tessa and Bram were personally met by Maddoc and travelled with him to Mossgate Common in a previously verified scene.",
+    "journalWitness": "Maddoc said 'Just follow me' and led willing companions Tessa and Bram to Mossgate Common.",
+    "historicalPlaceId": "mossgate_common"
+  },
+  "scene": "At Thistlebell Yard at 08:30 Rootday, Maddoc continues talking with the local beast handler. Tessa and Bram are his real acquaintances from an earlier witnessed day at Mossgate Common; neither is presently located or summoned. Player-confirmed: Tessa began martial training at the village training ground, and she holds her own Meridian notes. No retrospective practice results or magic progress are granted.",
+  "summary": "Player-confirmed history: Tessa began martial training at the village ground and keeps her own Meridian notes. Maddoc has met Tessa previously at Mossgate; Tessa's present whereabouts and any earned cultivation results are not established.",
+  "focus": [
+    "Still at Thistlebell Yard to ask after Hedra and Nessa",
+    "Tessa and Bram remain independent with unknown current locations"
+  ],
+  "continuity": [
+    {
+      "id": "maddoc_tessa_martial_training_started",
+      "action": "record",
+      "subject": {
+        "kind": "narrative",
+        "id": "tessa_martial_early_training"
+      },
+      "category": "witnessed-history",
+      "statement": "The player confirmed Tessa had already started martial training at the village training ground. This is a real established activity, but no historical training check, power rank, numeric ability gain or physical co-presence at Thistlebell is implied.",
+      "witness": "Tessa began martial training at the village training ground",
+      "visibility": "player-known"
+    }
+  ]
+}
