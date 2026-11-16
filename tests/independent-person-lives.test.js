@@ -22,7 +22,7 @@ R.act(s,{system:'world',operation:'establishPlace',params:{
  culture:'Community learning is open but does not force student careers or magical progress.'}});
 const moved=R.act(s,{system:'world',operation:'travelTo',params:{
  destinationId:'peer_test_common',minutes:15,
- journey:'The player walked by the public orchard road from the family cottage to the hamlet training and reading spaces.',
+ journey:'The player walked with Tessa and Bram by the public orchard road from the family cottage to the hamlet training and reading spaces.',
  uncontested:true}});
 A.equal(moved.arrived,true);
 const witness='Maddoc personally met Tessa and Bram at the community green, and both spoke about the lessons they wanted to explore.';
@@ -45,11 +45,18 @@ const t=R.act(s,{system:'social',operation:'introduceWitnessedPerson',
   'Practise supervised footwork and explore Meridian anatomy without compulsory training.',
   'Persistent, frank, and willing to challenge an instructor.',
   'A young local learner with friends and chores besides interest in physical practice.')});
-const b=R.act(s,{system:'social',operation:'introduceWitnessedPerson',
- params:make('Bram','Young arcane reader',
+// Simulate the short journal having pruned the original witness; the original
+// saved completed journey must still establish Bram without inventing a visit.
+s.chatRuntime.summary=witness;
+s.chatRuntime.journal=[];
+const bramFields=make('Bram','Young arcane reader',
   'Investigate Arcane foundations and learn how patterns work without guaranteed magical powers.',
   'Inquisitive and patient, with time for friends and other priorities.',
-  'A young local reader who can work on ordinary learning and neighbourhood responsibilities.')});
+  'A young local reader who can work on ordinary learning and neighbourhood responsibilities.');
+delete bramFields.journalWitness;
+bramFields.journeyWitness='The player walked with Tessa and Bram by the public orchard road';
+const b=R.act(s,{system:'social',operation:'introduceWitnessedPerson',
+ params:bramFields});
 A.equal(t.registered,true);A.equal(b.registered,true);
 const world=Realm.peek(s),day=Math.floor(s.world.minutes/1440);
 A.equal(Person.presence(world,t.npcId,'peer_test_home',day),null);
@@ -59,6 +66,8 @@ A.equal(Person.presence(world,t.npcId,'peer_test_common',day),null,
 A.equal(Person.presence(world,b.npcId,'peer_test_common',day),null);
 A.equal(world.emergentPeople.people[t.npcId.slice(9)].birthSource.retroactiveProgressDenied,true);
 A.equal(world.emergentPeople.people[b.npcId.slice(9)].birthSource.retroactiveProgressDenied,true);
+A.equal(world.emergentPeople.people[b.npcId.slice(9)].birthSource.historicalJourneyHash.length,64,
+ 'Immutable original completed journey persists after journal pruning');
 const tLife=R.act(s,{system:'social',operation:'establishIndependentLife',params:{
  actorId:t.npcId,interests:['martial','meridian','community','craft'],
  motivation:'Tessa is interested in martial exercises and Meridian learning but is also a child with other priorities.',
