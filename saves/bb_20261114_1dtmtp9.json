@@ -1747,7 +1747,7 @@
   "documentedBranches": {},
   "npcKnowledge": {},
   "chatRuntime": {
-    "revision": 58,
+    "revision": 59,
     "applied": {
       "fix_harness_maddoc_20261114_001": {
         "revision": 1,
@@ -5238,18 +5238,43 @@
             }
           ]
         }
+      },
+      "maddoc_tessa_independent_life_scene_20261116_02": {
+        "revision": 59,
+        "mode": "rule",
+        "hash": "441e2c6d216c1aea0dbedb2ebe8f54327ecafe5b9c6a62dfa9a8d4b9d4165914",
+        "receipt": {
+          "ok": true,
+          "clock": "Day 3, 08:30",
+          "output": {
+            "rules": {
+              "established": true,
+              "actorId": "emergent:person_4",
+              "name": "Tessa",
+              "interests": [
+                "martial",
+                "meridian",
+                "community",
+                "livelihood",
+                "craft",
+                "beast-care"
+              ],
+              "focus": "martial",
+              "day": 2,
+              "noAutomaticRankOrJob": true,
+              "noHistoricalProgressInvented": true
+            }
+          },
+          "events": []
+        }
       }
     },
     "focus": [
-      "Still at Thistlebell Yard, searching for Hedra and Nessa",
-      "Bram and Tessa retain independent lives rather than guaranteed player encounters"
+      "Continue inquiry at Thistlebell Yard",
+      "Bram and Tessa choose their own independent activities"
     ],
-    "scene": "Rootday 08:30 at Thistlebell Yard: Maddoc continues speaking with a local beast handler about searching for Hedra and Nessa. Earlier acquaintances Tessa and Bram have independently recorded identities; neither is confirmed at Thistlebell or Mossgate today. Bram shared introductory Meridian, Arcane and Soul reading with Maddoc and retains his own Arcane notes. No private off-screen training gains are assumed.",
+    "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc is still speaking with a handler about Hedra and Nessa. Tessa, a friend he earlier encountered, has her own independent interests: martial training begun at the village practice yard and her own Meridian studies. No prior training result is fabricated; Tessa is not presently confirmed here.",
     "journal": [
-      {
-        "day": 1,
-        "text": "Maddoc and Bram complete introductory Meridian theory and handwritten notes at the reading house; time verified 11:04."
-      },
       {
         "day": 1,
         "text": "At 13:39 Maddoc and Bram completed reading and handwritten introductory notes for Arcane and Soul; no cultivation gain."
@@ -5365,6 +5390,10 @@
       {
         "day": 3,
         "text": "Bram is an earlier genuinely encountered friend and Arcane-study note holder. He remains an independent person; his current location, private work and achieved magical advancement have not been established."
+      },
+      {
+        "day": 3,
+        "text": "Tessa's independent daily personal choices are now source-linked to her existing actor identity. No unearned powers, profession, wages or physical presence were granted."
       }
     ],
     "continuity": {
@@ -17634,6 +17663,62 @@
               "conversations": []
             },
             "playerObservedSites": []
+          }
+        }
+      },
+      "independentPersonLives": {
+        "version": 1,
+        "origin": "independent-person-daily-life-v1",
+        "people": {
+          "person_4": {
+            "origin": "independent-person-daily-life-v1",
+            "id": "person_4",
+            "actorId": "emergent:person_4",
+            "identityHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+            "foundationHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+            "interests": [
+              "martial",
+              "meridian",
+              "community",
+              "livelihood",
+              "craft",
+              "beast-care"
+            ],
+            "interestsAtIntroduction": [
+              "martial",
+              "meridian",
+              "community",
+              "livelihood",
+              "craft",
+              "beast-care"
+            ],
+            "focus": "martial",
+            "introducedDay": 2,
+            "lastDay": 2,
+            "metrics": {},
+            "fatigue": 0,
+            "history": [],
+            "discoveries": [],
+            "source": {
+              "origin": "independent-person-daily-life-v1",
+              "actorId": "emergent:person_4",
+              "identityHash": "250e9992137b29a108b943dc0f1242c846b92fd3b5483a300ff1e4b46baac222",
+              "startedDay": 2,
+              "interests": [
+                "martial",
+                "meridian",
+                "community",
+                "livelihood",
+                "craft",
+                "beast-care"
+              ],
+              "motivation": "Tessa has begun martial training at the village yard and has her own Meridian study notes, but remains an independent young person with friends, ordinary responsibilities, other interests and the freedom to pursue different work or rest.",
+              "witness": "Earlier acquaintances Tessa and Bram have independently recorded identities",
+              "noPreexistingTrainingAward": true,
+              "noAutomaticWorkContract": true
+            },
+            "sourceHash": "988e7d5669a86a294443975d1bb1f8f023387dd43232a336f1bc27de44bfc005",
+            "rngState": 1524501960
           }
         }
       }
