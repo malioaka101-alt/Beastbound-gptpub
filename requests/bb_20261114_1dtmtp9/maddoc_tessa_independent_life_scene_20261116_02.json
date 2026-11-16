@@ -1,0 +1,26 @@
+{
+  "id": "maddoc_tessa_independent_life_scene_20261116_02",
+  "campaign": "bb_20261114_1dtmtp9",
+  "mode": "rule",
+  "system": "social",
+  "operation": "establishIndependentLife",
+  "params": {
+    "actorId": "emergent:person_4",
+    "interests": [
+      "martial",
+      "meridian",
+      "community",
+      "livelihood",
+      "craft",
+      "beast-care"
+    ],
+    "motivation": "Tessa has begun martial training at the village yard and has her own Meridian study notes, but remains an independent young person with friends, ordinary responsibilities, other interests and the freedom to pursue different work or rest.",
+    "witness": "Earlier acquaintances Tessa and Bram have independently recorded identities"
+  },
+  "scene": "Rootday 08:30 at Thistlebell Yard. Maddoc is still speaking with a handler about Hedra and Nessa. Tessa, a friend he earlier encountered, has her own independent interests: martial training begun at the village practice yard and her own Meridian studies. No prior training result is fabricated; Tessa is not presently confirmed here.",
+  "summary": "Tessa's independent daily personal choices are now source-linked to her existing actor identity. No unearned powers, profession, wages or physical presence were granted.",
+  "focus": [
+    "Continue inquiry at Thistlebell Yard",
+    "Bram and Tessa choose their own independent activities"
+  ]
+}
