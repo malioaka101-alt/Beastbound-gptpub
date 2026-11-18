@@ -99,6 +99,9 @@ function earnedEvidence(w,actorId){
     awardedLicence:career.recognizedLicence,
     attestationCount:(career.attestations||[]).length
    }:null,
+   // True CURRENT ordinary work readiness comes from the original career
+   // formula, never a model-invented all-purpose NPC ability score.
+   currentMundaneWork:Careers.currentCapability(actor),
    ordinaryIndependentLife:life?{
     sourceHash:life.sourceHash,asOfDay:life.lastDay,
     focus:life.focus,familiarity:{...life.metrics},
