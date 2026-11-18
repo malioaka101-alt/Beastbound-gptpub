@@ -134,4 +134,21 @@ for(const wants of [true,false]){
  A.equal(p.rngState,old);
  A.equal(c.wounds[0],1);
 }
+{
+ const {s,p,id}=make(true,923901),c=Combat.get(s,id),rng=s.rngState;
+ const original=Combat.harm(s,c,4,{nonlethal:true});
+ A.equal(original.result,'Critical wound');
+ A.ok(original.criticalSave,'Original critical injury must use its real Vigor check');
+ A.ok(original.criticalSave.roll>=1&&original.criticalSave.roll<=20);
+ A.notEqual(s.rngState,rng);
+ const privateRoll=s.log.findLast(x=>x.details?.privateNaturalStatsNotDisclosed);
+ A.ok(privateRoll,'The original critical check must log only observed success/degree');
+ A.equal(privateRoll.details.originalOneCheck,true);
+ for(const key of ['modifier','total','margin','roll','dc','naturalBonus','dice'])
+  A.equal(Object.hasOwn(privateRoll.details,key),false);
+ A.equal(privateRoll.message.includes(' vs DC '),false);
+ const replay=E.importGame(E.exportGame(s));
+ A.deepEqual(Combat.get(replay,id),c);
+ A.equal(Realm.peek(replay).emergentPeople.people[p.id].rngState,p.rngState);
+}
 console.log('Independently consented human protection: source-present adult, single original beast attack against actual wounds, free decline, private numbers, replay and tamper prevention PASS');
