@@ -60,10 +60,10 @@ A.equal(condition.noAutomaticWoundHealingOrSkillAward,true);
 A.equal(condition.originalEntrySeal,injured.npcOrigin.seal);
 const injuredSnapshot=E.exportGame(s),rollAfterAttack=s.rngState;
 for(const request of [
- {system:'social',operation:'observeLocalWork',params:{npcId:p.actorId}},
+ {system:'social',operation:'observeLocalPersonWork',params:{npcId:p.actorId}},
  {system:'social',operation:'proposeLocalWork',
   params:{npcId:p.actorId,purpose:'Help repair the source-witnessed village work site'}},
- {system:'social',operation:'assistLocalWork',params:{npcId:p.actorId}}
+ {system:'social',operation:'assistLocalPersonWork',params:{npcId:p.actorId}}
 ]){
  A.throws(()=>Rules.act(s,request),/Original combat wounds or incapacity/);
  A.equal(E.exportGame(s),injuredSnapshot,
@@ -78,9 +78,9 @@ A.ok(summary.sixdayTicks.length>=1,
  'Source engine needs an actually elapsed original sixday');
 A.equal(p.career.workCount,originalWork,'Combat-wounded NPC cannot earn career progress');
 A.equal(p.funds,originalMoney,'Combat-wounded NPC cannot get unearned work income');
-A.equal(p.history.at(-1).choice,'rest-from-original-combat-condition');
-A.equal(p.history.at(-1).originalWoundWorkBlocked,true);
-A.equal(p.history.at(-1).originalCombatantEntrySeal,injured.npcOrigin.seal);
+A.equal(p.history.findLast(x=>x.type==='independent-life').choice,'rest-from-original-combat-condition');
+A.equal(p.history.findLast(x=>x.type==='independent-life').originalWoundWorkBlocked,true);
+A.equal(p.history.findLast(x=>x.type==='independent-life').originalCombatantEntrySeal,injured.npcOrigin.seal);
 A.equal(p.shift,null,'An injured actor cannot retain an ordinary productive work shift');
 A.deepEqual(Combat.get(s,id).wounds,wounds,'Ordinary sixday rest cannot silently heal combat wounds');
 A.equal(Health.currentNpcWoundCondition(s,p.actorId).workAndOrdinaryPracticeBlocked,true);
@@ -118,7 +118,7 @@ A.equal(dp.career.workCount,originalWork,
  'An NPC killed through the original combat model cannot work later');
 A.equal(dp.funds,originalMoney,'Death cannot generate ordinary wages');
 A.equal(dp.shift,null,'Death must prevent later independent work-site appearances');
-A.equal(dp.history.at(-1).choice,'original-combat-death-no-activity');
+A.equal(dp.history.findLast(x=>x.type==='independent-life').choice,'original-combat-death-no-activity');
 A.equal(dl.rngState,priorLifeRng,'The deceased cannot make new independent activity choices');
 A.deepEqual(dl.history,[],'A deceased person cannot study, make friends or practise offscreen');
 A.equal(dl.lastDay,6,'No imaginary skipped days can be awarded later');
