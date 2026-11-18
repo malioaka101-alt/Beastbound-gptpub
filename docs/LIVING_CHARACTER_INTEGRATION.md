@@ -84,6 +84,14 @@ The private evidence contains the original relative's sealed origin hash, exact 
 
 `tests/living-npc-original-kin-evidence.test.js` creates only disposable new-campaign relatives, tests source role/correction separation, actual original sixday decisions and source receipts, private/public boundaries, replay, tampered source and activity rejection, old saves without actors, and mismatched campaign rejection. It does not load or write Maddoc's actual save.
 
+## Stage 2B.6 — voluntary original living household evidence (source reuse)
+
+No new social, family, marriage, inheritance or household system has been added. The existing `world/emergent-households.js` owner already establishes **two independently consenting real adults** only after sustained original contact and source-witnessed co-presence, and records later actual separation or independently agreed reunion. The existing `world/emergent-people.js` person record starts with no family and receives its original home ID **only** from that owner.
+
+The emergent-person GM-private `earnedEvidence.chosenHousehold` field reads a real existing `person.family` home **only** after calling `emergent-households.valid(world,home)`, including its original founders, origin hashes, contact provenance and life-transition signatures. A person without such an owner-backed home remains `null` (no confirmed voluntary home), and a forged reference or rewritten separation/reunion is rejected. The original current `shared` or `apart` value remains **GM-private**. The owner deliberately publishes only historically witnessed formation, not private current arrangements.
+
+Founders are not automatically spouses, lovers, blood relatives, parents, hereditary heirs, permanent co-residents, obligated workers, consenting partners in a beast contract or supernatural cultivators. The bridge cannot confer common funds as private assets, magic, combat modifiers, rights or presence. `tests/living-npc-original-household-evidence.test.js` reproduces genuine original independent contact, free original household formation, original separation and save replay using disposable worlds. It tests both founders, a stranger, public privacy, non-inferred ancestry, no GM-read mutation and forged source rejection. No real saved campaign is loaded or changed.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
