@@ -36,6 +36,16 @@ Unverified legacy `practicedDisciplines` and `knownTechniques` arrays are delibe
 
 **Unfinished:** Stage 2B must bind individual discipline-specific original events, real techniques, equipment/ownership, wounds/age-adjusted current attributes, and origin-provenance for legacy actors. Stages 3–6 are still outstanding. No NPC combat capability or discipline award is inferred by the Stage 2A evidence view.
 
+## Stage 2B.1 — current ordinary professional capability from original work (stacked)
+
+The original `world/person-careers.js` now supplies a **read-only** `currentCapability(person)` projection. It shares `baseWorkReadiness` with the **actual** original `work()` resolution, including earned profession competence, the original personal aptitude and the current original fatigue penalty. Proven methods list the original lifetime recorded successes and available recent signed actual work receipts. No new dice, time, purchases or caller-selected ability modifiers are added, and the actual work owner's local DC, independent choices, peer support, innovations and effects still govern the outcome.
+
+`world/person-mechanical-foundations.js` links that projection as `earnedEvidence.currentMundaneWork`, inside the **GM-only** dossier. A social title, career description, study interest, or unverified legacy techniques never supplies a new ability. The current modifier is an **ordinary profession work** baseline, not a cultivation, spellcasting, combat, universal NPC skill or public knowledge rating. Wounds, equipment bonuses, current combat statistics, full technique capability and voluntary relationships remain unknown until separately sourced. No assumed attendance or willingness appears in the projection.
+
+`tests/living-npc-current-professional-capability.test.js` creates a disposable genuine witnessed worker, authentic witnessed duty and one original career work check. It verifies that the pre-check projection matches the exact original resolved work modifier (without extra assistance), that current fatigue and real success receipts update correctly, and that this remains private, replayable and tamper-rejecting without changing player rolls or clock.
+
+**Still outstanding:** systematic age/condition/wound/gear ownership, actual source-proven magical disciplines and techniques, all other Stage 2 scope and later stages. This increment never awards supernatural proficiency or retrospectively fills an older person's history.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
