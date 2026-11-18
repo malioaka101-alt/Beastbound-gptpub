@@ -101,8 +101,16 @@ function earnedEvidence(w,actorId){
   return {known:true,actorId,privateToGM:true,
    evidenceOwners:['world/emergent-people.js','world/person-careers.js',
     'world/independent-person-lives.js'],
+   // Physical condition is an independent source-owned snapshot. Past
+   // original workplace incidents are real, but no clinical diagnosis,
+   // combat wound boxes or age-adjusted abilities can be deduced from them.
    physicalCondition:{ageBand:actor.ageBand,status:actor.status,
     fatigue:actor.fatigue,currentAttributes:null,wounds:null,
+    workplaceIncidentEvidence:Careers.workplaceSafetyStatus(actor)
+     .map((incident,i)=>({...incident,
+      originalSourceHash:actor.career.safetyIncidents[i].sourceHash})),
+    originalCareerWorkBlockedByRecoveryStatus:actor.status==='recovering',
+    recoveryStatusNotClinicalWoundDiagnosis:true,
     woundDetailsNotEstablished:true},
    profession:career?{
     competenceRank:career.competenceRank,skillPoints:career.skillPoints,
