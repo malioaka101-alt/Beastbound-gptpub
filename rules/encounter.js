@@ -180,6 +180,10 @@ function exchange(s,p={}){
   throw Error('Spoken parley requires a previously established credible communication channel; a wild animal cannot understand speech by fiat');
  // The enemy chooses independently before any player combat dice.
  const decision=Agency.choose(s),enemyPlan=decision.plan;
+ // One nearby source-witnessed adult, if any, can make their OWN current
+ // defensive choice before the first attack die. The beast's attack plan
+ // and its single attack roll remain the original encounter owners.
+ const humanChoice=Agency.chooseHumanInterposition(s,enemyPlan);
  let ownResult=null,enemyResult=null;
  const atkOpts={attackerId:'player',targetId:fight.enemyId};
  // One actual minute of active-physique exertion costs physical Stamina.
@@ -319,9 +323,24 @@ function exchange(s,p={}){
   // Independent NPC/beast intent; no automatic surrender or death.
   s.battle=null;enemyResult={retreated:true};
  }else if(enemyPlan==='attack'&&enemy.status==='ok'&&player.status==='ok'){
-  enemyResult=Combat.attack(s,{attackerId:fight.enemyId,targetId:'player',modifier:enemy.attackModifier,damage:enemy.damage,
-    activeDefense:p.intent==='defend',coverBonus:fight.playerCover?2:0,
-    brace:p.playerBrace??'auto',nonlethal:decision.nonlethal});
+  const protectedPerson=humanChoice?.chosenInterposition===true?
+   Combat.get(s,humanChoice.combatantId):null;
+  const result=Combat.attack(s,{attackerId:fight.enemyId,
+   targetId:protectedPerson?humanChoice.combatantId:'player',
+   modifier:enemy.attackModifier,damage:enemy.damage,
+   activeDefense:protectedPerson?false:p.intent==='defend',
+   coverBonus:protectedPerson?0:fight.playerCover?2:0,
+   brace:protectedPerson?'auto':p.playerBrace??'auto',
+   nonlethal:decision.nonlethal});
+  // The original damage and wound calculations remain internal. A player
+  // observing another person's injuries does not receive their hidden
+  // defense, stamina, wound-box values, rank or physical potential.
+  enemyResult=protectedPerson?{
+   hit:result.hit,interposed:true,
+   npcId:humanChoice.actorId,
+   observedHuman:Combat.observedCombatant(protectedPerson),
+   originalBeastAttackResolved:true,
+   privateStatsNotDisclosed:true}:result;
  }else enemyResult={heldPosition:true};
  E.advance(s,1);
  // A Ward with a sourced one-minute duration covers the current exchange's
@@ -363,7 +382,12 @@ function exchange(s,p={}){
   s.battle=null;
  }else if(enemy.status!=='ok'||enemyPlan==='retreat')s.battle=null;
  else {Combat.newRound(s,{ids:['player',fight.enemyId]});fight.round++;}
- const r={ownResult,enemyResult,enemyPlan,aspectUpkeep,round:fight.round,elapsedMinutes:1,ended:!s.battle,
+ const r={ownResult,enemyResult,enemyPlan,
+  ...(humanChoice?{independentHumanChoice:{
+   npcId:humanChoice.actorId,
+   choseToInterpose:humanChoice.chosenInterposition,
+   noForcedLoyaltyOrCompulsoryAlly:true}}:{}),
+  aspectUpkeep,round:fight.round,elapsedMinutes:1,ended:!s.battle,
    defeated,rescueRequired:defeated,
    player:Combat.publicCombatant(player),opponent:Combat.observedCombatant(enemy)};
  C.event(s,'combat',`Exchange: ${p.intent} against ${enemyPlan}; ${r.ended?'the engagement ends':'the engagement continues'}.`,null);

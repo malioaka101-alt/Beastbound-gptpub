@@ -41,7 +41,7 @@ function roll(s,adv=0){
   const dice=adv?[die(s),die(s)]:[die(s)];
   return {dice,kept:adv===1?Math.max(...dice):adv===-1?Math.min(...dice):dice[0]};
 }
-function check(s,{modifier=0,dc=15,label='Check',risky=true,adv=0,takeTime=false}={}){
+function check(s,{modifier=0,dc=15,label='Check',risky=true,adv=0,takeTime=false,privateDisplay=false}={}){
   int(modifier,'modifier',-100,100);int(dc,'DC',2,100);
   const rolled=takeTime?{dice:[15],kept:15}:roll(s,adv);
   const naturalBonus=takeTime?0:naturalAdjustment(rolled.kept);
@@ -51,7 +51,19 @@ function check(s,{modifier=0,dc=15,label='Check',risky=true,adv=0,takeTime=false
   const display=rolled.dice.length===1?String(rolled.kept):`[${rolled.dice.join(', ')}]→${rolled.kept}`;
   const signed=(n)=>n>=0?`+${n}`:String(n);
   const nat=naturalBonus?` (${rolled.kept===20?'natural 20':'natural 1'} ${signed(naturalBonus)})`:'';
-  event(s,'roll',`🎲 ${String(label).slice(0,90)}: d20 ${display} ${signed(modifier)}${nat} = ${total} vs DC ${dc} → ${result.degree} (${signed(margin)})`,result);
+  // An original NPC critical-body check uses precisely this same roll and
+  // degree formula. Only its outward record is condensed: a witness seeing
+  // injury cannot calculate a stranger's private natural Vigor from the log.
+  if(privateDisplay){
+    if(typeof privateDisplay!=='boolean')
+      throw Error('A private physical check is an internal verification flag');
+    event(s,'roll',
+      `🎲 ${String(label).slice(0,90)}: independently resolved ${result.degree}`,
+      {success:result.success,degree:result.degree,
+       originalOneCheck:true,privateNaturalStatsNotDisclosed:true});
+  }else event(s,'roll',
+    `🎲 ${String(label).slice(0,90)}: d20 ${display} ${signed(modifier)}${nat} = ${total} vs DC ${dc} → ${result.degree} (${signed(margin)})`,
+    result);
   return result;
 }
 function opposed(s,a,b){

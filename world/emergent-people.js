@@ -628,6 +628,64 @@ function live(w,p,day,s=null){
   observed:false});
  if(p.history.length>24)p.history.shift();
 }
+// Combat decisions belong to the SAME autonomous person as their original
+// career and everyday choices. One independent personal RNG draw, not a player
+// directive, determines whether the adult voluntarily risks interposing when
+// the independently acting beast has already committed to attack.
+function chooseEmergencyInterposition(s,actorId){
+ const w=require('./simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)];
+ if(!p||p.actorId!==actorId||!verify(w,p)||
+  p.birthSource?.mechanicalFoundationVersion!==1)
+  throw Error('An original independently verified living person must decide');
+ const f=s.battle;
+ if(!f||f.mode!=='wounds-v1'||!f.beastId||
+  f.enemyId!=='beast:'+f.beastId||
+  s.encounter)
+  throw Error('An established current independent beast threat is required');
+ const Health=require('../rules/unified'),
+  Combat=require('../rules/combat'),
+  condition=Health.currentNpcWoundCondition(s,actorId),
+  c=condition&&Combat.get(s,condition.combatantId);
+ if(!condition||!c||condition.workAndOrdinaryPracticeBlocked||
+  p.status!=='active'||p.fatigue>75||p.ageBand!=='adult, exact birthday not established')
+  throw Error('The independently present adult is not physically able to intervene');
+ const day=Math.floor(s.world.minutes/DAY),minute=s.world.minutes%DAY,
+  present=require('./person-presence').resolve(
+   w,actorId,s.world.location,day,minute);
+ if(!present?.presence||present.presence.hash!==p.shift?.hash||
+  present.presence.originHash!==p.originHash||
+  c.npcOrigin?.location!==s.world.location||
+  !s.chatRuntime?.scene?.includes(p.name+' stands beside the player'))
+  throw Error('The person must actually be present and witnessed at this dangerous scene');
+ const before=p.rngState,roll=draw(p),
+  chance=Math.max(.08,Math.min(.55,
+   .32+(f.enemyBehavior?.style==='predatory'?.13:0)-
+   (p.fatigue>=50?.12:0))),
+  interposes=roll<chance,
+  source={origin:'original-independent-human-defensive-interposition-v1',
+   actorId,individualOriginHash:p.originHash,
+   physicalEntrySeal:c.npcOrigin.seal,
+   dangerBeastId:f.beastId,dangerStartedAt:f.startedAt,round:f.round,
+   worldMinute:s.world.minutes,location:s.world.location,
+   independentRngBefore:before,independentRngAfter:p.rngState,
+   choiceDraw:roll,threshold:chance,
+   freelyChosen:interposes,
+   noObligatedAllyOrPartnership:true,noExtraBeastAttack:true};
+ const proofHash=hash(source);
+ // This witness belongs to the existing combat event stream. No party,
+ // friendship, supernatural level or parallel NPC combat ledger is created.
+ require('../rules/core').event(s,'combat',
+  interposes?p.name+' independently steps between the danger and the player.':
+   p.name+' chooses not to enter the dangerous exchange.',{
+   origin:source.origin,actorId,individualOriginHash:p.originHash,
+   physicalEntrySeal:source.physicalEntrySeal,
+   sourceHash:proofHash,round:f.round,
+   chosenInterposition:interposes,sourcePrivateToGM:true});
+ return {actorId,combatantId:condition.combatantId,
+  chosenInterposition:interposes,sourceHash:proofHash,
+  actualChoice:source};
+}
 function sixday(s,w,day){
  if(!Number.isInteger(day)||day<0)throw Error('A real completed sixday is required for individual person lives');
  const t=ensure(w);
@@ -1122,7 +1180,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseEmergencyInterposition,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
