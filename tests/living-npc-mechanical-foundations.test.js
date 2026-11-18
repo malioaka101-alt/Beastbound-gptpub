@@ -40,6 +40,15 @@ A.equal(s.player.coins,coins,'No player money or rewards');
 const w=Realm.peek(s),actor=w.emergentPeople.people[joined.npcId.slice(9)];
 A.equal(People.verify(w,actor),true,'Fully sealed identity and foundation');
 A.equal(Foundations.verify(w,actor),true,'Original source-bound baseline');
+const externalDraft=Foundations.build(w,actor);
+externalDraft.baselineAttributes.str=999;
+externalDraft.unassessedPotential.meridianBreadth=999;
+A.equal(Foundations.verify(w,actor),true,
+ 'Changing a returned foundation copy must not corrupt the cached expected source');
+A.equal(Foundations.build(w,actor).baselineAttributes.str,
+ actor.mechanicalFoundation.baselineAttributes.str,
+ 'Recomputed/cached profile remains the actual original source');
+
 A.equal(actor.birthSource.mechanicalFoundationVersion,1);
 A.equal(actor.cashScales,0);
 A.equal(actor.career.competenceRank,0);
