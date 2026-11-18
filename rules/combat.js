@@ -74,6 +74,11 @@ function get(s,id){const c=s.table?.combatants?.[id];if(!c)throw Error('Combatan
 function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,press=false,charge=false,calledShot=false,activeDefense=false,coverBonus=0,brace='auto',nonlethal=false,castingDC=null,manaCost=null,arena=false}={}){
   if(arena)throw Error('Arena wards not ported yet: use non-arena combat only');
   const c=get(s,targetId),att=attackerId?get(s,attackerId):null;
+  // The wound model calculates private human attributes internally, but
+  // observing a stranger struck is not permission to learn their Defense,
+  // Toughness, stamina or precise wound boxes from a public combat event.
+  const privateHumanTarget=typeof targetId==='string'&&
+   targetId.startsWith('npc_')&&!!c.npcOrigin;
   const aspect=require('./personal-aspect').defensiveEffect(s,targetId);
   if(c.status!=='ok')throw Error('Combatant no longer able to fight');
   if(att && att.status!=='ok')throw Error('Attacker cannot act while incapacitated, fleeing or dying');
@@ -103,7 +108,11 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
   if(castingDC!==null)s.player.mana-=manaCost;
   if(kept===1 || (kept!==20&&total<defense)){
     const result={hit:false,roll:kept,total,defense,...(castingDC!==null?{manaSpent:manaCost}: {})};
-    C.event(s,'roll',`⚔️ ${c.name}: d20 ${kept} → miss vs Def ${defense}`,result);
+    C.event(s,'roll',privateHumanTarget?
+     `⚔️ ${c.name}: d20 ${kept} → attack misses`:
+     `⚔️ ${c.name}: d20 ${kept} → miss vs Def ${defense}`,
+     privateHumanTarget?{hit:false,roll:kept,
+      observed:observedCombatant(c),noPrivateHumanStats:true}:result);
     return result;
   }
   const margin=Math.max(0,total-defense);
@@ -135,7 +144,11 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
     worldMinute:s.world.minutes,
     source:'Real wound combat exchange with independently profiled opponent and successful Critical Vigor save'
    };
-  C.event(s,'combat',`⚔️ ${c.name}: d20 ${kept}, damage ${damageTotal} vs T${c.toughness} → ${ward?'Ward absorbed':wound.result}`,result);
+  C.event(s,'combat',privateHumanTarget?
+   `⚔️ ${c.name}: d20 ${kept} → ${observedCombatant(c).condition}`:
+   `⚔️ ${c.name}: d20 ${kept}, damage ${damageTotal} vs T${c.toughness} → ${ward?'Ward absorbed':wound.result}`,
+   privateHumanTarget?{hit:true,roll:kept,
+    observed:observedCombatant(c),noPrivateHumanStats:true}:result);
   return result;
 }
 function contestForce(s,{a,b}={}){
