@@ -303,4 +303,171 @@ function ownedAsset(s,item){
    ...witnesses[0]}),kind:'existing-purchased-mundane-equipment',
   source:'original locally witnessed and paid mundane equipment purchase'};
 }
-module.exports={offers,inquire,purchase,equip,unequip,status,ownedAsset};
+// Original paid-weapon owner remains authoritative after voluntary handoff.
+// An individual cannot acquire a combat profile from job title, a physical
+// material attestation, a generic source quote or a caller-chosen damage die.
+const PERSON_WEAPON='original-paid-mundane-weapon-voluntary-person-transfer-v1';
+function verifiedIndependentWeapon(s,actorId){
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Source-verified independent human identity required for physical weapon');
+ const w=Realm.peek(s),People=require('../world/emergent-people'),
+  person=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+ if(!person||person.actorId!==actorId||!People.verify(w,person))
+  throw Error('An original individual needs confirmed identity before having an item');
+ const attempts=person.originalWeaponOffers||[];
+ if(!Array.isArray(attempts)||attempts.length>30)
+  throw Error('Original individual weapon offers need finite receipt reconciliation');
+ const seen=new Set();
+ for(const row of attempts){
+  const q=row?.source;
+  if(!q||row.sourceHash!==hash(q)||
+    !People.verifyOriginalWeaponGiftChoice(q)||
+    q.actorId!==actorId||q.personOriginHash!==person.originHash||
+    seen.has(q.originalPurchasedAssetRoot+'|'+q.sourceShiftHash+'|'+
+     Math.floor(q.minute/1440)+'|'+q.item))
+   throw Error('An individual weapon offer does not have original independent consent');
+  seen.add(q.originalPurchasedAssetRoot+'|'+q.sourceShiftHash+'|'+
+   Math.floor(q.minute/1440)+'|'+q.item);
+ }
+ if(person.mundaneWeapon===undefined)return null;
+ const record=person.mundaneWeapon,q=record?.source;
+ if(!q||record.sourceHash!==hash(q)||q.origin!==PERSON_WEAPON||
+  q.actorId!==actorId||q.personOriginHash!==person.originHash||
+  q.ownerName!==person.name||
+  q.fromPlayer!==s.player.name||
+  q.noRankOrTechniqueAward!==true||
+  q.noFutureCombatConsentFromGift!==true||
+  q.originallyTransferredQuantity!==1||
+  !Number.isInteger(q.worldMinute)||q.worldMinute<0||
+  q.worldMinute>s.world.minutes||q.minuteAtTransfer!==q.worldMinute||
+  !/^[a-f0-9]{64}$/.test(q.originalPurchasedAssetRoot||'')||
+  !/^[a-f0-9]{64}$/.test(q.consentSourceHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+  typeof q.item!=='string'||!/^[a-z_]{3,60}$/.test(q.item))
+  throw Error('NPC weapon has no valid original paid physical transfer receipt');
+ const accepted=attempts.filter(row=>row.sourceHash===q.consentSourceHash&&
+  row.source.accepted===true&&
+  row.source.actorId===actorId&&row.source.item===q.item&&
+  row.source.originalPurchasedAssetRoot===q.originalPurchasedAssetRoot&&
+  row.source.sourceShiftHash===q.originalShiftHash&&
+  row.source.minute===q.worldMinute);
+ if(accepted.length!==1)
+  throw Error('NPC weapon does not have unique independent receipt of acceptance');
+ const asset=ownedAsset(s,q.item);
+ if(asset.quantity!==0||asset.originalRoot!==q.originalPurchasedAssetRoot||
+  q.originalQuoteOfferId!==s.table?.merchantOffers?.[q.originalQuoteOfferId]?.id)
+  throw Error('NPC paid weapon provenance conflicts with player custody');
+ const quote=s.table.merchantOffers[q.originalQuoteOfferId];
+ if(quote.item!==q.item||!quote.action||q.actionId!==quote.action.id||
+  JSON.stringify(q.originalCombatAction)!==JSON.stringify(quote.action))
+  throw Error('NPC weapon damage or attribute differs from original merchant appraisal');
+ Weapons.validateSpec(s,q.actionId,q.originalCombatAction);
+ if(Object.values(w.emergentPeople.people).filter(other=>
+  other.mundaneWeapon?.source?.originalPurchasedAssetRoot===
+  q.originalPurchasedAssetRoot).length!==1)
+  throw Error('One actual purchased weapon cannot be duplicated across people');
+ return {actorId,ownerName:person.name,item:q.item,
+  originalSourceHash:record.sourceHash,
+  originalPurchasedAssetRoot:q.originalPurchasedAssetRoot,
+  source:'rules/equipment.js',
+  actualMundaneAction:structuredClone(q.originalCombatAction),
+  noInferredCombatRank:true,
+  noForcedEquipmentUseOrFutureCombatConsent:true};
+}
+function giveWeaponToPerson(s,p={}){
+ input(p,['npcId','item']);
+ if(typeof p.npcId!=='string'||typeof p.item!=='string'||
+  !/^emergent:person_[0-9]+$/.test(p.npcId))
+  throw Error('A real person and one already owned weapon are required; never choose their acceptance');
+ if(s.battle||s.encounter)
+  throw Error('An unresolved encounter cannot be used to transfer or summon equipment');
+ if(s.table?.combatants?.player?.status&&
+  s.table.combatants.player.status!=='ok')
+  throw Error('The player cannot hand over equipment while incapacitated');
+ if(s.player.equippedWeapon===p.item)
+  throw Error('A genuinely held weapon must be unequipped before a voluntary transfer');
+ const owned=ownedAsset(s,p.item);
+ if(owned.quantity!==1)
+  throw Error('Cannot give away an unowned or previously transferred weapon');
+ const {id,action}=itemAction(s,p.item),w=Realm.peek(s),
+  People=require('../world/emergent-people'),
+  person=w?.emergentPeople?.people?.[p.npcId.slice('emergent:'.length)],
+  day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes%1440;
+ if(!person||person.actorId!==p.npcId||!People.verify(w,person)||
+  person.status!=='active'||person.ageBand!=='adult, exact birthday not established')
+  throw Error('Only a real active adult can freely consider an in-person weapon gift');
+ const health=Wallet.currentNpcWoundCondition(s,p.npcId);
+ if(health?.workAndOrdinaryPracticeBlocked)
+  throw Error('An incapacitated or seriously injured person cannot accept this weapon now');
+ if(minute<8*60||minute>17*60+30)
+  throw Error('An independently present current shift is required for the physical handover');
+ const seen=Presence.resolve(w,p.npcId,s.world.location,day,minute);
+ if(!seen?.presence||seen.presence.originHash!==person.originHash||
+  !s.chatRuntime?.scene?.includes(person.name))
+  throw Error('The individual must actually be here in a current witnessed scene');
+ if(verifiedIndependentWeapon(s,p.npcId))
+  throw Error('This person already holds a confirmed original purchased mundane weapon');
+ // The original paid merchant quote/purchase is not interchangeable with
+ // an arbitrary invented damage profile. This weapon has one source root.
+ const quotes=Object.entries(s.table?.merchantOffers||{}).
+  filter(([quoteId,q])=>q?.id===quoteId&&q?.item===p.item&&
+   q.action?.id===id&&
+   JSON.stringify(q.action)===JSON.stringify(action)&&
+   q.purchases?.some(x=>x.buyer===s.player.name));
+ if(quotes.length!==1)
+  throw Error('One original paid weapon quote must be uniquely established');
+ const quoteId=quotes[0][0];
+ const attempts=person.originalWeaponOffers||[];
+ if(!Array.isArray(attempts)||attempts.length>=30)
+  throw Error('Individual equipment-offer decision history needs reconciliation');
+ const key=owned.originalRoot+'|'+seen.presence.hash+'|'+day+'|'+p.item;
+ if(attempts.some(row=>row.source?.originalPurchasedAssetRoot+'|'+
+  row.source?.sourceShiftHash+'|'+
+  Math.floor(row.source?.minute/1440)+'|'+row.source?.item===key))
+  throw Error('An unchanged original item offer has already received an independent answer');
+ // No irreversible mutation before every ownership, presence, original
+ // appraisal and history preflight. The personal choice is real, once.
+ const choice=People.considerOriginalWeaponGift(w,person,{
+  item:p.item,originalPurchasedAssetRoot:owned.originalRoot,
+  sourceShiftHash:seen.presence.hash,minute:s.world.minutes});
+ person.originalWeaponOffers||=[];
+ person.originalWeaponOffers.push(choice);
+ if(choice.source.accepted){
+  // Original item physically moves; its purchased action remains archived
+  // on the player only so historical asset witnesses stay verifiable.
+  // The player cannot ATTACK with an inventory of zero.
+  s.player.inventory[p.item]=0;
+  const source={origin:PERSON_WEAPON,actorId:p.npcId,
+   personOriginHash:person.originHash,ownerName:person.name,
+   item:p.item,actionId:id,
+   originalCombatAction:structuredClone(action),
+   originalQuoteOfferId:quoteId,
+   originalPurchasedAssetRoot:owned.originalRoot,
+   consentSourceHash:choice.sourceHash,
+   originalShiftHash:seen.presence.hash,
+   fromPlayer:s.player.name,
+   worldMinute:s.world.minutes,minuteAtTransfer:s.world.minutes,
+   location:s.world.location,originallyTransferredQuantity:1,
+   noRankOrTechniqueAward:true,noFutureCombatConsentFromGift:true};
+  person.mundaneWeapon={source,sourceHash:hash(source)};
+  const proven=verifiedIndependentWeapon(s,p.npcId);
+  if(!proven||proven.item!==p.item)
+   throw Error('Source-verified original person equipment transfer failed reconciliation');
+ }
+ E.advance(s,5);
+ C.event(s,'equipment',
+  choice.source.accepted?
+   person.name+' freely accepts a physically transferred mundane weapon.':
+   person.name+' declines the offered mundane weapon; the player keeps it.',
+  {npcId:p.npcId,item:p.item,accepted:choice.source.accepted,
+   originalPurchasedAssetRoot:owned.originalRoot,
+   noNewDamageOrCombatPermission:true});
+ return {offered:true,accepted:choice.source.accepted,
+  npcId:p.npcId,name:person.name,item:p.item,elapsedMinutes:5,
+  transferred:choice.source.accepted,
+  weaponRemainsWithPlayer:!choice.source.accepted,
+  noEarnedTechniqueOrCombatConsent:true};
+}
+
+module.exports={offers,inquire,purchase,equip,unequip,status,ownedAsset,giveWeaponToPerson,verifiedIndependentWeapon};
