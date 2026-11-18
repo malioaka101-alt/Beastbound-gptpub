@@ -76,6 +76,14 @@ The existing original sapient-person verifier checks identity, original encounte
 
 `tests/living-npc-original-sapient-evidence-bridge.test.js` uses a disposable real engine wilderness encounter and subsequent independent original sixday work. It verifies source-owned earned outcomes, unchanged beast level/techniques, no forced bond, no public leak, no read-time dice or clock, replay stability, wrong-campaign rejection and original record tamper rejection. No campaign save is touched.
 
+## Stage 2B.5 — already living starting relatives, without invented kinship
+
+An existing `world/origin-relatives.js` person can now be inspected through the same internal `gmDossier(world, 'origin-kin:'+personId, matchingGameState)` bridge. It reuses the **original independent relative** source and `Kin.status(gameState)` family-continuity verifier; no relative is created, backfilled or summoned by reading. The matching-game-state requirement prevents mixing the player's family and another campaign's NPC records.
+
+The private evidence contains the original relative's sealed origin hash, exact founding household role, any separately established kinship, the original personally confirmed relationship statement (if one exists), and source-verified independently chosen sixday activity receipts. An old `guardian` role is **not** biological `mother`, `father` or `aunt` unless the player explicitly established that relationship in the original continuity record. This bridge neither rewrites sealed source records nor overrides an established player-confirmed family fact. Private funds and fatigue remain GM-only; a relative's attendance, consent, independent status, wounds, combat attributes, techniques and supernatural stages are not silently assumed from their family role.
+
+`tests/living-npc-original-kin-evidence.test.js` creates only disposable new-campaign relatives, tests source role/correction separation, actual original sixday decisions and source receipts, private/public boundaries, replay, tampered source and activity rejection, old saves without actors, and mismatched campaign rejection. It does not load or write Maddoc's actual save.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
