@@ -561,16 +561,27 @@ function presence(w,id,location,day,minute){
  const {hash:seal,...body}=sh;
  return hash(body)===seal?structuredClone(sh):null;
 }
-function live(w,p,day){
+function live(w,p,day,s=null){
  if(!verify(w,p))throw Error('Unverified independent person cannot act');
  if(p.lastTickDay>=day)return;
+ // Same physical person, same original wound record. Ordinary fatigue
+ // recovery must never erase real wounds or permit work after death.
+ const combatCondition=s?
+  require('../rules/unified').currentNpcWoundCondition(s,p.actorId):null,
+  combatBlocked=!!combatCondition?.workAndOrdinaryPracticeBlocked;
  const eco=w.ecosystems[p.regionId],host=w.countries[p.polity],
   region=Atlas.R[p.regionId];
  if(!eco||!host)throw Error('Living people require actual home ecology and polity');
- const x=p.status==='recovering'?null:draw(p),pressure=eco.pressure>74||eco.quality<28||
+ const x=p.status==='recovering'||combatBlocked?null:draw(p),pressure=eco.pressure>74||eco.quality<28||
   host.stability<28;
  let choice,jobOutcome=null;
- if(p.status==='recovering'){
+ if(combatBlocked){
+  // Only the ORIGINAL clinical/wound owner can clear injuries. Existing
+  // normal rest may ease ordinary fatigue but cannot heal wound boxes.
+  if(!combatCondition.terminal)p.fatigue=clamp(p.fatigue-20);
+  choice=combatCondition.terminal?'original-combat-death-no-activity':
+   'rest-from-original-combat-condition';
+ }else if(p.status==='recovering'){
   // The original real-work strain uses the SAME fatigue and presence state.
   // It heals with actual elapsed sixday world time, not an invented clinic,
   // second injury pool, mandatory fixed course or automatic employment.
@@ -606,8 +617,11 @@ function live(w,p,day){
  if(p.status==='relocated'&&choice!=='voluntarily-relocate')
   p.status='active';
  p.lastTickDay=day;
- p.shift=shift(p,day,w);
+ p.shift=combatBlocked?null:shift(p,day,w);
  p.history.push({day,type:'independent-life',choice,
+  ...(combatBlocked?{originalCombatantId:combatCondition.combatantId,
+   originalCombatantEntrySeal:combatCondition.originalEntrySeal,
+   originalWoundWorkBlocked:true}:{}),
   regionId:p.regionId,
   ...(jobOutcome?{professionalWorkHash:jobOutcome.receiptHash,
    actualResult:jobOutcome.success?'completed':'attempted'}:{}),
@@ -619,7 +633,7 @@ function sixday(s,w,day){
  const t=ensure(w);
  if(t.lastSixday>=day)return {created:0,updated:0};
  let updated=0;
- for(const p of Object.values(t.people)){live(w,p,day);updated++;}
+ for(const p of Object.values(t.people)){live(w,p,day,s);updated++;}
  // An emerging person has a local economic/ecological cause. Select across
  // ALL supported regions independently of the player's location. This is
  // not a fixed population count; it models key individuals whose actions
@@ -804,6 +818,9 @@ function observeLocalWork(s,params={}){
   p=w.emergentPeople?.people?.[params.npcId.slice('emergent:'.length)];
  if(!shift||!p||!verify(w,p))
   throw Error('An actual locally present independent person is required; no remote profession can be summoned');
+ if(require('../rules/unified').currentNpcWoundCondition(s,p.actorId)?.
+  workAndOrdinaryPracticeBlocked)
+  throw Error('Original combat wounds or incapacity prevent demonstrated professional work');
  const willing=p.fatigue<=75&&draw(p)<(p.personality==='independent'?.58:.78),
   observed=willing?Careers.work(w,p,day,'locally-witnessed-duty'):null,
   publicWork=observed?Careers.publicWitness(observed):{
@@ -874,6 +891,9 @@ function proposeLocalWork(s,params={}){
   p=w.emergentPeople?.people?.[params.npcId.slice('emergent:'.length)];
  if(!shift||!p||!verify(w,p)||p.status!=='active')
   throw Error('The individual is not actively present at this actual work scene');
+ if(require('../rules/unified').currentNpcWoundCondition(s,p.actorId)?.
+  workAndOrdinaryPracticeBlocked)
+  throw Error('Original combat wounds or incapacity prevent offering active work now');
  const existing=s.table?.localWorkProposals;
  if(existing&&(!existing.records||!existing.byShift||
     typeof existing.records!=='object'||typeof existing.byShift!=='object'||
@@ -998,6 +1018,9 @@ function assistLocalWork(s,params={}){
   p=w.emergentPeople?.people?.[params.npcId.slice('emergent:'.length)];
  if(!shift||!p||!verify(w,p)||p.status!=='active')
   throw Error('Only an active, individually present local worker can consider assistance');
+ if(require('../rules/unified').currentNpcWoundCondition(s,p.actorId)?.
+  workAndOrdinaryPracticeBlocked)
+  throw Error('Original combat wounds or incapacity prevent cooperative professional work');
  if(s.table?.localWorkAssistance?.lastByDay?.[p.id]===day)
   throw Error('The same task and shift have already received a work-help attempt; a distinct real task needs its own scene');
  const need=p.birthSource.need,
