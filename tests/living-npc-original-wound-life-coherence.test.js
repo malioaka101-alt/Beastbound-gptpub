@@ -67,7 +67,7 @@ for(const request of [
 ]){
  A.throws(()=>Rules.act(s,request),/Original combat wounds or incapacity/);
  A.equal(E.exportGame(s),injuredSnapshot,
-  'Rejected work cannot consume the player's roll, coin, clock, or choice');
+  'Rejected work cannot consume the player roll, coin, clock, or choice');
 }
 A.equal(s.rngState,rollAfterAttack);
 A.equal(p.career.workCount,originalWork);
