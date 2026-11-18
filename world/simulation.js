@@ -1127,6 +1127,8 @@ function tick(s,weekDays=[],monthDays=[]){
    // Per-individual wildlife acts against the ecology at THIS specific day,
    // not the future conditions at the end of a multi-month time jump.
    WildLives.sixday(s,[day]);
+   // Individuals from on-demand taxa share the real world clock and ecology.
+   require('./generated-wildlife').sixday(s,[day]);
    // Relationship decisions follow genuine individual movement in the
    // same sixday; no remote animal location is disclosed to the player.
    WildRelations.sixday(s,day);
@@ -1274,12 +1276,29 @@ function observe(s,{minutes=30,source='Direct field observation'}={}){
  const w=ensure(s),reg=A.R[locationRegion(s)];
  if(!reg)throw Error('Unknown local habitat');
  const local=E.LOCATIONS[s.world.location],can=(local?.spawns||[]).filter(x=>E.SPECIES[x]);
- const n=Math.floor(random(w)*0xffffffff), useCanon=can.length>0&&n%5===0;
- const species=useCanon?B.lookup('authored:'+can[n%can.length]):B.sample(reg.biome,n);
- const record={id:species.id,name:species.name,region:reg.id,day:worldDay(s)+1,source:source.slice(0,220),ecologicalRole:species.role,knownForm:species.canonical};
- w.knownSights.push(record);if(w.knownSights.length>120)w.knownSights.splice(0,w.knownSights.length-120);
- E.advance(s,minutes);return {observed:{name:species.name,habitat:reg.name,ecologicalRole:species.role,diet:species.diet,source:record.source},
-  id:record.id,observationTimeMinutes:minutes,note:'Observation is not a tame, contract, level gain, identification of all powers or guaranteed combat encounter'};
+ const n=Math.floor(random(w)*0xffffffff),useCanon=can.length>0&&n%5===0;
+ // The large taxonomic space is materialised only when the field actually
+ // reveals a creature. Existing individuals can return, independently;
+ // no player/GM selects a desired ID, grade, disposition or result.
+ const Individuals=require('./generated-wildlife');
+ const returning=useCanon?null:Individuals.maybeReturn(s,w,reg,n);
+ const species=returning?B.lookup(s.beasts[returning.beastId].species):
+  useCanon?B.lookup('authored:'+can[n%can.length]):B.sample(reg.biome,n);
+ const witnessed=returning||(useCanon?null:
+  Individuals.create(s,w,reg,species,source));
+ const record={id:species.id,name:species.name,region:reg.id,
+  day:worldDay(s)+1,source:source.slice(0,220),
+  ecologicalRole:species.role,knownForm:species.canonical,
+  ...(witnessed?{beastId:witnessed.beastId,
+   returningIndividual:witnessed.previouslyWitnessed}: {})};
+ w.knownSights.push(record);
+ if(w.knownSights.length>120)w.knownSights.splice(0,w.knownSights.length-120);
+ E.advance(s,minutes);
+ return {observed:{name:species.name,habitat:reg.name,
+   ecologicalRole:species.role,diet:species.diet,source:record.source},
+  id:record.id,observationTimeMinutes:minutes,
+  ...(witnessed?{individualSighting:witnessed}:{}),
+  note:'Field observation is not a tame, contract, power, grade, verified sapience or combat encounter. The first sighting of a new taxon establishes a persistent uncharacterised individual, not a complete bestiary entry.'};
 }
 function knownTaxon(s,{id}={}){const w=peek(s),found=w.knownSights.find(x=>x.id===id);if(!found)throw Error('Species has not been identified in this campaign');
  const v=B.lookup(id,{state:s});
