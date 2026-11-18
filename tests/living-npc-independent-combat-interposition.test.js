@@ -146,7 +146,7 @@ for(const wants of [true,false]){
  A.equal(privateRoll.details.originalOneCheck,true);
  for(const key of ['modifier','total','margin','roll','dc','naturalBonus','dice'])
   A.equal(Object.hasOwn(privateRoll.details,key),false);
- A.equal(privateRoll.message.includes(' vs DC '),false);
+ A.equal(privateRoll.text.includes(' vs DC '),false);
  const replay=E.importGame(E.exportGame(s));
  A.deepEqual(Combat.get(replay,id),c);
  A.equal(Realm.peek(replay).emergentPeople.people[p.id].rngState,p.rngState);
