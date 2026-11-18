@@ -173,6 +173,67 @@ function validateAccount(a,id){
       a.lastOffer.response!==(prior.accepted?'accepted':'declined')))
   throw Error('Recipient’s most recent real material decision needs its original witness');
 }
+// Internal GM-only source projection of CURRENT ordinary personal materials.
+// The original custodial validator remains the authority; this is a pure
+// view, not an alternative inventory, grant, transfer, combat gear or player
+// knowledge interface. The absence of an account is UNKNOWN, not zero goods.
+function privateHoldingEvidence(w,actorId){
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('A registered individual identity is required for private custody evidence');
+ const account=w?.materialCustody?.accounts?.[actorId];
+ if(!account)return {known:false,actorId,verifiedCurrentMaterials:null,
+  originalOwner:'rules/material-handoffs.js',
+  noInventoryCreated:true,noEquipmentOrCombatInference:true};
+ validateAccount(account,actorId);
+ const latest=new Map(),legacy=new Set();
+ const step=(item,before,after,sourceHash,sourceKind)=>{
+  const previous=latest.get(item);
+  // Actual older saves can begin before balance-rich receipts existed.
+  // Their unobserved past is not silently declared fully authenticated.
+  const fullChain=previous?previous.fullAcquisitionChain&&previous.quantity===before:
+   before===0&&!legacy.has(item);
+  latest.set(item,{item,quantity:after,sourceHash,sourceKind,
+   fullAcquisitionChain:fullChain});
+ };
+ for(const record of account.history){
+  if(record.origin===ORIGIN){
+   if(Number.isInteger(record.recipientStockBefore)&&
+      Number.isInteger(record.recipientStockAfter))
+    step(record.item,record.recipientStockBefore,record.recipientStockAfter,
+     record.hash,record.origin);
+   else legacy.add(record.item);
+  }else if(record.origin===SOURCE_PURCHASE){
+   if(Number.isInteger(record.heldBefore)&&
+      Number.isInteger(record.heldAfter))
+    step(record.item,record.heldBefore,record.heldAfter,
+     record.hash,record.origin);
+   else legacy.add(record.item);
+  }else if(record.origin===PERSON_SALE){
+   const q=record.source;
+   step(q.item,q.sellerHeldBefore,q.sellerHeldAfter,
+    record.sourceHash,record.origin);
+  }else if(record.origin==='independent-personal-ration-use-v1'){
+   if(Number.isInteger(record.heldBefore)&&
+      Number.isInteger(record.remainingOwned))
+    step(record.item,record.heldBefore,record.remainingOwned,
+     record.hash,record.origin);
+   else legacy.add(record.item);
+  }
+ }
+ const proven=[...latest.values()].sort((a,b)=>a.item.localeCompare(b.item));
+ for(const entry of proven)
+  if((account.held[entry.item]??0)!==entry.quantity)
+   throw Error('Current private material holding contradicts original custody proof');
+ const unverifiedItems=Object.keys(account.held).filter(k=>!latest.has(k));
+ return {known:true,actorId,originalOwner:'rules/material-handoffs.js',
+  verifiedCurrentMaterials:proven,
+  earlierUnverifiedItemTypes:unverifiedItems.length,
+  missingHistoricalBalances:legacy.size>0,
+  heldItemTypesAreNotCompleteInventory:true,
+  noInventoryCreated:true,noEquipmentOrCombatInference:true,
+  privateToGM:true};
+}
+
 function custody(w){
  if(w.materialCustody===undefined)w.materialCustody={version:1,accounts:{}};
  const c=w.materialCustody;
@@ -690,5 +751,5 @@ function creditPurchasedRation(w,id,row){
 }
 
 module.exports={ORIGIN,ASSET_ORIGIN,PERSON_SALE,offer,purchaseFromPerson,status,sixday,
- attestAsset,assetStatus,verifyAssetAttestations,validateAccount,
+ attestAsset,assetStatus,verifyAssetAttestations,validateAccount,privateHoldingEvidence,
  SOURCE_PURCHASE,preflightPurchasedRation,creditPurchasedRation};
