@@ -26,6 +26,10 @@ This work began when a deliberately fabricated non-canonical travelling clan eld
 
 **Phase 1 does NOT complete full NPC builds.** Natural baseline scores are *not* final current combat attributes (age, wounds, physique, training and equipment affect those), and no actual discipline rank or beast has been fabricated for the elder. The capability to display an NPC's current complete combat profile requires source-specific work in later phases.
 
+## Foundation source-verification cost hardening
+
+Long-running world regressions repeatedly verify the same person's source identity. The Stage 1 foundation now caches the **expected deterministic source derivation** by original world seed, actor ID and sealed origin hash, with a bounded 4,096-entry cache. Every verification still compares the actor's entire current profile with the expected record. Public `build()` returns a separate copy, so mutating that copy cannot corrupt future expected values or permit false verification. No saved schema, original rank, source witness, player dice or game-clock mechanics change. The disposable clan-elder regression checks cached-copy isolation and live source tamper rejection. This is a performance safeguard, not a migration or power grant.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
