@@ -234,7 +234,7 @@
       b.individualLife.witnessed?.length>0&&
       // An autonomous off-screen sixday must actually have elapsed.
       // Immediate repeated exploration cannot summon the same animal.
-      b.individualLife.lastTickDay>b.individualLife.source.initialDay&&
+      b.individualLife.lastTickDay>=b.individualLife.source.initialDay+12&&
       b.away===true&&
       Number.isInteger(b.individualLife.rngState)&&b.individualLife.rngState>0&&
       b.location===s.world.location&&site.spawns.includes(b.species)&&
