@@ -14,6 +14,15 @@ A free-form intention such as *look for unfamiliar beasts*, *look for beasts*, *
 
 An uncatalogued animal that genuinely needs a completely novel, not-yet-parametric species can still be introduced by the GM through existing witnessed biology + regional population + `world.gmWildWitness`. It remains uncharacterised until proper original observations support specialist assessment. **Never force a fully written bestiary before play**; flesh out the necessary biological facts as meaningful observations or research demand them, and never pretend their unimplemented numerical effects have already happened.
 
+## Existing species is not the same as an existing beast
+
+The encounter selector distinguishes three valid world results:
+- **First recorded species sighting:** sample a new `tx:...` taxon from the region-compatible expandable bestiary, establish a unique uncharacterised beast and retain the species ID in the player-known sighting ledger.
+- **Another individual of an already witnessed local species:** preferentially select an established regional taxon and create a **new beast ID** with independent biology still unmeasured. Recurring species should be more common than endless never-before-seen species.
+- **The same individual again:** reuse an actual saved beast ID only if it remains eligible under place, time, ecology, condition and independent agency. No cloning, teleportation or guaranteed response.
+
+Canonical prototype species and completely novel `gm:...` families remain compatible with their own source owners. A generated encounter record is evidence of this particular animal being witnessed, not the literal moment at which that species began existing across the realm.
+
 ## Returning creatures
 
 - Normal `explore` has a bounded chance of meeting an individually witnessed **existing** original-engine wild creature if it is still at a compatible site, free, well enough and not currently in an active encounter. Its own saved RNG independently decides whether it remains visible. Otherwise existing wild births or first-time engine individuals can appear.
