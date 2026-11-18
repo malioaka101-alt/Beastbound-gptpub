@@ -31,6 +31,92 @@ function ensurePlayer(s){
  t.combatants.player=c;t.healthModel=MODEL;t.legacyHealth={current:p.health,max:p.maxHealth};
  return {created:true,combatant:Combat.publicCombatant(c)};
 }
+// Source-witnessed ENTRY to the existing human wound combat owner, not an
+// alternative NPC combat engine. A living person's privately derived natural
+// baseline only becomes an unarmed, unarmoured CURRENT combatant when the GM's
+// real same-scene observation establishes absence of wounds and equipment.
+// Older/unknown condition never becomes a fabricated clean health bar.
+function linkWitnessedHuman(s,{npcId,witness,...extras}={}){
+ if(Object.keys(extras).length||typeof npcId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(npcId)||
+  typeof witness!=='string'||witness.trim().length<35||
+  witness.length>800)
+  throw Error('A genuine existing independent person and current physical witness are required; no stat selection');
+ const Realm=require('../world/simulation'),
+  People=require('../world/emergent-people'),
+  Presence=require('../world/person-presence'),
+  Mechanics=require('../world/person-mechanical-foundations'),
+  Crypto=require('node:crypto'),
+  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+ const w=Realm.peek(s),p=w.emergentPeople?.people?.[npcId.slice('emergent:'.length)];
+ if(!p||p.actorId!==npcId||!People.verify(w,p)||
+  p.birthSource?.mechanicalFoundationVersion!==1||
+  !Mechanics.verify(w,p))
+  throw Error('Original source-sealed living adult physical foundation required');
+ if(p.ageBand!=='adult, exact birthday not established'||
+  p.status!=='active'||
+  (p.career?.safetyIncidents?.length||0)>0)
+  throw Error('Unresolved age, current recovery or workplace injury cannot be converted into uninjured combat condition');
+ if(p.knownTechniques?.length||p.practicedDisciplines?.length)
+  throw Error('Legacy technique or power entries require original source adjudication');
+ const day=Math.floor(s.world.minutes/1440),minute=s.world.minutes%1440,
+  local=Presence.resolve(w,npcId,s.world.location,day,minute);
+ if(!local?.presence||local.presence.originHash!==p.originHash||
+  local.presence.location!==s.world.location)
+  throw Error('Current independent physical presence and shift provenance required');
+ const scene=s.chatRuntime?.scene;
+ if(typeof scene!=='string'||!scene.includes(witness)||
+  !witness.includes(p.name)||
+  !/uninjured/i.test(witness)||
+  !/unarmed/i.test(witness)||
+  !/unarmoured/i.test(witness))
+  throw Error('Original current scene must actually establish this named uninjured, unarmed, unarmoured adult');
+ if(s.battle||s.encounter)
+  throw Error('Cannot introduce a clean NPC wound state during an unresolved encounter');
+ const foundation=p.mechanicalFoundation.baselineAttributes,
+  abil=k=>Math.floor((foundation[k]-10)/2),
+  attrs={vigor:abil('con'),agility:abil('dex'),wits:abil('wis'),
+   will:abil('wis'),might:abil('str')},
+  base=B.humanStats(attrs,{skills:{Melee:0},size:'Medium'});
+ if(!Number.isInteger(base.stamina)||base.stamina<0)
+  throw Error('The original human stamina formula has no legal baseline for this individual; physical adjudication required');
+ const id='npc_'+p.id,t=s.table,old=t?.combatants?.[id];
+ if(old){
+  if(old.npcOrigin?.actorId!==npcId||
+   old.npcOrigin?.individualOriginHash!==p.originHash||
+   old.npcOrigin?.foundationSeal!==p.mechanicalFoundation.seal)
+   throw Error('Existing NPC combatant does not match original source identity');
+  return {created:false,id,npcId,
+   observed:Combat.observedCombatant(old),
+   existingWoundsPreserved:true,noRoll:true};
+ }
+ if(t?.healthModel&&t.healthModel!==MODEL)
+  throw Error('Conflicting original wound model cannot be replaced');
+ const proof={origin:'source-witnessed-original-human-wound-entry-v1',
+  actorId:npcId,individualOriginHash:p.originHash,
+  foundationSeal:p.mechanicalFoundation.seal,
+  originalShiftHash:local.presence.hash,
+  location:s.world.location,worldMinute:s.world.minutes,
+  sceneWitnessHash:hash(witness),size:'Medium',
+  originalUnarmouredHumanBaseline:true,
+  noInferredCombatRankTechniqueOrEquipment:true,
+  occupationalFatigueNotConvertedIntoWoundDamage:true};
+ // Combat.register is the actual original combatant owner; no duplicate
+ // health/stamina or second personal development record is created.
+ const registered=Combat.register(s,{id,name:p.name,
+  toughness:base.toughness,defense:base.defense,
+  vigor:attrs.vigor,will:attrs.will,stamina:base.stamina,
+  boxes:base.boxes,offM:0,durM:0});
+ s.table.healthModel=MODEL;
+ s.table.combatants[id].npcOrigin={...proof,seal:hash(proof)};
+ C.event(s,'ruling',
+  'A physically present independent adult is now subject to the original wound combat model; actual injuries and future power require their original owners.',{
+   npcId,id,sourceHash:hash(proof),originalShiftHash:proof.originalShiftHash,
+   noStatSelection:true,noRanksOrEquipmentGranted:true});
+ return {created:registered.registered,id,npcId,
+  observed:Combat.observedCombatant(s.table.combatants[id]),
+  noRoll:true,noUnverifiedPowerOrGear:true};
+}
 function migrateLegacy(s,{wounds,reason}={}){
  const t=state(s),p=s.player;
  if(t.combatants.player)throw Error('Wound model already exists');
@@ -225,4 +311,4 @@ function spend(s,{scales,reason}={}){
  s.table.finances.entries=s.table.finances.entries.slice(-100);
  return {spentScales:scales,balanceScales:remain};
 }
-module.exports={MODEL,playerProfile,ensurePlayer,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
+module.exports={MODEL,playerProfile,ensurePlayer,linkWitnessedHuman,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
