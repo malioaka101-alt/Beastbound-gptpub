@@ -30,6 +30,16 @@ This work began when a deliberately fabricated non-canonical travelling clan eld
 
 Long-running world regressions repeatedly verify the same person's source identity. The Stage 1 foundation now caches the **expected deterministic source derivation** by original world seed, actor ID and sealed origin hash, with a bounded 4,096-entry cache. Every verification still compares the actor's entire current profile with the expected record. Public `build()` returns a separate copy, so mutating that copy cannot corrupt future expected values or permit false verification. No saved schema, original rank, source witness, player dice or game-clock mechanics change. The disposable clan-elder regression checks cached-copy isolation and live source tamper rejection. This is a performance safeguard, not a migration or power grant.
 
+## Stage 2A — source-owned earned capability evidence (follow-up branch)
+
+The next tested increment adds `earnedEvidence(w,actorId)` and embeds its result in the private `gmDossier` bridge. It verifies the individual's original identity, `person-careers` receipts/promotions/methods and, when present, the independent-life source ledger before giving the GM an individual evidence snapshot. The preserved professional skill rank and earned work checks are **ordinary professional competence**, not power or a universal cultivation level. Independently accumulated study familiarity is explicitly **not** supernatural advancement.
+
+For existing notables the view distinguishes original professional standing, preparation for a system-specific trial and actual unawarded breakthroughs. It preserves recovery-month information without inventing detailed wounds. Every power family remains explicitly unresolved at this stage: Meridian stage and gates; Arcane core/circles; Soul phases; Body cycles; Rift steps; Beast-Origin integrations; human evolution; and partnership synchronisation. Current adjusted attributes, techniques, injuries, equipment, genuine beast bonds and combat effects stay **unknown** until original source owners prove them.
+
+Unverified legacy `practicedDisciplines` and `knownTechniques` arrays are deliberately **not** promoted into verified GM dossier powers. No public rule action exposes this private evidence. The disposable Stage 2A test verifies save replay, normal witnesses, null-vs-zero, career and life tamper rejection, no world mutation and no earned stage by social role.
+
+**Unfinished:** Stage 2B must bind individual discipline-specific original events, real techniques, equipment/ownership, wounds/age-adjusted current attributes, and origin-provenance for legacy actors. Stages 3–6 are still outstanding. No NPC combat capability or discipline award is inferred by the Stage 2A evidence view.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
