@@ -656,7 +656,7 @@ function chooseEmergencyInterposition(s,actorId){
  if(!present?.presence||present.presence.hash!==p.shift?.hash||
   present.presence.originHash!==p.originHash||
   c.npcOrigin?.location!==s.world.location||
-  !s.chatRuntime?.scene?.includes(p.name))
+  !s.chatRuntime?.scene?.includes(p.name+' stands beside the player'))
   throw Error('The person must actually be present and witnessed at this dangerous scene');
  const before=p.rngState,roll=draw(p),
   chance=Math.max(.08,Math.min(.55,
