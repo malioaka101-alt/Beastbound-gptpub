@@ -49,4 +49,49 @@ function choose(s){
   canCommunicate:profile.canCommunicate,
   withdrawalDC:profile.withdrawalDC,parleyDC:profile.parleyDC};
 }
-module.exports={verify,choose};
+// A source-witnessed independent adult may freely protect the player from
+// an ALREADY committed wild-beast attack. This is neither ally recruitment
+// nor a new human attack/damage scheme. Actual intervention has the original
+// beast roll target this person's real wound-model combatant instead.
+function chooseHumanInterposition(s,beastPlan){
+ if(beastPlan!=='attack')return null;
+ const f=s.battle;
+ if(!f||f.mode!=='wounds-v1'||!f.beastId||
+  f.enemyId!=='beast:'+f.beastId)return null;
+ const people=require('../world/emergent-people'),
+  realm=require('../world/simulation').peek(s),
+  presence=require('../world/person-presence'),
+  health=require('./unified'),
+  day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes%1440;
+ const eligibles=[];
+ for(const [id,combatant] of Object.entries(s.table?.combatants||{})){
+  if(!/^npc_person_[0-9]+$/.test(id)||!combatant.npcOrigin)
+   continue;
+  const actorId=combatant.npcOrigin.actorId;
+  if(typeof actorId!=='string'||id!=='npc_'+actorId.slice('emergent:'.length))
+   throw Error('Registered combatant is not the original individual person');
+  const condition=health.currentNpcWoundCondition(s,actorId),
+   p=realm?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+  if(!p||!condition||
+   condition.workAndOrdinaryPracticeBlocked||
+   p.status!=='active'||p.fatigue>75||
+   p.ageBand!=='adult, exact birthday not established'||
+   !s.chatRuntime?.scene?.includes(p.name))
+   continue;
+  const here=presence.resolve(realm,actorId,s.world.location,day,minute);
+  if(!here?.presence||here.presence.hash!==p.shift?.hash||
+   here.presence.originHash!==p.originHash||
+   combatant.npcOrigin.location!==s.world.location)
+   continue;
+  eligibles.push({actorId,entryMinute:combatant.npcOrigin.worldMinute});
+ }
+ if(!eligibles.length)return null;
+ // A bounded single protective reaction avoids granting a crowd free extra
+ // turns. Rank by original witnessed entry and identity, not by any caller's
+ // desired winner, stat, roll or actor ID.
+ eligibles.sort((a,b)=>a.entryMinute-b.entryMinute||
+  a.actorId.localeCompare(b.actorId));
+ return people.chooseEmergencyInterposition(s,eligibles[0].actorId);
+}
+module.exports={verify,choose,chooseHumanInterposition};
