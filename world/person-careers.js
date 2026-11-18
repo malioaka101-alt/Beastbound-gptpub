@@ -907,6 +907,45 @@ function task(w,p,day=w.lastTickDay){
    prosperity:host.prosperity},
   difficulty:12+pressure+scarcity+instability};
 }
+
+/**
+ * Current ordinary professional work capability, from the ORIGINAL
+ * individually earned career owner. This is not a universal NPC skill,
+ * a spellcasting modifier, a combatant, an invitation or proof of presence.
+ * The actual job DC, individual decision, local conditions, innovation and
+ * peer help remain with work(); this pure read never draws RNG or ticks time.
+ */
+function baseWorkReadiness(p,c){
+ const aptitudeAdjustment=Math.floor((c.aptitude-5)/2),
+  fatiguePenalty=p.fatigue>70?3:p.fatigue>45?1:0;
+ return {earnedCompetenceRank:c.competenceRank,
+  aptitudeAdjustment,fatiguePenalty,
+  unassistedModifier:c.competenceRank*2+aptitudeAdjustment-fatiguePenalty};
+}
+function currentCapability(p){
+ if(!p||!verify(p))
+  throw Error('Cannot inspect current work ability without original career verification');
+ if(!p.career)return null;
+ const c=p.career,base=baseWorkReadiness(p,c),
+  demonstratedMethods=Object.entries(c.demonstratedMethods).map(([method,count])=>({
+   method,lifetimeRecordedSuccesses:count,
+   recentVerifiedWork:c.workReceipts
+    .filter(r=>r.source.task.method===method&&r.source.outcome.success)
+    .map(r=>({day:r.source.day,receiptHash:r.sourceHash,
+     degree:r.source.outcome.degree}))
+  }));
+ return {origin:'original-earned-professional-readiness-v1',
+  owner:'world/person-careers.js',actorId:p.actorId,
+  ...base,attemptedWork:c.workCount,successfulWork:c.successes,
+  demonstratedMethods,
+  currentFatigue:p.fatigue,independentWorkerStatus:p.status,
+  presentlyWilling:null,locallyPresent:null,
+  equipmentBonuses:null,injuryAdjustment:null,
+  otherTaskBonusesNotApplied:true,originalDCNotPredetermined:true,
+  noRollOccurred:true,noTimeOrResourcesSpent:true,
+  noCultivationOrCombatPowerAward:true};
+}
+
 function work(w,p,day,context='independent-duty',assistance=null){
  if(p.status==='recovering')throw Error('A recovering worker cannot be compelled into another work check');
  if(!Number.isInteger(day)||day<0||
@@ -932,8 +971,8 @@ function work(w,p,day,context='independent-duty',assistance=null){
    e.method===job.method&&e.day<=day&&day<=e.source.validThroughDay),
   peerBonus=supportFromPeer?1:0,
   dc=job.difficulty+Math.floor(originalSkill/2),
-  modifier=originalSkill*2+Math.floor((c.aptitude-5)/2)-
-   (p.fatigue>70?3:p.fatigue>45?1:0)+support+innovation.bonus+peerBonus,
+  modifier=baseWorkReadiness(p,c).unassistedModifier+
+   support+innovation.bonus+peerBonus,
   roll=1+Math.floor(draw(p)*20),
   total=roll+modifier+(roll===20?5:roll===1?-5:0),
   margin=total-dc,
@@ -1038,7 +1077,7 @@ function publicWitness(x){
   reportedEffects:x.observedChange,
   noInferredFormalRank:true,noInferredMagicOrFamilyKnowledge:true};
 }
-module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,observePeerGuidance,peerGuidanceStatus,
+module.exports={ORIGIN,WORK,VERSION,TITLES,THRESHOLDS,DUTY,ATTEST,WORK_OFFER,ensure,verify,work,currentCapability,authorDuty,retireDuty,authoredDutyStatus,issueAttestation,revokeAttestation,attestationStatus,offerDuty,endWorkOffer,workOfferStatus,observePeerGuidance,peerGuidanceStatus,
  payVerifiedTradeWork,verifyLocalTradePayments,tradePaymentStatus,
  SAFETY,observeWorkplaceSafety,workplaceSafetyStatus,
  publicWitness,_debug:{draw,hash,innate,task,initial}};
