@@ -1283,7 +1283,14 @@ function observe(s,{minutes=30,source='Direct field observation'}={}){
  const Individuals=require('./generated-wildlife');
  const returning=useCanon?null:Individuals.maybeReturn(s,w,reg,n);
  const species=returning?B.lookup(s.beasts[returning.beastId].species):
-  useCanon?B.lookup('authored:'+can[n%can.length]):B.sample(reg.biome,n);
+  useCanon?B.lookup('authored:'+can[n%can.length]):
+  Individuals.localSpecies(s,w,reg,n)||B.sample(reg.biome,n);
+ // A taxon can be already known while THIS individual is newly seen.
+ // Keep the first recorded species distinct from the first encounter of
+ // an animal; never count distinct individual IDs as novel species.
+ const previouslyRecorded=w.knownSights.some(x=>x.id===species.id)||
+  Object.values(s.beasts||{}).some(x=>
+   x.species===species.id&&(x.generatedWild||x.gmWild||x.wildBirth));
  const witnessed=returning||(useCanon?null:
   Individuals.create(s,w,reg,species,source));
  // If the saved ecology cannot support an actual new resident, this is a
@@ -1297,6 +1304,7 @@ function observe(s,{minutes=30,source='Direct field observation'}={}){
  const record={id:species.id,name:species.name,region:reg.id,
   day:worldDay(s)+1,source:source.slice(0,220),
   ecologicalRole:species.role,knownForm:species.canonical,
+  firstRecordedSpeciesSighting:!previouslyRecorded,
   ...(witnessed?{beastId:witnessed.beastId,
    returningIndividual:witnessed.previouslyWitnessed}: {})};
  w.knownSights.push(record);
@@ -1316,8 +1324,9 @@ function observe(s,{minutes=30,source='Direct field observation'}={}){
  return {observed:{name:species.name,habitat:reg.name,
    ecologicalRole:species.role,diet:species.diet,source:record.source},
   id:record.id,observationTimeMinutes:minutes,
+  firstRecordedSpeciesSighting:!previouslyRecorded,
   ...(witnessed?{individualSighting:witnessed}:{}),
-  note:'Field observation is not a tame, contract, power, grade, verified sapience or combat encounter. The first sighting of a new taxon establishes a persistent uncharacterised individual, not a complete bestiary entry.'};
+  note:'A species can already be known while this animal is a new individual. A first-seen taxon enters the living bestiary with its own persistent uncharacterised beast, not an invented combat profile, rank, power, bond or complete biology.'};
 }
 function knownTaxon(s,{id}={}){const w=peek(s),found=w.knownSights.find(x=>x.id===id);if(!found)throw Error('Species has not been identified in this campaign');
  const v=B.lookup(id,{state:s});
