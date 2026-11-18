@@ -276,9 +276,13 @@
     const distanceMetres=2+Math.floor(rand(s)*16);
     s.encounter={beastId:b.id,observed:false,approaches:0,threat:danger>.82,distanceMetres};
     log(s,'encounter',`You find a wild ${SPECIES[k].name} near ${site.name}. It appears ${mood}. It has not agreed to approach or partner with you.`,{beastId:b.id,species:k,location:s.world.location,mood,distanceMetres,
-      independentlyBorn:!!independentlyBorn,returningIndividual,
-      previouslyWitnessed:returningIndividual,
-      origin:'engine-local-wildlife-encounter'});
+      independentlyBorn:!!independentlyBorn,
+      // Exact original encounter provenance (including key order) stays
+      // unchanged for all non-returning wildlife: the evidence hash seeds
+      // each animal's existing independent behaviour RNG.
+      origin:'engine-local-wildlife-encounter',
+      ...(returningIndividual?{returningIndividual:true,
+       previouslyWitnessed:true}:{})});
     return success(s);
   }
   function forage(s){
