@@ -5,6 +5,11 @@
 // remain exclusively with the original source-owned rules and event histories.
 const Crypto=require('node:crypto');
 const ORIGIN='independent-person-mechanical-foundation-v1';
+// Rebuilding twenty SHA-256 derivations for each verify() in long-running
+// independent-world ticks is needlessly expensive. Cache only deterministic
+// EXPECTED source results, never the person's mutable presented profile.
+// Every inspection still compares the entire live source-sealed record.
+const EXPECTED_CACHE=new Map(),EXPECTED_CACHE_LIMIT=4096;
 const ATTRIBUTES=Object.freeze(['str','dex','con','int','wis','cha']);
 const POTENTIAL=Object.freeze([
  'meridianBreadth','gateStability','manaCoreArchitecture','soulDepth',
@@ -16,11 +21,13 @@ function bytes(w,actor,field){
  return Crypto.createHash('sha256').update(
   ORIGIN+'|'+w.worldSeed+'|'+actor.actorId+'|'+actor.originHash+'|'+field).digest();
 }
-function build(w,actor){
+function expectedFoundation(w,actor){
  if(!w||w.worldSeed===undefined||!actor||
     !/^emergent:person_[0-9]+$/.test(actor.actorId||'')||
     !/^[a-f0-9]{64}$/.test(actor.originHash||''))
   throw Error('An original source-sealed independent individual is required');
+ const key=JSON.stringify([w.worldSeed,actor.actorId,actor.originHash]);
+ if(EXPECTED_CACHE.has(key))return EXPECTED_CACHE.get(key);
  const attributes={};
  for(const key of ATTRIBUTES){
   const h=bytes(w,actor,'attribute:'+key);
@@ -42,11 +49,21 @@ function build(w,actor){
   noAutomaticCultivationStage:true,
   noEarnedTechniqueOrBeastBond:true,
   originalOwnersRetainCurrentSkillsPowersWoundsAndConsent:true};
- return {...source,seal:hash(source)};
+ const expected={...source,seal:hash(source)};
+ if(EXPECTED_CACHE.size>=EXPECTED_CACHE_LIMIT)
+  EXPECTED_CACHE.delete(EXPECTED_CACHE.keys().next().value);
+ EXPECTED_CACHE.set(key,expected);
+ return expected;
+}
+function build(w,actor){
+ // Callers may amend a draft profile; that MUST NOT alter the expected
+ // canonical source for later verification or for another game/replay.
+ return structuredClone(expectedFoundation(w,actor));
 }
 function verify(w,actor){
  if(!actor?.mechanicalFoundation)return false;
- try{return JSON.stringify(actor.mechanicalFoundation)===JSON.stringify(build(w,actor));}
+ try{return JSON.stringify(actor.mechanicalFoundation)===
+  JSON.stringify(expectedFoundation(w,actor));}
  catch{return false;}
 }
 // Internal-only dossier: NEVER expose via an ordinary player-facing rule
