@@ -3,7 +3,8 @@
 // These are newly emerging *individual agents*, not a simulated census.
 // No compulsory family, teacher, caste, sex, magic rank or institutional place.
 const Crypto=require('node:crypto'),Atlas=require('./atlas'),
- Engine=require('../engine.js'),Careers=require('./person-careers');
+ Engine=require('../engine.js'),Careers=require('./person-careers'),
+ Mechanics=require('./person-mechanical-foundations');
 const ORIGIN='causal-world-person-v1',GM_ORIGIN='gm-witnessed-lived-person-v1',SHIFT='emergent-local-work-presence-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const clamp=(n,a=0,b=100)=>Math.min(b,Math.max(a,n));
@@ -242,6 +243,7 @@ function verify(w,p){
   p.actorId!=='emergent:'+p.id||p.originHash!==hash(p.birthSource)||
   p.birthSource?.origin!==p.origin||p.birthSource?.id!==p.id||
   !gmFounding(w,p)||
+  (p.birthSource?.mechanicalFoundationVersion===1&&!Mechanics.verify(w,p))||
   !Atlas.R[p.birthSource.regionId]||!Atlas.P[p.birthSource.polity]||
   Atlas.R[p.birthSource.regionId].polity!==p.birthSource.polity||
   !Number.isInteger(p.birthSource.day)||p.birthSource.day<0||
@@ -266,7 +268,8 @@ function make(w,t,day,d){
  const origin={origin:ORIGIN,id,regionId:d.regionId,polity:d.polity,
   day,need:d.kind,demandEvidenceHash:hash(d),
   initialProfession:work.profession,localGoods:d.evidence.regionalGoods,
-  language,nonAssumedKinship:true,noInheritedRanks:true};
+  language,nonAssumedKinship:true,noInheritedRanks:true,
+  mechanicalFoundationVersion:1};
  const personalSeed=(Crypto.createHash('sha256').update(
   w.worldSeed+'|'+id+'|'+hash(origin)+'|life-v1').digest().readUInt32BE(0))||0x91e10da5;
  const p={id,actorId:'emergent:'+id,origin:ORIGIN,
@@ -285,6 +288,7 @@ function make(w,t,day,d){
   history:[{day,type:'life-start',regionId:d.regionId,
    cause:d.kind,demandEvidenceHash:origin.demandEvidenceHash,observed:false}]};
  p.career=Careers._debug.initial(p);
+ p.mechanicalFoundation=Mechanics.build(w,p);
  if(!verify(w,p))throw Error('Cannot create an inconsistent living individual');
  t.people[id]=p;
  t.history.push({day,kind:'emergence',personId:id,
@@ -389,7 +393,7 @@ function registerGM(s,p={}){
   personality:p.personality.trim(),background:p.background.trim(),
   witness:p.witness.trim(),language,need:'gm-witnessed-occupation',
   nonAssumedKinship:true,nonAssumedConsent:true,
-  noInventedFundsOrRanks:true};
+  noInventedFundsOrRanks:true,mechanicalFoundationVersion:1};
  const sourceHash=hash(b);
  const rngState=Crypto.createHash('sha256')
   .update(w.worldSeed+'|'+id+'|'+sourceHash+'|life-v1').digest().readUInt32BE(0)||0x91e10da5;
@@ -406,6 +410,7 @@ function registerGM(s,p={}){
   history:[{day,type:'gm-witnessed-life-start',regionId:b.regionId,
    sourceHash,observed:true}]};
  actor.career=Careers._debug.initial(actor);
+ actor.mechanicalFoundation=Mechanics.build(w,actor);
  actor.shift=shift(actor,day,w);
  if(!actor.shift||!verify(w,actor))
   throw Error('The new GM individual lacks a valid witnessed local life and independent schedule');
