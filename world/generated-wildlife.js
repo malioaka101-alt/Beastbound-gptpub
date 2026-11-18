@@ -87,8 +87,8 @@ function maybeReturn(s,w,region,selector){
   s.world.minutes-b.generatedWild.lastSeenMinute>=60&&
   verify(s,b)&&fit(w,region.id,Bestiary.lookup(b.species)))
   .sort((a,b)=>a.id.localeCompare(b.id));
- if(!pool.length||selector%5!==0)return null;
- const b=pool[Math.floor(selector/5)%pool.length],life=b.individualLife;
+ if(!pool.length||selector%7!==0)return null;
+ const b=pool[Math.floor(selector/7)%pool.length],life=b.individualLife;
  const before=life.rngState,choice=draw(life),seen=choice<.62;
  life.history.push({day:Math.floor(s.world.minutes/DAY),
   type:'independent-visibility-decision',location:s.world.location,
