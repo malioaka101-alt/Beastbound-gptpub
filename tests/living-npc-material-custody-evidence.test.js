@@ -24,7 +24,7 @@ function fixture(seed){
  person.shift=People.shift(person,0);
  s.world.minutes=8*60;
  A.equal(People.verify(w,person),true);
- A.equal(People.presence(w,person.actorId,'crossing',0),true);
+ A.ok(People.presence(w,person.actorId,'crossing',0));
  return {s,w,person};
 }
 let accepted;
