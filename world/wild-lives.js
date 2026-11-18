@@ -362,6 +362,7 @@ function sixday(s,days){
  for(const day of days){
   for(const b of Object.values(s.beasts||{})){
    const life=b?.individualLife;
+   if(b?.generatedWild)continue; // Independently ticked by generated-wildlife's source owner.
    if(b?.gmWild)continue; // Their source-verified noncombat life uses the same actual world tick below.
    if(!life||b.owner||s.player.partnerIds?.includes(b.id)||
     s.encounter?.beastId===b.id||
@@ -447,6 +448,17 @@ function memories(s,p={}){
  for(const b of Object.values(s.beasts||{})){
   const life=b?.individualLife;
   if(!life)continue;
+  if(b.generatedWild){
+   if(!require('./generated-wildlife').verify(s,b))
+    throw Error('A previously seen generated beast has invalid identity evidence');
+   const last=life.witnessed.at(-1);
+   seen.push({beastId:b.id,lastSeenLocation:last?.location||
+    b.generatedWild.source.location,
+    lastSeenDay:Math.floor((last?.minute??b.generatedWild.source.minute)/DAY)+1,
+    lastObservedAction:'non-invasive individual field sighting',
+    lastSeenBy:'personally witnessed',currentlyPresent:'not established'});
+   continue;
+  }
   if(b.gmWild&&!life.witnessed?.length){
    // The original distant first sighting is already player-known.
    // Display only that witnessed history, never private current whereabouts.
@@ -476,6 +488,8 @@ function memories(s,p={}){
   note:'These are the player\'s recorded historical meetings, not current whereabouts, guaranteed survival, friendship, species identification or available targets.'};
 }
 function track(s,p={}){
+ if(p?.beastId&&s.beasts?.[p.beastId]?.generatedWild)
+  return require('./generated-wildlife').track(s,p);
  if(!p||typeof p!=='object'||Array.isArray(p)||
   Object.keys(p).length!==1||typeof p.beastId!=='string')
   throw Error('Searching accepts only a previously witnessed individual beastId, never a chosen location, chance, animal reaction or search result');

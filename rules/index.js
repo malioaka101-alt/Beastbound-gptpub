@@ -478,6 +478,24 @@ function act(s,{system,operation,params={}}={}){
   case 'world.establishPlace':return LivedPlaces.establish(s,params);
   case 'world.recordPlaceNote':return LivedPlaces.note(s,params);
   case 'world.travelTo':return LivedPlaces.travel(s,params);
+  case 'world.fieldTaxonSighting':{
+   if(Object.keys(params).length)
+    throw Error('A natural wildlife sighting cannot choose a species, individual, encounter odds, grade, time or outcome');
+   if(s.encounter||s.battle)
+    throw Error('Finish the current encounter before looking for unrelated wild individuals');
+   const here=require('../world/lived-places').location(s);
+   const built=E.LOCATIONS[s.world.location];
+   if(!here&&(!built||!built.spawns?.length))
+    throw Error('An actual accessible habitat is required for new wildlife encounters');
+   if(here?.biome==='settlement'&&!built?.spawns?.length)
+    throw Error('A settlement street is not by itself a wild habitat; visit a genuine ecological edge');
+   const old=s.world.minutes;
+   const v=Realm.observe(s,{minutes:30,
+    source:'Direct field observation of independently living local fauna'});
+   W.finalizeTime(s,old);
+   Unified.sync(s,{source:'legacy'});
+   return {...v,noForcedEncounter:true,noChosenSpecies:true};
+  }
   case 'world.observe':return Wildlife.observe(s,params);
   case 'world.gmWildWitness':return require('../world/gm-wild-individuals').witnessed(s,params);
   case 'world.gmWildCharacterise':return require('../world/gm-wild-individuals').characterise(s,params);

@@ -225,20 +225,64 @@
       b.away===true&&b.location===s.world.location&&
       site.spawns.includes(b.species)&&b.owner===null&&
       b.relationship==='wild'&&b.condition>=35);
-    const returning=born.length&&rand(s)<.22;
-    const b=returning?born[Math.floor(rand(s)*born.length)]:
+    // Give source-witnessed living animals an honest chance to be encountered
+    // again. This is an actual local encounter, never a remote lookup,
+    // guaranteed reunion, fixed NPC spawn, or chosen animal. The individual
+    // decides from its OWN saved RNG whether to remain visible.
+    const previouslyMet=Object.values(s.beasts).filter(b=>
+      b?.individualLife?.source?.origin==='engine-local-wildlife-encounter'&&
+      b.individualLife.witnessed?.length>0&&
+      // An autonomous off-screen sixday must actually have elapsed.
+      // Immediate repeated exploration cannot summon the same animal.
+      b.individualLife.lastTickDay>=b.individualLife.source.initialDay+12&&
+      b.away===true&&
+      Number.isInteger(b.individualLife.rngState)&&b.individualLife.rngState>0&&
+      b.location===s.world.location&&site.spawns.includes(b.species)&&
+      b.owner===null&&b.relationship==='wild'&&
+      !s.player.partnerIds.includes(b.id)&&
+      b.condition>=40&&b.hp>0&&!b.injuries?.length&&
+      !/hostile|terrified|panicked|desperate/i.test(String(b.mood||''))&&
+      s.world.minutes-(b.lastEncounterMinute??-1000000)>=60);
+    let b=null,returningIndividual=false;
+    if(previouslyMet.length&&
+       rand(s)<Math.min(.48,.18+previouslyMet.length*.06)){
+      const candidate=previouslyMet[Math.floor(rand(s)*previouslyMet.length)];
+      const life=candidate.individualLife,before=life.rngState;
+      let x=before>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;
+      life.rngState=(x>>>0)||0x91e10da5;
+      const remainsVisible=life.rngState/4294967296<
+        Math.max(.15,.70-(candidate.needs?.fatigue||0)/250);
+      life.returnChoices||=[];
+      life.returnChoices.push({atMinute:s.world.minutes,
+        location:s.world.location,rngBefore:before,rngAfter:life.rngState,
+        remainedVisible:remainsVisible});
+      if(life.returnChoices.length>24)life.returnChoices.shift();
+      if(remainsVisible){b=candidate;returningIndividual=true;}
+    }
+    const independentlyBorn=!b&&born.length&&rand(s)<.22;
+    if(!b)b=independentlyBorn?
+      born[Math.floor(rand(s)*born.length)]:
       beast(s,randomFrom(s,site.spawns),{level:1+Math.floor(rand(s)*3)});
     const k=b.species;
     b.habitatExposure[s.world.location]=1;
-    const danger=rand(s),mood=danger>.82?'agitated':danger>.63?'wary':SPECIES[k].temperament;
+    const danger=rand(s),mood=danger>.82?'agitated':
+      danger>.63?'wary':returningIndividual?
+      b.mood:SPECIES[k].temperament;
     b.mood=mood;b.away=false;b.location=s.world.location;
+    b.lastEncounterMinute=s.world.minutes;
     // Independently generate a concrete separation in the actual encounter.
     // Distances are not user-provided, and a Phase I 10 m soul sense must
     // never treat an arbitrary whole forest or city as within range.
     const distanceMetres=2+Math.floor(rand(s)*16);
     s.encounter={beastId:b.id,observed:false,approaches:0,threat:danger>.82,distanceMetres};
     log(s,'encounter',`You find a wild ${SPECIES[k].name} near ${site.name}. It appears ${mood}. It has not agreed to approach or partner with you.`,{beastId:b.id,species:k,location:s.world.location,mood,distanceMetres,
-      independentlyBorn:!!returning,origin:'engine-local-wildlife-encounter'});
+      independentlyBorn:!!independentlyBorn,
+      // Exact original encounter provenance (including key order) stays
+      // unchanged for all non-returning wildlife: the evidence hash seeds
+      // each animal's existing independent behaviour RNG.
+      origin:'engine-local-wildlife-encounter',
+      ...(returningIndividual?{returningIndividual:true,
+       previouslyWitnessed:true}:{})});
     return success(s);
   }
   function forage(s){
@@ -602,7 +646,7 @@
       // A source-witnessed unfamiliar species has no measured health,
       // grade, magical profile or form. Legacy defaults apply ONLY to
       // original mechanically characterised creatures.
-      if(b.gmWild)continue;
+      if(b.gmWild||b.generatedWild)continue;
       b.branchMaturity||={};b.ripeningBySeason||={};b.patternEchoByStage||={};
       b.condition??=100;
     }
