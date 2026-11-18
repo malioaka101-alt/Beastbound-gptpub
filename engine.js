@@ -232,6 +232,10 @@
     const previouslyMet=Object.values(s.beasts).filter(b=>
       b?.individualLife?.source?.origin==='engine-local-wildlife-encounter'&&
       b.individualLife.witnessed?.length>0&&
+      // An autonomous off-screen sixday must actually have elapsed.
+      // Immediate repeated exploration cannot summon the same animal.
+      b.individualLife.lastTickDay>b.individualLife.source.initialDay&&
+      b.away===true&&
       Number.isInteger(b.individualLife.rngState)&&b.individualLife.rngState>0&&
       b.location===s.world.location&&site.spawns.includes(b.species)&&
       b.owner===null&&b.relationship==='wild'&&
