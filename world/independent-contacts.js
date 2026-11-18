@@ -261,5 +261,54 @@ function sixday(w,day){
  if(!verify(w,t))throw Error('Independent social history failed checkpoint replay');
  return {meetings,exchanges,duplicate:false};
 }
-module.exports={ORIGIN,LIMIT,seed,ensure,verify,sixday,
+// Internal-only view for the already established living character GM dossier.
+// This is a PURE read of this original contact owner. Recorded co-presence,
+// an exchange and its bounded cooperation score are not proof of friendship,
+// affection, shared secrets, mastery, future attendance or other consent.
+function privateIndividualEvidence(w,actorId){
+ const p=typeof actorId==='string'&&actorId.startsWith('emergent:')?
+  w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)]:null;
+ if(!p||p.actorId!==actorId)return {known:false};
+ if(!Emergent.verify(w,p))throw Error('Unverified original person identity in contact evidence');
+ const t=w.independentContacts;
+ if(!t)return {known:true,privateToGM:true,
+  contactHistoryEstablished:false,
+  actualContacts:null,sharedOrdinaryMethods:null,
+  noAssumedFriendsOrTraining:true};
+ if(!verify(w,t))
+  throw Error('Unverified original independent co-presence contact history');
+ const pairs=Object.entries(t.state.relations).filter(([key,row])=>
+  key===row.people.slice().sort().join('|')&&
+  row.people.includes(actorId));
+ const contacts=pairs.map(([key,row])=>{
+  const otherId=row.people.find(x=>x!==actorId);
+  const other=w.emergentPeople?.people?.[otherId.slice('emergent:'.length)];
+  if(!other||other.actorId!==otherId||!Emergent.verify(w,other))
+   throw Error('Original contact references an unverified other individual');
+  const last=t.receipts.findLast(r=>r.source.pairKey===key);
+  return {otherActorId:otherId,otherOriginHash:other.originHash,
+   genuineIndependentMeetings:row.contacts,
+   lastOriginalMeetingDay:row.lastMeetingDay,
+   originalSourceReceiptHash:last?.hash||null,
+   // These are ledger counters recording cooperative/disagreeing events,
+   // not the individual's private emotions or a social standing rank.
+   recordedCooperationBalance:row.people[0]===actorId?
+    row.regardA:row.regardB,
+   actualMutualWorkExchanges:row.exchanges,
+   otherPersonAffectionOrFutureConsentNotEstablished:true};
+ });
+ const shared=(t.state.knowledge[actorId]||[]).map(k=>({
+  otherActorId:k.from,receivedOnDay:k.atDay,
+  originalWorkReceiptHash:k.sourceWorkHash,
+  actualMeetingReceiptHash:k.meetingReceiptHash,
+  observedOrdinaryMethod:k.method,originalWorkDomain:k.domain,
+  learnedCompetence:false,noSpellOrStage:true}));
+ return {known:true,privateToGM:true,
+  contactHistoryEstablished:true,originalLedgerHeadHash:t.headHash,
+  originalAnchoredReceiptCount:t.anchorAttempts,
+  actualContacts:contacts,sharedOrdinaryMethods:shared,
+  noAssumedFriendsOrTraining:true,
+  noInferredKnowledgeOfAnotherPersonOrPlayer:true};
+}
+module.exports={ORIGIN,LIMIT,seed,ensure,verify,sixday,privateIndividualEvidence,
  _debug:{snapshot,decision,record,validateEvent,shiftValid,validExchange,unit}};
