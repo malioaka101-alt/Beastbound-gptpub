@@ -77,7 +77,7 @@ function chooseHumanInterposition(s,beastPlan){
    condition.workAndOrdinaryPracticeBlocked||
    p.status!=='active'||p.fatigue>75||
    p.ageBand!=='adult, exact birthday not established'||
-   !s.chatRuntime?.scene?.includes(p.name))
+   !s.chatRuntime?.scene?.includes(p.name+' stands beside the player'))
    continue;
   const here=presence.resolve(realm,actorId,s.world.location,day,minute);
   if(!here?.presence||here.presence.hash!==p.shift?.hash||
