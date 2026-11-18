@@ -50,7 +50,7 @@ function harm(s,c,steps,{nonlethal=false}={}){
   c.wounds[i]++;
   let result={result:`${severities[i+2]} wound`,status:c.status,wounds:[...c.wounds]};
   if(c.status==='ok' && c.wounds[2]>=c.boxes[2]){
-    const save=C.check(s,{modifier:c.vigor-penalty(c),dc:14,label:`${c.name} critical Vigor save`});
+    const save=C.check(s,{modifier:c.vigor-penalty(c),dc:14,label:`${c.name} critical Vigor save`,privateDisplay:!!c.npcOrigin});
     if(!save.success)c.status=nonlethal?'knocked_out':'incapacitated';
     result.criticalSave=save;
   }
