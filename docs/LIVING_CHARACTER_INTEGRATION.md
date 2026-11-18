@@ -68,6 +68,14 @@ This does **not** assert a clinical injury, missing limb, HP deficit, wound-box 
 
 `tests/living-npc-original-workplace-condition.test.js` creates a disposable independently living worker who encounters an actually rolled hazardous work attempt, witnesses the original source-owned safety consequence, and verifies the GM-only condition, exact source receipt, original recovery gate, replay, tamper rejection and subsequent genuine sixday recovery. No Maddoc campaign file is used.
 
+## Stage 2B.4 — original sapient-beast personal experience bridge (source reuse)
+
+**No new progression, species, stat or personal achievement system.** Sapient beasts who have already been genuinely encountered and have an original `world/sapient-beast-persons.js` record already possess their own `world/earned-individual-practice.js` receipt-verified autonomous work. The private character dossier can now read that original individual evidence using `gmDossier(world, 'sapient:'+beastId, gameState)`. Because beast individuals live in the original game state's `beasts` table, the third argument must be the **matching same game state**, not a different campaign; the read itself must not mutate state.
+
+The existing original sapient-person verifier checks identity, original encounter and earned-practice source chain. The dossier only projects original source hashes, personally earned real-work domain points, demonstrated practical methods, the recorded success/receipt hashes, and evidence of the original species. The points represent their specific **mundane independently chosen work**, **not** beast grades/levels, human career ranks, Meridian or Arcane stages, combat stats, contracts, language, automatic techniques or implied cooperation. Without an original encountered personhood record, the individual remains unknown. A later voluntary partnership or evolution must use its **own existing source owner** and consent evidence.
+
+`tests/living-npc-original-sapient-evidence-bridge.test.js` uses a disposable real engine wilderness encounter and subsequent independent original sixday work. It verifies source-owned earned outcomes, unchanged beast level/techniques, no forced bond, no public leak, no read-time dice or clock, replay stability, wrong-campaign rejection and original record tamper rejection. No campaign save is touched.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
