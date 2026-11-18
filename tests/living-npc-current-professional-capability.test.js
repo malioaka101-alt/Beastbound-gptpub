@@ -9,7 +9,7 @@ const A=require('node:assert/strict'),E=require('../engine'),
  People=require('../world/emergent-people'),
  Foundations=require('../world/person-mechanical-foundations');
 
-const scene='Talia Vale surveys the ferry's worn plank routes and records the old bridge repairs at the river crossing while the player watches.';
+const scene="Talia Vale surveys the ferry's worn plank routes and records the old bridge repairs at the river crossing while the player watches.";
 const s=New.create({seed:9283101,slug:'disposable_current_work_ability',
  mode:'gm',age:28,gmOpening:{locationId:'crossing',
  scene,focus:'Visit the working river surveyor',
