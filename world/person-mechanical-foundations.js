@@ -193,6 +193,31 @@ function earnedEvidence(w,actorId,s=null){
   const life=w.independentPersonLives?.people?.[actor.id]||null;
   if(life&&!Lives.verifyEntry(w,life))
    throw Error('Unverified original independent-person life evidence');
+  // The original consent-backed household owner is the ONLY source of
+  // chosen co-residence. No invented marriage, bloodline, children, heirs,
+  // shared inventory, permanent romance or authority follows from it.
+  const Homes=require('./emergent-households'),
+   home=actor.family?
+    w.emergentHouseholds?.households?.[actor.family]:null;
+  if(actor.family&&(!home||!Homes.valid(w,home)||
+   !home.source.founders.some(f=>f.actorId===actorId&&
+    f.originHash===actor.originHash)))
+   throw Error('Unverified original voluntarily chosen household membership');
+  const chosenHousehold=home?{
+   originalOwner:'world/emergent-households.js',
+   householdId:home.id,sourceHash:home.sourceHash,
+   formedOnDay:home.source.foundedDay,
+   mutuallyConsentingFounders:home.source.founders.map(f=>({
+    actorId:f.actorId,originHash:f.originHash,name:f.name
+   })),
+   originalFoundingContactHash:home.source.contactReceiptHash,
+   originalRecordedCurrentArrangement:home.status,
+   originalLifeTransitionHashes:home.lifeHistory?
+    home.lifeHistory.receipts.map(r=>r.hash):null,
+   statusDoesNotProvePresentCoLocation:true,
+   noMarriageBloodlineHeirsOrInheritedPower:true,
+   privateToGM:true
+  }:null;
   const career=actor.career||null;
   return {known:true,actorId,privateToGM:true,
    evidenceOwners:['world/emergent-people.js','world/person-careers.js',
@@ -223,6 +248,7 @@ function earnedEvidence(w,actorId,s=null){
    // True CURRENT ordinary work readiness comes from the original career
    // formula, never a model-invented all-purpose NPC ability score.
    currentMundaneWork:Careers.currentCapability(actor),
+   chosenHousehold,
    ordinaryIndependentLife:life?{
     sourceHash:life.sourceHash,asOfDay:life.lastDay,
     focus:life.focus,familiarity:{...life.metrics},
