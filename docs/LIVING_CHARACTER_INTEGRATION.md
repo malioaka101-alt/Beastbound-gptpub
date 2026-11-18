@@ -60,6 +60,14 @@ Each recorded holding retains its latest original receipt hash, source kind, cur
 
 **Still unresolved:** currently equipped gear and weapon effects, individual wounds and age-adjusted combat stats, original Meridian/Arcane/Soul/Body/Rift/Beast-Origin milestones and techniques, evolution and beast partnership. No power is inferred from a profession or held materials.
 
+## Stage 2B.3 — real workplace strain, recovery and limitations (stacked)
+
+The private `earnedEvidence.physicalCondition` projection now includes the **original** `person-careers.workplaceSafetyStatus(person)` incident history plus each original career safety receipt hash. The same living person's recorded fatigue and recovery status are used to mark the original career-work recovery block: a recovering person cannot be compelled to perform another original work action. The source's own strain, near-miss or controlled-exposure records are durable actual work aftermath, and later independent recovery does not erase the historical event.
+
+This does **not** assert a clinical injury, missing limb, HP deficit, wound-box count, pain diagnosis, inability to participate in every other activity or change to supernatural powers. `wounds` and `currentAttributes` remain `null` pending genuine individual source-owned physical and combat records. No new condition roll, recovery shortcut, wage, teacher, equipment, combat advantage or stage is awarded.
+
+`tests/living-npc-original-workplace-condition.test.js` creates a disposable independently living worker who encounters an actually rolled hazardous work attempt, witnesses the original source-owned safety consequence, and verifies the GM-only condition, exact source receipt, original recovery gate, replay, tamper rejection and subsequent genuine sixday recovery. No Maddoc campaign file is used.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
