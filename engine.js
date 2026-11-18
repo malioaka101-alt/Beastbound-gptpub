@@ -638,7 +638,7 @@
       // A source-witnessed unfamiliar species has no measured health,
       // grade, magical profile or form. Legacy defaults apply ONLY to
       // original mechanically characterised creatures.
-      if(b.gmWild)continue;
+      if(b.gmWild||b.generatedWild)continue;
       b.branchMaturity||={};b.ripeningBySeason||={};b.patternEchoByStage||={};
       b.condition??=100;
     }
