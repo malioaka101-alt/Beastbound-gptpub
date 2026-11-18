@@ -721,6 +721,14 @@ function execute(savePath, req) {
      response.wildlife=Rules.act(s,{system:'world',
       operation:'seekKnownWildBeast',params:{beastId:id}});
      response.message=response.wildlife.message;
+   }else if(['look for unfamiliar beasts','survey local wildlife',
+     'search for wildlife','look for beasts','search for new beasts',
+     'observe local wildlife'].includes(action)){
+     response.wildlife=Rules.act(s,{system:'world',
+       operation:'fieldTaxonSighting',params:{}});
+     response.message=response.wildlife.individualSighting?
+       'A particular living animal has been witnessed without assigning it a combat profile or forcing interaction.':
+       'The local field survey records only what the habitat genuinely reveals.';
    }else if(['watch beast','watch animal','watch quietly'].includes(action)){
      response.wildlife=Rules.act(s,{system:'world',operation:'watchWildBeast',params:{}});
      response.message=response.wildlife.message;
@@ -755,7 +763,7 @@ function execute(savePath, req) {
      // has not yet been established. No unverified teleportation occurs.
      Object.assign(response,unresolvedSceneIntent(s,req.action.trim()));
    }else if(/^(?:travel|go to|move to)\s+\S/.test(action)||
-      ['explore','search area','look for beasts','scout',
+      ['explore','search area','scout',
        'leave','leave beast'].includes(action)){
      // Retain only the explicitly established ordinary legacy movement /
      // exploration bridge. Never let an unfamiliar intention fall through to
