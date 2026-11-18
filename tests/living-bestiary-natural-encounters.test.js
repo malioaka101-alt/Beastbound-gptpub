@@ -107,7 +107,7 @@ A.ok(watched,'Test requires an actual original wildlife witness');
 const originalId=watched.beastId;
 if(knownState.encounter)A.equal(E.dispatch(knownState,'leave').ok,true);
 const old=knownState.world.minutes;
-W.advance(knownState,6);
+W.advance(knownState,12);
 // The returning animal may have moved to a genuinely connected compatible
 // habitat during the real off-screen sixday; the fixture follows its source
 // location without pretending a live player knows it remotely.
