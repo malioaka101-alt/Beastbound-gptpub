@@ -50,6 +50,16 @@ The original `world/person-careers.js` now supplies a **read-only** `currentCapa
 
 **Still outstanding:** systematic age/condition/wound/gear ownership, actual source-proven magical disciplines and techniques, all other Stage 2 scope and later stages. This increment never awards supernatural proficiency or retrospectively fills an older person's history.
 
+## Stage 2B.2 — existing owner-verified physical materials (stacked)
+
+The original `rules/material-handoffs.js` now provides an **internal-only, read-only** `privateHoldingEvidence(world, actorId)` projection. It validates an existing, already established individual custody account using the original `validateAccount` owner and extracts only current ordinary material quantities supported by its original handoff, genuinely funded purchase, independently chosen sale, or consumption receipts. No account is created during inspection; a person with no custody account has **unknown** possessions, not an empty inventory.
+
+Each recorded holding retains its latest original receipt hash, source kind, current balance, and whether its earlier acquisition chain is fully witnessed in retained receipts. Legacy balances without adequately witnessed proof are counted as unverified item types, **not** converted into a confirmed object, free equipment, weapon, armor or specialist reagent. The report is private to the GM, never a standard player status display; ownership is not consent to transfer, ability to use, readiness to fight, or proof of currently worn equipment.
+
+`world/person-mechanical-foundations.js` bridges this owner view as `earnedEvidence.physicalMaterialCustody`; the distinct `equipment.verifiedItems` remains **null** pending authentic source-owned tools/gear and combat-ready condition. `tests/living-npc-material-custody-evidence.test.js` uses a disposable actually emerging person and real freely accepted physical item transfer to test source proof, unknown-vs-zero, replay, private projection, and forged-stock rejection. No Maddoc campaign save, player RNG, power stage, technique or beast relationship is modified by these GM-only reads.
+
+**Still unresolved:** currently equipped gear and weapon effects, individual wounds and age-adjusted combat stats, original Meridian/Arcane/Soul/Body/Rift/Beast-Origin milestones and techniques, evolution and beast partnership. No power is inferred from a profession or held materials.
+
 ## Next work — in source order
 
 1. **Audit all original NPC sources and save shapes.** Inventory player character, notable, emergent, origin-relative, professional-peer and independent sapient-being records; differentiate individuals vs abstract groups. Existing named actors require non-destructive legacy migration (original witness, no retrospective achievements or unearned levels). Check the actual original Master Prompt's power anatomies, not prototypes alone.
