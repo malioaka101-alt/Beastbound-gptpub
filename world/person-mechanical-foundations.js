@@ -74,7 +74,8 @@ function verify(w,actor){
  * their existing outcomes. Null means *not established*, never stage zero.
  * This function is GM-private; no player-facing Rules operation calls it.
  */
-function earnedEvidence(w,actorId){
+function earnedEvidence(w,actorId,s=null){
+ if(typeof actorId!=='string')throw Error('An established individual ID is required');
  const emptyMilestones=()=>({
   meridian:{stage:null,openedGates:null},
   arcane:{coreIgnited:null,circles:null},
@@ -82,6 +83,51 @@ function earnedEvidence(w,actorId){
   rift:{step:null},beastOrigin:{integrations:null},
   humanEvolution:{stage:null},partnership:{synchronisation:null}
  });
+ // Sapient beasts are already independently evidenced by their ORIGINAL
+ // personhood and per-activity competence owners. They do not acquire human
+ // six-attribute baselines, professional ranks or cultivation by this bridge.
+ if(actorId.startsWith('sapient:')){
+  // Beast individuals live in game.beasts, not the realm's human-person table.
+  // Require the EXACT matching live world so a caller cannot mix campaigns.
+  if(!s||s.table?.realm!==w)
+   throw Error('A matching original game state is required for this sapient person');
+  const beastId=actorId.slice('sapient:'.length),
+   b=s.beasts?.[beastId];
+  if(!b?.sapientLife)return {known:false};
+  const Sapient=require('./sapient-beast-persons');
+  if(!Sapient.verify(b))
+   throw Error('Unverified original sapient-person and earned-work evidence');
+  const life=b.sapientLife,practice=life.practice;
+  return {known:true,actorId,privateToGM:true,
+   evidenceOwners:['world/sapient-beast-persons.js',
+    'world/earned-individual-practice.js'],
+   individualOriginHash:life.sourceHash,
+   witnessedEncounterHash:life.source.encounterHash,
+   originalSpecies:life.source.species,
+   autonomousEarnedWork:{
+    sourceHash:practice.sourceHash,
+    completedAttempts:practice.attempts,
+    domains:Object.entries(practice.points).map(([domain,points])=>({
+     domain,earnedPracticalPoints:points,
+     demonstratedMethods:{...practice.successfulMethods[domain]}
+    })),
+    recentOriginalReceipts:practice.receipts.map(r=>({
+     sourceHash:r.hash,day:r.source.day,
+     domain:r.source.domain,method:r.source.method,
+     success:r.source.result.success,
+     earned:r.source.result.earned
+    })),
+    onlyGenuineIndependentlyChosenActivities:true
+   },
+   humanDisciplineProgression:null,
+   speciesEvolutionMilestones:null,
+   actualLearnedTechniqueEvents:null,
+   partnerConsentEvidence:null,
+   ordinaryProfessionalCareer:null,
+   noHumanSkillOrRankConversion:true,
+   noFreeSpellEvolutionOrBond:true,
+   originalBeastDevelopmentOwnersUnchanged:true};
+ }
  if(actorId.startsWith('emergent:')){
   const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
   if(!actor||actor.actorId!==actorId)return {known:false};
@@ -182,8 +228,19 @@ function earnedEvidence(w,actorId){
  return {known:false};
 }
 
-function gmDossier(w,actorId){
+function gmDossier(w,actorId,s=null){
  if(typeof actorId!=='string')throw Error('An established individual ID is required');
+ if(actorId.startsWith('sapient:')){
+  const evidence=earnedEvidence(w,actorId,s);
+  if(!evidence.known)return evidence;
+  return {known:true,kind:'independent-sapient-beast-person',actorId,
+   species:evidence.originalSpecies,privateToGM:true,
+   earnedEvidence:evidence,
+   humanBaselineAttributes:null,humanLatentPotential:null,
+   independentPersonalWorkNotBeastLevel:true,
+   noAssumedHumanProfessionOrSystemStages:true,
+   noAssumedPartnershipOrPlayerKnowledge:true};
+ }
  if(actorId.startsWith('emergent:')){
   const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
   if(!actor||actor.actorId!==actorId)return {known:false};
