@@ -183,7 +183,12 @@ function exchange(s,p={}){
  // One nearby source-witnessed adult, if any, can make their OWN current
  // defensive choice before the first attack die. The beast's attack plan
  // and its single attack roll remain the original encounter owners.
- const humanChoice=Agency.chooseHumanInterposition(s,enemyPlan);
+ // A genuinely armed present person gets ONE independent current-strike
+ // decision before the player's attack die. An armed bystander cannot then
+ // roll a separate protective-reaction decision in this same round.
+ const armedHumanChoice=Agency.chooseArmedHumanStrike(s,enemyPlan);
+ const humanChoice=Agency.chooseHumanInterposition(s,enemyPlan,
+  armedHumanChoice?.actorId||null);
  let ownResult=null,enemyResult=null;
  const atkOpts={attackerId:'player',targetId:fight.enemyId};
  // One actual minute of active-physique exertion costs physical Stamina.
@@ -319,6 +324,37 @@ function exchange(s,p={}){
   ownResult={check:c,disengaged:c.success};
   if(c.success){s.battle=null;E.advance(s,2);H.sync(s,{source:'legacy'});return {ended:true,reason:'Mutual disengagement',ownResult,elapsedMinutes:2};}
  }
+ // A person who ACTUALLY owns a source-verified readied weapon may act
+ // independently through the original Combat.attack once in this exchange.
+ // Exact damage and Offense Magnitude remain those of its original paid
+ // appraisal; no career-based skill rank or supernatural force is invented.
+ let independentHumanAttack=null;
+ if(armedHumanChoice?.choosesStrike===true&&enemy.status==='ok'){
+  const Profile=require('../world/person-mechanical-foundations'),
+   w=require('../world/simulation').peek(s),
+   individual=w.emergentPeople?.people?.[
+    armedHumanChoice.actorId.slice('emergent:'.length)],
+   physical=armedHumanChoice.weaponSource,
+   action=physical.actualMundaneAction;
+  if(!individual||!Profile.verify(w,individual)||
+   !['str','dex'].includes(action.attribute))
+   throw Error('Independent armed adult lacks original natural strength and paid action provenance');
+  const attr=individual.mechanicalFoundation.baselineAttributes[action.attribute],
+   bonus=Math.floor((attr-10)/2)+action.attackBonus,
+   original=Combat.attack(s,{
+    attackerId:armedHumanChoice.combatantId,
+    targetId:fight.enemyId,modifier:bonus,
+    damage:action.damage,offM:action.offM,
+    brace:false,nonlethal:action.canNonlethal});
+  independentHumanAttack={npcId:armedHumanChoice.actorId,
+   weaponItem:physical.item,originalActionId:action.id,
+   originalPaidWeaponSourceHash:physical.originalSourceHash,
+   hit:original.hit,roll:original.roll,
+   observedOpponent:Combat.observedCombatant(enemy),
+   noDisclosedPrivateCombatRankOrAttributes:true,
+   actualOriginalWoundRoll:true,
+   independentlyChosen:true};
+ }
  if(enemyPlan==='retreat'){
   // Independent NPC/beast intent; no automatic surrender or death.
   s.battle=null;enemyResult={retreated:true};
@@ -341,7 +377,7 @@ function exchange(s,p={}){
    observedHuman:Combat.observedCombatant(protectedPerson),
    originalBeastAttackResolved:true,
    privateStatsNotDisclosed:true}:result;
- }else enemyResult={heldPosition:true};
+ }else enemyResult=enemy.status!=='ok'?{unableToContinue:true}:{heldPosition:true};
  E.advance(s,1);
  // A Ward with a sourced one-minute duration covers the current exchange's
  // independent enemy response, but cannot be stockpiled for later combats.
@@ -381,8 +417,16 @@ function exchange(s,p={}){
   s.table.combatDefeats.push(incident);
   s.battle=null;
  }else if(enemy.status!=='ok'||enemyPlan==='retreat')s.battle=null;
- else {Combat.newRound(s,{ids:['player',fight.enemyId]});fight.round++;}
+ else {Combat.newRound(s,{ids:[...new Set(['player',fight.enemyId,
+  ...(humanChoice?.chosenInterposition?[humanChoice.combatantId]:[]),
+  ...(independentHumanAttack?[armedHumanChoice.combatantId]:[])])]});
+  fight.round++;}
  const r={ownResult,enemyResult,enemyPlan,
+  ...(armedHumanChoice?{independentArmedHumanDecision:{
+   npcId:armedHumanChoice.actorId,
+   choseStrike:armedHumanChoice.choosesStrike,
+   noCompulsoryCombatByEquippedHuman:true}}:{}),
+  ...(independentHumanAttack?{independentHumanAttack}:{}),
   ...(humanChoice?{independentHumanChoice:{
    npcId:humanChoice.actorId,
    choseToInterpose:humanChoice.chosenInterposition,
