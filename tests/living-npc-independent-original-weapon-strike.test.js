@@ -96,7 +96,8 @@ for(const want of [true,false]){
  const result=rule(s,'combat','exchange',{intent:'defend',playerBrace:false});
  A.equal(result.elapsedMinutes,1);
  A.equal(s.world.minutes,clock+1);
- A.notEqual(s.rngState,worldRng,'Original enemy attacks or real armed human roll the engine');
+ if(want||result.enemyPlan==='attack')A.notEqual(s.rngState,worldRng);
+ else A.equal(s.rngState,worldRng,'Two independent people can both hold without a combat die');
  A.equal(result.independentArmedHumanDecision.npcId,p.actorId);
  A.equal(result.independentArmedHumanDecision.choseStrike,want);
  A.equal(result.independentArmedHumanDecision.noCompulsoryCombatByEquippedHuman,true);
