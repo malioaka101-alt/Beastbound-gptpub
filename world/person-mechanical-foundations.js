@@ -51,12 +51,112 @@ function verify(w,actor){
 }
 // Internal-only dossier: NEVER expose via an ordinary player-facing rule
 // operation. All unrevealed attributes, study and potential are GM-private.
+
+/**
+ * Stage 2A: source-owned, read-only evidence projection. This is NOT a
+ * second progression system: only the career/life/notable owners may award
+ * their existing outcomes. Null means *not established*, never stage zero.
+ * This function is GM-private; no player-facing Rules operation calls it.
+ */
+function earnedEvidence(w,actorId){
+ const emptyMilestones=()=>({
+  meridian:{stage:null,openedGates:null},
+  arcane:{coreIgnited:null,circles:null},
+  soul:{phase:null},body:{completedCycles:null},
+  rift:{step:null},beastOrigin:{integrations:null},
+  humanEvolution:{stage:null},partnership:{synchronisation:null}
+ });
+ if(actorId.startsWith('emergent:')){
+  const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+  if(!actor||actor.actorId!==actorId)return {known:false};
+  // Verify both the birth identity and the ORIGINAL earned work ledger.
+  // The independent-life ledger is separate: its metrics never grant
+  // actual magical techniques, Circles, Gates or professional certificates.
+  const People=require('./emergent-people'),
+   Careers=require('./person-careers'),
+   Lives=require('./independent-person-lives');
+  if(!People.verify(w,actor)||!Careers.verify(actor))
+   throw Error('Unverified original living NPC identity or career evidence');
+  const life=w.independentPersonLives?.people?.[actor.id]||null;
+  if(life&&!Lives.verifyEntry(w,life))
+   throw Error('Unverified original independent-person life evidence');
+  const career=actor.career||null;
+  return {known:true,actorId,privateToGM:true,
+   evidenceOwners:['world/emergent-people.js','world/person-careers.js',
+    'world/independent-person-lives.js'],
+   physicalCondition:{ageBand:actor.ageBand,status:actor.status,
+    fatigue:actor.fatigue,currentAttributes:null,wounds:null,
+    woundDetailsNotEstablished:true},
+   profession:career?{
+    competenceRank:career.competenceRank,skillPoints:career.skillPoints,
+    completedWorkChecks:career.workCount,successfulWorkChecks:career.successes,
+    demonstratedMethods:{...career.demonstratedMethods},
+    verifiedWorkReceipts:career.workReceipts.map(r=>({
+     sourceHash:r.sourceHash,day:r.source.day,
+     method:r.source.task.method,degree:r.source.outcome.degree,
+     success:r.source.outcome.success
+    })),
+    awardedLicence:career.recognizedLicence,
+    attestationCount:(career.attestations||[]).length
+   }:null,
+   ordinaryIndependentLife:life?{
+    sourceHash:life.sourceHash,asOfDay:life.lastDay,
+    focus:life.focus,familiarity:{...life.metrics},
+    recentActivities:life.history.slice(-8).map(e=>({
+     sourceHash:e.seal,day:e.source.day,
+     action:e.source.action,focus:e.source.focus,
+     familiarityGained:e.source.improved
+    })),notSupernaturalAdvancement:true
+   }:null,
+   // No owner has yet bound emergent persons to actual source-verified
+   // personal discipline events or a technique catalogue. Raw legacy
+   // arrays are NOT evidence of power and must not be laundered as such.
+   originalPowerMilestones:emptyMilestones(),
+   verifiedLearnedTechniques:[],
+   unverifiedLegacyClaims:{
+    disciplineEntries:Array.isArray(actor.practicedDisciplines)?
+     actor.practicedDisciplines.length:0,
+    techniqueEntries:Array.isArray(actor.knownTechniques)?
+     actor.knownTechniques.length:0
+   },
+   equipment:{verifiedItems:null,reason:'Original ownership/inventory bridge not yet established'},
+   beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
+   sourceStatus:'Earned ordinary work and daily familiarity verified; supernatural and combat milestones unresolved',
+   noAbilityByTitle:true,noRetrospectivePower:true};
+ }
+ if(actorId.startsWith('notable:')){
+  const n=w?.notables?.[actorId.slice('notable:'.length)];
+  if(!n)return {known:false};
+  return {known:true,actorId,privateToGM:true,
+   evidenceOwners:['world/notables.js'],
+   physicalCondition:{ageBand:n.life?.ageBand??null,
+    recoveryMonths:n.injuryMonths,currentAttributes:null,wounds:null},
+   profession:{competenceRank:n.professional?.rank??null,
+    practicePoints:n.professional?.pp??null},
+   ordinaryIndependentLife:null,
+   disciplinePreparation:n.discipline?{
+    path:n.discipline.path,nextTrial:n.discipline.next,
+    preparationPoints:n.discipline.trainingPoints,
+    trialReady:n.discipline.ready,monthsStudied:n.discipline.trainingMonths,
+    actualBreakthroughNotGranted:true
+   }:null,
+   originalPowerMilestones:emptyMilestones(),
+   verifiedLearnedTechniques:[],
+   equipment:{verifiedItems:null},
+   beastRelationships:{verifiedPartners:null},
+   sourceStatus:'Professional progress and discipline preparation only; current power/combat record not established',
+   noPowerByProfession:true,noRetroactivePower:true};
+ }
+ return {known:false};
+}
+
 function gmDossier(w,actorId){
  if(typeof actorId!=='string')throw Error('An established individual ID is required');
  if(actorId.startsWith('emergent:')){
   const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
   if(!actor||actor.actorId!==actorId)return {known:false};
   if(!actor.mechanicalFoundation)return {known:true,actorId,legacy:true,
+   earnedEvidence:earnedEvidence(w,actorId),
    source:'Older witnessed individual: foundation has not been backfilled',
    unverified:['baseline attributes','latent potential'],
    noRetroactiveRanks:true};
@@ -66,8 +166,8 @@ function gmDossier(w,actorId){
    baselineAttributes:{...foundation.baselineAttributes},
    latentPotential:{...foundation.unassessedPotential},
    profession:actor.profession,professionCompetence:actor.career?.competenceRank??null,
-   practicedDisciplines:structuredClone(actor.practicedDisciplines||[]),
-   knownTechniques:structuredClone(actor.knownTechniques||[]),
+   practicedDisciplines:[],knownTechniques:[],
+   earnedEvidence:earnedEvidence(w,actorId),
    ageBand:actor.ageBand,
    actualCultivationAndCombatProfile:'Original earned source required; not deduced from social status, profession or baseline',
    beastRelationships:'Unestablished unless verified in original bond sources',
@@ -79,10 +179,11 @@ function gmDossier(w,actorId){
   return {known:true,kind:'established-notable',actorId,
    name:n.name,profession:n.profession,professionRank:n.professional?.rank??null,
    originalDiscipline:structuredClone(n.discipline||null),
+   earnedEvidence:earnedEvidence(w,actorId),
    actualCultivationAndCombatProfile:'Preparatory stage and actual earned breakthrough are not interchangeable',
    baselineAttributes:null,latentPotential:null,
    noRetrospectiveAttributeOrPowerCreation:true,privateToGM:true};
  }
  return {known:false};
 }
-module.exports={ORIGIN,ATTRIBUTES,POTENTIAL,build,verify,gmDossier};
+module.exports={ORIGIN,ATTRIBUTES,POTENTIAL,build,verify,earnedEvidence,gmDossier};
