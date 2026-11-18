@@ -25,6 +25,7 @@ A.equal(created.noForcedEncounter,true);
 const id=created.individualSighting.beastId,b=s.beasts[id];
 A.ok(b&&b.generatedWild&&b.species.startsWith('tx:'));
 A.equal(B.lookup(b.species).id,created.id);
+A.equal(created.firstRecordedSpeciesSighting,true);
 A.equal(G.verify(s,b),true);
 A.equal(b.owner,null);
 A.equal(b.relationship,'wild');
@@ -49,6 +50,21 @@ A.ok(b.individualLife.history.some(x=>x.type==='offscreen-sixday'));
 A.equal(b.individualLife.lastTickDay,Math.floor(s.world.minutes/1440));
 A.equal(b.hp,undefined,'Offscreen activity cannot invent measured combat stats');
 A.equal(s.player.partnerIds.length,0);
+// Repeated encounters need not be new species or the same animal:
+ // another distinct individual can belong to this already discovered taxon.
+let anotherOfSameSpecies=null;
+for(let i=0;i<65;i++){
+ const r=rule(s,'fieldTaxonSighting');
+ if(r.id===b.species&&r.individualSighting?.firstSighting&&
+   r.individualSighting.beastId!==id){
+  anotherOfSameSpecies=r;break;
+ }
+}
+A.ok(anotherOfSameSpecies,
+ 'A known generated species should produce new distinct individuals naturally');
+A.equal(anotherOfSameSpecies.firstRecordedSpeciesSighting,false);
+A.notEqual(anotherOfSameSpecies.individualSighting.beastId,id);
+A.equal(G.verify(s,s.beasts[anotherOfSameSpecies.individualSighting.beastId]),true);
 let returning=null;
 for(let i=0;i<80;i++){
  const r=rule(s,'fieldTaxonSighting');
