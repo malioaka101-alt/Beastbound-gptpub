@@ -90,7 +90,8 @@ function earnedEvidence(w,actorId){
   // actual magical techniques, Circles, Gates or professional certificates.
   const People=require('./emergent-people'),
    Careers=require('./person-careers'),
-   Lives=require('./independent-person-lives');
+   Lives=require('./independent-person-lives'),
+   Custody=require('../rules/material-handoffs');
   if(!People.verify(w,actor)||!Careers.verify(actor))
    throw Error('Unverified original living NPC identity or career evidence');
   const life=w.independentPersonLives?.people?.[actor.id]||null;
@@ -138,7 +139,11 @@ function earnedEvidence(w,actorId){
     techniqueEntries:Array.isArray(actor.knownTechniques)?
      actor.knownTechniques.length:0
    },
-   equipment:{verifiedItems:null,reason:'Original ownership/inventory bridge not yet established'},
+   // Ordinary finite goods are read from the ORIGINAL consent-and-custody
+   // source. Clothing, tools, weapons and actual worn gear remain unresolved.
+   physicalMaterialCustody:Custody.privateHoldingEvidence(w,actorId),
+   equipment:{verifiedItems:null,
+    reason:'Verified materials are not proof of equipped tools, weapons or armor'},
    beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
    sourceStatus:'Earned ordinary work and daily familiarity verified; supernatural and combat milestones unresolved',
    noAbilityByTitle:true,noRetrospectivePower:true};
