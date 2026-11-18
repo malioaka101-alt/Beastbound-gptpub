@@ -249,6 +249,10 @@ function earnedEvidence(w,actorId,s=null){
    // formula, never a model-invented all-purpose NPC ability score.
    currentMundaneWork:Careers.currentCapability(actor),
    chosenHousehold,
+   // Source-verified real co-present contacts are personal evidence, not
+   // friendship, magical teaching or the player's knowledge.
+   ordinaryIndependentContacts:
+    require('./independent-contacts').privateIndividualEvidence(w,actorId),
    ordinaryIndependentLife:life?{
     sourceHash:life.sourceHash,asOfDay:life.lastDay,
     focus:life.focus,familiarity:{...life.metrics},
