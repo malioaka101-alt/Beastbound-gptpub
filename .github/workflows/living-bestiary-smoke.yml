@@ -1,0 +1,32 @@
+name: Living Bestiary Safety
+on:
+  pull_request:
+    paths:
+      - 'engine.js'
+      - 'world/bestiary.js'
+      - 'world/generated-wildlife.js'
+      - 'world/simulation.js'
+      - 'world/wild-lives.js'
+      - 'rules/index.js'
+      - 'tests/living-bestiary-natural-encounters.test.js'
+      - 'tests/wild-relations.test.js'
+      - 'tests/wild-lives.test.js'
+      - '.github/workflows/living-bestiary-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wildlife:
+    name: wildlife
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify on-demand species and individual return encounters
+        run: |
+          node tests/living-bestiary-natural-encounters.test.js
+          node tests/wild-relations.test.js
+          node tests/wild-lives.test.js
+          node tests/wild-generations.test.js
