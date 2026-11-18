@@ -95,14 +95,26 @@ function enroll(s,p={}){
  return {established:true,actorId:q.actorId,name:actor.name,interests:q.interests,
   focus:q.focus,day:now,noAutomaticRankOrJob:true,noHistoricalProgressInvented:true};
 }
-function daily(w,q,day){
+function daily(w,q,day,s){
  if(!verifyEntry(w,q)||day<=q.lastDay)return null;
+ // Only real original human wound combatants gate ordinary day-by-day life.
+ // Do not create an injury pool or invent medical healing in this owner.
+ const condition=require('../rules/unified')
+  .currentNpcWoundCondition(s,q.actorId);
+ if(condition?.terminal){
+  // Death does not produce a fictional daily 'rest', new training or
+  // a three-draw personal RNG advance. The combat owner remains canonical.
+  q.lastDay=day;
+  if(!verifyEntry(w,q))throw Error('Original deceased actor activity ledger is invalid');
+  return null;
+ }
  // Every interval is evaluated once. No query or GM/player search may reroll.
  const before=q.rngState,a=draw(q),b=draw(q),c=draw(q);
  const actor=w.emergentPeople.people[q.id],candidates=q.interests;
  const work=actor.career?.authoredDuties?.some(d=>d.status==='available')||false;
  const offered=actor.career?.workOffers?.some(o=>o.status==='accepted')||false;
- const needsRest=q.fatigue>=62||actor.status!=='active';
+ const needsRest=q.fatigue>=62||actor.status!=='active'||
+  condition?.workAndOrdinaryPracticeBlocked===true;
  // People sometimes genuinely redirect their focus rather than always
  // training the first art they ever mentioned. All interests remain options.
  let action,focus=q.focus,improved=0,reason;
@@ -170,7 +182,7 @@ function tick(s,fromDay,toDay){
   if(q.lastDay>=toDay)continue;
   people++;
   for(let day=Math.max(fromDay+1,q.lastDay+1);day<=toDay;day++){
-   if(daily(w,q,day))activities++;
+   if(daily(w,q,day,s))activities++;
   }
  }
  return {individualsAdvanced:people,privateDailyActivities:activities,

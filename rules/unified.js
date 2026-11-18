@@ -117,6 +117,58 @@ function linkWitnessedHuman(s,{npcId,witness,...extras}={}){
   observed:Combat.observedCombatant(s.table.combatants[id]),
   noRoll:true,noUnverifiedPowerOrGear:true};
 }
+// The ORIGINAL wound combatant is the authoritative current physical
+// condition for a source-linked emergent adult. A world tick cannot turn
+// that person's combat injuries into ordinary fatigue or a free recovery.
+// Pure internal read: no rerolls, health creation, wound repair or public data.
+function currentNpcWoundCondition(s,actorId){
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Original source-linked emergent person ID required');
+ const id='npc_'+actorId.slice('emergent:'.length),
+  combatant=s.table?.combatants?.[id];
+ if(!combatant)return null; // Older independent people have no wound model.
+ if(s.table.healthModel!==MODEL)
+  throw Error('Original NPC and player wound owners conflict');
+ const w=require('../world/simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
+  People=require('../world/emergent-people'),
+  Mechanics=require('../world/person-mechanical-foundations'),
+  Crypto=require('node:crypto'),
+  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
+  proof=combatant.npcOrigin;
+ if(!p||p.actorId!==actorId||!People.verify(w,p)||
+  !Mechanics.verify(w,p)||!proof||
+  proof.origin!=='source-witnessed-original-human-wound-entry-v1'||
+  proof.actorId!==actorId||
+  proof.individualOriginHash!==p.originHash||
+  proof.foundationSeal!==p.mechanicalFoundation.seal)
+  throw Error('NPC wound state is not bound to its original independent person');
+ const {seal,...source}=proof;
+ if(seal!==hash(source))
+  throw Error('Original NPC combat physical-entry source was altered');
+ if(combatant.name!==p.name||
+  !Number.isInteger(combatant.stamina)||combatant.stamina<0||
+  !Number.isInteger(combatant.maxStamina)||
+  combatant.maxStamina<0||combatant.stamina>combatant.maxStamina||
+  !Array.isArray(combatant.boxes)||combatant.boxes.length!==3||
+  !Array.isArray(combatant.wounds)||combatant.wounds.length!==3||
+  combatant.boxes.some(v=>!Number.isInteger(v)||v<1||v>20)||
+  combatant.wounds.some((v,i)=>!Number.isInteger(v)||v<0||
+   v>combatant.boxes[i])||
+  !['ok','dead','dying','incapacitated','knocked_out','fled'].includes(
+   combatant.status))
+  throw Error('Invalid original human wound record; no independent activity permitted');
+ const existingWounds=combatant.wounds.some(n=>n>0),
+  unable=combatant.status!=='ok'||existingWounds||
+   combatant.stamina===0;
+ return {source:'rules/combat.js',actorId,combatantId:id,
+  originalEntrySeal:seal,observed:Combat.observedCombatant(combatant),
+  workAndOrdinaryPracticeBlocked:unable,
+  hasUnresolvedWounds:existingWounds,
+  terminal:combatant.status==='dead',
+  originalConditionStatus:combatant.status,
+  noAutomaticWoundHealingOrSkillAward:true};
+}
 function migrateLegacy(s,{wounds,reason}={}){
  const t=state(s),p=s.player;
  if(t.combatants.player)throw Error('Wound model already exists');
@@ -311,4 +363,4 @@ function spend(s,{scales,reason}={}){
  s.table.finances.entries=s.table.finances.entries.slice(-100);
  return {spentScales:scales,balanceScales:remain};
 }
-module.exports={MODEL,playerProfile,ensurePlayer,linkWitnessedHuman,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
+module.exports={MODEL,playerProfile,ensurePlayer,linkWitnessedHuman,currentNpcWoundCondition,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
