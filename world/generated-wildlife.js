@@ -80,6 +80,18 @@ function create(s,w,region,taxon,witness){
  return {beastId:id,firstSighting:true,previouslyWitnessed:false,
    noCombatBondOrRank:true};
 }
+// Repeated ordinary sightings should more often show an established local
+// species than an endless chain of first-ever discoveries. A species record
+// is not an individual: a fresh sighting still creates its own beast ID.
+// The only eligible taxa are already source-witnessed in this region.
+function localSpecies(s,w,region,selector){
+ const ids=[...new Set(Object.values(s.beasts||{})
+  .filter(b=>b?.generatedWild&&b.generatedWild.source.regionId===region.id&&
+   verify(s,b)).map(b=>b.species))].sort();
+ if(!ids.length||selector%3===0)return null;
+ const candidate=Bestiary.lookup(ids[Math.floor(selector/3)%ids.length]);
+ return fit(w,region.id,candidate)?candidate:null;
+}
 function maybeReturn(s,w,region,selector){
  const pool=Object.values(s.beasts||{}).filter(b=>
   b?.generatedWild&&b.location===s.world.location&&
@@ -197,4 +209,4 @@ function sighting(s,w,region,taxon,selector,witness){
    create(s,w,region,taxon,witness);
  return result;
 }
-module.exports={SOURCE,verify,create,maybeReturn,sighting,sixday,track};
+module.exports={SOURCE,verify,create,maybeReturn,localSpecies,sighting,sixday,track};
