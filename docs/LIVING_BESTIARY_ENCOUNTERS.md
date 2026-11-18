@@ -25,7 +25,7 @@ Canonical prototype species and completely novel `gm:...` families remain compat
 
 ## Returning creatures
 
-- Normal `explore` has a bounded chance of meeting an individually witnessed **existing** original-engine wild creature only after at least one genuine off-screen sixday of independent life, if it is still at a compatible site, free, well enough and not currently in an active encounter. Repeated exploration on the same day does not automatically resummon it. Its own saved RNG independently decides whether it remains visible. Otherwise existing wild births or first-time engine individuals can appear.
+- Normal `explore` has a bounded chance of meeting an individually witnessed **existing** original-engine wild creature only after two genuine off-screen sixday periods of independent life, if it is still at a compatible site, free, well enough and not currently in an active encounter. Repeated exploration on the same day does not automatically resummon it. Its own saved RNG independently decides whether it remains visible. Otherwise existing wild births or first-time engine individuals can appear.
 - Field-taxonomy observations can naturally re-sight an earlier `generatedWild` animal, retaining its ID and source before creating a new one.
 - `world.seekKnownWildBeast` and supported natural `track beast <beastId>` attempts can search for remembered individuals (including generated sightings), with genuine time, Stamina, check, autonomy and possible failure. They never reveal hidden movements. An uncharacterised new beast remains a **distant sighting only**, not eligible for automatic combat, bond or power expression.
 
