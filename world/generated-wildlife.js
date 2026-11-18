@@ -67,7 +67,7 @@ function create(s,w,region,taxon,witness){
   .readUInt32BE(0)||0x91e10da5;
  const b={id,name:taxon.name,species:taxon.id,
   evolutionStage:'Unclassified',relationship:'wild',owner:null,
-  location:s.world.location,away:false,consent:false,
+  location:s.world.location,away:true,consent:false,
   generatedWild:{source:root,seal,lastSeenMinute:s.world.minutes,encounterCount:1},
   individualLife:{version:1,beastId:id,species:taxon.id,
    source,sourceHash:hash(source),rngState:seed,
@@ -95,7 +95,8 @@ function maybeReturn(s,w,region,selector){
   before,after:life.rngState,wasSeen:seen,observed:seen});
  if(life.history.length>24)life.history.shift();
  if(!seen)return null;
- b.away=false;b.generatedWild.lastSeenMinute=s.world.minutes;
+ // A field glimpse is not an active encounter or continued co-presence.
+ b.away=true;b.generatedWild.lastSeenMinute=s.world.minutes;
  b.generatedWild.encounterCount++;
  life.witnessed.push({day:Math.floor(s.world.minutes/DAY),
   minute:s.world.minutes,location:s.world.location,
@@ -127,9 +128,73 @@ function sixday(s,days){
  }
  return {updated};
 }
+// A chosen *search target* is a previously seen individual, not a chosen
+// outcome. A source-owned field check and the animal's own independent RNG
+// determine whether the player sees it again. No combat or bond is unlocked.
+function track(s,p={}){
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+   Object.keys(p).join('|')!=='beastId'||typeof p.beastId!=='string')
+  throw Error('Tracking a generated animal requires only an originally witnessed individual ID');
+ const b=s.beasts?.[p.beastId];
+ if(!b?.generatedWild||!verify(s,b))
+  throw Error('Only an original generated wildlife sighting may be tracked');
+ if(s.encounter||s.battle||b.owner||b.relationship!=='wild')
+  throw Error('The animal is independent and no conflicting encounter may be active');
+ if(s.table?.combatants?.player?.status&&
+    s.table.combatants.player.status!=='ok')
+  throw Error('Incapacitation prevents independent wildlife tracking');
+ const C=require('../rules/core'),W=require('../rules/world'),
+  U=require('../rules/unified'),site=s.world.location,
+  origin=b.generatedWild.source,regionId=Atlas.LOCATION_REGION[site]||
+   require('./lived-places').location(s)?.regionId;
+ if(!regionId||!Atlas.R[regionId]||Atlas.R[regionId].biome==='settlement')
+  throw Error('The remembered animal can only be sought in a genuine outdoor habitat');
+ const stamina=C.int(s.player.stamina,'tracking stamina',0,100000),
+  other=s.table?.combatants?.player;
+ if(stamina<3||(other&&other.stamina<3))
+  throw Error('Insufficient actual Stamina to track a remembered beast');
+ const at=s.world.minutes;
+ C.event(s,'world','A field search begins for the witnessed individual; its whereabouts remain uncertain.',{
+  origin:SOURCE,beastId:b.id,site,startMinute:at,
+  timeMinutes:45,staminaCost:3,noAssumedAnimalLocation:true});
+ Engine.advance(s,45);W.finalizeTime(s,at);
+ s.player.stamina-=3;
+ if(other){other.stamina=s.player.stamina;U.sync(s,{source:'wounds'});}
+ const eco=s.table?.realm?.ecosystems?.[regionId];
+ const dc=eco&&(eco.pressure>75||eco.quality<30)?16:14;
+ const stat=C.int(s.player.attributes?.wis,'earned tracking Wisdom',1,30),
+  skill=C.int(s.player.skills?.survival?.rank,'earned Survival skill',0,5);
+ const check=C.check(s,{modifier:Math.floor((stat-10)/2)+2*skill,
+  dc,label:'Find the original unclassified field beast',risky:false});
+ const atSource=origin.regionId===regionId&&b.location===site;
+ const possible=atSource&&fit(s.table.realm,regionId,Bestiary.lookup(b.species));
+ const life=b.individualLife;
+ const accepted=check.success&&possible&&draw(life)<.58;
+ life.history.push({day:Math.floor(s.world.minutes/DAY),
+  type:'personal-search-response',location:site,
+  observed:accepted,notGuaranteed:true});
+ if(life.history.length>24)life.history.shift();
+ if(accepted){
+  b.generatedWild.lastSeenMinute=s.world.minutes;
+  b.generatedWild.encounterCount++;
+  life.witnessed.push({day:Math.floor(s.world.minutes/DAY),
+   minute:s.world.minutes,location:site,kind:'reencounter-after-tracking',
+   sourceHash:b.generatedWild.seal});
+  if(life.witnessed.length>24)life.witnessed.shift();
+ }
+ b.away=true;
+ C.event(s,'beast',accepted?
+  'The original unclassified animal is seen again at a distance, without any assumed willingness to approach.':
+  'The search does not confirm where the remembered animal is; nothing is summoned.',{
+  origin:SOURCE,beastId:b.id,found:accepted,
+  sourceHash:b.generatedWild.seal,noCombatOrBond:true});
+ return {searched:true,found:accepted,beastId:b.id,check,
+  minutes:45,staminaSpent:3,distantSightingOnly:true,
+  noCombatOrBondEncounter:true,noGuaranteedReturn:true};
+}
 function sighting(s,w,region,taxon,selector,witness){
  const result=maybeReturn(s,w,region,selector)||
    create(s,w,region,taxon,witness);
  return result;
 }
-module.exports={SOURCE,verify,create,maybeReturn,sighting,sixday};
+module.exports={SOURCE,verify,create,maybeReturn,sighting,sixday,track};
