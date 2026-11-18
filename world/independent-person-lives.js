@@ -105,7 +105,7 @@ function daily(w,q,day,s){
   // Death does not produce a fictional daily 'rest', new training or
   // a three-draw personal RNG advance. The combat owner remains canonical.
   q.lastDay=day;
-  if(!verifyEntry(w,q))throw Error('Original deceased person's activity ledger is invalid');
+  if(!verifyEntry(w,q))throw Error('Original deceased actor activity ledger is invalid');
   return null;
  }
  // Every interval is evaluated once. No query or GM/player search may reroll.
