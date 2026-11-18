@@ -34,7 +34,7 @@ function make(wants,start){
   s.world.minutes=600;s.chatRuntime||={};
   const witness=p.name+' is an uninjured, unarmed, unarmoured adult here at '+
    s.world.location+', directly witnessed in this present physical scene.';
-  s.chatRuntime.scene='An independent local person is here. '+witness;
+  s.chatRuntime.scene='An independent local person is here. '+witness+' '+p.name+' stands beside the player, with a clear path to intervene against the approaching wild beast.';
   const r=Rules.act(s,{system:'health',operation:'linkWitnessedHuman',
    params:{npcId:p.actorId,witness}});
   A.equal(r.created,true);
