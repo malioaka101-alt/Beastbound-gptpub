@@ -47,7 +47,9 @@ A.equal(G.verify(copy,copy.beasts[id]),true,
 W.advance(s,7);
 A.equal(G.verify(s,s.beasts[id]),true);
 A.ok(b.individualLife.history.some(x=>x.type==='offscreen-sixday'));
-A.equal(b.individualLife.lastTickDay,Math.floor(s.world.minutes/1440));
+A.equal(b.individualLife.lastTickDay,
+ Math.floor(Math.floor(s.world.minutes/1440)/6)*6,
+ 'Wildlife updates on the genuine sixday clock, not every calendar day');
 A.equal(b.hp,undefined,'Offscreen activity cannot invent measured combat stats');
 A.equal(s.player.partnerIds.length,0);
 // Repeated encounters need not be new species or the same animal:
@@ -105,7 +107,13 @@ A.ok(watched,'Test requires an actual original wildlife witness');
 const originalId=watched.beastId;
 if(knownState.encounter)A.equal(E.dispatch(knownState,'leave').ok,true);
 const old=knownState.world.minutes;
-E.advance(knownState,65);W.finalizeTime(knownState,old);
+W.advance(knownState,6);
+// The returning animal may have moved to a genuinely connected compatible
+// habitat during the real off-screen sixday; the fixture follows its source
+// location without pretending a live player knows it remotely.
+const knownAnimal=knownState.beasts[originalId];
+if(knownAnimal.location!==knownState.world.location)
+ A.equal(E.dispatch(knownState,'travel '+knownAnimal.location).ok,true);
 let reunion=false;
 for(let i=0;i<85;i++){
  A.equal(E.dispatch(knownState,'explore').ok,true);
