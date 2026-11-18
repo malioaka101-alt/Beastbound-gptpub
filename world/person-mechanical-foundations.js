@@ -83,6 +83,56 @@ function earnedEvidence(w,actorId,s=null){
   rift:{step:null},beastOrigin:{integrations:null},
   humanEvolution:{stage:null},partnership:{synchronisation:null}
  });
+ // Original starting relatives already have their own independent living
+ // actors. Read that exact original source; a guardian/household label alone
+ // is NOT a biological relationship or permission to claim family powers.
+ if(actorId.startsWith('origin-kin:')){
+  if(!s||s.table?.realm!==w)
+   throw Error('Matching original game state required for starting kin evidence');
+  const Kin=require('./origin-relatives'),
+   t=Kin.ensure(w),
+   p=t?.people?.[actorId.slice('origin-kin:'.length)];
+  if(!p||p.actorId!==actorId)return {known:false};
+  if(!Kin.verify(w,p))
+   throw Error('Unverified original independent relative identity or history');
+  // The original public family-status owner alone interprets saved player
+  // corrections: its confirmed personal statement overrides vague roles
+  // without rewriting the sealed founding document.
+  const original=Kin.status(s),
+   remembered=original.relatives.find(x=>x.npcId===actorId);
+  if(!remembered)throw Error('Original independent kin is not this campaign family');
+  return {known:true,actorId,privateToGM:true,
+   evidenceOwners:['world/origin-relatives.js','scripts/scene-continuity.js'],
+   originalIdentityHash:p.sourceHash,
+   name:p.name,originalHomeRegion:p.source.regionId,
+   familyRelationship:{
+    foundingHouseholdRole:p.relation,
+    explicitlyRecordedKinship:p.kinship||null,
+    playerConfirmedRelationship:remembered.confirmedRelationship,
+    originalHouseholdHouseId:p.source.houseId,
+    biologicalLineageNotInferred:true,
+    noInheritedPowersByKinship:true
+   },
+   autonomousOrdinaryLife:{
+    owner:'world/origin-relatives.js',
+    status:p.status,currentFatigue:p.fatigue,
+    currentPersonalFunds:p.funds,lastIndependentSixday:p.lastSixday,
+    recentOriginalReceipts:p.history.map(e=>({
+     sourceHash:e.hash,day:e.source.day,
+     choice:e.source.decision,
+     observedOrdinaryFundsBefore:e.source.before?.funds??null,
+     observedOrdinaryFundsAfter:e.source.after?.funds??null,
+     observedFatigueBefore:e.source.before?.fatigue??null,
+     observedFatigueAfter:e.source.after?.fatigue??null
+    }))
+   },
+   currentLocalPresence:null,consentToSpeak:null,
+   ageAndLiveCombatAttributes:null,clinicalWounds:null,
+   supernaturalDisciplineMilestones:null,
+   personalLearnedTechniques:null,
+   noRetrospectiveTrainingOrProficiency:true,
+   noPresenceOrConsentByFamilyRole:true};
+ }
  // Sapient beasts are already independently evidenced by their ORIGINAL
  // personhood and per-activity competence owners. They do not acquire human
  // six-attribute baselines, professional ranks or cultivation by this bridge.
@@ -230,6 +280,16 @@ function earnedEvidence(w,actorId,s=null){
 
 function gmDossier(w,actorId,s=null){
  if(typeof actorId!=='string')throw Error('An established individual ID is required');
+ if(actorId.startsWith('origin-kin:')){
+  const evidence=earnedEvidence(w,actorId,s);
+  if(!evidence.known)return evidence;
+  return {known:true,kind:'original-independent-origin-relative',
+   actorId,name:evidence.name,privateToGM:true,
+   earnedEvidence:evidence,
+   baselineAttributes:null,latentPotential:null,
+   noAssumedBiologicalKinshipFromRole:true,
+   noAutomaticProfessionPowerOrAttendance:true};
+ }
  if(actorId.startsWith('sapient:')){
   const evidence=earnedEvidence(w,actorId,s);
   if(!evidence.known)return evidence;
