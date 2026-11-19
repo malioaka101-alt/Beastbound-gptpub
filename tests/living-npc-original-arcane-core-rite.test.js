@@ -206,7 +206,7 @@ for(const [want,seed] of [['ignited',985100],['declined',985300],
  if(want==='ignited')fp.originalArcaneCore.structuredMana=9999;
  else {fr.source.originalRiteDC=2;fr.seal=hash(fr.source);}
  A.equal(Early.verify(forged,fp),false);
- A.throws(()=>rite(forged,fp),/original independent Arcane source or preparation has been altered/);
+ A.throws(()=>rite(forged,fp),/Original independent Arcane source or preparation has been altered/);
  const last=s.log.findLast(x=>x.details?.privateNaturalStatsNotDisclosed===true);
  if(want!=='declined'){A.ok(last);A.equal(Object.hasOwn(last.details,'roll'),false);}
 }
