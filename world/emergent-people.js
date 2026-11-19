@@ -689,6 +689,64 @@ function considerOriginalWeaponGift(w,p,{item,originalPurchasedAssetRoot,sourceS
 // weapon only after its original item-owner/consent sources verify ownership
 // and an on-scene witness establishes that the weapon is already readied.
 // This is one bounded independent decision, not a class/weapon skill grant.
+// Same independent person's original RNG decides whether to take a
+// physically witnessed safe overnight rest. The original Combat owner
+// handles ALL eventual Stamina and Light-wound recovery, not this module.
+const ORIGINAL_NIGHT_SLEEP='original-independent-human-witnessed-night-sleep-v1';
+function originalNightChance(personality,fatigue){
+ const base={curious:71,steady:82,independent:68,reserved:77}[personality];
+ if(!Number.isInteger(base)||!Number.isInteger(fatigue)||fatigue<0||fatigue>100)
+  throw Error('Original individual sleep intent lacks a current real personality or fatigue');
+ return Math.min(94,base+(fatigue>=50?9:0));
+}
+function verifyOriginalNightChoice(q){
+ if(!q||q.origin!==ORIGINAL_NIGHT_SLEEP||
+  !/^emergent:person_[0-9]+$/.test(q.actorId||'')||
+  !/^[a-f0-9]{64}$/.test(q.individualOriginHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.originalCombatEntrySeal||'')||
+  !/^[a-f0-9]{64}$/.test(q.sourceShiftHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.sceneWitnessHash||'')||
+  !['curious','steady','independent','reserved'].includes(q.personality)||
+  !Number.isInteger(q.fatigue)||q.fatigue<0||q.fatigue>100||
+  !Number.isInteger(q.startMinute)||q.startMinute<0||
+  !Number.isInteger(q.day)||q.day!==Math.floor(q.startMinute/1440)||
+  typeof q.location!=='string'||!q.location||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  q.rngAfter!==nextRng(q.rngBefore)||
+  !Number.isInteger(q.roll)||q.roll<1||q.roll>100||
+  !Number.isInteger(q.chance)||q.chance!==originalNightChance(q.personality,q.fatigue)||
+  typeof q.accepted!=='boolean'||
+  q.noForcedRestOrInferredHousing!==true||
+  q.noAutomaticMedicalCareOrPower===false)
+  return false;
+ return q.roll===1+Math.floor(q.rngAfter/4294967296*100)&&
+  q.accepted===(q.roll<=q.chance);
+}
+function considerOriginalOvernightSleep(w,p,details={}){
+ const {startMinute,sourceShiftHash,sceneWitnessHash,originalCombatEntrySeal,location}=details;
+ if(!verify(w,p)||p.status!=='active'||
+  !Number.isInteger(startMinute)||startMinute<0||
+  !/^[a-f0-9]{64}$/.test(sourceShiftHash||'')||
+  !/^[a-f0-9]{64}$/.test(sceneWitnessHash||'')||
+  !/^[a-f0-9]{64}$/.test(originalCombatEntrySeal||'')||
+  typeof location!=='string'||!location)
+  throw Error('An authentic living individual and witnessed original sleeping place are required');
+ const before=p.rngState,roll=1+Math.floor(draw(p)*100),
+  chance=originalNightChance(p.personality,p.fatigue),
+  source={origin:ORIGINAL_NIGHT_SLEEP,actorId:p.actorId,
+   individualOriginHash:p.originHash,
+   originalCombatEntrySeal,sourceShiftHash,sceneWitnessHash,
+   startMinute,day:Math.floor(startMinute/1440),location,
+   personality:p.personality,fatigue:p.fatigue,
+   rngBefore:before,rngAfter:p.rngState,roll,chance,
+   accepted:roll<=chance,
+   noForcedRestOrInferredHousing:true,
+   noAutomaticMedicalCareOrPower:true};
+ if(!verifyOriginalNightChoice(source))
+  throw Error('Original independent overnight intent failed personal choice replay');
+ return {source,sourceHash:hash(source)};
+}
 function chooseOriginalArmedBeastStrike(s,actorId){
  const w=require('./simulation').peek(s),p=w?.emergentPeople?.
   people?.[actorId?.slice('emergent:'.length)],
@@ -1292,7 +1350,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseOriginalArmedBeastStrike,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,considerOriginalOvernightSleep,verifyOriginalNightChoice,chooseOriginalArmedBeastStrike,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
