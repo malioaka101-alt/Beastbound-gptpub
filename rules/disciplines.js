@@ -1288,6 +1288,7 @@ function organWork(s,params={}){
 // owner, not a generic NPC powers/XP engine. No stage, Qi or ability is
 // awarded by a preparatory session or ordinary daily study.
 const NPC_MERIDIAN='original-independent-meridian-foundation-practice-v1';
+const NPC_MERIDIAN_RITE='original-independent-meridian-foundation-stage-one-rite-v1';
 const npcHash=v=>Crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const npcMethods=KEYS.meridian.focus;
 function npcSessionChance(p){
@@ -1303,7 +1304,9 @@ function npcSessionChance(p){
 function verifyNpcMeridian(s,person){
  const rec=person?.meridianTraining;
  if(rec===undefined)return true;
- if(!rec||rec.origin!==NPC_MERIDIAN||rec.target!=='foundation'||
+ if(!rec||rec.origin!==NPC_MERIDIAN||
+  !['foundation','awakening'].includes(rec.target)||
+  (rec.earnedStage!==undefined&&rec.earnedStage!==1)||
   rec.stageAtStart!==0||!Number.isInteger(rec.points)||
   rec.points<0||rec.points>KEYS.meridian.tracks.foundation[0]||
   !rec.methods||typeof rec.methods!=='object'||Array.isArray(rec.methods)||
@@ -1322,20 +1325,130 @@ function verifyNpcMeridian(s,person){
  const combatant=s.table?.combatants?.['npc_'+person.id];
  if(!combatant?.npcOrigin||
   combatant.npcOrigin.actorId!==person.actorId)return false;
- let points=0,lastDay=-1,lastMinute=-1,cooldown=0;
- const methods={},priorAcceptedWitnesses=[];
+ let points=0,lastDay=-1,lastMinute=-1,lastPracticeDay=-1,
+  lastRiteDay=-1,earntStage=0,quality=null,cooldown=0,previousEnd=-1;
+ const methods={},priorAcceptedWitnesses=[],
+  firstMaximum=combatant.maxStamina-(rec.earnedStage===1?
+   Build.meridianProfile(1).bonuses.stamina:0);
+ if(firstMaximum<1)return false;
  for(const row of rec.sessions){
   const q=row?.source;
-  if(!q||row.seal!==npcHash(q)||
+  if(q?.origin===NPC_MERIDIAN_RITE){
+   // An actual rite shares the SAME chronological discipline journal as
+   // ordinary Foundation training; history cannot overwrite earned points.
+   if(row.seal!==npcHash(q)||earntStage!==0||
+    q.actorId!==person.actorId||
+    q.individualOriginHash!==person.originHash||
+    q.originalCombatEntrySeal!==combatant.npcOrigin.seal||
+    q.originalFoundationSeal!==person.mechanicalFoundation.seal||
+    q.target!=='foundation'||q.noInventedTrainingRank!==true||
+    q.noFreeQiOrLearnedTechnique!==true||
+    q.insightSpent!==0||q.feeTalons!==0||
+    q.pointsBefore!==points||points<KEYS.meridian.tracks.foundation[0]||
+    q.distinctMethodsBefore!==Object.keys(methods).length||
+    q.distinctMethodsBefore<2||
+    !Number.isInteger(q.day)||q.day<lastDay||
+    q.day<=lastRiteDay||
+    !Number.isInteger(q.startMinute)||q.startMinute<previousEnd||
+    Math.floor(q.startMinute/1440)!==q.day||
+    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+    !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
+    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+    !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+    !Number.isInteger(q.choiceD100)||q.choiceD100<1||
+    q.choiceD100>100||q.personalityAtAttempt!==person.personality||
+    !Number.isInteger(q.fatigueAtAttempt)||q.fatigueAtAttempt<0||
+    q.fatigueAtAttempt>100||
+    q.choiceChance!==npcSessionChance({
+     personality:q.personalityAtAttempt,fatigue:q.fatigueAtAttempt})||
+    typeof q.accepted!=='boolean'||
+    q.cooldownBefore!==cooldown||q.day<cooldown||
+    q.staminaCost!==0||q.originalRiteDC!==
+     KEYS.meridian.tracks.foundation[1]+2+3)
+    return false;
+   const roller={rngState:q.rngBefore};
+   if(C.die(roller,100)!==q.choiceD100||
+    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
+   const aptDimension=Potential.PRIMARY.meridian.foundation,
+    apt=Potential.bonus(
+     person.mechanicalFoundation.unassessedPotential[aptDimension]),
+    originalWis=Math.floor((
+     person.mechanicalFoundation.baselineAttributes.wis-10)/2);
+   if(q.originalAptitudeDimension!==aptDimension||
+    q.originalAptitudeBonus!==apt)return false;
+   if(q.accepted){
+    if(q.actualMinutes!==180||
+     !q.check||q.check.roll!==C.die(roller,20)||
+     q.check.modifier!==originalWis+apt||
+     q.check.dc!==q.originalRiteDC||
+     !Number.isInteger(q.maxStaminaBefore)||
+     q.maxStaminaBefore!==firstMaximum||
+     !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
+     q.staminaBefore>q.maxStaminaBefore||
+     !Array.isArray(q.woundsBefore)||
+     q.woundsBefore.length!==3||
+     q.woundsBefore.some(v=>v!==0))
+     return false;
+    const margin=q.check.roll+q.check.modifier+
+     C.naturalAdjustment(q.check.roll)-q.check.dc,
+     degree=C.degree(margin),
+     successful=margin>=0,
+     expectedCooldown=successful?cooldown:
+      q.day+(degree==='setback'?12:
+       degree==='failure'?24:30),
+     expectedPoints=successful?0:degree==='severe failure'?
+      Math.floor(points*.75):points,
+     expectedQuality=successful?
+      (degree==='exceptional'?'Perfect':
+       degree==='strong'?'Firm':'Sound'):null,
+     staminaBenefit=successful?Build.meridianProfile(1).bonuses.stamina:0;
+    if(q.check.degree!==degree||
+     q.check.success!==successful||
+     q.outcome!==(successful?'breakthrough':
+      degree==='severe failure'?'backlash':'stalled')||
+     q.cooldownUntil!==expectedCooldown||
+     q.pointsAfter!==expectedPoints||
+     q.earnedStageAfter!==(successful?1:0)||
+     q.foundationQuality!==expectedQuality||
+     q.foundationIntegrityAfter!==(successful?20:null)||
+     q.maxStaminaAfter!==q.maxStaminaBefore+staminaBenefit||
+     q.staminaAfter!==q.staminaBefore+staminaBenefit||
+     !Array.isArray(q.woundsAfter)||
+     JSON.stringify(q.woundsAfter)!==
+      JSON.stringify(degree==='severe failure'?[1,0,0]:[0,0,0]))
+     return false;
+    points=expectedPoints;cooldown=expectedCooldown;
+    if(successful){
+     earntStage=1;quality=expectedQuality;
+     for(const method of Object.keys(methods))delete methods[method];
+    }
+   }else{
+    if(q.actualMinutes!==5||q.check!==null||
+     q.maxStaminaBefore!==null||q.maxStaminaAfter!==null||
+     q.staminaBefore!==null||q.staminaAfter!==null||
+     q.woundsBefore!==null||q.woundsAfter!==null||
+     q.pointsAfter!==points||q.cooldownUntil!==cooldown||
+     q.earnedStageAfter!==0||q.foundationQuality!==null||
+     q.foundationIntegrityAfter!==null||
+     q.outcome!=='declined')return false;
+   }
+   if(q.rngAfter!==roller.rngState)return false;
+   lastDay=q.day;lastRiteDay=q.day;
+   lastMinute=q.startMinute;previousEnd=q.startMinute+q.actualMinutes;
+   continue;
+  }
+  if(!q||row.seal!==npcHash(q)||earntStage!==0||
+
    q.origin!==NPC_MERIDIAN||q.actorId!==person.actorId||
    q.individualOriginHash!==person.originHash||
    q.originalCombatEntrySeal!==combatant.npcOrigin.seal||
    q.originalFoundationSeal!==person.mechanicalFoundation.seal||
    q.target!=='foundation'||q.originalSkillRankBonus!==0||
    q.noAutomaticRankOrStage!==true||
-   !Number.isInteger(q.day)||q.day<0||q.day<=lastDay||
+   !Number.isInteger(q.day)||q.day<0||q.day<lastDay||
+   q.day<=lastPracticeDay||
    !Number.isInteger(q.startMinute)||q.startMinute<0||
-   q.startMinute<=lastMinute||Math.floor(q.startMinute/1440)!==q.day||
+   q.startMinute<previousEnd||Math.floor(q.startMinute/1440)!==q.day||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
    !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
@@ -1371,7 +1484,7 @@ function verifyNpcMeridian(s,person){
    if(!Number.isInteger(q.maxStaminaAtAttempt)||
     q.maxStaminaAtAttempt<1||
     q.staminaBefore>q.maxStaminaAtAttempt||
-    q.maxStaminaAtAttempt!==combatant.maxStamina)
+    q.maxStaminaAtAttempt!==firstMaximum)
     return false;
    const expectedDC=Difficulty.disciplinePractice(s,{
     system:'meridian',method:q.method,
@@ -1415,10 +1528,17 @@ function verifyNpcMeridian(s,person){
    q.cooldownUntil!==cooldown)return false;
   if(q.pointsAfter!==points||roller.rngState!==q.rngAfter)
    return false;
-  lastDay=q.day;lastMinute=q.startMinute;
+  lastDay=q.day;lastPracticeDay=q.day;lastMinute=q.startMinute;
+  previousEnd=q.startMinute+q.actualMinutes;
  }
- return rec.points===points&&rec.lastAttemptDay===lastDay&&
+ return rec.points===points&&rec.lastAttemptDay===lastPracticeDay&&
   rec.cooldownUntil===cooldown&&
+  rec.target===(earntStage===1?'awakening':'foundation')&&
+  (rec.earnedStage===undefined?earntStage===0:rec.earnedStage===earntStage)&&
+  (rec.foundationQuality===undefined?quality===null:
+   rec.foundationQuality===quality)&&
+  (rec.foundationIntegrity===undefined?earntStage===0:
+   rec.foundationIntegrity===(earntStage===1?20:0))&&
   JSON.stringify(rec.methods)===JSON.stringify(methods);
 }
 function npcMeridianPrivateStatus(s,actorId){
@@ -1431,13 +1551,22 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original individual Meridian training proof was altered');
  const rec=p.meridianTraining;
  return {actorId,originalOwner:'rules/disciplines.js',
-  originalMeridianStageEarned:null,
+  originalMeridianStageEarned:rec?.earnedStage===1?1:null,
+  originalStageOneFoundationQuality:rec?.foundationQuality??null,
+  originalFoundationIntegrity:rec?.foundationIntegrity??null,
+  originalMeridianTrainingTarget:rec?.target??'foundation',
+  originalFoundationPracticeReceipts:rec?.sessions.filter(
+   x=>x.source.origin===NPC_MERIDIAN).length??0,
+  originalRiteAttempts:rec?.sessions.filter(
+   x=>x.source.origin===NPC_MERIDIAN_RITE).length??0,
   actualFoundationPracticePoints:rec?.points??0,
   requiredOriginalFoundationPoints:KEYS.meridian.tracks.foundation[0],
   distinctActualMethods:Object.keys(rec?.methods||{}).length,
-  originalRiteEligible:!!rec&&rec.points>=KEYS.meridian.tracks.foundation[0]&&
-   Object.keys(rec.methods).length>=2,
-  originalBreakthroughPerformed:false,
+  originalRiteEligible:!!rec&&rec.earnedStage!==1&&
+   rec.points>=KEYS.meridian.tracks.foundation[0]&&
+   Object.keys(rec.methods).length>=2&&
+   Math.floor(s.world.minutes/1440)>=rec.cooldownUntil,
+  originalBreakthroughPerformed:rec?.earnedStage===1,
   noUnverifiedQiOrLearnedTechnique:true,privateToGM:true};
 }
 // This scene operation can OFFER practice, but does not FORCE the person.
@@ -1478,6 +1607,11 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
  if(minute+120>=1440||minute<8*60||minute+120>18*60)
   throw Error('Actual independent Meridian practice requires a complete safe daylight session');
  const rec=p.meridianTraining;
+ if(rec?.earnedStage===1)
+  throw Error('This independent person already earned Meridian Stage I; Foundation practice cannot grant a second stage');
+ if(rec?.sessions?.some(row=>row.source.origin===NPC_MERIDIAN_RITE&&
+    row.source.day===day))
+  throw Error('A completed independent rite decision cannot be rerolled as another practice today');
  if(rec&&rec.lastAttemptDay>=day)
   throw Error('This person already made their independent Meridian choice today; no reroll');
  if(rec&&rec.points>=KEYS.meridian.tracks.foundation[0])
@@ -1497,7 +1631,8 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
  let newCooldown=target.cooldownUntil,minutes=5;
  if(accepted){
   methodNumber=C.die(p,3);method=npcMethods[methodNumber-1];
-  const prior=target.sessions.filter(x=>x.source.accepted).map(x=>({
+  const prior=target.sessions.filter(x=>x.source.origin===NPC_MERIDIAN&&
+    x.source.accepted).map(x=>({
    system:'meridian',target:'foundation',method:x.source.method,
    minutes:120,startMinute:x.source.startMinute,eventHash:x.seal}));
   const dc=Difficulty.disciplinePractice(s,{system:'meridian',method,
