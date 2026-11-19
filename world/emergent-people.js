@@ -632,6 +632,59 @@ function live(w,p,day,s=null){
 // career and everyday choices. One independent personal RNG draw, not a player
 // directive, determines whether the adult voluntarily risks interposing when
 // the independently acting beast has already committed to attack.
+// An offered purchased weapon is not a new friendship, following order,
+// licence, rank or promise to fight. Reuse the ORIGINAL personal choice stream
+// to accept/decline this real item while its witnessed offer still exists.
+const WEAPON_GIFT_CHOICE='original-independent-person-mundane-weapon-gift-choice-v1';
+function giftChance(personality,fatigue){
+ if(!['reserved','curious','steady','independent'].includes(personality)||
+  !Number.isInteger(fatigue)||fatigue<0||fatigue>100)
+  throw Error('The original independent person has no valid current choice condition');
+ return Math.max(.08,Math.min(.65,
+  (personality==='curious'?.52:personality==='steady'?.41:
+   personality==='independent'?.31:.23)-
+  (fatigue>=60?.16:fatigue>=35?.07:0)));
+}
+function verifyOriginalWeaponGiftChoice(q){
+ if(!q||q.origin!==WEAPON_GIFT_CHOICE||
+  !/^emergent:person_[0-9]+$/.test(q.actorId||'')||
+  !/^[a-f0-9]{64}$/.test(q.personOriginHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.originalPurchasedAssetRoot||'')||
+  !/^[a-f0-9]{64}$/.test(q.sourceShiftHash||'')||
+  typeof q.item!=='string'||!/^[a-z_]{3,60}$/.test(q.item)||
+  !Number.isInteger(q.minute)||q.minute<0||
+  !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+  !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+  q.rngAfter!==nextRng(q.rngBefore)||
+  !Number.isInteger(q.fatigueAtOffer)||
+  !['reserved','curious','steady','independent'].includes(q.personalityAtOffer)||
+  typeof q.accepted!=='boolean'||
+  q.noCompulsoryFighting!==true||
+  q.noLearnedTechniqueOrSupernaturalPower!==true)return false;
+ try{
+  return q.chance===giftChance(q.personalityAtOffer,q.fatigueAtOffer)&&
+   q.accepted===(q.rngAfter/4294967296<q.chance);
+ }catch{return false;}
+}
+function considerOriginalWeaponGift(w,p,{item,originalPurchasedAssetRoot,sourceShiftHash,minute}={}){
+ if(!verify(w,p)||p.status!=='active'||
+  !/^[a-f0-9]{64}$/.test(originalPurchasedAssetRoot||'')||
+  !/^[a-f0-9]{64}$/.test(sourceShiftHash||'')||
+  !/^[a-z_]{3,60}$/.test(item||'')||
+  !Number.isInteger(minute)||minute<0)
+  throw Error('An actually present, individually living person needs a real paid item before consenting');
+ const rngBefore=p.rngState,drawn=draw(p),
+  chance=giftChance(p.personality,p.fatigue);
+ const source={origin:WEAPON_GIFT_CHOICE,actorId:p.actorId,
+  personOriginHash:p.originHash,item,originalPurchasedAssetRoot,
+  sourceShiftHash,minute,rngBefore,rngAfter:p.rngState,
+  personalityAtOffer:p.personality,fatigueAtOffer:p.fatigue,chance,
+  accepted:drawn<chance,noCompulsoryFighting:true,
+  noLearnedTechniqueOrSupernaturalPower:true};
+ if(!verifyOriginalWeaponGiftChoice(source))
+  throw Error('The original individual item offer decision failed exact replay');
+ return {source,sourceHash:hash(source)};
+}
 function chooseEmergencyInterposition(s,actorId){
  const w=require('./simulation').peek(s),
   p=w?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)];
@@ -1180,7 +1233,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseEmergencyInterposition,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};

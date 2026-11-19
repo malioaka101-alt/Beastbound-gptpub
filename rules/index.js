@@ -382,6 +382,7 @@ function act(s,{system,operation,params={}}={}){
   case 'gear.purchase':return Equipment.purchase(s,params);
   case 'gear.equip':return Equipment.equip(s,params);
   case 'gear.unequip':return Equipment.unequip(s,params);
+  case 'gear.giveWeaponToPerson':return Equipment.giveWeaponToPerson(s,params);
   case 'gear.status':return Equipment.status(s,params);
   case 'economy.spend':return Unified.spend(s,params);
   case 'combat.attack':
