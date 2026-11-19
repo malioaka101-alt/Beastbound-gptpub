@@ -224,6 +224,13 @@ function earnedEvidence(w,actorId,s=null){
   // career prestige or a raw legacy array remain incapable of awarding it.
   const verifiedMeridian=s?.table?.realm===w&&actor.meridianTraining?
    require('../rules/disciplines').npcMeridianPrivateStatus(s,actorId):null;
+  // Genuine independent early preparation is NOT an earned magical stage.
+  // Keep all separate systems' milestones unknown until their own original
+  // source-owned ignition, refinement or awakening events actually occur.
+  const verifiedOtherPreparation=s?.table?.realm===w&&
+   actor.originalEarlyDisciplinePreparation?
+   require('../rules/independent-original-discipline-preparation')
+    .privateStatus(s,actorId):null;
   const originalMilestones=emptyMilestones();
   if(verifiedMeridian?.originalMeridianStageEarned===1){
    originalMilestones.meridian.stage=1;
