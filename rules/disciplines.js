@@ -1824,16 +1824,18 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
  E.advance(s,minutes);W.finalizeTime(s,start);
  C.event(s,'progress',
   accepted?(outcome==='breakthrough'?
-   p.name+' completes a witnessed Meridian Stage I Foundation Tempering rite.':
+   p.name+' completes their prepared Meridian rite; a change in breathing and bearing is visible.':
    p.name+' finishes a prepared Foundation rite with real physical consequences.'):
    p.name+' chooses not to undertake the prepared Foundation rite today.',{
    origin:NPC_MERIDIAN_RITE,actorId,choice:accepted?'attempted':'declined',
    originalRiteSourceHash:rec.sessions.at(-1).seal,
-   observedOutcome:outcome,meridianStageWitnessed:outcome==='breakthrough'?1:null,
+   observedOutcome:outcome,
+   verifiedExactStageMustRemainGMPrivate:true,
    privateAptitudeAndDiceNotDisclosed:true,noGrantedTechniqueOrQi:true});
  return {actorId,independentChoice:accepted?'attempted':'declined',
   observedOutcome:outcome,
-  witnessedStageEarned:outcome==='breakthrough'?1:null,
+  verifiedOriginalStageGMOnly:outcome==='breakthrough'?1:null,
+  playerKnownExactStage:false,
   elapsedMinutes:minutes,actualOriginalCheck:accepted,
   realBacklash:outcome==='backlash',
   privateDiceAndPotentialNotDisclosed:true,
