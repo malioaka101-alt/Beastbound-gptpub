@@ -282,6 +282,7 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
   case 'discipline.npcEarlyPreparation':return require('./independent-original-discipline-preparation').practice(s,params);
+  case 'discipline.npcArcaneCoreIgnition':return require('./independent-original-arcane-core').practice(s,params);
   case 'discipline.npcMeridianPractice':return Disciplines.npcMeridianPractice(s,params);
   case 'discipline.npcMeridianStageOneRite':return Disciplines.npcMeridianStageOneRite(s,params);
    case 'discipline.practiceDifficulty':return Disciplines.difficultyPreview(s,params);
