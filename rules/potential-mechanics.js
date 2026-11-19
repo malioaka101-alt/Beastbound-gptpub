@@ -55,14 +55,39 @@ function read(s,dimension){
  return {dimension,score,modifier:bonus(score),rating:BANDS[score-1],
   available:true,noStageCap:true};
 }
-function discipline(s,system,target,method){
+// Same ORIGINAL potential bands and bonuses for player and independently
+// sourced people. This read never awards a stage, teaches a skill, creates a
+// training record, asks the NPC to consent, or consumes either person's RNG.
+// Not exposed through a public Rules operation: other people's latent
+// potential remains GM-private even if a rule calculation needs it.
+function readForActor(s,dimension,actorId='player'){
+ if(actorId==='player')return read(s,dimension); // Preserve legacy PC semantics.
+ if(!DIMENSIONS.includes(dimension))
+  throw Error('Unknown human potential dimension');
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Only a real source-verified independent human may have private potential');
+ const Realm=require('../world/simulation'),
+  People=require('../world/emergent-people'),
+  Foundations=require('../world/person-mechanical-foundations'),
+  w=Realm.peek(s),person=w?.emergentPeople?.people?.[
+    actorId.slice('emergent:'.length)];
+ if(!w||s.table?.realm!==w||!person||
+  person.actorId!==actorId||!People.verify(w,person)||
+  !Foundations.verify(w,person))
+  throw Error('Original independent human latent potential source is not verified');
+ const score=person.mechanicalFoundation.unassessedPotential[dimension];
+ return {dimension,score,modifier:bonus(score),rating:BANDS[score-1],
+  available:true,noStageCap:true,actorId,privateToGM:true,
+  originalUnassessedPotentialOnly:true,earnedStageOrTechnique:null};
+}
+function discipline(s,system,target,method,actorId='player'){
  const dim=(method&&METHODS[system]?.[method])||
   PRIMARY[system]?.[target]||
   (system==='meridian'?'gateStability':
    system==='arcane'?'manaCoreArchitecture':
    system==='soul'?'soulDepth':
    system==='body'?'physicalAdaptation':'comprehension');
- return read(s,dim);
+ return readForActor(s,dim,actorId);
 }
 function originStep(s,step){
  if(!Object.hasOwn(ORIGIN_STEPS,step))throw Error('Unknown Origin integration step');
@@ -83,4 +108,4 @@ function matches(s,record,dimension){
   record.rating===expected.rating&&record.noStageCap===true;
 }
 module.exports={BANDS,DIMENSIONS,PRIMARY,METHODS,ORIGIN_STEPS,
- ORIGIN_AXES,bonus,read,discipline,originStep,originAxis,matches};
+ ORIGIN_AXES,bonus,read,readForActor,discipline,originStep,originAxis,matches};
