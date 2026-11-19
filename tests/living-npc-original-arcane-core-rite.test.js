@@ -166,6 +166,11 @@ for(const [want,seed] of [['ignited',985100],['declined',985300],
  A.equal(s.player.arcane.coreIgnited,false);
  A.equal(s.player.arcane.circles,0);
  const dossier=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
+ const arcaneStatus=dossier.originalOtherDisciplinePreparation.actualPreparations.arcane;
+ A.equal(arcaneStatus.realMilestoneAttemptCount,1);
+ A.equal(arcaneStatus.genuineSessionCount,
+  rec.sessions.filter(x=>x.source.origin===Early.ORIGIN&&x.source.accepted).length,
+  'The actual Arcane rite is not another preparation session');
  A.equal(dossier.originalPowerMilestones.arcane.coreIgnited,
   want==='ignited'?true:null);
  if(want==='ignited'){
