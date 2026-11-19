@@ -41,9 +41,15 @@ function roll(s,adv=0){
   const dice=adv?[die(s),die(s)]:[die(s)];
   return {dice,kept:adv===1?Math.max(...dice):adv===-1?Math.min(...dice):dice[0]};
 }
-function check(s,{modifier=0,dc=15,label='Check',risky=true,adv=0,takeTime=false,privateDisplay=false}={}){
+function check(s,{modifier=0,dc=15,label='Check',risky=true,adv=0,takeTime=false,privateDisplay=false,independentRngOwner=null}={}){
   int(modifier,'modifier',-100,100);int(dc,'DC',2,100);
-  const rolled=takeTime?{dice:[15],kept:15}:roll(s,adv);
+  // The ORIGINAL same die/check/degree owner may resolve a verified independent
+  // actor using that actor's already persisted RNG, never the player's RNG.
+  if(independentRngOwner!==null&&(!independentRngOwner||
+    !Number.isInteger(independentRngOwner.rngState)||
+    independentRngOwner.rngState<1||!privateDisplay))
+   throw Error('Independent private check needs a real persisted original RNG owner');
+  const rolled=takeTime?{dice:[15],kept:15}:roll(independentRngOwner||s,adv);
   const naturalBonus=takeTime?0:naturalAdjustment(rolled.kept);
   const total=rolled.kept+modifier+naturalBonus, margin=total-dc;
   const result={dice:rolled.dice,roll:rolled.kept,modifier,dc,total,margin,
