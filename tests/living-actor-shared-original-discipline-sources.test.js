@@ -104,6 +104,17 @@ A.equal(Engine.exportGame(s),initial,
  'All original five-power-system actor calculations are pure, with no NPC creation or hidden levels');
 A.equal(s.rngState,worldRng);
 A.equal(p.rngState,npcRng);
+// Source context is also PC-aware, and stays an inspection rather than a
+// training request across all five distinct original stage targets.
+for(const [system,target,method] of paths.filter(([,target])=>target!=='cycle2')){
+ const ctx=Disc.originalActorSessionContext(s,{system,target,method});
+ A.equal(ctx.actorId,'player');
+ A.equal(ctx.training.modifier,
+  Disc.originalActorTrainingProfile(s,{system,target,method}).modifier);
+ A.equal(ctx.currentStamina,s.player.stamina);
+ A.equal(ctx.noDecisionOrProgressAwarded,true);
+ A.equal(ctx.privateNpcInformation,false);
+}
 // The original PC progression owner permits a source-established
 // exceptional Wisdom fixture; generated-NPC natural-range rules must not
 // retroactively cap the player's original effective check arithmetic.
