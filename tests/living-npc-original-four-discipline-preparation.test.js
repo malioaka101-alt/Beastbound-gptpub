@@ -41,7 +41,7 @@ function fixture(system,accepted,seed){
  p.shift=People.shift(p,0,w);
  s.world.location=People.siteFor(p.regionId);
  s.world.minutes=600;s.chatRuntime||={};
- const witness=p.name+' is an independently living, unarmed adult currently witnessed at the real '+s.world.location+' workplace with no forced teacher or magic.';
+ const witness=p.name+' is an uninjured, unarmed, unarmoured adult here at '+s.world.location+', directly witnessed in the original current scene without an invented teacher or rank.';
  s.chatRuntime.scene='The adult considers real personal '+system+' preparation. '+witness;
  A.equal(Lives.enroll(s,{actorId:p.actorId,
   interests:[system,'craft'],
