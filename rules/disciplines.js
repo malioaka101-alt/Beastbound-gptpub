@@ -1288,6 +1288,7 @@ function organWork(s,params={}){
 // owner, not a generic NPC powers/XP engine. No stage, Qi or ability is
 // awarded by a preparatory session or ordinary daily study.
 const NPC_MERIDIAN='original-independent-meridian-foundation-practice-v1';
+const NPC_MERIDIAN_RITE='original-independent-meridian-foundation-stage-one-rite-v1';
 const npcHash=v=>Crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const npcMethods=KEYS.meridian.focus;
 function npcSessionChance(p){
@@ -1303,7 +1304,9 @@ function npcSessionChance(p){
 function verifyNpcMeridian(s,person){
  const rec=person?.meridianTraining;
  if(rec===undefined)return true;
- if(!rec||rec.origin!==NPC_MERIDIAN||rec.target!=='foundation'||
+ if(!rec||rec.origin!==NPC_MERIDIAN||
+  !['foundation','awakening'].includes(rec.target)||
+  (rec.earnedStage!==undefined&&rec.earnedStage!==1)||
   rec.stageAtStart!==0||!Number.isInteger(rec.points)||
   rec.points<0||rec.points>KEYS.meridian.tracks.foundation[0]||
   !rec.methods||typeof rec.methods!=='object'||Array.isArray(rec.methods)||
@@ -1322,20 +1325,130 @@ function verifyNpcMeridian(s,person){
  const combatant=s.table?.combatants?.['npc_'+person.id];
  if(!combatant?.npcOrigin||
   combatant.npcOrigin.actorId!==person.actorId)return false;
- let points=0,lastDay=-1,lastMinute=-1,cooldown=0;
- const methods={},priorAcceptedWitnesses=[];
+ let points=0,lastDay=-1,lastMinute=-1,lastPracticeDay=-1,
+  lastRiteDay=-1,earntStage=0,quality=null,cooldown=0,previousEnd=-1;
+ const methods={},priorAcceptedWitnesses=[],
+  firstMaximum=combatant.maxStamina-(rec.earnedStage===1?
+   Build.meridianProfile(1).bonuses.stamina:0);
+ if(firstMaximum<1)return false;
  for(const row of rec.sessions){
   const q=row?.source;
-  if(!q||row.seal!==npcHash(q)||
+  if(q?.origin===NPC_MERIDIAN_RITE){
+   // An actual rite shares the SAME chronological discipline journal as
+   // ordinary Foundation training; history cannot overwrite earned points.
+   if(row.seal!==npcHash(q)||earntStage!==0||
+    q.actorId!==person.actorId||
+    q.individualOriginHash!==person.originHash||
+    q.originalCombatEntrySeal!==combatant.npcOrigin.seal||
+    q.originalFoundationSeal!==person.mechanicalFoundation.seal||
+    q.target!=='foundation'||q.noInventedTrainingRank!==true||
+    q.noFreeQiOrLearnedTechnique!==true||
+    q.insightSpent!==0||q.feeTalons!==0||
+    q.pointsBefore!==points||points<KEYS.meridian.tracks.foundation[0]||
+    q.distinctMethodsBefore!==Object.keys(methods).length||
+    q.distinctMethodsBefore<2||
+    !Number.isInteger(q.day)||q.day<lastDay||
+    q.day<=lastRiteDay||
+    !Number.isInteger(q.startMinute)||q.startMinute<previousEnd||
+    Math.floor(q.startMinute/1440)!==q.day||
+    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+    !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
+    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+    !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+    !Number.isInteger(q.choiceD100)||q.choiceD100<1||
+    q.choiceD100>100||q.personalityAtAttempt!==person.personality||
+    !Number.isInteger(q.fatigueAtAttempt)||q.fatigueAtAttempt<0||
+    q.fatigueAtAttempt>100||
+    q.choiceChance!==npcSessionChance({
+     personality:q.personalityAtAttempt,fatigue:q.fatigueAtAttempt})||
+    typeof q.accepted!=='boolean'||
+    q.cooldownBefore!==cooldown||q.day<cooldown||
+    q.staminaCost!==0||q.originalRiteDC!==
+     KEYS.meridian.tracks.foundation[1]+2+3)
+    return false;
+   const roller={rngState:q.rngBefore};
+   if(C.die(roller,100)!==q.choiceD100||
+    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
+   const aptDimension=Potential.PRIMARY.meridian.foundation,
+    apt=Potential.bonus(
+     person.mechanicalFoundation.unassessedPotential[aptDimension]),
+    originalWis=Math.floor((
+     person.mechanicalFoundation.baselineAttributes.wis-10)/2);
+   if(q.originalAptitudeDimension!==aptDimension||
+    q.originalAptitudeBonus!==apt)return false;
+   if(q.accepted){
+    if(q.actualMinutes!==180||
+     !q.check||q.check.roll!==C.die(roller,20)||
+     q.check.modifier!==originalWis+apt||
+     q.check.dc!==q.originalRiteDC||
+     !Number.isInteger(q.maxStaminaBefore)||
+     q.maxStaminaBefore!==firstMaximum||
+     !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
+     q.staminaBefore>q.maxStaminaBefore||
+     !Array.isArray(q.woundsBefore)||
+     q.woundsBefore.length!==3||
+     q.woundsBefore.some(v=>v!==0))
+     return false;
+    const margin=q.check.roll+q.check.modifier+
+     C.naturalAdjustment(q.check.roll)-q.check.dc,
+     degree=C.degree(margin),
+     successful=margin>=0,
+     expectedCooldown=successful?cooldown:
+      q.day+(degree==='setback'?12:
+       degree==='failure'?24:30),
+     expectedPoints=successful?0:degree==='severe failure'?
+      Math.floor(points*.75):points,
+     expectedQuality=successful?
+      (degree==='exceptional'?'Perfect':
+       degree==='strong'?'Firm':'Sound'):null,
+     staminaBenefit=successful?Build.meridianProfile(1).bonuses.stamina:0;
+    if(q.check.degree!==degree||
+     q.check.success!==successful||
+     q.outcome!==(successful?'breakthrough':
+      degree==='severe failure'?'backlash':'stalled')||
+     q.cooldownUntil!==expectedCooldown||
+     q.pointsAfter!==expectedPoints||
+     q.earnedStageAfter!==(successful?1:0)||
+     q.foundationQuality!==expectedQuality||
+     q.foundationIntegrityAfter!==(successful?20:null)||
+     q.maxStaminaAfter!==q.maxStaminaBefore+staminaBenefit||
+     q.staminaAfter!==q.staminaBefore+staminaBenefit||
+     !Array.isArray(q.woundsAfter)||
+     JSON.stringify(q.woundsAfter)!==
+      JSON.stringify(degree==='severe failure'?[1,0,0]:[0,0,0]))
+     return false;
+    points=expectedPoints;cooldown=expectedCooldown;
+    if(successful){
+     earntStage=1;quality=expectedQuality;
+     for(const method of Object.keys(methods))delete methods[method];
+    }
+   }else{
+    if(q.actualMinutes!==5||q.check!==null||
+     q.maxStaminaBefore!==null||q.maxStaminaAfter!==null||
+     q.staminaBefore!==null||q.staminaAfter!==null||
+     q.woundsBefore!==null||q.woundsAfter!==null||
+     q.pointsAfter!==points||q.cooldownUntil!==cooldown||
+     q.earnedStageAfter!==0||q.foundationQuality!==null||
+     q.foundationIntegrityAfter!==null||
+     q.outcome!=='declined')return false;
+   }
+   if(q.rngAfter!==roller.rngState)return false;
+   lastDay=q.day;lastRiteDay=q.day;
+   lastMinute=q.startMinute;previousEnd=q.startMinute+q.actualMinutes;
+   continue;
+  }
+  if(!q||row.seal!==npcHash(q)||earntStage!==0||
+
    q.origin!==NPC_MERIDIAN||q.actorId!==person.actorId||
    q.individualOriginHash!==person.originHash||
    q.originalCombatEntrySeal!==combatant.npcOrigin.seal||
    q.originalFoundationSeal!==person.mechanicalFoundation.seal||
    q.target!=='foundation'||q.originalSkillRankBonus!==0||
    q.noAutomaticRankOrStage!==true||
-   !Number.isInteger(q.day)||q.day<0||q.day<=lastDay||
+   !Number.isInteger(q.day)||q.day<0||q.day<lastDay||
+   q.day<cooldown||q.day<=lastPracticeDay||
    !Number.isInteger(q.startMinute)||q.startMinute<0||
-   q.startMinute<=lastMinute||Math.floor(q.startMinute/1440)!==q.day||
+   q.startMinute<previousEnd||Math.floor(q.startMinute/1440)!==q.day||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
    !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
@@ -1371,7 +1484,7 @@ function verifyNpcMeridian(s,person){
    if(!Number.isInteger(q.maxStaminaAtAttempt)||
     q.maxStaminaAtAttempt<1||
     q.staminaBefore>q.maxStaminaAtAttempt||
-    q.maxStaminaAtAttempt!==combatant.maxStamina)
+    q.maxStaminaAtAttempt!==firstMaximum)
     return false;
    const expectedDC=Difficulty.disciplinePractice(s,{
     system:'meridian',method:q.method,
@@ -1415,10 +1528,17 @@ function verifyNpcMeridian(s,person){
    q.cooldownUntil!==cooldown)return false;
   if(q.pointsAfter!==points||roller.rngState!==q.rngAfter)
    return false;
-  lastDay=q.day;lastMinute=q.startMinute;
+  lastDay=q.day;lastPracticeDay=q.day;lastMinute=q.startMinute;
+  previousEnd=q.startMinute+q.actualMinutes;
  }
- return rec.points===points&&rec.lastAttemptDay===lastDay&&
+ return rec.points===points&&rec.lastAttemptDay===lastPracticeDay&&
   rec.cooldownUntil===cooldown&&
+  rec.target===(earntStage===1?'awakening':'foundation')&&
+  (rec.earnedStage===undefined?earntStage===0:rec.earnedStage===earntStage)&&
+  (rec.foundationQuality===undefined?quality===null:
+   rec.foundationQuality===quality)&&
+  (rec.foundationIntegrity===undefined?earntStage===0:
+   rec.foundationIntegrity===(earntStage===1?20:0))&&
   JSON.stringify(rec.methods)===JSON.stringify(methods);
 }
 function npcMeridianPrivateStatus(s,actorId){
@@ -1431,13 +1551,22 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original individual Meridian training proof was altered');
  const rec=p.meridianTraining;
  return {actorId,originalOwner:'rules/disciplines.js',
-  originalMeridianStageEarned:null,
+  originalMeridianStageEarned:rec?.earnedStage===1?1:null,
+  originalStageOneFoundationQuality:rec?.foundationQuality??null,
+  originalFoundationIntegrity:rec?.foundationIntegrity??null,
+  originalMeridianTrainingTarget:rec?.target??'foundation',
+  originalFoundationPracticeReceipts:rec?.sessions.filter(
+   x=>x.source.origin===NPC_MERIDIAN).length??0,
+  originalRiteAttempts:rec?.sessions.filter(
+   x=>x.source.origin===NPC_MERIDIAN_RITE).length??0,
   actualFoundationPracticePoints:rec?.points??0,
   requiredOriginalFoundationPoints:KEYS.meridian.tracks.foundation[0],
   distinctActualMethods:Object.keys(rec?.methods||{}).length,
-  originalRiteEligible:!!rec&&rec.points>=KEYS.meridian.tracks.foundation[0]&&
-   Object.keys(rec.methods).length>=2,
-  originalBreakthroughPerformed:false,
+  originalRiteEligible:!!rec&&rec.earnedStage!==1&&
+   rec.points>=KEYS.meridian.tracks.foundation[0]&&
+   Object.keys(rec.methods).length>=2&&
+   Math.floor(s.world.minutes/1440)>=rec.cooldownUntil,
+  originalBreakthroughPerformed:rec?.earnedStage===1,
   noUnverifiedQiOrLearnedTechnique:true,privateToGM:true};
 }
 // This scene operation can OFFER practice, but does not FORCE the person.
@@ -1478,6 +1607,11 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
  if(minute+120>=1440||minute<8*60||minute+120>18*60)
   throw Error('Actual independent Meridian practice requires a complete safe daylight session');
  const rec=p.meridianTraining;
+ if(rec?.earnedStage===1)
+  throw Error('This independent person already earned Meridian Stage I; Foundation practice cannot grant a second stage');
+ if(rec?.sessions?.some(row=>row.source.origin===NPC_MERIDIAN_RITE&&
+    row.source.day===day))
+  throw Error('A completed independent rite decision cannot be rerolled as another practice today');
  if(rec&&rec.lastAttemptDay>=day)
   throw Error('This person already made their independent Meridian choice today; no reroll');
  if(rec&&rec.points>=KEYS.meridian.tracks.foundation[0])
@@ -1497,7 +1631,8 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
  let newCooldown=target.cooldownUntil,minutes=5;
  if(accepted){
   methodNumber=C.die(p,3);method=npcMethods[methodNumber-1];
-  const prior=target.sessions.filter(x=>x.source.accepted).map(x=>({
+  const prior=target.sessions.filter(x=>x.source.origin===NPC_MERIDIAN&&
+    x.source.accepted).map(x=>({
    system:'meridian',target:'foundation',method:x.source.method,
    minutes:120,startMinute:x.source.startMinute,eventHash:x.seal}));
   const dc=Difficulty.disciplinePractice(s,{system:'meridian',method,
@@ -1558,4 +1693,152 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
   stageOrTechniqueEarned:false,
   privateProgressNotDisclosed:true};
 }
-module.exports={npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
+// The exact original Stage I FOUNDATION TEMPERING breakthrough: 40 actual
+// practice points, two source-earned methods, independent DC 12+2+3 = 17,
+// one real check, three hours and original setback/backlash consequences.
+// Unlike routine progress, this milestone may actually give Stage I.
+function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
+ if(Object.keys(untrusted).length||
+  typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Only a real independent actor can be offered a Meridian Foundation rite; never select its dice, result, stage or consent');
+ const Realm=require('../world/simulation'),
+  People=require('../world/emergent-people'),
+  Presence=require('../world/person-presence'),
+  Lives=require('../world/independent-person-lives'),
+  Foundation=require('../world/person-mechanical-foundations'),
+  w=Realm.peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
+  life=w?.independentPersonLives?.people?.[actorId.slice('emergent:'.length)];
+ if(!p||p.actorId!==actorId||!People.verify(w,p)||
+  !Foundation.verify(w,p)||!life||!Lives.verifyEntry(w,life)||
+  !life.interests.includes('meridian')||life.focus!=='meridian'||
+  p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
+  throw Error('Original independently interested active adult needed for the Meridian rite');
+ if(!verifyNpcMeridian(s,p))
+  throw Error('Original individual Meridian Foundation history is not source verified');
+ const rec=p.meridianTraining,required=KEYS.meridian.tracks.foundation[0];
+ if(!rec||rec.points!==required||
+  Object.keys(rec.methods).filter(k=>rec.methods[k]>0).length<2)
+  throw Error('Original Stage I requires 40 genuinely earned Foundation points and two different methods');
+ if(rec.earnedStage===1||rec.target!=='foundation')
+  throw Error('An actually completed Stage I rite cannot award the same stage again');
+ const day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes%1440;
+ if(day<rec.cooldownUntil)
+  throw Error('Real Meridian recovery cooldown prevents this rite');
+ if(rec.sessions.some(row=>row.source.origin===NPC_MERIDIAN_RITE&&
+   row.source.day===day))
+  throw Error('The independently resolved rite decision cannot be rerolled today');
+ if(rec.sessions.length>=480)
+  throw Error('The existing original training journal must be reconciled before a rite');
+ const condition=U.currentNpcWoundCondition(s,actorId);
+ if(!condition||condition.workAndOrdinaryPracticeBlocked)
+  throw Error('Original physical wounds or exhaustion prevent this Meridian rite');
+ const c=Combat.get(s,condition.combatantId);
+ if(c.status!=='ok'||c.stamina<1||c.wounds.some(n=>n!==0))
+  throw Error('The original human must be physically capable of an uninterrupted rite');
+ const site=independentSite(s,'meridian',{
+  shortSession:true,independentPerson:true});
+ if(minute<8*60||minute+180>18*60)
+  throw Error('The original 180-minute Meridian rite requires real uninterrupted daylight');
+ const present=Presence.resolve(w,actorId,s.world.location,day,minute);
+ if(!present?.presence||present.presence.hash!==p.shift?.hash||
+  present.presence.originHash!==p.originHash||
+  c.npcOrigin.location!==s.world.location||
+  !s.chatRuntime?.scene?.includes(
+   p.name+' begins a prepared Meridian Foundation rite'))
+  throw Error('A genuine current witnessed prepared Foundation rite and present individual are required');
+ const start=s.world.minutes,initialRng=p.rngState,
+  chance=npcSessionChance(p),choice=C.die(p,100),
+  accepted=choice<=chance,
+  dc=KEYS.meridian.tracks.foundation[1]+2+3,
+  dimension=Potential.PRIMARY.meridian.foundation,
+  aptitude=Potential.bonus(
+   p.mechanicalFoundation.unassessedPotential[dimension]),
+  originalWis=Math.floor((
+   p.mechanicalFoundation.baselineAttributes.wis-10)/2),
+  beforePoints=rec.points,distinct=Object.keys(rec.methods).length,
+  initialMax=c.maxStamina,initialStamina=c.stamina,
+  initialWounds=[...c.wounds],oldCooldown=rec.cooldownUntil;
+ let check=null,outcome='declined',newCooldown=oldCooldown,
+  quality=null,foundation=null,minutes=5;
+ if(accepted){
+  minutes=180;
+  const actual=C.check(s,{modifier:originalWis+aptitude,dc,
+   label:p.name+' independent Meridian Foundation rite',
+   independentRngOwner:p,privateDisplay:true});
+  check={roll:actual.roll,modifier:actual.modifier,dc:actual.dc,
+   degree:actual.degree,success:actual.success};
+  if(actual.success){
+   quality=actual.degree==='exceptional'?'Perfect':
+    actual.degree==='strong'?'Firm':'Sound';
+   foundation=20;
+   const sourceBonus=Build.meridianProfile(1).bonuses.stamina;
+   c.maxStamina+=sourceBonus;c.stamina+=sourceBonus;
+   rec.earnedStage=1;rec.foundationQuality=quality;
+   rec.foundationIntegrity=foundation;
+   rec.target='awakening';rec.points=0;rec.methods={};
+   outcome='breakthrough';
+  }else if(actual.degree==='setback'){
+   newCooldown=day+12;outcome='stalled';
+  }else if(actual.degree==='failure'){
+   newCooldown=day+24;outcome='stalled';
+  }else{
+   newCooldown=day+30;rec.points=Math.floor(rec.points*.75);
+   // Original failed rite: a genuine Light wound and lost preparation,
+   // not an invented permanent curse or a forced stage.
+   Combat.harm(s,c,2);
+   outcome='backlash';
+  }
+ }
+ const proof={origin:NPC_MERIDIAN_RITE,actorId,
+  individualOriginHash:p.originHash,
+  originalCombatEntrySeal:c.npcOrigin.seal,
+  originalFoundationSeal:p.mechanicalFoundation.seal,
+  originalShiftHash:present.presence.hash,
+  originalSceneHash:npcHash(s.chatRuntime.scene),
+  originalAptitudeDimension:dimension,originalAptitudeBonus:aptitude,
+  originalRiteDC:dc,target:'foundation',
+  pointsBefore:beforePoints,pointsAfter:rec.points,
+  distinctMethodsBefore:distinct,
+  day,startMinute:start,actualMinutes:minutes,
+  rngBefore:initialRng,rngAfter:p.rngState,
+  personalityAtAttempt:p.personality,fatigueAtAttempt:p.fatigue,
+  choiceD100:choice,choiceChance:chance,accepted,
+  check,outcome,cooldownBefore:oldCooldown,
+  cooldownUntil:newCooldown,
+  earnedStageAfter:rec.earnedStage===1?1:0,
+  foundationQuality:quality,foundationIntegrityAfter:foundation,
+  staminaCost:0,staminaBefore:accepted?initialStamina:null,
+  staminaAfter:accepted?c.stamina:null,
+  maxStaminaBefore:accepted?initialMax:null,
+  maxStaminaAfter:accepted?c.maxStamina:null,
+  woundsBefore:accepted?initialWounds:null,
+  woundsAfter:accepted?[...c.wounds]:null,
+  feeTalons:0,insightSpent:0,
+  noInventedTrainingRank:true,noFreeQiOrLearnedTechnique:true};
+ rec.cooldownUntil=newCooldown;
+ rec.sessions.push({source:proof,seal:npcHash(proof)});
+ if(!verifyNpcMeridian(s,p))
+  throw Error('Original NPC Foundation rite and exact earned milestone failed replay');
+ E.advance(s,minutes);W.finalizeTime(s,start);
+ C.event(s,'progress',
+  accepted?(outcome==='breakthrough'?
+   p.name+' completes their prepared Meridian rite; a change in breathing and bearing is visible.':
+   p.name+' finishes a prepared Foundation rite with real physical consequences.'):
+   p.name+' chooses not to undertake the prepared Foundation rite today.',{
+   origin:NPC_MERIDIAN_RITE,actorId,choice:accepted?'attempted':'declined',
+   originalRiteSourceHash:rec.sessions.at(-1).seal,
+   observedOutcome:outcome,
+   verifiedExactStageMustRemainGMPrivate:true,
+   privateAptitudeAndDiceNotDisclosed:true,noGrantedTechniqueOrQi:true});
+ return {actorId,independentChoice:accepted?'attempted':'declined',
+  observedOutcome:outcome,
+  verifiedOriginalStageGMOnly:outcome==='breakthrough'?1:null,
+  playerKnownExactStage:false,
+  elapsedMinutes:minutes,actualOriginalCheck:accepted,
+  realBacklash:outcome==='backlash',
+  privateDiceAndPotentialNotDisclosed:true,
+  noFreeQiOrTechnique:true};
+}
+module.exports={npcMeridianStageOneRite,npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
