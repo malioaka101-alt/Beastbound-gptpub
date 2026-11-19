@@ -298,26 +298,50 @@ function night(s,ctx){
   noPlayerKnowledge:true};
 }
 function verifyNights(s,p){
- const rows=p?.originalOffscreenCombatNights||[];
+ const rows=p?.originalOffscreenCombatNights||[],
+  life=s.table?.realm?.independentPersonLives?.people?.[p?.id];
  if(!Array.isArray(rows)||rows.length>480)return false;
+ if(rows.length&&(!life||!require('./independent-person-lives').
+  verifyEntry(s.table.realm,life)))return false;
  let prev=-1;
  for(const row of rows){
-  const q=row?.source;
+  const q=row?.source,
+   body=s.table?.combatants?.['npc_'+p.id];
   if(!q||row.seal!==hash(q)||q.origin!==REST||
    q.actorId!==p.actorId||q.personOriginHash!==p.originHash||
-   q.physicalEntrySeal!==s.table?.combatants?.['npc_'+p.id]?.npcOrigin?.seal||
+   q.physicalEntrySeal!==body?.npcOrigin?.seal||
    q.noAdditionalPlayerTimeOrFreePower!==true||
    !isDay(q.completedDay)||q.completedDay<=prev||
    q.startMinute!==(q.completedDay-1)*1440+960||
    q.endMinute!==q.startMinute+480||q.endMinute>s.world.minutes||
-   !Array.isArray(q.before?.wounds)||!Array.isArray(q.after?.wounds)||
+   typeof q.site!=='string'||q.site.length<2||
+   !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+   !/^[a-f0-9]{64}$/.test(q.independentDailySourceHash||'')||
+   !Array.isArray(q.before?.wounds)||q.before.wounds.length!==3||
+   !Array.isArray(q.after?.wounds)||q.after.wounds.length!==3||
+   q.before.wounds.some((v,i)=>!Number.isInteger(v)||v<0||
+    v>body.boxes[i])||
+   !Number.isInteger(q.before.stamina)||q.before.stamina<0||
+   !Number.isInteger(q.before.maxStamina)||q.before.maxStamina<1||
+   q.before.stamina>q.before.maxStamina||
+   !['ok','incapacitated','knocked_out'].includes(q.before.status)||
    JSON.stringify(q.after.wounds)!==JSON.stringify([
     Math.max(0,q.before.wounds[0]-1),
     q.before.wounds[1],q.before.wounds[2]])||
    q.after.stamina!==q.before.maxStamina||
    q.after.maxStamina!==q.before.maxStamina||
-   q.after.status!==(q.before.status==='incapacitated'&&q.before.wounds[2]===0?
-    'ok':q.before.status))
+   q.after.status!==(
+    ['incapacitated','knocked_out'].includes(q.before.status)&&
+     q.before.wounds[2]===0?'ok':q.before.status))
+   return false;
+  // Source-verify original private rest from the already chosen daily
+  // action. This remains required while the 80-entry daily ledger retains
+  // that date; old archived histories rely on the separately sealed receipt.
+  const day=life.history.find(x=>x.source.day===q.completedDay);
+  if(day){
+   if(day.seal!==q.independentDailySourceHash||
+    day.source.action!=='rest')return false;
+  }else if(life.history.length&&q.completedDay>=life.history[0].source.day)
    return false;
   prev=q.completedDay;
  }
