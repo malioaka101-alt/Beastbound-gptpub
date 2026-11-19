@@ -213,7 +213,7 @@ for(const expected of ['breakthrough','declined','backlash','stalled']){
  const forged=E.importGame(saved),
   fperson=World.peek(forged).emergentPeople.people[p.id],
   row=fperson.meridianTraining.sessions.at(-1);
- row.source.outcome='breakthrough';
+ row.source.outcome=row.source.outcome==='breakthrough'?'backlash':'breakthrough';
  A.equal(D.verifyNpcMeridian(forged,fperson),false);
  const resealed=E.importGame(saved),
   rp=World.peek(resealed).emergentPeople.people[p.id],
