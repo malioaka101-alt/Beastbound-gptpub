@@ -57,7 +57,7 @@ function verifyEvidence(s,p,q){
  const x=q?.offscreenOpportunity;
  if(!x)return q?.offscreenOpportunity===undefined;
  if(x.origin!==ORIGIN||x.actorId!==p.actorId||
-  !supported.has(x.kind)||
+  x.kind!==q.system||!supported.has(x.kind)||
   !isDay(x.originalWorkDay)||x.independentLifeDay!==x.originalWorkDay+1||
   x.originalWorkDay!==q.day||x.originalShiftHash!==q.originalShiftHash||
   q.originalSceneHash!==hash(x)||
@@ -100,9 +100,14 @@ function sourceBase(ctx,system,start,minutes,before,choice,accepted,points,metho
 function safeCheck(s,params){
  // The actual original Core.check writes one GM-only outcome to the shared
  // event log. Distant private actions must not leak their names or outcomes.
- const old=s.log.length;
+ const earlier=s.log.slice();
  try{return Core.check(s,{...params,privateDisplay:true});}
- finally{s.log.splice(old);}
+ finally{
+  // Original Core.event keeps at most 90 records. Restoring only an old
+  // length would leak the 90th private distant check when the shared
+  // player-facing event log was already full.
+  s.log.splice(0,s.log.length,...earlier);
+ }
 }
 function dailyPractice(s,ctx,system){
  const {actor:p,body}=ctx,sp=Disc.KEYS[system],spec=Early.TARGETS[system],
