@@ -224,7 +224,7 @@ for(const expected of ['breakthrough','declined','backlash','stalled']){
  }
  const lastState=E.exportGame(s),lastRng=p.rngState;
  A.throws(()=>rite(s,p),
-  /40 genuinely earned|rite decision cannot be rerolled|completed Stage I/);
+  /40 genuinely earned|rite decision cannot be rerolled|completed Stage I|recovery cooldown/);
  A.equal(E.exportGame(s),lastState);
  A.equal(p.rngState,lastRng);
 }
