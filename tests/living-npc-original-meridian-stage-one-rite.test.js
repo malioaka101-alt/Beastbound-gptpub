@@ -154,6 +154,10 @@ for(const expected of ['breakthrough','declined','backlash','stalled']){
  const result=rite(s,p);
  A.equal(result.observedOutcome,expected);
  A.equal(result.actualOriginalCheck,expected!=='declined');
+ A.equal(result.playerKnownExactStage,false);
+ A.equal(result.verifiedOriginalStageGMOnly,expected==='breakthrough'?1:null);
+ A.equal(s.log.some(x=>x.text?.includes('Stage I Foundation Tempering rite')),false,
+  'An ordinary witnessed event cannot reveal exact privately earned rank');
  A.equal(result.elapsedMinutes,expected==='declined'?5:180);
  A.equal(s.world.minutes,initial+result.elapsedMinutes);
  A.equal(s.rngState,pcRng);
