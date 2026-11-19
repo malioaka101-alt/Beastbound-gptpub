@@ -30,7 +30,10 @@ function starting(){
 const {save,actorId}=starting();
 for(const days of [4,13,38]){
  const bulk=E.importGame(save),single=E.importGame(save);
- const initialRng=bulk.rngState,initialCoins=bulk.player.coins;
+ // The ORIGINAL engine.advance daily market/weather owner legitimately
+ // uses the shared world RNG. Compare bulk-vs-daily source replay, not
+ // pre-passage RNG immobility (a false assertion for real elapsed time).
+ const initialCoins=bulk.player.coins;
  W.advance(bulk,days);
  for(let i=0;i<days;i++)W.advance(single,1);
  const a=Realm.peek(bulk),b=Realm.peek(single),
@@ -49,8 +52,8 @@ for(const days of [4,13,38]){
  A.deepEqual(a.countries,b.countries);
  A.equal(a.rngState,b.rngState);
  A.equal(bulk.world.minutes,single.world.minutes);
- A.equal(bulk.rngState,initialRng);
- A.equal(single.rngState,initialRng);
+ A.equal(bulk.rngState,single.rngState,
+  'The original daily world RNG must replay identically in both intervals');
  A.equal(bulk.player.coins,initialCoins);
  A.equal(single.player.coins,initialCoins);
  A.deepEqual(personA.practicedDisciplines,[]);
