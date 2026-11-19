@@ -141,7 +141,7 @@ for(const system of ['arcane','soul','body','rift']){
  s.chatRuntime.scene=witness;
  const observed=Rules.act(s,{system:'health',
   operation:'witnessedNpcNightSleep',params:{actorId:p.actorId,witness}});
- A.equal(observed.accepted,true,'The first actual safe-room visit is voluntary');
+ A.equal(observed.freelyAccepted,true,'The first actual safe-room visit is voluntary');
  A.equal(p.originalOvernightRestDecisions?.length,1);
  A.equal(s.world.minutes,1440);
  A.equal(p.originalOffscreenCombatNights,undefined,
