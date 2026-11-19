@@ -1115,14 +1115,28 @@ function tickMonth(w,day){
  KnowledgeDiffusion.month(w,day,v=>event(w,v));
  AdaptiveAmbitions.month(w,day,v=>event(w,v));
 }
-function tick(s,weekDays=[],monthDays=[]){
+function tick(s,weekDays=[],monthDays=[],chronology=null){
+ // Used only by the original local world-time finalizer.  The ordinary
+ // direct realm owner keeps its established two-array interface unchanged.
+ if(chronology!==null&&(!chronology||
+  typeof chronology.beforeMilestone!=='function'||
+  typeof chronology.afterMilestone!=='function'))
+  throw Error('World chronology requires internal before/after milestones');
  if(!weekDays.length&&!monthDays.length)return {sixdays:0,months:0,publicNotices:[]};
  const w=ensure(s,{startDay:Math.min(...weekDays,...monthDays)-1}),we=new Set(weekDays),mo=new Set(monthDays),times=[...new Set([...we,...mo])].sort((a,b)=>a-b);
  let nW=0,nM=0;
  // Validate the saved ecological sources once per world advance; never rehash
  // the entire multiyear history for each internal sixday/month transition.
  EcologicalWebs.validate(w);
+ const actualClock=s.world.minutes;
+ try{
  for(const day of times){if(day<=w.lastTickDay)continue;
+  if(chronology){
+   chronology.beforeMilestone(day);
+   // The historic world event is at THIS calendar boundary, not the
+   // future clock after the entire player-approved passage.
+   s.world.minutes=day*1440;
+  }
   if(we.has(day)){tickSixday(w,day);Houses.deliver(s,w,day,()=>random(w));Civic.review(s,w,day,()=>random(w),v=>event(w,v));PublicHearings.review(s,w,day,()=>random(w),v=>event(w,v));Gov.followUpPublicRecordsInspections(w,day,v=>event(w,v));Mediation.review(s,w,day,()=>random(w),v=>event(w,v));ProfessionalPeers.tick(w,day,v=>event(w,v));
    // Per-individual wildlife acts against the ecology at THIS specific day,
    // not the future conditions at the end of a multi-month time jump.
@@ -1141,7 +1155,10 @@ function tick(s,weekDays=[],monthDays=[]){
    SapientBeasts.sixday(s,day);
    // Existing human–beast social promises have real welfare and expiry
    // consequences, but no automatic labour, friendship or obedience.
-   require('../rules/beast-social-arrangements').sixday(s,[day]);
+   // Original social promises still use the completed-passage clock. Do
+   // not backdate or prematurely expire contractual receipts within a
+   // historical human-life replay. Finalize once in the original owner.
+   if(!chronology)require('../rules/beast-social-arrangements').sixday(s,[day]);
    // New individuals can arise from real ecological/economic work demand
    // anywhere in the known simulated geography, without player observation.
    // Their independent decisions are dated and source-bound.
@@ -1161,7 +1178,9 @@ function tick(s,weekDays=[],monthDays=[]){
    EmergentHouseholds.sixday(w,day,v=>event(w,v));nW++;}
   if(mo.has(day)){tickMonth(w,day);nM++;}
   w.lastTickDay=day;
+  if(chronology)chronology.afterMilestone(day);
  }
+ }finally{s.world.minutes=actualClock;}
  const local=polityOf(s),localReg=locationRegion(s);
  return {sixdays:nW,months:nM,publicNotices:w.chronicle.filter(e=>e.day>times[0]-1&&e.releaseDay<=worldDay(s)&&(e.region===local||e.region===localReg)).slice(-3).map(e=>e.text)};
 }

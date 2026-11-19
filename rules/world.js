@@ -26,10 +26,48 @@ function finalizeTime(s,oldMinutes){
  const weeks=ticks.sixdays.filter(n=>!oldWeeks.has(n)),months=ticks.months.filter(n=>!oldMonths.has(n));
  t.calendar.sixdays.push(...weeks);t.calendar.months.push(...months);
  const agendas=Agendas.tick(s,weeks,months);
- const realm=Realm.tick(s,weeks,months);
- // Source-established people choose their own daily lives even before a
- // sixday completes. Only completed real days count; never on mere queries.
- const individuals=require('../world/independent-person-lives').tick(s,before,after);
+ // A long action must not replay day-one choices against end-of-month
+ // conditions.  Process each personally recorded day in real chronological
+ // order, on either side of the existing, ORIGINAL sixday/month owners.
+ // This does not add supernatural progression or draw any extra dice.
+ const Lives=require('../world/independent-person-lives');
+ let cursor=before,activityCount=0;
+ const advanced=new Set();
+ const individualDays=target=>{
+  if(target<=cursor)return;
+  const existing=Object.values(s.table?.realm?.independentPersonLives?.people||{});
+  for(const person of existing)if(person.lastDay<target)
+   advanced.add(person.actorId);
+  if(!existing.length){
+   // Preserve the original world initialisation in saves without actors.
+   Lives.tick(s,cursor,target);
+   cursor=target;return;
+  }
+  const clock=s.world.minutes;
+  try{
+   for(let day=cursor+1;day<=target;day++){
+    // Historical source owners see their genuine completed-day boundary,
+    // never the world clock at the END of a multi-month jump.
+    s.world.minutes=day*1440;
+    const result=Lives.tick(s,day-1,day);
+    activityCount+=result.privateDailyActivities;
+   }
+  }finally{s.world.minutes=clock;}
+  cursor=target;
+ };
+ const realm=Realm.tick(s,weeks,months,{
+  beforeMilestone(day){individualDays(day-1);},
+  afterMilestone(day){individualDays(day);}
+ });
+ individualDays(after);
+ // The existing beast-social owner already defines expiration and welfare
+ // review against the actual END of the confirmed passage.  Preserve that
+ // verified clock and do not invent a new contract scheduler in this change.
+ if(weeks.length)
+  require('./beast-social-arrangements').sixday(s,[weeks.at(-1)]);
+ const individuals={individualsAdvanced:advanced.size,
+  privateDailyActivities:activityCount,
+  noGuaranteedPowerJobsOrMeetings:true};
  // Evolved individuals respond to the SAME actual sixday environment,
  // without inventing a second calendar or species population.
  require('./evolution-branch-web').sixday(s,weeks);
