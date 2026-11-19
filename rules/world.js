@@ -60,6 +60,11 @@ function finalizeTime(s,oldMinutes){
   afterMilestone(day){individualDays(day);}
  });
  individualDays(after);
+ // The existing beast-social owner already defines expiration and welfare
+ // review against the actual END of the confirmed passage.  Preserve that
+ // verified clock and do not invent a new contract scheduler in this change.
+ if(weeks.length)
+  require('./beast-social-arrangements').sixday(s,[weeks.at(-1)]);
  const individuals={individualsAdvanced:advanced.size,
   privateDailyActivities:activityCount,
   noGuaranteedPowerJobsOrMeetings:true};
