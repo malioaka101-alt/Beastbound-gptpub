@@ -87,6 +87,12 @@ function verify(s,p){
    if(ignited||otherMilestone)return false;
    // Neither a successful original Core ignition nor a completed distinct
    // Soul/Body/Rift milestone may be followed by more same-target prep.
+   // Ordinary off-screen life can only open an ORIGINAL check if its
+   // independently chosen day is genuinely source-replayed. Nearby PC
+   // presence is neither required nor falsely claimed for that history.
+   if(q.offscreenOpportunity!==undefined&&
+    !require('../world/independent-original-power-days')
+     .verifyEvidence(s,p,q))return false;
    const roller={rngState:q.rngBefore};
    if(q.origin===ARCANE_RITE){
     if(system!=='arcane')return false;
@@ -337,4 +343,4 @@ function practice(s,{actorId,system,...untrusted}={}){
   elapsedMinutes:minutes,actualOriginalCheck:accepted,
   stageOrTechniqueEarned:false,privateProgressNotDisclosed:true};
 }
-module.exports={ORIGIN,TARGETS,METHODS,verify,privateStatus,practice};
+module.exports={ORIGIN,TARGETS,METHODS,chance,hash,verify,privateStatus,practice};
