@@ -224,6 +224,13 @@ function earnedEvidence(w,actorId,s=null){
   // career prestige or a raw legacy array remain incapable of awarding it.
   const verifiedMeridian=s?.table?.realm===w&&actor.meridianTraining?
    require('../rules/disciplines').npcMeridianPrivateStatus(s,actorId):null;
+  // Genuine independent early preparation is NOT an earned magical stage.
+  // Keep all separate systems' milestones unknown until their own original
+  // source-owned ignition, refinement or awakening events actually occur.
+  const verifiedOtherPreparation=s?.table?.realm===w&&
+   actor.originalEarlyDisciplinePreparation?
+   require('../rules/independent-original-discipline-preparation')
+    .privateStatus(s,actorId):null;
   const originalMilestones=emptyMilestones();
   if(verifiedMeridian?.originalMeridianStageEarned===1){
    originalMilestones.meridian.stage=1;
@@ -281,6 +288,9 @@ function earnedEvidence(w,actorId,s=null){
    // arrays are NOT evidence of power and must not be laundered as such.
    originalPowerMilestones:originalMilestones,
    originalMeridianPreparation:verifiedMeridian,
+   // Actual original practice receipts, but NO core ignition, Soul phase,
+   // Body cycle, Rift step, free mana or learned technique.
+   originalOtherDisciplinePreparation:verifiedOtherPreparation,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -352,7 +362,7 @@ function gmDossier(w,actorId,s=null){
   const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
   if(!actor||actor.actorId!==actorId)return {known:false};
   if(!actor.mechanicalFoundation)return {known:true,actorId,legacy:true,
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    source:'Older witnessed individual: foundation has not been backfilled',
    unverified:['baseline attributes','latent potential'],
    noRetroactiveRanks:true};
@@ -363,7 +373,7 @@ function gmDossier(w,actorId,s=null){
    latentPotential:{...foundation.unassessedPotential},
    profession:actor.profession,professionCompetence:actor.career?.competenceRank??null,
    practicedDisciplines:[],knownTechniques:[],
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    ageBand:actor.ageBand,
    actualCultivationAndCombatProfile:'Original earned source required; not deduced from social status, profession or baseline',
    beastRelationships:'Unestablished unless verified in original bond sources',
@@ -375,7 +385,7 @@ function gmDossier(w,actorId,s=null){
   return {known:true,kind:'established-notable',actorId,
    name:n.name,profession:n.profession,professionRank:n.professional?.rank??null,
    originalDiscipline:structuredClone(n.discipline||null),
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    actualCultivationAndCombatProfile:'Preparatory stage and actual earned breakthrough are not interchangeable',
    baselineAttributes:null,latentPotential:null,
    noRetrospectiveAttributeOrPowerCreation:true,privateToGM:true};
