@@ -47,9 +47,15 @@ function make(system,want,seed){
      ' practice and ordinary responsibilities',witness});
    A.ok(established.established);
    const q=w.independentPersonLives.people[p.id];
+   // A previously witnessed safe shelter must first have been accepted
+   // by this same person. Do not force a night-time decision to pass a test.
+   const nightChance=Math.min(94,({curious:71,steady:82,
+    independent:68,reserved:77})[p.personality]+(p.fatigue>=50?9:0)),
+    nightRoll=1+Math.floor(next(p.rngState)/4294967296*100);
    if(independentAction(q)!==want||
     (want==='practice'&&Core.die({rngState:p.rngState},100)>
-     Early.chance(p)))continue;
+     Early.chance(p))||
+    (want==='rest'&&nightRoll>nightChance))continue;
    const original=source(s,p);
    A.equal(original.created,true);
    const c=Combat.get(s,original.id);
@@ -125,16 +131,34 @@ for(const system of ['arcane','soul','body','rift']){
 // chosen rest action in real confirmed safe shelter repairs one LIGHT wound,
 // never a second night or an invented clinic visit.
 {
- const {s,p,q,c}=make('body','rest',998880),
-  old=s.world.minutes,initialRng=p.rngState;
+ const {s,p,q,c}=make('body','rest',998880);
+ // First prove a true, independently ACCEPTED safe room at this exact
+ // site using the existing original observed night owner. The witness is
+ // genuinely present NOW; later remote nights never invent another scene.
+ E.advance(s,360); // Existing witnessed evening, not an arbitrary rewind.
+ const witness=p.name+
+  ' chooses to sleep in a safe room at an established sheltered home.';
+ s.chatRuntime.scene=witness;
+ const observed=Rules.act(s,{system:'health',
+  operation:'witnessedNpcNightSleep',params:{actorId:p.actorId,witness}});
+ A.equal(observed.accepted,true,'The first actual safe-room visit is voluntary');
+ A.equal(p.originalOvernightRestDecisions?.length,1);
+ A.equal(s.world.minutes,1440);
+ A.equal(p.originalOffscreenCombatNights,undefined,
+  'One original witnessed night must never be counted a second time');
+ // A later real Light wound and a real next-day personally chosen rest
+ // permit an off-screen night at the already source-witnessed safe site.
  Combat.harm(s,c,2);A.deepEqual(c.wounds,[1,0,0]);
- E.advance(s,840);World.finalizeTime(s,old);
+ const previous=s.world.minutes,initialRng=p.rngState;
+ E.advance(s,1440);World.finalizeTime(s,previous);
  A.equal(q.history.at(-1).source.action,'rest');
  A.equal(c.wounds[0],0);
  A.equal(c.stamina,c.maxStamina);
  A.equal(p.rngState,initialRng,
   'Ordinary source-owned overnight Combat rest needs no second person roll');
  A.equal(p.originalOffscreenCombatNights?.length,1);
+ A.equal(p.originalOffscreenCombatNights[0].source.originalWitnessedShelterHash,
+  p.originalOvernightRestDecisions[0].sourceHash);
  A.equal(Offscreen.verifyNights(s,p),true);
  A.equal(Early.verify(s,p),true);
  const after=E.exportGame(s),reloaded=E.importGame(after),
