@@ -163,7 +163,9 @@ for(const [want,seed] of [['ignited',985100],['declined',985300],
  A.equal(q.noCircleSpellOrTechniqueGranted,true);
  A.equal(q.originalSkillRankBonus,0);
  A.deepEqual(p.knownTechniques,[]);A.deepEqual(p.practicedDisciplines,[]);
- A.equal(s.player.arcane.coreIgnited,false);
+ // The original untouched player character does not necessarily possess
+ // a false-valued ignition flag in legacy saves; undefined stays unknown.
+ A.equal(s.player.arcane.coreIgnited,undefined);
  A.equal(s.player.arcane.circles,0);
  const dossier=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
  const arcaneStatus=dossier.originalOtherDisciplinePreparation.actualPreparations.arcane;
