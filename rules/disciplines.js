@@ -588,7 +588,8 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
  if(system==='arcane'&&target==='core'&&s.player.arcane.circles!==0)throw Error('Mana Core condition inconsistent');
  const fee=self?0:(system==='arcane'?5:3);
  if(s.player.coins<fee)throw Error('Selected rite preparations and safeguards not funded');
- const aptitude=Potential.discipline(s,system,target,null);
+ const actorTraining=originalActorTrainingProfile(s,{system,target});
+ const aptitude=actorTraining.potential;
  const actualDC=dc+2+(self?3:0);
  const riteSource=self?independentSource(s,system,target,self.site):source;
  if(self){
@@ -599,7 +600,7 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
   });
  }
  s.player.coins-=fee;s.player.insightPoints-=insightSpent;
- const check=C.check(s,{modifier:modifier(s,system)+aptitude.modifier+2*insightSpent+(theory?.bonus||0),dc:actualDC,
+ const check=C.check(s,{modifier:actorTraining.modifier+2*insightSpent+(theory?.bonus||0),dc:actualDC,
   label:`${system} ${target} breakthrough`});
  let outcome,change=null;
  if(check.success){
