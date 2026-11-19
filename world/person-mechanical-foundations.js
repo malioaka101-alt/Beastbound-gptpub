@@ -219,6 +219,20 @@ function earnedEvidence(w,actorId,s=null){
    privateToGM:true
   }:null;
   const career=actor.career||null;
+  // The ORIGINAL discipline owner alone knows whether a personal practice
+  // history culminated in a genuinely earned Stage I rite. Ordinary study,
+  // career prestige or a raw legacy array remain incapable of awarding it.
+  const verifiedMeridian=s?.table?.realm===w&&actor.meridianTraining?
+   require('../rules/disciplines').npcMeridianPrivateStatus(s,actorId):null;
+  const originalMilestones=emptyMilestones();
+  if(verifiedMeridian?.originalMeridianStageEarned===1){
+   originalMilestones.meridian.stage=1;
+   originalMilestones.meridian.openedGates=0;
+   originalMilestones.meridian.foundationQuality=
+    verifiedMeridian.originalStageOneFoundationQuality;
+   originalMilestones.meridian.foundationIntegrity=
+    verifiedMeridian.originalFoundationIntegrity;
+  }
   return {known:true,actorId,privateToGM:true,
    evidenceOwners:['world/emergent-people.js','world/person-careers.js',
     'world/independent-person-lives.js'],
@@ -265,7 +279,8 @@ function earnedEvidence(w,actorId,s=null){
    // No owner has yet bound emergent persons to actual source-verified
    // personal discipline events or a technique catalogue. Raw legacy
    // arrays are NOT evidence of power and must not be laundered as such.
-   originalPowerMilestones:emptyMilestones(),
+   originalPowerMilestones:originalMilestones,
+   originalMeridianPreparation:verifiedMeridian,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -279,7 +294,9 @@ function earnedEvidence(w,actorId,s=null){
    equipment:{verifiedItems:null,
     reason:'Verified materials are not proof of equipped tools, weapons or armor'},
    beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
-   sourceStatus:'Earned ordinary work and daily familiarity verified; supernatural and combat milestones unresolved',
+   sourceStatus:verifiedMeridian?.originalMeridianStageEarned===1?
+    'Real original Stage I Meridian Foundation and individual daily/work evidence verified; other power systems unresolved':
+    'Earned ordinary work and daily familiarity verified; unearned supernatural stages remain unresolved',
    noAbilityByTitle:true,noRetrospectivePower:true};
  }
  if(actorId.startsWith('notable:')){
