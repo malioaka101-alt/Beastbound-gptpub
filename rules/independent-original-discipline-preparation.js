@@ -174,7 +174,8 @@ function privateStatus(s,actorId){
   originalOwner:'rules/disciplines.js',
   actualPreparations:Object.fromEntries(Object.entries(p.originalEarlyDisciplinePreparation||{})
    .map(([system,r])=>[system,{target:r.target,earnedPreparationPoints:r.points,
-    genuineSessionCount:r.sessions.filter(x=>x.source.accepted).length,
+    genuineSessionCount:r.sessions.filter(x=>x.source.origin===ORIGIN&&x.source.accepted).length,
+    realMilestoneAttemptCount:r.sessions.filter(x=>x.source.origin===ARCANE_RITE).length,
     distinctSourceMethods:Object.keys(r.methods).length,
     originalTrainingThreshold:trainingSpec(system).required,
     milestoneAwarded:system==='arcane'&&r.target==='circle1',
