@@ -102,6 +102,16 @@ for(const accept of [true,false]){
    Core.progress(source.check.degree)+(source.check.success?Math.max(0,aptitude):0));
   A.equal(rec.points,source.check.earned);
   A.equal(rec.methods[source.method],1);
+  // A re-sealed but internally falsified low DC is not authentic original
+  // practice: the discipline owner recomputes its DC and personal bonus.
+  const fakeDC=E.importGame(E.exportGame(s)),
+   fakePerson=Realm.peek(fakeDC).emergentPeople.people[p.id],
+   fakeRow=fakePerson.meridianTraining.sessions[0];
+  fakeRow.source.check.dc=2;
+  fakeRow.seal=require('node:crypto').createHash('sha256').
+   update(JSON.stringify(fakeRow.source)).digest('hex');
+  A.equal(Disc.verifyNpcMeridian(fakeDC,fakePerson),false,
+   'Re-sealing a claimed DC cannot replace the original source calculation');
   const pr=s.log.findLast(x=>x.details?.privateNaturalStatsNotDisclosed===true);
   A.ok(pr,'Real original practice check logged privately');
   for(const field of ['modifier','roll','dc','total','margin'])
