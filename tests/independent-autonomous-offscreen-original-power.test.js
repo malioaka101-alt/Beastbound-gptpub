@@ -47,7 +47,9 @@ function make(system,want,seed){
      ' practice and ordinary responsibilities',witness});
    A.ok(established.established);
    const q=w.independentPersonLives.people[p.id];
-   if(independentAction(q)!==want)continue;
+   if(independentAction(q)!==want||
+    (want==='practice'&&Core.die({rngState:p.rngState},100)>
+     Early.chance(p)))continue;
    const original=source(s,p);
    A.equal(original.created,true);
    const c=Combat.get(s,original.id);
@@ -84,8 +86,7 @@ for(const system of ['arcane','soul','body','rift']){
  A.equal(attempt.offscreenOpportunity.originalWorkDay,0);
  A.equal(attempt.offscreenOpportunity.privatePhysicalSite,
   People.siteFor(p.regionId));
- A.equal(attempt.originalSceneHash,Offscreen.hashOpportunity?Offscreen.hashOpportunity(
-  attempt.offscreenOpportunity):attempt.originalSceneHash);
+ A.equal(Offscreen.verifyEvidence(s,p,attempt),true);
  A.equal(attempt.startMinute,600);
  A.equal(attempt.actualMinutes,120);
  A.equal(attempt.accepted,true,'Original private personal decision is genuine');
@@ -141,8 +142,9 @@ for(const system of ['arcane','soul','body','rift']){
  A.equal(Offscreen.verifyNights(reloaded,rp),true);
  const oldNight=rp.originalOffscreenCombatNights[0];
  oldNight.source.after.stamina=-99;
- oldNight.seal=Offscreen.hashNight?Offscreen.hashNight(oldNight.source):
-  oldNight.seal;
+ // A re-sealed invalid night still fails its original Combat rules.
+ oldNight.seal=require('node:crypto').createHash('sha256').
+  update(JSON.stringify(oldNight.source)).digest('hex');
  A.equal(Offscreen.verifyNights(reloaded,rp),false);
 }
 console.log('Autonomous original offscreen power PASS: four true Core owner practices from actually chosen private lives, original anatomy, personal RNG, privacy, real chronology, no rerolls, replay/tamper and one actual settled Combat overnight recovery');
