@@ -232,6 +232,12 @@ function earnedEvidence(w,actorId,s=null){
    require('../rules/independent-original-discipline-preparation')
     .privateStatus(s,actorId):null;
   const originalMilestones=emptyMilestones();
+  // The actual original Arcane Core (no Circle, spell or casting formula)
+  // is only known after its source-replayed individual ignition rite.
+  if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
+   originalMilestones.arcane.coreIgnited=true;
+   originalMilestones.arcane.circles=0;
+  }
   if(verifiedMeridian?.originalMeridianStageEarned===1){
    originalMilestones.meridian.stage=1;
    originalMilestones.meridian.openedGates=0;
