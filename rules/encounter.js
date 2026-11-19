@@ -339,12 +339,18 @@ function exchange(s,p={}){
   if(!individual||!Profile.verify(w,individual)||
    !['str','dex'].includes(action.attribute))
    throw Error('Independent armed adult lacks original natural strength and paid action provenance');
-  const attr=individual.mechanicalFoundation.baselineAttributes[action.attribute],
-   bonus=Math.floor((attr-10)/2)+action.attackBonus,
-   original=Combat.attack(s,{
+  // The original player's already-earned Muscle–Tendon Cycle uses
+  // +1 real current Strength and M1 non-additive natural force. Apply
+  // EXACTLY that same law to this individual if (and only if) their own
+  // genuine Body Cycle I rite replays against the same current wound body.
+  // There remains ONE already-chosen action and ONE Combat.attack roll.
+  const owned=require('./independent-original-body-combat').profile(s,{
+   actorId:armedHumanChoice.actorId,
+   combatantId:armedHumanChoice.combatantId,action});
+  const original=Combat.attack(s,{
     attackerId:armedHumanChoice.combatantId,
-    targetId:fight.enemyId,modifier:bonus,
-    damage:action.damage,offM:action.offM,
+    targetId:fight.enemyId,modifier:owned.modifier,
+    damage:action.damage,offM:owned.offM,
     brace:false,nonlethal:action.canNonlethal});
   independentHumanAttack={npcId:armedHumanChoice.actorId,
    weaponItem:physical.item,originalActionId:action.id,
