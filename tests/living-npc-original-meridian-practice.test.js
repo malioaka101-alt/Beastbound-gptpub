@@ -50,7 +50,7 @@ function fixture(accepted,seed){
  const ctx=Disc.originalActorSessionContext(s,{
   actorId:p.actorId,system:'meridian',target:'foundation',method:'breath'});
  A.equal(ctx.actorId,p.actorId);
- A.equal(ctx.combatant.id,bodyId);
+ A.equal(ctx.combatant,Combat.get(s,bodyId));
  A.equal(ctx.person.actorId,p.actorId);
  A.equal(ctx.life.focus,'meridian');
  A.equal(ctx.training.originalAttribute,'wis');
