@@ -114,8 +114,10 @@ for(const accept of [true,false]){
   A.equal(c.stamina,stamina);
   A.equal(rec.points,0);
   A.deepEqual(rec.methods,{});
-  A.equal(p.rngState,Core.die({rngState:individualRng},100)?
-   source.rngAfter:source.rngAfter);
+  const onlyChoice={rngState:individualRng};
+  Core.die(onlyChoice,100);
+  A.equal(p.rngState,onlyChoice.rngState,
+   'An independent refusal consumes only the original personal decision draw');
  }
  const end=E.exportGame(s),rngAfter=p.rngState;
  A.throws(()=>perform(s,p.actorId),/already made their independent Meridian choice today/);
