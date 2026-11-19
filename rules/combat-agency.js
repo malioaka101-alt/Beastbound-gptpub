@@ -53,7 +53,7 @@ function choose(s){
 // an ALREADY committed wild-beast attack. This is neither ally recruitment
 // nor a new human attack/damage scheme. Actual intervention has the original
 // beast roll target this person's real wound-model combatant instead.
-function chooseHumanInterposition(s,beastPlan){
+function chooseHumanInterposition(s,beastPlan,excludedActorId=null){
  if(beastPlan!=='attack')return null;
  const f=s.battle;
  if(!f||f.mode!=='wounds-v1'||!f.beastId||
@@ -69,6 +69,7 @@ function chooseHumanInterposition(s,beastPlan){
   if(!/^npc_person_[0-9]+$/.test(id)||!combatant.npcOrigin)
    continue;
   const actorId=combatant.npcOrigin.actorId;
+  if(actorId===excludedActorId)continue; // One personal response per actual round.
   if(typeof actorId!=='string'||id!=='npc_'+actorId.slice('emergent:'.length))
    throw Error('Registered combatant is not the original individual person');
   const condition=health.currentNpcWoundCondition(s,actorId),
@@ -94,4 +95,45 @@ function chooseHumanInterposition(s,beastPlan){
   a.actorId.localeCompare(b.actorId));
  return people.chooseEmergencyInterposition(s,eligibles[0].actorId);
 }
-module.exports={verify,choose,chooseHumanInterposition};
+// Reuse the actual source-established paid equipment owner, this same
+// original registered human combatant and the SAME personal RNG. No weapon
+// is assumed from title or occupation; no player-picked strike probability.
+function chooseArmedHumanStrike(s,beastPlan){
+ if(beastPlan==='retreat')return null;
+ const battle=s.battle;
+ if(!battle||battle.mode!=='wounds-v1'||!battle.beastId||
+  battle.enemyId!=='beast:'+battle.beastId)return null;
+ const realm=require('../world/simulation').peek(s),
+  People=require('../world/emergent-people'),
+  Gear=require('./equipment'),
+  Health=require('./unified'),
+  Presence=require('../world/person-presence'),
+  day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes%1440,eligible=[];
+ for(const [id,c] of Object.entries(s.table?.combatants||{})){
+  if(!/^npc_person_[0-9]+$/.test(id)||!c.npcOrigin)continue;
+  const actorId=c.npcOrigin.actorId;
+  const condition=Health.currentNpcWoundCondition(s,actorId),
+   p=realm?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)];
+  if(!p||!condition||condition.workAndOrdinaryPracticeBlocked||
+   p.status!=='active'||p.fatigue>75||
+   p.ageBand!=='adult, exact birthday not established')continue;
+  const weapon=Gear.verifiedIndependentWeapon(s,actorId);
+  if(!weapon)continue;
+  const present=Presence.resolve(realm,actorId,s.world.location,day,minute);
+  if(!present?.presence||present.presence.hash!==p.shift?.hash||
+   present.presence.originHash!==p.originHash||
+   c.npcOrigin.location!==s.world.location||
+   !s.chatRuntime?.scene?.includes(
+     p.name+' holds the '+weapon.item.replace(/_/g,' ')+
+     ' ready beside the player'))continue;
+  eligible.push({actorId,entryMinute:c.npcOrigin.worldMinute});
+ }
+ if(!eligible.length)return null;
+ // Only one independently acting armed bystander per exchange. This limit
+ // does not invent a combat party or grant universal cooperative attacks.
+ eligible.sort((a,b)=>a.entryMinute-b.entryMinute||
+  a.actorId.localeCompare(b.actorId));
+ return People.chooseOriginalArmedBeastStrike(s,eligible[0].actorId);
+}
+module.exports={verify,choose,chooseHumanInterposition,chooseArmedHumanStrike};

@@ -685,6 +685,65 @@ function considerOriginalWeaponGift(w,p,{item,originalPurchasedAssetRoot,sourceS
   throw Error('The original individual item offer decision failed exact replay');
  return {source,sourceHash:hash(source)};
 }
+// An individual can decide to use an actual PREVIOUSLY PURCHASED mundane
+// weapon only after its original item-owner/consent sources verify ownership
+// and an on-scene witness establishes that the weapon is already readied.
+// This is one bounded independent decision, not a class/weapon skill grant.
+function chooseOriginalArmedBeastStrike(s,actorId){
+ const w=require('./simulation').peek(s),p=w?.emergentPeople?.
+  people?.[actorId?.slice('emergent:'.length)],
+  f=s.battle;
+ if(!p||p.actorId!==actorId||!verify(w,p)||
+  !f||f.mode!=='wounds-v1'||f.enemyId!=='beast:'+f.beastId||
+  !f.enemyBehavior||s.encounter)
+  throw Error('Only a real independent person facing the original wild beast may decide');
+ const Gear=require('../rules/equipment'),
+  Health=require('../rules/unified'),
+  Combat=require('../rules/combat'),
+  source=Gear.verifiedIndependentWeapon(s,actorId),
+  condition=Health.currentNpcWoundCondition(s,actorId),
+  human=condition&&Combat.get(s,condition.combatantId);
+ if(!source||!human||condition.workAndOrdinaryPracticeBlocked||
+  p.status!=='active'||p.fatigue>75||
+  p.ageBand!=='adult, exact birthday not established')
+  throw Error('An independently armed adult must be actually fit and equipped for this choice');
+ const day=Math.floor(s.world.minutes/DAY),
+  minute=s.world.minutes%DAY,
+  seen=require('./person-presence').resolve(
+   w,actorId,s.world.location,day,minute),
+  weaponText=source.item.replace(/_/g,' ');
+ if(!seen?.presence||seen.presence.hash!==p.shift?.hash||
+  seen.presence.originHash!==p.originHash||
+  human.npcOrigin?.location!==s.world.location||
+  !s.chatRuntime?.scene?.includes(
+   p.name+' holds the '+weaponText+' ready beside the player'))
+  throw Error('A current witnessed already-readied genuine weapon is required for independent human strike');
+ const before=p.rngState,choice=draw(p),chance=Math.max(.08,Math.min(.72,
+   (p.personality==='curious'?.46:p.personality==='steady'?.38:
+    p.personality==='independent'?.32:.20)+
+   (f.enemyBehavior.style==='predatory'?.10:0)-
+   (p.fatigue>=50?.14:0))),
+  attacks=choice<chance,
+  body={origin:'original-armed-individual-beast-strike-choice-v1',
+   actorId,originalPersonOriginHash:p.originHash,
+   physicalEntrySeal:human.npcOrigin.seal,
+   originalPaidWeaponSourceHash:source.originalSourceHash,
+   beastId:f.beastId,battleStartedAt:f.startedAt,round:f.round,
+   worldMinute:s.world.minutes,sceneLocation:s.world.location,
+   personalRngBefore:before,personalRngAfter:p.rngState,
+   originalPersonalDraw:choice,sourceChance:chance,
+   choseStrike:attacks,noForcedAllyOrPlayerControlledDamage:true};
+ const decisionSourceHash=hash(body);
+ require('../rules/core').event(s,'combat',
+  attacks?p.name+' independently commits to strike with the witnessed weapon.':
+   p.name+' chooses to keep the weapon ready without attacking.',{
+   origin:body.origin,actorId,weapon:source.item,round:f.round,
+   choseStrike:attacks,decisionSourceHash,
+   noPlayerControlOfCombatChoice:true});
+ return {actorId,combatantId:condition.combatantId,
+  choosesStrike:attacks,weaponSource:source,
+  choiceSourceHash:decisionSourceHash};
+}
 function chooseEmergencyInterposition(s,actorId){
  const w=require('./simulation').peek(s),
   p=w?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)];
@@ -1233,7 +1292,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,chooseOriginalArmedBeastStrike,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};

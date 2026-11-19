@@ -79,6 +79,8 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
   // Toughness, stamina or precise wound boxes from a public combat event.
   const privateHumanTarget=typeof targetId==='string'&&
    targetId.startsWith('npc_')&&!!c.npcOrigin;
+  const privateHumanAttacker=typeof attackerId==='string'&&
+   attackerId.startsWith('npc_')&&!!att?.npcOrigin;
   const aspect=require('./personal-aspect').defensiveEffect(s,targetId);
   if(c.status!=='ok')throw Error('Combatant no longer able to fight');
   if(att && att.status!=='ok')throw Error('Attacker cannot act while incapacitated, fleeing or dying');
@@ -108,11 +110,13 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
   if(castingDC!==null)s.player.mana-=manaCost;
   if(kept===1 || (kept!==20&&total<defense)){
     const result={hit:false,roll:kept,total,defense,...(castingDC!==null?{manaSpent:manaCost}: {})};
-    C.event(s,'roll',privateHumanTarget?
-     `⚔️ ${c.name}: d20 ${kept} → attack misses`:
-     `⚔️ ${c.name}: d20 ${kept} → miss vs Def ${defense}`,
-     privateHumanTarget?{hit:false,roll:kept,
-      observed:observedCombatant(c),noPrivateHumanStats:true}:result);
+    C.event(s,'roll',privateHumanAttacker?
+     `⚔️ ${att.name} attacks ${c.name}: d20 ${kept} → misses`:
+     privateHumanTarget?`⚔️ ${c.name}: d20 ${kept} → attack misses`:
+      `⚔️ ${c.name}: d20 ${kept} → miss vs Def ${defense}`,
+     privateHumanTarget||privateHumanAttacker?{hit:false,roll:kept,
+      observed:observedCombatant(c),noPrivateHumanStats:true,
+      ...(privateHumanAttacker?{independentHumanAttack:true}:{})}:result);
     return result;
   }
   const margin=Math.max(0,total-defense);
@@ -144,11 +148,14 @@ function attack(s,{targetId,attackerId,modifier,damage,offM=0,adv=0,flank=false,
     worldMinute:s.world.minutes,
     source:'Real wound combat exchange with independently profiled opponent and successful Critical Vigor save'
    };
-  C.event(s,'combat',privateHumanTarget?
-   `⚔️ ${c.name}: d20 ${kept} → ${observedCombatant(c).condition}`:
-   `⚔️ ${c.name}: d20 ${kept}, damage ${damageTotal} vs T${c.toughness} → ${ward?'Ward absorbed':wound.result}`,
-   privateHumanTarget?{hit:true,roll:kept,
-    observed:observedCombatant(c),noPrivateHumanStats:true}:result);
+  C.event(s,'combat',privateHumanAttacker?
+    `⚔️ ${att.name} strikes ${c.name}: d20 ${kept} → ${observedCombatant(c).condition}`:
+    privateHumanTarget?
+    `⚔️ ${c.name}: d20 ${kept} → ${observedCombatant(c).condition}`:
+    `⚔️ ${c.name}: d20 ${kept}, damage ${damageTotal} vs T${c.toughness} → ${ward?'Ward absorbed':wound.result}`,
+   privateHumanTarget||privateHumanAttacker?{hit:true,roll:kept,
+    observed:observedCombatant(c),noPrivateHumanStats:true,
+    ...(privateHumanAttacker?{independentHumanAttack:true}:{})}:result);
   return result;
 }
 function contestForce(s,{a,b}={}){
