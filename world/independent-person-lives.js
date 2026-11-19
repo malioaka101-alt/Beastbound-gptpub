@@ -168,9 +168,21 @@ function daily(w,q,day,s){
   rngAfter:q.rngState,fatigueAfter:q.fatigue,
   noMagicProgress:true,noProfessionalCertification:true,
   noUnpaidToPaidConversion:true,noForcedOtherPerson:true};
+ // The life owner decides what this person does; it never manufactures
+ // power. A separate ORIGINAL discipline owner may now resolve the actual
+ // chosen physical workday, using the same person's seeded source RNG and
+ // original Combat body (if one truly exists). This runs inside the true
+ // already elapsed world-day boundary, not a free E.advance or PC visit.
  const e=record(q,source);q.lastDay=day;
  if(!verifyEntry(w,q))throw Error('Unverified independent day: original character history rejected');
- return {actorId:q.actorId,day,action,focus,improved,eventHash:e.seal};
+ const originalIndependentPower=require('./independent-original-power-days').
+  afterDaily(s,w,q,e,day);
+ return {actorId:q.actorId,day,action,focus,improved,eventHash:e.seal,
+  ...(originalIndependentPower?{originalPrivatePowerAction:{
+   sourceOwner:originalIndependentPower.kind,
+   realSourceSystem:originalIndependentPower.system||null,
+   actualOriginalCheck:originalIndependentPower.actualOriginalCheck||false,
+   playerKnowledgeNotGranted:true}}:{})};
 }
 function tick(s,fromDay,toDay){
  const w=Realm.ensure(s),t=ensure(w);
