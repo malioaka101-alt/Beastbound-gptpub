@@ -104,6 +104,18 @@ A.equal(Engine.exportGame(s),initial,
  'All original five-power-system actor calculations are pure, with no NPC creation or hidden levels');
 A.equal(s.rngState,worldRng);
 A.equal(p.rngState,npcRng);
+// The original PC progression owner permits a source-established
+// exceptional Wisdom fixture; generated-NPC natural-range rules must not
+// retroactively cap the player's original effective check arithmetic.
+const high=Engine.newGame({seed:946102,name:'Exceptional original PC study parity'});
+high.player.attributes.wis=30;
+high.player.skills.cultivation.rank=5;
+const highProfile=Disc.originalActorTrainingProfile(high,{
+ system:'soul',target:'phase1',method:'self-awareness'});
+A.equal(highProfile.modifier,10+10+
+ Potential.discipline(high,'soul','phase1','self-awareness').modifier);
+A.equal(highProfile.earnedSkillRankBonus,10);
+A.equal(highProfile.earnedSkillRankEstablished,true);
 const tampered=Engine.importGame(initial),
  tp=Realm.peek(tampered).emergentPeople.people[p.id];
 tp.mechanicalFoundation.unassessedPotential.soulDepth=
