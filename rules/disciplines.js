@@ -1446,7 +1446,7 @@ function verifyNpcMeridian(s,person){
    q.target!=='foundation'||q.originalSkillRankBonus!==0||
    q.noAutomaticRankOrStage!==true||
    !Number.isInteger(q.day)||q.day<0||q.day<lastDay||
-   q.day<=lastPracticeDay||
+   q.day<cooldown||q.day<=lastPracticeDay||
    !Number.isInteger(q.startMinute)||q.startMinute<0||
    q.startMinute<previousEnd||Math.floor(q.startMinute/1440)!==q.day||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
