@@ -60,7 +60,7 @@ function fixture(accepted,seed){
   const target=system==='arcane'?'core':system==='soul'?'phase1':
    system==='body'?'cycle1':'sense';
   A.throws(()=>Disc.originalActorSessionContext(s,{
-   actorId:p.actorId,system,target}),/independent discipline interest|practice environment/);
+   actorId:p.actorId,system,target}),/original independent .* interest|practice environment/);
  }
  A.throws(()=>Disc.originalActorSessionContext(s,{
   actorId:p.actorId,system:'meridian',target:'circle1'}),/original discipline|stage/);
