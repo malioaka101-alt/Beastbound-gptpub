@@ -32,6 +32,20 @@ const paths=[
  ['body','cycle2','bone','con','physicalAdaptation'],
  ['rift','sense','orientation','int','comprehension']
 ];
+// The same original 14 facets also cover beast-origin and partnership
+// preparation, but a latent compatibility score is NOT an earned integration,
+// evolution, bond, beast rank or synchronisation achievement.
+for(const dimension of Potential.DIMENSIONS){
+ const local=Potential.readForActor(s,dimension,p.actorId),
+  score=p.mechanicalFoundation.unassessedPotential[dimension];
+ A.equal(local.score,score);
+ A.equal(local.modifier,Potential.bonus(score));
+ A.equal(local.rating,Potential.BANDS[score-1]);
+ A.equal(local.privateToGM,true);
+ A.equal(local.originalUnassessedPotentialOnly,true);
+ A.equal(local.earnedStageOrTechnique,null);
+ A.equal(local.noStageCap,true);
+}
 for(const [system,target,method,attribute,dim] of paths){
  const human=Disc.originalActorTrainingProfile(s,{actorId:p.actorId,system,target,method}),
   player=Disc.originalActorTrainingProfile(s,{system,target,method}),
