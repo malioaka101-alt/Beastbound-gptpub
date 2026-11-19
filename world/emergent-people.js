@@ -718,7 +718,7 @@ function verifyOriginalNightChoice(q){
   !Number.isInteger(q.chance)||q.chance!==originalNightChance(q.personality,q.fatigue)||
   typeof q.accepted!=='boolean'||
   q.noForcedRestOrInferredHousing!==true||
-  q.noAutomaticMedicalCareOrPower===false)
+  q.noAutomaticMedicalCareOrPower!==true)
   return false;
  return q.roll===1+Math.floor(q.rngAfter/4294967296*100)&&
   q.accepted===(q.roll<=q.chance);
