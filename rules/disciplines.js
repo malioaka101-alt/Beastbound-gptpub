@@ -1323,7 +1323,7 @@ function verifyNpcMeridian(s,person){
  if(!combatant?.npcOrigin||
   combatant.npcOrigin.actorId!==person.actorId)return false;
  let points=0,lastDay=-1,lastMinute=-1,cooldown=0;
- const methods={};
+ const methods={},priorAcceptedWitnesses=[];
  for(const row of rec.sessions){
   const q=row?.source;
   if(!q||row.seal!==npcHash(q)||
@@ -1366,11 +1366,29 @@ function verifyNpcMeridian(s,person){
     !Number.isInteger(q.check.earned)||
     q.check.roll!==C.die(roller,20))
     return false;
-   const margin=q.check.roll+q.check.modifier+
-    C.naturalAdjustment(q.check.roll)-q.check.dc,
-    degree=C.degree(margin),
+   // Recompute the actual original DC and real method bonus, rather
+   // than trusting a receipt that could claim free progress at DC 2.
+   if(!Number.isInteger(q.maxStaminaAtAttempt)||
+    q.maxStaminaAtAttempt<1||
+    q.staminaBefore>q.maxStaminaAtAttempt||
+    q.maxStaminaAtAttempt!==combatant.maxStamina)
+    return false;
+   const expectedDC=Difficulty.disciplinePractice(s,{
+    system:'meridian',method:q.method,
+    record:{target:'foundation',methods},
+    baseDC:KEYS.meridian.tracks.foundation[1],
+    independent:true,short:true,
+    originalPhysicalOwner:{stamina:q.staminaBefore,maxStamina:q.maxStaminaAtAttempt},
+    originalTrainingWitnesses:priorAcceptedWitnesses}).dc;
+   const originalWis=Math.floor((
+    person.mechanicalFoundation.baselineAttributes.wis-10)/2),
     apt=Potential.bonus(person.mechanicalFoundation.unassessedPotential[
      Potential.METHODS.meridian[q.method]]);
+   if(q.check.dc!==expectedDC||
+    q.check.modifier!==originalWis+apt)return false;
+   const margin=q.check.roll+q.check.modifier+
+    C.naturalAdjustment(q.check.roll)-q.check.dc,
+    degree=C.degree(margin);
    if(q.check.degree!==degree||
     q.check.success!==(margin>=0)||
     q.check.earned!==C.progress(degree)+
@@ -1386,9 +1404,13 @@ function verifyNpcMeridian(s,person){
    points=Math.min(KEYS.meridian.tracks.foundation[0],
     points+q.check.earned);
    methods[q.method]=(methods[q.method]||0)+1;
+   priorAcceptedWitnesses.push({system:'meridian',target:'foundation',
+    method:q.method,minutes:120,startMinute:q.startMinute,
+    eventHash:row.seal});
   }else if(q.actualMinutes!==5||q.method!==null||
    q.methodNumber!==null||q.check!==null||
-   q.staminaCost!==0||q.staminaBefore!==null||
+   q.staminaCost!==0||q.maxStaminaAtAttempt!==null||
+   q.staminaBefore!==null||
    q.staminaAfter!==null||q.complicationRoll!==null||
    q.cooldownUntil!==cooldown)return false;
   if(q.pointsAfter!==points||roller.rngState!==q.rngAfter)
@@ -1514,6 +1536,7 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
   personalityAtAttempt:p.personality,fatigueAtAttempt:p.fatigue,
   actualMinutes:minutes,method,methodNumber,
   staminaCost:spent,staminaBefore:accepted?physicalBefore:null,
+  maxStaminaAtAttempt:accepted?body.maxStamina:null,
   staminaAfter:accepted?physicalBefore-spent:null,
   check,complicationRoll,pointsBefore:rec?.points||0,
   pointsAfter:target.points,cooldownUntil:newCooldown,
