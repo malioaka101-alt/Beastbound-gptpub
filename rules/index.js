@@ -281,6 +281,7 @@ function act(s,{system,operation,params={}}={}){
   case 'meridian.qiStrikeStudy':return QiStrike.learn(s,params);
   case 'meridian.qiStrikeStatus':return QiStrike.status(s,params);
   case 'discipline.practice':return Disciplines.practice(s,params);
+  case 'discipline.npcMeridianPractice':return Disciplines.npcMeridianPractice(s,params);
    case 'discipline.practiceDifficulty':return Disciplines.difficultyPreview(s,params);
   case 'discipline.breakthrough':return Disciplines.breakthrough(s,params);
   case 'body.organStatus':return Disciplines.organStatus(s);
