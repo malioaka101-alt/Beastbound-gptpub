@@ -385,6 +385,57 @@ function status(s){
  return {systems,note:'Independent earned skills, physical Gates and Arcane Circles are different structures. No teacher, fee, elapsed age or preselected result unlocks a power.'};
 }
 function modifier(s,system){const sp=KEYS[system];const rank=s.player.skills?.[sp.skill]?.rank||0;return Math.floor((s.player.attributes[sp.attribute]-10)/2)+2*rank;}
+// A shared ORIGINAL training modifier for the player and established
+// individuals across the five distinct introductory power-system tracks.
+// This is source-verified arithmetic, NOT a universal rank/level ladder,
+// an eligibility grant, or a player-facing hidden NPC information command.
+function originalActorTrainingProfile(s,{actorId='player',system,target,method}={}){
+ const sp=KEYS[system];
+ if(!sp||typeof target!=='string'||!Object.hasOwn(sp.tracks,target))
+  throw Error('Existing original discipline and its authentic stage target required');
+ if(method!==undefined&&method!==null&&
+  !methodsFor(system,target).includes(method))
+  throw Error('Training method is not in the original power-system stage');
+ const potential=Potential.discipline(s,system,target,method,actorId);
+ let attrs,rank=0,rankEstablished=false;
+ if(actorId==='player'){
+  attrs=s.player?.attributes;
+  rank=s.player?.skills?.[sp.skill]?.rank||0;
+  rankEstablished=true; // The saved player skill owner is authoritative.
+ }else{
+  const w=require('../world/simulation').peek(s),
+   person=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+  if(!person||person.actorId!==actorId||
+   !require('../world/emergent-people').verify(w,person)||
+   !require('../world/person-mechanical-foundations').verify(w,person))
+   throw Error('Original individual natural attributes need verified source');
+  attrs=person.mechanicalFoundation.baselineAttributes;
+  // An NPC's ordinary work, school or occupation cannot buy a formal
+  // skill-rank bonus. Unestablished skills contribute no rank modifier.
+  // This does NOT assert that the individual really possesses rank zero.
+ }
+ const attributeScore=attrs?.[sp.attribute];
+ // Existing PC source-owner tests deliberately use exceptional WIS 30
+ // in a high-end training fixture. Do not impose source-BORN NPC creation
+ // bounds on an already established PC: preserve original PC arithmetic.
+ // Independently generated adults still need their genuine 1-20 baseline.
+ if(!Number.isFinite(attributeScore)||
+  (actorId!=='player'&&
+   (!Number.isInteger(attributeScore)||attributeScore<1||attributeScore>20))||
+  !Number.isInteger(rank)||rank<0)
+  throw Error('Original human natural attribute or verified rank is invalid');
+ const naturalModifier=Math.floor((attributeScore-10)/2);
+ return {actorId,system,target,method:method??null,
+  originalRuleOwner:'rules/disciplines.js',
+  originalAttribute:sp.attribute,naturalModifier,
+  earnedSkillRankBonus:rankEstablished?rank*2:0,
+  earnedSkillRankEstablished:rankEstablished,
+  unverifiedNpcSkillNotInferred:actorId!=='player',
+  potential,modifier:naturalModifier+(rankEstablished?rank*2:0)+
+   potential.modifier,noStageOrTechniqueAwarded:true,
+  ...(actorId==='player'?{}:{privateToGM:true})};
+}
+
 // A GM can examine the engine's actual baseline and own factors BEFORE any
 // roleplay-sensitive judgment. No dice, training, time or hidden source claims.
 function difficultyPreview(s,p={}){
@@ -445,7 +496,8 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
  // The old established sixday course retains its known tuition. A brief
  // practice visit or conversation is not automatically a purchased lesson
  // and cannot claim the course's preparatory advantage merely by naming it.
- const aptitude=Potential.discipline(s,system,target,method);
+ const actorTraining=originalActorTrainingProfile(s,{system,target,method});
+ const aptitude=actorTraining.potential;
  const [length,dc]=spec.tracks[target],
   fee=self||short?0:(partTime?1:2),
   difficulty=GM.adjust(s,Difficulty.disciplinePractice(s,{
@@ -477,7 +529,7 @@ function practice(s,{system,method,partTime=false,source,route=source===undefine
   if(s.table?.combatants?.player)
    s.table.combatants.player.stamina=s.player.stamina;
  }
- const check=C.check(s,{modifier:modifier(s,system)+aptitude.modifier+(theory?.bonus||0),dc:actualDC,label:`${system} ${target} — ${method}`});
+ const check=C.check(s,{modifier:actorTraining.modifier+(theory?.bonus||0),dc:actualDC,label:`${system} ${target} — ${method}`});
  // High aptitude improves useful progress after a genuine successful check.
  // Low aptitude makes the check harder but never forbids reaching the target.
  const earned=(check.progress+(check.success?Math.max(0,aptitude.modifier):0))*(partTime?0.5:1);record.points=cap(record.points+earned,0,length);
@@ -542,7 +594,8 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
  if(system==='arcane'&&target==='core'&&s.player.arcane.circles!==0)throw Error('Mana Core condition inconsistent');
  const fee=self?0:(system==='arcane'?5:3);
  if(s.player.coins<fee)throw Error('Selected rite preparations and safeguards not funded');
- const aptitude=Potential.discipline(s,system,target,null);
+ const actorTraining=originalActorTrainingProfile(s,{system,target});
+ const aptitude=actorTraining.potential;
  const actualDC=dc+2+(self?3:0);
  const riteSource=self?independentSource(s,system,target,self.site):source;
  if(self){
@@ -553,7 +606,7 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
   });
  }
  s.player.coins-=fee;s.player.insightPoints-=insightSpent;
- const check=C.check(s,{modifier:modifier(s,system)+aptitude.modifier+2*insightSpent+(theory?.bonus||0),dc:actualDC,
+ const check=C.check(s,{modifier:actorTraining.modifier+2*insightSpent+(theory?.bonus||0),dc:actualDC,
   label:`${system} ${target} breakthrough`});
  let outcome,change=null;
  if(check.success){
@@ -1641,10 +1694,10 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
    originalTrainingWitnesses:prior});
   actualDC=dc.dc;spent=1;minutes=120;
   body.stamina-=1;
-  const mod=Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2),
-   aptitude=Potential.bonus(p.mechanicalFoundation.unassessedPotential[
-    Potential.METHODS.meridian[method]]);
-  const actual=C.check(s,{modifier:mod+aptitude,dc:actualDC,
+  const training=originalActorTrainingProfile(s,{actorId,
+   system:'meridian',target:'foundation',method}),
+   aptitude=training.potential.modifier;
+  const actual=C.check(s,{modifier:training.modifier,dc:actualDC,
    label:p.name+' Meridian Foundation '+method,
    independentRngOwner:p,privateDisplay:true});
   earned=actual.progress+(actual.success?Math.max(0,aptitude):0);
@@ -1752,11 +1805,11 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   chance=npcSessionChance(p),choice=C.die(p,100),
   accepted=choice<=chance,
   dc=KEYS.meridian.tracks.foundation[1]+2+3,
-  dimension=Potential.PRIMARY.meridian.foundation,
-  aptitude=Potential.bonus(
-   p.mechanicalFoundation.unassessedPotential[dimension]),
-  originalWis=Math.floor((
-   p.mechanicalFoundation.baselineAttributes.wis-10)/2),
+  actorTraining=originalActorTrainingProfile(s,{
+   actorId,system:'meridian',target:'foundation'}),
+  dimension=actorTraining.potential.dimension,
+  aptitude=actorTraining.potential.modifier,
+  originalWis=actorTraining.naturalModifier,
   beforePoints=rec.points,distinct=Object.keys(rec.methods).length,
   initialMax=c.maxStamina,initialStamina=c.stamina,
   initialWounds=[...c.wounds],oldCooldown=rec.cooldownUntil;
@@ -1764,7 +1817,7 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   quality=null,foundation=null,minutes=5;
  if(accepted){
   minutes=180;
-  const actual=C.check(s,{modifier:originalWis+aptitude,dc,
+  const actual=C.check(s,{modifier:actorTraining.modifier,dc,
    label:p.name+' independent Meridian Foundation rite',
    independentRngOwner:p,privateDisplay:true});
   check={roll:actual.roll,modifier:actual.modifier,dc:actual.dc,
@@ -1841,4 +1894,4 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   privateDiceAndPotentialNotDisclosed:true,
   noFreeQiOrTechnique:true};
 }
-module.exports={npcMeridianStageOneRite,npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
+module.exports={originalActorTrainingProfile,npcMeridianStageOneRite,npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
