@@ -106,7 +106,8 @@ A.equal(s.rngState,worldRng);
 A.equal(p.rngState,npcRng);
 const tampered=Engine.importGame(initial),
  tp=Realm.peek(tampered).emergentPeople.people[p.id];
-tp.mechanicalFoundation.unassessedPotential.soulDepth=9;
+tp.mechanicalFoundation.unassessedPotential.soulDepth=
+ tp.mechanicalFoundation.unassessedPotential.soulDepth===9?1:9;
 A.throws(()=>Potential.discipline(tampered,'soul','phase1',
  'self-awareness',p.actorId),/source is not verified/);
 A.throws(()=>Disc.originalActorTrainingProfile(tampered,{
