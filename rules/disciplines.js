@@ -1342,7 +1342,12 @@ function verifyNpcMeridian(s,person){
    !Number.isInteger(q.rngAfter)||q.rngAfter<1||
    !Number.isInteger(q.choiceD100)||q.choiceD100<1||q.choiceD100>100||
    !Number.isInteger(q.choiceChance)||q.choiceChance<1||q.choiceChance>100||
-   typeof q.accepted!=='boolean'||q.pointsBefore!==points||
+   typeof q.accepted!=='boolean'||q.personalityAtAttempt!==person.personality||
+   !Number.isInteger(q.fatigueAtAttempt)||q.fatigueAtAttempt<0||
+   q.fatigueAtAttempt>100||
+   q.choiceChance!==npcSessionChance({
+    personality:q.personalityAtAttempt,fatigue:q.fatigueAtAttempt})||
+   q.pointsBefore!==points||
    !Number.isInteger(q.actualMinutes)||q.actualMinutes<5||q.actualMinutes>120)
    return false;
   const roller={rngState:q.rngBefore};
@@ -1506,6 +1511,7 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
   target:'foundation',originalSkillRankBonus:0,
   startMinute:start,day,rngBefore,rngAfter:p.rngState,
   choiceD100:decision,choiceChance:chance,accepted,
+  personalityAtAttempt:p.personality,fatigueAtAttempt:p.fatigue,
   actualMinutes:minutes,method,methodNumber,
   staminaCost:spent,staminaBefore:accepted?physicalBefore:null,
   staminaAfter:accepted?physicalBefore-spent:null,
