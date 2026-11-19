@@ -238,6 +238,24 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.arcane.coreIgnited=true;
    originalMilestones.arcane.circles=0;
   }
+  // Only independently earned, fully replayed ORIGINAL individual milestones
+  // can establish Phase I, Cycle I or Rift Sense. The same calculation does
+  // NOT claim later phases, cycles, spatial steps or learned techniques.
+  const earnedOther=verifiedOtherPreparation?.originalSourceEarnedFirstMilestones||{};
+  if(earnedOther.soul?.phase===1){
+   originalMilestones.soul.phase=1;
+   originalMilestones.soul.soulReserve=earnedOther.soul.soulReserve;
+   originalMilestones.soul.perceptionRangeMetres=earnedOther.soul.perceptionRangeMetres;
+  }
+  if(earnedOther.body?.completedCycle==='Muscle-Tendon Cycle'){
+   originalMilestones.body.completedCycles=['Muscle-Tendon Cycle'];
+   originalMilestones.body.originalCurrentStrengthBonus=1;
+   originalMilestones.body.realCombatBodyStaminaBonus=2;
+  }
+  if(earnedOther.rift?.step===1){
+   originalMilestones.rift.step=1;
+   originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
+  }
   if(verifiedMeridian?.originalMeridianStageEarned===1){
    originalMilestones.meridian.stage=1;
    originalMilestones.meridian.openedGates=0;
