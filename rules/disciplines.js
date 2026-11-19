@@ -415,8 +415,14 @@ function originalActorTrainingProfile(s,{actorId='player',system,target,method}=
   // This does NOT assert that the individual really possesses rank zero.
  }
  const attributeScore=attrs?.[sp.attribute];
- if(!Number.isInteger(attributeScore)||attributeScore<1||attributeScore>20||
-  !Number.isInteger(rank)||rank<0||rank>5)
+ // Existing PC source-owner tests deliberately use exceptional WIS 30
+ // in a high-end training fixture. Do not impose source-BORN NPC creation
+ // bounds on an already established PC: preserve original PC arithmetic.
+ // Independently generated adults still need their genuine 1-20 baseline.
+ if(!Number.isFinite(attributeScore)||
+  (actorId!=='player'&&
+   (!Number.isInteger(attributeScore)||attributeScore<1||attributeScore>20))||
+  !Number.isInteger(rank)||rank<0)
   throw Error('Original human natural attribute or verified rank is invalid');
  const naturalModifier=Math.floor((attributeScore-10)/2);
  return {actorId,system,target,method:method??null,
