@@ -31,7 +31,7 @@ const SELF_SITES=Object.freeze({
  meridian:EVERYWHERE,arcane:EVERYWHERE,
  soul:EVERYWHERE,body:EVERYWHERE,rift:['ruins']
 });
-function independentSite(s,system,{shortSession=false}={}){
+function independentSite(s,system,{shortSession=false,independentPerson=false}={}){
  const site=s.world?.location,loc=LivedPlaces.location(s,site);
  // A GM-established settlement is as real as a fixed engine location.
  // Ordinary self-awareness, breathing and core-theory practice can occur
@@ -43,7 +43,7 @@ function independentSite(s,system,{shortSession=false}={}){
  if(s.battle||s.encounter)
   throw Error('An unresolved threat cannot be treated as an uneventful independent practice period');
  const c=s.table?.combatants?.player;
- if(c&&c.status!=='ok')
+ if(!independentPerson&&c&&c.status!=='ok')
   throw Error('An incapacitated character cannot perform self-directed training');
  if(!shortSession&&s.player?.partnerIds?.length)
   throw Error('Sixday independent practice with animal partners needs real separately funded and witnessed care');
@@ -1282,4 +1282,251 @@ function organWork(s,params={}){
   noMandatoryTeacher:true,noAutomaticOtherPower:true};
 }
 
-module.exports={difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
+// The original Meridian Foundation track (40 points, DC 12, breath/tissue/
+// circulation methods, 120-minute physical session, real check) can also
+// belong to an INDIVIDUAL living adult. It stays inside THIS discipline
+// owner, not a generic NPC powers/XP engine. No stage, Qi or ability is
+// awarded by a preparatory session or ordinary daily study.
+const NPC_MERIDIAN='original-independent-meridian-foundation-practice-v1';
+const npcHash=v=>Crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
+const npcMethods=KEYS.meridian.focus;
+function npcSessionChance(p){
+ const byPersonality={curious:66,steady:59,independent:51,reserved:39};
+ const base=byPersonality[p?.personality];
+ if(!Number.isInteger(base)||!Number.isInteger(p.fatigue)||
+  p.fatigue<0||p.fatigue>100)
+  throw Error('Original individual cannot make a training choice from invalid personal condition');
+ return Math.max(10,base-(p.fatigue>=55?15:0));
+}
+// Private, deterministic check of the same original C.die/C.degree and
+// aptitude/track progress. It does not roll against or modify live state.
+function verifyNpcMeridian(s,person){
+ const rec=person?.meridianTraining;
+ if(rec===undefined)return true;
+ if(!rec||rec.origin!==NPC_MERIDIAN||rec.target!=='foundation'||
+  rec.stageAtStart!==0||!Number.isInteger(rec.points)||
+  rec.points<0||rec.points>KEYS.meridian.tracks.foundation[0]||
+  !rec.methods||typeof rec.methods!=='object'||Array.isArray(rec.methods)||
+  Object.keys(rec.methods).some(k=>!npcMethods.includes(k)||
+   !Number.isInteger(rec.methods[k])||rec.methods[k]<1)||
+  !Array.isArray(rec.sessions)||rec.sessions.length<1||
+  rec.sessions.length>480||!Number.isInteger(rec.lastAttemptDay)||
+  rec.lastAttemptDay<0||!Number.isInteger(rec.cooldownUntil)||
+  rec.cooldownUntil<0)
+  return false;
+ const w=require('../world/simulation').peek(s);
+ if(!w||!person||person.actorId!=='emergent:'+person.id||
+  !require('../world/emergent-people').verify(w,person)||
+  !require('../world/person-mechanical-foundations').verify(w,person))
+  return false;
+ const combatant=s.table?.combatants?.['npc_'+person.id];
+ if(!combatant?.npcOrigin||
+  combatant.npcOrigin.actorId!==person.actorId)return false;
+ let points=0,lastDay=-1,lastMinute=-1,cooldown=0;
+ const methods={};
+ for(const row of rec.sessions){
+  const q=row?.source;
+  if(!q||row.seal!==npcHash(q)||
+   q.origin!==NPC_MERIDIAN||q.actorId!==person.actorId||
+   q.individualOriginHash!==person.originHash||
+   q.originalCombatEntrySeal!==combatant.npcOrigin.seal||
+   q.originalFoundationSeal!==person.mechanicalFoundation.seal||
+   q.target!=='foundation'||q.originalSkillRankBonus!==0||
+   q.noAutomaticRankOrStage!==true||
+   !Number.isInteger(q.day)||q.day<0||q.day<=lastDay||
+   !Number.isInteger(q.startMinute)||q.startMinute<0||
+   q.startMinute<=lastMinute||Math.floor(q.startMinute/1440)!==q.day||
+   !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+   !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
+   !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+   !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+   !Number.isInteger(q.choiceD100)||q.choiceD100<1||q.choiceD100>100||
+   !Number.isInteger(q.choiceChance)||q.choiceChance<1||q.choiceChance>100||
+   typeof q.accepted!=='boolean'||q.pointsBefore!==points||
+   !Number.isInteger(q.actualMinutes)||q.actualMinutes<5||q.actualMinutes>120)
+   return false;
+  const roller={rngState:q.rngBefore};
+  if(C.die(roller,100)!==q.choiceD100||
+   q.accepted!==(q.choiceD100<=q.choiceChance))
+   return false;
+  if(q.accepted){
+   if(q.actualMinutes!==120||q.staminaCost!==1||
+    !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
+    q.staminaAfter!==q.staminaBefore-1||
+    !npcMethods.includes(q.method)||q.methodNumber!==C.die(roller,3)||
+    q.method!==npcMethods[q.methodNumber-1]||
+    !q.check||!Number.isInteger(q.check.roll)||
+    !Number.isInteger(q.check.dc)||
+    !Number.isInteger(q.check.modifier)||
+    !Number.isInteger(q.check.earned)||
+    q.check.roll!==C.die(roller,20))
+    return false;
+   const margin=q.check.roll+q.check.modifier+
+    C.naturalAdjustment(q.check.roll)-q.check.dc,
+    degree=C.degree(margin),
+    apt=Potential.bonus(person.mechanicalFoundation.unassessedPotential[
+     Potential.METHODS.meridian[q.method]]);
+   if(q.check.degree!==degree||
+    q.check.success!==(margin>=0)||
+    q.check.earned!==C.progress(degree)+
+     (margin>=0?Math.max(0,apt):0))
+    return false;
+   if(degree==='severe failure'){
+    if(q.complicationRoll!==C.die(roller,20))return false;
+    if(q.cooldownUntil!==
+     (q.complicationRoll<=5?q.day+6:cooldown))return false;
+   }else if(q.complicationRoll!==null||q.cooldownUntil!==cooldown)
+    return false;
+   cooldown=q.cooldownUntil;
+   points=Math.min(KEYS.meridian.tracks.foundation[0],
+    points+q.check.earned);
+   methods[q.method]=(methods[q.method]||0)+1;
+  }else if(q.actualMinutes!==5||q.method!==null||
+   q.methodNumber!==null||q.check!==null||
+   q.staminaCost!==0||q.staminaBefore!==null||
+   q.staminaAfter!==null||q.complicationRoll!==null||
+   q.cooldownUntil!==cooldown)return false;
+  if(q.pointsAfter!==points||roller.rngState!==q.rngAfter)
+   return false;
+  lastDay=q.day;lastMinute=q.startMinute;
+ }
+ return rec.points===points&&rec.lastAttemptDay===lastDay&&
+  rec.cooldownUntil===cooldown&&
+  JSON.stringify(rec.methods)===JSON.stringify(methods);
+}
+function npcMeridianPrivateStatus(s,actorId){
+ const w=require('../world/simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)];
+ if(!p||p.actorId!==actorId||
+  !require('../world/emergent-people').verify(w,p))
+  throw Error('Original independent human identity not verified');
+ if(!verifyNpcMeridian(s,p))
+  throw Error('Original individual Meridian training proof was altered');
+ const rec=p.meridianTraining;
+ return {actorId,originalOwner:'rules/disciplines.js',
+  originalMeridianStageEarned:null,
+  actualFoundationPracticePoints:rec?.points??0,
+  requiredOriginalFoundationPoints:KEYS.meridian.tracks.foundation[0],
+  distinctActualMethods:Object.keys(rec?.methods||{}).length,
+  originalRiteEligible:!!rec&&rec.points>=KEYS.meridian.tracks.foundation[0]&&
+   Object.keys(rec.methods).length>=2,
+  originalBreakthroughPerformed:false,
+  noUnverifiedQiOrLearnedTechnique:true,privateToGM:true};
+}
+// This scene operation can OFFER practice, but does not FORCE the person.
+// The caller may identify the present adult, never choose a method, dice,
+// progress, aptitude, formal breakthrough or the NPC's voluntary choice.
+function npcMeridianPractice(s,{actorId,...untrusted}={}){
+ if(Object.keys(untrusted).length||
+  typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Only an original independently living actor may be offered real Meridian practice; no chosen roll or method');
+ const Realm=require('../world/simulation'),
+  People=require('../world/emergent-people'),
+  Presence=require('../world/person-presence'),
+  Lives=require('../world/independent-person-lives'),
+  Mechanical=require('../world/person-mechanical-foundations'),
+  w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
+  q=w?.independentPersonLives?.people?.[actorId.slice('emergent:'.length)];
+ if(!p||p.actorId!==actorId||!People.verify(w,p)||
+  !Mechanical.verify(w,p)||
+  !q||!Lives.verifyEntry(w,q)||
+  !q.interests.includes('meridian')||q.focus!=='meridian'||
+  p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
+  throw Error('Genuine current original independent Meridian interest and physically active adult are required');
+ if(!verifyNpcMeridian(s,p))
+  throw Error('Original individual Meridian training proof was altered');
+ const condition=U.currentNpcWoundCondition(s,actorId);
+ if(!condition||condition.workAndOrdinaryPracticeBlocked)
+  throw Error('Unresolved original combat injury or missing physical condition prevents actual Meridian practice');
+ const body=Combat.get(s,condition.combatantId);
+ if(body.stamina<1)throw Error('An original individual needs real physical Stamina for a 120-minute Meridian session');
+ const site=independentSite(s,'meridian',{shortSession:true,independentPerson:true});
+ const day=Math.floor(s.world.minutes/1440),minute=s.world.minutes%1440,
+  present=Presence.resolve(w,actorId,s.world.location,day,minute);
+ if(!present?.presence||present.presence.hash!==p.shift?.hash||
+  present.presence.originHash!==p.originHash||
+  typeof s.chatRuntime?.scene!=='string'||
+  !s.chatRuntime.scene.includes(p.name))
+  throw Error('An actually present, witnessed adult must consider personal Meridian practice here');
+ if(minute+120>=1440||minute<8*60||minute+120>18*60)
+  throw Error('Actual independent Meridian practice requires a complete safe daylight session');
+ const rec=p.meridianTraining;
+ if(rec&&rec.lastAttemptDay>=day)
+  throw Error('This person already made their independent Meridian choice today; no reroll');
+ if(rec&&rec.points>=KEYS.meridian.tracks.foundation[0])
+  throw Error('Original Foundation practice is complete; only a genuine separate rite can advance the stage');
+ if(rec&&day<rec.cooldownUntil)
+  throw Error('Original individual Meridian strain cooldown has not finished');
+ const target=rec||{origin:NPC_MERIDIAN,target:'foundation',
+  stageAtStart:0,points:0,methods:{},sessions:[],
+  lastAttemptDay:-1,cooldownUntil:0};
+ if(target.sessions.length>=480)
+  throw Error('Original personal session journal must be reviewed before continuing');
+ const chance=npcSessionChance(p),start=s.world.minutes,
+  rngBefore=p.rngState,physicalBefore=body.stamina,
+  decision=C.die(p,100),accepted=decision<=chance;
+ let method=null,methodNumber=null,check=null,earned=0,
+  actualDC=null,complicationRoll=null,spent=0;
+ let newCooldown=target.cooldownUntil,minutes=5;
+ if(accepted){
+  methodNumber=C.die(p,3);method=npcMethods[methodNumber-1];
+  const prior=target.sessions.filter(x=>x.source.accepted).map(x=>({
+   system:'meridian',target:'foundation',method:x.source.method,
+   minutes:120,startMinute:x.source.startMinute,eventHash:x.seal}));
+  const dc=Difficulty.disciplinePractice(s,{system:'meridian',method,
+   record:target,baseDC:KEYS.meridian.tracks.foundation[1],
+   independent:true,short:true,originalPhysicalOwner:body,
+   originalTrainingWitnesses:prior});
+  actualDC=dc.dc;spent=1;minutes=120;
+  body.stamina-=1;
+  const mod=Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2),
+   aptitude=Potential.bonus(p.mechanicalFoundation.unassessedPotential[
+    Potential.METHODS.meridian[method]]);
+  const actual=C.check(s,{modifier:mod+aptitude,dc:actualDC,
+   label:p.name+' Meridian Foundation '+method,
+   independentRngOwner:p,privateDisplay:true});
+  earned=actual.progress+(actual.success?Math.max(0,aptitude):0);
+  check={roll:actual.roll,dc:actual.dc,modifier:actual.modifier,
+   degree:actual.degree,success:actual.success,earned};
+  if(actual.degree==='severe failure'){
+   complicationRoll=C.die(p,20);
+   if(complicationRoll<=3||complicationRoll===14||complicationRoll===15)
+    Combat.harm(s,body,2);
+   if(complicationRoll<=5)newCooldown=day+6;
+  }
+  target.points=Math.min(KEYS.meridian.tracks.foundation[0],target.points+earned);
+  target.methods[method]=(target.methods[method]||0)+1;
+ }
+ const proof={origin:NPC_MERIDIAN,actorId,
+  individualOriginHash:p.originHash,
+  originalFoundationSeal:p.mechanicalFoundation.seal,
+  originalCombatEntrySeal:body.npcOrigin.seal,
+  originalShiftHash:present.presence.hash,
+  originalSceneHash:npcHash(s.chatRuntime.scene),
+  target:'foundation',originalSkillRankBonus:0,
+  startMinute:start,day,rngBefore,rngAfter:p.rngState,
+  choiceD100:decision,choiceChance:chance,accepted,
+  actualMinutes:minutes,method,methodNumber,
+  staminaCost:spent,staminaBefore:accepted?physicalBefore:null,
+  staminaAfter:accepted?physicalBefore-spent:null,
+  check,complicationRoll,pointsBefore:rec?.points||0,
+  pointsAfter:target.points,cooldownUntil:newCooldown,
+  noAutomaticRankOrStage:true};
+ const row={source:proof,seal:npcHash(proof)};
+ target.sessions.push(row);target.cooldownUntil=newCooldown;
+ target.lastAttemptDay=day;p.meridianTraining=target;
+ if(!verifyNpcMeridian(s,p))
+  throw Error('Original independent Meridian training failed exact proof replay');
+ E.advance(s,minutes);W.finalizeTime(s,start);
+ C.event(s,'progress',accepted?
+  p.name+' completes an independent Meridian Foundation practice session.':
+  p.name+' chooses not to undertake Meridian training today.',{
+   origin:NPC_MERIDIAN,actorId,accepted,sourceHash:row.seal,
+   noPowerOrRankAwarded:true,privateTrainingNumbersNotDisclosed:true});
+ return {actorId,independentChoice:accepted?'practised':'declined',
+  observed:accepted?'actual physical Foundation preparation':'chose not to train',
+  elapsedMinutes:minutes,actualOriginalCheck:accepted,
+  stageOrTechniqueEarned:false,
+  privateProgressNotDisclosed:true};
+}
+module.exports={npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
