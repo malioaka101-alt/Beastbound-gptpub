@@ -83,7 +83,13 @@ for(const accept of [true,false]){
  A.equal(s.world.minutes,beforeMinute+(accept?480:5));
  A.equal(p.rngState,rngNext(oldNpcRng),
   'One original personal choice RNG draw, never a player roll');
- A.equal(s.rngState,playerRng);
+ // Actual midnight world ticks can consume the existing world RNG.
+ // Compare an identical original time advance, not an impossible frozen world.
+ const calendarControl=E.importGame(before);
+ E.advance(calendarControl,accept?480:5);
+ World.finalizeTime(calendarControl,beforeMinute);
+ A.equal(s.rngState,calendarControl.rngState,
+  'NPC sleep must not add any extra player/world dice beyond real elapsed time');
  A.equal(s.player.stamina,playerStamina);
  A.equal(s.player.meridian.stage,0);
  A.equal(s.player.arcane.circles,0);
