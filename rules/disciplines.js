@@ -436,6 +436,57 @@ function originalActorTrainingProfile(s,{actorId='player',system,target,method}=
   ...(actorId==='player'?{}:{privateToGM:true})};
 }
 
+// The one actor/session evidence gate for future original Meridian, Arcane,
+// Soul, Body and Rift owner actions.  Arithmetic alone is NOT proof that a
+// person is nearby, physically well, free to act or interested in this art.
+// This pure GM-private view makes those original prerequisites reusable without
+// choosing an NPC's action, drawing dice, awarding progress or advancing time.
+function originalActorSessionContext(s,{actorId='player',system,target,method}={}){
+ const training=originalActorTrainingProfile(s,{actorId,system,target,method});
+ if(actorId==='player'){
+  if(currentTarget(s,system)!==target)
+   throw Error('Player discipline stage must match the original current anatomy');
+  return {actorId,system,target,training,
+   currentStamina:s.player.stamina,maxStamina:s.player.maxStamina,
+   person:null,life:null,combatant:null,presence:null,
+   noDecisionOrProgressAwarded:true,privateNpcInformation:false};
+ }
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Only an existing source-established independent human is supported');
+ const Realm=require('../world/simulation'),
+  People=require('../world/emergent-people'),
+  Lives=require('../world/independent-person-lives'),
+  Presence=require('../world/person-presence'),
+  Foundation=require('../world/person-mechanical-foundations'),
+  w=Realm.peek(s),
+  id=actorId.slice('emergent:'.length),
+  p=w?.emergentPeople?.people?.[id],
+  life=w?.independentPersonLives?.people?.[id];
+ if(!p||p.actorId!==actorId||!People.verify(w,p)||
+  !Foundation.verify(w,p)||!life||!Lives.verifyEntry(w,life)||
+  !life.interests.includes(system)||life.focus!==system||
+  p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
+  throw Error('Genuine current original independent '+system[0].toUpperCase()+system.slice(1)+' interest and physically active adult are required');
+ const condition=U.currentNpcWoundCondition(s,actorId);
+ if(!condition||condition.workAndOrdinaryPracticeBlocked)
+  throw Error('Unresolved original combat injury or missing physical condition prevents actual independent practice or rite');
+ const combatant=Combat.get(s,condition.combatantId);
+ const site=independentSite(s,system,{shortSession:true,independentPerson:true});
+ const day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes%1440,
+  present=Presence.resolve(w,actorId,s.world.location,day,minute);
+ if(!present?.presence||present.presence.hash!==p.shift?.hash||
+  present.presence.originHash!==p.originHash||
+  combatant.npcOrigin?.location!==s.world.location||
+  typeof s.chatRuntime?.scene!=='string'||
+  !s.chatRuntime.scene.includes(p.name))
+  throw Error('An actually present, witnessed independent human is required for a real discipline session');
+ return {actorId,system,target,training,
+  person:p,life,w,condition,combatant,site,day,minute,
+  presence:present,currentStamina:combatant.stamina,
+  maxStamina:combatant.maxStamina,
+  noDecisionOrProgressAwarded:true,privateNpcInformation:true};
+}
 // A GM can examine the engine's actual baseline and own factors BEFORE any
 // roleplay-sensitive judgment. No dice, training, time or hidden source claims.
 function difficultyPreview(s,p={}){
@@ -1629,34 +1680,12 @@ function npcMeridianPractice(s,{actorId,...untrusted}={}){
  if(Object.keys(untrusted).length||
   typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
   throw Error('Only an original independently living actor may be offered real Meridian practice; no chosen roll or method');
- const Realm=require('../world/simulation'),
-  People=require('../world/emergent-people'),
-  Presence=require('../world/person-presence'),
-  Lives=require('../world/independent-person-lives'),
-  Mechanical=require('../world/person-mechanical-foundations'),
-  w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
-  q=w?.independentPersonLives?.people?.[actorId.slice('emergent:'.length)];
- if(!p||p.actorId!==actorId||!People.verify(w,p)||
-  !Mechanical.verify(w,p)||
-  !q||!Lives.verifyEntry(w,q)||
-  !q.interests.includes('meridian')||q.focus!=='meridian'||
-  p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
-  throw Error('Genuine current original independent Meridian interest and physically active adult are required');
+ const ctx=originalActorSessionContext(s,{
+  actorId,system:'meridian',target:'foundation'});
+ const {person:p,combatant:body,site,day,minute,presence:present}=ctx;
  if(!verifyNpcMeridian(s,p))
   throw Error('Original individual Meridian training proof was altered');
- const condition=U.currentNpcWoundCondition(s,actorId);
- if(!condition||condition.workAndOrdinaryPracticeBlocked)
-  throw Error('Unresolved original combat injury or missing physical condition prevents actual Meridian practice');
- const body=Combat.get(s,condition.combatantId);
  if(body.stamina<1)throw Error('An original individual needs real physical Stamina for a 120-minute Meridian session');
- const site=independentSite(s,'meridian',{shortSession:true,independentPerson:true});
- const day=Math.floor(s.world.minutes/1440),minute=s.world.minutes%1440,
-  present=Presence.resolve(w,actorId,s.world.location,day,minute);
- if(!present?.presence||present.presence.hash!==p.shift?.hash||
-  present.presence.originHash!==p.originHash||
-  typeof s.chatRuntime?.scene!=='string'||
-  !s.chatRuntime.scene.includes(p.name))
-  throw Error('An actually present, witnessed adult must consider personal Meridian practice here');
  if(minute+120>=1440||minute<8*60||minute+120>18*60)
   throw Error('Actual independent Meridian practice requires a complete safe daylight session');
  const rec=p.meridianTraining;
@@ -1754,29 +1783,21 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
  if(Object.keys(untrusted).length||
   typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
   throw Error('Only a real independent actor can be offered a Meridian Foundation rite; never select its dice, result, stage or consent');
- const Realm=require('../world/simulation'),
-  People=require('../world/emergent-people'),
-  Presence=require('../world/person-presence'),
-  Lives=require('../world/independent-person-lives'),
-  Foundation=require('../world/person-mechanical-foundations'),
-  w=Realm.peek(s),
-  p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
-  life=w?.independentPersonLives?.people?.[actorId.slice('emergent:'.length)];
- if(!p||p.actorId!==actorId||!People.verify(w,p)||
-  !Foundation.verify(w,p)||!life||!Lives.verifyEntry(w,life)||
-  !life.interests.includes('meridian')||life.focus!=='meridian'||
-  p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
-  throw Error('Original independently interested active adult needed for the Meridian rite');
- if(!verifyNpcMeridian(s,p))
+ // Preserve the original rite's precedence: genuine earned preparation
+ // and recovery cooldown are checked BEFORE the physical condition gate.
+ // A previous backlash therefore cannot be reclassified as a new attempt.
+ const preliminary=require('../world/simulation').peek(s)
+  ?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+ if(!preliminary||!verifyNpcMeridian(s,preliminary))
   throw Error('Original individual Meridian Foundation history is not source verified');
- const rec=p.meridianTraining,required=KEYS.meridian.tracks.foundation[0];
+ const rec=preliminary.meridianTraining,
+  required=KEYS.meridian.tracks.foundation[0],
+  day=Math.floor(s.world.minutes/1440);
  if(!rec||rec.points!==required||
   Object.keys(rec.methods).filter(k=>rec.methods[k]>0).length<2)
   throw Error('Original Stage I requires 40 genuinely earned Foundation points and two different methods');
  if(rec.earnedStage===1||rec.target!=='foundation')
   throw Error('An actually completed Stage I rite cannot award the same stage again');
- const day=Math.floor(s.world.minutes/1440),
-  minute=s.world.minutes%1440;
  if(day<rec.cooldownUntil)
   throw Error('Real Meridian recovery cooldown prevents this rite');
  if(rec.sessions.some(row=>row.source.origin===NPC_MERIDIAN_RITE&&
@@ -1784,21 +1805,14 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   throw Error('The independently resolved rite decision cannot be rerolled today');
  if(rec.sessions.length>=480)
   throw Error('The existing original training journal must be reconciled before a rite');
- const condition=U.currentNpcWoundCondition(s,actorId);
- if(!condition||condition.workAndOrdinaryPracticeBlocked)
-  throw Error('Original physical wounds or exhaustion prevent this Meridian rite');
- const c=Combat.get(s,condition.combatantId);
+ const ctx=originalActorSessionContext(s,{
+  actorId,system:'meridian',target:'foundation'});
+ const {person:p,combatant:c,site,minute,presence:present}=ctx;
  if(c.status!=='ok'||c.stamina<1||c.wounds.some(n=>n!==0))
   throw Error('The original human must be physically capable of an uninterrupted rite');
- const site=independentSite(s,'meridian',{
-  shortSession:true,independentPerson:true});
  if(minute<8*60||minute+180>18*60)
   throw Error('The original 180-minute Meridian rite requires real uninterrupted daylight');
- const present=Presence.resolve(w,actorId,s.world.location,day,minute);
- if(!present?.presence||present.presence.hash!==p.shift?.hash||
-  present.presence.originHash!==p.originHash||
-  c.npcOrigin.location!==s.world.location||
-  !s.chatRuntime?.scene?.includes(
+ if(!s.chatRuntime?.scene?.includes(
    p.name+' begins a prepared Meridian Foundation rite'))
   throw Error('A genuine current witnessed prepared Foundation rite and present individual are required');
  const start=s.world.minutes,initialRng=p.rngState,
@@ -1894,4 +1908,4 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   privateDiceAndPotentialNotDisclosed:true,
   noFreeQiOrTechnique:true};
 }
-module.exports={originalActorTrainingProfile,npcMeridianStageOneRite,npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
+module.exports={originalActorTrainingProfile,originalActorSessionContext,npcMeridianStageOneRite,npcMeridianPractice,npcMeridianPrivateStatus,verifyNpcMeridian,difficultyPreview,KEYS,currentTarget,status,practice,breakthrough,gatePractice,arcaneCircleWork,seaStatus,seaWork,matrixStatus,matrixWork,verifyThirdCircle,organStatus,organWork,organEarned};
