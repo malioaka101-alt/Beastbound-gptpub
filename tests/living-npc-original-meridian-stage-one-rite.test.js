@@ -119,8 +119,14 @@ function fixture(outcome,seed){
    if(expected!==outcome)continue;
    const day=past.lastDay+1,shift=People.shift(p,day,w);
    if(!shift)continue;
+   // This fixture explicitly synthesises an already-elapsed history.
+   // A real person at the rite's current day has already received the
+   // original world-tick update; do not weaken production presence rules.
+   p.lastTickDay=day;
    p.meridianTraining=past.rec;p.rngState=past.rng;p.shift=shift;
    s.world.minutes=day*1440+600;
+   A.ok(People.presence(w,p.actorId,s.world.location,day,600),
+    'Only a physically verifiable present individual can make this rite');
    s.chatRuntime.scene=p.name+
     ' begins a prepared Meridian Foundation rite, witnessed locally in a suitable quiet courtyard.';
    A.equal(D.verifyNpcMeridian(s,p),true,
