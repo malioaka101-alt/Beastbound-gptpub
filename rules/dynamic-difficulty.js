@@ -6,8 +6,9 @@
 const Crypto=require('node:crypto');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,n));
-function fatigue(s){
- const current=s.player?.stamina,max=s.player?.maxStamina;
+function fatigue(s,originalPhysicalOwner=null){
+ const owner=originalPhysicalOwner||s.player;
+ const current=owner?.stamina,max=owner?.maxStamina;
  if(!Number.isInteger(current)||!Number.isInteger(max)||max<=0||
     current<0||current>max)throw Error('Dynamic difficulty needs genuine current Stamina');
  if(current*4<max)return 3; // less than one quarter
@@ -67,7 +68,7 @@ function householdWork(s,{person,approach='standard'}={}){
  return {...finish(12,factors,{min:8,max:18}),approach,
    minutes:route.minutes,staminaCost:route.stamina};
 }
-function disciplinePractice(s,{system,method,record,baseDC,independent=false,short=false}={}){
+function disciplinePractice(s,{system,method,record,baseDC,independent=false,short=false,originalPhysicalOwner=null,originalTrainingWitnesses=null}={}){
  if(typeof system!=='string'||!system||
     typeof method!=='string'||!method||!record||
     typeof record!=='object'||!Number.isInteger(baseDC)||
@@ -79,7 +80,10 @@ function disciplinePractice(s,{system,method,record,baseDC,independent=false,sho
  // Practice does not automatically grant skill ranks or power. Existing
  // owner-written, sustained method records can lower the *difficulty* of
  // continuing the same target; stage transitions start a fresh record.
- const witnessed=(s.table?.independentTraining||[]).filter(x=>
+ if(originalTrainingWitnesses!==null&&(!Array.isArray(originalTrainingWitnesses)||
+   originalTrainingWitnesses.some(x=>!x||typeof x!=='object')))
+   throw Error('Original individual training witnesses must be actual recorded sessions');
+ const witnessed=(originalTrainingWitnesses||s.table?.independentTraining||[]).filter(x=>
   x?.system===system&&x.target===record.target&&x.method===method&&
   Number.isInteger(x.minutes)&&x.minutes>=15&&x.minutes<=480&&
   Number.isInteger(x.startMinute)&&x.startMinute>=0&&
@@ -95,9 +99,10 @@ function disciplinePractice(s,{system,method,record,baseDC,independent=false,sho
  if(familiarity)factors.push({id:'earned-method-familiarity',delta:familiarity,
   evidence:count+' original '+system+' '+method+
    ' sessions and '+minutes+' witnessed minutes for the current '+record.target+' training target'});
- const tired=fatigue(s);
- if(tired)factors.push({id:'real-fatigue',delta:tired,
-  evidence:'Current recorded Stamina is '+s.player.stamina+'/'+s.player.maxStamina});
+ const tired=fatigue(s,originalPhysicalOwner);
+ if(tired){const owner=originalPhysicalOwner||s.player;
+  factors.push({id:'real-fatigue',delta:tired,
+   evidence:'Current recorded Stamina is '+owner.stamina+'/'+owner.maxStamina});}
  return finish(baseDC,factors,{min:5,max:35});
 }
 module.exports={finish,fatigue,householdWork,disciplinePractice,WORK_APPROACHES};
