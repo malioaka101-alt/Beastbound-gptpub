@@ -288,6 +288,9 @@ function earnedEvidence(w,actorId,s=null){
    // arrays are NOT evidence of power and must not be laundered as such.
    originalPowerMilestones:originalMilestones,
    originalMeridianPreparation:verifiedMeridian,
+   // Actual original practice receipts, but NO core ignition, Soul phase,
+   // Body cycle, Rift step, free mana or learned technique.
+   originalOtherDisciplinePreparation:verifiedOtherPreparation,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
