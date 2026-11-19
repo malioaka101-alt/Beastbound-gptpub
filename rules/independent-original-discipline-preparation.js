@@ -212,7 +212,8 @@ function privateStatus(s,actorId){
   actualPreparations:Object.fromEntries(Object.entries(p.originalEarlyDisciplinePreparation||{})
    .map(([system,r])=>[system,{target:r.target,earnedPreparationPoints:r.points,
     genuineSessionCount:r.sessions.filter(x=>x.source.origin===ORIGIN&&x.source.accepted).length,
-    realMilestoneAttemptCount:r.sessions.filter(x=>x.source.origin===ARCANE_RITE).length,
+    realMilestoneAttemptCount:r.sessions.filter(x=>[ARCANE_RITE,FIRST_OTHER_RITE]
+     .includes(x.source.origin)).length,
     distinctSourceMethods:Object.keys(r.methods).length,
     originalTrainingThreshold:trainingSpec(system).required,
     milestoneAwarded:(system==='arcane'&&r.target==='circle1')||
