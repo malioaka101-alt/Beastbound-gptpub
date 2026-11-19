@@ -86,6 +86,55 @@ function synthetic(s,p,c,system){
  }
  return null;
 }
+// Cheap, EXACT preflight for disposable candidates. We only construct a
+// several-hundred-entry source-stamped journal for the one actual matching
+// individual. This mirrors original Core.die/degree/progress and the ORIGINAL
+// witnessed method-familiarity DC; final approval still requires a complete
+// mechanically replayed receipt and the genuine LIVE milestone check.
+function forecast(p,system){
+ const track=Disc.KEYS[system].tracks[Early.TARGETS[system]],
+  attr=p.mechanicalFoundation.baselineAttributes[attrs[system]],
+  dice={rngState:p.rngState},methods={},aptitudes=p.mechanicalFoundation
+   .unassessedPotential;
+ let points=0,cooldown=0;
+ for(let day=0;day<360;day++){
+  if(day<cooldown)continue;
+  const choice=Core.die(dice,100);
+  if(choice<=chance(p)){
+   const method=Early.METHODS[system][Core.die(dice,3)-1],
+    already=methods[method]||0,
+    familiarity=already>=8?-2:already>=2?-1:0,
+    originalDC=track[1]+2+familiarity,
+    aptitude=Potential.bonus(aptitudes[Potential.METHODS[system][method]]),
+    roll=Core.die(dice,20),
+    margin=roll+Math.floor((attr-10)/2)+aptitude+
+     Core.naturalAdjustment(roll)-originalDC,
+    degree=Core.degree(margin);
+   points=Math.min(track[0],points+Core.progress(degree)+
+    (margin>=0?Math.max(0,aptitude):0));
+   methods[method]=already+1;
+   if(degree==='severe failure'){
+    const injury=Core.die(dice,20);
+    if(injury<=3||injury===14||injury===15)return null;
+    if(injury<=5)cooldown=day+6;
+   }
+  }
+  if(points===track[0]&&Object.keys(methods).length>=2){
+   if(day+1<cooldown)return null;
+   const next=Core.die(dice,100),accepted=next<=chance(p),
+    dimension=First.spec(system).dimension,
+    aptitude=Potential.bonus(aptitudes[dimension]),
+    modifier=Math.floor((attr-10)/2)+aptitude,
+    d20=accepted?Core.die(dice,20):null,
+    margin=accepted?d20+modifier+Core.naturalAdjustment(d20)-
+     First.spec(system).dc:null,
+    degree=accepted?Core.degree(margin):null;
+   return !accepted?'declined':margin>=0?'breakthrough':
+    degree==='severe failure'?'backlash':'stalled';
+  }
+ }
+ return null;
+}
 function fixture(system,want,seed){
  const rule=First.spec(system);
  for(let offset=0;offset<5;offset++){
@@ -103,7 +152,8 @@ function fixture(system,want,seed){
    const p=People._debug.make(w,roster,0,demand);
    const baseline=p.mechanicalFoundation.baselineAttributes;
    if(baseline.con<7||baseline[rule.attribute]<10||
-    p.mechanicalFoundation.unassessedPotential[rule.dimension]<5)continue;
+    p.mechanicalFoundation.unassessedPotential[rule.dimension]<5||
+    forecast(p,system)!==want)continue;
    p.shift=People.shift(p,0,w);
    s.world.location=People.siteFor(p.regionId);
    s.world.minutes=600;s.chatRuntime||={};
@@ -116,7 +166,8 @@ function fixture(system,want,seed){
    const linked=Rules.act(s,{system:'health',operation:'linkWitnessedHuman',
     params:{npcId:p.actorId,witness}});
    const c=Combat.get(s,linked.id),past=synthetic(s,p,c,system);
-   if(!past||past.injured)continue;
+   A.ok(past&&!past.injured,
+    'The source-exact preflight must agree with the fully replayed original ledger');
    const resultRng={rngState:past.rng},
     nextChoice=Core.die(resultRng,100),accepted=nextChoice<=chance(p),
     roll=accepted?Core.die(resultRng,20):null,
@@ -127,7 +178,8 @@ function fixture(system,want,seed){
     degree=accepted?Core.degree(margin):null,
     predicted=!accepted?'declined':margin>=0?'breakthrough':
      degree==='severe failure'?'backlash':'stalled';
-   if(predicted!==want)continue;
+   A.equal(predicted,want,
+    'Lightweight preflight must match the original full check forecast');
    const day=past.lastDay+1;
    p.lastTickDay=day;p.shift=People.shift(p,day,w);
    p.rngState=past.rng;p.originalEarlyDisciplinePreparation={[system]:past.rec};
