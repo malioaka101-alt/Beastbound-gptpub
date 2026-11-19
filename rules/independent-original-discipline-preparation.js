@@ -1,0 +1,249 @@
+'use strict';
+// #177: original-source early discipline preparation for independently
+// living adults. This is an NPC adapter to the SAME original discipline
+// targets, difficulty, potential, body and check owners as the PC. It is
+// not an alternate magical rank, energy, awakening or progress system.
+const Crypto=require('node:crypto'),
+ Core=require('./core'),Combat=require('./combat'),
+ E=require('../engine'),W=require('./world'),
+ Disc=require('./disciplines'),Potential=require('./potential-mechanics'),
+ Difficulty=require('./dynamic-difficulty');
+const ORIGIN='source-owned-independent-early-discipline-practice-v1';
+const TARGETS=Object.freeze({arcane:'core',soul:'phase1',body:'cycle1',rift:'sense'});
+const METHODS=Object.freeze({
+ arcane:Object.freeze(['mana-attunement','core-geometry','formulae']),
+ soul:Object.freeze(['self-awareness','identity-ward','resonance']),
+ body:Object.freeze(['muscle','tendon','recovery']),
+ rift:Object.freeze(['boundaries','orientation','anchor-theory'])
+});
+const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const cap=(x,hi)=>Math.min(hi,Math.max(0,x));
+function chance(p){
+ const base={curious:66,steady:59,independent:51,reserved:39}[p.personality];
+ if(!Number.isInteger(base)||!Number.isFinite(p.fatigue)||p.fatigue<0||p.fatigue>100)
+  throw Error('Unverified original independent person choice condition');
+ return base-(p.fatigue>=55?15:0);
+}
+function trainingSpec(system){
+ if(!Object.hasOwn(TARGETS,system))throw Error('Only original early Arcane, Soul, Body and Rift preparation is implemented');
+ const target=TARGETS[system],original=Disc.KEYS[system]?.tracks?.[target];
+ if(!original||original.length!==2)throw Error('Missing original power-system training source');
+ return {target,methods:METHODS[system],required:original[0],baseDC:original[1]};
+}
+function verify(s,p){
+ if(!p?.originalEarlyDisciplinePreparation)return true;
+ const w=s.table?.realm,entries=p.originalEarlyDisciplinePreparation;
+ if(!w||!p.actorId||!require('../world/emergent-people').verify(w,p)||
+  !require('../world/person-mechanical-foundations').verify(w,p)||
+  !entries||typeof entries!=='object'||Array.isArray(entries)||
+  Object.keys(entries).some(x=>!Object.hasOwn(TARGETS,x)))return false;
+ const condition=require('./unified').currentNpcWoundCondition(s,p.actorId),
+  body=condition?Combat.get(s,condition.combatantId):null;
+ if(!body?.npcOrigin?.seal)return false;
+ for(const [system,r] of Object.entries(entries)){
+  const spec=trainingSpec(system),track=Disc.KEYS[system];
+  if(!r||r.origin!==ORIGIN||r.target!==spec.target||
+    !Array.isArray(r.sessions)||r.sessions.length>480||
+    !Number.isInteger(r.lastAttemptDay)||r.lastAttemptDay<0||
+    !Number.isInteger(r.cooldownUntil)||r.cooldownUntil<0||
+    !Number.isInteger(r.points)||r.points<0||r.points>spec.required||
+    !r.methods||typeof r.methods!=='object'||Array.isArray(r.methods))
+   return false;
+  let points=0,methods={},lastDay=-1,cooldown=0,previousEnd=0;
+  const prior=[];
+  for(const row of r.sessions){
+   const q=row?.source;
+   if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||
+    q.actorId!==p.actorId||q.system!==system||q.target!==spec.target||
+    q.individualOriginHash!==p.originHash||
+    q.originalFoundationSeal!==p.mechanicalFoundation.seal||
+    q.originalCombatEntrySeal!==body.npcOrigin.seal||
+    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+    !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
+    !Number.isInteger(q.startMinute)||q.startMinute<previousEnd||
+    !Number.isInteger(q.day)||q.day!==Math.floor(q.startMinute/1440)||
+    q.day<=lastDay||q.startMinute>=s.world.minutes||
+    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
+    !Number.isInteger(q.rngAfter)||q.rngAfter<1||
+    !Number.isInteger(q.choiceD100)||q.choiceD100<1||q.choiceD100>100||
+    !Number.isInteger(q.choiceChance)||q.choiceChance<1||q.choiceChance>100||
+    !['curious','steady','reserved','independent'].includes(q.personalityAtAttempt)||
+    !Number.isInteger(q.fatigueAtAttempt)||q.fatigueAtAttempt<0||q.fatigueAtAttempt>100||
+    q.choiceChance!==chance({personality:q.personalityAtAttempt,
+     fatigue:q.fatigueAtAttempt})||
+    q.pointsBefore!==points||q.cooldownBefore!==cooldown||
+    q.noAutomaticStageOrTechnique!==true||
+    q.originalSkillRankBonus!==0||typeof q.accepted!=='boolean')
+    return false;
+   const roller={rngState:q.rngBefore};
+   if(Core.die(roller,100)!==q.choiceD100||
+    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
+   if(q.accepted){
+    if(q.day<cooldown||q.actualMinutes!==120||q.staminaCost!==1||
+     !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
+     !Number.isInteger(q.maxStaminaAtAttempt)||q.maxStaminaAtAttempt<1||
+     q.staminaBefore>q.maxStaminaAtAttempt||
+     q.staminaAfter!==q.staminaBefore-1||
+     q.methodNumber!==Core.die(roller,spec.methods.length)||
+     q.method!==spec.methods[q.methodNumber-1]||!q.check||
+     q.check.roll!==Core.die(roller,20)||
+     !Number.isInteger(q.check.earned)||q.check.earned<0)
+     return false;
+    const expectedDC=Difficulty.disciplinePractice(s,{
+     system,method:q.method,record:{target:spec.target,methods},
+     baseDC:spec.baseDC,independent:true,short:true,
+     originalPhysicalOwner:{stamina:q.staminaBefore,
+      maxStamina:q.maxStaminaAtAttempt},originalTrainingWitnesses:prior
+    }).dc;
+    const attr=p.mechanicalFoundation.baselineAttributes[track.attribute],
+     apt=Potential.bonus(p.mechanicalFoundation.unassessedPotential[
+      Potential.METHODS[system][q.method]]),
+     mod=Math.floor((attr-10)/2)+apt,
+     margin=q.check.roll+mod+Core.naturalAdjustment(q.check.roll)-expectedDC,
+     degree=Core.degree(margin),
+     earned=Core.progress(degree)+(margin>=0?Math.max(0,apt):0);
+    if(q.check.dc!==expectedDC||q.check.modifier!==mod||
+     q.check.degree!==degree||q.check.success!==(margin>=0)||
+     q.check.earned!==earned||
+     q.pointsAfter!==cap(points+earned,spec.required))return false;
+    if(degree==='severe failure'){
+     if(q.complicationRoll!==Core.die(roller,20)||
+      q.cooldownUntil!==(q.complicationRoll<=5?q.day+6:cooldown)||
+      q.originalPhysicalInjury!==(q.complicationRoll<=3||
+       q.complicationRoll===14||q.complicationRoll===15))
+      return false;
+    }else if(q.complicationRoll!==null||q.originalPhysicalInjury!==false||
+     q.cooldownUntil!==cooldown)return false;
+    points=q.pointsAfter;methods[q.method]=(methods[q.method]||0)+1;
+    prior.push({system,target:spec.target,method:q.method,minutes:120,
+     startMinute:q.startMinute,eventHash:row.seal});
+   }else{
+    if(q.actualMinutes!==5||q.staminaCost!==0||
+     q.method!==null||q.methodNumber!==null||q.check!==null||
+     q.complicationRoll!==null||q.originalPhysicalInjury!==false||
+     q.staminaBefore!==null||q.staminaAfter!==null||
+     q.maxStaminaAtAttempt!==null||q.cooldownUntil!==cooldown||
+     q.pointsAfter!==points)return false;
+   }
+   if(roller.rngState!==q.rngAfter)return false;
+   cooldown=q.cooldownUntil;lastDay=q.day;
+   previousEnd=q.startMinute+q.actualMinutes;
+  }
+  if(r.sessions.length===0||r.lastAttemptDay!==lastDay||
+   r.points!==points||r.cooldownUntil!==cooldown||
+   JSON.stringify(r.methods)!==JSON.stringify(methods))
+   return false;
+ }
+ return true;
+}
+function privateStatus(s,actorId){
+ if(typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Original private actor identity required');
+ const w=require('../world/simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+ if(!p||p.actorId!==actorId||!require('../world/emergent-people').verify(w,p)||
+  !verify(s,p))throw Error('Unverified original NPC discipline preparation');
+ return {actorId,privateToGM:true,
+  originalOwner:'rules/disciplines.js',
+  actualPreparations:Object.fromEntries(Object.entries(p.originalEarlyDisciplinePreparation||{})
+   .map(([system,r])=>[system,{target:r.target,earnedPreparationPoints:r.points,
+    genuineSessionCount:r.sessions.filter(x=>x.source.accepted).length,
+    distinctSourceMethods:Object.keys(r.methods).length,
+    originalTrainingThreshold:trainingSpec(system).required,
+    milestoneAwarded:false,physicalAndEthicalMilestoneStillRequired:true}])),
+  noArcaneCoreCircleSoulPhaseBodyCycleOrRiftStepAwarded:true};
+}
+function practice(s,{actorId,system,...untrusted}={}){
+ if(Object.keys(untrusted).length||
+  typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Original independent NPC practice accepts actorId and discipline only; no chosen method, result, dice or costs');
+ const spec=trainingSpec(system),
+  ctx=Disc.originalActorSessionContext(s,{actorId,system,target:spec.target}),
+  {person:p,combatant:body,day,minute,presence:present}=ctx;
+ if(!verify(s,p))throw Error('Original individual early discipline proof was altered');
+ const records=p.originalEarlyDisciplinePreparation||{};
+ if(Object.values(records).some(r=>r.lastAttemptDay>=day)||
+  p.meridianTraining?.lastAttemptDay>=day)
+  throw Error('This original person already chose whether to train today');
+ const old=records[system];
+ if(old?.points>=spec.required)
+  throw Error('Original stage preparation complete; the distinct real milestone is still required');
+ if(old&&day<old.cooldownUntil)
+  throw Error('Existing original physical training cooldown has not finished');
+ if(body.stamina<1||body.status!=='ok')
+  throw Error('An original living person requires real available Stamina to practise');
+ if(minute<8*60||minute+120>18*60)
+  throw Error('A complete original 120-minute daylight practice window is required');
+ const record=old||{origin:ORIGIN,target:spec.target,points:0,methods:{},
+  sessions:[],lastAttemptDay:-1,cooldownUntil:0};
+ if(record.sessions.length>=480)
+  throw Error('Original chronological training journal needs review');
+ const start=s.world.minutes,initialRng=p.rngState,startingStamina=body.stamina,
+  choiceChance=chance(p),choiceD100=Core.die(p,100),
+  accepted=choiceD100<=choiceChance;
+ let method=null,methodNumber=null,check=null,complicationRoll=null,
+  injury=false,spent=0,minutes=5,cooldown=record.cooldownUntil;
+ if(accepted){
+  methodNumber=Core.die(p,spec.methods.length);
+  method=spec.methods[methodNumber-1];
+  const prior=record.sessions.filter(x=>x.source.accepted).map(row=>({
+   system,target:spec.target,method:row.source.method,
+   minutes:120,startMinute:row.source.startMinute,eventHash:row.seal}));
+  const dc=Difficulty.disciplinePractice(s,{system,method,record,
+   baseDC:spec.baseDC,independent:true,short:true,
+   originalPhysicalOwner:body,originalTrainingWitnesses:prior}).dc;
+  const training=Disc.originalActorTrainingProfile(s,{
+   actorId,system,target:spec.target,method});
+  spent=1;minutes=120;body.stamina-=1;
+  const actual=Core.check(s,{modifier:training.modifier,dc,
+   label:p.name+' independent '+system+' '+spec.target+' '+method,
+   independentRngOwner:p,privateDisplay:true});
+  const earned=actual.progress+(actual.success?
+   Math.max(0,training.potential.modifier):0);
+  check={roll:actual.roll,modifier:actual.modifier,dc:actual.dc,
+   degree:actual.degree,success:actual.success,earned};
+  record.points=cap(record.points+earned,spec.required);
+  record.methods[method]=(record.methods[method]||0)+1;
+  if(actual.degree==='severe failure'){
+   complicationRoll=Core.die(p,20);
+   injury=complicationRoll<=3||complicationRoll===14||complicationRoll===15;
+   if(injury)Combat.harm(s,body,2);
+   if(complicationRoll<=5)cooldown=day+6;
+  }
+ }
+ const proof={origin:ORIGIN,actorId,system,target:spec.target,
+  individualOriginHash:p.originHash,
+  originalFoundationSeal:p.mechanicalFoundation.seal,
+  originalCombatEntrySeal:body.npcOrigin.seal,
+  originalShiftHash:present.presence.hash,
+  originalSceneHash:hash(s.chatRuntime.scene),
+  day,startMinute:start,actualMinutes:minutes,
+  rngBefore:initialRng,rngAfter:p.rngState,
+  personalityAtAttempt:p.personality,fatigueAtAttempt:p.fatigue,
+  choiceD100,choiceChance,accepted,
+  method,methodNumber,check,complicationRoll,
+  originalPhysicalInjury:injury,
+  staminaCost:spent,staminaBefore:accepted?startingStamina:null,
+  maxStaminaAtAttempt:accepted?body.maxStamina:null,
+  staminaAfter:accepted?startingStamina-spent:null,
+  pointsBefore:old?.points||0,pointsAfter:record.points,
+  cooldownBefore:old?.cooldownUntil||0,cooldownUntil:cooldown,
+  originalSkillRankBonus:0,noAutomaticStageOrTechnique:true};
+ const row={source:proof,seal:hash(proof)};
+ record.sessions.push(row);record.cooldownUntil=cooldown;
+ record.lastAttemptDay=day;
+ p.originalEarlyDisciplinePreparation={...records,[system]:record};
+ if(!verify(s,p))
+  throw Error('Original independent discipline preparation failed exact source replay');
+ E.advance(s,minutes);W.finalizeTime(s,start);
+ Core.event(s,'progress',accepted?
+  p.name+' undertakes an independent '+system+' preparation session.':
+  p.name+' chooses not to undertake '+system+' preparation today.',{
+  origin:ORIGIN,actorId,system,accepted,sourceHash:row.seal,
+  noRankManaCorePhaseCycleRiftStepOrTechniqueAwarded:true,
+  privateTrainingNumbersNotDisclosed:true});
+ return {actorId,system,independentChoice:accepted?'practised':'declined',
+  elapsedMinutes:minutes,actualOriginalCheck:accepted,
+  stageOrTechniqueEarned:false,privateProgressNotDisclosed:true};
+}
+module.exports={ORIGIN,TARGETS,METHODS,verify,privateStatus,practice};
