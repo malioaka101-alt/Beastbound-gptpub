@@ -1783,12 +1783,16 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
  if(Object.keys(untrusted).length||
   typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
   throw Error('Only a real independent actor can be offered a Meridian Foundation rite; never select its dice, result, stage or consent');
- const ctx=originalActorSessionContext(s,{
-  actorId,system:'meridian',target:'foundation'});
- const {person:p,combatant:c,site,day,minute,presence:present}=ctx;
- if(!verifyNpcMeridian(s,p))
+ // Preserve the original rite's precedence: genuine earned preparation
+ // and recovery cooldown are checked BEFORE the physical condition gate.
+ // A previous backlash therefore cannot be reclassified as a new attempt.
+ const preliminary=require('../world/simulation').peek(s)
+  ?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+ if(!preliminary||!verifyNpcMeridian(s,preliminary))
   throw Error('Original individual Meridian Foundation history is not source verified');
- const rec=p.meridianTraining,required=KEYS.meridian.tracks.foundation[0];
+ const rec=preliminary.meridianTraining,
+  required=KEYS.meridian.tracks.foundation[0],
+  day=Math.floor(s.world.minutes/1440);
  if(!rec||rec.points!==required||
   Object.keys(rec.methods).filter(k=>rec.methods[k]>0).length<2)
   throw Error('Original Stage I requires 40 genuinely earned Foundation points and two different methods');
@@ -1801,6 +1805,9 @@ function npcMeridianStageOneRite(s,{actorId,...untrusted}={}){
   throw Error('The independently resolved rite decision cannot be rerolled today');
  if(rec.sessions.length>=480)
   throw Error('The existing original training journal must be reconciled before a rite');
+ const ctx=originalActorSessionContext(s,{
+  actorId,system:'meridian',target:'foundation'});
+ const {person:p,combatant:c,site,minute,presence:present}=ctx;
  if(c.status!=='ok'||c.stamina<1||c.wounds.some(n=>n!==0))
   throw Error('The original human must be physically capable of an uninterrupted rite');
  if(minute<8*60||minute+180>18*60)
