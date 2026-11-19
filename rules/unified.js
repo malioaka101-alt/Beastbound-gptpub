@@ -263,8 +263,7 @@ function sleep(s,params={}){
  // organisations; the older rest path skipped this important causal step.
  require('./world').finalizeTime(s,beforeMinute);
  // Rest restores exertion and energy, but does not magically erase Serious/Critical injuries.
- c.stamina=c.maxStamina;s.player.stamina=c.stamina;
- c.recoverUses=0;c.firstAided=false;
+ Combat.completedNight(s,'player');s.player.stamina=c.stamina;
  s.player.qi=Math.min(s.player.maxQi,s.player.qi+10);
  s.player.mana=Math.min(s.player.maxMana,s.player.mana+12);
  // The genuine Phase I Soul reservoir recovers slowly through real night
@@ -277,9 +276,128 @@ function sleep(s,params={}){
     s.player.soul.reserve<=s.player.soul.maxReserve)
    s.player.soul.reserve=Math.min(s.player.soul.maxReserve,
     s.player.soul.reserve+3);
- // A full sleep interval is one night of Light-wound recovery, at most one.
- c.wounds[0]=Math.max(0,c.wounds[0]-1);
+ // Combat.completedNight above heals exactly one original Light wound.
  return {sleptHours:hours,dayBefore:before,dayAfter:E.day(s),wounds:[...c.wounds],stamina:c.stamina,qi:s.player.qi,mana:s.player.mana};
+}
+// The existing Combat owner applies an actual completed night; a separate
+// NPC energy pool or an invented off-screen overnight interval is forbidden.
+const npcNightHash=x=>require('node:crypto').createHash('sha256').
+ update(JSON.stringify(x)).digest('hex');
+function verifyNpcNightHistory(s,actorId){
+ const w=require('../world/simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId?.slice('emergent:'.length)],
+  People=require('../world/emergent-people');
+ if(!p||p.actorId!==actorId||!People.verify(w,p))
+  throw Error('Original independent person identity required');
+ const entries=p.originalOvernightRestDecisions;
+ if(entries===undefined)return true;
+ if(!Array.isArray(entries)||entries.length>90)return false;
+ let previousDay=-1;
+ for(const row of entries){
+  const q=row?.source,r=row?.result;
+  if(!q||row.sourceHash!==npcNightHash(q)||
+   !People.verifyOriginalNightChoice(q)||
+   q.actorId!==actorId||q.individualOriginHash!==p.originHash||
+   q.day<=previousDay||q.startMinute>s.world.minutes||
+   !r||r.accepted!==q.accepted||
+   r.elapsedMinutes!==(q.accepted?480:5)||
+   r.endedMinute!==q.startMinute+r.elapsedMinutes||
+   r.endedMinute>s.world.minutes||
+   r.noUnverifiedPowerOrClinicalTreatment!==true)
+   return false;
+  if(q.accepted){
+   if(!Array.isArray(r.woundsBefore)||r.woundsBefore.length!==3||
+    r.woundsBefore.some(v=>!Number.isInteger(v)||v<0)||
+    !Array.isArray(r.woundsAfter)||r.woundsAfter.length!==3||
+    r.woundsAfter[0]!==Math.max(0,r.woundsBefore[0]-1)||
+    r.woundsAfter[1]!==r.woundsBefore[1]||
+    r.woundsAfter[2]!==r.woundsBefore[2]||
+    !Number.isInteger(r.staminaBefore)||r.staminaBefore<0||
+    !Number.isInteger(r.maximumStamina)||r.maximumStamina<1||
+    r.staminaBefore>r.maximumStamina||
+    r.staminaAfter!==r.maximumStamina||
+    r.originalCombatEntrySeal!==q.originalCombatEntrySeal)
+    return false;
+  }else if(r.woundsBefore!==null||r.woundsAfter!==null||
+    r.staminaBefore!==null||r.staminaAfter!==null||
+    r.maximumStamina!==null)return false;
+  previousDay=q.day;
+ }
+ return true;
+}
+function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
+ if(Object.keys(extras).length||
+  typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
+  typeof witness!=='string'||witness.length<35||witness.length>700)
+  throw Error('An actual witnessed sleeping opportunity for an independent person is required');
+ if(s.battle||s.encounter)
+  throw Error('Cannot sleep during an unresolved encounter');
+ const Realm=require('../world/simulation'),People=require('../world/emergent-people'),
+  Presence=require('../world/person-presence'),
+  LivedPlaces=require('../world/lived-places'),
+  w=Realm.peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)],
+  condition=currentNpcWoundCondition(s,actorId),
+  c=condition&&Combat.get(s,condition.combatantId);
+ if(!p||p.actorId!==actorId||!People.verify(w,p)||
+  p.status!=='active'||!c||c.status!=='ok'||
+  p.ageBand!=='adult, exact birthday not established')
+  throw Error('A genuine active adult with legal original wound condition must rest');
+ if(!verifyNpcNightHistory(s,actorId))
+  throw Error('Original person rest receipts are altered');
+ const place=LivedPlaces.location(s),start=s.world.minutes,
+  minute=start%1440,day=Math.floor(start/1440);
+ if(place?.biome!=='settlement'||place.regionId!==p.regionId)
+  throw Error('An unknown or remote sleeping place does not establish safe shelter');
+ if(minute<16*60||minute>17*60+30)
+  throw Error('A current witnessed evening start and full overnight interval are required');
+ const presence=Presence.resolve(w,actorId,s.world.location,day,minute);
+ if(!presence?.presence||presence.presence.hash!==p.shift?.hash||
+  presence.presence.originHash!==p.originHash)
+  throw Error('The actual person must be physically witnessed before resting');
+ if(!s.chatRuntime?.scene?.includes(witness)||!witness.includes(p.name)||
+  !/(sleep|bed|rest)/i.test(witness)||
+  !/(safe|shelter|room|home)/i.test(witness))
+  throw Error('The original scene needs a true safe room and a witnessed person');
+ if(p.originalOvernightRestDecisions?.some(row=>row.source?.day===day))
+  throw Error('The same person already answered a sleep opportunity tonight');
+ if((p.originalOvernightRestDecisions||[]).length>=90)
+  throw Error('Old overnight decisions need source reconciliation');
+ const response=People.considerOriginalOvernightSleep(w,p,{
+  startMinute:start,location:s.world.location,
+  sourceShiftHash:presence.presence.hash,
+  sceneWitnessHash:npcNightHash(witness),
+  originalCombatEntrySeal:c.npcOrigin.seal});
+ const wounds=[...c.wounds],stamina=c.stamina,
+  maximum=c.maxStamina,
+  minutes=response.source.accepted?480:5;
+ E.advance(s,minutes);W.finalizeTime(s,start);
+ if(response.source.accepted)Combat.completedNight(s,condition.combatantId);
+ const result={accepted:response.source.accepted,elapsedMinutes:minutes,
+  endedMinute:s.world.minutes,
+  originalCombatEntrySeal:c.npcOrigin.seal,
+  woundsBefore:response.source.accepted?wounds:null,
+  woundsAfter:response.source.accepted?[...c.wounds]:null,
+  staminaBefore:response.source.accepted?stamina:null,
+  staminaAfter:response.source.accepted?c.stamina:null,
+  maximumStamina:response.source.accepted?maximum:null,
+  noUnverifiedPowerOrClinicalTreatment:true};
+ p.originalOvernightRestDecisions||=[];
+ p.originalOvernightRestDecisions.push({
+  source:response.source,sourceHash:response.sourceHash,result});
+ if(!verifyNpcNightHistory(s,actorId))
+  throw Error('Original eight-hour completion evidence is invalid');
+ C.event(s,'injury',response.source.accepted?
+  p.name+' completes a freely chosen safe night of rest.':
+  p.name+' declines the witnessed sleeping opportunity.',{
+   origin:'original-independent-human-witnessed-night-sleep-v1',
+   actorId,accepted:response.source.accepted,
+   sourceHash:response.sourceHash,
+   onlyOriginalCombatRecovery:true,noSupernaturalPowerGranted:true});
+ return {actorId,freelyAccepted:response.source.accepted,
+  elapsedMinutes:minutes,completedOriginalNight:response.source.accepted,
+  observedPhysicalState:Combat.observedCombatant(c),
+  noNewHealthOrPowerSystem:true};
 }
 function balm(s){
  if(s.battle)throw Error('Treat wounds after securing the immediate danger');
@@ -363,4 +481,4 @@ function spend(s,{scales,reason}={}){
  s.table.finances.entries=s.table.finances.entries.slice(-100);
  return {spentScales:scales,balanceScales:remain};
 }
-module.exports={MODEL,playerProfile,ensurePlayer,linkWitnessedHuman,currentNpcWoundCondition,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
+module.exports={MODEL,playerProfile,ensurePlayer,linkWitnessedHuman,currentNpcWoundCondition,witnessedNpcNightSleep,verifyNpcNightHistory,migrateLegacy,ensureBeast,sync,status,sleep,shelterStatus,balm,validate,spend,planItems,applyItems};
