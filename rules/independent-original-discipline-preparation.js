@@ -62,7 +62,7 @@ function verify(s,p){
     !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
     !Number.isInteger(q.startMinute)||q.startMinute<previousEnd||
     !Number.isInteger(q.day)||q.day!==Math.floor(q.startMinute/1440)||
-    q.day<=lastDay||q.startMinute>=s.world.minutes||
+    q.day<=lastDay||q.startMinute>s.world.minutes||
     !Number.isInteger(q.rngBefore)||q.rngBefore<1||
     !Number.isInteger(q.rngAfter)||q.rngAfter<1||
     !Number.isInteger(q.choiceD100)||q.choiceD100<1||q.choiceD100>100||
