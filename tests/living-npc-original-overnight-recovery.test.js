@@ -124,7 +124,8 @@ for(const accept of [true,false]){
  A.deepEqual(Combat.get(replay,'npc_'+p.id),c);
  A.equal(E.exportGame(s),saved,'Source verification is pure');
  const tampered=E.importGame(saved),tp=Realm.peek(tampered).emergentPeople.people[p.id];
- tp.originalOvernightRestDecisions[0].source.roll=1;
+ const invalidChoice=tp.originalOvernightRestDecisions[0].source;
+ invalidChoice.roll=invalidChoice.roll===1?2:1;
  A.equal(Unified.verifyNpcNightHistory(tampered,p.actorId),false,
   'A forged personal rest decision cannot become healed Stamina');
 }
