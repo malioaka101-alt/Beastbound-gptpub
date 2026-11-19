@@ -272,9 +272,20 @@ function milestone(s,ctx,system){
 }
 function night(s,ctx){
  const {actor:p,body,loc}=ctx;
- if(loc.biome!=='settlement'||ctx.workDay<0||
+ if(loc.biome!=='settlement'||ctx.workDay<1||
   body.status!=='ok'||!ctx.dailyActivity||
   ctx.dailyActivity.action!=='rest')return null;
+ // A town is NOT proof of a safe bed. Require an actual earlier
+ // independently accepted, personally witnessed safe shelter at this exact
+ // site, with the ORIGINAL Night source fully reconciled. An already
+ // witnessed night on the same date must never be processed a second time.
+ const Health=require('../rules/unified');
+ if(!Health.verifyNpcNightHistory(s,p.actorId))
+  throw Error('Prior original safe-shelter history is invalid');
+ const witnessed=(p.originalOvernightRestDecisions||[]).filter(x=>
+  x?.source?.accepted===true&&x.result?.accepted===true&&
+  x.source.location===ctx.site&&x.source.day<ctx.workDay).at(-1);
+ if(!witnessed)return null;
  // The completed real night is 16:00–00:00 before this day boundary,
  // never another E.advance(s,480). Same Combat owner, one night.
  const start=ctx.workDay*1440+960,before={wounds:[...body.wounds],
@@ -282,6 +293,7 @@ function night(s,ctx){
   recovery=Combat.completedNight(s,'npc_'+p.id),
   proof={origin:REST,actorId:p.actorId,personOriginHash:p.originHash,
    physicalEntrySeal:body.npcOrigin.seal,
+   originalWitnessedShelterHash:witnessed.sourceHash,
    independentDailySourceHash:ctx.dailySourceHash,
    originalShiftHash:ctx.originalShiftHash,
    site:ctx.site,startMinute:start,endMinute:start+480,
@@ -317,6 +329,7 @@ function verifyNights(s,p){
    typeof q.site!=='string'||q.site.length<2||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
    !/^[a-f0-9]{64}$/.test(q.independentDailySourceHash||'')||
+   !/^[a-f0-9]{64}$/.test(q.originalWitnessedShelterHash||'')||
    !Array.isArray(q.before?.wounds)||q.before.wounds.length!==3||
    !Array.isArray(q.after?.wounds)||q.after.wounds.length!==3||
    q.before.wounds.some((v,i)=>!Number.isInteger(v)||v<0||
@@ -333,6 +346,17 @@ function verifyNights(s,p){
    q.after.status!==(
     ['incapacitated','knocked_out'].includes(q.before.status)&&
      q.before.wounds[2]===0?'ok':q.before.status))
+   return false;
+  // No ordinary settlement alone can establish safe sleeping. A real
+  // prior, independently accepted original night proves this individual had
+  // access to shelter at this exact location. The current night's choice
+  // is still the separately committed genuine daily rest.
+  if(!require('../rules/unified').verifyNpcNightHistory(s,p.actorId)||
+   !(p.originalOvernightRestDecisions||[]).some(x=>
+    x.sourceHash===q.originalWitnessedShelterHash&&
+    x.source.accepted===true&&x.result.accepted===true&&
+    x.source.location===q.site&&
+    x.source.day<q.completedDay-1))
    return false;
   // Source-verify original private rest from the already chosen daily
   // action. This remains required while the 80-entry daily ledger retains
