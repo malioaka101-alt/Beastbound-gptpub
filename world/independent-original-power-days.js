@@ -33,13 +33,23 @@ function opportunity(s,w,life,activity,day){
  const id='npc_'+p.id,condition=require('../rules/unified').
   currentNpcWoundCondition(s,p.actorId),body=condition&&Combat.get(s,id);
  if(!body||!body.npcOrigin||body.status!=='ok')return null;
- const workDay=day-1,site=People.shift(p,workDay,w)?.location;
- if(!site||site!==People.siteFor(p.regionId))return null;
+ const workDay=day-1,originalShift=People.shift(p,workDay,w),
+  site=originalShift?.location;
+ if(!site)return null;
  const loc=Lived.location(s,site);
- if(!loc)return null;
+ // A real GM-established home/work settlement is every bit as legitimate
+ // as one of the engine's six fixed player locations. Only the person's
+ // own source-authored site and actual region may supply a remote practice
+ // opportunity, never the player's current location or a fabricated visit.
+ if(!loc||loc.regionId!==p.regionId)return null;
+ // A completed original paid-work sixday on the same physical daylight
+ // date is not a free simultaneous two-hour supernatural practice slot.
+ if(p.history?.some(h=>h.day===workDay&&
+  h.type==='independent-life'&&h.choice==='livelihood-work'))return null;
  return {actor:p,life,body,workDay,site,loc,condition,
+  originalShift,
   dailySourceHash:activity.seal,dailyActivity:activity.source,
-  originalShiftHash:People.shift(p,workDay,w).hash};
+  originalShiftHash:originalShift.hash};
 }
 function evidence(ctx,kind){
  return {origin:ORIGIN,kind,actorId:ctx.actor.actorId,
@@ -48,6 +58,7 @@ function evidence(ctx,kind){
   originalWorkDay:ctx.workDay,sourceRegionId:ctx.actor.regionId,
   privatePhysicalSite:ctx.site,
   originalShiftHash:ctx.originalShiftHash,
+  originalShiftProof:structuredClone(ctx.originalShift),
   noPlayerPresenceOrPlayerControlAssumed:true};
 }
 // A sealed original personal-day event may age out of its 80-entry ordinary
@@ -60,6 +71,14 @@ function verifyEvidence(s,p,q){
   x.kind!==q.system||!supported.has(x.kind)||
   !isDay(x.originalWorkDay)||x.independentLifeDay!==x.originalWorkDay+1||
   x.originalWorkDay!==q.day||x.originalShiftHash!==q.originalShiftHash||
+  !x.originalShiftProof||
+  x.originalShiftProof.hash!==x.originalShiftHash||
+  hash(Object.fromEntries(Object.entries(x.originalShiftProof).
+   filter(([k])=>k!=='hash')))!==x.originalShiftHash||
+  x.originalShiftProof.actorId!==p.actorId||
+  x.originalShiftProof.originHash!==p.originHash||
+  x.originalShiftProof.location!==x.privatePhysicalSite||
+  x.originalShiftProof.scheduledAtDay!==q.day||
   q.originalSceneHash!==hash(x)||
   !/^[a-f0-9]{64}$/.test(x.independentDailySourceHash||'')||
   typeof x.privatePhysicalSite!=='string'||
