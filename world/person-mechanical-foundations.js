@@ -362,7 +362,7 @@ function gmDossier(w,actorId,s=null){
   const actor=w?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
   if(!actor||actor.actorId!==actorId)return {known:false};
   if(!actor.mechanicalFoundation)return {known:true,actorId,legacy:true,
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    source:'Older witnessed individual: foundation has not been backfilled',
    unverified:['baseline attributes','latent potential'],
    noRetroactiveRanks:true};
@@ -373,7 +373,7 @@ function gmDossier(w,actorId,s=null){
    latentPotential:{...foundation.unassessedPotential},
    profession:actor.profession,professionCompetence:actor.career?.competenceRank??null,
    practicedDisciplines:[],knownTechniques:[],
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    ageBand:actor.ageBand,
    actualCultivationAndCombatProfile:'Original earned source required; not deduced from social status, profession or baseline',
    beastRelationships:'Unestablished unless verified in original bond sources',
@@ -385,7 +385,7 @@ function gmDossier(w,actorId,s=null){
   return {known:true,kind:'established-notable',actorId,
    name:n.name,profession:n.profession,professionRank:n.professional?.rank??null,
    originalDiscipline:structuredClone(n.discipline||null),
-   earnedEvidence:earnedEvidence(w,actorId),
+   earnedEvidence:earnedEvidence(w,actorId,s),
    actualCultivationAndCombatProfile:'Preparatory stage and actual earned breakthrough are not interchangeable',
    baselineAttributes:null,latentPotential:null,
    noRetrospectiveAttributeOrPowerCreation:true,privateToGM:true};
