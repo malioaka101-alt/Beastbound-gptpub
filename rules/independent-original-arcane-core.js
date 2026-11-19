@@ -34,6 +34,10 @@ function replay(s,p,q,roller,{points,methods,cooldown,body,priorSuccess}={}){
   Object.keys(methods).filter(k=>methods[k]>0).length<2||
   q.pointsBefore!==points||q.distinctMethodsBefore!==Object.keys(methods).length||
   q.cooldownBefore!==cooldown||q.day<cooldown||
+  // This original source-owned rite is a real witnessed daylight three-hour
+  // procedure, never a backdated midnight rite made from a forged receipt.
+  !Number.isInteger(q.startMinute)||
+  q.startMinute%1440<8*60||q.startMinute%1440+180>18*60||
   q.originalRiteDC!==DC()||
   q.originalPotentialDimension!==Potential.PRIMARY.arcane.core||
   q.originalPotentialBonus!==Potential.bonus(
@@ -60,8 +64,8 @@ function replay(s,p,q,roller,{points,methods,cooldown,body,priorSuccess}={}){
    q.check.modifier!==modifier||q.check.dc!==DC()||
    q.check.success!==successful||q.check.degree!==degree||
    !Array.isArray(q.woundsBefore)||!Array.isArray(q.woundsAfter)||
-   q.woundsBefore.length!==q.woundsAfter.length||
-   q.woundsBefore.some(x=>!Number.isInteger(x)||x<0)||
+   q.woundsBefore.length!==3||q.woundsAfter.length!==3||
+   q.woundsBefore.some(x=>x!==0)||
    q.woundsAfter.some(x=>!Number.isInteger(x)||x<0))
    return null;
   if(successful){
@@ -87,7 +91,12 @@ function replay(s,p,q,roller,{points,methods,cooldown,body,priorSuccess}={}){
    // Only an actual severe failure may cause an original Light wound.
    // Its historical before/after is recorded by the Combat owner; ordinary
    // later healing must not retroactively delete this genuine consequence.
-   if(degree!=='severe failure'&&q.woundsBefore.some((x,i)=>x!==q.woundsAfter[i]))
+   if(degree==='severe failure'){
+    // The original Combat.harm(s,human,2) on this uninjured, Medium human
+    // resolves exactly one Light wound; no extra dice or invented category.
+    if(q.woundsAfter[0]!==1||q.woundsAfter[1]!==0||
+     q.woundsAfter[2]!==0)return null;
+   }else if(q.woundsBefore.some((x,i)=>x!==q.woundsAfter[i]))
     return null;
   }
   if(q.outcome!==expected||q.cooldownUntil!==end)
