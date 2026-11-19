@@ -194,6 +194,7 @@ function fixture(system,want,seed){
  throw Error('No disposable original '+system+' person with result '+want+
   ' and actual source-replayable prerequisite history');
 }
+if(require.main===module){
 for(const system of ['soul','body','rift']){
  for(const want of ['breakthrough','declined','backlash']){
   const {s,p,c,day,beforeRng}=fixture(system,want,971800+
@@ -301,3 +302,6 @@ for(const system of ['soul','body','rift']){
  }
 }
 console.log('Original independent Soul/Body/Rift milestones PASS: three anatomical owners with genuine personal original checks, refusal, severe Light wound, source proof, no generic stage and exact replay');
+}
+// Reusable disposable SOURCE-REPLAYED fixture; import never runs this test suite.
+module.exports={fixture};
