@@ -211,14 +211,26 @@ function recover(s,{id,enduranceTrained=false}={}){
  c.stamina=Math.min(c.maxStamina,c.stamina+Math.max(0,2+c.vigor+organBonus+schoolBreath));
  return {gained:c.stamina-old,uses:c.recoverUses};
 }
-function rest(s,{id,nights=0,weeks=0}={}){
- const c=get(s,id);
- C.int(nights,'nights',0,365);C.int(weeks,'weeks',0,52);
+// All human wound recovery uses this original owner. Completing a REAL
+// eight-hour night already advanced by Unified.sleep must not advance another
+// full world day (and must not unlock Serious or Critical wound healing).
+function applyRest(c,nights,weeks){
  c.wounds[0]=Math.max(0,c.wounds[0]-nights);
  if(nights){c.stamina=c.maxStamina;c.firstAided=false;c.recoverUses=0;}
  c.wounds[1]=Math.max(0,c.wounds[1]-weeks);
  if(weeks)c.wounds[0]=0;
  if(['incapacitated','knocked_out'].includes(c.status)&&c.wounds[2]===0)c.status='ok';
+}
+function completedNight(s,id){
+ const c=get(s,id);
+ applyRest(c,1,0);
+ return {wounds:[...c.wounds],stamina:c.stamina,status:c.status,
+  completedNights:1,additionalTimeAdvanced:false};
+}
+function rest(s,{id,nights=0,weeks=0}={}){
+ const c=get(s,id);
+ C.int(nights,'nights',0,365);C.int(weeks,'weeks',0,52);
+ applyRest(c,nights,weeks);
  const elapsed=nights+6*weeks;
  if(elapsed)W.advance(s,elapsed);
  return {wounds:[...c.wounds],stamina:c.stamina,status:c.status,daysPassed:elapsed};
@@ -235,4 +247,4 @@ function observedCombatant(c){
    c.stamina<c.maxStamina/3?'badly winded':'no obvious wound';
  return {name:c.name,condition};
 }
-module.exports={severity,makeCombatant,penalty,harm,register,get,attack,contestForce,newRound,recover,rest,publicCombatant,observedCombatant};
+module.exports={severity,makeCombatant,penalty,harm,register,get,attack,contestForce,newRound,recover,rest,completedNight,publicCombatant,observedCombatant};
