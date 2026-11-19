@@ -466,7 +466,7 @@ function originalActorSessionContext(s,{actorId='player',system,target,method}={
   !Foundation.verify(w,p)||!life||!Lives.verifyEntry(w,life)||
   !life.interests.includes(system)||life.focus!==system||
   p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
-  throw Error('Genuine current original independent '+system+' interest and physically active adult are required');
+  throw Error('Genuine current original independent '+system[0].toUpperCase()+system.slice(1)+' interest and physically active adult are required');
  const condition=U.currentNpcWoundCondition(s,actorId);
  if(!condition||condition.workAndOrdinaryPracticeBlocked)
   throw Error('Unresolved original combat injury or missing physical condition prevents actual independent practice or rite');
