@@ -42,6 +42,36 @@ function fixture(accepted,seed){
  A.equal(body.created,true);
  return {s,w,p,bodyId:body.id};
 }
+// New shared source-session gate: it cannot grant off-screen attendance,
+// a second discipline interest, dice, training or another magical stage.
+{
+ const {s,p,bodyId}=fixture(true,939117);
+ const saved=E.exportGame(s),personRng=p.rngState,playerRng=s.rngState;
+ const ctx=Disc.originalActorSessionContext(s,{
+  actorId:p.actorId,system:'meridian',target:'foundation',method:'breath'});
+ A.equal(ctx.actorId,p.actorId);
+ A.equal(ctx.combatant.id,bodyId);
+ A.equal(ctx.person.actorId,p.actorId);
+ A.equal(ctx.life.focus,'meridian');
+ A.equal(ctx.training.originalAttribute,'wis');
+ A.equal(ctx.privateNpcInformation,true);
+ A.equal(ctx.noDecisionOrProgressAwarded,true);
+ for(const system of ['arcane','soul','body','rift']){
+  const target=system==='arcane'?'core':system==='soul'?'phase1':
+   system==='body'?'cycle1':'sense';
+  A.throws(()=>Disc.originalActorSessionContext(s,{
+   actorId:p.actorId,system,target}),/independent discipline interest|practice environment/);
+ }
+ A.throws(()=>Disc.originalActorSessionContext(s,{
+  actorId:p.actorId,system:'meridian',target:'circle1'}),/original discipline|stage/);
+ A.equal(E.exportGame(s),saved);
+ A.equal(p.rngState,personRng);
+ A.equal(s.rngState,playerRng);
+ A.throws(()=>Rules.act(s,{system:'discipline',
+  operation:'originalActorSessionContext',
+  params:{actorId:p.actorId,system:'meridian',target:'foundation'}}),
+ /Unsupported|Unknown|No rule|operation/i);
+}
 for(const accept of [true,false]){
  const {s,p,bodyId}=fixture(accept,accept?930911:931012),
   initial=E.exportGame(s),playerRng=s.rngState,
