@@ -207,6 +207,15 @@ for(const [want,seed] of [['ignited',985100],['declined',985300],
  else {fr.source.originalRiteDC=2;fr.seal=hash(fr.source);}
  A.equal(Early.verify(forged,fp),false);
  A.throws(()=>rite(forged,fp),/Original independent Arcane source or preparation has been altered/);
+ if(want==='backlash'){
+  const woundForged=E.importGame(after),
+   woundPerson=Realm.peek(woundForged).emergentPeople.people[p.id],
+   woundRow=woundPerson.originalEarlyDisciplinePreparation.arcane.sessions.at(-1);
+  woundRow.source.woundsAfter=[0,0,0];
+  woundRow.seal=hash(woundRow.source);
+  A.equal(Early.verify(woundForged,woundPerson),false,
+   'Even a re-sealed severe backlash cannot hide the original Light wound');
+ }
  const last=s.log.findLast(x=>x.details?.privateNaturalStatsNotDisclosed===true);
  if(want!=='declined'){A.ok(last);A.equal(Object.hasOwn(last.details,'roll'),false);}
 }
