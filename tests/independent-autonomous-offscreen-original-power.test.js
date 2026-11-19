@@ -147,4 +147,50 @@ for(const system of ['arcane','soul','body','rift']){
   update(JSON.stringify(oldNight.source)).digest('hex');
  A.equal(Offscreen.verifyNights(reloaded,rp),false);
 }
+// Source-prepared original Body individual from the existing independently
+// replayed disposable fixture. Only its PREVIOUS preparation is synthetic;
+// this test does NOT choose their upcoming daily activity or milestone result.
+// It allows the actual private daily-life owner to encounter the next eligible
+// independent practice day, which invokes ONE real Body milestone check.
+{
+ const {fixture}=require('./living-npc-original-soul-body-rift-first-milestones.test.js'),
+  {s,p,day}=fixture('body','breakthrough',973100),
+  q=Realm.peek(s).independentPersonLives.people[p.id],
+  start=s.world.minutes;
+ A.ok(q);A.equal(Early.verify(s,p),true);
+ A.equal(p.originalEarlyDisciplinePreparation.body.points,150);
+ // Disposable prior history has already been fully source-replayed by the
+ // original fixture: align only its separately simulated ordinary-life
+ // cursor, never its personal RNG, milestone outcome or current body.
+ q.lastDay=day;
+ A.equal(Lives.verifyEntry(Realm.peek(s),q),true);
+ let found=null;
+ for(let i=0;i<26;i++){
+  const old=s.world.minutes;
+  E.advance(s,1440);
+  World.finalizeTime(s,old);
+  const history=p.originalEarlyDisciplinePreparation.body.sessions,
+   last=history.at(-1).source;
+  if(last.origin===require('../rules/independent-original-first-milestones').ORIGIN){
+   found=last;break;
+  }
+ }
+ A.ok(found,'Original human eventually independently chose a genuine remote Body milestone rite');
+ A.equal(found.offscreenOpportunity.kind,'body');
+ A.equal(Offscreen.verifyEvidence(s,p,found),true);
+ A.equal(found.pointsBefore,150);
+ A.equal(found.noOtherSystemOrTechniqueGranted,true);
+ A.equal(Early.verify(s,p),true);
+ A.ok(['breakthrough','declined','stalled','backlash'].includes(found.outcome));
+ if(found.outcome==='breakthrough'){
+  A.equal(p.originalFirstPowerMilestones?.body?.completedCycle,
+   'Muscle-Tendon Cycle');
+  A.equal(p.originalFirstPowerMilestones.body.naturalStrengthIncrease,1);
+ }
+ const saved=E.exportGame(s),loaded=E.importGame(saved),
+  lp=Realm.peek(loaded).emergentPeople.people[p.id];
+ A.equal(Early.verify(loaded,lp),true);
+ A.equal(loaded.world.minutes,s.world.minutes);
+ A.ok(s.world.minutes>=start+1440);
+}
 console.log('Autonomous original offscreen power PASS: four true Core owner practices from actually chosen private lives, original anatomy, personal RNG, privacy, real chronology, no rerolls, replay/tamper and one actual settled Combat overnight recovery');
