@@ -114,16 +114,18 @@ function practice(s,{actorId,...untrusted}={}){
   throw Error('Original independent Arcane source or preparation has been altered');
  if(p.originalArcaneCore?.coreIgnited)
   throw Error('This person has already earned their original Arcane Mana Core');
+ // The past original decision must not become a new opportunity just
+ // because an actual failed rite reduced preparation or inflicted a wound.
+ if(r?.lastAttemptDay>=today||
+  p.meridianTraining?.lastAttemptDay>=today||
+  Object.values(p.originalEarlyDisciplinePreparation||{}).
+   some(x=>x!==r&&x.lastAttemptDay>=today))
+  throw Error('An independent original discipline or rite decision cannot be rerolled today');
  if(!r||r.target!=='core'||r.points!==Disc.KEYS.arcane.tracks.core[0]||
   Object.keys(r.methods).filter(k=>r.methods[k]>0).length<2)
   throw Error('Arcane Core ignition requires 40 genuine points and two distinct original methods');
  if(today<r.cooldownUntil)
   throw Error('Original Arcane tissue and energy recovery cooldown prevents an ignition attempt');
- if(r.lastAttemptDay>=today||
-  p.meridianTraining?.lastAttemptDay>=today||
-  Object.values(p.originalEarlyDisciplinePreparation||{}).
-   some(x=>x!==r&&x.lastAttemptDay>=today))
-  throw Error('An independent original discipline or rite decision cannot be rerolled today');
  if(r.sessions.length>=480)
   throw Error('Original source-owned Arcane training journal must be reconciled before a rite');
  const ctx=Disc.originalActorSessionContext(s,{
