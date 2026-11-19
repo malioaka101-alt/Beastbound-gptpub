@@ -76,7 +76,7 @@ altered.maxStamina+=8;
 A.throws(()=>Body.profile(alteredBody,{actorId,combatantId,action:action('str')}),
  /original earned independent Body Cycle combat evidence is not replayable/);
 A.throws(()=>Body.profile(s,{actorId:'emergent:person_9000000',
- combatantId,action:action('str')}),/original independent Body weapon profile requires/);
+ combatantId,action:action('str')}),/Original independent Body weapon profile requires/);
 A.equal(typeof PC.profile,'function',
  'Original player action source is reused; no duplicate source-authored PC progression');
 console.log('Original independent Body force combat PASS: genuinely earned first-cycle +1 current Strength, M1 force only on Strength attacks, M2 never stacks, one original combat owner, tamper and save proof, no extra dice or PC power');
