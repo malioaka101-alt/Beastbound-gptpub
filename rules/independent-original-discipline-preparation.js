@@ -157,8 +157,23 @@ function practice(s,{actorId,system,...untrusted}={}){
  if(Object.keys(untrusted).length||
   typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId))
   throw Error('Original independent NPC practice accepts actorId and discipline only; no chosen method, result, dice or costs');
- const spec=trainingSpec(system),
-  ctx=Disc.originalActorSessionContext(s,{actorId,system,target:spec.target}),
+ const spec=trainingSpec(system);
+ // An original already-made personal decision cannot be disguised as a new
+ // attempt just because that decision itself inflicted a real wound.
+ // Verify the stored original source FIRST, then enforce no reroll before
+ // the shared current physical capability/presence gate.
+ const preliminary=require('../world/simulation').peek(s)
+  ?.emergentPeople?.people?.[actorId.slice('emergent:'.length)];
+ const today=Math.floor(s.world.minutes/1440);
+ if(preliminary?.actorId===actorId){
+  if(preliminary.originalEarlyDisciplinePreparation&&!verify(s,preliminary))
+   throw Error('Original individual early discipline proof was altered');
+  const history=preliminary.originalEarlyDisciplinePreparation||{};
+  if(Object.values(history).some(r=>r.lastAttemptDay>=today)||
+   preliminary.meridianTraining?.lastAttemptDay>=today)
+   throw Error('This original person already chose whether to train today');
+ }
+ const ctx=Disc.originalActorSessionContext(s,{actorId,system,target:spec.target}),
   {person:p,combatant:body,day,minute,presence:present}=ctx;
  if(!verify(s,p))throw Error('Original individual early discipline proof was altered');
  const records=p.originalEarlyDisciplinePreparation||{};
