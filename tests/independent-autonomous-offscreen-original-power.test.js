@@ -71,13 +71,20 @@ for(const system of ['arcane','soul','body','rift']){
   oldMax=c.maxStamina,oldStamina=c.stamina,
   originalClock=s.world.minutes,
   playerLocation=s.world.location,originalPlayerCoins=s.player.coins,
-  logLen=s.log.length,personalSource=q.rngState;
+  personalSource=q.rngState;
+ // Compare against the SAME original completed-day world simulation,
+ // without this person's linked physical Combat owner. Ordinary world
+ // passage itself legitimately consumes original core world RNG; only an
+ // EXTRA remote personal check must not.
+ const control=E.importGame(E.exportGame(s));
+ delete control.table.combatants['npc_'+p.id];
  A.equal(Early.verify(s,p),true);
  E.advance(s,840);World.finalizeTime(s,originalClock);
+ E.advance(control,840);World.finalizeTime(control,originalClock);
  A.equal(s.world.minutes,1440,'One completed day; offscreen sessions add no player time');
  A.equal(s.world.location,playerLocation);
- A.equal(s.rngState,originalPlayerRng,
-  'The independent personal and world owners do not consume player RNG');
+ A.equal(s.rngState,control.rngState,
+  'Original independent power checks must not consume EXTRA shared player RNG');
  A.equal(s.player.coins,originalPlayerCoins);
  A.equal(q.lastDay,1);A.equal(q.history.at(-1).source.action,'practice');
  A.equal(q.history.at(-1).source.focus,system);
@@ -102,8 +109,8 @@ for(const system of ['arcane','soul','body','rift']){
  A.equal(attempt.originalSkillRankBonus,0);
  A.equal(c.stamina,oldStamina-1);
  A.equal(c.maxStamina,oldMax);
- A.equal(s.log.length,logLen,
-  'Private distant power check never leaks person, exact method or die into player log');
+ A.deepEqual(s.log,control.log,
+  'Private distant Core checks must restore the entire player-known event log, while original world events remain');
  A.equal(p.originalArcaneCore,undefined);
  A.equal(p.originalFirstPowerMilestones,undefined);
  A.equal(prep.target,Early.TARGETS[system]);
