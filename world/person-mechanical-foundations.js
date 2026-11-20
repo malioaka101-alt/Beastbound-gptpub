@@ -267,6 +267,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedSoulTwo=s?.table?.realm===w&&actor.originalSoulThreadTwo?
    require('../rules/independent-original-soul-thread-two')
     .privateStatus(s,actor):null;
+  const verifiedRiftExterior=s?.table?.realm===w&&actor.originalRiftMeasuredSense?
+   require('../rules/independent-original-rift-sense-observation')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
@@ -394,6 +397,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalSoulMindBodyThreading:verifiedSoulTwo,
+   originalRiftExteriorBoundaryReading:verifiedRiftExterior,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -460,6 +464,7 @@ function earnedEvidence(w,actorId,s=null){
       originalCombatSourceRequired:true}:null,
     originalRiftSense:originalMilestones.rift.step===1?
      structuredClone(originalMilestones.rift.originalLimitedSense):null,
+    actualExteriorRiftglassReading:verifiedRiftExterior?.originalReading||null,
     actionNeedsOriginalSourceAndLiveResources:true,privateToGM:true
    },
    noAbilityByTitle:true,noRetrospectivePower:true};
