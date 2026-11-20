@@ -28,19 +28,28 @@ function born(){
  Object.assign(eco,{quality:75,pressure:15,water:75,forage:80});
  Object.assign(polity,{prosperity:75,stability:78});
  const demand=People.sourceDemand(w,region);
- let p=null;
+ // Select solely for *source-born* aptitude and physical fitness, before
+ // any personal-world day or power check. This is a favourable but ordinary
+ // real individual, NOT a fabricated stage, training point or chosen roll.
+ // The witnessed eight-hour sleep is still independently decided by the
+ // original owner; the fixture cannot make a declined night accepted.
+ let p=null,best=-Infinity;
  for(let i=0;i<250;i++){
   const c=People._debug.make(w,people,0,demand);
   const chance=Math.min(94,
    ({curious:71,steady:82,independent:68,reserved:77})[c.personality]+
    (c.fatigue>=50?9:0));
-  const attrs=c.mechanicalFoundation.baselineAttributes;
+  const attrs=c.mechanicalFoundation.baselineAttributes,
+   potential=c.mechanicalFoundation.unassessedPotential;
   if(attrs.con>=11&&attrs.wis>=15&&
     1+Math.floor(next(c.rngState)/4294967296*100)<=chance){
-   p=c;break;
+   const score=4*attrs.wis+6*potential.meridianBreadth+
+    4*potential.physicalAdaptation+4*potential.gateStability+
+    (c.personality==='curious'?5:0);
+   if(score>best){p=c;best=score;}
   }
  }
- A.ok(p,'Only an existing source-born adult who freely accepts shelter may be chosen');
+ A.ok(p,'Only a source-born adult with a genuinely independently accepted safe-shelter night qualifies');
  p.shift=People.shift(p,0,w);
  s.world.location=People.siteFor(p.regionId);
  s.chatRuntime||={};
