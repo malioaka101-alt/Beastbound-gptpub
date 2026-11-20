@@ -8,6 +8,7 @@
 // acceptance and ONE original Core check remain mandatory.
 const Crypto=require('node:crypto'),C=require('../rules/core'),
  Web=require('./independent-meridian-web'),
+ Night=require('./independent-meridian-night-qi'),
  Meridian=require('./independent-offscreen-meridian'),
  Offscreen=require('./independent-original-power-days'),
  Gates=require('../rules/meridian-shared-original-gates'),
@@ -232,8 +233,12 @@ function verify(s,p){
   r.noInheritedImmortalityOrUnlearnedTechnique!==true)
   return false;
  const current=initial(p);
- let t=current,last=-1,lastEnd=0;
+ let t=current,last=-1,lastEnd=0,restIndex=0;
  for(const row of r.sessions){
+  const prior=Night.replayUntil(s,p,r.rests||[],restIndex,
+   row?.source?.startMinute??0,t.energy,lastEnd);
+  if(!prior)return false;
+  t.energy=prior.energy;restIndex=prior.index;lastEnd=prior.end;
   const q=row?.source,seal=row?.seal;
   if(!q||seal!==H(q)||q.origin!==SESSION||
    q.system!=='meridian'||q.actorId!==p.actorId||
@@ -261,6 +266,10 @@ function verify(s,p){
   if(!t)return false;
   last=q.day;lastEnd=q.startMinute+q.actualMinutes;
  }
+ const later=Night.replayUntil(s,p,r.rests||[],restIndex,
+  Number.POSITIVE_INFINITY,t.energy,lastEnd);
+ if(!later||later.index!==(r.rests||[]).length)return false;
+ t.energy=later.energy;
  return JSON.stringify({
   stage:t.stage,track:t.track,achieved:t.achieved,energy:t.energy,
   stability:t.stability,
