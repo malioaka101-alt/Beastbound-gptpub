@@ -31,6 +31,26 @@ function foundation(p){
 // It is not an earned Phase II grant or a player's hidden Soul technique.
 const ORIGINAL_HUMAN_SOUL_STABILITY=95;
 const chance=Early.chance;
+// A genuinely independently living personality chooses a personal Soul
+// practice focus from its existing incomplete anatomy, not a GM instruction.
+// A non-integrated practitioner eventually chooses necessary integration.
+const FOCUS_ORDER=Object.freeze({
+ curious:['resonance','mind','body'],
+ steady:['body','mind','resonance'],
+ independent:['resonance','body','mind'],
+ reserved:['mind','resonance','body']});
+function focusFor(p,links,integrated){
+ const order=FOCUS_ORDER[p.personality];
+ if(!order)throw Error('Verified original Soul practitioner personality required');
+ if(!integrated){
+  const preferred=order[0];
+  if(['reserved','independent'].includes(p.personality)&&links[preferred]<2)
+   return preferred;
+  return 'integrated';
+ }
+ return p.personality==='curious'?'integrated':
+  order.find(k=>links[k]<2)||'integrated';
+}
 function verify(s,p){
  const r=p?.originalSoulThreadTwo;
  if(r===undefined)return true;
@@ -84,6 +104,7 @@ function verify(s,p){
    q.stabilityBefore!==stability||
    JSON.stringify(q.linksBefore)!==JSON.stringify(links)||
    q.integratedBefore!==integrated||
+   q.focus!==(q.accepted?focusFor(p,links,integrated):null)||
    !Number.isInteger(q.rngBefore)||q.rngBefore<1||
    !['curious','steady','independent','reserved'].includes(q.personalityAtDecision)||
    !Number.isInteger(q.fatigueAtDecision)||
@@ -199,7 +220,8 @@ function afterDaily(s,ctx){
   p.meridianTraining?.lastAttemptDay>=ctx.workDay)return null;
  const start=ctx.workDay*1440+600,before=p.rngState,
   chanceValue=chance(p),choiceD100=Core.die(p,100),
-  accepted=choiceD100<=chanceValue,focus='integrated',
+  accepted=choiceD100<=chanceValue,
+  focus=focusFor(p,r.links,r.integrated),
   reserveBefore=r.reserveRemaining,maximumBefore=r.maxReserve,
   stabilityBefore=r.soulStability,linksBefore={...r.links},
   integratedBefore=r.integrated,staminaBefore=body.stamina,
@@ -285,4 +307,4 @@ function afterNight(s,p,nightRow){
  return {originalSoulReserveRestored:after-before,
   independentOriginalSoulNight:true};
 }
-module.exports={ORIGIN,NIGHT,verify,ensureLedger,privateStatus,afterDaily,afterNight};
+module.exports={ORIGIN,NIGHT,verify,focusFor,ensureLedger,privateStatus,afterDaily,afterNight};
