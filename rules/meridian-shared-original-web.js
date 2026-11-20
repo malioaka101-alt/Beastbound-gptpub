@@ -33,6 +33,20 @@ function integration({routes,extraordinary,stability,minutes=90}={}){
   modifierStability:Math.floor(stability/25)-2,
   originalSource:'rules/meridian-living-anatomy.js:completeWeb'};
 }
+// EXACT existing personal Meridian pressure-repair law from
+// rules/meridian-living-anatomy.js:treat. This is only the immutable math:
+// neither actor receives a free clinical witness, medical skill, appointment,
+// roll, spent Stamina or successful healing from reading this source rule.
+function care({load,stabilityLoss,minutes=120,medicineRank=0}={}){
+ if(!int(load,1,9)||!int(stabilityLoss,1,10)||
+  !int(minutes,15,480)||!int(medicineRank,0,5))
+  throw Error('Original individual pressure injury, treatment duration and earned Medicine rank required');
+ return {staminaSpent:Math.ceil(minutes/120),
+  dc:12+load+stabilityLoss,medicineBonus:2*medicineRank,
+  stabilityRecoveredOnSuccess:Math.min(2,stabilityLoss),
+  originalSource:'rules/meridian-living-anatomy.js:treat',
+  noAutomaticHealingOrMedicalRank:true};
+}
 // The original Stage V spanning graph must contain actual healed routes
 // connected by shared, individually opened Gates, with at least one
 // Extraordinary, Major and Minor segment; a title is never proof.
@@ -71,4 +85,4 @@ function spanning(routes,stability){
   .filter(y=>y.kind==='extraordinary').map(y=>y.number)));
  return {ready:true,extraordinary:segments.size};
 }
-module.exports={SEGMENTS,required,pressure,integration,spanning};
+module.exports={SEGMENTS,required,pressure,integration,care,spanning};
