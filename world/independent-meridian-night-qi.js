@@ -63,11 +63,22 @@ function verifiedNight(s,p,q){
    if(!Offscreen.verifyNights(s,p))return false;
    const row=(p.originalOffscreenCombatNights||[]).find(x=>
     x.seal===q.originalNightSeal);
-   return !!row&&row.seal===hash(row.source)&&
-    row.source.actorId===p.actorId&&
-    row.source.completedDay===q.completedDay&&
-    row.source.endMinute===q.completedMinute&&
-    row.source.noAdditionalPlayerTimeOrFreePower===true;
+   // The original physical-night owner retains a rolling 480-night ledger.
+   // A Qi restoration must survive that ledger ageing out only when its
+   // complete ORIGINAL night source was retained in the restoration receipt
+   // and still passes the same original verified-night rules.
+   if(q.originalNightSource!==undefined&&
+    hash(q.originalNightSource)!==q.originalNightSeal)return false;
+   if(!row&&!q.originalNightSource)return false;
+   if(!row&&!Offscreen.verifyNights(s,p,[{
+    source:q.originalNightSource,seal:q.originalNightSeal
+   }]))return false;
+   const source=row?.source||q.originalNightSource;
+   return !!source&&hash(source)===q.originalNightSeal&&
+    source.actorId===p.actorId&&
+    source.completedDay===q.completedDay&&
+    source.endMinute===q.completedMinute&&
+    source.noAdditionalPlayerTimeOrFreePower===true;
   }
   const Health=require('../rules/unified');
   if(!Health.verifyNpcNightHistory(s,p.actorId))return false;
@@ -123,6 +134,8 @@ function recover(s,p,night,sourceKind){
    s.table.combatants['npc_'+p.id].npcOrigin.seal,
   sourceKind:stamp.sourceKind,
   originalNightSeal:stamp.originalNightSeal,
+  ...(sourceKind==='offscreen'?{
+   originalNightSource:structuredClone(night.source)}:{}),
   completedDay:stamp.completedDay,
   completedMinute:stamp.completedMinute,
   restoredQi:restored,energyBefore:before,energyAfter:after,
