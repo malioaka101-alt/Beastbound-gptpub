@@ -1643,7 +1643,8 @@ function verifyNpcMeridian(s,person){
    rec.foundationQuality===quality)&&
   (rec.foundationIntegrity===undefined?earntStage===0:
    rec.foundationIntegrity===(earntStage===1?20:0))&&
-  JSON.stringify(rec.methods)===JSON.stringify(methods);
+  JSON.stringify(rec.methods)===JSON.stringify(methods)&&
+  require('../world/independent-meridian-ladder').verify(s,person);
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
