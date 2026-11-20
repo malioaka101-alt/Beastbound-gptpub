@@ -330,20 +330,27 @@ function night(s,ctx){
  if(overlapping?.actorId===p.actorId&&
   overlapping.day===ctx.workDay&&overlapping.accepted===true)
   return null;
- if(loc.biome!=='settlement'||ctx.workDay<1||
-  body.status!=='ok'||!ctx.dailyActivity||
+ if(ctx.workDay<1||body.status!=='ok'||!ctx.dailyActivity||
   ctx.dailyActivity.action!=='rest')return null;
- // A town is NOT proof of a safe bed. Require an actual earlier
- // independently accepted, personally witnessed safe shelter at this exact
- // site, with the ORIGINAL Night source fully reconciled. An already
- // witnessed night on the same date must never be processed a second time.
- const Health=require('../rules/unified');
- if(!Health.verifyNpcNightHistory(s,p.actorId))
-  throw Error('Prior original safe-shelter history is invalid');
- const witnessed=(p.originalOvernightRestDecisions||[]).filter(x=>
-  x?.source?.accepted===true&&x.result?.accepted===true&&
-  x.source.location===ctx.site&&x.source.day<ctx.workDay).at(-1);
- if(!witnessed)return null;
+ // Settlement nights retain their OWN prior witnessed, independently
+ // accepted original shelter. A Riftglass RUINS night instead requires
+ // original survival surveying (45 minutes, 3 real Stamina, weather/risk),
+ // an actual successful temporary site and a distinct independent human
+ // choice to sleep there. Mere wardstones or a rift survey facility are
+ // never automatic shelter; no other wilderness site becomes free lodging.
+ let witnessed=null,field=null;
+ if(loc.biome==='settlement'){
+  const Health=require('../rules/unified');
+  if(!Health.verifyNpcNightHistory(s,p.actorId))
+   throw Error('Prior original safe-shelter history is invalid');
+  witnessed=(p.originalOvernightRestDecisions||[]).filter(x=>
+   x?.source?.accepted===true&&x.result?.accepted===true&&
+   x.source.location===ctx.site&&x.source.day<ctx.workDay).at(-1);
+  if(!witnessed)return null;
+ }else if(ctx.site==='ruins'&&p.regionId==='riftglass'){
+  field=require('../rules/independent-riftglass-field-refuge').propose(s,ctx);
+  if(!field?.accepted)return null;
+ }else return null;
  // The completed real night is 16:00–00:00 before this day boundary,
  // never another E.advance(s,480). Same Combat owner, one night.
  const start=ctx.workDay*1440+960,before={wounds:[...body.wounds],
@@ -351,7 +358,9 @@ function night(s,ctx){
   recovery=Combat.completedNight(s,'npc_'+p.id),
   proof={origin:REST,actorId:p.actorId,personOriginHash:p.originHash,
    physicalEntrySeal:body.npcOrigin.seal,
-   originalWitnessedShelterHash:witnessed.sourceHash,
+   ...(witnessed?{originalWitnessedShelterHash:witnessed.sourceHash}:{}),
+   ...(field?{originalFieldSurveyHash:field.originalSurveySourceHash,
+    originalFieldNightChoiceHash:field.originalNightChoiceSourceHash}:{}),
    independentDailySourceHash:ctx.dailySourceHash,
    originalShiftHash:ctx.originalShiftHash,
    site:ctx.site,startMinute:start,endMinute:start+480,
@@ -412,7 +421,13 @@ function verifyNights(s,p,archivedRows=null){
    typeof q.site!=='string'||q.site.length<2||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
    !/^[a-f0-9]{64}$/.test(q.independentDailySourceHash||'')||
-   !/^[a-f0-9]{64}$/.test(q.originalWitnessedShelterHash||'')||
+   !(q.site==='ruins'?
+    /^[a-f0-9]{64}$/.test(q.originalFieldSurveyHash||'')&&
+    /^[a-f0-9]{64}$/.test(q.originalFieldNightChoiceHash||'')&&
+    q.originalWitnessedShelterHash===undefined:
+    /^[a-f0-9]{64}$/.test(q.originalWitnessedShelterHash||'')&&
+    q.originalFieldSurveyHash===undefined&&
+    q.originalFieldNightChoiceHash===undefined)||
    !Array.isArray(q.before?.wounds)||q.before.wounds.length!==3||
    !Array.isArray(q.after?.wounds)||q.after.wounds.length!==3||
    q.before.wounds.some((v,i)=>!Number.isInteger(v)||v<0||
@@ -430,11 +445,14 @@ function verifyNights(s,p,archivedRows=null){
     ['incapacitated','knocked_out'].includes(q.before.status)&&
      q.before.wounds[2]===0?'ok':q.before.status))
    return false;
-  // No ordinary settlement alone can establish safe sleeping. A real
-  // prior, independently accepted original night proves this individual had
-  // access to shelter at this exact location. The current night's choice
-  // is still the separately committed genuine daily rest.
-  if(!require('../rules/unified').verifyNpcNightHistory(s,p.actorId)||
+  // Keep independent physical shelter owner source-specific.
+  // A source-proven exterior Riftglass wardstone refuge is NOT a
+  // settlement room, must expire after 18h and requires BOTH a completed
+  // Survival survey AND an independently accepted personal sleep choice.
+  if(q.site==='ruins'){
+   if(!require('../rules/independent-riftglass-field-refuge').
+    verifiedNight(s,p,q))return false;
+  }else if(!require('../rules/unified').verifyNpcNightHistory(s,p.actorId)||
    !(p.originalOvernightRestDecisions||[]).some(x=>
     x.sourceHash===q.originalWitnessedShelterHash&&
     x.source.accepted===true&&x.result.accepted===true&&
