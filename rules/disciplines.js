@@ -1643,11 +1643,19 @@ function verifyNpcMeridian(s,person){
   (rec.foundationIntegrity===undefined?earntStage===0:
    rec.foundationIntegrity===(earntStage===1?20:0))&&
   JSON.stringify(rec.methods)===JSON.stringify(methods)&&
-  require('../world/independent-meridian-ladder').verify(s,person)&&
-  require('../world/independent-meridian-gates').verify(s,person)&&
-  require('../world/independent-meridian-sea').verify(s,person)&&
-  require('../world/independent-meridian-web').verify(s,person)&&
-  require('../world/independent-meridian-advanced').verify(s,person);
+  // Each later ORIGINAL source verifier already recursively confirms every
+  // physically prerequisite earlier actor record. Verify only the deepest
+  // actually earned owner, instead of replaying 108 Gates five separate
+  // times per ordinary world tick. No absent stage can be assumed.
+  (person.originalMeridianAdvanced?
+   require('../world/independent-meridian-advanced').verify(s,person):
+   person.originalMeridianWeb?
+    require('../world/independent-meridian-web').verify(s,person):
+   person.originalMeridianSea?
+    require('../world/independent-meridian-sea').verify(s,person):
+   person.originalMeridianGates?
+    require('../world/independent-meridian-gates').verify(s,person):
+   require('../world/independent-meridian-ladder').verify(s,person));
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
