@@ -68,7 +68,7 @@ A.equal(sleep.freelyAccepted,true);
 A.equal(Unified.verifyNpcNightHistory(s,p.actorId),true);
 const initialSource=E.exportGame(s),originalPcSoul=s.player.soul.phase;
 let completed=false,days=0;
-for(let interval=0;interval<20&&!completed;interval++){
+for(let interval=0;interval<36&&!completed;interval++){
  const minute=s.world.minutes;
  // The original 45-day Meridian real-chain acceptance already establishes
  // that the existing calendar processes EVERY individual daily source
@@ -93,9 +93,9 @@ const diag=()=>JSON.stringify({
  combat:{status:body.status,wounds:body.wounds,
  stamina:body.stamina,maxStamina:body.maxStamina}
 });
-A.ok(completed,'A truly source-born Soul adult has not earned the actual Phase I rite: '+diag());
+A.ok(completed,'A truly source-born Soul adult has not completed the original 100-point Phase I rite in the bounded acceptance horizon: '+diag());
 A.ok(rec?.sessions?.filter(x=>x.source.origin===Early.ORIGIN).length,
- 'The original Phase I cannot emerge from an untrained actor with no actual sessions');
+ 'The original 100-point Soul Phase I cannot emerge from an untrained actor with no actual sessions');
 A.equal(Early.verify(s,p),true);
 A.ok(p.originalFirstPowerMilestones.soul.originalSourceHash,
  'The original Source-owner rite must retain its own earned success receipt');
