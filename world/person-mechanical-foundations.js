@@ -270,6 +270,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedRiftExterior=s?.table?.realm===w&&actor.originalRiftMeasuredSense?
    require('../rules/independent-original-rift-sense-observation')
     .privateStatus(s,actor):null;
+  const verifiedRiftAnchorTwo=s?.table?.realm===w&&actor.originalRiftExteriorAnchor?
+   require('../rules/independent-original-rift-exterior-anchor-two')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
@@ -304,7 +307,10 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.body.originalSeriousWoundBoxGain=1;
   }
   if(earnedOther.rift?.step===1){
-   originalMilestones.rift.step=1;
+   originalMilestones.rift.step=verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1;
+   if(verifiedRiftAnchorTwo?.verifiedRiftStep===2)
+    originalMilestones.rift.originalExteriorAnchor=
+     structuredClone(verifiedRiftAnchorTwo.provenRiftglassAnchor);
    originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
   }
   if([1,2,3,4,5,6,7,8,9].includes(verifiedMeridian?.originalMeridianStageEarned)){
@@ -398,6 +404,7 @@ function earnedEvidence(w,actorId,s=null){
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalSoulMindBodyThreading:verifiedSoulTwo,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
+   originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -437,6 +444,7 @@ function earnedEvidence(w,actorId,s=null){
      'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===2?'Rift Anchor II':
     originalMilestones.rift.step===1?'Rift Sense I':null
    ].filter(Boolean).join(', ')||
     'Ordinary career and independent life only; no source-earned supernatural milestone',
@@ -462,9 +470,11 @@ function earnedEvidence(w,actorId,s=null){
     originalBodyBoneMarrowAnatomy:verifiedBodyTwo?.earnedBoneMarrowRefinement?
      {toughnessGain:1,seriousWoundBoxGain:1,
       originalCombatSourceRequired:true}:null,
-    originalRiftSense:originalMilestones.rift.step===1?
+    originalRiftSense:originalMilestones.rift.step>=1?
      structuredClone(originalMilestones.rift.originalLimitedSense):null,
     actualExteriorRiftglassReading:verifiedRiftExterior?.originalReading||null,
+    earnedExteriorRiftglassAnchor:verifiedRiftAnchorTwo?.provenRiftglassAnchor||null,
+    riftFoldStepNotLearned:true,
     actionNeedsOriginalSourceAndLiveResources:true,privateToGM:true
    },
    noAbilityByTitle:true,noRetrospectivePower:true};
