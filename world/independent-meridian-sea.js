@@ -209,7 +209,8 @@ function afterDaily(s,ctx){
   earned=0,injury=0,stabilityAfter=r.stability,formation=null,
   staminaBefore=accepted?body.stamina:null,
   woundsBefore=accepted?[...body.wounds]:null,
-  pointsBefore=r.points,minutes=accepted?120:5,qiSpent=0,
+  pointsBefore=r.points,stabilityBefore=r.stability,
+  minutes=accepted?120:5,qiSpent=0,
   staminaSpent=0;
  if(accepted){
   methodNumber=C.die(p,Shared.METHODS.length);
@@ -251,7 +252,7 @@ function afterDaily(s,ctx){
   woundsAfter:accepted?[...body.wounds]:null,
   originalWoundSteps:injury,
   check,pointsBefore,pointsEarned:earned,pointsAfter:r.points,
-  stabilityBefore:injury?Math.min(100,r.stability+4):r.stability,
+  stabilityBefore,
   stabilityAfter:r.stability,
   energyBefore:qiBefore,energyAfter:structuredClone(r.energy),
   stageAfter:r.stage,formed:!!formation,seaAfter:formation});
