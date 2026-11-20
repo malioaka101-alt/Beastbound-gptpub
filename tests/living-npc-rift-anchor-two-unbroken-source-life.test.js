@@ -65,8 +65,8 @@ for(const item of options){
  acceptedTotal+=chargedAnchors.length;
  if(formed)completions++;
  if(body.stamina<Law.staminaCost(120))exhaustions++;
- A.equal(body.stamina,startingStamina-spent,
-  'Original wilderness-day skill practice cannot refill or conceal Stamina expenditure');
+ A.ok(body.stamina<=startingStamina-spent&&body.stamina>=0,
+  'True Rift expenditure is a minimum; independent Meridian or another originally owned activity may also spend the SAME Combat Stamina. Remote rest cannot silently refill it');
  A.equal((p.originalOffscreenCombatNights||[]).length,0,
   'A Riftglass exterior ruin is not an independently verified settlement bedroom');
  A.equal((p.originalOvernightRestDecisions||[]).length,0,
@@ -91,7 +91,8 @@ for(const item of options){
    !formed);
  }
  const summary={seed,int:item.originalInt,initial:startingStamina,
-  remaining:body.stamina,readingChecks:chargedSense.length,
+  remaining:body.stamina,otherOriginalExertionOrDamage:
+   startingStamina-spent-body.stamina,readingChecks:chargedSense.length,
   anchorChecks:chargedAnchors.length,
   anchorAxes:r?.axes||null,integrated:r?.integrated||false,
   strain:r?.strain||0,formed,
