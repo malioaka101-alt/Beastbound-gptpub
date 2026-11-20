@@ -134,4 +134,26 @@ overlap.push({source:duplicate,seal:HASH(duplicate)});
 A.equal(Night.replayUntil(s,p,overlap,0,Infinity,
  originalEnergy,0),null,
  'Two overlapping witnessed and offscreen receipts on one calendar night cannot double-recover Qi');
+// The physical-night source ledger is intentionally bounded to 480 entries.
+// Once an old actual night ages out, the Qi receipt must preserve its exact
+// original source and replay that source, never grant a retroactive extra rest.
+const archived=structuredClone(p.originalMeridianSea.rests);
+A.equal(archived[0].source.originalNightSource.endMinute,
+ firstNight.source.endMinute);
+p.originalOffscreenCombatNights=[second];
+A.equal(Night.replayUntil(s,p,archived,0,Infinity,
+ originalEnergy,0).energy.currentQi,beforeWitnessedQi+10,
+ 'Archived original night source survives bounded journal rollover');
+const forgedArchive=structuredClone(archived);
+forgedArchive[0].source.originalNightSource.completedDay=100;
+forgedArchive[0].seal=HASH(forgedArchive[0].source);
+A.equal(Night.replayUntil(s,p,forgedArchive,0,Infinity,
+ originalEnergy,0),null,
+ 'Resealing a changed archived original night cannot recover Qi');
+const unprovenArchive=structuredClone(archived);
+delete unprovenArchive[0].source.originalNightSource;
+unprovenArchive[0].seal=HASH(unprovenArchive[0].source);
+A.equal(Night.replayUntil(s,p,unprovenArchive,0,Infinity,
+ originalEnergy,0),null,
+ 'A missing original night is not replaced by an unsupported old receipt');
 console.log('Isolated original Meridian night Qi source PASS: original +10 only after actual original sleep receipt, no world tick, exact before/after replay, cap, idempotence, anti-forgery; this fixture does NOT prove full Stage I-IX NPC advancement');
