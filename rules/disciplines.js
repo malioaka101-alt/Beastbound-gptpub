@@ -1212,12 +1212,12 @@ function matrixWork(s,params={}){
 // systems represented here are heart, lungs, liver and kidneys; integrated
 // work includes their coordination with other organs. Exceptional integrated
 // practice can advance several tissues in the SAME genuine check.
-const ORGAN_NAMES=Object.freeze(['heart','lungs','liver','kidneys']);
-const ORGAN_FOCI=Object.freeze([...ORGAN_NAMES,'integrated']);
+const OrganLaw=require('./body-shared-original-organ-cycle-three');
+const ORGAN_NAMES=OrganLaw.ORGANS,ORGAN_FOCI=OrganLaw.FOCI;
 const ORGAN_ORIGIN='earned-body-organ-cycle-iii-v1';
 const organDigest=x=>Crypto.createHash('sha256')
  .update(JSON.stringify(x)).digest('hex');
-const organPoints=()=>({heart:0,lungs:0,liver:0,kidneys:0});
+const organPoints=OrganLaw.empty;
 function organPrerequisites(s){
  const p=s.player,body=p?.body,h=s.table?.disciplineTraining?.body?.history||[];
  if(!body||!Array.isArray(body.cycles)||body.cycles.length!==2||
@@ -1311,7 +1311,7 @@ function organWork(s,params={}){
  organPrerequisites(s);
  const self=independentSite(s,'body',{shortSession:true});
  const theory=witnessedTheory(s,'body',guidanceId);
- const fatigue=Math.ceil(minutes/120),p=s.player;
+ const fatigue=OrganLaw.staminaCost(minutes),p=s.player;
  if(!Number.isInteger(p.stamina)||p.stamina<fatigue)
   throw Error('Organ adaptation requires available Stamina for real exertion');
  const old=s.table?.organCycleWork;
@@ -1325,17 +1325,11 @@ function organWork(s,params={}){
  p.stamina-=fatigue;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=p.stamina;
  const check=C.check(s,{modifier:modifier(s,'body')+
-  (theory?.bonus||0),dc:17,
+  (theory?.bonus||0),dc:OrganLaw.DC,
   label:'Organ Cycle III — '+focus+' adaptation'});
- const earned=check.progress;
- if(earned){
-  if(focus==='integrated'){
-   work.integrated=true;
-   for(const organ of ORGAN_NAMES)
-    work.systems[organ]=Math.min(2,work.systems[organ]+
-     (check.degree==='exceptional'?2:1));
-  }else work.systems[focus]=Math.min(2,work.systems[focus]+earned);
- }
+ const grown=OrganLaw.grow(work.systems,work.integrated,focus,check.degree);
+ const earned=grown.earned;
+ work.systems=grown.organs;work.integrated=grown.integrated;
  let setback=null;
  if(check.degree==='severe failure'){
   setback='organ strain';
@@ -1351,11 +1345,11 @@ function organWork(s,params={}){
  work.attempts.push(record);
  s.table.organCycleWork=work;
  let completedCycle=false;
- if(work.integrated&&ORGAN_NAMES.every(k=>work.systems[k]>=2)){
+ if(OrganLaw.formed(work.systems,work.integrated)){
   const c=s.table.combatants.player;
   p.body.cycles.push('Organ Cycle');
-  staminaGain(s,2);
-  c.toughness+=1;c.boxes[2]+=1;
+  staminaGain(s,OrganLaw.STAMINA_GAIN);
+  c.toughness+=OrganLaw.TOUGHNESS_GAIN;c.boxes[2]+=OrganLaw.CRITICAL_BOX_GAIN;
   p.body.organAdaptation={
    systems:structuredClone(work.systems),originalSource:ORGAN_ORIGIN,
    completedMinute:start+minutes,attemptsHash:organDigest(work.attempts)};
