@@ -32,8 +32,11 @@ function newState(p){
 }
 function nextAction(r){
  if(r.stage===5)return null;
- if(r.routes.some(x=>x.injuries.some(y=>!y.healed)))
-  return null; // Genuine original separate medical assessment required.
+ for(const route of r.routes){
+  const pending=route.injuries.find(x=>!x.healed);
+  if(pending)return {type:'care',routeId:route.id,
+   injuryHash:pending.sourceHash};
+ }
  if(r.routes.length<3)return {type:'map',kind:KINDS[r.routes.length]};
  const route=r.routes.find(x=>x.integrity<x.required);
  if(route)return {type:'work',routeId:route.id};
@@ -120,6 +123,18 @@ function verify(s,p){
    q.stabilityBefore!==state.stability||
    q.routeCountBefore!==state.routes.length)
    return false;
+  if(q.actionType==='care'){
+   if(q.originalMedicalSkillRank!==0||
+    q.originalPressureInjuryHash===null||
+    q.originalPressureInjuryHash===undefined||
+    q.selfCareNotPhysicianTreatment!==true||
+    q.originalCareSite!==q.offscreenOpportunity?.privatePhysicalSite||
+    require('./lived-places').location(s,q.originalCareSite)?.biome!=='settlement')
+    return false;
+  }else if(q.originalMedicalSkillRank!==null||
+    q.originalPressureInjuryHash!==null||
+    q.originalCareSite!==null||q.selfCareNotPhysicianTreatment!==null)
+   return false;
   const expected=nextAction(state),
    roller={rngState:q.rngBefore},
    accepted=C.die(roller,100)<=q.choiceChance;
@@ -131,12 +146,22 @@ function verify(s,p){
    return false;
   const body=s.table?.combatants?.['npc_'+p.id];
   let expectedCheck=null,route=null,earned=0,injury=null,
-   qiSpent=0,staminaSpent=0,mapped=false,completed=false;
+   qiSpent=0,staminaSpent=0,mapped=false,completed=false,
+   healed=false,recovered=0;
   if(accepted){
    let dc,mod,load=0;
    if(expected.type==='map'){
     load=loadFor(expected.kind);
     dc=13+load;mod=modifier(p,state.stability,'map',seaPurity);
+   }else if(expected.type==='care'){
+    route=state.routes.find(x=>x.id===expected.routeId);
+    const pending=route?.injuries.find(x=>!x.healed);
+    if(!pending||q.originalPressureInjuryHash!==pending.sourceHash||
+     pending.sourceHash!==expected.injuryHash)return false;
+    const plan=Web.care({load:route.load,stabilityLoss:pending.loss,
+     minutes:120,medicineRank:0});
+    dc=plan.dc;staminaSpent=plan.staminaSpent;
+    mod=Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2);
    }else if(expected.type==='work'){
     route=state.routes.find(x=>x.id===expected.routeId);
     const flawed=route.gates.filter(i=>gates[i-1].quality==='Flawed').length;
@@ -160,7 +185,15 @@ function verify(s,p){
     C.naturalAdjustment(q.check.roll)-dc,
     degree=C.degree(margin),success=margin>=0;
    expectedCheck={roll:q.check.roll,modifier:mod,dc,degree,success};
-   if(expected.type==='map'&&success){
+   if(expected.type==='care'){
+    const pending=route.injuries.find(x=>!x.healed);
+    if(success){
+     pending.healed=true;healed=true;
+     recovered=Web.care({load:route.load,stabilityLoss:pending.loss,
+      minutes:120,medicineRank:0}).stabilityRecoveredOnSuccess;
+     state.stability=Math.min(100,state.stability+recovered);
+    }
+   }else if(expected.type==='map'&&success){
     const kind=expected.kind,number=mapNumber(p,kind);
     route={id:'route_'+kind,load,kind,segments:[{kind,number}],
      gates:[1],required:Web.required(1,load),integrity:0,
@@ -190,10 +223,14 @@ function verify(s,p){
   }else if(q.check!==null||q.qiSpent!==0||q.staminaSpent!==0||
    q.staminaBefore!==null||q.staminaAfter!==null||
    q.maxStaminaAtAttempt!==null)return false;
-  if(q.routeId!==(expected.type==='work'?expected.routeId:
+  if(q.routeId!==(['work','care'].includes(expected.type)?expected.routeId:
    expected.type==='map'?'route_'+expected.kind:null)||
    q.routeKind!==(expected.type==='map'?expected.kind:
-    expected.type==='work'&&accepted?route.kind:null)||
+    ['work','care'].includes(expected.type)&&accepted?route.kind:null)||
+   q.originalPressureInjuryHash!==(expected.type==='care'?
+    expected.injuryHash:null)||
+   q.careSucceeded!==(expected.type==='care'?healed:null)||
+   q.careStabilityRecovered!==(expected.type==='care'?recovered:null)||
    q.qiSpent!==qiSpent||q.staminaSpent!==staminaSpent||
    JSON.stringify(q.check)!==JSON.stringify(expectedCheck)||
    q.pointsEarned!==earned||
@@ -229,10 +266,18 @@ function afterDaily(s,ctx){
   return require('./independent-meridian-advanced').afterDaily(s,ctx);
  const next=nextAction(r);
  if(!next||r.sessions.length>=500)return null;
+ // An ordinary source-evidenced independent settlement practice day is
+ // necessary for personally chosen, untrained pressure self-care. Never
+ // infer consent from an absent professional or a player's scene.
+ if(next.type==='care'&&ctx.loc?.biome!=='settlement')return null;
  // A person who lacks real Qi or physical Stamina cannot silently draw
  // an unreplayable private acceptance roll. Check source costs first.
  if(next.type!=='map'){
-  const cost=next.type==='work'?(()=>{
+  const cost=next.type==='care'?Web.care({
+   load:r.routes.find(x=>x.id===next.routeId).load,
+   stabilityLoss:r.routes.find(x=>x.id===next.routeId).injuries.
+    find(x=>!x.healed).loss,minutes:120,medicineRank:0
+  }):next.type==='work'?(()=>{
    const route=r.routes.find(x=>x.id===next.routeId);
    const flawed=route.gates.filter(i=>
     p.originalMeridianGates.gates[i-1].quality==='Flawed').length;
@@ -250,7 +295,8 @@ function afterDaily(s,ctx){
   staminaBefore=accepted?body.stamina:null,seaPurity=sea.sea.purity;
  let checkRecord=null,route=null,earned=0,injury=false,
   mapped=false,formed=false,qiSpent=0,staminaSpent=0,
-  routeId=next.type==='work'?next.routeId:
+  healed=false,recovered=0,
+  routeId=['work','care'].includes(next.type)?next.routeId:
    next.type==='map'?'route_'+next.kind:null,
   routeKind=next.type==='map'?next.kind:null;
  if(accepted){
@@ -258,6 +304,14 @@ function afterDaily(s,ctx){
   if(next.type==='map'){
    dc=13+loadFor(next.kind);
    mod=modifier(p,r.stability,'map',seaPurity);
+  }else if(next.type==='care'){
+   route=r.routes.find(x=>x.id===next.routeId);
+   routeKind=route.kind;
+   const pending=route.injuries.find(x=>!x.healed),
+    plan=Web.care({load:route.load,stabilityLoss:pending.loss,
+     minutes:120,medicineRank:0});
+   dc=plan.dc;staminaSpent=plan.staminaSpent;
+   mod=Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2);
   }else if(next.type==='work'){
    route=r.routes.find(x=>x.id===next.routeId);
    routeKind=route.kind;
@@ -277,7 +331,15 @@ function afterDaily(s,ctx){
   const result=check(s,p,mod,dc,next.type);
   checkRecord={roll:result.roll,modifier:result.modifier,
    dc:result.dc,degree:result.degree,success:result.success};
-  if(next.type==='map'&&result.success){
+  if(next.type==='care'){
+   const pending=route.injuries.find(x=>!x.healed);
+   if(result.success){
+    pending.healed=true;healed=true;
+    recovered=Web.care({load:route.load,stabilityLoss:pending.loss,
+     minutes:120,medicineRank:0}).stabilityRecoveredOnSuccess;
+    r.stability=Math.min(100,r.stability+recovered);
+   }
+  }else if(next.type==='map'&&result.success){
    const kind=next.kind,number=mapNumber(p,kind),load=loadFor(kind);
    route={id:'route_'+kind,load,kind,segments:[{kind,number}],
     gates:[1],required:Web.required(1,load),integrity:0,
@@ -305,6 +367,12 @@ function afterDaily(s,ctx){
   rngBefore,rngAfter:p.rngState,
   choiceD100,choiceChance:chance,accepted,
   actionType:next.type,routeId,routeKind,
+  originalPressureInjuryHash:next.type==='care'?next.injuryHash:null,
+  originalMedicalSkillRank:next.type==='care'?0:null,
+  originalCareSite:next.type==='care'?ctx.site:null,
+  selfCareNotPhysicianTreatment:next.type==='care'?true:null,
+  careSucceeded:next.type==='care'?healed:null,
+  careStabilityRecovered:next.type==='care'?recovered:null,
   actualMinutes:accepted?120:5,
   staminaBefore,staminaAfter:accepted?body.stamina:null,
   maxStaminaAtAttempt:accepted?body.maxStamina:null,
@@ -324,6 +392,7 @@ function afterDaily(s,ctx){
   throw Error('Independent original Stage V living web failed physiological source replay');
  return {kind:'original-independent-meridian-web',system:'meridian',
   accepted,originalActionType:next.type,formed,
+  ...(next.type==='care'?{originalSelfCareSucceeded:healed}:{}),
   privateOriginalEvidenceHash:seal,playerKnowledgeNotGranted:true};
 }
 module.exports={ORIGIN,ATTEMPT,afterDaily,verify};
