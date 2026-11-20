@@ -219,6 +219,30 @@ function earnedEvidence(w,actorId,s=null){
    privateToGM:true
   }:null;
   const career=actor.career||null;
+  // This private GM view must read the SAME source-owned human Combat body
+  // and individually consented weapon as an actual encounter. The dossier
+  // does not invent either from a profession, age label, or baseline.
+  const inMatchingGame=!!s&&s.table?.realm===w,
+   Health=inMatchingGame?require('../rules/unified'):null,
+   condition=Health?Health.currentNpcWoundCondition(s,actorId):null,
+   combatant=condition?s.table.combatants[condition.combatantId]:null,
+   Combat=combatant?require('../rules/combat'):null,
+   verifiedWeapon=inMatchingGame?
+    require('../rules/equipment').verifiedIndependentWeapon(s,actorId):null,
+   currentCombat=combatant?{
+    originalOwner:'rules/combat.js',combatantId:condition.combatantId,
+    sourceEntrySeal:condition.originalEntrySeal,
+    stamina:combatant.stamina,maxStamina:combatant.maxStamina,
+    defense:combatant.defense,toughness:combatant.toughness,
+    woundBoxes:[...combatant.boxes],wounds:[...combatant.wounds],
+    status:combatant.status,offenseMagnitude:combatant.offM,
+    durabilityMagnitude:combatant.durM,
+    woundPenaltyReduction:combatant.wpr,
+    currentWoundPenalty:Combat.penalty(combatant),
+    workOrPracticeBlocked:condition.workAndOrdinaryPracticeBlocked,
+    equipmentAndPowersDoNotFollowFromStats:true,
+    privateToGM:true
+   }:null;
   // The ORIGINAL discipline owner alone knows whether a personal practice
   // history culminated in a genuinely earned Stage I rite. Ordinary study,
   // career prestige or a raw legacy array remain incapable of awarding it.
@@ -295,13 +319,16 @@ function earnedEvidence(w,actorId,s=null){
    // original workplace incidents are real, but no clinical diagnosis,
    // combat wound boxes or age-adjusted abilities can be deduced from them.
    physicalCondition:{ageBand:actor.ageBand,status:actor.status,
-    fatigue:actor.fatigue,currentAttributes:null,wounds:null,
+    fatigue:actor.fatigue,currentAttributes:null,
+    wounds:currentCombat?[...currentCombat.wounds]:null,
     workplaceIncidentEvidence:Careers.workplaceSafetyStatus(actor)
      .map((incident,i)=>({...incident,
       originalSourceHash:actor.career.safetyIncidents[i].sourceHash})),
     originalCareerWorkBlockedByRecoveryStatus:actor.status==='recovering',
     recoveryStatusNotClinicalWoundDiagnosis:true,
-    woundDetailsNotEstablished:true},
+    woundDetailsNotEstablished:!currentCombat,
+    liveCombatSource:currentCombat,
+    liveWoundsFromOriginalCombatOnly:!!currentCombat},
    profession:career?{
     competenceRank:career.competenceRank,skillPoints:career.skillPoints,
     completedWorkChecks:career.workCount,successfulWorkChecks:career.successes,
@@ -350,12 +377,48 @@ function earnedEvidence(w,actorId,s=null){
    // source. Clothing, tools, weapons and actual worn gear remain unresolved.
    physicalMaterialCustody:Custody.privateHoldingEvidence(w,actorId),
    equipment:{verifiedItems:null,
-    reason:'Verified materials are not proof of equipped tools, weapons or armor'},
+    // The gift is a physically accepted *owned* weapon, not proof it is
+    // equipped, readied today, or that the adult consents to a fight.
+    acceptedOwnedWeapon:verifiedWeapon?{
+     item:verifiedWeapon.item,
+     originalTransferSourceHash:verifiedWeapon.originalSourceHash,
+     originalPaidAssetRoot:verifiedWeapon.originalPurchasedAssetRoot,
+     originalAction:structuredClone(verifiedWeapon.actualMundaneAction),
+     noInferredCombatRank:true,
+     noAutomaticEquippingOrCombatConsent:true
+    }:null,
+    ownershipCheckedAgainstOriginalEquipmentOwner:inMatchingGame,
+    reason:verifiedWeapon?
+     'Accepted and source-owned weapon; present readiness still requires live encounter evidence':
+     'Verified materials are not proof of equipped tools, weapons or armor'},
    beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
-   sourceStatus:verifiedMeridian?.originalMeridianStageEarned>=1?
-    'Real original Stage '+verifiedMeridian.originalMeridianStageEarned+
-     ' Meridian anatomy, actual source-owned practice and individual daily/work evidence verified; other powers unresolved':
-    'Earned ordinary work and daily familiarity verified; unearned supernatural stages remain unresolved',
+   sourceStatus:[
+    verifiedMeridian?.originalMeridianStageEarned>=1?
+     'Meridian Stage '+verifiedMeridian.originalMeridianStageEarned:null,
+    originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
+    originalMilestones.soul.phase===1?'Soul Phase I':null,
+    originalMilestones.body.completedCycles?.length===1?
+     'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===1?'Rift Sense I':null
+   ].filter(Boolean).join(', ')||
+    'Ordinary career and independent life only; no source-earned supernatural milestone',
+   originalPowerReadiness:{
+    // Source-earned Core/Phase/Sense/Body are not the same as a learned
+    // spell, soul art, physical combat technique or arbitrary Rift travel.
+    meridianQi:verifiedMeridian?.originalMeridianStageEarned>=2?
+     structuredClone(verifiedMeridian.originalStageTwoQiProfile):null,
+    arcaneManaCore:originalMilestones.arcane.coreIgnited===true?
+     actor.originalArcaneCore.structuredMana:null,
+    arcaneCircleAndSpellStillUnproven:
+     originalMilestones.arcane.coreIgnited===true,
+    originalSoulReserveCapacity:originalMilestones.soul.phase===1?
+     originalMilestones.soul.soulReserve:null,
+    originalBodyCycleWeaponForce:
+     originalMilestones.body.completedCycles?.length===1?1:null,
+    originalRiftSense:originalMilestones.rift.step===1?
+     structuredClone(originalMilestones.rift.originalLimitedSense):null,
+    actionNeedsOriginalSourceAndLiveResources:true,privateToGM:true
+   },
    noAbilityByTitle:true,noRetrospectivePower:true};
  }
  if(actorId.startsWith('notable:')){
