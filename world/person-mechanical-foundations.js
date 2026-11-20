@@ -264,6 +264,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
    require('../rules/independent-original-body-cycle-two')
     .privateStatus(s,actor):null;
+  const verifiedBodyThree=s?.table?.realm===w&&actor.originalBodyOrganCycleThree?
+   require('../rules/independent-original-body-organ-cycle-three')
+    .privateStatus(s,actor):null;
   const verifiedSoulTwo=s?.table?.realm===w&&actor.originalSoulThreadTwo?
    require('../rules/independent-original-soul-thread-two')
     .privateStatus(s,actor):null;
@@ -305,6 +308,13 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.body.completedCycles=['Muscle-Tendon Cycle','Bone-Marrow Cycle'];
    originalMilestones.body.originalToughnessGain=1;
    originalMilestones.body.originalSeriousWoundBoxGain=1;
+  }
+  if(verifiedBodyThree?.earnedOrganCycle===true){
+   originalMilestones.body.completedCycles.push('Organ Cycle');
+   originalMilestones.body.originalOrganIntegration={...verifiedBodyThree.organIntegration};
+   originalMilestones.body.originalToughnessGain=2;
+   originalMilestones.body.originalCriticalWoundBoxGain=1;
+   originalMilestones.body.realCombatBodyStaminaBonus=4;
   }
   if(earnedOther.rift?.step===1){
    originalMilestones.rift.step=verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1;
@@ -402,6 +412,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
+   originalBodyOrganCycleThree:verifiedBodyThree,
    originalSoulMindBodyThreading:verifiedSoulTwo,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
    originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
@@ -440,6 +451,8 @@ function earnedEvidence(w,actorId,s=null){
      originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
     originalMilestones.soul.phase===2?'Soul Phase II Threading':
     originalMilestones.soul.phase===1?'Soul Phase I':null,
+    originalMilestones.body.completedCycles?.length===3?
+     'Body Integrated Organ Cycle III':
     originalMilestones.body.completedCycles?.length===2?
      'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
@@ -470,6 +483,10 @@ function earnedEvidence(w,actorId,s=null){
     originalBodyBoneMarrowAnatomy:verifiedBodyTwo?.earnedBoneMarrowRefinement?
      {toughnessGain:1,seriousWoundBoxGain:1,
       originalCombatSourceRequired:true}:null,
+    originalBodyOrganPhysiology:verifiedBodyThree?.earnedOrganCycle?
+     {organs:{...verifiedBodyThree.organIntegration},
+      staminaCapacityGain:2,toughnessGain:1,criticalWoundBoxGain:1,
+      originalCombatSourceRequired:true,noAutomaticTechnique:true}:null,
     originalRiftSense:originalMilestones.rift.step>=1?
      structuredClone(originalMilestones.rift.originalLimitedSense):null,
     actualExteriorRiftglassReading:verifiedRiftExterior?.originalReading||null,
