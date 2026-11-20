@@ -367,7 +367,11 @@ function afterDaily(s,ctx){
      seaRings:1,extraordinary,webComplete:true,intentDepth:1});
    temp.energy.maxQi=Math.max(temp.energy.maxQi,profile.qi);
    temp.energy.flow=profile.flow;temp.energy.recovery=profile.recovery;
-   if(target!==9)temp.track={target:target+1,mapped:false,
+   if(target===9){
+    // A genuinely formed constitution starts with zero original metabolic
+    // burden. The source verifier, receipt and live individual must agree.
+    temp.originalConstitutionBurden=0;
+   }else temp.track={target:target+1,mapped:false,
     points:0,mapSourceHash:null,site:null};
   }
  }
