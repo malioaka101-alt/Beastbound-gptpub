@@ -8,6 +8,7 @@ const Crypto=require('node:crypto'),C=require('../rules/core'),
  Combat=require('../rules/combat'),Gates=require('./independent-meridian-gates'),
  Shared=require('../rules/meridian-shared-original-sea'),
  Foundation=require('../rules/meridian-shared-original-gates'),
+ Night=require('./independent-meridian-night-qi'),
  Meridian=require('./independent-offscreen-meridian'),
  Offscreen=require('./independent-original-power-days');
 const ORIGIN='original-independent-meridian-dantian-sea-v1',
@@ -78,7 +79,12 @@ function verify(s,p){
   energy=structuredClone(ready.gates.energy),sea=null,
   stage=3,lastDay=-1,lastEnd=0,completedAtMinute=null;
  const personFoundation=p.mechanicalFoundation;
+ let restIndex=0;
  for(const row of r.attempts){
+  const prior=Night.replayUntil(s,p,r.rests||[],restIndex,
+   row?.source?.startMinute??0,energy,lastEnd);
+  if(!prior)return false;
+  energy=prior.energy;restIndex=prior.index;lastEnd=prior.end;
   const q=row?.source;
   if(!q||row.seal!==hash(q)||stage!==3||
    q.origin!==ATTEMPT||q.system!=='meridian'||
@@ -183,6 +189,10 @@ function verify(s,p){
   if(formedSea){sea=formedSea;completedAtMinute=q.startMinute;}
   lastDay=q.day;lastEnd=q.startMinute+q.actualMinutes;
  }
+ const later=Night.replayUntil(s,p,r.rests||[],restIndex,
+  Number.POSITIVE_INFINITY,energy,lastEnd);
+ if(!later||later.index!==(r.rests||[]).length)return false;
+ energy=later.energy;
  return r.stage===stage&&r.points===points&&
   r.stability===stability&&r.lastAttemptDay===lastDay&&
   JSON.stringify(r.energy)===JSON.stringify(energy)&&
