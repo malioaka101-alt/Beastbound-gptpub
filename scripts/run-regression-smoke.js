@@ -21,6 +21,7 @@ const QUICK=[
  'meridian-npc-witnessed-night-qi-source-contract.test.js',
  'living-shared-original-clinic-physical-law.test.js',
  'living-npc-source-backed-clinic-readiness.test.js',
+ 'living-npc-original-body-force-combat.test.js',
  'clinic-original-treatment-course-source.test.js',
  'independent-autonomous-offscreen-original-power.test.js'
 ];
