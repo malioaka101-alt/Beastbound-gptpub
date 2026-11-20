@@ -30,4 +30,8 @@ A.throws(()=>NPC.privateStatus({table:{}},{
 }),/Independent original Rift Anchor proof was altered/);
 A.match(Player.mark.toString(),/AnchorLaw.grow/);
 A.match(Player.mark.toString(),/AnchorLaw.dc/);
+// Also run the existing *actual player* original Rift II end-to-end
+// action contract in the quick source check after changing its common law.
+// This is focused owner parity, not the 300+ file consolidated regression.
+require('./rift-anchor-marking.test.js');
 console.log('Original player/independent Rift Anchor Step II source law and forged stage blocking PASS');
