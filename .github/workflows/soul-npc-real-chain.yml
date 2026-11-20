@@ -1,0 +1,25 @@
+name: Beastbound Soul Real-Chain Verification
+# Separate measured long-lived source-born NPC check from draft edit smoke.
+# No synthetic preparation, chosen rolls, forced rest or real campaign saves.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/soul-npc-real-chain.yml'
+      - 'tests/living-npc-source-born-original-soul-first-stage.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  soul-original-stage-one:
+    name: Authentic untrained source-born independent Soul Phase I
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run true original day-by-day NPC practice and Phase I acceptance
+        run: node tests/living-npc-source-born-original-soul-first-stage.test.js
