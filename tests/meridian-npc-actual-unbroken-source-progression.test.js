@@ -226,6 +226,16 @@ if(target!==0){
   actual=Realm.peek(restored).emergentPeople.people[p.id];
  A.equal(Gates.verify(restored,actual),true);
  A.ok(actual.originalMeridianGates.gates.length>=target);
+ // Test-only, strictly real-source save: stage-four onward can resume
+ // from this *verified* 108-Gate engine outcome, not synthetic receipts,
+ // duplicate world rolls, or a campaign file under saves/.
+ if(target===108&&process.env.BEASTBOUND_MERIDIAN_REAL_SOURCE_OUTPUT){
+  const output=process.env.BEASTBOUND_MERIDIAN_REAL_SOURCE_OUTPUT;
+  if(!/^meridian-real-108-[a-z0-9_-]+\.json$/.test(output))
+   throw Error('Original test checkpoint may be written only as a test-local source artifact');
+  require('node:fs').writeFileSync(output,savedLong,{flag:'wx'});
+  console.log('Verified genuine Gate-108 source saved only to disposable test artifact '+output);
+ }
  console.log('REAL uninterrupted original Meridian source-born NPC Gate '+target+
   ' PASS: all actual chosen Gate practice, real wounds and restorative nights,'+
   ' physical Combat anatomy, saved journal replay; days '+(daysElapsed+more));
