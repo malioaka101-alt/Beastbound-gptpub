@@ -1644,7 +1644,8 @@ function verifyNpcMeridian(s,person){
   (rec.foundationIntegrity===undefined?earntStage===0:
    rec.foundationIntegrity===(earntStage===1?20:0))&&
   JSON.stringify(rec.methods)===JSON.stringify(methods)&&
-  require('../world/independent-meridian-ladder').verify(s,person);
+  require('../world/independent-meridian-ladder').verify(s,person)&&
+  require('../world/independent-meridian-gates').verify(s,person);
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
@@ -1656,15 +1657,20 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original individual Meridian training proof was altered');
  const rec=p.meridianTraining,
   ladder=p.originalMeridianLadder,
-  stage=ladder?.stage===2?2:rec?.earnedStage===1?1:null;
+  gateWork=p.originalMeridianGates,
+  stage=gateWork?.stage===3?3:
+   ladder?.stage===2?2:rec?.earnedStage===1?1:null;
  return {actorId,originalOwner:'rules/disciplines.js',
   originalMeridianStageEarned:stage,
   originalStageTwoPrimaryMeridians:
-   stage===2?ladder.primaryMapped:null,
-  originalStageTwoQiProfile:stage===2?
-   structuredClone(ladder.energy):null,
+   stage>=2?ladder.primaryMapped:null,
+  originalStageThreeOpenedGates:stage>=3?gateWork.gates.length:null,
+  originalStageThreeIndividualGates:stage>=3?
+   structuredClone(gateWork.gates):null,
+  originalStageTwoQiProfile:stage>=2?
+   structuredClone(stage===3?gateWork.energy:ladder.energy):null,
   originalAwakeningTrainingPoints:ladder?.awakening?.points??null,
-  originalAwakeningRiteSourceHash:stage===2?
+  originalAwakeningRiteSourceHash:stage>=2?
    ladder.originalStageTwoSourceHash:null,
   originalStageOneFoundationQuality:rec?.foundationQuality??null,
   originalFoundationIntegrity:rec?.foundationIntegrity??null,
