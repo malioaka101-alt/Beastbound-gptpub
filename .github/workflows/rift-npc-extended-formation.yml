@@ -1,0 +1,27 @@
+name: Beastbound Rift Extended Original Formation Acceptance
+# Long-run source auditing, not the brief 45s draft smoke. Real autonomous
+# 720-day world days for each of 14 independent Rift first practitioners.
+# A pending Rift II stage may legitimately remain unearned; do not adjust
+# original RNG, risk DC, integrated 3-axis requirement, rest or historic save.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/rift-npc-extended-formation.yml'
+      - 'tests/living-npc-rift-anchor-two-long-form-assessment.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-rift-extended:
+    name: Authentic independent 720-day Riftglass 3-axis Anchor II
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay original Rift Sense, 45min field survey, personal night and measured Anchor II
+        run: node tests/living-npc-rift-anchor-two-long-form-assessment.test.js
