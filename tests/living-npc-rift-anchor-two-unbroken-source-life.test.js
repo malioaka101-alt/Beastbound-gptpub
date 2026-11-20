@@ -87,6 +87,15 @@ for(const item of options){
  A.equal(d.originalPowerMilestones.rift.step,formed?2:1);
  if(r){
   A.equal(d.originalRiftExteriorAnchorMarking.noFoldOrVaultAccess,true);
+  A.equal(d.originalRiftExteriorAnchorMarking.currentOriginalCombatStamina,
+   body.stamina,'GM-only Rift readiness must read the real Combat source');
+  A.equal(d.originalRiftExteriorAnchorMarking.nextOriginalAnchorPracticeStaminaCost,
+   Law.staminaCost(120));
+  A.equal(d.originalRiftExteriorAnchorMarking.actualPhysicalReadinessForAnotherAnchor,
+   !formed&&body.status==='ok'&&body.wounds.every(x=>x===0)&&
+    body.stamina>=Law.staminaCost(120));
+  A.equal(d.originalRiftExteriorAnchorMarking.hasActualVerifiedRiftglassSafeSleep,
+   false,'An observed dangerous field site is not a fictitious safe bedroom');
   A.equal(d.originalRiftExteriorAnchorMarking.provenRiftglassAnchor===null,
    !formed);
  }
