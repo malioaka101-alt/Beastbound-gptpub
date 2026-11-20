@@ -94,7 +94,7 @@ function verify(s,p){
    !n(q.startMinute)||q.startMinute<lastEnd||
    q.startMinute!==q.day*1440+600||
    q.startMinute+q.actualMinutes>s.world.minutes||
-   !n(q.rngBefore,1)||!n(q.rngAfter,1)||
+   !n(q.rngBefore,1,0xffffffff)||!n(q.rngAfter,1,0xffffffff)||
    !n(q.choiceD100,1,100)||
    !['reserved','curious','steady','independent']
     .includes(q.personalityAtAttempt)||
