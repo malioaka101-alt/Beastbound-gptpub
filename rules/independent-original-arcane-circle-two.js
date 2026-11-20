@@ -209,7 +209,9 @@ function afterDaily(s,ctx){
 // claimed location may replenish the recorded energy budget.
 function afterNight(s,p,nightRow){
  const r=p?.originalArcaneCircleTwo;
- if(!r)return null;
+ // Once the matrix owner starts, the SAME stored Mana moves forward to
+ // that distinct source ledger. Never restore both records on one night.
+ if(!r||p.originalArcaneMatrix!==undefined)return null;
  if(!verify(s,p))throw Error('Arcane Mana recovery requires verified prior structural history');
  const Offscreen=require('../world/independent-original-power-days');
  if(!nightRow||!Offscreen.verifyNights(s,p,[nightRow])||
