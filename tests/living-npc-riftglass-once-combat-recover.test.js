@@ -34,6 +34,11 @@ A.equal(q.independentRestDay.action,'rest');
 A.equal(q.independentRestDay.actorId,p.actorId);
 A.equal(q.independentRestDay.identityHash,p.originHash);
 A.equal(q.independentRestDayHash,hash(q.independentRestDay));
+A.equal(q.originalShiftHash,q.originalShiftProof.hash);
+A.equal(q.originalShiftProof.originHash,p.originHash);
+A.equal(q.originalShiftProof.location,'ruins');
+A.equal(q.originalShiftHash,hash(Object.fromEntries(
+ Object.entries(q.originalShiftProof).filter(([k])=>k!=='hash'))));
 A.ok(p.originalRiftMeasuredSense.attempts.some(x=>
  x.seal===q.originalRiftSenseSourceHash&&x.source.accepted&&
  x.source.day<q.day));
