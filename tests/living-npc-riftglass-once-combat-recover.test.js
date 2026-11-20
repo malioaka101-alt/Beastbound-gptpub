@@ -64,4 +64,11 @@ fp.originalRiftglassRecover.seal=
  hash(fp.originalRiftglassRecover.source);
 A.equal(Recovery.verify(falsified,fp),false,
  'Resealed invented Stamina recovery must not alter original Combat Recover');
+const falsePlace=E.importGame(saved),
+ forgedPlace=Realm.peek(falsePlace).emergentPeople.people[p.id];
+forgedPlace.originalRiftglassRecover.source.originalShiftProof.location='fen';
+forgedPlace.originalRiftglassRecover.seal=
+ hash(forgedPlace.originalRiftglassRecover.source);
+A.equal(Recovery.verify(falsePlace,forgedPlace),false,
+ 'A resealed alternative location is not authentic source-owned Riftglass rest');
 console.log('Authentic Riftglass independent rest DAY => exactly ONE original Combat Recover, no overnight campsite, replay/import/forged-recovery rejection PASS');
