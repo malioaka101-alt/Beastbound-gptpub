@@ -19,7 +19,7 @@ const integral=(n,a,b)=>Number.isInteger(n)&&n>=a&&n<=b;
 function law(stage,{kind='practice',load=1,radius=3,
  stability=95,minutes=60}={}){
  if(!integral(stage,6,9)||!['practice','form'].includes(kind)||
-  !integral(load,1,9)||!integral(radius,1,100)||
+  !integral(load,1,9)||!integral(radius,1,1000000)||
   !integral(stability,1,100)||
   !integral(minutes,kind==='practice'?15:30,480))
   throw Error('Only the original source-evidenced advanced Meridian stage, route, local radius and bodily time are supported');
