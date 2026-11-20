@@ -279,6 +279,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedRiftAnchorTwo=s?.table?.realm===w&&actor.originalRiftExteriorAnchor?
    require('../rules/independent-original-rift-exterior-anchor-two')
     .privateStatus(s,actor):null;
+  const verifiedRiftFieldRest=s?.table?.realm===w&&actor.originalRiftglassFieldRest?
+   require('../rules/independent-riftglass-field-refuge')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
@@ -428,6 +431,7 @@ function earnedEvidence(w,actorId,s=null){
    originalSoulResonanceLatticeThree:verifiedSoulThree,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
    originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
+   originalRiftglassFieldRefuge:verifiedRiftFieldRest,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
