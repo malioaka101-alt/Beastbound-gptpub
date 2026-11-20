@@ -461,8 +461,18 @@ function afterDaily(s,w,life,activity,day){
  if(!['practice','rest'].includes(activity?.source?.action))return null;
  const ctx=opportunity(s,w,life,activity,day);
  if(!ctx)return null;
- if(activity.source.action==='rest')
+ if(activity.source.action==='rest'){
+  // An exterior Riftglass rest is NOT a settlement safe night. After
+  // independently witnessed sensing, the person can still choose ONE
+  // original Combat Recover action without inventing shelter or an
+  // overnight recharge. It does not create a second independent life day.
+  if(ctx.site==='ruins'&&ctx.actor.regionId==='riftglass'){
+   const safeNight=night(s,ctx);
+   return safeNight||require('../rules/independent-original-riftglass-one-recover')
+    .afterRestDay(s,ctx);
+  }
   return night(s,ctx);
+ }
  const system=activity.source.focus;
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
