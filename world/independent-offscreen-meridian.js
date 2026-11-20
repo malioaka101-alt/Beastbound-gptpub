@@ -42,7 +42,7 @@ function source(ctx,base,additional){
 }
 function ready(s,ctx){
  const p=ctx.actor,b=ctx.body,existing=p.meridianTraining;
- if(p.originalArcaneCore?.coreIgnited||false){} // Other art is not a free Meridian gate.
+ // Other systems do not automatically grant or bar genuine Meridian practice.
  // One independently chosen original discipline action per real day, even
  // after refusal or a backlash; no cross-discipline double practice.
  if(Object.values(p.originalEarlyDisciplinePreparation||{}).
