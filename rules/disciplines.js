@@ -1654,9 +1654,18 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original independent human identity not verified');
  if(!verifyNpcMeridian(s,p))
   throw Error('Original individual Meridian training proof was altered');
- const rec=p.meridianTraining;
+ const rec=p.meridianTraining,
+  ladder=p.originalMeridianLadder,
+  stage=ladder?.stage===2?2:rec?.earnedStage===1?1:null;
  return {actorId,originalOwner:'rules/disciplines.js',
-  originalMeridianStageEarned:rec?.earnedStage===1?1:null,
+  originalMeridianStageEarned:stage,
+  originalStageTwoPrimaryMeridians:
+   stage===2?ladder.primaryMapped:null,
+  originalStageTwoQiProfile:stage===2?
+   structuredClone(ladder.energy):null,
+  originalAwakeningTrainingPoints:ladder?.awakening?.points??null,
+  originalAwakeningRiteSourceHash:stage===2?
+   ladder.originalStageTwoSourceHash:null,
   originalStageOneFoundationQuality:rec?.foundationQuality??null,
   originalFoundationIntegrity:rec?.foundationIntegrity??null,
   originalMeridianTrainingTarget:rec?.target??'foundation',
