@@ -10,7 +10,9 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Realm=require('../world/simulation'),Lives=require('../world/independent-person-lives'),
  Early=require('../rules/independent-original-discipline-preparation'),
  Sense=require('../rules/independent-original-rift-sense-observation'),
- Recovery=require('../rules/independent-original-riftglass-one-recover');
+ Recovery=require('../rules/independent-original-riftglass-one-recover'),
+ Field=require('../rules/independent-riftglass-field-refuge'),
+ Offscreen=require('../world/independent-original-power-days');
 const {fixture}=require('./living-npc-original-soul-body-rift-first-milestones.test.js');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const {s,p,day}=fixture('rift','breakthrough',973800);
@@ -26,6 +28,8 @@ E.advance(s,180*1440);World.finalizeTime(s,start);
 A.equal(Early.verify(s,p),true);
 A.equal(Sense.verify(s,p),true);
 A.equal(Recovery.verify(s,p),true);
+A.equal(Field.verify(s,p),true);
+A.equal(Offscreen.verifyNights(s,p),true);
 const record=p.originalRiftglassRecover;
 A.ok(record,"The actually earned sensing practitioner\x27s own rest days should allow one legal original Combat Recover");
 const q=record.source,body=s.table.combatants['npc_'+p.id];
@@ -43,19 +47,27 @@ A.ok(p.originalRiftMeasuredSense.attempts.some(x=>
  x.seal===q.originalRiftSenseSourceHash&&x.source.accepted&&
  x.source.day<q.day));
 A.equal(q.recoverUsesBefore,0);A.equal(q.recoverUsesAfter,1);
-A.equal(body.recoverUses,1,'Only one original Recover can be spent until a real completed night');
+A.ok([0,1].includes(body.recoverUses),
+ 'Only an actual later independently accepted original 8-hour night resets the Combat Recover use');
+if(body.recoverUses===0)
+ A.ok(p.originalOffscreenCombatNights?.length,
+  'Original Combat Recover must never reset without an actually completed verified safe field night');
 A.equal(q.actualOriginalRecoverGain,Math.min(q.maximumStamina,
  q.staminaBefore+Math.max(0,2+q.vigorAtAttempt))-q.staminaBefore);
 A.deepEqual(q.woundsAfter,q.woundsBefore);
 A.equal(q.noUnverifiedShelterNightOrWoundHealing,true);
 A.equal(q.noAdditionalWorldTimeOrAnotherAction,true);
 A.equal(q.noQiManaSoulOrFreeSpatialPower,true);
-A.equal((p.originalOffscreenCombatNights||[]).length,0);
+A.ok((p.originalOffscreenCombatNights||[]).every(row=>
+ Field.verifiedNight(s,p,row.source)),
+ 'No ordinary unsafe ruins night is legal; every full sleep needs a real original refuge and personal acceptance');
 A.equal((p.originalOvernightRestDecisions||[]).length,0);
 A.deepEqual(p.knownTechniques,[]);
 const saved=E.exportGame(s),replayed=E.importGame(saved),
  rp=Realm.peek(replayed).emergentPeople.people[p.id];
 A.equal(Recovery.verify(replayed,rp),true);
+A.equal(Field.verify(replayed,rp),true);
+A.equal(Offscreen.verifyNights(replayed,rp),true);
 A.deepEqual(rp.originalRiftglassRecover,record);
 const falsified=E.importGame(saved),
  fp=Realm.peek(falsified).emergentPeople.people[p.id];
