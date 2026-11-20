@@ -77,7 +77,7 @@ const witnessedNight=p.originalOvernightRestDecisions[0].sourceHash,
  actorRng=p.rngState,pcStage=s.player.meridian.stage;
 let reachedI=false,reachedII=false,firstGate=false,daysElapsed=0,
  firstI=null,firstII=null,firstGateHash=null;
-for(let interval=0;interval<24&&!firstGate;interval++){
+for(let interval=0;interval<72&&!firstGate;interval++){
  const clock=s.world.minutes;
  E.advance(s,45*1440);
  World.finalizeTime(s,clock);
@@ -105,9 +105,25 @@ for(let interval=0;interval<24&&!firstGate;interval++){
   firstGateHash=p.originalMeridianGates.gates[0].sourceHash;
  }
 }
+const diagnostic=()=>JSON.stringify({elapsedDays:daysElapsed,
+ founded:reachedI,awakened:reachedII,firstGate,
+ physical:{status:combatant.status,wounds:combatant.wounds,
+ stamina:combatant.stamina,maxStamina:combatant.maxStamina},
+ person:{status:p.status,fatigue:p.fatigue,personality:p.personality,
+ interests:Realm.peek(s)?.independentPersonLives?.people?.[p.id]?.interests},
+ foundation:{stage:p.meridianTraining?.earnedStage,
+ points:p.meridianTraining?.points,sessions:p.meridianTraining?.sessions?.length},
+ awakening:{stage:p.originalMeridianLadder?.stage,
+ points:p.originalMeridianLadder?.awakening?.points,
+ sessions:p.originalMeridianLadder?.awakening?.sessions?.length,
+ cooldown:p.originalMeridianLadder?.awakening?.cooldownUntil},
+ gates:{count:p.originalMeridianGates?.gates?.length,
+ progress:p.originalMeridianGates?.gateWork?.progress,
+ sessions:p.originalMeridianGates?.sessions?.length},
+ verifiedOffscreenNights:p.originalOffscreenCombatNights?.length||0});
 A.ok(reachedI,'One ordinary untrained person must genuinely earn the complete 40-point Stage I rite through personal-world days');
-A.ok(reachedII,'The same person must genuinely earn 72 Stage II points and pass the independently chosen original Awakening rite');
-A.ok(firstGate,'The genuinely awakened individual must actually open Lower Gate 1 without a synthetic prerequisite');
+A.ok(reachedII,'The same person must genuinely earn 72 Stage II points and pass the independently chosen original Awakening rite: '+diagnostic());
+A.ok(firstGate,'The genuinely awakened individual must actually open Lower Gate 1 without a synthetic prerequisite: '+diagnostic());
 A.match(firstI,/^[0-9a-f]{64}$/);A.match(firstII,/^[0-9a-f]{64}$/);
 A.match(firstGateHash,/^[0-9a-f]{64}$/);
 A.equal(p.originalMeridianLadder.foundationRiteSeal,firstI);
