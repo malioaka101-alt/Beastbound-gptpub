@@ -177,6 +177,7 @@ function firstArcaneArchitecture(s){
  return {core,first,profile};
 }
 function arcaneCircleWork(s,params={}){
+ const circleLaw=require('./arcane-shared-original-circle-two');
  if(!params||typeof params!=='object'||Array.isArray(params)||
   Object.keys(params).some(k=>!['design','minutes','route','guidanceId'].includes(k)))
   throw Error('Circle construction accepts only a genuine freeform design, session time and practice route, not chosen checks, ranks or effects');
@@ -190,7 +191,7 @@ function arcaneCircleWork(s,params={}){
  const {first}=firstArcaneArchitecture(s);
  const a=s.player.arcane;
  if(a.coreStability<40)throw Error('The Mana Core is too unstable for a structural redesign without real treatment');
- if(!Number.isInteger(s.player.mana)||s.player.mana<2)
+ if(!Number.isInteger(s.player.mana)||s.player.mana<circleLaw.MANA_COST)
   throw Error('Two units of actual available Mana are required to attempt a dual-channel working');
  const old=s.table?.arcaneCircleRevision;
  if(old&&(old.target!==2||old.originalGeometry!==a.geometry||
@@ -201,31 +202,30 @@ function arcaneCircleWork(s,params={}){
  const work=old||{target:2,originalGeometry:from,progress:0,attempts:[]};
  const designNote=design.trim();
  const result=C.check(s,{modifier:modifier(s,'arcane')+
-  (a.coreStability>=85?1:a.coreStability<60?-2:0)+(theory?.bonus||0),
-  dc:17,label:'Second Arcane Circle — dual-channel integration'});
- const effort=result.success?(result.degree==='exceptional'?4:
-  result.degree==='strong'?3:2):0;
+  circleLaw.stabilityBonus(a.coreStability)+(theory?.bonus||0),
+  dc:circleLaw.DC,label:'Second Arcane Circle — dual-channel integration'});
+ const effort=circleLaw.earned(result);
  // Consume actual mana only after all material/anatomical prerequisites were
  // met. The check remains the sole source of success and complications.
- s.player.mana-=2;
+ s.player.mana-=circleLaw.MANA_COST;
  work.progress+=effort;
  let backlash=false;
  if(result.degree==='severe failure'){
-  backlash=true;a.coreStability=Math.max(0,a.coreStability-7);
+  backlash=true;a.coreStability=circleLaw.stabilityAfter(a.coreStability,result);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
- }else if(result.success)a.coreStability=Math.min(100,a.coreStability+1);
+ }else if(result.success)a.coreStability=circleLaw.stabilityAfter(a.coreStability,result);
  const priorIndex=s.log.length-1,
   check=result,
   attempt={startedMinute:startMinute,location:self.site,design:designNote,
    firstGeometry:from,sourceDay:first.day,checkIndex:priorIndex,
    theoreticalGuidance:theory,result:check.degree,
-   earnedIntegrity:effort,manaSpent:2,
+   earnedIntegrity:effort,manaSpent:circleLaw.MANA_COST,
    stabilityAfter:a.coreStability};
  work.attempts.push(attempt);
  s.table||={};s.table.arcaneCircleRevision=work;
  let constructed=false;
- if(work.progress>=4){
+ if(work.progress>=circleLaw.REQUIRED){
   const next=Build.arcaneProfile(2);
   // Capacity/profile upgrades do not teach new spells, copy beast traits,
   // reset spent mana or change independent Qi, Soul, Body or Rift stages.
@@ -249,7 +249,7 @@ function arcaneCircleWork(s,params={}){
    day:E.day(s),target:'circle2',quality:check.degree,
    change:'Second Circle constructed; dual channels integrated from the original First Circle',
    witnessSource:witness.originalSource});
-  work.progress=4;work.completed=true;constructed=true;
+  work.progress=circleLaw.REQUIRED;work.completed=true;constructed=true;
  }
  E.advance(s,minutes);W.finalizeTime(s,startMinute);
  U.sync(s,{source:'legacy'});
@@ -262,11 +262,11 @@ function arcaneCircleWork(s,params={}){
    design:designNote,elapsedMinutes:minutes,roll:check.roll,
    theoreticalGuidance:theory,
    earnedIntegrity:effort,integrityProgress:work.progress,
-   constructed,backlash,manaSpent:2,
+   constructed,backlash,manaSpent:circleLaw.MANA_COST,
    newSpells:0,noCompulsoryTeacher:true});
  return {system:'arcane',target:'circle2',route,
-  constructed,progress:work.progress,required:4,
-  check,manaSpent:2,minutes,backlash,coreStability:a.coreStability,
+  constructed,progress:work.progress,required:circleLaw.REQUIRED,
+  check,manaSpent:circleLaw.MANA_COST,minutes,backlash,coreStability:a.coreStability,
   newChannels:constructed?2:0,newSpellGranted:false,
   noAutomaticTechnique:true,noCompulsoryTeacher:true,tuitionTalons:0,
   theoreticalGuidance:theory};
