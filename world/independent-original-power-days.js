@@ -113,7 +113,7 @@ function sourceBase(ctx,system,start,minutes,before,choice,accepted,points,metho
  cooldown,training,extra={}){
  const e=evidence(ctx,system);
  return {origin:extra.origin||Early.ORIGIN,actorId:ctx.actor.actorId,
-  system,target:Early.TARGETS[system],
+  system,target:extra.target||Early.TARGETS[system],
   individualOriginHash:ctx.actor.originHash,
   originalFoundationSeal:ctx.actor.mechanicalFoundation.seal,
   originalCombatEntrySeal:ctx.body.npcOrigin.seal,
@@ -141,14 +141,16 @@ function safeCheck(s,params){
  }
 }
 function dailyPractice(s,ctx,system){
- const {actor:p,body}=ctx,sp=Disc.KEYS[system],spec=Early.TARGETS[system],
+ const {actor:p,body}=ctx,sp=Disc.KEYS[system],
+  spec=system==='arcane'&&p.originalArcaneCore?.coreIgnited?'circle1':Early.TARGETS[system],
   original=sp.tracks[spec],journal=p.originalEarlyDisciplinePreparation||{},
   old=journal[system],all=Object.values(journal);
- if(p.originalArcaneCore?.coreIgnited&&system==='arcane'||
+ if(p.originalArcaneCore?.circles>=1&&system==='arcane'||
   p.originalFirstPowerMilestones?.[system]||
   all.some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay||
-  old?.points>=original[0]||ctx.workDay<(old?.cooldownUntil||0)||
+  old?.points>=original[0]||old?.target&&old.target!==spec||
+  ctx.workDay<(old?.cooldownUntil||0)||
   body.stamina<1||body.wounds.some(x=>x>0)||
   old?.sessions?.length>=480)return null;
  if(!Early.verify(s,p))throw Error('Original off-screen training source is altered');
@@ -166,7 +168,7 @@ function dailyPractice(s,ctx,system){
   methodNumber=Core.die(p,Early.METHODS[system].length);
   method=Early.METHODS[system][methodNumber-1];
   const prior=record.sessions.filter(x=>x.source.origin===Early.ORIGIN&&
-   x.source.accepted).map(x=>({system,target:spec,method:x.source.method,
+   x.source.accepted&&x.source.target===spec).map(x=>({system,target:spec,method:x.source.method,
     minutes:120,startMinute:x.source.startMinute,eventHash:x.seal})),
    dc=Difficulty.disciplinePractice(s,{system,method,record,
     baseDC:original[1],independent:true,short:true,
@@ -192,7 +194,7 @@ function dailyPractice(s,ctx,system){
  }
  const source=sourceBase(ctx,system,minutes,actualMinutes,before,choice,
   accepted,oldPoints,oldMethods,cooldown,null,{
-   method,methodNumber,check,complicationRoll,
+   target:spec,method,methodNumber,check,complicationRoll,
    originalPhysicalInjury:injury,staminaCost:spent,
    staminaBefore:accepted?startingStamina:null,
    maxStaminaAtAttempt:accepted?body.maxStamina:null,
@@ -209,16 +211,17 @@ function dailyPractice(s,ctx,system){
 }
 function milestone(s,ctx,system){
  const {actor:p,body}=ctx,journal=p.originalEarlyDisciplinePreparation||{},
-  record=journal[system],target=Early.TARGETS[system],
+  record=journal[system],
+  target=system==='arcane'&&p.originalArcaneCore?.coreIgnited?'circle1':Early.TARGETS[system],
   [required,baseDC]=Disc.KEYS[system].tracks[target],
-  isArcane=system==='arcane';
+  isArcane=system==='arcane',isCircleOne=isArcane&&target==='circle1';
  if(!record||record.points!==required||record.target!==target||
   Object.keys(record.methods).filter(k=>record.methods[k]>0).length<2||
   ctx.workDay<record.cooldownUntil||
   Object.values(journal).some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay||
   p.originalFirstPowerMilestones?.[system]||
-  p.originalArcaneCore?.coreIgnited||
+  p.originalArcaneCore?.circles>=1||
   body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x!==0)||record.sessions.length>=480)
   return null;
@@ -227,7 +230,9 @@ function milestone(s,ctx,system){
   accepted=choice<=chance,starting=ctx.workDay*1440+600,
   base=sourceBase(ctx,system,starting,accepted?180:5,before,choice,
    accepted,record.points,record.methods,record.cooldownUntil,null,{
-    origin:isArcane?require('../rules/independent-original-arcane-core').ORIGIN:
+    target,origin:isCircleOne?
+     require('../rules/independent-original-arcane-core').CIRCLE:
+     isArcane?require('../rules/independent-original-arcane-core').ORIGIN:
      First.ORIGIN,
     originalRiteDC:baseDC+5,
     originalPotentialDimension:Potential.PRIMARY[system][target],
@@ -235,14 +240,17 @@ function milestone(s,ctx,system){
      p.mechanicalFoundation.unassessedPotential[
       Potential.PRIMARY[system][target]]),
     insightSpent:0,feeTalons:0,
-    ...(isArcane?{noCircleSpellOrTechniqueGranted:true}:{
+    ...(isCircleOne?{
+     noLearnedSpellOrTechniqueGranted:true,
+     originalPriorCoreSourceHash:p.originalArcaneCore.originalSourceHash
+    }:isArcane?{noCircleSpellOrTechniqueGranted:true}:{
      sourceOwner:'rules/disciplines.js',noOtherSystemOrTechniqueGranted:true})
    }),
   previous={...record.methods},previousPoints=record.points,
   initialWounds=[...body.wounds];
  let check=null,outcome='declined',endCooldown=record.cooldownUntil,
   nextPoints=record.points,nextMethods=record.methods,
-  injury=false,effect=null,mana=null,geometry=null;
+  injury=false,effect=null,mana=null,geometry=null,channels=null,maxComplexity=null;
  if(accepted){
   const training=Disc.originalActorTrainingProfile(s,{
    actorId:p.actorId,system,target});
@@ -252,10 +260,15 @@ function milestone(s,ctx,system){
   check={roll:actual.roll,modifier:actual.modifier,dc:actual.dc,
    degree:actual.degree,success:actual.success};
   if(actual.success){
-   outcome=isArcane?'ignited':'breakthrough';
+   outcome=isCircleOne?'circle-formed':isArcane?'ignited':'breakthrough';
    nextPoints=0;nextMethods={};
    if(isArcane){
-    mana=Build.arcaneProfile(0).mana;geometry='seeded core';
+    const profile=Build.arcaneProfile(isCircleOne?1:0);
+    mana=profile.mana;
+    geometry=isCircleOne?
+     require('../rules/independent-original-arcane-core').circleGeometry(p):
+     'seeded core';
+    if(isCircleOne){channels=profile.channels;maxComplexity=profile.maxComplexity;}
    }else{
     effect=First.effect(system,p,body);
     if(system==='body'){
@@ -281,13 +294,21 @@ function milestone(s,ctx,system){
   woundsBefore:accepted?initialWounds:null,
   woundsAfter:accepted?[...body.wounds]:null,
   ...(isArcane?{
-   structuredManaAfter:mana,geometryAfter:geometry
+   structuredManaAfter:mana,geometryAfter:geometry,
+   ...(isCircleOne?{channelsAfter:channels,maxComplexityAfter:maxComplexity}:{})
   }:{effect})};
  const seal=Early.hash(source);
  record.sessions.push({source,seal});
  record.points=nextPoints;record.methods=nextMethods;
  record.cooldownUntil=endCooldown;record.lastAttemptDay=ctx.workDay;
- if(outcome==='ignited'){
+ if(outcome==='circle-formed'){
+  record.target='circle-one-earned';
+  p.originalArcaneCore={coreIgnited:true,circles:1,
+   geometry,structuredMana:mana,
+   originalSourceHash:p.originalArcaneCore.originalSourceHash,
+   noLearnedSpells:true,
+   originalCircleOneSourceHash:seal,channels,maxComplexity};
+ }else if(outcome==='ignited'){
   record.target='circle1';
   p.originalArcaneCore={coreIgnited:true,circles:0,geometry:'seeded core',
    structuredMana:mana,originalSourceHash:hash(source),noLearnedSpells:true};
@@ -450,7 +471,9 @@ function afterDaily(s,w,life,activity,day){
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
- return original?.points===Disc.KEYS[system].tracks[Early.TARGETS[system]][0]?
+ const target=system==='arcane'&&ctx.actor.originalArcaneCore?.coreIgnited?
+  'circle1':Early.TARGETS[system];
+ return original?.points===Disc.KEYS[system].tracks[target][0]?
   milestone(s,ctx,system):dailyPractice(s,ctx,system);
 }
 module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyEvidenceBatch,verifyNights,

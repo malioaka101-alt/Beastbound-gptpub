@@ -10,6 +10,7 @@ const Crypto=require('node:crypto'),
  Difficulty=require('./dynamic-difficulty');
 const ORIGIN='source-owned-independent-early-discipline-practice-v1';
 const ARCANE_RITE='original-source-independent-arcane-mana-core-ignition-v1';
+const ARCANE_CIRCLE='source-earned-original-independent-arcane-first-circle-v1';
 const FIRST_OTHER_RITE='source-owned-independent-original-first-milestone-v1';
 const TARGETS=Object.freeze({arcane:'core',soul:'phase1',body:'cycle1',rift:'sense'});
 const METHODS=Object.freeze({
@@ -26,9 +27,11 @@ function chance(p){
   throw Error('Unverified original independent person choice condition');
  return base-(p.fatigue>=55?15:0);
 }
-function trainingSpec(system){
- if(!Object.hasOwn(TARGETS,system))throw Error('Only original early Arcane, Soul, Body and Rift preparation is implemented');
- const target=TARGETS[system],original=Disc.KEYS[system]?.tracks?.[target];
+function trainingSpec(system,target=TARGETS[system]){
+ if(!Object.hasOwn(TARGETS,system)||
+  (target!==TARGETS[system]&&!(system==='arcane'&&target==='circle1')))
+  throw Error('Only original early discipline and First Circle are supported');
+ const original=Disc.KEYS[system]?.tracks?.[target];
  if(!original||original.length!==2)throw Error('Missing original power-system training source');
  return {target,methods:METHODS[system],required:original[0],baseDC:original[1]};
 }
@@ -47,23 +50,25 @@ function verify(s,p){
   const spec=trainingSpec(system),track=Disc.KEYS[system];
   if(!r||r.origin!==ORIGIN||
     !(r.target===spec.target||
-     (system==='arcane'&&r.target==='circle1')||
+     (system==='arcane'&&['circle1','circle-one-earned'].includes(r.target))||
      (system!=='arcane'&&r.target==='earned-first-milestone'))||
     !Array.isArray(r.sessions)||r.sessions.length>480||
     !Number.isInteger(r.lastAttemptDay)||r.lastAttemptDay<0||
     !Number.isInteger(r.cooldownUntil)||r.cooldownUntil<0||
-    !Number.isInteger(r.points)||r.points<0||r.points>spec.required||
+    !Number.isInteger(r.points)||r.points<0||r.points>(system==='arcane'?Disc.KEYS.arcane.tracks.circle1[0]:spec.required)||
     !r.methods||typeof r.methods!=='object'||Array.isArray(r.methods))
    return false;
   let points=0,methods={},lastDay=-1,cooldown=0,previousEnd=0,
-   ignited=false,coreSourceHash=null,otherMilestone=false,
+   ignited=false,coreSourceHash=null,circleOne=false,circleSourceHash=null,
+   otherMilestone=false,
    otherSourceHash=null,otherEffect=null;
   const prior=[];
   for(const row of r.sessions){
-   const q=row?.source;
+   const q=row?.source,
+    active=trainingSpec(system,system==='arcane'&&ignited?'circle1':spec.target);
    if(!q||row.seal!==hash(q)||
-    ![ORIGIN,ARCANE_RITE,FIRST_OTHER_RITE].includes(q.origin)||
-    q.actorId!==p.actorId||q.system!==system||q.target!==spec.target||
+    ![ORIGIN,ARCANE_RITE,ARCANE_CIRCLE,FIRST_OTHER_RITE].includes(q.origin)||
+    q.actorId!==p.actorId||q.system!==system||q.target!==active.target||
     q.individualOriginHash!==p.originHash||
     q.originalFoundationSeal!==p.mechanicalFoundation.seal||
     q.originalCombatEntrySeal!==body.npcOrigin.seal||
@@ -84,7 +89,7 @@ function verify(s,p){
     (q.origin===ORIGIN&&q.noAutomaticStageOrTechnique!==true)||
     q.originalSkillRankBonus!==0||typeof q.accepted!=='boolean')
     return false;
-   if(ignited||otherMilestone)return false;
+   if(circleOne||otherMilestone)return false;
    // Neither a successful original Core ignition nor a completed distinct
    // Soul/Body/Rift milestone may be followed by more same-target prep.
    // Ordinary off-screen life can only open an ORIGINAL check if its
@@ -95,12 +100,24 @@ function verify(s,p){
      .verifyEvidence(s,p,q))return false;
    const roller={rngState:q.rngBefore};
    if(q.origin===ARCANE_RITE){
-    if(system!=='arcane')return false;
+    if(system!=='arcane'||ignited)return false;
     const rite=require('./independent-original-arcane-core').replay(
      s,p,q,roller,{points,methods,cooldown,body,priorSuccess:ignited});
     if(!rite)return false;
     points=rite.points;methods=rite.methods;cooldown=rite.cooldown;
-    if(rite.ignited){ignited=true;coreSourceHash=rite.coreSourceHash;}
+    if(rite.ignited){ignited=true;coreSourceHash=rite.coreSourceHash;
+     prior.length=0;}
+    lastDay=q.day;previousEnd=q.startMinute+q.actualMinutes;
+    continue;
+   }
+   if(q.origin===ARCANE_CIRCLE){
+    if(system!=='arcane'||!ignited)return false;
+    const rite=require('./independent-original-arcane-core').replayCircle(
+     s,p,q,roller,{points,methods,cooldown,body,coreSourceHash,
+      priorSuccess:circleOne});
+    if(!rite)return false;
+    points=rite.points;methods=rite.methods;cooldown=rite.cooldown;
+    if(rite.formed){circleOne=true;circleSourceHash=rite.circleSourceHash;}
     lastDay=q.day;previousEnd=q.startMinute+q.actualMinutes;
     continue;
    }
@@ -125,14 +142,14 @@ function verify(s,p){
      !Number.isInteger(q.maxStaminaAtAttempt)||q.maxStaminaAtAttempt<1||
      q.staminaBefore>q.maxStaminaAtAttempt||
      q.staminaAfter!==q.staminaBefore-1||
-     q.methodNumber!==Core.die(roller,spec.methods.length)||
-     q.method!==spec.methods[q.methodNumber-1]||!q.check||
+     q.methodNumber!==Core.die(roller,active.methods.length)||
+     q.method!==active.methods[q.methodNumber-1]||!q.check||
      q.check.roll!==Core.die(roller,20)||
      !Number.isInteger(q.check.earned)||q.check.earned<0)
      return false;
     const expectedDC=Difficulty.disciplinePractice(s,{
-     system,method:q.method,record:{target:spec.target,methods},
-     baseDC:spec.baseDC,independent:true,short:true,
+     system,method:q.method,record:{target:active.target,methods},
+     baseDC:active.baseDC,independent:true,short:true,
      originalPhysicalOwner:{stamina:q.staminaBefore,
       maxStamina:q.maxStaminaAtAttempt},originalTrainingWitnesses:prior
     }).dc;
@@ -146,7 +163,7 @@ function verify(s,p){
     if(q.check.dc!==expectedDC||q.check.modifier!==mod||
      q.check.degree!==degree||q.check.success!==(margin>=0)||
      q.check.earned!==earned||
-     q.pointsAfter!==cap(points+earned,spec.required))return false;
+     q.pointsAfter!==cap(points+earned,active.required))return false;
     if(degree==='severe failure'){
      if(q.complicationRoll!==Core.die(roller,20)||
       q.cooldownUntil!==(q.complicationRoll<=5?q.day+6:cooldown)||
@@ -156,7 +173,7 @@ function verify(s,p){
     }else if(q.complicationRoll!==null||q.originalPhysicalInjury!==false||
      q.cooldownUntil!==cooldown)return false;
     points=q.pointsAfter;methods[q.method]=(methods[q.method]||0)+1;
-    prior.push({system,target:spec.target,method:q.method,minutes:120,
+    prior.push({system,target:active.target,method:q.method,minutes:120,
      startMinute:q.startMinute,eventHash:row.seal});
    }else{
     if(q.actualMinutes!==5||q.staminaCost!==0||
@@ -172,7 +189,7 @@ function verify(s,p){
   }
   if(r.sessions.length===0||r.lastAttemptDay!==lastDay||
    r.points!==points||r.cooldownUntil!==cooldown||
-   r.target!==(ignited?'circle1':
+   r.target!==(circleOne?'circle-one-earned':ignited?'circle1':
     otherMilestone?'earned-first-milestone':spec.target)||
    JSON.stringify(r.methods)!==JSON.stringify(methods))
    return false;
@@ -186,10 +203,14 @@ function verify(s,p){
   }
   if(system==='arcane'){
    if(ignited){
-    const expected={coreIgnited:true,circles:0,
-     geometry:'seeded core',
-     structuredMana:require('./build').arcaneProfile(0).mana,
-     originalSourceHash:coreSourceHash,noLearnedSpells:true};
+    const Build=require('./build'),owner=require('./independent-original-arcane-core'),
+     profile=Build.arcaneProfile(circleOne?1:0),
+     expected={coreIgnited:true,circles:circleOne?1:0,
+      geometry:circleOne?owner.circleGeometry(p):'seeded core',
+      structuredMana:profile.mana,originalSourceHash:coreSourceHash,
+      noLearnedSpells:true};
+    if(circleOne){expected.originalCircleOneSourceHash=circleSourceHash;
+     expected.channels=profile.channels;expected.maxComplexity=profile.maxComplexity;}
     if(JSON.stringify(p.originalArcaneCore)!==JSON.stringify(expected))
      return false;
    }else if(p.originalArcaneCore!==undefined)return false;
@@ -221,15 +242,19 @@ function privateStatus(s,actorId){
     realMilestoneAttemptCount:r.sessions.filter(x=>[ARCANE_RITE,FIRST_OTHER_RITE]
      .includes(x.source.origin)).length,
     distinctSourceMethods:Object.keys(r.methods).length,
-    originalTrainingThreshold:trainingSpec(system).required,
-    milestoneAwarded:(system==='arcane'&&r.target==='circle1')||
+    originalTrainingThreshold:trainingSpec(system,system==='arcane'&&
+      r.target!=='core'?'circle1':TARGETS[system]).required,
+    milestoneAwarded:(system==='arcane'&&
+      ['circle1','circle-one-earned'].includes(r.target))||
       r.target==='earned-first-milestone',
-    physicalAndEthicalMilestoneStillRequired:r.target!=='circle1'&&
+    physicalAndEthicalMilestoneStillRequired:!['circle1','circle-one-earned'].includes(r.target)&&
       r.target!=='earned-first-milestone'}])),
   verifiedArcaneCoreIgnition:!!p.originalArcaneCore?.coreIgnited,
+   verifiedArcaneFirstCircle:p.originalArcaneCore?.circles===1,
   originalSourceEarnedFirstMilestones:structuredClone(
    p.originalFirstPowerMilestones||{}),
-  noArcaneCircleOrUnearnedOtherStageOrTechnique:true};
+  noArcaneCircleOrUnearnedOtherStageOrTechnique:p.originalArcaneCore?.circles!==1,
+   noFreeSpellOrTechniqueByCircle:true};
 }
 function practice(s,{actorId,system,...untrusted}={}){
  if(Object.keys(untrusted).length||

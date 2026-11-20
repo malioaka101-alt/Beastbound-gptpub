@@ -260,7 +260,7 @@ function earnedEvidence(w,actorId,s=null){
   // is only known after its source-replayed individual ignition rite.
   if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
    originalMilestones.arcane.coreIgnited=true;
-   originalMilestones.arcane.circles=0;
+   originalMilestones.arcane.circles=actor.originalArcaneCore.circles;
   }
   // Only independently earned, fully replayed ORIGINAL individual milestones
   // can establish Phase I, Cycle I or Rift Sense. The same calculation does
@@ -395,7 +395,8 @@ function earnedEvidence(w,actorId,s=null){
    sourceStatus:[
     verifiedMeridian?.originalMeridianStageEarned>=1?
      'Meridian Stage '+verifiedMeridian.originalMeridianStageEarned:null,
-    originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
+    originalMilestones.arcane.circles===1?'Arcane First Circle':
+     originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
     originalMilestones.soul.phase===1?'Soul Phase I':null,
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
@@ -409,7 +410,8 @@ function earnedEvidence(w,actorId,s=null){
      structuredClone(verifiedMeridian.originalStageTwoQiProfile):null,
     arcaneManaCore:originalMilestones.arcane.coreIgnited===true?
      actor.originalArcaneCore.structuredMana:null,
-    arcaneCircleAndSpellStillUnproven:
+    originalArcaneCircles:originalMilestones.arcane.circles,
+    arcaneSpellStillUnproven:
      originalMilestones.arcane.coreIgnited===true,
     originalSoulReserveCapacity:originalMilestones.soul.phase===1?
      originalMilestones.soul.soulReserve:null,
