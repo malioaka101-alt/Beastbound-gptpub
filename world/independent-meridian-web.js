@@ -257,11 +257,16 @@ function verify(s,p){
 }
 function afterDaily(s,ctx){
  const p=ctx.actor,body=ctx.body,sea=p.originalMeridianSea;
- if(!sea||sea.stage!==4||!Sea.verify(s,p)||
+ if(!sea||sea.stage!==4||
   body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x>0)||
   ctx.workDay<=sea.attempts.at(-1).source.day)return null;
- if(!verify(s,p))throw Error('Original independent Stage V web evidence cannot be replayed');
+ // When Stage V exists, Web.verify ALREADY fully verifies the Stage IV
+ // Sea and all 108 prior Gates. Before Stage V exists, verify Sea once.
+ // Both paths retain complete original source replay and tamper detection.
+ const valid=p.originalMeridianWeb===undefined?
+  Sea.verify(s,p):verify(s,p);
+ if(!valid)throw Error('Original Stage IV/Stage V individual evidence cannot be replayed');
  let r=p.originalMeridianWeb||newState(p);
  if(r.stage===5)
   return require('./independent-meridian-advanced').afterDaily(s,ctx);
