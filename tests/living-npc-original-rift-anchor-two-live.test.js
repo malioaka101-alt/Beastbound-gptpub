@@ -30,7 +30,15 @@ for(let i=0;i<500;i++){
  if(exercised)break;
 }
 const measured=p.originalRiftMeasuredSense?.successfulReading;
-A.ok(measured,'A genuinely successful independently checked original boundary measurement must precede Anchor II');
+A.ok(measured,'A genuinely successful independently checked original boundary measurement must precede Anchor II; '+JSON.stringify({
+ measuredAttempts:p.originalRiftMeasuredSense?.attempts?.length||0,
+ accepted:p.originalRiftMeasuredSense?.attempts?.filter(a=>a.source.accepted).length||0,
+ successful:p.originalRiftMeasuredSense?.attempts?.filter(a=>a.source.success).length||0,
+ anchorAttempts:p.originalRiftExteriorAnchor?.attempts?.length||0,
+ status:p.status,site:p.regionId,lifeDay:life.lastDay,
+ last15Actions:life.history.slice(-15).map(a=>[a.source.action,a.source.focus]),
+ lastSenseDay:p.originalRiftMeasuredSense?.lastPracticeDay||null
+ }));
 A.ok(exercised,'A living NPC must personally choose a real original Anchor II attempt');
 A.equal(Sense.verify(s,p),true);
 A.equal(Anchor.verify(s,p),true);
