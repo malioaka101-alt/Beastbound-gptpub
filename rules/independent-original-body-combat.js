@@ -5,7 +5,7 @@
 //   effective Strength includes genuinely earned +1 and M1 natural force
 //   applies ONLY to Strength-based attacks, via Math.max(weapon M,1).
 // Never create a second attack roll, weapon, combat rank or bonus damage.
-const Combat=require('./combat'),
+const Combat=require('./combat'),Build=require('./build'),
  People=require('../world/emergent-people'),
  Foundation=require('../world/person-mechanical-foundations'),
  Early=require('./independent-original-discipline-preparation'),
@@ -37,11 +37,19 @@ function profile(s,{actorId,combatantId,action}={}){
    earned.completedCycle!=='Muscle-Tendon Cycle'||
    earned.originalBirthAttributesRemainImmutable!==true||
    earned.naturalStrengthIncrease!==1||
-   earned.maxStaminaAfter!==combatant.maxStamina||
    !Number.isInteger(combatant.offM)||combatant.offM<1||
    earned.offMAfter!==combatant.offM||
    earned.maxStaminaAfter!==earned.maxStaminaBefore+2)
    throw Error('The original earned independent Body Cycle combat evidence is not replayable against actual current human anatomy');
+  const attrs=p.mechanicalFoundation.baselineAttributes,
+   abi=k=>Math.floor((attrs[k]-10)/2),
+   baseHuman=Build.humanStats({vigor:abi('con'),agility:abi('dex'),
+    wits:abi('wis'),will:abi('wis'),might:abi('str')},
+    {skills:{Melee:0},size:'Medium'}),
+   meridian=require('./meridian-npc-physical').sourceProfile(s,p),
+   exactSharedMax=baseHuman.stamina+2+(meridian?.physical.stamina||0);
+  if(combatant.maxStamina!==exactSharedMax)
+   throw Error('Original Body and Meridian cumulative Combat Stamina must reconcile to this actual human');
   if(action.attribute==='str'){
    bodyStrength=earned.naturalStrengthIncrease;
    bodyForceM=1;
