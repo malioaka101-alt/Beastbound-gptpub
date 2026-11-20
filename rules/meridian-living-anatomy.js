@@ -354,16 +354,19 @@ function treat(s,p={}){
  const witnessHash=hash(witness);
  if(route.care.some(x=>x.source.witnessHash===witnessHash))
   throw Error('One treatment scene cannot create multiple separate healing checks');
- const minutes=p.minutes??120,staminaCost=Math.ceil(minutes/120);
+ const minutes=p.minutes??120,clinical=WebLaw.care({
+  load:route.source.load,stabilityLoss:injury.source.stabilityLoss,
+  minutes,medicineRank:s.player.skills?.medicine?.rank||0}),
+  staminaCost=clinical.staminaSpent;
  if(!integer(s.player.stamina,staminaCost,100000))
   throw Error('Clinical pressure recovery needs actual available Stamina');
  const before=s.world.minutes;
  s.player.stamina-=staminaCost;
  const modifier=Math.floor((s.player.attributes.wis-10)/2)+
-   2*(s.player.skills?.medicine?.rank||0);
- const check=C.check(s,{modifier,dc:12+route.source.load+
-  injury.source.stabilityLoss,label:'Original Meridian pressure recovery'});
- const restored=check.success?Math.min(2,injury.source.stabilityLoss):0;
+   clinical.medicineBonus;
+ const check=C.check(s,{modifier,dc:clinical.dc,
+  label:'Original Meridian pressure recovery'});
+ const restored=check.success?clinical.stabilityRecoveredOnSuccess:0;
  if(restored)s.player.meridian.stability=Math.min(100,s.player.meridian.stability+restored);
  const source={origin:TREAT,routeId:route.id,
   injuryHash:injury.seal,originalLoss:injury.source.stabilityLoss,
