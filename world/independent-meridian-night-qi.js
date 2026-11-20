@@ -89,10 +89,12 @@ function recover(s,p,night,sourceKind){
   throw Error('Original independent Meridian Qi capacity is not valid');
  if(energy.currentQi===energy.maxQi)return null;
  const stamp=sourceKind==='offscreen'?{
+  originalCombatEntrySeal:s.table.combatants['npc_'+p.id].npcOrigin.seal,
   sourceKind,originalNightSeal:night?.seal,
   completedDay:night?.source?.completedDay,
   completedMinute:night?.source?.endMinute
  }:sourceKind==='witnessed'?{
+  originalCombatEntrySeal:s.table.combatants['npc_'+p.id].npcOrigin.seal,
   sourceKind,originalNightSeal:night?.sourceHash,
   completedDay:Math.floor((night?.result?.endedMinute??-1)/1440),
   completedMinute:night?.result?.endedMinute
