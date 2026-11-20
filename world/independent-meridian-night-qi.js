@@ -26,7 +26,8 @@ function replayUntil(s,p,rows,index,limit,energy,priorEnd=0){
  // original off-screen personal night. Merely advancing time grants none.
  for(;i<rows.length;i++){
   const row=rows[i],q=row?.source;
-  if(!q||row.seal!==hash(q)||!good(q.completedMinute))
+  if(!q||row.seal!==hash(q)||!good(q.completedMinute)||
+   (i>0&&q.completedDay<=rows[i-1]?.source?.completedDay))
    return null;
   if(q.completedMinute>=limit)break;
   if(q.origin!==ORIGIN||q.actorId!==p.actorId||
@@ -110,7 +111,8 @@ function recover(s,p,night,sourceKind){
  const rows=state.rests||[];
  if(rows.length>=480||rows.some(x=>
    x.source?.originalNightSeal===stamp.originalNightSeal||
-   x.source?.completedMinute===stamp.completedMinute))
+   x.source?.completedMinute===stamp.completedMinute||
+   x.source?.completedDay===stamp.completedDay))
   throw Error('Duplicate or unreconciled Meridian rest is not permitted');
  const before=structuredClone(energy),after=structuredClone(energy),
   restored=Math.min(RECOVER,energy.maxQi-energy.currentQi);
