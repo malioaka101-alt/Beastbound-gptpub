@@ -197,8 +197,9 @@ function afterDaily(s,ctx){
   return null;
  if(!verify(s,p))throw Error('A private Dantian Sea record cannot be replayed');
  let r=p.originalMeridianSea||start(s,p);
- if(r.stage===4||r.attempts.length>=500||
-  r.energy.currentQi<8)return null;
+ if(r.stage===4)
+  return require('./independent-meridian-web').afterDaily(s,ctx);
+ if(r.attempts.length>=500||r.energy.currentQi<8)return null;
  const chance=Meridian.chance(p),rngBefore=p.rngState,
   chosen=C.die(p,100),accepted=chosen<=chance,
   qiBefore=structuredClone(r.energy),
