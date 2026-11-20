@@ -1,0 +1,97 @@
+'use strict';
+// A truly autonomous original Rift Sense I actor, starting ONLY with the
+// disclosed synthetic source-replayed preliminary First Rite preparation,
+// earns one actual SURVIVAL-surveyed Riftglass refuge on an independently
+// chosen REST day. The original 45-minute/3-Stamina camp survey check and
+// the ORIGINAL individual voluntary overnight sleep choice remain unforced.
+// Assert original Combat.completedNight and source replay/import/forgery,
+// never a promised safe ruins site, wizardry, stage or extra player clock.
+const A=require('node:assert/strict'),Crypto=require('node:crypto'),
+ E=require('../engine'),Rules=require('../rules'),World=require('../rules/world'),
+ Realm=require('../world/simulation'),Lives=require('../world/independent-person-lives'),
+ Field=require('../rules/independent-riftglass-field-refuge'),
+ Offscreen=require('../world/independent-original-power-days'),
+ Sense=require('../rules/independent-original-rift-sense-observation'),
+ Recover=require('../rules/independent-original-riftglass-one-recover'),
+ Wilderness=require('../rules/wilderness-camp'),
+ Foundation=require('../world/person-mechanical-foundations');
+const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const {fixture}=require('./living-npc-original-soul-body-rift-first-milestones.test.js');
+const seed=973987,{s,p,day}=fixture('rift','breakthrough',seed),
+ rite=Rules.act(s,{system:'discipline',
+  operation:'npcOriginalFirstMilestone',
+  params:{actorId:p.actorId,system:'rift'}});
+A.equal(rite.observedOutcome,'breakthrough');
+const w=Realm.peek(s),life=w.independentPersonLives.people[p.id];
+life.lastDay=day;A.equal(Lives.verifyEntry(w,life),true);
+const first=s.world.minutes;
+E.advance(s,180*1440);World.finalizeTime(s,first);
+A.equal(Sense.verify(s,p),true);
+A.equal(Field.verify(s,p),true);
+A.equal(Recover.verify(s,p),true);
+A.equal(Offscreen.verifyNights(s,p),true);
+const camp=p.originalRiftglassFieldRest?.attempts.find(x=>
+ x.source.shelterSurveySucceeded&&x.source.nightAccepted);
+A.ok(camp,'This sampled original life must actually earn a difficult outdoor camp and freely accept sleep');
+const q=camp.source,night=p.originalOffscreenCombatNights?.find(x=>
+ x.source.originalFieldSurveyHash===camp.seal);
+A.ok(night,'The actual completed eight-hour Combat night must link this verified original Survival survey');
+A.equal(q.originalIndependentRestDay.action,'rest');
+A.equal(camp.seal,hash(q));
+A.equal(q.originalShiftHash,q.originalShiftProof.hash);
+A.equal(q.check.success,true);
+A.equal(q.check.dc,Wilderness.SITES.ruins.dc+
+ Wilderness.weatherPenalty(q.weather));
+A.equal(q.scoutStaminaSpent,Wilderness.STAMINA);
+A.equal(q.scoutMinutes,Wilderness.MINUTES);
+A.equal(q.staminaAfterSurvey,q.staminaBefore-Wilderness.STAMINA);
+A.equal(q.nightChoice.accepted,true);
+A.equal(q.nightChoice.location,'ruins');
+A.equal(q.nightChoice.rngBefore,CoreAfterScout(q.rngBefore,q.check.roll));
+A.equal(q.nightChoiceHash,hash(q.nightChoice));
+A.equal(q.validUntilMinute>=night.source.endMinute,true);
+A.equal(night.source.originalFieldNightChoiceHash,q.nightChoiceHash);
+A.equal(night.source.before.stamina,q.staminaAfterSurvey);
+A.equal(night.source.after.stamina,night.source.after.maxStamina);
+A.deepEqual(night.source.after.wounds,[
+ Math.max(0,night.source.before.wounds[0]-1),
+ night.source.before.wounds[1],night.source.before.wounds[2]]);
+A.equal(night.source.site,'ruins');
+A.equal(night.source.noAdditionalPlayerTimeOrFreePower,true);
+A.equal(Field.verifiedNight(s,p,night.source),true);
+A.equal((p.originalOvernightRestDecisions||[]).length,0,
+ 'Non-settlement verified field night is not a made-up city room');
+A.deepEqual(p.knownTechniques,[]);
+const d=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
+if(d.originalRiftExteriorAnchorMarking)
+ A.equal(d.originalRiftExteriorAnchorMarking.hasActualVerifiedRiftglassSafeSleep,true);
+const saved=E.exportGame(s),imported=E.importGame(saved),
+ cp=Realm.peek(imported).emergentPeople.people[p.id];
+A.equal(Field.verify(imported,cp),true);
+A.equal(Offscreen.verifyNights(imported,cp),true);
+A.deepEqual(cp.originalRiftglassFieldRest,p.originalRiftglassFieldRest);
+const fake=E.importGame(saved),fp=Realm.peek(fake).emergentPeople.people[p.id],
+ forged=fp.originalRiftglassFieldRest.attempts.find(x=>x.seal===camp.seal);
+forged.source.check.dc=2;forged.seal=hash(forged.source);
+A.equal(Field.verify(fake,fp),false,
+ 'Resealed impossible easy Riftglass Survival DC cannot establish shelter');
+const fakeNight=E.importGame(saved),np=Realm.peek(fakeNight).emergentPeople.people[p.id],
+ editedNight=np.originalOffscreenCombatNights.find(x=>
+ x.source.originalFieldSurveyHash===camp.seal);
+editedNight.source.originalFieldSurveyHash='f'.repeat(64);
+editedNight.seal=hash(editedNight.source);
+A.equal(Offscreen.verifyNights(fakeNight,np),false,
+ 'Forging a valid-looking fake wilderness campsite source cannot create night-scale healing');
+const fakeChoice=E.importGame(saved),pc=Realm.peek(fakeChoice).emergentPeople.people[p.id],
+ nightChoice=pc.originalRiftglassFieldRest.attempts.find(x=>x.seal===camp.seal);
+nightChoice.source.nightChoice.accepted=false;
+nightChoice.source.nightAccepted=false;
+nightChoice.source.nightChoiceHash=hash(nightChoice.source.nightChoice);
+nightChoice.seal=hash(nightChoice.source);
+A.equal(Field.verify(fakeChoice,pc),false,
+ 'A personally accepted original sleep cannot be forged into refusal with rehashed evidence');
+function CoreAfterScout(rngBefore,expected){
+ const x={rngState:rngBefore},roll=require('../rules/core').die(x,20);
+ A.equal(roll,expected);return x.rngState;
+}
+console.log('SOURCE-VERIFIED RIFTGLASS REFUGE: original DC20+ Survival/3 Stamina, genuine volunteered overnight sleep, original Combat full night, no automatic shelter, import and 3 resealed forgeries all rejected PASS; world seed '+seed);
