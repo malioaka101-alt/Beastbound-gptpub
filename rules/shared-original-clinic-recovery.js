@@ -13,7 +13,7 @@ function project(c){
   !c.boxes.every(x=>integer(x,1,20))||
   c.wounds.some((n,i)=>!integer(n,0,c.boxes[i]))||
   c.wounds[1]<1||c.wounds[2]>0||
-  !integer(c.maxStamina,1,10000)||!integer(c.stamina,0,c.maxStamina))
+  !integer(c.maxStamina,0,10000)||!integer(c.stamina,0,c.maxStamina))
   throw Error('Original paid clinic course requires a conscious human with a verified Serious wound, no Critical wound and the real Combat body');
  return {originalOwner:ORIGINAL_OWNER,
   requiredStayDays:DAYS,requiredFeeScales:COST_SCALES,
