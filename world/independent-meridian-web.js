@@ -216,6 +216,8 @@ function afterDaily(s,ctx){
   ctx.workDay<=sea.attempts.at(-1).source.day)return null;
  if(!verify(s,p))throw Error('Original independent Stage V web evidence cannot be replayed');
  let r=p.originalMeridianWeb||newState(p);
+ if(r.stage===5)
+  return require('./independent-meridian-advanced').afterDaily(s,ctx);
  const next=nextAction(r);
  if(!next||r.sessions.length>=500)return null;
  // A person who lacks real Qi or physical Stamina cannot silently draw
