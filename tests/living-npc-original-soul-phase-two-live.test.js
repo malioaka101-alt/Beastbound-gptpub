@@ -33,6 +33,12 @@ for(let i=0;i<130;i++){
 A.ok(witnessed,'A truly autonomous completed life day must eventually offer Soul II work');
 A.equal(witnessed.seal,hash(witnessed.source));
 A.equal(witnessed.source.offscreenOpportunity.kind,'soul');
+A.equal(witnessed.source.originalShiftHash,
+ witnessed.source.offscreenOpportunity.originalShiftHash);
+A.equal(witnessed.source.originalSceneHash,
+ hash(witnessed.source.offscreenOpportunity));
+A.equal(witnessed.source.focus,witnessed.source.accepted?
+ Soul.focusFor(p,witnessed.source.linksBefore,witnessed.source.integratedBefore):null);
 A.equal(witnessed.source.noThoughtReadingSoulArtOrForcedBond,true);
 A.equal(Soul.verify(s,p),true);
 A.equal(Early.verify(s,p),true);
