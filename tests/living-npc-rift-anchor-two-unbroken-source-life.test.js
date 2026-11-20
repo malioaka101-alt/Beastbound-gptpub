@@ -17,6 +17,8 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Sense=require('../rules/independent-original-rift-sense-observation'),
  Anchor=require('../rules/independent-original-rift-exterior-anchor-two'),
  Recover=require('../rules/independent-original-riftglass-one-recover'),
+ Field=require('../rules/independent-riftglass-field-refuge'),
+ Offscreen=require('../world/independent-original-power-days'),
  SenseLaw=require('../rules/rift-shared-original-exterior-sense'),
  Law=require('../rules/rift-shared-original-anchor-law'),
  Foundation=require('../world/person-mechanical-foundations');
@@ -55,6 +57,8 @@ for(const item of options){
  A.equal(Sense.verify(s,p),true);
  A.equal(Anchor.verify(s,p),true);
  A.equal(Recover.verify(s,p),true);
+ A.equal(Field.verify(s,p),true);
+ A.equal(Offscreen.verifyNights(s,p),true);
  A.equal(Lives.verifyEntry(Realm.peek(s),item.life),true);
  const sensed=p.originalRiftMeasuredSense?.attempts||[],
   anchors=p.originalRiftExteriorAnchor?.attempts||[],
@@ -63,15 +67,22 @@ for(const item of options){
   spent=chargedSense.length*SenseLaw.STAMINA_COST+
    chargedAnchors.length*Law.staminaCost(120),
   trueOnceRecover=p.originalRiftglassRecover?.source?.actualOriginalRecoverGain||0,
+  verifiedFieldNights=(p.originalOffscreenCombatNights||[]).filter(x=>
+   x.source.site==='ruins'),
+  fieldNightRecovery=verifiedFieldNights.reduce((sum,x)=>sum+
+   x.source.after.stamina-x.source.before.stamina,0),
   formed=p.originalRiftExteriorAnchor?.completed===true;
  sensedTotal+=chargedSense.length;
  acceptedTotal+=chargedAnchors.length;
  if(formed)completions++;
  if(body.stamina<Law.staminaCost(120))exhaustions++;
- A.ok(body.stamina<=startingStamina-spent+trueOnceRecover&&body.stamina>=0,
-  'True Rift expenditure is a minimum; a personally CHOSEN rest day may restore at most ONE source-verified Combat Recover. Other independently original actions also spend Stamina; no unsafe-site sleep inferred');
- A.equal((p.originalOffscreenCombatNights||[]).length,0,
-  'A Riftglass exterior ruin is not an independently verified settlement bedroom');
+ A.ok(body.stamina<=startingStamina-spent+trueOnceRecover+
+  fieldNightRecovery&&body.stamina>=0,
+  'Real Rift costs remain conserved; only ONE verified Recover and original fully source-surveyed personally accepted Combat nights may refill Stamina');
+ A.equal((p.originalOffscreenCombatNights||[]).length,verifiedFieldNights.length,
+  'Riftglass does not inherit settlement rest: each actual night needs a surveyed field refuge');
+ A.ok(verifiedFieldNights.every(row=>Field.verifiedNight(s,p,row.source)),
+  'Each field night requires the original DC20+ Survival survey and actual independently accepted sleep');
  A.equal((p.originalOvernightRestDecisions||[]).length,0,
   'A remote field worker has no invented witnessed safe shelter');
  A.deepEqual(p.knownTechniques,[],
@@ -104,14 +115,17 @@ for(const item of options){
    !formed&&body.status==='ok'&&body.wounds.every(x=>x===0)&&
     body.stamina>=Law.staminaCost(120));
   A.equal(d.originalRiftExteriorAnchorMarking.hasActualVerifiedRiftglassSafeSleep,
-   false,'An observed dangerous field site is not a fictitious safe bedroom');
+   verifiedFieldNights.length>0,
+   'GM sees a real refuge only when a personally earned, source-backed field night exists');
   A.equal(d.originalRiftExteriorAnchorMarking.provenRiftglassAnchor===null,
    !formed);
  }
  const summary={seed,int:item.originalInt,initial:startingStamina,
   remaining:body.stamina,originalSingleRecoverGain:trueOnceRecover,
+  originalVerifiedFieldNights:verifiedFieldNights.length,
+  originalFieldNightStaminaRestored:fieldNightRecovery,
   otherOriginalExertionOrDamage:
-   startingStamina-spent+trueOnceRecover-body.stamina,
+   startingStamina-spent+trueOnceRecover+fieldNightRecovery-body.stamina,
   readingChecks:chargedSense.length,
   anchorChecks:chargedAnchors.length,
   anchorAxes:r?.axes||null,integrated:r?.integrated||false,
@@ -140,6 +154,8 @@ const exported=E.exportGame(s),imported=E.importGame(exported),
 A.equal(Sense.verify(imported,copy),true);
 A.equal(Anchor.verify(imported,copy),true);
 A.equal(Recover.verify(imported,copy),true);
+A.equal(Field.verify(imported,copy),true);
+A.equal(Offscreen.verifyNights(imported,copy),true);
 A.deepEqual(copy.originalRiftExteriorAnchor,anchor);
 const tampered=E.importGame(exported),
  falsePerson=Realm.peek(tampered).emergentPeople.people[p.id];
