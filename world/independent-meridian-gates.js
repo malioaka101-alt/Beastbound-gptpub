@@ -234,7 +234,9 @@ function afterDaily(s,ctx){
   ctx.workDay<=base.awakening.lastAttemptDay||
   body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x!==0))return null;
- if(!Ladder.verify(s,p)||!verify(s,p))
+ // Gate.verify ALREADY replays the exact Stage II ladder before checking
+ // Gate 1–108; a second full ladder replay here is identical wasted work.
+ if(!verify(s,p))
   throw Error('Original Stage II/Gate receipts have been altered');
  const state=p.originalMeridianGates||openState(p);
  if(state.gates.length===108)
