@@ -188,7 +188,7 @@ function verify(s,p){
   if(q.routeId!==(expected.type==='work'?expected.routeId:
    expected.type==='map'?'route_'+expected.kind:null)||
    q.routeKind!==(expected.type==='map'?expected.kind:
-    expected.type==='work'?route.kind:null)||
+    expected.type==='work'&&accepted?route.kind:null)||
    q.qiSpent!==qiSpent||q.staminaSpent!==staminaSpent||
    JSON.stringify(q.check)!==JSON.stringify(expectedCheck)||
    q.pointsEarned!==earned||
@@ -218,6 +218,20 @@ function afterDaily(s,ctx){
  let r=p.originalMeridianWeb||newState(p);
  const next=nextAction(r);
  if(!next||r.sessions.length>=500)return null;
+ // A person who lacks real Qi or physical Stamina cannot silently draw
+ // an unreplayable private acceptance roll. Check source costs first.
+ if(next.type!=='map'){
+  const cost=next.type==='work'?(()=>{
+   const route=r.routes.find(x=>x.id===next.routeId);
+   const flawed=route.gates.filter(i=>
+    p.originalMeridianGates.gates[i-1].quality==='Flawed').length;
+   return Web.pressure({load:route.load,segments:route.segments.length,
+    flawed,seaPurity:sea.sea.purity,minutes:120});
+  })():Web.integration({routes:r.routes.length,
+   extraordinary:next.extraordinary,stability:r.stability,minutes:120});
+  if(r.energy.currentQi<cost.qiSpent||body.stamina<cost.staminaSpent)
+   return null;
+ }
  const chance=Meridian.chance(p),rngBefore=p.rngState,
   choiceD100=C.die(p,100),accepted=choiceD100<=chance,
   qiBefore=structuredClone(r.energy),stabilityBefore=r.stability,
@@ -248,7 +262,6 @@ function afterDaily(s,ctx){
    dc=plan.dc;mod=modifier(p,r.stability,'integrate',seaPurity);
    qiSpent=plan.qiSpent;staminaSpent=plan.staminaSpent;
   }
-  if(r.energy.currentQi<qiSpent||body.stamina<staminaSpent)return null;
   r.energy.currentQi-=qiSpent;body.stamina-=staminaSpent;
   const result=check(s,p,mod,dc,next.type);
   checkRecord={roll:result.roll,modifier:result.modifier,
