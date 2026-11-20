@@ -14,7 +14,8 @@ const sources={
  './independent-original-power-days':{verifyNights:(_,p)=>p.originalNightsVerified===true},
  './independent-meridian-sea':{verify:()=>true},
  './independent-meridian-web':{verify:()=>true},
- './independent-meridian-advanced':{verify:()=>true}
+ './independent-meridian-advanced':{verify:()=>true},
+ '../rules/unified':{verifyNpcNightHistory:()=>true}
 };
 VM.runInNewContext(src,{module:mod,structuredClone,console,
  require:id=>id==='node:crypto'?Crypto:
@@ -67,7 +68,7 @@ const secondSource={...shelter,completedDay:5,endMinute:5*1440};
 const second={source:secondSource,seal:HASH(secondSource)};
 p.originalOffscreenCombatNights.push(second);
 const capped=Night.replayUntil(s,p,[{source:{
- origin:Night.ORIGIN,actorId:p.actorId,individualOriginHash:p.originHash,
+ origin:Night.ORIGIN,sourceKind:'offscreen',actorId:p.actorId,individualOriginHash:p.originHash,
  originalCombatEntrySeal:'e'.repeat(64),originalNightSeal:second.seal,
  completedDay:5,completedMinute:5*1440,restoredQi:3,
  energyBefore:consumed,energyAfter:{...consumed,currentQi:90},
@@ -75,7 +76,7 @@ const capped=Night.replayUntil(s,p,[{source:{
  noSecondWorldTickOrUnlearnedPower:true},seal:null}],0,
  Infinity,consumed,0);
 A.equal(capped,null,'Even a valid-looking receipt requires a real matching seal');
-const sealed={origin:Night.ORIGIN,actorId:p.actorId,
+const sealed={origin:Night.ORIGIN,sourceKind:'offscreen',actorId:p.actorId,
  individualOriginHash:p.originHash,originalCombatEntrySeal:'e'.repeat(64),
  originalNightSeal:second.seal,completedDay:5,
  completedMinute:5*1440,restoredQi:3,
@@ -86,4 +87,31 @@ const ok=Night.replayUntil(s,p,[{source:sealed,seal:HASH(sealed)}],
  0,Infinity,consumed,0);
 A.equal(ok.energy.currentQi,90,
  'Genuine personally evidenced recovery is capped at the actual maximum');
+// The original observed-night owner is a DISTINCT verifiable route.
+// An eight-hour witnessed sleep can finish after midnight, and must not
+// become a second offscreen night, free resource tick or forgery shortcut.
+const witnessedSource={actorId:p.actorId,accepted:true,
+ day:5,startMinute:5*1440+16*60+30};
+const witnessed={source:witnessedSource,sourceHash:HASH(witnessedSource),
+ result:{accepted:true,elapsedMinutes:480,
+ endedMinute:6*1440+30,originalCombatEntrySeal:'e'.repeat(64)}};
+p.originalOvernightRestDecisions=[witnessed];
+s.world.minutes=7*1440;
+const beforeWitnessedQi=p.originalMeridianSea.energy.currentQi;
+const viaWitness=Night.afterWitnessedNight(s,p,witnessed);
+A.equal(viaWitness.restoredQi,10);
+A.equal(p.originalMeridianSea.energy.currentQi,beforeWitnessedQi+10);
+A.equal(p.originalMeridianSea.rests.at(-1).source.sourceKind,'witnessed');
+A.equal(p.originalMeridianSea.rests.at(-1).source.completedMinute,
+ 6*1440+30,'Original witnessed sleep is not restricted to exactly midnight');
+A.equal(Night.replayUntil(s,p,p.originalMeridianSea.rests,0,
+ Infinity,originalEnergy,0).energy.currentQi,beforeWitnessedQi+10);
+A.throws(()=>Night.afterWitnessedNight(s,p,witnessed),
+ /Duplicate or unreconciled/);
+const alteredWitness=structuredClone(p.originalMeridianSea.rests);
+alteredWitness.at(-1).source.originalNightSeal='a'.repeat(64);
+alteredWitness.at(-1).seal=HASH(alteredWitness.at(-1).source);
+A.equal(Night.replayUntil(s,p,alteredWitness,0,Infinity,
+ originalEnergy,0),null,
+ 'Re-sealed original witnessed sleep replacement cannot recover Qi');
 console.log('Isolated original Meridian night Qi source PASS: original +10 only after actual original sleep receipt, no world tick, exact before/after replay, cap, idempotence, anti-forgery; this fixture does NOT prove full Stage I-IX NPC advancement');
