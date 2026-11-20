@@ -68,6 +68,28 @@ A.equal(q.originalSceneHash,hash(q.offscreenOpportunity));
 A.equal(q.reserveSpent,0);
 A.equal(q.staminaSpent,0);
 A.equal(q.noOtherMindReadingOrUnlearnedArt,true);
+// The mapped lattice alone is only a personally observed design; it must
+// develop actual structural practice from another real independent choice.
+let actualPractice=null;
+for(let n=0;n<180;n++){
+ const before=s.world.minutes;
+ E.advance(s,1440);World.finalizeTime(s,before);
+ actualPractice=p.originalSoulLatticeThree?.sessions?.find(x=>
+  x.source.origin===Lattice.ORIGIN&&x.source.kind==='practice'&&
+  x.source.accepted===true);
+ if(actualPractice)break;
+}
+A.ok(actualPractice,'A mapped Phase III needs later genuine independently chosen, resource-paid Soul lattice practice');
+const worked=actualPractice.source;
+A.equal(actualPractice.seal,hash(worked));
+A.equal(worked.reserveSpent,2);
+A.equal(worked.staminaSpent,2);
+A.equal(worked.actualMinutes,120);
+A.equal(worked.check.dc,17);
+A.equal(worked.noOtherMindReadingOrUnlearnedArt,true);
+A.equal(worked.offscreenOpportunity.kind,'soul');
+A.equal(worked.originalShiftHash,worked.offscreenOpportunity.originalShiftHash);
+A.equal(worked.originalSceneHash,hash(worked.offscreenOpportunity));
 A.equal(Thread.verify(s,p),true);
 A.equal(Lattice.verify(s,p),true);
 A.equal(Early.verify(s,p),true);
