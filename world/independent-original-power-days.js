@@ -502,7 +502,10 @@ function afterDaily(s,w,life,activity,day){
  // not a free cycle, technique or invented combat statistics.
  if(system==='body'&&ctx.actor.originalFirstPowerMilestones?.body?.
   completedCycle==='Muscle-Tendon Cycle')
-  return require('../rules/independent-original-body-cycle-two').afterDaily(s,ctx);
+  return ctx.actor.originalBodyCycleTwo?.completed?
+   require('../rules/independent-original-body-organ-cycle-three')
+    .afterDaily(s,ctx):
+   require('../rules/independent-original-body-cycle-two').afterDaily(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
