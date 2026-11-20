@@ -141,5 +141,52 @@ for(const n of [36,72,108]){
  A.equal(r.transition,true);
  A.equal(r.actualDC,r.baseDC+3);
 }
+// A deliberately slow, independently forced first attempt scars this one
+// Gate until it opens. The original Gate source does not forget a forced
+// circulation simply because the next session is unforced.
+const scarred=structuredClone(p);
+scarred.id='disposable_person_scarred';
+scarred.actorId='emergent:disposable_person_scarred';
+delete scarred.originalMeridianGates;
+s.table.combatants['npc_'+scarred.id]=structuredClone(body);
+let slowForcedSeed=null;
+for(let seed=1;seed<1000000;seed++){
+ const roller={rngState:seed},accept=C.die(roller,100),
+  force=C.die(roller,100),roll=C.die(roller,20);
+ if(accept<=66&&force<=Original.forceChance(scarred)&&roll===1){
+  slowForcedSeed=seed;break;
+ }
+}
+A.ok(slowForcedSeed,'The original private RNG can produce a risky, unsuccessful first Gate session');
+scarred.rngState=slowForcedSeed;
+s.world.minutes=71*1440;
+const firstForced=Original.afterDaily(s,{actor:scarred,
+ body:s.table.combatants['npc_'+scarred.id],workDay:70,
+ site:'crossing',originalShiftHash:'s'.repeat(64)});
+A.equal(firstForced.accepted,true);
+A.equal(firstForced.gateOpened,false,
+ 'A forced attempt without enough original points cannot instantly open a Gate');
+A.equal(scarred.originalMeridianGates.gateWork.forced,true);
+A.equal(scarred.originalMeridianGates.sessions[0].source.forceAfter,true);
+A.equal(Original.verify(s,scarred),true,
+ 'The source verifier retains real forced circulation across a still-closed Gate');
+for(let day=71;day<=155&&!scarred.originalMeridianGates.gates.length;day++){
+ s.world.minutes=(day+1)*1440;
+ Original.afterDaily(s,{actor:scarred,
+  body:s.table.combatants['npc_'+scarred.id],workDay:day,
+  site:'crossing',originalShiftHash:'s'.repeat(64)});
+ A.equal(Original.verify(s,scarred),true);
+}
+A.equal(scarred.originalMeridianGates.gates.length,1);
+A.equal(scarred.originalMeridianGates.gates[0].quality,'Flawed',
+ 'The original damaged quality persists even after a later unforced opening');
+A.equal(scarred.originalMeridianGates.gateWork.forced,false,
+ 'Only the NEXT individual Gate begins without a forced-circulation history');
+const forgedScar=structuredClone(scarred),scarRow=forgedScar.originalMeridianGates.sessions[0];
+scarRow.source.forceAfter=false;
+scarRow.seal=Crypto.createHash('sha256').update(JSON.stringify(scarRow.source)).digest('hex');
+A.equal(Original.verify(s,forgedScar),false,
+ 'Re-sealing away the original risky circulation must fail exact-source replay');
+
 A.equal(s.player.meridian.stage,0);
 console.log('Isolated original independent NPC 108-Gate source contract PASS: source-only Stage II prerequisite, real private acceptance and independently chosen forced circulation, original persistent Flawed quality/deviation rules, exact core check and forged DC rejection');
