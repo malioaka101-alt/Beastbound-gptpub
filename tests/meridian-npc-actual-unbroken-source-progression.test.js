@@ -112,9 +112,13 @@ for(let interval=0;interval<72&&!firstGate;interval++){
   firstI=p.meridianTraining.sessions.find(x=>
    x.source.origin==='original-independent-meridian-foundation-stage-one-rite-v1'&&
    x.source.outcome==='breakthrough')?.seal;
-  A.equal(combatant.maxStamina,
+  A.ok(combatant.maxStamina>=
    baseline.stamina+Build.meridianProfile(1).bonuses.stamina,
    'Original earned Stage I breakthrough physically increases the SAME NPC Combat body');
+  if(!p.originalMeridianLadder?.stage)
+   A.equal(combatant.maxStamina,
+    baseline.stamina+Build.meridianProfile(1).bonuses.stamina,
+    'Before later milestones, genuine Stage I receives exactly its original bonus');
  }
  if(p.originalMeridianLadder?.stage===2&&!reachedII){
   reachedII=true;
