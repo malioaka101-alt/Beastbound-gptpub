@@ -185,7 +185,7 @@ function practice(s,p={}){
  const checkEvent=structuredClone(s.log.at(-1));
  const earned=LatticeLaw.earned(check),
   after=LatticeLaw.practiceState(r.points,r.strain,check),
-  strainAdded=after.strain-r.strain;
+  strainAdded=check.degree==='severe failure'?3:0;
  r.points=after.points;r.strain=after.strain;
  if(strainAdded){
   so.stability=Math.max(1,so.stability-3);
