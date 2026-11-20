@@ -55,6 +55,8 @@ const p={id:'disposable_person',actorId:'emergent:disposable_person',
    originalCapacityOwner:'rules/build.js:meridianProfile'}}};
 const body={status:'ok',stamina:40,maxStamina:40,wounds:[0,0,0],
  npcOrigin:{seal:'b'.repeat(64)}};
+s.table||={};
+s.table.combatants||={};
 s.table.combatants['npc_'+p.id]=body;
 A.equal(Original.verify(s,p),true);
 let found=null,opened=false;
