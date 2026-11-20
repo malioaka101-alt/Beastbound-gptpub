@@ -877,7 +877,7 @@ function seaPrerequisites(s){
   throw Error('No high-pressure Dantian formation during combat, immediate danger or incapacity');
  return {perfect,flawed,foundationQuality:phys.foundationQuality};
 }
-const SEA_METHODS=Object.freeze(['compression','circulation','stabilisation','integrated']);
+const SEA_METHODS=require('./meridian-shared-original-sea').METHODS;
 function seaStatus(s){
  const m=s.player.meridian,sea=m.dantianSea;
  if(m.stage>=4)return {stage:m.stage,formed:!!sea,
@@ -908,7 +908,11 @@ function seaWork(s,params={}){
  const quality=seaPrerequisites(s);
  const self=independentSite(s,'meridian',{shortSession:true});
  const theory=witnessedTheory(s,'meridian',guidanceId);
- const energySpent=8,staminaSpent=Math.ceil(minutes/120);
+ const seaLaw=require('./meridian-shared-original-sea'),
+  plan=seaLaw.working({perfect:quality.perfect,flawed:quality.flawed,
+   foundationQuality:quality.foundationQuality,
+   stability:s.player.meridian.stability,minutes}),
+  energySpent=plan.qiSpent,staminaSpent=plan.staminaSpent;
  if(s.player.qi<energySpent||s.player.stamina<staminaSpent)
   throw Error('Dantian Sea formation requires eight available Qi and real Stamina');
  const record=s.table.meridianSeaFormation ||= {
@@ -920,12 +924,9 @@ function seaWork(s,params={}){
     !Array.isArray(record.attempts)||record.attempts.length>500)
   throw Error('Invalid Stage IV work ledger; no roll may be made');
  const now=s.world.minutes,oldCurrentQi=s.player.qi,
-  baseMod=modifier(s,'meridian'),flaws=quality.flawed,
-  foundationBonus=quality.foundationQuality==='Perfect'?2:
-    quality.foundationQuality==='Firm'?1:0,
-  gateBonus=Math.min(2,Math.floor(quality.perfect/36)),
-  dc=21+Math.floor(flaws/18)+
-    (s.player.meridian.stability<70?2:0);
+  baseMod=modifier(s,'meridian'),
+  foundationBonus=plan.foundationBonus,
+  gateBonus=plan.gateBonus,dc=plan.actualDC;
  // The user's wording names how they attempt the work but cannot set DC,
  // talent, output, difficulty, quality or another character's permission.
  s.player.qi-=energySpent;
@@ -934,7 +935,7 @@ function seaWork(s,params={}){
   s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:baseMod+foundationBonus+gateBonus+
    (theory?.bonus||0),dc,label:'Stage IV Dantian Sea '+method});
- const earned=check.degree==='exceptional'?5:check.progress;
+ const earned=seaLaw.progress(check.degree,check.progress);
  record.points=Math.min(5,record.points+earned);
  let backlash=null;
  if(check.degree==='severe failure'){
@@ -946,10 +947,8 @@ function seaWork(s,params={}){
  }
  let formed=false,profile=null;
  if(record.points>=5){
-  const purity=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/36)-
-    Math.floor(flaws/27)));
-  const density=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/27)-
-    Math.floor(flaws/36)));
+  const {purity,density}=seaLaw.formation({perfect:quality.perfect,
+   flawed:quality.flawed,stability:s.player.meridian.stability});
   s.player.meridian.stage=4;
   s.player.meridian.dantianSea={
    rings:1,density,purity,stability:s.player.meridian.stability,
