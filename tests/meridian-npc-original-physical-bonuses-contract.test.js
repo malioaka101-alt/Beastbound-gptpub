@@ -17,6 +17,7 @@ VM.runInNewContext(original,{module:moduleStub,structuredClone,require:id=>
  id==='./build'?B:
  id==='./meridian-shared-original-gates'?G:
  id==='./disciplines'?{npcMeridianPrivateStatus:()=>fake}:
+ id==='./independent-original-discipline-preparation'?{verify:()=>true}:
  (()=>{throw Error('Unexpected original physical law dependency '+id)})()});
 const Phys=moduleStub.exports;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -75,6 +76,18 @@ fake.stage=7;
 const stage7=Phys.synchronize(s,p);
 A.equal(stage7.applied,true);
 A.equal(human.boxes[2],base.boxes[2]+1);
+// Isolated source-only Body Cycle confirmation: another original power
+// already granted its own +2; Meridian may not erase or double count it.
+p.originalFirstPowerMilestones={body:{kind:'body-muscle-tendon-cycle-one',
+ maxStaminaBefore:human.maxStamina,maxStaminaAfter:human.maxStamina+2}};
+human.maxStamina+=2;human.stamina+=2;
+const coexist=Phys.synchronize(s,p);
+A.equal(coexist.applied,false);
+A.equal(human.maxStamina,base.stamina+
+ B.meridianProfile(7,{meridians:12,gatesS:108,
+  seaRings:1,extraordinary:1,webComplete:true,intentDepth:1}).
+ bonuses.stamina+2,'Original Body and Meridian physiological effects coexist');
+A.deepEqual(human.wounds,[1,0,0]);
 const forged=structuredClone(human);
 forged.originalMeridianPhysical.bonuses.stamina=999;
 A.throws(()=>Phys.synchronize({table:{combatants:{npc_person_1:forged}}},p),
