@@ -15,6 +15,9 @@ const SITES=Object.freeze({
  ruins:Object.freeze({description:'a dry exterior wardstone windbreak beyond the sealed Riftglass breach and active boundary',dc:20})
 });
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const weatherPenalty=weather=>
+ /storm|gale|flood|downpour|blizzard|whiteout/i.test(weather)?3:
+ /rain|mist|fog|sleet/i.test(weather)?1:0;
 function preflight(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
   throw Error('Scout a genuine local campsite; callers cannot choose its safety, DC, shelter ID, result or resources');
@@ -41,8 +44,7 @@ function preflight(s,p={}){
   throw Error('The character stamina must match the actual wound model before scouting');
  const elemental=require('./specialist-elemental-wetland').support(s);
  const weather=String(s.world.weather||'Fair').slice(0,120);
- const hard=/storm|gale|flood|downpour|blizzard|whiteout/i.test(weather);
- const penalty=hard?3:/rain|mist|fog|sleet/i.test(weather)?1:0;
+ const penalty=weatherPenalty(weather);
  return {loc,cfg,weather,stamina,elemental,
   modifier:Math.floor((score-10)/2)+2*rank,
   dc:cfg.dc+penalty-elemental.mitigation};
@@ -146,4 +148,4 @@ function valid(s,site){
   throw Error('A newly documented severe weather event calls for renewed shelter verification');
  return site;
 }
-module.exports={ORIGIN,SITES,MINUTES,STAMINA,find,valid};
+module.exports={ORIGIN,SITES,MINUTES,STAMINA,weatherPenalty,find,valid};
