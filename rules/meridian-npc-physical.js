@@ -60,13 +60,26 @@ function synchronize(s,p){
   throw Error('Actual original witnessed human Combat body is required');
  const earned=sourceProfile(s,p);
  if(!earned)return {applied:false,noUnverifiedPower:true};
- const base=originalHuman(p),prior=body.originalMeridianPhysical;
+ const base=originalHuman(p),prior=body.originalMeridianPhysical,
+  bodyMilestone=p.originalFirstPowerMilestones?.body;
+ // Body Cycle I is a DIFFERENT, originally earned human tissue law.
+ // It adds +2 to this SAME Combat body. Preserve it instead of having a
+ // Meridian projection silently overwrite or reject the other discipline.
+ const bodyBonus=bodyMilestone?(()=>{
+  if(!require('./independent-original-discipline-preparation').verify(s,p)||
+   bodyMilestone.kind!=='body-muscle-tendon-cycle-one'||
+   bodyMilestone.maxStaminaAfter!==bodyMilestone.maxStaminaBefore+2)
+   throw Error('Body Cycle I Stamina requires independently replayed original source');
+  return 2;
+ })():0;
  const previousBonus=prior?.bonuses||
   (p.meridianTraining?.earnedStage===1&&
-   body.maxStamina===base.stamina+B.meridianProfile(1).bonuses.stamina?
+   body.maxStamina===base.stamina+bodyBonus+
+    B.meridianProfile(1).bonuses.stamina?
    B.meridianProfile(1).bonuses:{});
  const before=expected(base,previousBonus),
   after=expected(base,earned.physical);
+ before.maxStamina+=bodyBonus;after.maxStamina+=bodyBonus;
  if(prior){
   const {seal,...sourceData}=prior;
   if(prior.origin!==ORIGIN||prior.actorId!==p.actorId||
