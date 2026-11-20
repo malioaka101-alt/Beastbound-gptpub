@@ -233,5 +233,27 @@ function propose(s,ctx){
   originalSurveyStaminaSpent:Wilderness.STAMINA,
   noUnverifiedNightOrFutureRiftProgress:true};
 }
+function privateStatus(s,p){
+ if(!verify(s,p)||!require('../world/independent-original-power-days').
+  verifyNights(s,p))
+  throw Error('Original private Riftglass field refuge proof was altered');
+ const attempts=p.originalRiftglassFieldRest?.attempts||[],
+  nights=(p.originalOffscreenCombatNights||[]).filter(x=>
+   x.source?.site===LOCATION&&x.source.originalFieldSurveyHash);
+ return {privateToGM:true,
+  originalSurvivalRuleOwner:'rules/wilderness-camp.js',
+  actualIndependentRestSurveys:attempts.length,
+  personallySuccessfulScoutedRefuges:attempts.filter(x=>
+   x.source.shelterSurveySucceeded).length,
+  personallyAcceptedOriginalFieldNights:nights.length,
+  verifiedOriginalCombatNightStaminaRestored:nights.reduce((sum,x)=>
+   sum+x.source.after.stamina-x.source.before.stamina,0),
+  originalSurveyStaminaCost:Wilderness.STAMINA,
+  originalSurveyMinutes:Wilderness.MINUTES,
+  originalRiftglassSurvivalBaseDC:Wilderness.SITES.ruins.dc,
+  temporaryRefugeNotPermanentHousing:true,
+  expiresAfterOriginalHours:DURATION/60,
+  noUnverifiedFreeSleepOrVoidVaultTravel:true};
+}
 module.exports={ORIGIN,REGION,LOCATION,SCOUT_AT,REST_AT,DURATION,
- costWeather,verify,verifiedNight,propose};
+ costWeather,verify,verifiedNight,propose,privateStatus};
