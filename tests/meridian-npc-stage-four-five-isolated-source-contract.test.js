@@ -165,7 +165,9 @@ for(let day=2;day<=220;day++){
    A.equal(q.selfCareNotPhysicianTreatment,true);
    A.equal(q.qiSpent,0);
    A.equal(q.staminaSpent,q.accepted?1:0);
-   A.equal(q.check?.dc,q.accepted?12+4+2:undefined);
+   A.equal(q.check?.dc,q.accepted?12+4+
+    p.originalMeridianWeb.routes.find(r=>r.id===q.routeId).injuries.
+     find(x=>x.sourceHash===injuryReceiptHash).loss:undefined);
    if(!q.accepted){
     careRefused=true;
     A.equal(q.careStabilityRecovered,0);
