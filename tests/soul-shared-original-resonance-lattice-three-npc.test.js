@@ -37,6 +37,8 @@ A.match(PC.repair.toString(),/LatticeLaw.repairState/);
 A.match(PC.complete.toString(),/LatticeLaw.formationModifier/);
 A.match(NPC.afterDaily.toString(),/if\(kind==='repair'\)return null/,
  'Independent Soul III must not fake the player owner\'s separate clinical repair witness');
+A.match(NPC.verify.toString(),/if\(q.kind==='repair'\)return false/,
+ 'Source replay must reject unobserved clinician repairs even if a forged receipt is resealed');
 A.equal(NPC.verify({table:{}},{originalSoulLatticeThree:undefined}),true);
 A.equal(NPC.verify({table:{}},{
  originalSoulLatticeThree:{formed:true}
