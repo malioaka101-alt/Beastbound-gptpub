@@ -114,7 +114,8 @@ const seed=(want)=>{
  for(let n=1;n<200000;n++){
   const roller={rngState:n},choice=C.die(roller,100);
   if(want==='decline'&&choice>66)return n;
-  if(choice<=66&&C.die(roller,20)===(want==='injury'?1:20))
+  if(want!=='decline'&&choice<=66&&
+   C.die(roller,20)===(want==='injury'?1:20))
    return n;
  }
  throw Error('Disposable deterministic RNG fixture not found');
