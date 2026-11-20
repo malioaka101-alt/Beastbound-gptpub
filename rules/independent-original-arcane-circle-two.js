@@ -78,7 +78,7 @@ function verify(s,p){
    q.accepted!==(q.choiceD100<=q.choiceChance))
    return false;
   if(!q.accepted){
-   if(q.actualMinutes!==5||q.check!==null||
+   if(q.actualMinutes!==5||q.check!==null||q.earnedIntegrity!==0||
     q.manaSpent!==0||q.originalPhysicalBacklash!==false||
     q.woundsBefore!==null||q.woundsAfter!==null)return false;
   }else{
