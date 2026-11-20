@@ -1694,6 +1694,21 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original independent human identity not verified');
  if(!verifyNpcMeridian(s,p))
   throw Error('Original individual Meridian training proof was altered');
+ // A saved *claim* of Meridian advancement cannot be a source of truth.
+ // Verify the deepest actually present original NPC owner's entire
+ // chronological source (and its earlier prerequisites) ONCE here. This
+ // private reader feeds both the GM actor dossier and real Combat anatomy.
+ // Partly mapped stages still have to verify before the preceding completed
+ // stage may be presented, and no client can bypass source verification by
+ // reading stage numbers alone.
+ const presentOwner=p.originalMeridianAdvanced?
+  '../world/independent-meridian-advanced':
+  p.originalMeridianWeb?'../world/independent-meridian-web':
+  p.originalMeridianSea?'../world/independent-meridian-sea':
+  p.originalMeridianGates?'../world/independent-meridian-gates':
+  p.originalMeridianLadder?'../world/independent-meridian-ladder':null;
+ if(presentOwner&&!require(presentOwner).verify(s,p))
+  throw Error('Original individual Meridian stage source failed full owner replay');
  const rec=p.meridianTraining,
   ladder=p.originalMeridianLadder,
   gateWork=p.originalMeridianGates,
