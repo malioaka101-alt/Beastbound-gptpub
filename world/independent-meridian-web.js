@@ -61,7 +61,7 @@ function receipt(ctx,r,values){
   originalCombatEntrySeal:ctx.body.npcOrigin.seal,
   originalStageFourSeaHash:r.seaSourceHash,
   originalShiftHash:ctx.originalShiftHash,
-  originalSceneHash:H(witness),offscreenOpportunity:witness,
+  originalSceneHash:H(witnessed),offscreenOpportunity:witnessed,
   day:ctx.workDay,startMinute:ctx.workDay*1440+600,
   personalityAtAttempt:ctx.actor.personality,
   fatigueAtAttempt:ctx.actor.fatigue,
