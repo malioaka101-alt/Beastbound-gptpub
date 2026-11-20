@@ -131,9 +131,10 @@ function verify(s,p){
     q.originalCareSite!==q.offscreenOpportunity?.privatePhysicalSite||
     require('./lived-places').location(s,q.originalCareSite)?.biome!=='settlement')
     return false;
-  }else if(q.originalMedicalSkillRank!==null||
-    q.originalPressureInjuryHash!==null||
-    q.originalCareSite!==null||q.selfCareNotPhysicianTreatment!==null)
+  }else if((q.originalMedicalSkillRank??null)!==null||
+    (q.originalPressureInjuryHash??null)!==null||
+    (q.originalCareSite??null)!==null||
+    (q.selfCareNotPhysicianTreatment??null)!==null)
    return false;
   const expected=nextAction(state),
    roller={rngState:q.rngBefore},
@@ -227,10 +228,10 @@ function verify(s,p){
    expected.type==='map'?'route_'+expected.kind:null)||
    q.routeKind!==(expected.type==='map'?expected.kind:
     ['work','care'].includes(expected.type)&&accepted?route.kind:null)||
-   q.originalPressureInjuryHash!==(expected.type==='care'?
+   (q.originalPressureInjuryHash??null)!==(expected.type==='care'?
     expected.injuryHash:null)||
-   q.careSucceeded!==(expected.type==='care'?healed:null)||
-   q.careStabilityRecovered!==(expected.type==='care'?recovered:null)||
+   (q.careSucceeded??null)!==(expected.type==='care'?healed:null)||
+   (q.careStabilityRecovered??null)!==(expected.type==='care'?recovered:null)||
    q.qiSpent!==qiSpent||q.staminaSpent!==staminaSpent||
    JSON.stringify(q.check)!==JSON.stringify(expectedCheck)||
    q.pointsEarned!==earned||
