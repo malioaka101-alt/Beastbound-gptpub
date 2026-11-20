@@ -264,6 +264,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
    require('../rules/independent-original-body-cycle-two')
     .privateStatus(s,actor):null;
+  const verifiedSoulTwo=s?.table?.realm===w&&actor.originalSoulThreadTwo?
+   require('../rules/independent-original-soul-thread-two')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
@@ -278,9 +281,14 @@ function earnedEvidence(w,actorId,s=null){
   // NOT claim later phases, cycles, spatial steps or learned techniques.
   const earnedOther=verifiedOtherPreparation?.originalSourceEarnedFirstMilestones||{};
   if(earnedOther.soul?.phase===1){
-   originalMilestones.soul.phase=1;
+   originalMilestones.soul.phase=verifiedSoulTwo?.verifiedSoulPhase===2?2:1;
    originalMilestones.soul.soulReserve=earnedOther.soul.soulReserve;
    originalMilestones.soul.perceptionRangeMetres=earnedOther.soul.perceptionRangeMetres;
+   if(verifiedSoulTwo?.verifiedSoulPhase===2){
+    originalMilestones.soul.earnedThreadLinks={...verifiedSoulTwo.mindBodyResonanceLinks};
+    originalMilestones.soul.originalThreadIntegrity=verifiedSoulTwo.earnedThreadIntegrity;
+    originalMilestones.soul.soulReserve=verifiedSoulTwo.maxSoulReserve;
+   }
   }
   if(earnedOther.body?.completedCycle==='Muscle-Tendon Cycle'){
    originalMilestones.body.completedCycles=['Muscle-Tendon Cycle'];
@@ -385,6 +393,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
+   originalSoulMindBodyThreading:verifiedSoulTwo,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -418,6 +427,7 @@ function earnedEvidence(w,actorId,s=null){
     originalMilestones.arcane.circles===2?'Arcane Second Circle':
     originalMilestones.arcane.circles===1?'Arcane First Circle':
      originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
+    originalMilestones.soul.phase===2?'Soul Phase II Threading':
     originalMilestones.soul.phase===1?'Soul Phase I':null,
     originalMilestones.body.completedCycles?.length===2?
      'Body Bone–Marrow Cycle II':
@@ -440,8 +450,9 @@ function earnedEvidence(w,actorId,s=null){
     originalArcaneCircles:originalMilestones.arcane.circles,
     arcaneSpellStillUnproven:
      originalMilestones.arcane.coreIgnited===true,
-    originalSoulReserveCapacity:originalMilestones.soul.phase===1?
+    originalSoulReserveCapacity:originalMilestones.soul.phase>=1?
      originalMilestones.soul.soulReserve:null,
+    actualSoulReserveAvailable:verifiedSoulTwo?.currentSoulReserve??null,
     originalBodyCycleWeaponForce:
      originalMilestones.body.completedCycles?.length>=1?1:null,
     originalBodyBoneMarrowAnatomy:verifiedBodyTwo?.earnedBoneMarrowRefinement?
