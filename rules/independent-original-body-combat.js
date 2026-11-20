@@ -49,7 +49,7 @@ function profile(s,{actorId,combatantId,action}={}){
    meridian=require('./meridian-npc-physical').sourceProfile(s,p),
    exactSharedMax=baseHuman.stamina+2+(meridian?.physical.stamina||0);
   if(combatant.maxStamina!==exactSharedMax)
-   throw Error('Original Body and Meridian cumulative Combat Stamina must reconcile to this actual human');
+   throw Error('The original earned independent Body Cycle combat evidence is not replayable against actual current human anatomy: Meridian cumulative Stamina mismatch');
   if(action.attribute==='str'){
    bodyStrength=earned.naturalStrengthIncrease;
    bodyForceM=1;
