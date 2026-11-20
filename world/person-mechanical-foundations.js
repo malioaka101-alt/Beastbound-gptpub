@@ -258,12 +258,16 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedArcaneSecond=s?.table?.realm===w&&actor.originalArcaneCircleTwo?
    require('../rules/independent-original-arcane-circle-two')
     .privateStatus(s,actor):null;
+  const verifiedArcaneThird=s?.table?.realm===w&&actor.originalArcaneMatrix?
+   require('../rules/independent-original-arcane-matrix-three')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
   if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
    originalMilestones.arcane.coreIgnited=true;
-   originalMilestones.arcane.circles=verifiedArcaneSecond?.sourceVerifiedSecondCircle?
+   originalMilestones.arcane.circles=verifiedArcaneThird?.sourceVerifiedThirdCircle?
+    3:verifiedArcaneSecond?.sourceVerifiedSecondCircle?
     2:actor.originalArcaneCore.circles;
   }
   // Only independently earned, fully replayed ORIGINAL individual milestones
@@ -371,6 +375,7 @@ function earnedEvidence(w,actorId,s=null){
    // Body cycle, Rift step, free mana or learned technique.
    originalOtherDisciplinePreparation:verifiedOtherPreparation,
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
+   originalArcaneResonantMatrix:verifiedArcaneThird,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -400,6 +405,7 @@ function earnedEvidence(w,actorId,s=null){
    sourceStatus:[
     verifiedMeridian?.originalMeridianStageEarned>=1?
      'Meridian Stage '+verifiedMeridian.originalMeridianStageEarned:null,
+    originalMilestones.arcane.circles===3?'Arcane Third Circle':
     originalMilestones.arcane.circles===2?'Arcane Second Circle':
     originalMilestones.arcane.circles===1?'Arcane First Circle':
      originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
@@ -415,10 +421,11 @@ function earnedEvidence(w,actorId,s=null){
     meridianQi:verifiedMeridian?.originalMeridianStageEarned>=2?
      structuredClone(verifiedMeridian.originalStageTwoQiProfile):null,
     arcaneManaCore:originalMilestones.arcane.coreIgnited===true?
-     (originalMilestones.arcane.circles===2?
-      require('../rules/build').arcaneProfile(2).mana:
+     (originalMilestones.arcane.circles>=2?
+      require('../rules/build').arcaneProfile(originalMilestones.arcane.circles).mana:
       actor.originalArcaneCore.structuredMana):null,
-    arcaneAvailableMana:verifiedArcaneSecond?.currentMana??null,
+    arcaneAvailableMana:verifiedArcaneThird?.currentMana??
+     verifiedArcaneSecond?.currentMana??null,
     originalArcaneCircles:originalMilestones.arcane.circles,
     arcaneSpellStillUnproven:
      originalMilestones.arcane.coreIgnited===true,
