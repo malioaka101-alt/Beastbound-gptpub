@@ -1440,10 +1440,26 @@ function verifyNpcMeridian(s,person){
    size:'Medium'}),
   methods={},priorAcceptedWitnesses=[],
   firstMaximum=originalHuman.stamina;
+ // The independent ORIGINAL Body Muscle–Tendon cycle can be earned before
+ // or after Meridian preparation. Its separate already-verified +2 Stamina
+ // must be honoured at the historical minute of EACH Meridian receipt.
+ // Never treat another distinct power as invalid anatomy or invent a bonus.
+ const bodyMilestone=person.originalFirstPowerMilestones?.body,
+  bodyProof=bodyMilestone?person.originalEarlyDisciplinePreparation?.body?.
+   sessions?.find(x=>x.seal===bodyMilestone.originalSourceHash):null;
+ if(bodyMilestone&&(!bodyProof||
+  !require('./independent-original-discipline-preparation').verify(s,person)||
+  bodyMilestone.kind!=='body-muscle-tendon-cycle-one'||
+  bodyMilestone.maxStaminaAfter!==bodyMilestone.maxStaminaBefore+2))
+  return false;
+ const originalBodyMinute=bodyProof?.source?.startMinute,
+  bodyEarnedBefore=time=>originalBodyMinute!==undefined&&
+   Number.isInteger(originalBodyMinute)&&originalBodyMinute<time?2:0;
  if(!combatant.npcOrigin.originalUnarmouredHumanBaseline||
   firstMaximum<1||
-  combatant.maxStamina<firstMaximum+(rec.earnedStage===1?
-   Build.meridianProfile(1).bonuses.stamina:0))return false;
+  combatant.maxStamina<firstMaximum+(bodyMilestone?2:0)+
+   (rec.earnedStage===1?Build.meridianProfile(1).bonuses.stamina:0))
+  return false;
  for(const row of rec.sessions){
   const q=row?.source;
   if(q?.offscreenOpportunity!==undefined&&
@@ -1498,7 +1514,7 @@ function verifyNpcMeridian(s,person){
      q.check.modifier!==originalWis+apt||
      q.check.dc!==q.originalRiteDC||
      !Number.isInteger(q.maxStaminaBefore)||
-     q.maxStaminaBefore!==firstMaximum||
+     q.maxStaminaBefore!==firstMaximum+bodyEarnedBefore(q.startMinute)||
      !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
      q.staminaBefore>q.maxStaminaBefore||
      !Array.isArray(q.woundsBefore)||
@@ -1600,7 +1616,7 @@ function verifyNpcMeridian(s,person){
    if(!Number.isInteger(q.maxStaminaAtAttempt)||
     q.maxStaminaAtAttempt<1||
     q.staminaBefore>q.maxStaminaAtAttempt||
-    q.maxStaminaAtAttempt!==firstMaximum)
+    q.maxStaminaAtAttempt!==firstMaximum+bodyEarnedBefore(q.startMinute))
     return false;
    const expectedDC=Difficulty.disciplinePractice(s,{
     system:'meridian',method:q.method,
