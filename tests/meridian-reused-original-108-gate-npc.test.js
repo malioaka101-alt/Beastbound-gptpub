@@ -25,6 +25,7 @@ const mod={exports:{}},STAGE_TWO='2'.repeat(64),
   }},
   './independent-original-power-days':{
    verifyEvidence:()=>true,
+   verifyEvidenceBatch:()=>true,
    opportunityEvidence:(ctx,kind)=>({
     origin:'fixture-only-original-actor-day',
     kind,actorId:ctx.actor.actorId,privatePhysicalSite:ctx.site,
