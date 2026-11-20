@@ -367,8 +367,11 @@ function night(s,ctx){
  const originalNight=p.originalOffscreenCombatNights.at(-1);
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
   originalNight);
- const soulReserve=require('../rules/independent-original-soul-thread-two')
-  .afterNight(s,p,originalNight);
+ const soulReserve=p.originalSoulLatticeThree!==undefined?
+  require('../rules/independent-original-soul-lattice-three')
+   .afterNight(s,p,originalNight):
+  require('../rules/independent-original-soul-thread-two')
+   .afterNight(s,p,originalNight);
  const arcaneMana=p.originalArcaneMatrix!==undefined?
   require('../rules/independent-original-arcane-matrix-three')
    .afterNight(s,p,originalNight):
@@ -488,7 +491,11 @@ function afterDaily(s,w,life,activity,day){
  // Independently earned Soul Phase I begins only original Phase II inner
  // mind/body/resonance Threading. A title never unlocks an art.
  if(system==='soul'&&ctx.actor.originalFirstPowerMilestones?.soul?.phase===1)
-  return require('../rules/independent-original-soul-thread-two').afterDaily(s,ctx);
+  return ctx.actor.originalSoulThreadTwo?.completed?
+   require('../rules/independent-original-soul-lattice-three')
+    .afterDaily(s,ctx):
+   require('../rules/independent-original-soul-thread-two')
+    .afterDaily(s,ctx);
  // Only genuine source-earned Rift Sense I at the original Riftglass
  // exterior may independently MEASURE the real spatial boundary. A signed
  // successful reading is NOT an anchor, Fold Step or vault permission.
