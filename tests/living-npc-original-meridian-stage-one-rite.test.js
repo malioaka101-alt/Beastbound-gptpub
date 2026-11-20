@@ -138,6 +138,7 @@ function fixture(outcome,seed){
  throw Error('No independently seeded '+outcome+
   ' rite case after original replayed 40-point history');
 }
+if(require.main===module){
 for(const expected of ['breakthrough','declined','backlash','stalled']){
  const {s,p,c,degree}=fixture(expected,
   expected==='breakthrough'?982111:expected==='declined'?982211:
@@ -229,3 +230,5 @@ for(const expected of ['breakthrough','declined','backlash','stalled']){
  A.equal(p.rngState,lastRng);
 }
 console.log('Original NPC Stage I Meridian rite: 40 source-replayed Foundation points, two methods, independent DC17 check, actual 180-minute rite, Stage I +2 stamina, genuine refusal/stalls and 25% backlash loss plus Light wound, private GM evidence, save replay and tamper rejection PASS');
+}
+module.exports={fixture};
