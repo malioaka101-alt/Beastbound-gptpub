@@ -209,7 +209,8 @@ function afterDaily(s,ctx){
   beforeEnergy=structuredClone(state.energy),
   oldStamina=body.stamina,oldWounds=accepted?[...body.wounds]:null,
   baseMod=modifier(p),m=baseMod.attribute+
-   baseMod.aptitude+baseMod.foundation;
+   baseMod.aptitude+baseMod.foundation,
+  workBefore=state.gateWork.progress;
  let earn=0,receipt=null,mitigationRoll=null,deviation=null,steps=0,
   opened=null,minutes=accepted?180:5,progress=state.gateWork.progress;
  if(accepted){
@@ -254,7 +255,7 @@ function afterDaily(s,ctx){
   gateNumber:spec.number,gateBand:spec.band,
   transition:spec.transition,requiredPoints:spec.points,
   actualDC:spec.actualDC,originalForceChoice:false,
-  pointsBefore:progress-(accepted?earn:0), // overwritten below with true original prior
+  pointsBefore:workBefore,
   pointsAfter:state.gateWork.progress,
   gatesBefore:state.gates.length,gatesAfter:state.gates.length+(opened?1:0),
   staminaSpent:0,staminaBefore:accepted?oldStamina:null,
@@ -266,9 +267,6 @@ function afterDaily(s,ctx){
   earnedPoints:earn,stageAfter:state.stage,
   energyBefore:beforeEnergy,energyAfter:structuredClone(state.energy)
  });
- // Preserve actual pre-check progress even for a boundary crossing or
- // serious deviation; don't reconstruct it from a new stage's points.
- q.pointsBefore=ctx.originalGatePointsBefore;
  const seal=H(q);
  if(opened)state.gates.push({...opened,sourceHash:seal});
  state.sessions.push({source:q,seal});
