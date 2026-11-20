@@ -468,6 +468,11 @@ function afterDaily(s,w,life,activity,day){
    require('../rules/meridian-npc-physical').synchronize(s,ctx.actor);
   return result;
  }
+ // Only after a genuinely verified First Circle may this exact existing
+ // independent practice day advance the original Second Circle architecture.
+ // No extra life choice, time, player RNG, training rank or spell is created.
+ if(system==='arcane'&&ctx.actor.originalArcaneCore?.circles===1)
+  return require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
