@@ -79,7 +79,7 @@ function verify(s,p){
   state.sessions.length>3000||
   !state.gateWork||!integer(state.gateWork.number)||
   !integer(state.gateWork.progress)||
-  state.gateWork.forced!==false||
+  typeof state.gateWork.forced!=='boolean'||
   !state.energy)return false;
  try{Gate.verifiedGates(state.gates);}catch{return false;}
  let gates=[],work={number:1,progress:0,forced:false},
@@ -198,7 +198,7 @@ function verify(s,p){
      originalCapacityOwner:'rules/build.js:meridianProfile'};
     expectedStage=3;
     work={number:spec.number+1,progress:0,forced:false};
-   }else work={number:spec.number,progress,forced:false};
+   }else work={number:spec.number,progress,forced:work.forced};
   }else{
    if(q.actualMinutes!==5||q.check!==null||
     q.staminaBefore!==null||q.staminaAfter!==null||
