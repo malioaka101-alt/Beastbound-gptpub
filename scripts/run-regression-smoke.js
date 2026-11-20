@@ -62,7 +62,8 @@ function main(){
  const files=changed(),
   selected=new Set(QUICK),deferred=[];
  for(const file of files){
-  if(file.startsWith('tests/')&&file.endsWith('.test.js')){
+  if(file.startsWith('tests/')&&file.endsWith('.test.js')&&
+    fs.existsSync(Path.join(ROOT,file))){
    const name=Path.basename(file);
    if(EXPENSIVE.has(name)){deferred.push(name);continue;}
    selected.add(name);
