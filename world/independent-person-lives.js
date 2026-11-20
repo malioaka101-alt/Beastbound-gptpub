@@ -59,6 +59,26 @@ function verifyEntry(w,q){
  const actor=w.emergentPeople?.people?.[q.id];
  return !!actor&&People.verify(w,actor)&&actor.originHash===q.identityHash;
 }
+// New interests widen opportunity; they do not automatically erase the
+// source-witnessed long-standing pursuits or every later personal redirection.
+// One of the original life-owner's existing three RNG draws selects among
+// initial commitments, current focus and all discovered interests. The person
+// still independently chooses whether to practise, study, work, rest or leave.
+// No rank, skill, paid work or discipline result is granted by this weighting.
+function practiceFocus(q,b){
+ if(!Number.isFinite(b)||b<0||b>=1||
+  !Array.isArray(q?.interests)||!q.interests.length||
+  !Array.isArray(q.interestsAtIntroduction)||
+  !q.interestsAtIntroduction.length||
+  !q.interests.includes(q.focus))
+  throw Error('A real independent personal interest and one original source RNG draw are required');
+ const longstanding=q.interestsAtIntroduction;
+ if(b<.35)return longstanding[Math.min(longstanding.length-1,
+  Math.floor(b/.35*longstanding.length))];
+ if(b<.60)return q.focus;
+ return q.interests[Math.min(q.interests.length-1,
+  Math.floor((b-.60)/.40*q.interests.length))];
+}
 function record(q,body){
  const source={origin:ORIGIN,actorId:q.actorId,identityHash:q.identityHash,...body};
  const e={source,seal:hash(source)};
@@ -154,7 +174,7 @@ function daily(w,q,day,s){
  else if(a<.62&&b<.42){action='seek-work';focus='livelihood';
    reason='independently considering local chores, apprenticeships or paid work without assuming any offer or wage';}
  else {
-  focus=candidates[Math.floor(b*candidates.length)];
+  focus=practiceFocus(q,b);
   if(c<.38){action='study';reason='private theory and preparation';}
   else {action='practice';reason='ordinary independent physical or intellectual practice';}
   // Technical familiarity is not an original power-system rank, learned
@@ -217,4 +237,4 @@ function status(s,p={}){
    privateUnlessPersonallyLearned:true};
  }),note:'These are independent off-screen private lives. The player character does not automatically know them, and familiarity is never a source-owned cultivation level, skill award, qualification or income.'};
 }
-module.exports={ORIGIN,ensure,verifyEntry,enroll,daily,tick,status,_debug:{rngNext}};
+module.exports={ORIGIN,ensure,verifyEntry,enroll,daily,tick,status,_debug:{rngNext,practiceFocus}};
