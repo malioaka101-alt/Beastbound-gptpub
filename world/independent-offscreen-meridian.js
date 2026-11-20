@@ -58,6 +58,11 @@ function ready(s,ctx){
  return true;
 }
 function practice(s,ctx){
+ // The ORIGINAL Meridian track continues after a real Foundation rite.
+ // Use the source-owned Stage II Awakening adapter, not a second generic
+ // power ladder, and do not repeat completed Stage I Foundation work.
+ if(ctx.actor.meridianTraining?.earnedStage===1)
+  return require('./independent-meridian-ladder').afterDaily(s,ctx);
  if(!ready(s,ctx))return null;
  const p=ctx.actor,body=ctx.body,existing=p.meridianTraining;
  const required=Disc.KEYS.meridian.tracks.foundation[0];
