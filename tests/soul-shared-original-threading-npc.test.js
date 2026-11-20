@@ -34,7 +34,7 @@ A.equal(Law.stabilityAfter(95,{degree:'severe failure'}),89);
 A.equal(Law.stabilityAfter(2,{degree:'severe failure'}),1);
 A.equal(Law.stabilityAfter(95,{degree:'failure'}),95);
 A.equal(Build.soulProfile(2,{will:0}).perceptionRangeMetres,20);
-A.match(Player.work.toString(),/soul-shared-original-threading/);
+A.match(Player.work.toString(),/LAW\.DC/);
 A.match(Player.work.toString(),/LAW\.grow/);
 A.match(Player.work.toString(),/LAW\.stabilityAfter/);
 A.equal(NPC.verify({table:{}},{originalSoulThreadTwo:undefined}),true);
