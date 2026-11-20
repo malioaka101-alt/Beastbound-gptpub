@@ -5,6 +5,7 @@
 // Both are bounded, costly, source-witnessed actions after earned rites.
 const Crypto=require('node:crypto');
 const RiftAnchors=require('./rift-anchors');
+const RiftLaw=require('./rift-shared-original-exterior-sense');
 const SoulThreads=require('./soul-threading');
 const Creation=require('./creation-design');
 const E=require('../engine.js'),Core=require('./core'),W=require('./world'),
@@ -12,7 +13,8 @@ const E=require('../engine.js'),Core=require('./core'),W=require('./world'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas'),
  Presence=require('../world/person-presence');
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
-const SOUL_COST=2,RIFT_STAMINA=2,SOUL_MINUTES=6,RIFT_MINUTES=12;
+const SOUL_COST=2,RIFT_STAMINA=RiftLaw.STAMINA_COST,
+ SOUL_MINUTES=6,RIFT_MINUTES=RiftLaw.READ_MINUTES;
 const SOUL='phase1',RIFT='sense';
 function noParams(p){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
@@ -275,21 +277,9 @@ function senseRift(s,p={}){
  const c=s.table?.combatants?.player;
  if(stamina<RIFT_STAMINA||(c&&c.stamina<RIFT_STAMINA))
   throw Error('Insufficient Stamina for a careful boundary-sense session');
- const w=Realm.peek(s),site=w.mythic?.riftglass_vault,
-  eco=w.ecosystems?.riftglass;
- if(!site||!eco||
-  !['quiet','fading','surging','unstable'].includes(site.phase)||
-  !Number.isInteger(site.charge)||site.charge<0||site.charge>100||
-  !Number.isInteger(site.seal)||site.seal<0||site.seal>100||
-  !Number.isInteger(eco.pressure)||eco.pressure<0||eco.pressure>100)
-  throw Error('A genuinely recorded local boundary and ecological pressure are required');
- const pre={siteId:'riftglass_vault',phase:site.phase,charge:site.charge,
-  seal:site.seal,ecosystemPressure:eco.pressure,
-  worldSeed:w.worldSeed,day:Math.floor(s.world.minutes/1440)};
- const sampleHash=digest(pre);
- const risk=site.phase==='unstable'||site.seal<35?'unstable':
-  site.phase==='surging'||site.charge>72||eco.pressure>73?'elevated':'contained';
- const dc=risk==='unstable'?17:risk==='elevated'?15:13;
+ const pre=RiftLaw.snapshot(Realm.peek(s),Math.floor(s.world.minutes/1440));
+ const sampleHash=RiftLaw.digest(pre);
+ const dc=RiftLaw.dc(pre);
  const int=Core.int(s.player.attributes.int,'recorded Intelligence',1,30),
   rank=Core.int(s.player.skills?.arcana?.rank,'earned Arcana rank',0,5),
   modifier=Math.floor((int-10)/2)+2*rank+
@@ -310,11 +300,7 @@ function senseRift(s,p={}){
  if(c){c.stamina-=RIFT_STAMINA;U.sync(s,{source:'wounds'});}
  const old=s.world.minutes;
  E.advance(s,RIFT_MINUTES);W.finalizeTime(s,old);U.sync(s,{source:'legacy'});
- const publicObservation=check.success?
-  risk==='unstable'?'Strongly irregular boundary pressure; maintaining distance from the sealed vault is prudent.':
-   risk==='elevated'?'Elevated, shifting spatial pressure along the known exterior wards.':
-    'The existing exterior ward line feels comparatively contained at this moment.':
-  'The surrounding spatial pressure cannot be interpreted reliably.';
+ const publicObservation=RiftLaw.observation(pre,check.success);
  s.table||={};s.table.perceptionPractice||={soulAttempts:[],riftAttempts:[]};
  s.table.perceptionPractice.riftAttempts.push({
   origin:'earned-rift-sense-exterior',day:E.day(s),worldMinute:s.world.minutes,
