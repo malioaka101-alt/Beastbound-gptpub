@@ -52,4 +52,15 @@ function law(stage,{kind='practice',load=1,radius=3,
   severePracticeStabilityLoss:practice?2:0,
   mayGrantRankOnlyAfterSeparateSuccessfulFormation:true};
 }
-module.exports={POINTS,SYSTEM,SOURCE,law};
+// Stage IX stays biological and finite. This is the ORIGINAL separate
+// Constitution.care source, not an automatic day-tick benefit or healing.
+function maintenance({minutes=45}={}){
+ if(!integral(minutes,15,480))
+  throw Error('Real Stage IX personal metabolic maintenance time required');
+ return {qiSpent:3,staminaSpent:2+Math.ceil(minutes/120),
+  dc:19,attribute:'con',stabilityModifier:0,
+  severeStabilityLoss:2,minutes,
+  sourceOwner:SOURCE[9]+':care',
+  noImmortalityOrAutomaticBiologicalUpkeep:true};
+}
+module.exports={POINTS,SYSTEM,SOURCE,law,maintenance};
