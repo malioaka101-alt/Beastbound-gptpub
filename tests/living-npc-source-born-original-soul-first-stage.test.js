@@ -96,6 +96,13 @@ const diag=()=>JSON.stringify({
 A.ok(completed,'A truly source-born Soul adult has not completed the original 100-point Phase I rite in the bounded acceptance horizon: '+diag());
 A.ok(rec?.sessions?.filter(x=>x.source.origin===Early.ORIGIN).length,
  'The original 100-point Soul Phase I cannot emerge from an untrained actor with no actual sessions');
+const originalRite=rec.sessions.find(x=>
+ x.source.origin===First.ORIGIN&&x.source.outcome==='breakthrough');
+A.ok(originalRite,'An earned Soul Phase I requires an actual resolved first-milestone receipt');
+A.equal(originalRite.source.pointsBefore,100,
+ 'Original Soul Phase I demands the source-owned 100-point threshold, not 40');
+A.ok(originalRite.source.distinctMethodsBefore>=2,
+ 'The personally earned original rite requires at least two actually practised methods');
 A.equal(Early.verify(s,p),true);
 A.ok(p.originalFirstPowerMilestones.soul.originalSourceHash,
  'The original Source-owner rite must retain its own earned success receipt');
@@ -120,4 +127,4 @@ const forged=E.importGame(save),
 fp.originalFirstPowerMilestones.soul.soulReserve+=100;
 A.equal(Early.verify(forged,fp),false,
  'Changing an earned original Soul reserve cannot bypass genuine rite replay');
-console.log('Untrained source-born independent Soul -> genuine daily study/practice -> 40-point/2-method preparation -> authentic original Phase I rite, overnight recovery, save/tamper PASS; days '+days);
+console.log('Untrained source-born independent Soul -> genuine daily study/practice -> 100-point/2-method preparation -> authentic original Phase I rite, overnight recovery, save/tamper PASS; days '+days);
