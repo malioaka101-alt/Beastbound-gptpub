@@ -1,0 +1,28 @@
+name: Beastbound Rift Real-Chain Verification
+# Honest, bounded multi-individual source analysis. The original exterior
+# Riftglass ruins are NOT automatically safe shelter, and the NPC's finite
+# Combat stamina may block eventual Anchor II completion.
+# Long-running evidence is separate from fast draft smoke; all files still
+# belong to the mandatory whole-branch six-shard full regression.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/rift-npc-real-chain.yml'
+      - 'tests/living-npc-rift-anchor-two-unbroken-source-life.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-exterior-anchors:
+    name: Independent Riftglass Sense through original Anchor II, no invented rest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay independently chosen Rift exterior geometry across real world lives
+        run: node tests/living-npc-rift-anchor-two-unbroken-source-life.test.js
