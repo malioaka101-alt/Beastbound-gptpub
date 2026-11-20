@@ -255,7 +255,8 @@ function verify(s,p){
 function afterDaily(s,ctx){
  const p=ctx.actor,body=ctx.body,
   foundation=foundationSeal(p);
- if(!foundation||body.status!=='ok'||body.stamina<1||
+ if(!foundation||ctx.workDay<=p.meridianTraining.lastAttemptDay||
+  body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x!==0))return null;
  if(!Disc.verifyNpcMeridian(s,p)||!verify(s,p))
   throw Error('Original Meridian Stage I or later source was altered');
@@ -335,7 +336,8 @@ function attemptRite(s,ctx,r){
   beforeWounds=accepted?[...body.wounds]:null,
   training=Disc.originalActorTrainingProfile(s,{
    actorId:p.actorId,system:'meridian',target:'awakening'}),
-  profile=Build.meridianProfile(2,{meridians:12});
+  profile=Build.meridianProfile(2,{meridians:12}),
+  oldCooldown=track.cooldownUntil;
  let outcome='declined',dc=baseDC+5,minutes=accepted?180:5,
   receipt=null,afterPoints=track.points,cooldown=track.cooldownUntil,
   injury=false,energy=null,primary=0,awareness=0;
@@ -370,7 +372,7 @@ function attemptRite(s,ctx,r){
   originalAptitudeDimension:training.potential.dimension,
   originalAptitudeBonus:training.potential.modifier,
   pointsBefore:startPoints,pointsAfter:afterPoints,
-  cooldownBefore:accepted&&outcome==='breakthrough'?track.cooldownUntil:track.cooldownUntil,
+  cooldownBefore:oldCooldown,
   cooldownUntil:cooldown,
   check:receipt,outcome,primaryMappedAfter:primary,
   awarenessAfter:awareness,energyAfter:energy,
