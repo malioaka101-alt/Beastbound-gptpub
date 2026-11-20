@@ -52,7 +52,7 @@ function proof(ctx,r,details){
   originalCombatEntrySeal:ctx.body.npcOrigin.seal,
   originalStageThreeGateHash:r.gateFinalSourceHash,
   originalShiftHash:ctx.originalShiftHash,
-  originalSceneHash:hash(witness),offscreenOpportunity:witness,
+  originalSceneHash:hash(witnessed),offscreenOpportunity:witnessed,
   day:ctx.workDay,startMinute:ctx.workDay*1440+600,
   personalityAtAttempt:ctx.actor.personality,
   fatigueAtAttempt:ctx.actor.fatigue,
