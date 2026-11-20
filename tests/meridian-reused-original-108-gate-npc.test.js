@@ -57,7 +57,20 @@ const body={status:'ok',stamina:40,maxStamina:40,wounds:[0,0,0],
  npcOrigin:{seal:'b'.repeat(64)}};
 s.table||={};
 s.table.combatants||={};
-s.table.combatants['npc_'+p.id]=body;
+ s.table.combatants['npc_'+p.id]=body;
+// Test fixture selects a deterministic *future independent RNG sequence*
+// containing a voluntary risky Gate decision. It does not choose or fake
+// the result of the actual original Core.check or breakthrough.
+let forcedSeed=null;
+for(let seed=1;seed<1000000;seed++){
+ const r={rngState:seed},practice=C.die(r,100),
+  forced=C.die(r,100);
+ if(practice<=66&&forced<=Original.forceChance(p)){
+  forcedSeed=seed;break;
+ }
+}
+A.ok(forcedSeed);
+p.rngState=forcedSeed;
 A.equal(Original.verify(s,p),true);
 let found=null,opened=false;
 for(let day=1;day<=60;day++){
@@ -74,7 +87,17 @@ for(let day=1;day<=60;day++){
   const q=p.originalMeridianGates.sessions.at(-1).source;
   A.equal(q.originalStageTwoSourceHash,STAGE_TWO);
   A.equal(q.originalSkillRankBonus,0);
-  A.equal(q.originalForceChoice,false);
+  A.equal(q.originalForceChance,q.accepted?Original.forceChance(p):null);
+  if(q.accepted){
+   A.ok(q.originalForceD100>=1&&q.originalForceD100<=100);
+   A.equal(q.originalForceChoice,
+    q.originalForceD100<=q.originalForceChance);
+  }else{
+   A.equal(q.originalForceChoice,false);
+   A.equal(q.originalForceD100,null);
+  }
+  A.equal(typeof q.forceBefore,'boolean');
+  A.equal(typeof q.forceAfter,'boolean');
   A.equal(q.actualDC,Gate.gateSpec(1).actualDC);
   A.equal(q.requiredPoints,3);
   A.equal(q.gateBand,'Lower');
@@ -98,8 +121,8 @@ A.ok(found,'Real original core/check from independently accepted or declined Gat
 A.equal(opened,true,'A genuine original Gate opening is possible with the distinct Stage II prerequisite');
 A.equal(p.originalMeridianGates.stage,3);
 A.equal(p.originalMeridianGates.gates[0].number,1);
-A.ok(['Perfect','Sound','Flawed'].includes(
- p.originalMeridianGates.gates[0].quality));
+A.equal(p.originalMeridianGates.gates[0].quality,'Flawed',
+ 'One independently chosen forced circulation in this exact Gate persists into its genuinely opened quality');
 A.deepEqual(Gate.verifiedGates([{number:1,band:'Lower',
  quality:p.originalMeridianGates.gates[0].quality}]),
  {Perfect:p.originalMeridianGates.gates[0].quality==='Perfect'?1:0,
@@ -119,4 +142,4 @@ for(const n of [36,72,108]){
  A.equal(r.actualDC,r.baseDC+3);
 }
 A.equal(s.player.meridian.stage,0);
-console.log('Isolated original independent NPC 108-Gate source contract PASS: original separate Stage II required, real private acceptance/check, correct Gate 1, exact replay and forged DC rejection; synthetic earlier prerequisite restricted to test VM');
+console.log('Isolated original independent NPC 108-Gate source contract PASS: source-only Stage II prerequisite, real private acceptance and independently chosen forced circulation, original persistent Flawed quality/deviation rules, exact core check and forged DC rejection');
