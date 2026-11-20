@@ -286,7 +286,8 @@ function afterDaily(s,ctx){
 }
 function afterNight(s,p,nightRow){
  if(!foundation(p)||p.originalSoulThreadTwo?.completed&&
-  p.originalSoulLattice!==undefined)return null;
+  (p.originalSoulLattice!==undefined||
+   p.originalSoulLatticeThree!==undefined))return null;
  const r=ensureLedger(s,p);
  const Offscreen=require('../world/independent-original-power-days');
  if(!nightRow||!Offscreen.verifyNights(s,p,[nightRow])||
