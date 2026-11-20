@@ -337,8 +337,11 @@ function night(s,ctx){
   originalRestoredQi:qi?.restoredQi||0,
   noPlayerKnowledge:true};
 }
-function verifyNights(s,p){
- const rows=p?.originalOffscreenCombatNights||[],
+// An archived original-night receipt can be checked after the current
+// 480-night rolling body ledger has aged it out. All ordinary source checks,
+// prior witnessed shelter, physical costs and daily provenance still apply.
+function verifyNights(s,p,archivedRows=null){
+ const rows=archivedRows===null?(p?.originalOffscreenCombatNights||[]):archivedRows,
   life=s.table?.realm?.independentPersonLives?.people?.[p?.id];
  if(!Array.isArray(rows)||rows.length>480)return false;
  if(rows.length&&(!life||!require('./independent-person-lives').
