@@ -20,6 +20,10 @@ function replayUntil(s,p,rows,index,limit,energy,priorEnd=0){
   !energy||!good(energy.currentQi)||!good(energy.maxQi)||
   energy.currentQi>energy.maxQi)return null;
  let end=priorEnd,now=structuredClone(energy),i=index;
+ // Recheck the immutable complete night ledger ONCE per synchronous replay,
+ // not for every individual Qi receipt. Never persist this across turns:
+ // a later world day or edited history must receive a fresh full audit.
+ const checkedHistory={offscreen:false,witnessed:false};
  if(!rows.length)return {energy:now,index:i,end};
  // Each receipt must have an original independent source: either an
  // actually witnessed safe eight-hour sleep or the already source-sealed
@@ -34,7 +38,7 @@ function replayUntil(s,p,rows,index,limit,energy,priorEnd=0){
    q.individualOriginHash!==p.originHash||
    q.originalCombatEntrySeal!==
     s.table?.combatants?.['npc_'+p.id]?.npcOrigin?.seal||
-   !verifiedNight(s,p,q)||
+   !verifiedNight(s,p,q,checkedHistory)||
    q.completedMinute<=end||q.completedMinute>s.world.minutes||
    q.originalRecoveryOwner!=='rules/unified.js:sleep'||
    q.noSecondWorldTickOrUnlearnedPower!==true||
@@ -48,7 +52,7 @@ function replayUntil(s,p,rows,index,limit,energy,priorEnd=0){
  }
  return {energy:now,index:i,end};
 }
-function verifiedNight(s,p,q){
+function verifiedNight(s,p,q,checkedHistory=null){
  if(!q||!['offscreen','witnessed'].includes(q.sourceKind)||
   typeof q.originalNightSeal!=='string'||q.originalNightSeal.length!==64||
   !good(q.completedDay)||!good(q.completedMinute)||
@@ -60,7 +64,10 @@ function verifiedNight(s,p,q){
  try{
   if(q.sourceKind==='offscreen'){
    const Offscreen=require('./independent-original-power-days');
-   if(!Offscreen.verifyNights(s,p))return false;
+   if(!checkedHistory?.offscreen){
+    if(!Offscreen.verifyNights(s,p))return false;
+    if(checkedHistory)checkedHistory.offscreen=true;
+   }
    const row=(p.originalOffscreenCombatNights||[]).find(x=>
     x.seal===q.originalNightSeal);
    // The original physical-night owner retains a rolling 480-night ledger.
@@ -81,7 +88,10 @@ function verifiedNight(s,p,q){
     source.noAdditionalPlayerTimeOrFreePower===true;
   }
   const Health=require('../rules/unified');
-  if(!Health.verifyNpcNightHistory(s,p.actorId))return false;
+  if(!checkedHistory?.witnessed){
+   if(!Health.verifyNpcNightHistory(s,p.actorId))return false;
+   if(checkedHistory)checkedHistory.witnessed=true;
+  }
   const row=(p.originalOvernightRestDecisions||[]).find(x=>
    x.sourceHash===q.originalNightSeal);
   return !!row&&row.sourceHash===hash(row.source)&&
