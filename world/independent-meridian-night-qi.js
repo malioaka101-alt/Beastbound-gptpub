@@ -51,7 +51,11 @@ function verifiedNight(s,p,q){
  if(!q||!['offscreen','witnessed'].includes(q.sourceKind)||
   typeof q.originalNightSeal!=='string'||q.originalNightSeal.length!==64||
   !good(q.completedDay)||!good(q.completedMinute)||
-  q.completedMinute!==q.completedDay*1440)return false;
+  (q.sourceKind==='offscreen'&&
+   q.completedMinute!==q.completedDay*1440)||
+  (q.sourceKind==='witnessed'&&
+   (q.completedMinute<q.completedDay*1440||
+    q.completedMinute>q.completedDay*1440+90)))return false;
  try{
   if(q.sourceKind==='offscreen'){
    const Offscreen=require('./independent-original-power-days');
