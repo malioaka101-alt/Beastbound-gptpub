@@ -1,0 +1,27 @@
+name: Beastbound Body Real-Chain Verification
+# Source-owner acceptance, not a replacement for the six-shard full regression.
+# Uses an expressly disposable earlier Body I preparation fixture; all II
+# and III training decisions, dice, original safe rest, wounds and gain are
+# genuine from existing actors and source-sealed independent day receipts.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/body-npc-real-chain.yml'
+      - 'tests/living-npc-original-body-through-organ-three-live.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  body-original-through-organs:
+    name: Verified independent Bone-Marrow II through integrated Organ III
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove original source-owned independent Body II to III physical history
+        run: node tests/living-npc-original-body-through-organ-three-live.test.js
