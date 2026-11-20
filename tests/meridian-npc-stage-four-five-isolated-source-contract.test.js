@@ -138,7 +138,8 @@ for(let day=2;day<=220;day++){
  s.world.minutes=(day+1)*1440;
  const shared=s.rngState,log=JSON.stringify(s.log);
  const result=Web.afterDaily(s,{actor:p,body,workDay:day,
-  site:'crossing',originalShiftHash:'c'.repeat(64)});
+  site:'crossing',loc:{biome:'settlement'},
+  originalShiftHash:'c'.repeat(64)});
  A.equal(s.rngState,shared);
  A.equal(JSON.stringify(s.log),log);
  A.equal(Sea.verify(s,p),true);
