@@ -261,7 +261,8 @@ function afterDaily(s,ctx){
  if(!Disc.verifyNpcMeridian(s,p)||!verify(s,p))
   throw Error('Original Meridian Stage I or later source was altered');
  let r=p.originalMeridianLadder;
- if(r?.stage===2)return null; // Later exact Gates use a separate owner.
+ if(r?.stage===2)
+  return require('./independent-meridian-gates').afterDaily(s,ctx);
  if(r?.awakening.lastAttemptDay>=ctx.workDay||
   r&&ctx.workDay<r.awakening.cooldownUntil)return null;
  if(Object.values(p.originalEarlyDisciplinePreparation||{}).
