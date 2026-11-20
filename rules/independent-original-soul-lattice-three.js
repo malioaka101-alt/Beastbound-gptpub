@@ -112,6 +112,10 @@ function verify(s,p){
    strain>=5||points>=Law.GOAL&&strain>2?'repair':
    points>=Law.GOAL?'form':'practice';
   if(q.kind!==expectedKind)return false;
+  // Source verification must reject any invented clinical-repair row too.
+  // No independent original clinician/identity-countertest source exists yet.
+  // It is not enough merely to block creation in afterDaily.
+  if(q.kind==='repair')return false;
   const roller={rngState:q.rngBefore};
   if(q.choiceD100!==Core.die(roller,100)||
    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
