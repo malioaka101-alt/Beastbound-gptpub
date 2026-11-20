@@ -371,7 +371,18 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
  const wounds=[...c.wounds],stamina=c.stamina,
   maximum=c.maxStamina,
   minutes=response.source.accepted?480:5;
- E.advance(s,minutes);W.finalizeTime(s,start);
+ // A personally witnessed night may cross the same date boundary at which
+ // the independent daily-life scheduler chooses its own rest. That is ONE
+ // overlapping eight-hour sleep, never two independent nights or two Qi
+ // recoveries. Hold a transient verified internal overlap marker only while
+ // the existing world tick executes, then remove it before checkpointing.
+ if(s.table.originalNpcNightInProgress)
+  throw Error('An original witnessed independent night is already in progress');
+ s.table.originalNpcNightInProgress={
+  actorId,day,sourceHash:response.sourceHash,accepted:response.source.accepted};
+ try{
+  E.advance(s,minutes);W.finalizeTime(s,start);
+ }finally{delete s.table.originalNpcNightInProgress;}
  if(response.source.accepted)Combat.completedNight(s,condition.combatantId);
  const result={accepted:response.source.accepted,elapsedMinutes:minutes,
   endedMinute:s.world.minutes,
