@@ -27,7 +27,7 @@ function initial(p){
   noInheritedImmortalityOrUnlearnedTechnique:true};
 }
 function action(state){
- if(state.stage===9)return null;
+ if(state.stage===9)return 'care';
  if(state.track.target!==state.stage+1)return null;
  return !state.track.mapped?'map':
   state.track.points<Law.POINTS[state.track.target]?'practice':'form';
@@ -45,7 +45,9 @@ function params(p,web,state,site,s){
   state.track.mapped&&(!number(radius,1,100)||
    radius>Math.max(2,Math.floor(state.energy.flow*state.stability/20)))))
   return null;
- const originalProof=target===6?web.originalStageFiveSourceHash:
+ const originalProof=state.stage===9?
+  state.achieved[9]?.originalSourceHash:
+  target===6?web.originalStageFiveSourceHash:
   state.achieved[target-1]?.originalSourceHash;
  if(!originalProof)return null;
  return {target,load:route.load,radius,sourceLocation:site,
@@ -56,6 +58,12 @@ function params(p,web,state,site,s){
   noPeopleOrTerritoryControlled:true};
 }
 function plan(p,state,x,kind){
+ if(kind==='care'){
+  const law=Law.maintenance({minutes:45});
+  return {law,qiSpent:law.qiSpent,staminaSpent:law.staminaSpent,
+   modifier:Math.floor((p.mechanicalFoundation.baselineAttributes.con-10)/2),
+   dc:law.dc,minutes:45};
+ }
  const law=Law.law(x.target,{kind:kind==='form'?'form':'practice',
   load:x.load,radius:x.radius,stability:state.stability,
   minutes:kind==='form'?90:60});
@@ -94,7 +102,9 @@ function compute(s,p,web,state,q,sourceHash){
  if(!next||!number(q.target,6,9)||q.target!==state.track.target||
   q.action!==next||q.stageBefore!==state.stage||
   q.pointsBefore!==state.track.points||
-  q.originalStagePriorHash!==(state.track.mapSourceHash||
+  q.originalStagePriorHash!==(next==='care'?
+   state.achieved[9]?.originalSourceHash:
+   state.track.mapSourceHash||
    state.achieved[q.target-1]?.originalSourceHash||
    web.originalStageFiveSourceHash))
   return null;
@@ -119,7 +129,8 @@ function compute(s,p,web,state,q,sourceHash){
   q.qiSpent!==(accepted?policy.qiSpent:0)||
   q.staminaSpent!==(accepted?policy.staminaSpent:0)||
   JSON.stringify(q.energyBefore)!==JSON.stringify(state.energy)||
-  q.stabilityBefore!==state.stability)
+  q.stabilityBefore!==state.stability||
+  q.burdenBefore!==state.originalConstitutionBurden)
   return null;
  const after=structuredClone(state);
  let mapped=false,formed=false,earned=0,stabilityLost=0;
@@ -152,6 +163,14 @@ function compute(s,p,web,state,q,sourceHash){
     after.track.points+earned);
    if(degree==='severe failure'){
     stabilityLost=policy.law.severePracticeStabilityLoss;
+    after.stability=Math.max(1,after.stability-stabilityLost);
+   }
+  }else if(next==='care'){
+   after.originalConstitutionBurden=success?
+    Math.max(0,state.originalConstitutionBurden-1):
+    Math.min(10,state.originalConstitutionBurden+2);
+   if(degree==='severe failure'){
+    stabilityLost=policy.law.severeStabilityLoss;
     after.stability=Math.max(1,after.stability-stabilityLost);
    }
   }else if(next==='form'&&success){
@@ -190,6 +209,7 @@ function compute(s,p,web,state,q,sourceHash){
   q.pointsAfter!==after.track.points||
   JSON.stringify(q.energyAfter)!==JSON.stringify(after.energy)||
   q.stabilityAfter!==after.stability||
+  q.burdenAfter!==after.originalConstitutionBurden||
   roller.rngState!==q.rngAfter)
   return null;
  return after;
@@ -281,7 +301,9 @@ function afterDaily(s,ctx){
  const q=source(ctx,r,{
   target,action:next,stageBefore:r.stage,
   stageAfter:null,pointsBefore:r.track.points,pointsAfter:null,
-  originalStagePriorHash:r.track.mapSourceHash||
+  originalStagePriorHash:next==='care'?
+   r.achieved[9]?.originalSourceHash:
+   r.track.mapSourceHash||
    r.achieved[target-1]?.originalSourceHash||
    web.originalStageFiveSourceHash,
   originalEarlierStageHash:x.originalProof,
@@ -301,6 +323,7 @@ function afterDaily(s,ctx){
   maxStaminaAtAttempt:accepted?body.maxStamina:null,
   energyBefore:beforeQi,energyAfter:null,
   stabilityBefore,stabilityAfter:null,
+  burdenBefore:r.originalConstitutionBurden,burdenAfter:null,
   earnedPoints:null,stabilityLoss:null,mapped:null,formed:null
  });
  // Fill only the mechanical fields computed from this ONE actual check,
@@ -323,6 +346,14 @@ function afterDaily(s,ctx){
     stabilityLoss=policy.law.severePracticeStabilityLoss;
     temp.stability=Math.max(1,temp.stability-stabilityLoss);
    }
+  }else if(next==='care'){
+   temp.originalConstitutionBurden=success?
+    Math.max(0,r.originalConstitutionBurden-1):
+    Math.min(10,r.originalConstitutionBurden+2);
+   if(result==='severe failure'){
+    stabilityLoss=policy.law.severeStabilityLoss;
+    temp.stability=Math.max(1,temp.stability-stabilityLoss);
+   }
   }else if(next==='form'&&success){
    formed=true;temp.stage=target;
    const extraordinary=new Set(web.routes.flatMap(y=>y.segments)
@@ -337,7 +368,9 @@ function afterDaily(s,ctx){
  }
  q.stageAfter=temp.stage;q.pointsAfter=temp.track.points;
  q.energyAfter=structuredClone(temp.energy);
- q.stabilityAfter=temp.stability;q.earnedPoints=earned;
+ q.stabilityAfter=temp.stability;
+ q.burdenAfter=temp.originalConstitutionBurden;
+ q.earnedPoints=earned;
  q.stabilityLoss=stabilityLoss;q.mapped=mapped;q.formed=formed;
  const seal=H(q),applied=compute(s,p,web,r,q,seal);
  if(!applied)throw Error('The actual original advanced Meridian check disagreed with its source owner');
