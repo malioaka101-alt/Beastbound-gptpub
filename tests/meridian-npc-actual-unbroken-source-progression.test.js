@@ -10,6 +10,7 @@ const A=require('node:assert/strict'),E=require('../engine.js'),
  Lives=require('../world/independent-person-lives'),
  Unified=require('../rules/unified'),World=require('../rules/world'),
  Combat=require('../rules/combat'),Disc=require('../rules/disciplines'),
+ Build=require('../rules/build'),
  Ladder=require('../world/independent-meridian-ladder'),
  Gates=require('../world/independent-meridian-gates'),
  Power=require('../world/independent-original-power-days');
@@ -82,6 +83,13 @@ function born(){
  return {s,p,combatant};
 }
 const {s,p,combatant}=born(),initialPc=E.exportGame(s);
+const a=p.mechanicalFoundation.baselineAttributes,
+ ability=k=>Math.floor((a[k]-10)/2),
+ baseline=Build.humanStats({vigor:ability('con'),agility:ability('dex'),
+  wits:ability('wis'),will:ability('wis'),might:ability('str')},
+  {skills:{Melee:0},size:'Medium'});
+A.equal(combatant.maxStamina,baseline.stamina,
+ 'Actual original independent NPC begins with a genuine unmodified human body');
 const witnessedNight=p.originalOvernightRestDecisions[0].sourceHash,
  actorRng=p.rngState,pcStage=s.player.meridian.stage;
 let reachedI=false,reachedII=false,firstGate=false,daysElapsed=0,
@@ -104,14 +112,24 @@ for(let interval=0;interval<72&&!firstGate;interval++){
   firstI=p.meridianTraining.sessions.find(x=>
    x.source.origin==='original-independent-meridian-foundation-stage-one-rite-v1'&&
    x.source.outcome==='breakthrough')?.seal;
+  A.equal(combatant.maxStamina,
+   baseline.stamina+Build.meridianProfile(1).bonuses.stamina,
+   'Original earned Stage I breakthrough physically increases the SAME NPC Combat body');
  }
  if(p.originalMeridianLadder?.stage===2&&!reachedII){
   reachedII=true;
   firstII=p.originalMeridianLadder.originalStageTwoSourceHash;
+  A.equal(combatant.maxStamina,
+   baseline.stamina+Build.meridianProfile(2,{meridians:12}).bonuses.stamina,
+   'Actual Stage II completion grants source-owned Combat Stamina without resetting wounds');
  }
  if(p.originalMeridianGates?.gates?.length){
   firstGate=true;
   firstGateHash=p.originalMeridianGates.gates[0].sourceHash;
+  A.equal(combatant.maxStamina,
+   baseline.stamina+Build.meridianProfile(3,
+    {meridians:12,gatesS:1}).bonuses.stamina,
+   'First earned Lower Gate uses original Stage III physique, not an invented bonus');
  }
 }
 const diagnostic=()=>JSON.stringify({elapsedDays:daysElapsed,
