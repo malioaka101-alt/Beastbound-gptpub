@@ -256,7 +256,7 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.rift.step=1;
    originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
   }
-  if([1,2,3,4].includes(verifiedMeridian?.originalMeridianStageEarned)){
+  if([1,2,3,4,5].includes(verifiedMeridian?.originalMeridianStageEarned)){
    originalMilestones.meridian.stage=verifiedMeridian.originalMeridianStageEarned;
    originalMilestones.meridian.openedGates=0;
    originalMilestones.meridian.foundationQuality=
@@ -273,9 +273,12 @@ function earnedEvidence(w,actorId,s=null){
       verifiedMeridian.originalStageThreeOpenedGates;
      originalMilestones.meridian.originalVerifiedGateRecords=
       structuredClone(verifiedMeridian.originalStageThreeIndividualGates);
-     if(verifiedMeridian.originalMeridianStageEarned===4)
+     if(verifiedMeridian.originalMeridianStageEarned>=4)
       originalMilestones.meridian.originalDantianSea=
        structuredClone(verifiedMeridian.originalStageFourSea);
+     if(verifiedMeridian.originalMeridianStageEarned===5)
+      originalMilestones.meridian.originalLivingWebRoutes=
+       structuredClone(verifiedMeridian.originalStageFiveWebRoutes);
     }
    }
   }
