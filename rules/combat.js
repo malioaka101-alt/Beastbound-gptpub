@@ -227,6 +227,16 @@ function completedNight(s,id){
  return {wounds:[...c.wounds],stamina:c.stamina,status:c.status,
   completedNights:1,additionalTimeAdvanced:false};
 }
+// Exactly the original Combat.rest(...,{weeks:1}) wound law, but the six
+// days have ALREADY elapsed in the independent world's recorded life tick.
+// Only the source-verifying sixday rest owner may call this without another
+// W.advance. One Serious and all Light injuries heal; never Critical.
+function completedWeek(s,id){
+ const c=get(s,id);
+ applyRest(c,0,1);
+ return {wounds:[...c.wounds],stamina:c.stamina,status:c.status,
+  completedWeeks:1,additionalTimeAdvanced:false};
+}
 function rest(s,{id,nights=0,weeks=0}={}){
  const c=get(s,id);
  C.int(nights,'nights',0,365);C.int(weeks,'weeks',0,52);
@@ -247,4 +257,4 @@ function observedCombatant(c){
    c.stamina<c.maxStamina/3?'badly winded':'no obvious wound';
  return {name:c.name,condition};
 }
-module.exports={severity,makeCombatant,penalty,harm,register,get,attack,contestForce,newRound,recover,rest,completedNight,publicCombatant,observedCombatant};
+module.exports={severity,makeCombatant,penalty,harm,register,get,attack,contestForce,newRound,recover,rest,completedNight,completedWeek,publicCombatant,observedCombatant};
