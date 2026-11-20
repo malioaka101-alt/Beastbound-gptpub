@@ -248,7 +248,7 @@ function verify(s,p){
    !number(q.startMinute)||q.startMinute!==q.day*1440+600||
    q.startMinute<lastEnd||
    !number(q.actualMinutes)||q.startMinute+q.actualMinutes>s.world.minutes||
-   !number(q.rngBefore,1)||!number(q.rngAfter,1)||
+   !number(q.rngBefore,1,0xffffffff)||!number(q.rngAfter,1,0xffffffff)||
    !number(q.choiceD100,1,100)||
    !['reserved','curious','steady','independent']
     .includes(q.personalityAtAttempt)||
