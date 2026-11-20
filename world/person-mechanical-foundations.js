@@ -256,13 +256,19 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.rift.step=1;
    originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
   }
-  if(verifiedMeridian?.originalMeridianStageEarned===1){
-   originalMilestones.meridian.stage=1;
+  if([1,2].includes(verifiedMeridian?.originalMeridianStageEarned)){
+   originalMilestones.meridian.stage=verifiedMeridian.originalMeridianStageEarned;
    originalMilestones.meridian.openedGates=0;
    originalMilestones.meridian.foundationQuality=
     verifiedMeridian.originalStageOneFoundationQuality;
    originalMilestones.meridian.foundationIntegrity=
     verifiedMeridian.originalFoundationIntegrity;
+   if(verifiedMeridian.originalMeridianStageEarned===2){
+    originalMilestones.meridian.primaryMeridiansMapped=
+     verifiedMeridian.originalStageTwoPrimaryMeridians;
+    originalMilestones.meridian.originalQiCapacityProfile=
+     structuredClone(verifiedMeridian.originalStageTwoQiProfile);
+   }
   }
   return {known:true,actorId,privateToGM:true,
    evidenceOwners:['world/emergent-people.js','world/person-careers.js',
@@ -328,8 +334,9 @@ function earnedEvidence(w,actorId,s=null){
    equipment:{verifiedItems:null,
     reason:'Verified materials are not proof of equipped tools, weapons or armor'},
    beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
-   sourceStatus:verifiedMeridian?.originalMeridianStageEarned===1?
-    'Real original Stage I Meridian Foundation and individual daily/work evidence verified; other power systems unresolved':
+   sourceStatus:verifiedMeridian?.originalMeridianStageEarned>=1?
+    'Real original Stage '+verifiedMeridian.originalMeridianStageEarned+
+     ' Meridian anatomy, actual source-owned practice and individual daily/work evidence verified; other powers unresolved':
     'Earned ordinary work and daily familiarity verified; unearned supernatural stages remain unresolved',
    noAbilityByTitle:true,noRetrospectivePower:true};
  }
