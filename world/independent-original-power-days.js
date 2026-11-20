@@ -367,8 +367,11 @@ function night(s,ctx){
  const originalNight=p.originalOffscreenCombatNights.at(-1);
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
   originalNight);
- const arcaneMana=require('../rules/independent-original-arcane-circle-two')
-  .afterNight(s,p,originalNight);
+ const arcaneMana=p.originalArcaneMatrix!==undefined?
+  require('../rules/independent-original-arcane-matrix-three')
+   .afterNight(s,p,originalNight):
+  require('../rules/independent-original-arcane-circle-two')
+   .afterNight(s,p,originalNight);
  // Original Combat.rest({weeks:1}) Serious recovery requires six
  // consecutive PERSONALLY chosen, fully witnessed safe rest days.
  // Already elapsed independent days never advance again.
@@ -476,7 +479,9 @@ function afterDaily(s,w,life,activity,day){
  // independent practice day advance the original Second Circle architecture.
  // No extra life choice, time, player RNG, training rank or spell is created.
  if(system==='arcane'&&ctx.actor.originalArcaneCore?.circles===1)
-  return require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
+  return ctx.actor.originalArcaneCircleTwo?.completed?
+   require('../rules/independent-original-arcane-matrix-three').afterDaily(s,ctx):
+   require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
