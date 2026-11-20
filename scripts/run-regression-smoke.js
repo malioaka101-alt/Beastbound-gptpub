@@ -33,6 +33,7 @@ const EXPENSIVE=new Set([
  'living-world.test.js','agent-initiatives.test.js',
  'knowledge-diffusion.test.js',
  'meridian-npc-actual-unbroken-source-progression.test.js',
+ 'living-npc-source-born-original-soul-first-stage.test.js',
  'professional-peers-longrun.test.js','adaptive-ambitions.test.js',
  'emergent-groups.test.js','family-members-longrun.test.js',
  'government-offices.test.js','open-learning-routes.test.js',
