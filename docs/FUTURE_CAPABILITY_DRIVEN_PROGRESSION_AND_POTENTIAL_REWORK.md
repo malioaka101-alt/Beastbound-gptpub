@@ -101,18 +101,48 @@ Create many other original constitutions, mutations and family powers before cal
 - Cultivation may be lifelong because it influences profession, family identity, pressure to improve, relationships, competition and civic obligation; it need not take a lifetime to get "advanced".
 - All NPCs follow the same **system-specific original mechanics** and private evidence requirements; no PC-only perks, fake off-screen power, or fabricated historical breakthroughs.
 
-## 8. Implementation order AFTER #177 — staged, source-compatible rework
+## 8. Combat rework assessment and likely redesign (new user-directed future scope)
+
+**User addition:** The potential/progression overhaul may also require the combat system to be reworked. Treat combat as a **first-class part of the future design**, not a balancing afterthought. The exact scale of replacement will be determined by a source-owner audit and prototype; do **not** prematurely discard the present combat engine.
+
+**Why:** capability-driven rapid progression, vastly stronger potential synergies, rare constitutions, clan techniques and extraordinary beast/human physiology will only be credible if *fighting* reflects actual mastery, specialised control and power differences. A high-stage prodigy should not merely receive a larger flat attack bonus; neither should a uniquely trained weaker fighter be automatically worthless. Avoid turning combat into purely numerical advantage or a scripted guaranteed victory.
+
+### Combat pillars to audit and redesign where necessary
+
+1. **Demonstrated combat skill vs innate talent:** potential changes how a person *learns, perceives, adapts, executes and sustains* combat techniques; actual trained technique, decision-making, real experience, position and ability decide their current repertoire and fighting effectiveness. Inherited power alone does not teach combat judgement.
+2. **Meaningful power disparity and plausible interaction:** high-stage practitioners, specialised beasts and apex constitutions can have genuinely extraordinary force, range, speed, resilience, control and environmental effects. Account for overwhelming mismatches without a simplistic level-based auto-win. Tactical counters, favourable conditions and genuine specialised expertise can remain relevant if the original physics permit.
+3. **Distinct martial styles and systems:** Meridian Qi reinforcement/bursts, Arcane geometry and cast load, Soul stability and identity resistance, Body tissue and sensory adaptation, Rift measured local geometry, Beast-Origin traits and beast-specific bodies require different action/counter/cost rules. Do not flatten them into universal ranks, one damage curve or arbitrary cross-system equivalence.
+4. **Technique sophistication, timing and control:** incorporate genuine preparation, interruption, reaction, perception, prediction, simultaneous technique handling, feints, spacing, line of effect, obstacles, environmental context, tactical intent, and the ability to execute a technique under pressure. Strong comprehension may allow quicker adaptation but not unearned knowledge or future sight.
+5. **Explicit resource conservation:** Qi, Mana, Soul reserve, Stamina, physical strain, wounds, tissue injury and spatial instability must pay their actual costs. Efficiency inheritances can be exceptionally strong but their limits, overload conditions, drawbacks and failure consequences must be defined. No infinite attacks, instant recovery, or extra actions from a title.
+6. **Constitutions and inherited techniques:** original rare features should fundamentally change combat possibilities and tradeoffs—e.g., pattern perception, multiple energy flows, tissue-reinforcement exchange, strain tolerance or unusual counters—not just +N damage. Inherited compatibility, training and genuine ability determine usable applications; equivalent families need not fight alike.
+7. **Human–beast equivalence and partnership:** beast dimensions, species organs, evolution paths, intelligence, senses and genuine biological attributes count. Humans must have plausible ways to interact with dangerous beasts without erasing beast threat. True paired coordination, combined techniques and voluntary consent matter; non-tamers retain meaningful independent routes. No automatic commanded cooperation.
+8. **Defense, injuries and stakes:** retain source-owned wound boxes, defense, toughness, fatigue and serious consequences unless a **versioned, explicitly approved** replacement is shown more coherent. Resolve attack penetration, protection, avoidance, partial defenses, resistance, fatigue, incapacitation and recovery without free heals, invulnerable characters or implausible one-hit outcomes for peers.
+9. **NPC intelligence and independent fighting:** combat choices need coherent personality, experience, profession, objectives, morale, self-preservation, willingness to retreat and situational knowledge. No omniscience, hidden GM exploitation, scripted player losses or superior enemy dice; same source-verifiable physical rules for PCs, NPCs and beasts, with fair asymmetries of anatomy and training.
+10. **Scale and performance:** individual duels, multi-party beast fights, tournaments, squad actions and exceptional high-stage conflicts should remain legible and mechanically resolvable without a prohibitive turn count or a host of nearly identical repetitive checks. Clear narration should accurately explain why moves succeed or fail.
+11. **Fair competition and world consequences:** military doctrine, guild rankings, arena structures, training schools, rare-family politics and realistic public recognition must reflect genuine demonstrated combat capability; an early-advanced prodigy cannot automatically inherit impeccable battlecraft.
+
+### Suggested future combat evaluation process (after #177)
+
+- Map all current canonical combat owners and interactions, including `rules/combat.js`, power-specific technique owners, body/physiology bonuses, player equipment, NPC Combat records, beast actions, arena rules and injury/recovery. Identify which mechanics *actually* need redesign versus safe adaptation.
+- Produce an explicit combat model and sample transcripts before code changes: an ordinary novice vs trained peer, a true high-stage prodigy vs several weaker enemies, a constitution-limited powerhouse, a technique specialist exploiting an authentic counter, an independently fighting beast and a freely cooperating human–beast team.
+- Test power gaps, speed/precision, multiple simultaneous effects, defenses and skill depth across all individual power systems. Use genuine resources, wounds, line-of-effect, witnesses and historical mastery; test rare inheritances and no-special-heritage experts alike.
+- Protect existing saves and source seals through versioned migration / separate combat implementation PRs. Record old semantics in baseline tests, never silently reinterpret historical damage or learned abilities.
+- Run source-verification, replay/forgery, balance, AI decision quality, interoperability, scaling and full consolidated regression before accepting any combat replacement.
+
+**Decision status:** Combat redesign is **in scope for future investigation and likely modification**, but *exact replacement rules, damage formulae, initiative systems and balance constants are not yet approved*. Design these alongside grouped potential, progression and inheritances rather than independently.
+
+## 9. Implementation order AFTER #177 — staged, source-compatible rework
 
 0. **Do NOT merge this planning file into #188** or modify current character source logic before #177 acceptance.
-1. Audit every existing power/potential/constitution/progression owner and special-case inherited source; create a source-to-feature matrix, baseline fixtures for PC and NPC, compatibility and rollback plan.
+1. Audit every existing power/potential/constitution/progression/**combat** owner and special-case inherited source; create a source-to-feature matrix, baseline fixtures for PC and NPC, compatibility and rollback plan.
 2. Ratify grouped potential schema, correlation, deterministic seeded source, rarity and derivation rules with exact treatment of Rift and species/nonhuman differences.
 3. Add **versioned migration** from actual immutable v1 `capabilityProfile.potential` and private NPC `mechanicalFoundation.unassessedPotential`: preserve old scores and all assessment history; do **not** secretly regenerate or "repair" existing people to fit new groups. For legacy people derive a **non-destructive inferred group summary** and maintain truthful existing subpotentials, or use an explicit approved new-generation-only schema. Define which approach is used before shipping.
 4. Implement original potential effects on **existing source owners**, one system at a time, with explicit independent exercise of real capability and no mandatory calendar/sessions. Recheck special environmental, materials and beast-consent prerequisites.
 5. Implement original constitution/lineage/inheritance sources, mutations, tradeoffs and unique learned techniques with source seals, traceable lineages, rarity distribution, explicit learning/activation and risk, NPC autonomy and GM privacy.
-6. Regenerate **only newly created characters** under the new grouping algorithm; exercise prodigies, ordinary individuals, low-potential success, incompatible inheritance, unusual non-tamers, unusually young advanced characters, extraordinary NPCs and beasts.
-7. Full original and new regression: no invented roll/time/technique/advancement, no save corruption, no universal rank ladder, stable real previous characters, coherent mechanics across PC and NPC, performance at world scale. Keep new rework in its own PR and accept only after #177.
+6. Prototype combat-system integration and its required revisions against the new power disparities, potential effects, rare constitutions, NPC choices and original wound/resource laws. Keep source owners and migration strategy explicit; preserve existing combat until a replacement passes acceptance.\n7. Regenerate **only newly created characters** under the new grouping algorithm; exercise prodigies, ordinary individuals, low-potential success, incompatible inheritance, unusual non-tamers, unusually young advanced characters, extraordinary NPCs and beasts.
+8. Full original and new regression: no invented roll/time/technique/advancement, no save corruption, no universal rank ladder, stable real previous characters, coherent mechanics across PC and NPC, performance at world scale. Keep new rework in its own PR and accept only after #177.
 
-## 9. Acceptance tests to write for this proposed rework
+## 10. Acceptance tests to write for this proposed rework
 
 - Individual attributes correlate within groups but permit specialisation; all fourteen present keys remain valid or explicitly/versioned migrated.
 - Repeated seeded generation is deterministic; integrity seals and privacy survive save/import/export.
@@ -121,6 +151,6 @@ Create many other original constitutions, mutations and family powers before cal
 - Potentials affect actual comprehension/efficiency/architecture/precision/innovation/biological response, not just d20 modifiers, without unlimited compounding.
 - Bloodline owners do not automatically master inherited techniques; limitations have meaningful reciprocal effects and counters.
 - No forged off-screen NPC ability or player presence; individual witnesses, resources, actual Combat conditions and consent are honored.
-- Existing campaign characters, facts and previous outcomes remain unchanged unless user explicitly approves migration.
+- Combat in asymmetric prodigy, average, high-stage, non-tamer and human–beast fights exhibits real capability differences, grounded counters, original resource/wound consequences and no universal auto-wins. NPC combat decisions remain independently source-honest and historically compatible.\n- Existing campaign characters, facts and previous outcomes remain unchanged unless user explicitly approves migration.
 
 **Deferred by user instruction. Return now to Unified Living Character #177 / PR #188.**
