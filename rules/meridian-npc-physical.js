@@ -13,18 +13,9 @@ function sourceProfile(s,p){
  const info=Disc.npcMeridianPrivateStatus(s,p.actorId),
   stage=info.originalMeridianStageEarned;
  if(!Number.isInteger(stage)||stage<1||stage>9)return null;
- // The private Meridian status owns authentic Foundation proof, but the
- // higher-stage status is a READ view. Revalidate the actual stage owner's
- // complete chronological receipts before projecting physical effects
- // into Combat or into a second discipline's weapon action.
- const owner=stage===1?null:stage===2?
-  '../world/independent-meridian-ladder':stage===3?
-  '../world/independent-meridian-gates':stage===4?
-  '../world/independent-meridian-sea':stage===5?
-  '../world/independent-meridian-web':
-  '../world/independent-meridian-advanced';
- if(owner&&!require(owner).verify(s,p))
-  throw Error('Original individual Meridian stage source failed full owner replay');
+ // Disc.npcMeridianPrivateStatus already replayed the deepest real
+ // chronological owner (including incomplete current-stage journals).
+ // Never rerun the same source chain a second time for this Combat view.
  const gates=info.originalStageThreeIndividualGates||[],
   routes=info.originalStageFiveWebRoutes||[],
   extraordinary=new Set(routes.flatMap(x=>x.segments||[])
