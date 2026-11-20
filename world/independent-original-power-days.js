@@ -333,8 +333,14 @@ function night(s,ctx){
  if(!verifyNights(s,p))throw Error('Actual original offscreen sleep source failed replay');
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
   p.originalOffscreenCombatNights.at(-1));
+ // Original Combat.rest({weeks:1}) Serious recovery requires six
+ // consecutive PERSONALLY chosen, fully witnessed safe rest days.
+ // Already elapsed independent days never advance again.
+ const convalesced=require('./independent-serious-convalescence').
+  afterNight(s,ctx);
  return {kind:'sleep',actualOriginalCombatRecovery:recovery.completedNights,
   originalRestoredQi:qi?.restoredQi||0,
+  ...(convalesced?{originalSeriousSixdayRecovery:1}:{}),
   noPlayerKnowledge:true};
 }
 // An archived original-night receipt can be checked after the current
