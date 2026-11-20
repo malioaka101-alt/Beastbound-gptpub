@@ -233,6 +233,12 @@ function afterDaily(s,ctx){
  const kind=!r.mapped?'design':
   r.strain>=5||r.points>=Law.GOAL&&r.strain>2?'repair':
   r.points>=Law.GOAL?'form':'practice';
+ // The ORIGINAL Phase III repair owner requires a NEW personally
+ // witnessed clinical identity-interference diagnosis and correction.
+ // Existing independent practice plus a numeric strain value is NOT a
+ // diagnosis, a clinician or treatment. Until that specific evidence owner
+ // is integrated, do not silently invent a restorative Soul intervention.
+ if(kind==='repair')return null;
  const cost=kind==='design'?0:
   kind==='form'?Law.FORMATION_RESERVE:
   kind==='repair'?Law.REPAIR_RESERVE:Law.PRACTICE_RESERVE;
