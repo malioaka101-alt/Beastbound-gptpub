@@ -206,7 +206,9 @@ function afterDaily(s,ctx){
  if(!Ladder.verify(s,p)||!verify(s,p))
   throw Error('Original Stage II/Gate receipts have been altered');
  const state=p.originalMeridianGates||openState(p);
- if(state.gates.length===108||state.sessions.length>=3000)return null;
+ if(state.gates.length===108)
+  return require('./independent-meridian-sea').afterDaily(s,ctx);
+ if(state.sessions.length>=3000)return null;
  const spec=Gate.gateSpec(state.gateWork.number),
   sourceRng=p.rngState,choiceChance=Meridian.chance(p),
   choiceD100=Core.die(p,100),accepted=choiceD100<=choiceChance,
