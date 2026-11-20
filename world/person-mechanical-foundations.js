@@ -261,6 +261,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedArcaneThird=s?.table?.realm===w&&actor.originalArcaneMatrix?
    require('../rules/independent-original-arcane-matrix-three')
     .privateStatus(s,actor):null;
+  const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
+   require('../rules/independent-original-body-cycle-two')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
@@ -283,6 +286,11 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.body.completedCycles=['Muscle-Tendon Cycle'];
    originalMilestones.body.originalCurrentStrengthBonus=1;
    originalMilestones.body.realCombatBodyStaminaBonus=2;
+  }
+  if(verifiedBodyTwo?.earnedBoneMarrowRefinement===true){
+   originalMilestones.body.completedCycles=['Muscle-Tendon Cycle','Bone-Marrow Cycle'];
+   originalMilestones.body.originalToughnessGain=1;
+   originalMilestones.body.originalSeriousWoundBoxGain=1;
   }
   if(earnedOther.rift?.step===1){
    originalMilestones.rift.step=1;
@@ -376,6 +384,7 @@ function earnedEvidence(w,actorId,s=null){
    originalOtherDisciplinePreparation:verifiedOtherPreparation,
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
    originalArcaneResonantMatrix:verifiedArcaneThird,
+   originalBodyBoneMarrowCycle:verifiedBodyTwo,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -410,6 +419,8 @@ function earnedEvidence(w,actorId,s=null){
     originalMilestones.arcane.circles===1?'Arcane First Circle':
      originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
     originalMilestones.soul.phase===1?'Soul Phase I':null,
+    originalMilestones.body.completedCycles?.length===2?
+     'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
     originalMilestones.rift.step===1?'Rift Sense I':null
@@ -432,7 +443,10 @@ function earnedEvidence(w,actorId,s=null){
     originalSoulReserveCapacity:originalMilestones.soul.phase===1?
      originalMilestones.soul.soulReserve:null,
     originalBodyCycleWeaponForce:
-     originalMilestones.body.completedCycles?.length===1?1:null,
+     originalMilestones.body.completedCycles?.length>=1?1:null,
+    originalBodyBoneMarrowAnatomy:verifiedBodyTwo?.earnedBoneMarrowRefinement?
+     {toughnessGain:1,seriousWoundBoxGain:1,
+      originalCombatSourceRequired:true}:null,
     originalRiftSense:originalMilestones.rift.step===1?
      structuredClone(originalMilestones.rift.originalLimitedSense):null,
     actionNeedsOriginalSourceAndLiveResources:true,privateToGM:true
