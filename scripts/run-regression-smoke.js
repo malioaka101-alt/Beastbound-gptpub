@@ -35,6 +35,7 @@ const EXPENSIVE=new Set([
  'meridian-npc-actual-unbroken-source-progression.test.js',
  'living-npc-source-born-original-soul-first-stage.test.js',
  'living-npc-original-body-through-organ-three-live.test.js',
+ 'living-npc-rift-anchor-two-unbroken-source-life.test.js',
  'professional-peers-longrun.test.js','adaptive-ambitions.test.js',
  'emergent-groups.test.js','family-members-longrun.test.js',
  'government-offices.test.js','open-learning-routes.test.js',
