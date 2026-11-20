@@ -367,6 +367,8 @@ function night(s,ctx){
  const originalNight=p.originalOffscreenCombatNights.at(-1);
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
   originalNight);
+ const soulReserve=require('../rules/independent-original-soul-thread-two')
+  .afterNight(s,p,originalNight);
  const arcaneMana=p.originalArcaneMatrix!==undefined?
   require('../rules/independent-original-arcane-matrix-three')
    .afterNight(s,p,originalNight):
@@ -379,6 +381,7 @@ function night(s,ctx){
   afterNight(s,ctx);
  return {kind:'sleep',actualOriginalCombatRecovery:recovery.completedNights,
   originalRestoredQi:qi?.restoredQi||0,
+  ...(soulReserve?{originalRestoredSoulReserve:soulReserve.originalSoulReserveRestored}:{}),
   ...(arcaneMana?{originalRestoredArcaneMana:arcaneMana.actualOriginalManaRestored}:{}),
   ...(convalesced?{originalSeriousSixdayRecovery:1}:{}),
   noPlayerKnowledge:true};
@@ -482,6 +485,10 @@ function afterDaily(s,w,life,activity,day){
   return ctx.actor.originalArcaneCircleTwo?.completed?
    require('../rules/independent-original-arcane-matrix-three').afterDaily(s,ctx):
    require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
+ // Independently earned Soul Phase I begins only original Phase II inner
+ // mind/body/resonance Threading. A title never unlocks an art.
+ if(system==='soul'&&ctx.actor.originalFirstPowerMilestones?.soul?.phase===1)
+  return require('../rules/independent-original-soul-thread-two').afterDaily(s,ctx);
  // Stage I Body tissue proof unlocks only the original Bone-Marrow work,
  // not a free cycle, technique or invented combat statistics.
  if(system==='body'&&ctx.actor.originalFirstPowerMilestones?.body?.
