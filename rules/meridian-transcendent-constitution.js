@@ -206,8 +206,10 @@ function practice(s,p={}){
  const witnessHash=H(witness);
  if(record.attempts.some(x=>x.source.witnessHash===witnessHash))
   throw Error('The original constitutional adaptation was already resolved');
- const minutes=p.minutes??45,qiSpent=4+Math.ceil(minutes/90),
-  staminaSpent=3+Math.ceil(minutes/90);
+ const minutes=p.minutes??45,
+  law=require('./meridian-shared-original-advanced').law(9,{kind:'practice',
+   stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('Actual human Qi and Stamina are insufficient for constitutional adaptation');
  const before=s.world.minutes;
@@ -247,7 +249,10 @@ function form(s,p={}){
  const proof=H(witness);
  if(net.constitutionTests.some(x=>x.source.witnessHash===proof))
   throw Error('The original bodily transition trial was already rolled');
- const minutes=p.minutes??90,qiSpent=10,staminaSpent=Math.ceil(minutes/90)+4;
+ const minutes=p.minutes??90,
+  law=require('./meridian-shared-original-advanced').law(9,{kind:'form',
+   stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('Real original bodily Qi and energy are insufficient for constitutional conversion');
  const before=s.world.minutes,oldQi=s.player.qi,oldMax=s.player.maxQi;
