@@ -38,7 +38,15 @@ function verify(s,p){
   q.checkedAtMinute!==(q.day+1)*1440||
   q.checkedAtMinute>s.world.minutes||
   q.actualMinutes!==5||
-  q.originalShiftHash!==People.shift(p,q.day,w)?.hash||
+  !q.originalShiftProof||
+  q.originalShiftProof.hash!==q.originalShiftHash||
+  q.originalShiftProof.actorId!==p.actorId||
+  q.originalShiftProof.originHash!==p.originHash||
+  q.originalShiftProof.location!==SenseLaw.LOCATION||
+  q.originalShiftProof.fromDay>q.day||
+  q.originalShiftProof.throughDay<q.day||
+  hash(Object.fromEntries(Object.entries(q.originalShiftProof).
+   filter(([k])=>k!=='hash')))!==q.originalShiftHash||
   !q.independentRestDay||q.independentRestDay.day!==q.day+1||
   q.independentRestDay.origin!==Lives.ORIGIN||
   q.independentRestDay.actorId!==p.actorId||
@@ -94,6 +102,7 @@ function afterRestDay(s,ctx){
   day:ctx.workDay,startMinute:ctx.workDay*1440+960,
   checkedAtMinute:s.world.minutes,actualMinutes:5,
   originalShiftHash:ctx.originalShiftHash,
+  originalShiftProof:structuredClone(ctx.originalShift),
   independentRestDay:restSource,independentRestDayHash:ctx.dailySourceHash,
   staminaBefore:before,maximumStamina:maximum,
   staminaAfter:body.stamina,vigorAtAttempt:vigor,
