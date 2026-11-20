@@ -190,7 +190,16 @@ for(let day=2;day<=220;day++){
 A.ok(observed>0,'True independent original Web mapping/practice resolves checks');
 A.equal(placedInjury,true,'True original pressure check reached its selected fixture seed');
 A.ok(injuryReceiptHash,'The actual source-owned severe check generated an injury');
-A.equal(careRefused,true,'Independent refusal cannot heal an existing injury');
+A.equal(careRefused,true,'Independent refusal cannot heal an existing injury. '+JSON.stringify({
+ observed,placedInjury,careHealed,completed,blockedByInjury,
+ lastAction:p.originalMeridianWeb?.sessions.at(-1)?.source.actionType,
+ lastDay:p.originalMeridianWeb?.sessions.at(-1)?.source.day,
+ routeInjuries:p.originalMeridianWeb?.routes.map(x=>({
+  id:x.id,injuries:x.injuries,integrity:x.integrity,
+  required:x.required
+ })),energy:p.originalMeridianWeb?.energy,
+ bodyStamina:body.stamina
+}));
 A.equal(careHealed,true,'A later real original Medicine check can heal precisely that injury');
 A.ok(completed||blockedByInjury,
  'The actual source either forms a physically connected Stage V web or blocks on untreated pressure injury');
