@@ -278,6 +278,11 @@ function afterDaily(s,ctx){
   ctx.workDay<=web.sessions.at(-1)?.source.day)return null;
  if(!verify(s,p))throw Error('Original advanced independent Meridian source no longer verifies');
  let r=p.originalMeridianAdvanced||initial(p);
+ // The ORIGINAL advanced Intent/Physique/Domain/Constitution modules each
+ // refuse a new high-pressure Stage while circulation stability <55.
+ // Clinical maintenance after already earning Stage IX remains separately
+ // permitted, but no free source-unsupported stabilization is granted.
+ if(r.stage<9&&r.stability<55)return null;
  const next=action(r);
  if(!next||r.sessions.length>=500)return null;
  const target=r.track.target,
