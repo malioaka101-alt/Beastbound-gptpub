@@ -47,7 +47,7 @@ const p={id:'disposable_person',actorId:'emergent:disposable_person',
  rngState:0x91e10da5,
  mechanicalFoundation:{seal:'f'.repeat(64),
   baselineAttributes:{str:10,dex:10,con:13,int:12,wis:17,cha:10},
-  unassessedPotential:{gateStability:75}},
+  unassessedPotential:{gateStability:7}},
  meridianTraining:{foundationQuality:'Firm'},
  originalMeridianLadder:{stage:2,originalStageTwoSourceHash:STAGE_TWO,
   awakening:{lastAttemptDay:0},
@@ -86,7 +86,7 @@ for(let day=1;day<=60;day++){
    A.equal(q.check.dc,13);
    A.equal(q.check.modifier,Gate.foundationBonus('Firm')+
     Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2)+
-    Potential.bonus(75));
+    Potential.bonus(7));
   }else A.equal(q.actualMinutes,5);
   found=q;
  }
