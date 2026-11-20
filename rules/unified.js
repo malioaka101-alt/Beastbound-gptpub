@@ -385,6 +385,12 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
  p.originalOvernightRestDecisions||=[];
  p.originalOvernightRestDecisions.push({
   source:response.source,sourceHash:response.sourceHash,result});
+ // The same verified original eight-hour physical sleep may also replenish
+ // genuinely earned, previously spent individual Qi. No new sleep interval,
+ // source claim, Mana, technique, species organ or supernatural rank.
+ const restoredQi=response.source.accepted?
+  (require('../world/independent-meridian-night-qi').
+    afterWitnessedNight(s,p,p.originalOvernightRestDecisions.at(-1))?.restoredQi||0):0;
  if(!verifyNpcNightHistory(s,actorId))
   throw Error('Original eight-hour completion evidence is invalid');
  C.event(s,'injury',response.source.accepted?
@@ -393,10 +399,13 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
    origin:'original-independent-human-witnessed-night-sleep-v1',
    actorId,accepted:response.source.accepted,
    sourceHash:response.sourceHash,
-   onlyOriginalCombatRecovery:true,noSupernaturalPowerGranted:true});
+   onlyOriginalCombatRecovery:restoredQi===0,
+   originalSourceBoundQiRestored:restoredQi,
+   noSupernaturalPowerGranted:true});
  return {actorId,freelyAccepted:response.source.accepted,
   elapsedMinutes:minutes,completedOriginalNight:response.source.accepted,
   observedPhysicalState:Combat.observedCombatant(c),
+  originalSourceBoundQiRestored:restoredQi,
   noNewHealthOrPowerSystem:true};
 }
 function balm(s){
