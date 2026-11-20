@@ -90,6 +90,41 @@ A.equal(worked.noOtherMindReadingOrUnlearnedArt,true);
 A.equal(worked.offscreenOpportunity.kind,'soul');
 A.equal(worked.originalShiftHash,worked.offscreenOpportunity.originalShiftHash);
 A.equal(worked.originalSceneHash,hash(worked.offscreenOpportunity));
+// Continue *the same genuine person* to attempt full structural
+// formation. No selected dice, forced work, healing, or invented reserve.
+let attemptedFormation=null,formedDay=null;
+for(let n=0;n<420&&!p.originalSoulLatticeThree?.formed;n++){
+ const at=s.world.minutes;
+ E.advance(s,1440);World.finalizeTime(s,at);
+ const forms=p.originalSoulLatticeThree?.sessions?.filter(x=>
+  x.source.origin===Lattice.ORIGIN&&x.source.kind==='form'&&
+  x.source.accepted);
+ if(forms?.length)attemptedFormation=forms.at(-1);
+ if(p.originalSoulLatticeThree?.formed)formedDay=Math.floor(s.world.minutes/1440);
+}
+const lifeResult=p.originalSoulLatticeThree;
+A.ok(lifeResult?.formed,'Genuine Phase III resonance lattice was not completed; '+JSON.stringify({
+ seed,phase2:p.originalSoulThreadTwo?.completed,
+ acceptedPractice:lifeResult?.sessions?.filter(x=>
+  x.source.kind==='practice'&&x.source.accepted).length||0,
+ progress:lifeResult?.points,interference:lifeResult?.strain,
+ attempts:lifeResult?.sessions?.length,formationAttempts:lifeResult?.sessions?.
+  filter(x=>x.source.kind==='form').length||0,
+ nightlyRecovery:lifeResult?.sessions?.filter(x=>
+  x.source.origin===Lattice.NIGHT).length||0,
+ currentReserve:lifeResult?.reserveRemaining,
+ body:s.table.combatants['npc_'+p.id].wounds,
+ stamina:s.table.combatants['npc_'+p.id].stamina,
+ lastDay:Math.floor(s.world.minutes/1440)
+ }));
+A.ok(attemptedFormation&&attemptedFormation.source.check.success);
+A.equal(lifeResult.earnedProof.formationSourceHash,attemptedFormation.seal);
+A.equal(lifeResult.earnedProof.latticeIntegrity,1);
+A.equal(lifeResult.earnedProof.perceptionRangeMetres,50);
+A.equal(attemptedFormation.source.reserveSpent,4);
+A.equal(attemptedFormation.source.staminaSpent,3);
+A.equal(attemptedFormation.source.check.dc,21);
+A.equal(formedDay>q.day,true);
 A.equal(Thread.verify(s,p),true);
 A.equal(Lattice.verify(s,p),true);
 A.equal(Early.verify(s,p),true);
