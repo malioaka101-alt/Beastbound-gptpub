@@ -761,9 +761,9 @@ function gatePractice(s,params={}){
   throw Error('A verified sequence of prior Gate openings is required before a transition rite; no claimed Gate count can replace individual evidence');
  const next=gates.length+1;
  if(next>108)throw Error('All 108 Gates are already open');
- const transition=[36,72,108].includes(next);
- const [band,pts,dc]=next<=36?['Lower',3,13]:next<=72?['Middle',5,16]:['High',8,19];
- const gradeBonus=({Perfect:2,Firm:1,Sound:0,Thin:-1,Cracked:-2})[phys.foundationQuality];
+ const originalLaw=require('./meridian-shared-original-gates'),
+  {transition,band,points:pts,baseDC:dc,actualDC}=originalLaw.gateSpec(next),
+  gradeBonus=originalLaw.foundationBonus(phys.foundationQuality);
  const theory=witnessedTheory(s,'meridian',guidanceId);
  const stage=s.table.meridianGateTraining ||= {gate:next,progress:0,forced:false};
  if(stage.gate!==next||!Number.isInteger(stage.progress)||stage.progress<0||
@@ -773,7 +773,6 @@ function gatePractice(s,params={}){
  // The structural boundary is real: its check is harder, but does NOT
  // require a pre-selected true flag, universal price or specific teacher.
  const aptitude=Potential.read(s,'gateStability');
- const actualDC=dc+(transition?3:0);
  const roll=C.check(s,{modifier:modifier(s,'meridian')+gradeBonus+aptitude.modifier+(theory?.bonus||0),
   dc:actualDC,label:'Gate '+next+' ('+band+(transition?', structural transition':'')+')'});
  let gain=roll.progress+(roll.success?Math.max(0,aptitude.modifier):0),severe=roll.degree==='severe failure'||(force&&roll.margin<=-5);
@@ -797,9 +796,7 @@ function gatePractice(s,params={}){
  }
  let opened=null;
  if(stage.progress>=pts){
-  const quality=stage.forced?'Flawed':
-   roll.degree==='exceptional'||(roll.degree==='strong'&&
-   phys.foundationQuality==='Perfect')?'Perfect':'Sound';
+  const quality=originalLaw.gateQuality(roll.degree,phys.foundationQuality,stage.forced);
   opened={number:next,band,quality};
   p.gates ||= [];p.gates.push(opened);
   phys.gateRecords.push({...opened,day:E.day(s)});
