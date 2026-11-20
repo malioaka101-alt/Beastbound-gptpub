@@ -36,9 +36,14 @@ function params(p,web,state,site,s){
  const target=state.track.target,route=web.routes.find(x=>
   x.integrity>=x.required&&!x.injuries.some(v=>!v.healed));
  if(!route)return null;
- const loc=Places.location(s,site),radius=Math.min(3,
-  Math.max(2,Math.floor(state.energy.flow*state.stability/20)));
- if(target===8&&(!loc?.biome||state.track.site&&state.track.site!==site))
+ const loc=Places.location(s,site),
+  measuredRadius=Math.min(3,
+   Math.max(2,Math.floor(state.energy.flow*state.stability/20))),
+  radius=target===8&&state.track.mapped?
+   state.track.radius:measuredRadius;
+ if(target===8&&(!loc?.biome||state.track.site&&state.track.site!==site||
+  state.track.mapped&&(!number(radius,1,100)||
+   radius>Math.max(2,Math.floor(state.energy.flow*state.stability/20)))))
   return null;
  const originalProof=target===6?web.originalStageFiveSourceHash:
   state.achieved[target-1]?.originalSourceHash;
@@ -98,6 +103,7 @@ function compute(s,p,web,state,q,sourceHash){
   x.originalRouteSourceHash!==q.originalRouteHash||
   x.existingHumanTissue!==q.existingHumanTissue||
   x.environmentBiome!==q.environmentBiome||
+  x.radius!==q.radiusMetres||
   x.noInheritedBiologicalTrait!==q.noInheritedBiologicalTrait||
   x.noPeopleOrTerritoryControlled!==q.noPeopleOrTerritoryControlled)
   return null;
@@ -135,6 +141,10 @@ function compute(s,p,web,state,q,sourceHash){
    after.track.mapped=true;
    after.track.mapSourceHash=sourceHash;
    after.track.site=q.target===8?x.sourceLocation:null;
+   if(q.target===8){
+    after.track.radius=x.radius;
+    after.track.environmentBiome=x.environmentBiome;
+   }
    mapped=true;
   }else if(next==='practice'){
    earned=success?C.progress(degree):0;
@@ -277,7 +287,7 @@ function afterDaily(s,ctx){
   originalEarlierStageHash:x.originalProof,
   originalRouteHash:x.originalRouteSourceHash,
   existingHumanTissue:x.existingHumanTissue,
-  environmentBiome:x.environmentBiome,
+  environmentBiome:x.environmentBiome,radiusMetres:x.radius,
   noInheritedBiologicalTrait:true,
   noPeopleOrTerritoryControlled:true,
   rngBefore,rngAfter:p.rngState,
