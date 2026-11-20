@@ -180,8 +180,10 @@ function practice(s,p={}){
  const witnessHash=h(witness);
  if(form.practices.some(x=>x.source.witnessHash===witnessHash))
   throw Error('Each distinct real practice scene can only produce one original check');
- const minutes=p.minutes??60,qiCost=2+Math.ceil(route.source.load/2),
-  staminaCost=Math.ceil(minutes/90)+1;
+ const minutes=p.minutes??60,
+  law=require('./meridian-shared-original-advanced').law(6,{kind:'practice',
+   load:route.source.load,stability:s.player.meridian.stability,minutes}),
+  qiCost=law.qiSpent,staminaCost=law.staminaSpent;
  if(!int(s.player.qi,qiCost,100000)||!int(s.player.stamina,staminaCost,100000))
   throw Error('Intent practice requires real Qi and Stamina reserves');
  const start=s.world.minutes,modifier=Math.floor((s.player.attributes.wis-10)/2)+
@@ -238,8 +240,10 @@ function embody(s,p={}){
  const witnessHash=h(witness);
  if(net.intentTests.some(x=>x.source.witnessHash===witnessHash))
   throw Error('One embodiment challenge may not be rolled more than once');
- const minutes=p.minutes??90,qiCost=6+route.source.load,
-  staminaCost=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??90,
+  law=require('./meridian-shared-original-advanced').law(6,{kind:'form',
+   load:route.source.load,stability:s.player.meridian.stability,minutes}),
+  qiCost=law.qiSpent,staminaCost=law.staminaSpent;
  if(!int(s.player.qi,qiCost,100000)||!int(s.player.stamina,staminaCost,100000))
   throw Error('Human Qi and Stamina must actually sustain the final autonomic circulation test');
  const before=s.world.minutes,oldQi=s.player.qi,oldMax=s.player.maxQi,
