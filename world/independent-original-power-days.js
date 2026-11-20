@@ -64,7 +64,7 @@ function evidence(ctx,kind){
 // A sealed original personal-day event may age out of its 80-entry ordinary
 // history. Check it against that actual record whenever retained, and retain
 // its original signed source inside the cultivation receipt for older saves.
-function verifyEvidence(s,p,q){
+function verifyEvidenceInternal(s,p,q,verifiedLife=null){
  const x=q?.offscreenOpportunity;
  if(!x)return q?.offscreenOpportunity===undefined;
  if(x.origin!==ORIGIN||x.actorId!==p.actorId||
@@ -85,7 +85,8 @@ function verifyEvidence(s,p,q){
   x.noPlayerPresenceOrPlayerControlAssumed!==true)
   return false;
  const w=s.table?.realm,life=w?.independentPersonLives?.people?.[p.id];
- if(!life||!require('./independent-person-lives').verifyEntry(w,life))
+ if(!life||(verifiedLife!==life&&
+  !require('./independent-person-lives').verifyEntry(w,life)))
   return false;
  const row=life.history.find(y=>y.source.day===x.independentLifeDay);
  if(row){
@@ -96,6 +97,17 @@ function verifyEvidence(s,p,q){
   x.independentLifeDay>=life.history[0].source.day)
   return false;
  return true;
+}
+// One SOURCE-VERIFIED life for ONE immediate 108-Gate history replay.
+// Never cache this across world ticks, replay calls, imports or mutations.
+// Each practice witness / shift / day hash is STILL checked individually.
+function verifyEvidence(s,p,q){return verifyEvidenceInternal(s,p,q);}
+function verifyEvidenceBatch(s,p,receipts){
+ if(!Array.isArray(receipts)||!receipts.length)return false;
+ const w=s.table?.realm,life=w?.independentPersonLives?.people?.[p?.id];
+ if(!life||!require('./independent-person-lives').verifyEntry(w,life))
+  return false;
+ return receipts.every(q=>verifyEvidenceInternal(s,p,q,life));
 }
 function sourceBase(ctx,system,start,minutes,before,choice,accepted,points,methods,
  cooldown,training,extra={}){
@@ -441,5 +453,5 @@ function afterDaily(s,w,life,activity,day){
  return original?.points===Disc.KEYS[system].tracks[Early.TARGETS[system]][0]?
   milestone(s,ctx,system):dailyPractice(s,ctx,system);
 }
-module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyNights,
+module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyEvidenceBatch,verifyNights,
  opportunityEvidence:evidence};
