@@ -15,6 +15,16 @@ const ORIGIN='original-independent-108-meridian-gate-history-v1',
 const H=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const integer=x=>Number.isInteger(x)&&x>=0;
 const severityName=['Mild','Moderate','Severe','Critical','Catastrophic'];
+// An independent adult can freely risk forced circulation. The *choice
+// propensity* is an NPC decision policy, not a new Meridian rank, point
+// value or breakthrough DC; actual consequences reuse Disciplines.gatePractice.
+function forceChance(p){
+ const preferences={curious:12,steady:4,independent:18,reserved:2};
+ if(!Object.hasOwn(preferences,p?.personality)||
+  !Number.isInteger(p?.fatigue)||p.fatigue<0||p.fatigue>100)
+  throw Error('Source-verified independent Gate risk personality is required');
+ return Math.min(25,preferences[p.personality]+(p.fatigue>=55?3:0));
+}
 function openState(p){
  return {origin:ORIGIN,originalAwakeningSourceHash:
    p.originalMeridianLadder.originalStageTwoSourceHash,
@@ -103,7 +113,10 @@ function verify(s,p){
    q.choiceChance!==Meridian.chance({personality:q.personalityAtAttempt,
     fatigue:q.fatigueAtAttempt})||
    typeof q.accepted!=='boolean'||
-   q.originalForceChoice!==false||
+   typeof q.originalForceChoice!=='boolean'||
+   q.originalForceChance!==(q.accepted?forceChance({
+    personality:q.personalityAtAttempt,fatigue:q.fatigueAtAttempt}):null)||
+   q.forceBefore!==work.forced||
    q.staminaSpent!==0||
    JSON.stringify(q.energyBefore)!==JSON.stringify(current))
    return false;
@@ -116,6 +129,19 @@ function verify(s,p){
    Core.die(random,100)!==q.choiceD100||
    q.accepted!==(q.choiceD100<=q.choiceChance))
    return false;
+  const chosenForce=q.accepted?
+   Core.die(random,100)<=q.originalForceChance:false;
+  if(q.originalForceChoice!==chosenForce||
+   (q.accepted?!integer(q.originalForceD100)||
+    q.originalForceD100<1||q.originalForceD100>100:
+    q.originalForceD100!==null))
+   return false;
+  // Verify the original independent choice die, not only its boolean.
+  if(q.accepted){
+   const control={rngState:q.rngBefore};
+   Core.die(control,100);
+   if(Core.die(control,100)!==q.originalForceD100)return false;
+  }
   let earned=0,mitigationRoll=null,deviation=null,opened=null,
    progress=work.progress,after=structuredClone(current);
   if(q.accepted){
@@ -131,18 +157,21 @@ function verify(s,p){
      Core.naturalAdjustment(q.check.roll)-spec.actualDC,
     degree=Core.degree(margin),
     bonus=margin>=0?Math.max(0,orig.aptitude):0;
-   earned=Core.progress(degree)+bonus;
+   earned=Core.progress(degree)+bonus+
+    (chosenForce?(margin>=0?2:1):0);
    progress+=earned;
+   if(chosenForce)work.forced=true;
    if(q.check.degree!==degree||q.check.success!==(margin>=0)||
     q.check.earned!==earned)return false;
    let woundSteps=0;
-   if(degree==='severe failure'){
+   if(degree==='severe failure'||chosenForce&&margin<=-5){
     mitigationRoll=Core.die(random,20);
     const reduction=mitigationRoll+
       Math.floor((p.mechanicalFoundation.baselineAttributes.con-10)/2)+
       Core.naturalAdjustment(mitigationRoll)>=15?1:0,
      sev=Math.min(4,Math.max(0,
-      (spec.band==='Lower'?0:spec.band==='Middle'?1:2)-reduction));
+      (spec.band==='Lower'?0:spec.band==='Middle'?1:2)+
+      (chosenForce&&spec.band==='High'?1:0)-reduction));
     deviation=severityName[sev];
     if(sev>=2){
      woundSteps=sev>=3?3:2;
@@ -156,7 +185,8 @@ function verify(s,p){
      woundSteps===2?[1,0,0]:woundSteps===3?[0,1,0]:[0,0,0]))
     return false;
    if(progress>=spec.points){
-    const quality=Gate.gateQuality(degree,p.meridianTraining.foundationQuality);
+    const quality=Gate.gateQuality(degree,p.meridianTraining.foundationQuality,
+     work.forced);
     opened={number:spec.number,band:spec.band,quality,
      day:q.day,sourceHash:ref};
     gates.push(opened);
@@ -179,6 +209,7 @@ function verify(s,p){
   }
   if(q.gateOpened!==!!opened||
    q.openedQuality!==(opened?.quality||null)||
+   q.forceAfter!==work.forced||
    q.earnedPoints!==earned||
    q.pointsAfter!==work.progress||
    q.gatesAfter!==gates.length||
@@ -212,6 +243,10 @@ function afterDaily(s,ctx){
  const spec=Gate.gateSpec(state.gateWork.number),
   sourceRng=p.rngState,choiceChance=Meridian.chance(p),
   choiceD100=Core.die(p,100),accepted=choiceD100<=choiceChance,
+  riskChance=accepted?forceChance(p):null,
+  riskD100=accepted?Core.die(p,100):null,
+  force=accepted&&riskD100<=riskChance,
+  forcedBefore=state.gateWork.forced,
   beforeEnergy=structuredClone(state.energy),
   oldStamina=body.stamina,oldWounds=accepted?[...body.wounds]:null,
   baseMod=modifier(p),m=baseMod.attribute+
@@ -221,16 +256,19 @@ function afterDaily(s,ctx){
   opened=null,minutes=accepted?180:5,progress=state.gateWork.progress;
  if(accepted){
   const roll=privateCheck(s,p,m,spec.actualDC);
-  earn=roll.progress+(roll.success?Math.max(0,baseMod.aptitude):0);
+  earn=roll.progress+(roll.success?Math.max(0,baseMod.aptitude):0)+
+   (force?(roll.success?2:1):0);
   progress+=earn;
+  if(force)state.gateWork.forced=true;
   receipt={roll:roll.roll,modifier:roll.modifier,dc:roll.dc,
    degree:roll.degree,success:roll.success,earned:earn};
-  if(roll.degree==='severe failure'){
+  if(roll.degree==='severe failure'||force&&roll.margin<=-5){
    const mitigating=privateCheck(s,p,
     Math.floor((p.mechanicalFoundation.baselineAttributes.con-10)/2),15);
    mitigationRoll=mitigating.roll;
    const sev=Math.min(4,Math.max(0,
-    (spec.band==='Lower'?0:spec.band==='Middle'?1:2)-
+    (spec.band==='Lower'?0:spec.band==='Middle'?1:2)+
+    (force&&spec.band==='High'?1:0)-
     (mitigating.success?1:0)));
    deviation=severityName[sev];
    if(sev>=2){
@@ -241,7 +279,7 @@ function afterDaily(s,ctx){
   }
   if(progress>=spec.points){
    const quality=Gate.gateQuality(roll.degree,
-    p.meridianTraining.foundationQuality,false);
+    p.meridianTraining.foundationQuality,state.gateWork.forced);
    opened={number:spec.number,band:spec.band,quality,
     day:ctx.workDay};
    const nextGates=[...state.gates,{...opened,sourceHash:null}],
@@ -260,7 +298,10 @@ function afterDaily(s,ctx){
   choiceChance,choiceD100,accepted,actualMinutes:minutes,
   gateNumber:spec.number,gateBand:spec.band,
   transition:spec.transition,requiredPoints:spec.points,
-  actualDC:spec.actualDC,originalForceChoice:false,
+  actualDC:spec.actualDC,
+  originalForceChance:riskChance,originalForceD100:riskD100,
+  originalForceChoice:force,forceBefore:forcedBefore,
+  forceAfter:state.gateWork.forced,
   pointsBefore:workBefore,
   pointsAfter:state.gateWork.progress,
   gatesBefore:state.gates.length,gatesAfter:state.gates.length+(opened?1:0),
@@ -282,4 +323,4 @@ function afterDaily(s,ctx){
   accepted,gateNumber:spec.number,gateOpened:!!opened,
   originalSourceHash:seal,privateToGM:true,noPlayerKnowledge:true};
 }
-module.exports={ORIGIN,PRACTICE,afterDaily,verify};
+module.exports={ORIGIN,PRACTICE,afterDaily,verify,forceChance};
