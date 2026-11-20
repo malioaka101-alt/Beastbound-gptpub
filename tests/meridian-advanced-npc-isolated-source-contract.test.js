@@ -10,7 +10,8 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  VM=require('node:vm'),Path=require('node:path'),
  E=require('../engine.js'),Core=require('../rules/core'),
  Gate=require('../rules/meridian-shared-original-gates'),
- Law=require('../rules/meridian-shared-original-advanced');
+ Law=require('../rules/meridian-shared-original-advanced'),
+ Night=require('../world/independent-meridian-night-qi');
 const file=Path.resolve(__dirname,'../world/independent-meridian-advanced.js'),
  source=FS.readFileSync(file,'utf8'),
  mod={exports:{}};
@@ -27,6 +28,7 @@ const prior={
 };
 const stub={
  './independent-meridian-web':{verify:()=>true},
+ './independent-meridian-night-qi':Night,
  './independent-offscreen-meridian':{chance:p=>{
   const base={curious:66,steady:59,independent:51,reserved:39}[p.personality];
   return Math.max(10,base-(p.fatigue>=55?15:0));
