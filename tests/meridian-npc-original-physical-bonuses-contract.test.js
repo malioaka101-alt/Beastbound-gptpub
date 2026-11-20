@@ -8,7 +8,8 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  B=require('../rules/build'),G=require('../rules/meridian-shared-original-gates');
 const original=FS.readFileSync(
  Path.resolve(__dirname,'../rules/meridian-npc-physical.js'),'utf8'),
- fake={stage:1,originalStageThreeIndividualGates:null,
+ fake={stage:1,get originalMeridianStageEarned(){return this.stage;},
+  originalStageThreeIndividualGates:null,
   originalStageFiveWebRoutes:null},
  moduleStub={exports:{}};
 VM.runInNewContext(original,{module:moduleStub,structuredClone,require:id=>
