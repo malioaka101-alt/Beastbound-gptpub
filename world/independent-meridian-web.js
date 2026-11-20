@@ -11,6 +11,7 @@ const Crypto=require('node:crypto'),C=require('../rules/core'),
  Web=require('../rules/meridian-shared-original-web'),
  Gates=require('../rules/meridian-shared-original-gates'),
  Sea=require('./independent-meridian-sea'),
+ Night=require('./independent-meridian-night-qi'),
  Meridian=require('./independent-offscreen-meridian'),
  Offscreen=require('./independent-original-power-days');
 const ORIGIN='source-owned-independent-existing-meridian-web-v1',
@@ -86,8 +87,12 @@ function verify(s,p){
  const initial=newState(p),state=structuredClone(initial),
   gates=p.originalMeridianGates.gates,
   seaPurity=sea.sea.purity;
- let lastDay=-1,lastMinute=-1;
+ let lastDay=-1,lastMinute=0,restIndex=0;
  for(const row of r.sessions){
+  const prior=Night.replayUntil(s,p,r.rests||[],restIndex,
+   row?.source?.startMinute??0,state.energy,lastMinute);
+  if(!prior)return false;
+  state.energy=prior.energy;restIndex=prior.index;lastMinute=prior.end;
   const q=row?.source;
   if(!q||row.seal!==H(q)||state.stage===5||
    q.origin!==ATTEMPT||q.system!=='meridian'||
@@ -202,6 +207,10 @@ function verify(s,p){
    return false;
   lastDay=q.day;lastMinute=q.startMinute+q.actualMinutes;
  }
+ const later=Night.replayUntil(s,p,r.rests||[],restIndex,
+  Number.POSITIVE_INFINITY,state.energy,lastMinute);
+ if(!later||later.index!==(r.rests||[]).length)return false;
+ state.energy=later.energy;
  return r.stage===state.stage&&r.stability===state.stability&&
   JSON.stringify(r.energy)===JSON.stringify(state.energy)&&
   JSON.stringify(r.routes)===JSON.stringify(state.routes)&&
