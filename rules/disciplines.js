@@ -1644,7 +1644,8 @@ function verifyNpcMeridian(s,person){
    rec.foundationIntegrity===(earntStage===1?20:0))&&
   JSON.stringify(rec.methods)===JSON.stringify(methods)&&
   require('../world/independent-meridian-ladder').verify(s,person)&&
-  require('../world/independent-meridian-gates').verify(s,person);
+  require('../world/independent-meridian-gates').verify(s,person)&&
+  require('../world/independent-meridian-sea').verify(s,person);
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
@@ -1657,17 +1658,23 @@ function npcMeridianPrivateStatus(s,actorId){
  const rec=p.meridianTraining,
   ladder=p.originalMeridianLadder,
   gateWork=p.originalMeridianGates,
-  stage=gateWork?.stage===3?3:
+  sea=p.originalMeridianSea,
+  stage=sea?.stage===4?4:gateWork?.stage===3?3:
    ladder?.stage===2?2:rec?.earnedStage===1?1:null;
  return {actorId,originalOwner:'rules/disciplines.js',
   originalMeridianStageEarned:stage,
   originalStageTwoPrimaryMeridians:
    stage>=2?ladder.primaryMapped:null,
   originalStageThreeOpenedGates:stage>=3?gateWork.gates.length:null,
+  originalStageFourSea:stage===4?
+   structuredClone(sea.sea):null,
+  originalStageFourSourceHash:stage===4?
+   sea.attempts.at(-1).seal:null,
   originalStageThreeIndividualGates:stage>=3?
    structuredClone(gateWork.gates):null,
   originalStageTwoQiProfile:stage>=2?
-   structuredClone(stage===3?gateWork.energy:ladder.energy):null,
+   structuredClone(stage===4?sea.energy:
+    stage===3?gateWork.energy:ladder.energy):null,
   originalAwakeningTrainingPoints:ladder?.awakening?.points??null,
   originalAwakeningRiteSourceHash:stage>=2?
    ladder.originalStageTwoSourceHash:null,
