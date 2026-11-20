@@ -62,7 +62,7 @@ function born(){
  E.advance(s,16*60+30-early);World.finalizeTime(s,early);
  const shelter=p.name+
   ' voluntarily settles into a personally witnessed safe room for sleep at home, for eight continuous hours.';
- s.chatRuntime.scene='The safe room and the person's choice are directly witnessed: '+shelter;
+ s.chatRuntime.scene="The safe room and the person's choice are directly witnessed: "+shelter;
  const rest=Rules.act(s,{system:'health',
   operation:'witnessedNpcNightSleep',params:{actorId:p.actorId,witness:shelter}});
  A.equal(rest.freelyAccepted,true);
