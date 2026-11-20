@@ -325,7 +325,10 @@ function night(s,ctx){
   p.originalOffscreenCombatNights.shift();
  p.originalOffscreenCombatNights.push({source:proof,seal:hash(proof)});
  if(!verifyNights(s,p))throw Error('Actual original offscreen sleep source failed replay');
+ const qi=require('./independent-meridian-night-qi').afterNight(s,p,
+  p.originalOffscreenCombatNights.at(-1));
  return {kind:'sleep',actualOriginalCombatRecovery:recovery.completedNights,
+  originalRestoredQi:qi?.restoredQi||0,
   noPlayerKnowledge:true};
 }
 function verifyNights(s,p){
