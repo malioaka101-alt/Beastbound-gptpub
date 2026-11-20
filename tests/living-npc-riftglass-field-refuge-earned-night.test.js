@@ -63,6 +63,13 @@ A.equal((p.originalOvernightRestDecisions||[]).length,0,
  'Non-settlement verified field night is not a made-up city room');
 A.deepEqual(p.knownTechniques,[]);
 const d=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
+A.ok(d.originalRiftglassFieldRefuge?.personallyAcceptedOriginalFieldNights>=1,
+ 'GM privacy view must count only actually witnessed source-verified Combat field nights');
+A.equal(d.originalRiftglassFieldRefuge.originalSurvivalRuleOwner,
+ 'rules/wilderness-camp.js');
+A.equal(d.originalRiftglassFieldRefuge.originalSurveyStaminaCost,
+ Wilderness.STAMINA);
+A.equal(d.originalRiftglassFieldRefuge.temporaryRefugeNotPermanentHousing,true);
 if(d.originalRiftExteriorAnchorMarking)
  A.equal(d.originalRiftExteriorAnchorMarking.hasActualVerifiedRiftglassSafeSleep,true);
 const saved=E.exportGame(s),imported=E.importGame(saved),
