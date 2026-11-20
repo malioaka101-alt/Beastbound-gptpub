@@ -16,9 +16,11 @@ VM.runInNewContext(original,{module:moduleStub,structuredClone,require:id=>
  id==='node:crypto'?Crypto:
  id==='./build'?B:
  id==='./meridian-shared-original-gates'?G:
- id==='./disciplines'?{npcMeridianPrivateStatus:()=>fake}:
- id.startsWith('../world/independent-meridian-')?
-  {verify:()=>ownerProof.valid}:
+ id==='./disciplines'?{npcMeridianPrivateStatus:()=>{
+  if(!ownerProof.valid)
+   throw Error('Original individual Meridian stage source failed full owner replay');
+  return fake;
+ }}:
  id==='./independent-original-discipline-preparation'?{verify:()=>true}:
  (()=>{throw Error('Unexpected original physical law dependency '+id)})()});
 const Phys=moduleStub.exports;
