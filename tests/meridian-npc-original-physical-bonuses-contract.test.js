@@ -11,12 +11,14 @@ const original=FS.readFileSync(
  fake={stage:1,get originalMeridianStageEarned(){return this.stage;},
   originalStageThreeIndividualGates:null,
   originalStageFiveWebRoutes:null},
- moduleStub={exports:{}};
+ moduleStub={exports:{}},ownerProof={valid:true};
 VM.runInNewContext(original,{module:moduleStub,structuredClone,require:id=>
  id==='node:crypto'?Crypto:
  id==='./build'?B:
  id==='./meridian-shared-original-gates'?G:
  id==='./disciplines'?{npcMeridianPrivateStatus:()=>fake}:
+ id.startsWith('../world/independent-meridian-')?
+  {verify:()=>ownerProof.valid}:
  id==='./independent-original-discipline-preparation'?{verify:()=>true}:
  (()=>{throw Error('Unexpected original physical law dependency '+id)})()});
 const Phys=moduleStub.exports;
@@ -98,4 +100,9 @@ A.throws(()=>Phys.synchronize({table:{combatants:{npc_person_1:corrupted}}},p),
  /ancestry differs/);
 const falseActor=structuredClone(p);falseActor.actorId='emergent:person_8';
 A.throws(()=>Phys.synchronize(s,falseActor),/witnessed human Combat body/);
+ownerProof.valid=false;
+A.throws(()=>Phys.sourceProfile(s,p),
+ /stage source failed full owner replay/,
+ 'A fabricated advanced-stage status cannot grant Combat bonuses without its actual chronological owner');
+ownerProof.valid=true;
 console.log('Isolated shared original NPC Combat parity PASS: physically earned Stage I, II, gate 36, V and VII stamina/toughness/wound boxes/wpr; no free recovery or technique, forged body/seal rejected; earlier stages are synthetic VM-only');
