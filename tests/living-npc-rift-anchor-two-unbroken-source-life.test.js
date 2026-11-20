@@ -94,6 +94,12 @@ for(const item of options){
    body.stamina,'GM-only Rift readiness must read the real Combat source');
   A.equal(d.originalRiftExteriorAnchorMarking.nextOriginalAnchorPracticeStaminaCost,
    Law.staminaCost(120));
+  A.equal(d.originalRiftExteriorAnchorMarking.originalOneRecoverActuallyUsed,
+   !!p.originalRiftglassRecover);
+  A.equal(d.originalRiftExteriorAnchorMarking.sourceVerifiedOneRecoverGain,
+   trueOnceRecover);
+  A.equal(d.originalRiftExteriorAnchorMarking.furtherOriginalRecoverNeedsRealNight,
+   (body.recoverUses||0)>=1);
   A.equal(d.originalRiftExteriorAnchorMarking.actualPhysicalReadinessForAnotherAnchor,
    !formed&&body.status==='ok'&&body.wounds.every(x=>x===0)&&
     body.stamina>=Law.staminaCost(120));
