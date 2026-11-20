@@ -291,6 +291,12 @@ function milestone(s,ctx,system){
 }
 function night(s,ctx){
  const {actor:p,body,loc}=ctx;
+ // A real observed sleep already occupies these physical hours. Never
+ // duplicate it with an unwitnessed 16:00–00:00 NPC rest on the same day.
+ const overlapping=s.table?.originalNpcNightInProgress;
+ if(overlapping?.actorId===p.actorId&&
+  overlapping.day===ctx.workDay&&overlapping.accepted===true)
+  return null;
  if(loc.biome!=='settlement'||ctx.workDay<1||
   body.status!=='ok'||!ctx.dailyActivity||
   ctx.dailyActivity.action!=='rest')return null;
