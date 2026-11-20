@@ -18,7 +18,7 @@ const ORIGIN='original-autonomous-offscreen-power-opportunity-v1';
 const REST='original-autonomous-offscreen-combat-night-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const isDay=x=>Number.isInteger(x)&&x>=0;
-const supported=new Set(['arcane','soul','body','rift']);
+const supported=new Set(['meridian','arcane','soul','body','rift']);
 function opportunity(s,w,life,activity,day){
  if(!isDay(day)||day<1||s.world.minutes!==day*1440||
   !life||life.lastDay!==day||!activity||
@@ -68,7 +68,7 @@ function verifyEvidence(s,p,q){
  const x=q?.offscreenOpportunity;
  if(!x)return q?.offscreenOpportunity===undefined;
  if(x.origin!==ORIGIN||x.actorId!==p.actorId||
-  x.kind!==q.system||!supported.has(x.kind)||
+  x.kind!==(q.system||'meridian')||!supported.has(x.kind)||
   !isDay(x.originalWorkDay)||x.independentLifeDay!==x.originalWorkDay+1||
   x.originalWorkDay!==q.day||x.originalShiftHash!==q.originalShiftHash||
   !x.originalShiftProof||
@@ -403,10 +403,15 @@ function afterDaily(s,w,life,activity,day){
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
   system==='rift'&&ctx.site!=='ruins')return null;
+ // Meridian uses its OWN Foundation / Stage I source owner. Never route
+ // its Qi quality, integrity or stamina through a generic first-milestone.
+ if(system==='meridian')
+  return require('./independent-offscreen-meridian').practice(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
  return original?.points===Disc.KEYS[system].tracks[Early.TARGETS[system]][0]?
   milestone(s,ctx,system):dailyPractice(s,ctx,system);
 }
-module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyNights};
+module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyNights,
+ opportunityEvidence:evidence};
