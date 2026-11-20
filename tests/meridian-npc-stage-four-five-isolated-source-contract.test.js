@@ -8,7 +8,7 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  Path=require('node:path'),VM=require('node:vm'),
  Crypto=require('node:crypto'),
  E=require('../engine.js'),C=require('../rules/core'),
- Combat=require('../rules/combat'),
+ Combat=require('../rules/combat'),Build=require('../rules/build'),
  Gates=require('../rules/meridian-shared-original-gates'),
  SeaLaw=require('../rules/meridian-shared-original-sea'),
  WebLaw=require('../rules/meridian-shared-original-web');
@@ -25,6 +25,7 @@ const witness={
 };
 const seaStub={
  '../rules/core':C,'../rules/combat':Combat,
+ '../rules/build':Build,
  '../rules/meridian-shared-original-sea':SeaLaw,
  '../rules/meridian-shared-original-gates':Gates,
  './independent-meridian-gates':{verify:()=>true},
