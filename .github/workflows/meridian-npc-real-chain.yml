@@ -15,14 +15,14 @@ jobs:
   meridian-real-first-gate:
     name: Authentic NPC Foundation to Gate 1
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Genuine source-born NPC through first 72 source-earned Gates
+      - name: Genuine source-born NPC through all 108 source-earned Gates
         env:
-          BEASTBOUND_MERIDIAN_GATE_TARGET: '72'
-          BEASTBOUND_MERIDIAN_MAX_ADDITIONAL_DAYS: '9000'
+          BEASTBOUND_MERIDIAN_GATE_TARGET: '108'
+          BEASTBOUND_MERIDIAN_MAX_ADDITIONAL_DAYS: '18000'
         run: node tests/meridian-npc-actual-unbroken-source-progression.test.js
