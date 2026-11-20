@@ -8,6 +8,8 @@ const Crypto=require('node:crypto'),
  Early=require('./independent-original-discipline-preparation'),
  Law=require('./arcane-shared-original-circle-two');
 const ORIGIN='source-earned-independent-original-arcane-circle-two-v1';
+const RECOVERY='source-earned-independent-original-arcane-rested-mana-v1';
+const ORIGINAL_EIGHT_HOUR_MANA_RECOVERY=12;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const pattern=p=>'Dual channel revision of '+p.originalArcaneCore.geometry+
  ' using independently measured core feedback and coupled circulation';
@@ -22,12 +24,32 @@ function verify(s,p){
   !Array.isArray(r.sessions)||r.sessions.length<1||r.sessions.length>480)
   return false;
  let mana=initialMana(),stability=initialStability,progress=0,
-  completed=false,prevDay=-1;
+  completed=false,prevDay=-1,previousEnd=0;
+ const priorNights=new Set();
  const body=s.table?.combatants?.['npc_'+p.id];
  if(!body?.npcOrigin?.seal)return false;
  const Offscreen=require('../world/independent-original-power-days');
  for(const row of r.sessions){
   const q=row?.source;
+  if(q?.origin===RECOVERY){
+   const originalNight=q.originalNight,
+    originalHash=originalNight?.seal;
+   const capacity=Build.arcaneProfile(completed?2:1).mana;
+   if(row.seal!==hash(q)||
+    q.actorId!==p.actorId||q.system!=='arcane'||
+    q.originalFirstCircleSourceHash!==r.originalFirstCircleSourceHash||
+    !originalHash||priorNights.has(originalHash)||
+    q.originalNightSourceHash!==originalHash||
+    q.endMinute!==originalNight.source?.endMinute||
+    q.endMinute<=previousEnd||q.endMinute>s.world.minutes||
+    !Offscreen.verifyNights(s,p,[originalNight])||
+    q.manaBefore!==mana||q.manaCapacity!==capacity||
+    q.manaAfter!==Math.min(capacity,mana+ORIGINAL_EIGHT_HOUR_MANA_RECOVERY)||
+    q.noAdditionalTimeOrManaWithoutRealRest!==true)return false;
+   priorNights.add(originalHash);
+   mana=q.manaAfter;previousEnd=q.endMinute;
+   continue;
+  }
   if(!q||row.seal!==hash(q)||completed||
    q.origin!==ORIGIN||q.system!=='arcane'||q.target!=='circle2'||
    q.actorId!==p.actorId||q.individualOriginHash!==p.originHash||
@@ -36,7 +58,7 @@ function verify(s,p){
    q.originalFoundationSeal!==p.mechanicalFoundation?.seal||
    q.noSpellOrTechniqueGranted!==true||
    !Number.isInteger(q.day)||q.day<=prevDay||
-   q.startMinute!==q.day*1440+600||
+   q.startMinute!==q.day*1440+600||q.startMinute<previousEnd||
    q.startMinute+q.actualMinutes>s.world.minutes||
    !Offscreen.verifyEvidence(s,p,q)||
    q.manaBefore!==mana||q.coreStabilityBefore!==stability||
@@ -86,7 +108,7 @@ function verify(s,p){
    q.coreStabilityAfter!==stability||
    q.stageAfter!==(completed?2:1)||
    q.rngAfter!==roller.rngState)return false;
-  prevDay=q.day;
+  prevDay=q.day;previousEnd=q.startMinute+q.actualMinutes;
  }
  return r.integrity===progress&&r.manaRemaining===mana&&
   r.coreStability===stability&&r.completed===completed&&
@@ -182,4 +204,28 @@ function afterDaily(s,ctx){
   actualManaSpent:accepted?Law.MANA_COST:0,
   originalPhysicalBacklash:injury,noNewSpell:true,noPlayerKnowledge:true};
 }
-module.exports={ORIGIN,verify,privateStatus,afterDaily};
+// Only a real existing independent eight-hour safe sleep restores the
+// ORIGINAL 12 Mana. No companion sleep, narrative rest, clock increment or
+// claimed location may replenish the recorded energy budget.
+function afterNight(s,p,nightRow){
+ const r=p?.originalArcaneCircleTwo;
+ if(!r)return null;
+ if(!verify(s,p))throw Error('Arcane Mana recovery requires verified prior structural history');
+ const Offscreen=require('../world/independent-original-power-days');
+ if(!nightRow||!Offscreen.verifyNights(s,p,[nightRow])||
+  r.sessions.length>=480||r.sessions.some(x=>x.source?.origin===RECOVERY&&
+   x.source.originalNightSourceHash===nightRow.seal))return null;
+ const capacity=Build.arcaneProfile(r.completed?2:1).mana,
+  before=r.manaRemaining,after=Math.min(capacity,before+ORIGINAL_EIGHT_HOUR_MANA_RECOVERY);
+ const source={origin:RECOVERY,system:'arcane',actorId:p.actorId,
+  originalFirstCircleSourceHash:r.originalFirstCircleSourceHash,
+  originalNight:structuredClone(nightRow),originalNightSourceHash:nightRow.seal,
+  endMinute:nightRow.source.endMinute,manaBefore:before,
+  manaAfter:after,manaCapacity:capacity,
+  noAdditionalTimeOrManaWithoutRealRest:true};
+ r.sessions.push({source,seal:hash(source)});
+ r.manaRemaining=after;
+ if(!verify(s,p))throw Error('Original Arcane rested Mana source replay failed');
+ return {actualOriginalManaRestored:after-before,noFreeReplenishment:true};
+}
+module.exports={ORIGIN,RECOVERY,verify,privateStatus,afterDaily,afterNight};
