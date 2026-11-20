@@ -179,3 +179,55 @@ tp.originalMeridianGates.gates[0].quality='Perfect';
 A.equal(Gates.verify(tampered,tp),false,
  'A forged Gate quality cannot survive exact historical source replay');
 console.log('REAL independent Meridian living chain PASS: never-filled Foundation -> original Stage I rite -> all 12 Primary Stage II -> first actual individual Gate, genuine voluntary nightly recovery, personal RNG, saved replay, anti-forgery, no unearned Qi Strike; real elapsed days '+daysElapsed);
+
+ // OPTIONAL, genuine longer integration proof. Run on demand, never on
+ // ordinary draft edits or the full inventory: this deliberately uses real
+ // person/world RNG and NO fabricated Stage II/Gate source or forced rolls.
+ // Only the runtime budget differs; all original source validators remain.
+const target=Number(process.env.BEASTBOUND_MERIDIAN_GATE_TARGET||0);
+if(target!==0){
+ A.ok([12,36,72,108].includes(target),'Only real original Gate milestones');
+ const GateLaw=require('../rules/meridian-shared-original-gates');
+ const maxMoreDays=Number(process.env.BEASTBOUND_MERIDIAN_MAX_ADDITIONAL_DAYS||3600);
+ A.ok(Number.isInteger(maxMoreDays)&&maxMoreDays>=45&&maxMoreDays<=18000);
+ let more=0,record=0;
+ while((p.originalMeridianGates?.gates?.length||0)<target&&more<maxMoreDays){
+  const began=s.world.minutes;
+  E.advance(s,45*1440);
+  World.finalizeTime(s,began);
+  more+=45;
+  A.equal(Gates.verify(s,p),true,
+   'The full previously earned original 108-Gate journal must replay');
+  A.equal(Power.verifyNights(s,p),true,
+   'The independent person only receives source-verified night recovery');
+  if(p.originalMeridianGates?.gates?.length>=record+12){
+   record=p.originalMeridianGates.gates.length;
+   console.log('REAL Meridian gate milestone: '+record+
+    '/108 after '+(daysElapsed+more)+' physical days');
+  }
+ }
+ const count=p.originalMeridianGates?.gates?.length||0;
+ const problem=JSON.stringify({target,count,
+  additionalDays:more,elapsedDays:daysElapsed+more,
+  physicalStatus:combatant.status,wounds:combatant.wounds,
+  stamina:combatant.stamina,maxStamina:combatant.maxStamina,
+  gateSessions:p.originalMeridianGates?.sessions?.length,
+  first108Source:p.originalMeridianGates?.gates?.[107]?.sourceHash||null,
+  livingSourceValid:Gates.verify(s,p)});
+ A.ok(count>=target,'Real unscripted source-born Gate target did not finish: '+problem);
+ const profile=GateLaw.profile(3,p.originalMeridianGates.gates);
+ A.equal(combatant.maxStamina,baseline.stamina+profile.bonuses.stamina,
+  'Every real Gate threshold updates the SAME original NPC physical Combat body');
+ A.equal(combatant.toughness,baseline.toughness+(profile.bonuses.toughness||0));
+ A.equal(combatant.wpr,profile.bonuses.wpr||0);
+ A.deepEqual(p.knownTechniques,[],
+  'An actual long 108-Gate journey never automatically teaches Qi Strike');
+ const savedLong=E.exportGame(s),restored=E.importGame(savedLong),
+  actual=Realm.peek(restored).emergentPeople.people[p.id];
+ A.equal(Gates.verify(restored,actual),true);
+ A.ok(actual.originalMeridianGates.gates.length>=target);
+ console.log('REAL uninterrupted original Meridian source-born NPC Gate '+target+
+  ' PASS: all actual chosen Gate practice, real wounds and restorative nights,'+
+  ' physical Combat anatomy, saved journal replay; days '+(daysElapsed+more));
+}
+
