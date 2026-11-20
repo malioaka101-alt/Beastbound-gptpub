@@ -417,8 +417,18 @@ function afterDaily(s,w,life,activity,day){
   system==='rift'&&ctx.site!=='ruins')return null;
  // Meridian uses its OWN Foundation / Stage I source owner. Never route
  // its Qi quality, integrity or stamina through a generic first-milestone.
- if(system==='meridian')
-  return require('./independent-offscreen-meridian').practice(s,ctx);
+ if(system==='meridian'){
+  const result=require('./independent-offscreen-meridian').practice(s,ctx);
+  // Real verified Meridian breakthroughs have real physical Combat effects.
+  // Apply the EXISTING Build.meridianProfile anatomy to this same Combat
+  // body only after its actual original source receipt has passed replay.
+  // Not every practice or refusal updates stats; no second check or tick.
+  if(result&&(result.outcome==='breakthrough'||
+   result.gateOpened&&[1,36,72,108].includes(result.gateNumber)||
+   result.formed===true))
+   require('../rules/meridian-npc-physical').synchronize(s,ctx.actor);
+  return result;
+ }
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
