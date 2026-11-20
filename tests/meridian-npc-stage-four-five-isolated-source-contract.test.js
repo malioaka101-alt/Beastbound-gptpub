@@ -52,7 +52,8 @@ const Web=load('independent-meridian-web',{
  '../rules/meridian-shared-original-web':WebLaw,
  './independent-meridian-sea':{verify:(s,p)=>Sea.verify(s,p)},
  './independent-meridian-advanced':{afterDaily:()=>{
-  throw Error('Stage VI needs its original separate source owner')}}
+  throw Error('Stage VI needs its original separate source owner')}},
+ './lived-places':{location:()=>({biome:'settlement'})}
 });
 const s=E.newGame({seed:988127,name:'Disposable original Dantian/Web source'});
 s.table||={};s.table.combatants||={};
@@ -88,7 +89,8 @@ p.rngState=sourceSeed;
 s.world.minutes=2*1440;
 const beforeShared=s.rngState,playerLog=JSON.stringify(s.log),
  seaResult=Sea.afterDaily(s,{actor:p,body,workDay:1,
-  site:'crossing',originalShiftHash:'c'.repeat(64)});
+  site:'crossing',loc:{biome:'settlement'},
+  originalShiftHash:'c'.repeat(64)});
 A.equal(Sea.verify(s,p),true);
 A.equal(seaResult.formed,true);
 A.equal(s.player.meridian.stage,0);
@@ -105,8 +107,34 @@ A.equal(seaSource.qiSpent,8);
 A.equal(seaSource.staminaSpent,1);
 A.equal(body.stamina,999);
 A.equal(seaSource.noAdditionalWorldTime,true);
-let observed=0,completed=false,blockedByInjury=false;
-for(let day=2;day<=140;day++){
+// Disposable source-contract only: select personal RNG seeds BEFORE test
+// actions to exercise a real severe pressure failure, free refusal, then
+// independently checked self-care. Production NPC RNG is NEVER selectable.
+const seed=(want)=>{
+ for(let n=1;n<200000;n++){
+  const roller={rngState:n},choice=C.die(roller,100);
+  if(want==='decline'&&choice>66)return n;
+  if(choice<=66&&C.die(roller,20)===(want==='injury'?1:20))
+   return n;
+ }
+ throw Error('Disposable deterministic RNG fixture not found');
+};
+const severeSeed=seed('injury'),declinedSeed=seed('decline'),
+ healSeed=seed('heal');
+let observed=0,completed=false,blockedByInjury=false,
+ placedInjury=false,careRefused=false,careHealed=false,
+ injuryReceiptHash=null;
+for(let day=2;day<=220;day++){
+ const active=p.originalMeridianWeb,
+  untreated=active?.routes.find(r=>r.injuries.some(x=>!x.healed));
+ if(active?.routes.length===3&&!placedInjury&&!untreated&&
+  active.routes.some(r=>r.integrity<r.required)){
+  p.rngState=severeSeed;placedInjury=true;
+ }else if(untreated&&!careRefused){
+  p.rngState=declinedSeed;
+ }else if(untreated&&careRefused&&!careHealed){
+  p.rngState=healSeed;
+ }
  s.world.minutes=(day+1)*1440;
  const shared=s.rngState,log=JSON.stringify(s.log);
  const result=Web.afterDaily(s,{actor:p,body,workDay:day,
@@ -124,12 +152,43 @@ for(let day=2;day<=140;day++){
   A.equal(q.noAdditionalPlayerTime,true);
   A.equal(q.actionType,result.originalActionType);
   if(q.accepted)A.ok(q.check.roll>=1&&q.check.roll<=20);
+  if(q.pressureInjury){
+   const route=p.originalMeridianWeb.routes.find(r=>r.id===q.routeId);
+   injuryReceiptHash=route.injuries.at(-1).sourceHash;
+   A.equal(injuryReceiptHash,p.originalMeridianWeb.sessions.at(-1).seal);
+   A.equal(route.injuries.at(-1).healed,false);
+  }
+  if(q.actionType==='care'){
+   A.equal(q.originalPressureInjuryHash,injuryReceiptHash);
+   A.equal(q.originalMedicalSkillRank,0);
+   A.equal(q.originalCareSite,'crossing');
+   A.equal(q.selfCareNotPhysicianTreatment,true);
+   A.equal(q.qiSpent,0);
+   A.equal(q.staminaSpent,q.accepted?1:0);
+   A.equal(q.check?.dc,q.accepted?12+4+2:undefined);
+   if(!q.accepted){
+    careRefused=true;
+    A.equal(q.careStabilityRecovered,0);
+    A.equal(q.careSucceeded,false);
+    A.ok(p.originalMeridianWeb.routes.some(r=>
+     r.injuries.some(x=>!x.healed)));
+   }else if(q.careSucceeded){
+    careHealed=true;
+    A.ok(q.careStabilityRecovered>0);
+    A.ok(p.originalMeridianWeb.routes.every(r=>
+     r.injuries.every(x=>x.healed)));
+   }
+  }
  }
  if(p.originalMeridianWeb?.stage===5){completed=true;break;}
- if(p.originalMeridianWeb?.routes.some(r=>
-  r.injuries.some(x=>!x.healed))){blockedByInjury=true;break;}
+ if(day===220&&p.originalMeridianWeb?.routes.some(r=>
+  r.injuries.some(x=>!x.healed))){blockedByInjury=true;}
 }
 A.ok(observed>0,'True independent original Web mapping/practice resolves checks');
+A.equal(placedInjury,true,'True original pressure check reached its selected fixture seed');
+A.ok(injuryReceiptHash,'The actual source-owned severe check generated an injury');
+A.equal(careRefused,true,'Independent refusal cannot heal an existing injury');
+A.equal(careHealed,true,'A later real original Medicine check can heal precisely that injury');
 A.ok(completed||blockedByInjury,
  'The actual source either forms a physically connected Stage V web or blocks on untreated pressure injury');
 if(completed){
@@ -138,7 +197,7 @@ if(completed){
   p.originalMeridianWeb.stability).ready,true);
 }else{
  A.equal(p.originalMeridianWeb.stage,4);
- A.ok(blockedByInjury,'An unhealed Meridian source injury is never silently repaired');
+ A.equal(careHealed,true,'No unstated free medical reset is permitted');
 }
 const pristine=structuredClone(p),
  latest=p.originalMeridianWeb.sessions.at(-1);
@@ -148,4 +207,4 @@ latest.seal=Crypto.createHash('sha256').
 A.equal(Web.verify(s,p),false,
  'Resealing an invented source that claims an additional world-time turn must not pass');
 A.equal(Web.verify(s,pristine),true);
-console.log('ISOLATED Stage IV/V source owner PASS: true Core d20, 108 prerequisite contract, actual Dantian Sea at 8 Qi, private replay, Stage V physical mapped routes, real costs/healed graph or clinical blockage; no production progression forged');
+console.log('ISOLATED Stage IV/V source owner PASS: actual independent pressure deviation, separate refused self-care, accepted original Medicine roll, real Stamina/time source and healed anatomical graph; synthetic earlier 108 Gates remain TEST-ONLY, not production completion');
