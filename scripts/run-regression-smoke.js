@@ -53,6 +53,10 @@ function runNode(args,label){
    ': '+(result.error?.message||'exit '+result.status));
 }
 function main(){
+ // Cheap but REAL inventory proof: all discovered full-regression files
+ // exist and receive exactly one deterministic six-shard assignment.
+ runNode(['scripts/run-regression-batches.js','--shards=6','--validate'],
+  'full exact-once test inventory and original source contract coverage');
  const files=changed(),
   selected=new Set(QUICK),deferred=[];
  for(const file of files){
