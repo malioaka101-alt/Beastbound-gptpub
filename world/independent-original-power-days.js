@@ -364,8 +364,11 @@ function night(s,ctx){
   p.originalOffscreenCombatNights.shift();
  p.originalOffscreenCombatNights.push({source:proof,seal:hash(proof)});
  if(!verifyNights(s,p))throw Error('Actual original offscreen sleep source failed replay');
+ const originalNight=p.originalOffscreenCombatNights.at(-1);
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
-  p.originalOffscreenCombatNights.at(-1));
+  originalNight);
+ const arcaneMana=require('../rules/independent-original-arcane-circle-two')
+  .afterNight(s,p,originalNight);
  // Original Combat.rest({weeks:1}) Serious recovery requires six
  // consecutive PERSONALLY chosen, fully witnessed safe rest days.
  // Already elapsed independent days never advance again.
@@ -373,6 +376,7 @@ function night(s,ctx){
   afterNight(s,ctx);
  return {kind:'sleep',actualOriginalCombatRecovery:recovery.completedNights,
   originalRestoredQi:qi?.restoredQi||0,
+  ...(arcaneMana?{originalRestoredArcaneMana:arcaneMana.actualOriginalManaRestored}:{}),
   ...(convalesced?{originalSeriousSixdayRecovery:1}:{}),
   noPlayerKnowledge:true};
 }
