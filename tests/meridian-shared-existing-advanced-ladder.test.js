@@ -40,6 +40,16 @@ for(const load of [1,3,6,9])
     }
    }
   }
+for(const minutes of [15,45,90,120,240,480]){
+ const care=Original.maintenance({minutes});
+ A.equal(care.qiSpent,3);
+ A.equal(care.staminaSpent,2+Math.ceil(minutes/120));
+ A.equal(care.dc,19);
+ A.equal(care.attribute,'con');
+ A.equal(care.severeStabilityLoss,2);
+ A.equal(care.noImmortalityOrAutomaticBiologicalUpkeep,true);
+}
+A.throws(()=>Original.maintenance({minutes:0}),/metabolic maintenance time/);
 A.throws(()=>Original.law(10),/original source-evidenced/);
 A.throws(()=>Original.law(8,{radius:0}),/original source-evidenced/);
 const game=Engine.newGame({name:'No fictional advanced constitution',seed:906602});
