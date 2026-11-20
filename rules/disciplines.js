@@ -690,7 +690,9 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
       throw Error('Bone-Marrow refining requires an authentically completed Muscle-Tendon Cycle');
      s.player.body.cycles.push('Bone-Marrow Cycle');
      const c=s.table.combatants.player;
-     c.toughness+=1;c.boxes[1]+=1;
+     const cycleTwoLaw=require('./body-shared-original-cycle-two');
+     c.toughness+=cycleTwoLaw.toughGain;
+     c.boxes[1]+=cycleTwoLaw.seriousBoxGain;
      change='Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box';
     }
    }
