@@ -1,0 +1,25 @@
+name: Beastbound Meridian Real-Chain Verification
+# Exact source-born long-run evidence, NOT a draft-PR regression penalty.
+# A push to this workflow file starts one focused proof; later edits to
+# unrelated files do not keep replaying this expensive simulation.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - .github/workflows/meridian-npc-real-chain.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  meridian-real-first-gate:
+    name: Authentic NPC Foundation to Gate 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Genuine source-born NPC, real calendar, real Combat body
+        run: node tests/meridian-npc-actual-unbroken-source-progression.test.js
