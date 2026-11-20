@@ -489,6 +489,12 @@ function afterDaily(s,w,life,activity,day){
  // mind/body/resonance Threading. A title never unlocks an art.
  if(system==='soul'&&ctx.actor.originalFirstPowerMilestones?.soul?.phase===1)
   return require('../rules/independent-original-soul-thread-two').afterDaily(s,ctx);
+ // Only genuine source-earned Rift Sense I at the original Riftglass
+ // exterior may independently MEASURE the real spatial boundary. A signed
+ // successful reading is NOT an anchor, Fold Step or vault permission.
+ if(system==='rift'&&ctx.actor.originalFirstPowerMilestones?.rift?.step===1)
+  return require('../rules/independent-original-rift-sense-observation')
+   .afterDaily(s,ctx);
  // Stage I Body tissue proof unlocks only the original Bone-Marrow work,
  // not a free cycle, technique or invented combat statistics.
  if(system==='body'&&ctx.actor.originalFirstPowerMilestones?.body?.
