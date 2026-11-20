@@ -46,7 +46,7 @@ const stub={
  '../rules/meridian-shared-original-advanced':Law,
  '../rules/core':Core
 };
-VM.runInNewContext(source,{module:mod,require:id=>{
+VM.runInNewContext(source+'\nmodule.exports.__diagnose={initial,compute,action,params,plan};',{module:mod,require:id=>{
  if(id==='node:crypto')return require('node:crypto');
  if(!Object.hasOwn(stub,id))
   throw Error('Isolated source-law test attempted unexpected import '+id);
@@ -73,8 +73,28 @@ let reached=5,acceptedCare=null,days=0;
 for(let day=1;day<=600;day++){
  game.world.minutes=(day+1)*1440;
  const rng=game.rngState,log=JSON.stringify(game.log);
- const r=Advanced.afterDaily(game,{actor:p,body,workDay:day,
-  site:'crossing',originalShiftHash:'c'.repeat(64)});
+ let r;
+ try{
+  r=Advanced.afterDaily(game,{actor:p,body,workDay:day,
+   site:'crossing',originalShiftHash:'c'.repeat(64)});
+ }catch(err){
+  const current=p.originalMeridianAdvanced,last=current?.sessions?.at(-1),
+   replay=last&&Advanced.__diagnose.compute(game,p,
+    p.originalMeridianWeb,Advanced.__diagnose.initial(p),last.source,last.seal);
+  console.error('ISOLATED DEBUG replay',JSON.stringify({
+   day,error:err.message,rng:p.rngState,
+   source:last?.source,
+   stored:current?{stage:current.stage,track:current.track,
+    achieved:current.achieved,energy:current.energy,
+    stability:current.stability,
+    burden:current.originalConstitutionBurden}:null,
+   replay:replay?{stage:replay.stage,track:replay.track,
+    achieved:replay.achieved,energy:replay.energy,
+    stability:replay.stability,
+    burden:replay.originalConstitutionBurden}:null
+  }));
+  throw err;
+ }
  A.equal(game.rngState,rng,'Only original personal owner RNG may be used');
  A.equal(JSON.stringify(game.log),log,
   'A remote authentic individual check may not leak to player event log');
