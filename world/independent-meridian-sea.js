@@ -24,8 +24,8 @@ function stageThree(s,p){
   r.gates[i-1].sourceHash))return null;
  return {gates:r,qualities,gateFinal:r.gates[107].sourceHash};
 }
-function start(s,p){
- const ready=stageThree(s,p);
+function start(s,p,preverifiedStageThree=null){
+ const ready=preverifiedStageThree||stageThree(s,p);
  if(!ready)throw Error('Real source-evidenced individual 108-Gate anatomy is required');
  return {origin:ORIGIN,gateFinalSourceHash:ready.gateFinal,
   originalStageThreeSourceHash:ready.gates.originalAwakeningSourceHash,
@@ -59,10 +59,9 @@ function proof(ctx,r,details){
   noInventedTechniqueOrStage:true,
   noAdditionalWorldTime:true,...details};
 }
-function verify(s,p){
+function verifyReady(s,p,ready){
  const r=p?.originalMeridianSea;
  if(r===undefined)return true;
- const ready=stageThree(s,p);
  if(!ready||!r||r.origin!==ORIGIN||
   r.gateFinalSourceHash!==ready.gateFinal||
   r.originalStageThreeSourceHash!==
@@ -199,14 +198,22 @@ function verify(s,p){
   JSON.stringify(r.sea)===JSON.stringify(sea)&&
   r.completedAtMinute===completedAtMinute;
 }
+function verify(s,p){
+ return p?.originalMeridianSea===undefined?true:
+  verifyReady(s,p,stageThree(s,p));
+}
 function afterDaily(s,ctx){
  const p=ctx.actor,body=ctx.body,ready=stageThree(s,p);
  if(!ready||body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x>0)||
   ctx.workDay<=ready.gates.sessions.at(-1)?.source?.day)
   return null;
- if(!verify(s,p))throw Error('A private Dantian Sea record cannot be replayed');
- let r=p.originalMeridianSea||start(s,p);
+ // 'ready' just replayed all 108 source-earned Gates. Reuse that exact
+ // attestation within this single synchronous turn, rather than doing
+ // the 108-Gate replay TWO more times before today's action.
+ if(!verifyReady(s,p,ready))
+  throw Error('A private Dantian Sea record cannot be replayed');
+ let r=p.originalMeridianSea||start(s,p,ready);
  if(r.stage===4)
   return require('./independent-meridian-web').afterDaily(s,ctx);
  if(r.attempts.length>=500||r.energy.currentQi<8)return null;
