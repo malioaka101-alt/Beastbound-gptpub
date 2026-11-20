@@ -16,6 +16,7 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Early=require('../rules/independent-original-discipline-preparation'),
  Sense=require('../rules/independent-original-rift-sense-observation'),
  Anchor=require('../rules/independent-original-rift-exterior-anchor-two'),
+ Recover=require('../rules/independent-original-riftglass-one-recover'),
  SenseLaw=require('../rules/rift-shared-original-exterior-sense'),
  Law=require('../rules/rift-shared-original-anchor-law'),
  Foundation=require('../world/person-mechanical-foundations');
@@ -53,6 +54,7 @@ for(const item of options){
  A.equal(Early.verify(s,p),true);
  A.equal(Sense.verify(s,p),true);
  A.equal(Anchor.verify(s,p),true);
+ A.equal(Recover.verify(s,p),true);
  A.equal(Lives.verifyEntry(Realm.peek(s),item.life),true);
  const sensed=p.originalRiftMeasuredSense?.attempts||[],
   anchors=p.originalRiftExteriorAnchor?.attempts||[],
@@ -60,13 +62,14 @@ for(const item of options){
   chargedAnchors=anchors.filter(x=>x.source.accepted),
   spent=chargedSense.length*SenseLaw.STAMINA_COST+
    chargedAnchors.length*Law.staminaCost(120),
+  trueOnceRecover=p.originalRiftglassRecover?.source?.actualOriginalRecoverGain||0,
   formed=p.originalRiftExteriorAnchor?.completed===true;
  sensedTotal+=chargedSense.length;
  acceptedTotal+=chargedAnchors.length;
  if(formed)completions++;
  if(body.stamina<Law.staminaCost(120))exhaustions++;
- A.ok(body.stamina<=startingStamina-spent&&body.stamina>=0,
-  'True Rift expenditure is a minimum; independent Meridian or another originally owned activity may also spend the SAME Combat Stamina. Remote rest cannot silently refill it');
+ A.ok(body.stamina<=startingStamina-spent+trueOnceRecover&&body.stamina>=0,
+  'True Rift expenditure is a minimum; a personally CHOSEN rest day may restore at most ONE source-verified Combat Recover. Other independently original actions also spend Stamina; no unsafe-site sleep inferred');
  A.equal((p.originalOffscreenCombatNights||[]).length,0,
   'A Riftglass exterior ruin is not an independently verified settlement bedroom');
  A.equal((p.originalOvernightRestDecisions||[]).length,0,
@@ -100,8 +103,10 @@ for(const item of options){
    !formed);
  }
  const summary={seed,int:item.originalInt,initial:startingStamina,
-  remaining:body.stamina,otherOriginalExertionOrDamage:
-   startingStamina-spent-body.stamina,readingChecks:chargedSense.length,
+  remaining:body.stamina,originalSingleRecoverGain:trueOnceRecover,
+  otherOriginalExertionOrDamage:
+   startingStamina-spent+trueOnceRecover-body.stamina,
+  readingChecks:chargedSense.length,
   anchorChecks:chargedAnchors.length,
   anchorAxes:r?.axes||null,integrated:r?.integrated||false,
   strain:r?.strain||0,formed,
@@ -128,6 +133,7 @@ const exported=E.exportGame(s),imported=E.importGame(exported),
  copy=Realm.peek(imported).emergentPeople.people[p.id];
 A.equal(Sense.verify(imported,copy),true);
 A.equal(Anchor.verify(imported,copy),true);
+A.equal(Recover.verify(imported,copy),true);
 A.deepEqual(copy.originalRiftExteriorAnchor,anchor);
 const tampered=E.importGame(exported),
  falsePerson=Realm.peek(tampered).emergentPeople.people[p.id];
