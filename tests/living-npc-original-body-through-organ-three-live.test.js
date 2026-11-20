@@ -30,6 +30,9 @@ for(let i=0;i<9;i++){
 }
 candidates.sort((a,b)=>b.score-a.score||a.seed-b.seed);
 const selected=candidates[0],{s,p,day,seed}=selected;
+// The prior 2,520-day actual run reached 145/180 source-paid Bone-Marrow
+// points without a rite. A larger bounded calendar is required for a *real*
+// rite and subsequent real four-organ work, not fewer original points.
 const first=Rules.act(s,{system:'discipline',operation:'npcOriginalFirstMilestone',
  params:{actorId:p.actorId,system:'body'}});
 A.equal(first.observedOutcome,'breakthrough');
@@ -53,7 +56,7 @@ A.equal(rested.freelyAccepted,true,
  'Even an exceptional body candidate has no compulsory choice to sleep');
 A.equal(Health.verifyNpcNightHistory(s,p.actorId),true);
 let stageTwo=null,stageThree=null,firstThreeDay=null,days=0;
-for(let i=0;i<84;i++){
+for(let i=0;i<140;i++){
  const minute=s.world.minutes;
  E.advance(s,30*1440);World.finalizeTime(s,minute);days+=30;
  if(i%5===4){
