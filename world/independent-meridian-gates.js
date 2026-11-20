@@ -82,6 +82,12 @@ function verify(s,p){
   typeof state.gateWork.forced!=='boolean'||
   !state.energy)return false;
  try{Gate.verifiedGates(state.gates);}catch{return false;}
+ // A chronological Gate source may be long, but its person's own
+ // birth/life ledger is identical across every entry during this one
+ // synchronous replay. Verify it once; verify EACH Gate day's original
+ // choice, shift, witness and receipt independently below.
+ if(!Offscreen.verifyEvidenceBatch(s,p,state.sessions.map(x=>x?.source)))
+  return false;
  let gates=[],work={number:1,progress:0,forced:false},
   current=structuredClone(previous.energy),lastDay=-1,lastEnd=-1,
   expectedStage=2;
@@ -101,7 +107,6 @@ function verify(s,p){
    q.startMinute+q.actualMinutes>s.world.minutes||
    q.day!==Math.floor(q.startMinute/1440)||
    q.day<=previous.awakening.lastAttemptDay||
-   !Offscreen.verifyEvidence(s,p,q)||
    q.gateNumber!==work.number||q.pointsBefore!==work.progress||
    q.gatesBefore!==gates.length||
    !integer(q.rngBefore)||q.rngBefore<1||
