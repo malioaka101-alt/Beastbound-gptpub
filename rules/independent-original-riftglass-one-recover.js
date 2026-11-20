@@ -40,7 +40,9 @@ function verify(s,p){
   q.actualMinutes!==5||
   q.originalShiftHash!==People.shift(p,q.day,w)?.hash||
   !q.independentRestDay||q.independentRestDay.day!==q.day+1||
+  q.independentRestDay.origin!==Lives.ORIGIN||
   q.independentRestDay.actorId!==p.actorId||
+  q.independentRestDay.identityHash!==p.originHash||
   q.independentRestDay.action!=='rest'||
   q.independentRestDayHash!==hash(q.independentRestDay)||
   q.staminaBefore>=q.maximumStamina||
