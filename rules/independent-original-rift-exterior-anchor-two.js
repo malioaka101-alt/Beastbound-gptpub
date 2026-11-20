@@ -169,9 +169,10 @@ function privateStatus(s,p){
  if(!Sense.verify(s,p)||!Early.verify(s,p)||!verify(s,p))
   throw Error('Independent original Rift Anchor proof was altered');
  const r=p.originalRiftExteriorAnchor,
-  body=s.table?.combatants?.['npc_'+p.id];
- if(!body?.npcOrigin?.seal)
-  throw Error('Original Rift field work requires the actual individual Combat body');
+  body=s.table?.combatants?.['npc_'+p.id],
+  Recovery=require('./independent-original-riftglass-one-recover');
+ if(!body?.npcOrigin?.seal||!Recovery.verify(s,p))
+  throw Error('Original Rift field work requires the authentic Combat body and personally chosen Recover evidence');
  const realCost=Law.staminaCost(120),
   physicalReady=body.status==='ok'&&body.wounds.every(x=>x===0)&&
    body.stamina>=realCost;
@@ -183,6 +184,11 @@ function privateStatus(s,p){
   currentOriginalCombatStamina:body.stamina,
   nextOriginalAnchorPracticeStaminaCost:realCost,
   actualPhysicalReadinessForAnotherAnchor:!r?.completed&&physicalReady,
+  originalOneRecoverActuallyUsed:!!p.originalRiftglassRecover,
+  sourceVerifiedOneRecoverGain:
+   p.originalRiftglassRecover?.source?.actualOriginalRecoverGain??0,
+  furtherOriginalRecoverNeedsRealNight:
+   (body.recoverUses||0)>=1,
   hasActualVerifiedRiftglassSafeSleep:
    (p.originalOffscreenCombatNights||[]).some(row=>
     row?.source?.site===SenseLaw.LOCATION),
