@@ -10,7 +10,8 @@ const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'
 const prose=(v,min=12,max=950)=>typeof v==='string'&&v.trim().length>=min&&v.trim().length<=max;
 const integer=(v,min=0,max=1000000000)=>Number.isInteger(v)&&v>=min&&v<=max;
 const ident=v=>typeof v==='string'&&/^[a-z][a-z0-9_-]{2,75}$/.test(v);
-const segments={extraordinary:8,major:36,minor:72};
+const WebLaw=require('./meridian-shared-original-web');
+const segments=WebLaw.SEGMENTS;
 const keep=(p,fields)=>p&&typeof p==='object'&&!Array.isArray(p)&&
  Object.keys(p).every(x=>fields.includes(x));
 function prior(s){
@@ -76,7 +77,7 @@ function checkRoute(r){
   !integer(r.integrity,0,20)||!integer(r.required,1,20)||
   !Array.isArray(r.attempts)||!Array.isArray(r.injuries)||
   !Array.isArray(r.care))return false;
- const required=Math.max(2,Math.ceil(z.segments.length/3)+z.load-2);
+ const required=WebLaw.required(z.segments.length,z.load);
  if(r.required!==required||r.integrity>r.required)return false;
  let earnedIntegrity=0,lastMinute=z.createdMinute;
  for(const attempt of r.attempts){
@@ -254,7 +255,7 @@ function mapRoute(s,p={}){
   load:p.load,segments:structuredClone(p.segments),gates:[...p.gates],
   dantian:p.dantian,witness:structuredClone(event),
   witnessHash:hash(event),createdMinute:s.world.minutes};
- const required=Math.max(2,Math.ceil(draft.segments.length/3)+draft.load-2);
+ const required=WebLaw.required(draft.segments.length,draft.load);
  const route={id:p.id,origin:ORIGIN,source:draft,seal:hash(draft),
   integrity:0,required,attempts:[],injuries:[],care:[]};
  if(!checkRoute(route))throw Error('Route references nonexistent or duplicate anatomical structures');
@@ -282,8 +283,12 @@ function work(s,p={}){
  available(s);
  if(route.integrity>=route.required)
   throw Error('This individually mapped circuit is already structurally integrated');
- const qiCost=2+route.source.load,minutes=p.minutes??120,
-  staminaCost=Math.ceil(minutes/120)+Math.ceil(route.source.load/3);
+ const minutes=p.minutes??120,n=route.source.segments.length,
+  flawed=route.source.gates.filter(x=>
+   s.player.meridian.gates[x-1].quality==='Flawed').length,
+  pressure=WebLaw.pressure({load:route.source.load,segments:n,
+   flawed,seaPurity:s.player.meridian.dantianSea.purity,minutes}),
+  qiCost=pressure.qiSpent,staminaCost=pressure.staminaSpent;
  if(!integer(s.player.qi,qiCost,100000)||
     !integer(s.player.stamina,staminaCost,100000))
   throw Error('Actual available Qi and Stamina cannot support the route pressure');
@@ -291,13 +296,10 @@ function work(s,p={}){
  s.player.qi-=qiCost;s.player.stamina-=staminaCost;
  if(s.table?.combatants?.player)
   s.table.combatants.player.stamina=s.player.stamina;
- const n=route.source.segments.length,
-   flawed=route.source.gates.filter(x=>
-    s.player.meridian.gates[x-1].quality==='Flawed').length,
-   modifier=Math.floor((s.player.attributes.wis-10)/2)+
+ const modifier=Math.floor((s.player.attributes.wis-10)/2)+
     2*(s.player.skills?.cultivation?.rank||0)+
-    (s.player.meridian.dantianSea.purity>=5?1:0),
-   dc=13+route.source.load+Math.ceil(n/4)+2*flawed;
+    pressure.modifierPurity,
+   dc=pressure.dc;
  const check=C.check(s,{modifier,dc,label:'Stage V living circuit '+route.source.name});
  const earned=check.success?C.progress(check.degree):0;
  route.integrity=Math.min(route.required,route.integrity+earned);
@@ -459,8 +461,11 @@ function completeWeb(s,p={}){
  const witnessHash=hash(witness);
  if(net.integrationAttempts.some(x=>x.source.witnessHash===witnessHash))
   throw Error('The same original living-web demonstration cannot be rolled twice');
- const minutes=p.minutes??90,qiCost=8+state.extraordinary,
-  staminaCost=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??90,
+  law=WebLaw.integration({routes:state.ids.length,
+   extraordinary:state.extraordinary,
+   stability:s.player.meridian.stability,minutes}),
+  qiCost=law.qiSpent,staminaCost=law.staminaSpent;
  if(!integer(s.player.qi,qiCost,100000)||
     !integer(s.player.stamina,staminaCost,100000))
   throw Error('The real pair of Qi and Stamina reservoirs cannot sustain a living network test');
@@ -470,8 +475,8 @@ function completeWeb(s,p={}){
   s.table.combatants.player.stamina=s.player.stamina;
  const modifier=Math.floor((s.player.attributes.wis-10)/2)+
   2*(s.player.skills?.cultivation?.rank||0)+
-  Math.floor(s.player.meridian.stability/25)-2,
-  dc=19+Math.ceil(state.ids.length/4);
+  law.modifierStability,
+  dc=law.dc;
  const check=C.check(s,{modifier,dc,
   label:'Stage V physically integrated responsive Meridian Web'});
  const checkEvent=structuredClone(s.log.at(-1));
