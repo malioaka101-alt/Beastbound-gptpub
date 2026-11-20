@@ -1427,10 +1427,23 @@ function verifyNpcMeridian(s,person){
   combatant.npcOrigin.actorId!==person.actorId)return false;
  let points=0,lastDay=-1,lastMinute=-1,lastPracticeDay=-1,
   lastRiteDay=-1,earntStage=0,quality=null,cooldown=0,previousEnd=-1;
- const methods={},priorAcceptedWitnesses=[],
-  firstMaximum=combatant.maxStamina-(rec.earnedStage===1?
-   Build.meridianProfile(1).bonuses.stamina:0);
- if(firstMaximum<1)return false;
+ // The Stage I entry maximum is immutable ORIGINAL human anatomy. Reading
+ // it back from a *current* combat body would invalidate every honest later
+ // Stage II–IX Stamina bonus and strand a trained independent NPC forever.
+ const a=person.mechanicalFoundation.baselineAttributes,
+  abilities={vigor:Math.floor((a.con-10)/2),
+   agility:Math.floor((a.dex-10)/2),
+   wits:Math.floor((a.wis-10)/2),
+   will:Math.floor((a.wis-10)/2),
+   might:Math.floor((a.str-10)/2)},
+  originalHuman=Build.humanStats(abilities,{skills:{Melee:0},
+   size:'Medium'}),
+  methods={},priorAcceptedWitnesses=[],
+  firstMaximum=originalHuman.stamina;
+ if(!combatant.npcOrigin.originalUnarmouredHumanBaseline||
+  firstMaximum<1||
+  combatant.maxStamina<firstMaximum+(rec.earnedStage===1?
+   Build.meridianProfile(1).bonuses.stamina:0))return false;
  for(const row of rec.sessions){
   const q=row?.source;
   if(q?.offscreenOpportunity!==undefined&&
