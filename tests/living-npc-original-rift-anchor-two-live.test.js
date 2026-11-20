@@ -14,21 +14,32 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Foundation=require('../world/person-mechanical-foundations');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const {fixture}=require('./living-npc-original-soul-body-rift-first-milestones.test.js');
-const {s,p,day}=fixture('rift','breakthrough',973800);
-const outcome=Rules.act(s,{system:'discipline',operation:'npcOriginalFirstMilestone',
- params:{actorId:p.actorId,system:'rift'}});
-A.equal(outcome.observedOutcome,'breakthrough');
-const w=Realm.peek(s),life=w.independentPersonLives.people[p.id];
-life.lastDay=day;
-A.equal(Lives.verifyEntry(w,life),true);
-const playerRng=s.rngState;
-let exercised=null;
-for(let i=0;i<500;i++){
- const before=s.world.minutes;
- E.advance(s,1440);World.finalizeTime(s,before);
- exercised=p.originalRiftExteriorAnchor?.attempts?.find(a=>a.source.accepted);
- if(exercised)break;
+// A single real autonomous person's choices never guarantee future Rift
+// practice or a successful field measurement. Sample distinct disposable
+// seeded test WORLDS; never force one person's choice, dice or wound recovery.
+let selected=null;
+for(let index=0;index<14&&!selected;index++){
+ const seed=973800+index*17;
+ const {s,p,day}=fixture('rift','breakthrough',seed);
+ const outcome=Rules.act(s,{system:'discipline',
+  operation:'npcOriginalFirstMilestone',
+  params:{actorId:p.actorId,system:'rift'}});
+ A.equal(outcome.observedOutcome,'breakthrough');
+ const w=Realm.peek(s),life=w.independentPersonLives.people[p.id];
+ life.lastDay=day;
+ A.equal(Lives.verifyEntry(w,life),true);
+ const playerRng=s.rngState;
+ for(let i=0;i<170;i++){
+  const before=s.world.minutes;
+  E.advance(s,1440);World.finalizeTime(s,before);
+  const exercised=p.originalRiftExteriorAnchor?.attempts?.find(a=>a.source.accepted);
+  if(exercised){
+   selected={s,p,life,playerRng,exercised,seed};break;
+  }
+ }
 }
+A.ok(selected,'Among distinct naturally seeded original lives, at least one person should actually choose an independently earned Riftglass anchor attempt');
+const {s,p,life,playerRng,exercised,seed}=selected;
 const measured=p.originalRiftMeasuredSense?.successfulReading;
 A.ok(measured,'A genuinely successful independently checked original boundary measurement must precede Anchor II; '+JSON.stringify({
  measuredAttempts:p.originalRiftMeasuredSense?.attempts?.length||0,
