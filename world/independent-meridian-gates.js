@@ -97,6 +97,9 @@ function verify(s,p){
    !integer(q.rngBefore)||q.rngBefore<1||
    !integer(q.rngAfter)||q.rngAfter<1||
    !integer(q.choiceD100)||q.choiceD100<1||q.choiceD100>100||
+   !['reserved','curious','steady','independent']
+     .includes(q.personalityAtAttempt)||
+   !integer(q.fatigueAtAttempt)||q.fatigueAtAttempt>100||
    q.choiceChance!==Meridian.chance({personality:q.personalityAtAttempt,
     fatigue:q.fatigueAtAttempt})||
    typeof q.accepted!=='boolean'||
@@ -104,6 +107,7 @@ function verify(s,p){
    q.staminaSpent!==0||
    JSON.stringify(q.energyBefore)!==JSON.stringify(current))
    return false;
+  if(work.number<1||work.number>108)return false;
   const spec=Gate.gateSpec(work.number),random={rngState:q.rngBefore};
   if(q.gateBand!==spec.band||
    q.transition!==spec.transition||
