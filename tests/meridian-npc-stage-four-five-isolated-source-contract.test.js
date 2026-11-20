@@ -198,7 +198,13 @@ A.equal(careRefused,true,'Independent refusal cannot heal an existing injury. '+
   id:x.id,injuries:x.injuries,integrity:x.integrity,
   required:x.required
  })),energy:p.originalMeridianWeb?.energy,
- bodyStamina:body.stamina
+ bodyStamina:body.stamina,
+ seeds:{severeSeed,declinedSeed,healSeed},
+ careRows:p.originalMeridianWeb.sessions.filter(x=>
+  x.source.actionType==='care').map(x=>({day:x.source.day,
+   rngBefore:x.source.rngBefore,choice:x.source.choiceD100,
+   chance:x.source.choiceChance,accepted:x.source.accepted,
+   healed:x.source.careSucceeded,roll:x.source.check?.roll}))
 }));
 A.equal(careHealed,true,'A later real original Medicine check can heal precisely that injury');
 A.ok(completed||blockedByInjury,
