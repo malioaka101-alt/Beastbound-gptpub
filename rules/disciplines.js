@@ -1437,6 +1437,9 @@ function verifyNpcMeridian(s,person){
  if(firstMaximum<1)return false;
  for(const row of rec.sessions){
   const q=row?.source;
+  if(q?.offscreenOpportunity!==undefined&&
+   !require('../world/independent-original-power-days').
+    verifyEvidence(s,person,q))return false;
   if(q?.origin===NPC_MERIDIAN_RITE){
    // An actual rite shares the SAME chronological discipline journal as
    // ordinary Foundation training; history cannot overwrite earned points.
