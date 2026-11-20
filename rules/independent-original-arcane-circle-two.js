@@ -13,7 +13,9 @@ const ORIGINAL_EIGHT_HOUR_MANA_RECOVERY=12;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const pattern=p=>'Dual channel revision of '+p.originalArcaneCore.geometry+
  ' using independently measured core feedback and coupled circulation';
-const initialMana=()=>Build.arcaneProfile(1).mana;
+// Structured capacity is NOT a paid, currently filled Mana pool. With no
+// proven previous Arcane recharge, spendable energy conservatively starts 0.
+const initialMana=()=>0;
 const initialStability=90; // Original starting player Mana Core stability.
 function verify(s,p){
  const r=p?.originalArcaneCircleTwo;
@@ -21,7 +23,7 @@ function verify(s,p){
  if(!p?.originalArcaneCore||p.originalArcaneCore.circles!==1||
   !Early.verify(s,p)||!r||r.origin!==ORIGIN||
   r.originalFirstCircleSourceHash!==p.originalArcaneCore.originalCircleOneSourceHash||
-  !Array.isArray(r.sessions)||r.sessions.length<1||r.sessions.length>480)
+  !Array.isArray(r.sessions)||r.sessions.length>480)
   return false;
  let mana=initialMana(),stability=initialStability,progress=0,
   completed=false,prevDay=-1,previousEnd=0;
@@ -115,6 +117,22 @@ function verify(s,p){
   r.lastAttemptDay===prevDay&&
   r.originalFirstCircleSourceHash===p.originalArcaneCore.originalCircleOneSourceHash;
 }
+function ensureLedger(s,p){
+ if(p?.originalArcaneCore?.circles!==1)return null;
+ if(!Early.verify(s,p))
+  throw Error('An actual source-earned First Circle is mandatory before Arcane Mana accounting');
+ if(p.originalArcaneCircleTwo!==undefined){
+  if(!verify(s,p))throw Error('Existing Second Circle resource evidence was altered');
+  return p.originalArcaneCircleTwo;
+ }
+ const r={origin:ORIGIN,
+  originalFirstCircleSourceHash:p.originalArcaneCore.originalCircleOneSourceHash,
+  sessions:[],integrity:0,manaRemaining:initialMana(),
+  coreStability:initialStability,completed:false,lastAttemptDay:-1};
+ p.originalArcaneCircleTwo=r;
+ if(!verify(s,p))throw Error('Original First Circle cannot initialise an unsupported Mana reserve');
+ return r;
+}
 function privateStatus(s,p){
  if(!Early.verify(s,p)||!verify(s,p))
   throw Error('Independent Second Arcane Circle source was altered');
@@ -135,7 +153,7 @@ function afterDaily(s,ctx){
   !Early.verify(s,p)||!verify(s,p)||
   body.status!=='ok'||body.wounds.some(x=>x!==0))
   return null;
- const prior=p.originalArcaneCircleTwo;
+ const prior=ensureLedger(s,p);
  if(prior?.lastAttemptDay>=ctx.workDay||
   Object.values(p.originalEarlyDisciplinePreparation||{})
    .some(x=>x.lastAttemptDay>=ctx.workDay)||
@@ -143,10 +161,7 @@ function afterDaily(s,ctx){
  // First-Circle source owns the structured Mana reservoir. There have
  // been no licensed spells or earlier verified Circle expenses; initialise
  // once. No per-day free refill is permitted.
- const r=prior||{origin:ORIGIN,
-  originalFirstCircleSourceHash:p.originalArcaneCore.originalCircleOneSourceHash,
-  sessions:[],integrity:0,manaRemaining:initialMana(),
-  coreStability:initialStability,completed:false,lastAttemptDay:-1};
+ const r=prior;
  if(r.sessions.length>=480||r.manaRemaining<Law.MANA_COST||
   r.coreStability<40)return null;
  const start=ctx.workDay*1440+600,oldLog=s.log.slice(),
@@ -208,7 +223,7 @@ function afterDaily(s,ctx){
 // ORIGINAL 12 Mana. No companion sleep, narrative rest, clock increment or
 // claimed location may replenish the recorded energy budget.
 function afterNight(s,p,nightRow){
- const r=p?.originalArcaneCircleTwo;
+ const r=p?.originalArcaneMatrix!==undefined?null:ensureLedger(s,p);
  // Once the matrix owner starts, the SAME stored Mana moves forward to
  // that distinct source ledger. Never restore both records on one night.
  if(!r||p.originalArcaneMatrix!==undefined)return null;
@@ -230,4 +245,4 @@ function afterNight(s,p,nightRow){
  if(!verify(s,p))throw Error('Original Arcane rested Mana source replay failed');
  return {actualOriginalManaRestored:after-before,noFreeReplenishment:true};
 }
-module.exports={ORIGIN,RECOVERY,verify,privateStatus,afterDaily,afterNight};
+module.exports={ORIGIN,RECOVERY,verify,privateStatus,ensureLedger,afterDaily,afterNight};
