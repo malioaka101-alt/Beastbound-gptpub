@@ -254,6 +254,8 @@ function afterDaily(s,ctx){
   originalFoundationSeal:p.mechanicalFoundation.seal,
   originalCombatEntrySeal:body.npcOrigin.seal,
   originalSoulPerceptionSourceHash:r.originalSoulPerceptionSourceHash,
+  originalShiftHash:ctx.originalShiftHash,
+  originalSceneHash:hash(Offscreen.opportunityEvidence(ctx,'soul')),
   offscreenOpportunity:Offscreen.opportunityEvidence(ctx,'soul'),
   day:ctx.workDay,startMinute:start,actualMinutes:accepted?120:5,
   rngBefore:before,rngAfter:p.rngState,
