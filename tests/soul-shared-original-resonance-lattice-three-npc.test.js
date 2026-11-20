@@ -35,6 +35,8 @@ A.equal(Build.soulProfile(3,{will:1}).perceptionRangeMetres,50);
 A.match(PC.practice.toString(),/LatticeLaw.practiceState/);
 A.match(PC.repair.toString(),/LatticeLaw.repairState/);
 A.match(PC.complete.toString(),/LatticeLaw.formationModifier/);
+A.match(NPC.afterDaily.toString(),/if\(kind==='repair'\)return null/,
+ 'Independent Soul III must not fake the player owner\'s separate clinical repair witness');
 A.equal(NPC.verify({table:{}},{originalSoulLatticeThree:undefined}),true);
 A.equal(NPC.verify({table:{}},{
  originalSoulLatticeThree:{formed:true}
