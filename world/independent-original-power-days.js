@@ -482,6 +482,11 @@ function afterDaily(s,w,life,activity,day){
   return ctx.actor.originalArcaneCircleTwo?.completed?
    require('../rules/independent-original-arcane-matrix-three').afterDaily(s,ctx):
    require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
+ // Stage I Body tissue proof unlocks only the original Bone-Marrow work,
+ // not a free cycle, technique or invented combat statistics.
+ if(system==='body'&&ctx.actor.originalFirstPowerMilestones?.body?.
+  completedCycle==='Muscle-Tendon Cycle')
+  return require('../rules/independent-original-body-cycle-two').afterDaily(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
