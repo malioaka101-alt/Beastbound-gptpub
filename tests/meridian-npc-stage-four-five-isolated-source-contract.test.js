@@ -11,7 +11,8 @@ const A=require('node:assert/strict'),FS=require('node:fs'),
  Combat=require('../rules/combat'),Build=require('../rules/build'),
  Gates=require('../rules/meridian-shared-original-gates'),
  SeaLaw=require('../rules/meridian-shared-original-sea'),
- WebLaw=require('../rules/meridian-shared-original-web');
+ WebLaw=require('../rules/meridian-shared-original-web'),
+ Night=require('../world/independent-meridian-night-qi');
 const chance=p=>{
  const original={curious:66,steady:59,independent:51,reserved:39}[p.personality];
  return Math.max(10,original-(p.fatigue>=55?15:0));
@@ -29,6 +30,7 @@ const seaStub={
  '../rules/meridian-shared-original-sea':SeaLaw,
  '../rules/meridian-shared-original-gates':Gates,
  './independent-meridian-gates':{verify:()=>true},
+ './independent-meridian-night-qi':Night,
  './independent-offscreen-meridian':{chance},
  './independent-original-power-days':witness
 };
