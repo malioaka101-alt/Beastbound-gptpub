@@ -256,18 +256,24 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.rift.step=1;
    originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
   }
-  if([1,2].includes(verifiedMeridian?.originalMeridianStageEarned)){
+  if([1,2,3].includes(verifiedMeridian?.originalMeridianStageEarned)){
    originalMilestones.meridian.stage=verifiedMeridian.originalMeridianStageEarned;
    originalMilestones.meridian.openedGates=0;
    originalMilestones.meridian.foundationQuality=
     verifiedMeridian.originalStageOneFoundationQuality;
    originalMilestones.meridian.foundationIntegrity=
     verifiedMeridian.originalFoundationIntegrity;
-   if(verifiedMeridian.originalMeridianStageEarned===2){
+   if(verifiedMeridian.originalMeridianStageEarned>=2){
     originalMilestones.meridian.primaryMeridiansMapped=
      verifiedMeridian.originalStageTwoPrimaryMeridians;
     originalMilestones.meridian.originalQiCapacityProfile=
      structuredClone(verifiedMeridian.originalStageTwoQiProfile);
+    if(verifiedMeridian.originalMeridianStageEarned===3){
+     originalMilestones.meridian.openedGates=
+      verifiedMeridian.originalStageThreeOpenedGates;
+     originalMilestones.meridian.originalVerifiedGateRecords=
+      structuredClone(verifiedMeridian.originalStageThreeIndividualGates);
+    }
    }
   }
   return {known:true,actorId,privateToGM:true,
