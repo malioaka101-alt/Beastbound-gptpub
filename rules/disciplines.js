@@ -1119,6 +1119,7 @@ function matrixStatus(s){
   note:'Earn a stable third resonance layer; no compound spell or formula is granted by rank alone'};
 }
 function matrixWork(s,params={}){
+ const matrixLaw=require('./arcane-shared-original-matrix');
  if(!params||typeof params!=='object'||Array.isArray(params)||
     Object.keys(params).some(k=>!['design','focus','minutes','guidanceId','route'].includes(k)))
   throw Error('Matrix work accepts only genuine geometry design, focus, duration, optional witnessed theory and route; not chosen checks, ranks or spells');
@@ -1133,7 +1134,7 @@ function matrixWork(s,params={}){
  const self=independentSite(s,'arcane',{shortSession:true});
  const chain=thirdPrerequisites(s);
  const theory=witnessedTheory(s,'arcane',guidanceId);
- const a=chain.a,manaSpent=4,staminaSpent=Math.ceil(minutes/120);
+ const a=chain.a,manaSpent=matrixLaw.MANA_COST,staminaSpent=matrixLaw.staminaCost(minutes);
  if(!Number.isInteger(s.player.mana)||s.player.mana<manaSpent||
     !Number.isInteger(s.player.stamina)||s.player.stamina<staminaSpent)
   throw Error('Matrix work requires four real Mana and physical Stamina');
@@ -1147,30 +1148,27 @@ function matrixWork(s,params={}){
  const record=previous||{target:3,secondCircleHash,progress:0,
   attempts:[],completed:false};
  const start=s.world.minutes,designNote=design.trim();
- const coreMod=a.coreStability>=85?1:a.coreStability<60?-2:0;
+ const coreMod=matrixLaw.stabilityBonus(a.coreStability);
  const check=C.check(s,{modifier:modifier(s,'arcane')+coreMod+(theory?.bonus||0),
-  dc:20,label:'Third Circle — resonant matrix '+focus});
- const earned=check.degree==='exceptional'?6:check.degree==='strong'?3:
-  check.degree==='success'?2:0;
+  dc:matrixLaw.DC,label:'Third Circle — resonant matrix '+focus});
+ const earned=matrixLaw.earned(check);
  s.player.mana-=manaSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  let backlash=false;
  if(check.degree==='severe failure'){
-  backlash=true;a.coreStability=Math.max(0,a.coreStability-9);
+  backlash=true;a.coreStability=matrixLaw.stabilityAfter(a.coreStability,check);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
- }else if(check.success)a.coreStability=Math.min(100,a.coreStability+1);
- record.progress=Math.min(6,record.progress+earned);
+ }else if(check.success)a.coreStability=matrixLaw.stabilityAfter(a.coreStability,check);
+ record.progress=Math.min(matrixLaw.REQUIRED,record.progress+earned);
  const entry={startedMinute:start,location:self.site,focus,design:designNote,
   degree:check.degree,roll:check.roll,earned,manaSpent,staminaSpent};
  record.attempts.push(entry);
  s.table.arcaneMatrixRevision=record;
  let formed=false;
- if(record.progress>=6){
+ if(record.progress>=matrixLaw.REQUIRED){
   const next=Build.arcaneProfile(3);
-  const integrity=Math.min(100,Math.max(40,
-   58+Math.max(0,check.margin)*2+Math.min(12,record.attempts.length*2)-
-   Math.max(0,80-a.coreStability)));
+  const integrity=matrixLaw.integrity(check.margin,record.attempts.length,a.coreStability);
   a.circles=3;a.channels=next.channels;a.structuredMana=next.mana;
   a.maxComplexity=next.maxComplexity;a.intake=next.intake;
   a.loadTolerance=next.loadTolerance;a.preparedCapacity=next.prepared;
@@ -1187,7 +1185,7 @@ function matrixWork(s,params={}){
    day:E.day(s),target:'circle3',quality:check.degree,
    change:'Third Circle constructed; the three-Circle resonance matrix is stable',
    witnessSource:MATRIX_SOURCE});
-  record.progress=6;record.completed=true;formed=true;
+  record.progress=matrixLaw.REQUIRED;record.completed=true;formed=true;
  }
  E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
  C.event(s,'progress',formed?
@@ -1200,7 +1198,7 @@ function matrixWork(s,params={}){
    ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}: {})
  });
  return {system:'arcane',target:'circle3',formed,progress:record.progress,
-  required:6,focus,check,backlash,minutes,manaSpent,staminaSpent,
+  required:matrixLaw.REQUIRED,focus,check,backlash,minutes,manaSpent,staminaSpent,
   route,feeTalons:0,coreStability:a.coreStability,
   ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}:{}),
   noAutomaticSpell:true,independent:true};
