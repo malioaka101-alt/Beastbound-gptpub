@@ -185,8 +185,10 @@ function work(s,p={}){
  const witnessHash=H(witness);
  if(x.attempts.some(y=>y.source.witnessHash===witnessHash))
   throw Error('A recorded tissue practice cannot produce repeated checks');
- const minutes=p.minutes??60,qiCost=3+Math.ceil(r.source.load/2),
-  staminaCost=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??60,
+  law=require('./meridian-shared-original-advanced').law(7,{kind:'practice',
+   load:r.source.load,stability:m.stability,minutes}),
+  qiCost=law.qiSpent,staminaCost=law.staminaSpent;
  if(!I(s.player.qi,qiCost,100000)||!I(s.player.stamina,staminaCost,100000))
   throw Error('Actual physical and Qi reserves cannot support tissue adaptation');
  const start=s.world.minutes;
@@ -229,8 +231,10 @@ function finish(s,p={}){
  const witnessHash=H(witness);
  if(net.tissueTests.some(a=>a.source.witnessHash===witnessHash))
   throw Error('One whole-body tissue source cannot create multiple resolution rolls');
- const minutes=p.minutes??90,qiCost=8+route.source.load,
-  staminaCost=Math.ceil(minutes/90)+3;
+ const minutes=p.minutes??90,
+  law=require('./meridian-shared-original-advanced').law(7,{kind:'form',
+   load:route.source.load,stability:m.stability,minutes}),
+  qiCost=law.qiSpent,staminaCost=law.staminaSpent;
  if(!I(s.player.qi,qiCost,100000)||!I(s.player.stamina,staminaCost,100000))
   throw Error('Earned integration needs real available body and Meridian energy');
  const start=s.world.minutes,oldQi=s.player.qi,oldMax=s.player.maxQi;
