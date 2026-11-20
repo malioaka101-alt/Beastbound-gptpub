@@ -1646,7 +1646,8 @@ function verifyNpcMeridian(s,person){
   require('../world/independent-meridian-ladder').verify(s,person)&&
   require('../world/independent-meridian-gates').verify(s,person)&&
   require('../world/independent-meridian-sea').verify(s,person)&&
-  require('../world/independent-meridian-web').verify(s,person);
+  require('../world/independent-meridian-web').verify(s,person)&&
+  require('../world/independent-meridian-advanced').verify(s,person);
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
@@ -1661,7 +1662,9 @@ function npcMeridianPrivateStatus(s,actorId){
   gateWork=p.originalMeridianGates,
   sea=p.originalMeridianSea,
   web=p.originalMeridianWeb,
-  stage=web?.stage===5?5:sea?.stage===4?4:gateWork?.stage===3?3:
+  advanced=p.originalMeridianAdvanced,
+  stage=advanced?.stage>=6?advanced.stage:
+   web?.stage===5?5:sea?.stage===4?4:gateWork?.stage===3?3:
    ladder?.stage===2?2:rec?.earnedStage===1?1:null;
  return {actorId,originalOwner:'rules/disciplines.js',
   originalMeridianStageEarned:stage,
@@ -1670,17 +1673,22 @@ function npcMeridianPrivateStatus(s,actorId){
   originalStageThreeOpenedGates:stage>=3?gateWork.gates.length:null,
   originalStageFourSea:stage>=4?
    structuredClone(sea.sea):null,
-  originalStageFiveWebRoutes:stage===5?
+  originalStageFiveWebRoutes:stage>=5?
    structuredClone(web.routes):null,
-  originalStageFiveSourceHash:stage===5?
+  originalAdvancedStages:stage>=6?
+   structuredClone(advanced.achieved):null,
+  originalAdvancedCurrentTrack:stage>=6?
+   structuredClone(advanced.track):null,
+  originalStageFiveSourceHash:stage>=5?
    web.originalStageFiveSourceHash:null,
   originalStageFourSourceHash:stage>=4?
    sea.attempts.at(-1).seal:null,
   originalStageThreeIndividualGates:stage>=3?
    structuredClone(gateWork.gates):null,
   originalStageTwoQiProfile:stage>=2?
-   structuredClone(stage===5?web.energy:
-    stage===4?sea.energy:stage===3?gateWork.energy:ladder.energy):null,
+   structuredClone(stage>=6?advanced.energy:
+    stage===5?web.energy:stage===4?sea.energy:
+     stage===3?gateWork.energy:ladder.energy):null,
   originalAwakeningTrainingPoints:ladder?.awakening?.points??null,
   originalAwakeningRiteSourceHash:stage>=2?
    ladder.originalStageTwoSourceHash:null,
