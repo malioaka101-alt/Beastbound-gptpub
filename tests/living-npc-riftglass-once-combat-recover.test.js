@@ -27,7 +27,7 @@ A.equal(Early.verify(s,p),true);
 A.equal(Sense.verify(s,p),true);
 A.equal(Recovery.verify(s,p),true);
 const record=p.originalRiftglassRecover;
-A.ok(record,'The actually earned sensing practitioner's own rest days should allow one legal original Combat Recover');
+A.ok(record,"The actually earned sensing practitioner\x27s own rest days should allow one legal original Combat Recover");
 const q=record.source,body=s.table.combatants['npc_'+p.id];
 A.equal(record.seal,hash(q));
 A.equal(q.independentRestDay.action,'rest');
