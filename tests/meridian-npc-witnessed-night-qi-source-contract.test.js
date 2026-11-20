@@ -114,4 +114,24 @@ alteredWitness.at(-1).seal=HASH(alteredWitness.at(-1).source);
 A.equal(Night.replayUntil(s,p,alteredWitness,0,Infinity,
  originalEnergy,0),null,
  'Re-sealed original witnessed sleep replacement cannot recover Qi');
+// Two source-verified-looking receipts from the same elapsed night do not
+// constitute two sleeps, even if their completion minutes differ.
+const overlap=structuredClone(p.originalMeridianSea.rests);
+const fakeSource={actorId:p.actorId,accepted:true,day:5,
+ startMinute:5*1440+16*60+31};
+const fakeSeen={source:fakeSource,sourceHash:HASH(fakeSource),
+ result:{accepted:true,elapsedMinutes:480,endedMinute:6*1440+31,
+ originalCombatEntrySeal:'e'.repeat(64)}};
+p.originalOvernightRestDecisions.push(fakeSeen);
+const duplicate=structuredClone(overlap.at(-1).source);
+duplicate.originalNightSeal=fakeSeen.sourceHash;
+duplicate.completedMinute=fakeSeen.result.endedMinute;
+duplicate.energyBefore=structuredClone(overlap.at(-1).source.energyAfter);
+duplicate.energyAfter={...duplicate.energyBefore,
+ currentQi:duplicate.energyBefore.currentQi+10};
+duplicate.restoredQi=10;
+overlap.push({source:duplicate,seal:HASH(duplicate)});
+A.equal(Night.replayUntil(s,p,overlap,0,Infinity,
+ originalEnergy,0),null,
+ 'Two overlapping witnessed and offscreen receipts on one calendar night cannot double-recover Qi');
 console.log('Isolated original Meridian night Qi source PASS: original +10 only after actual original sleep receipt, no world tick, exact before/after replay, cap, idempotence, anti-forgery; this fixture does NOT prove full Stage I-IX NPC advancement');
