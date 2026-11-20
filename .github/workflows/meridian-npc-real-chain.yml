@@ -1,7 +1,8 @@
 name: Beastbound Meridian Real-Chain Verification
-# Exact source-born long-run evidence, NOT a draft-PR regression penalty.
-# A push to this workflow file starts one focused proof; later edits to
-# unrelated files do not keep replaying this expensive simulation.
+# Tests only actual source-born individual progression; no synthetic prior
+# Gate history or free outcomes. Split the real 108-Gate simulation from
+# original Stage IV–IX, so any later-stage failure can be retried WITHOUT
+# re-running thousands of earlier world days. No campaign saves changed.
 on:
   push:
     branches:
@@ -12,8 +13,8 @@ on:
 permissions:
   contents: read
 jobs:
-  meridian-real-first-gate:
-    name: Authentic NPC Foundation to Gate 1
+  meridian-original-all-gates:
+    name: Authentic source-born NPC through Gate 108
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -21,8 +22,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Genuine source-born NPC through all 108 source-earned Gates
+      - name: One real NPC from Foundation through all 108 Gates
         env:
           BEASTBOUND_MERIDIAN_GATE_TARGET: '108'
           BEASTBOUND_MERIDIAN_MAX_ADDITIONAL_DAYS: '18000'
+          BEASTBOUND_MERIDIAN_REAL_SOURCE_OUTPUT: meridian-real-108-gate.json
         run: node tests/meridian-npc-actual-unbroken-source-progression.test.js
+      - name: Preserve actual verified Gate 108 source for later-stage proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: meridian-source-earned-gate-108
+          path: meridian-real-108-gate.json
+          if-no-files-found: error
+          retention-days: 7
+  meridian-original-advanced:
+    name: Same NPC progresses through genuine Stages IV to IX
+    needs: meridian-original-all-gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reuse exact verified source output from first job
+        uses: actions/download-artifact@v4
+        with:
+          name: meridian-source-earned-gate-108
+      - name: Continue actual original Dantian, Web and Stages VI through IX
+        env:
+          BEASTBOUND_MERIDIAN_REAL_SOURCE_INPUT: meridian-real-108-gate.json
+          BEASTBOUND_MERIDIAN_ADVANCED_TARGET: '9'
+          BEASTBOUND_MERIDIAN_ADVANCED_MAX_DAYS: '18000'
+        run: node scripts/meridian-real-advanced-from-gate108.js
