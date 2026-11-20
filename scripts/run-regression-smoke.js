@@ -22,6 +22,7 @@ const QUICK=[
  'living-shared-original-clinic-physical-law.test.js',
  'living-npc-source-backed-clinic-readiness.test.js',
  'living-npc-original-body-force-combat.test.js',
+ 'meridian-npc-actual-sixday-serious-convalescence.test.js',
  'clinic-original-treatment-course-source.test.js',
  'independent-autonomous-offscreen-original-power.test.js'
 ];
