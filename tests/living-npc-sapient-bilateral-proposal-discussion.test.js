@@ -613,6 +613,23 @@ for(let n=0;n<80;n++){
         trueArrival:welfareArrival.location,individualChoice:beastRespite.observedChoice,
         sourceFatigueReduction:beastRespite.sourceOwnedFatigueReduction,
         noAddedHumanBeastSocialContractOrFood:true}));
+       // An original crossing arrival does not create food or
+       // imply that the native sapient individual eats human rations.
+       const noFoodBefore=E.exportGame(js),
+        unprovided=R.act(js,{system:'bond',
+         operation:'npcVisitorFoodReadiness',params:{
+          actorId:jp.actorId,beastId:jb.id}});
+       A.equal(unprovided.privateToGM,true);
+       A.equal(unprovided.noPlayerInventoryOrWageOrMerchantStockOrBeastHungerChanged,true);
+       A.equal(unprovided.independentHumanAndSapientChoicesRequired,true);
+       A.equal(unprovided.canOffer,false,
+        'Original visiting person does not automatically own a suitable ration or establish an individual diet plan');
+       A.equal(E.exportGame(js),noFoodBefore);
+       A.throws(()=>R.act(js,{system:'bond',
+         operation:'npcVisitorFoodReadiness',params:{
+          actorId:jp.actorId,beastId:jb.id,food:'clean_rations'}}),
+         /Only two original individual identities, not chosen food or acceptance/);
+       A.equal(E.exportGame(js),noFoodBefore);
        // A distinct real-world disposable visitor can DISCUSS a genuinely
        // funded market service with the original independent merchant.
        // Signed crossing arrival proves the worker is present without

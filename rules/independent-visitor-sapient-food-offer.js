@@ -30,8 +30,9 @@ function structure(b){
    !integer(q.minute,last+1)||q.day!==Math.floor(q.minute/1440)||
    q.site!=='crossing'||q.item!=='clean_rations'||q.quantity!==1||
    q.elapsedMinutes!==Wild.OFFER_MINUTES||
-   q.sourceOriginalSpecies!==b.species||
-   q.originalForm!==b.evolutionStage||
+   !E.SPECIES[q.sourceOriginalSpecies]||
+   E.SPECIES[q.sourceOriginalSpecies].diet!=='omnivore'||
+   !['Base'].includes(q.originalForm)||
    !integer(q.hungerBefore,0,100)||!integer(q.hungerAfter,0,100)||
    !integer(q.heldBefore,1,100000)||!integer(q.heldAfter,0,100000)||
    q.accepted!==Boolean(q.humanChoice?.accepted&&q.beastChoice?.outcome==='accepted')||
@@ -107,7 +108,7 @@ function verify(s,p){
   !People.verify(Realm.peek(s),p)||!Journey.verify(s,p))return false;
  let last=-1;const days=new Set();
  const w=Realm.peek(s),account=w.materialCustody?.accounts?.[p.actorId];
- if(!account)return false;
+ if(!account||!require('../world/independent-local-purchases').verify(w))return false;
  try{Handoffs.validateAccount(account,p.actorId);}catch{return false;}
  for(const row of rows){
   const q=row?.source,b=s.beasts?.[q?.beastId],
@@ -149,7 +150,10 @@ function readiness(s,{actorId,beastId,...extra}={}){
   b=s.beasts?.[beastId],found=actualPair(s,p,b,s.world.minutes),
   account=w.materialCustody?.accounts?.[actorId];
  let verified=null;
- try{verified=Handoffs.privateHoldingEvidence(w,actorId);}catch{}
+ try{
+  if(require('../world/independent-local-purchases').verify(w))
+   verified=Handoffs.privateHoldingEvidence(w,actorId);
+ }catch{}
  const stored=verified?.verifiedCurrentMaterials?.find(x=>
   x.item==='clean_rations'&&x.quantity>=1);
  const canOffer=!!found&&!!account&&!!stored&&
