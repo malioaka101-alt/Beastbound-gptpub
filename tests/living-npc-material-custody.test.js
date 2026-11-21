@@ -20,6 +20,7 @@ for(let n=0;n<32;n++){
  const d=People.sourceDemand(w,region);A.ok(d);
  const p=People._debug.make(w,roster,0,d);p.shift=People.shift(p,0,w);
  s.world.location=People.siteFor(p.regionId);s.world.minutes=600;s.chatRuntime||={};
+ require('../rules/unified').ensurePlayer(s);
  const personalWitness=p.name+' is an uninjured, unarmed, unarmoured adult here at '+s.world.location+', directly witnessed and conscious.';
  s.chatRuntime.scene=personalWitness;
  R.act(s,{system:'health',operation:'linkWitnessedHuman',params:{npcId:p.actorId,witness:personalWitness}});
