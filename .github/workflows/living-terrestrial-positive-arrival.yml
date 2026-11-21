@@ -5,6 +5,7 @@ on:
       - '.github/workflows/living-terrestrial-positive-arrival.yml'
       - 'rules/independent-sapient-terrestrial-journey.js'
       - 'rules/independent-sapient-terrestrial-return-preflight.js'
+      - 'rules/independent-sapient-terrestrial-visitor-proposal.js'
       - 'world/emergent-people.js'
       - 'world/sapient-beast-persons.js'
       - 'rules/independent-sapient-terrestrial-proposal.js'
@@ -15,7 +16,7 @@ permissions:
   contents: read
 jobs:
   first-real-arrival:
-    name: Original source-funded positive human and sapient physical linked leg
+    name: Original source-funded first legs and freely chosen visitor next-leg checks
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -23,7 +24,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Actually search 96 independent source-resolved worlds for paid and freely accepted arrival
+      - name: Search 96 independent source-resolved worlds for first arrivals and separately accepted next legs
         env:
           BEASTBOUND_SAPIENT_SAMPLE_WORLD_COUNT: '96'
         run: node tests/living-npc-sapient-positive-continuity-assessment.test.js
