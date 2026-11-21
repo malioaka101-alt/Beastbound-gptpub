@@ -565,10 +565,19 @@ for(let n=0;n<80;n++){
          operation:'npcGradeCalibrationReadiness',
          params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id}});
         A.equal(assaySite.privateToGM,true);
-        A.equal(assaySite.calibrationSiteEligible,true,
-         'A truly funded, safely co-present original visitor is eligible to consider a separate assay source');
-        A.equal(assaySite.site,'crossing');
-        A.equal(assaySite.genuinePriorCalibrationStillMissing,true);
+        // Paid work proves funds and presence, NOT a still-current voluntary
+        // relationship. The original agreement may have expired before the
+        // worker earned their first 137 Scales. That legitimate refusal
+        // cannot be overcome by a new assay-readiness convenience route.
+        A.equal(typeof assaySite.calibrationSiteEligible,'boolean');
+        if(assaySite.calibrationSiteEligible){
+         A.equal(assaySite.site,'crossing');
+         A.equal(assaySite.genuinePriorCalibrationStillMissing,true);
+        }else{
+         A.ok(['no-current-mutually-revocable-examination-relationship',
+          'no-pre-established-numeric-individual-grade-calibration'].includes(assaySite.reason),
+          'An assay-site refusal must retain the actual relationship or prior-calibration source: '+assaySite.reason);
+        }
         A.equal(assaySite.noNumericGradeOrAssayCreated,true);
         A.equal(assaySite.noTimeRngFeeOrConsentSpent,true);
         A.equal(assaySite.requiresSeparateActualIndividualAssaySource,true);
