@@ -240,6 +240,7 @@ function screeningRisks(axis,q,body,details){
  return risk;
 }
 function screeningSpec(load,minutes,attribute,rank,aptitudeModifier,risks){
+ C.int(attribute,'earned attribute',1,30);C.int(rank,'earned skill rank',0,5);
  return {dc:15+Math.min(4,load)+Math.min(3,risks.length),stamina:Math.ceil(minutes/120),
   modifier:Math.floor((attribute-10)/2)+2*rank+aptitudeModifier};
 }
