@@ -7,6 +7,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Atlas=require('./atlas'),Practice=require('./earned-individual-practice'),
  Agency=require('../rules/beast-agency'),C=require('../rules/core');
 const ORIGIN='genuine-encounter-sapient-person-v1',
+ FOLLOWUP='source-witnessed-independent-renewed-sapient-contact-v1',
  ACTIVITY='autonomous-sapient-person-activity-v1',
  DAY=1440,HISTORY=24;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -90,6 +91,36 @@ function verifyContacts(b,l){
  const seen=new Set();let head=l.sourceHash,last=-1;
  for(const row of rows){
   const q=row?.source,e=q?.encounter,contact=q?.contact,d=e?.details;
+  if(q?.origin===FOLLOWUP){
+   const w=q.witness,d=w?.details,human=require('../rules/independent-sapient-arrangements');
+   if(row.seal!==hash(q)||q.previous!==head||q.personSeal!==l.sourceHash||
+    q.beastId!==b.id||q.encounterHash!==hash(w)||seen.has(q.encounterHash)||
+    w?.type!=='story'||w.day!==Math.floor(q.minute/DAY)+1||
+    w.time!==E.clock({world:{minutes:q.minute}})||q.witnessHash!==hash(w)||
+    d?.origin!=='gm-witnessed-independent-renewed-sapient-contact-v1'||
+    d.actorId!==q.actorId||d.beastId!==b.id||d.location!==q.location||
+    d.actualRenewedCoPresence!==true||d.noAssignedBeastConsentOrOwnership!==true||
+    typeof d.unconditionalRefusalAndCommunication!=='string'||
+    d.unconditionalRefusalAndCommunication.trim().length<25||
+    !human.verifyHuman(q.humanChoice,q.witnessHash)||
+    contact?.type!=='personally-witnessed-contact'||
+    contact.meetingHash!==q.encounterHash||contact.minute!==q.minute||
+    contact.location!==q.location||!Number.isInteger(q.minute)||q.minute<last||
+    contact.day!==Math.floor(q.minute/DAY)||contact.private!==false||
+    typeof contact.description!=='string'||!['affiliative','curious','reserved','independent'].includes(q.disposition)||
+    !Number.isInteger(q.rngBefore)||q.rngBefore<1||q.rngBefore>4294967295||
+    !['hunger','fatigue','condition'].every(k=>Number.isFinite(q.welfare?.[k])&&q.welfare[k]>=0&&q.welfare[k]<=100))
+    return false;
+   const rng={rngState:q.rngBefore},offer=q.humanChoice.accepted?draw(rng):null,
+    threshold=q.disposition==='independent'?.36:q.disposition==='reserved'?.49:.72,
+    available=q.welfare.hunger<65&&q.welfare.fatigue<65&&q.welfare.condition>=65;
+   if(q.offer!==offer||q.rngAfter!==rng.rngState||
+    contact.willingness!==(q.humanChoice.accepted&&available&&offer<threshold))return false;
+   const retained=l.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===q.encounterHash);
+   if(retained&&hash(retained)!==hash(contact))return false;
+   if(!retained&&l.history[0]&&contact.day>l.history[0].day)return false;
+   seen.add(q.encounterHash);head=row.seal;last=contact.minute;continue;
+  }
   if(!q||q.origin!=='source-resolved-sapient-contact-v1'||row.seal!==hash(q)||
    q.previous!==head||q.personSeal!==l.sourceHash||q.beastId!==b.id||
    e?.type!=='encounter'||d?.origin!=='engine-local-wildlife-encounter'||
@@ -287,5 +318,5 @@ function sixday(s,day){
  }
  return {acted,earned}; // GM-private, never a public XP notification.
 }
-module.exports={ORIGIN,ACTIVITY,make,verify,contactProof,ensure,meet,witnessedStatus,sixday,
+module.exports={ORIGIN,FOLLOWUP,ACTIVITY,make,verify,contactProof,ensure,meet,witnessedStatus,sixday,
  _debug:{hash,original,aptitude,originProof,draw,location}};
