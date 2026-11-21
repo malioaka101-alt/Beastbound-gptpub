@@ -8,6 +8,7 @@ const Crypto=require('node:crypto'),E=require('../engine'),C=require('./core'),B
  Arr=require('./independent-sapient-arrangements'),Social=require('./beast-social-arrangements'),
  Agency=require('./beast-agency'),Realm=require('../world/simulation'),People=require('../world/emergent-people'),
  Presence=require('../world/person-presence'),Person=require('../world/sapient-beast-persons'),W=require('./world');
+const Sync=require('./bond-synchronisation'),Potential=require('./potential-mechanics'),Health=require('./unified'),Higher=require('./independent-original-higher-architectures');
 const ORIGIN='source-earned-independent-original-pair-interaction-v1',
  WITNESS='gm-witnessed-independent-original-pair-friendly-opportunity-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
@@ -26,7 +27,7 @@ function welfare(b){
 function opportunity(s,b,r,q){
  const actor={...b,...q.welfare};
  if(actor.agencyBoundaries===null)delete actor.agencyBoundaries;
- return Agency.evaluate({...s,world:{...s.world,minutes:q.minute}},actor,r,q.approach).possible;
+ return Agency.evaluate({...s,world:{...s.world,minutes:q.minute}},actor,r,q.approach==='drill'?'sync_practice':q.approach).possible;
 }
 function witnessValid(p,b,q){
  const w=q.witness,d=w?.details;
@@ -36,19 +37,33 @@ function witnessValid(p,b,q){
   d.pairSeal===q.pairSeal&&d.arrangementHash===q.arrangementHash&&d.arrangementRevision===q.arrangementRevision&&
   d.location===q.site&&d.contactHash===hash(q.contact)&&d.approach===q.approach&&
   prose(d.independentConcreteOpportunity)&&prose(d.actualCommunication)&&
-  prose(d.unconditionalRightToRefuse)&&d.noCompelledInteraction===true;
+  prose(d.unconditionalRightToRefuse)&&d.noCompelledInteraction===true&&
+  (q.approach!=='drill'||prose(d.actualJointTimingAndSignalDrill)&&d.noMagicOrSyncExercise===true);
 }
 function mode(p,b,r,q){
+ if(q.approach==='drill'){
+  const dex=p.mechanicalFoundation.baselineAttributes.dex,
+   aptitude=Potential.bonus(p.mechanicalFoundation.unassessedPotential.synchronisation);
+  return {...Sync.practiceSpec(1,dex,0,r.coordination,aptitude),event:'training_week'};
+ }
  return Original.interactionSpec(q.approach,p.mechanicalFoundation.baselineAttributes.cha,0,
   /wary|uneasy|agitated|fear|hostile|territorial/i.test(q.welfare.mood),r.willingness,b.sapience);
 }
-function consequence(r,q,check){
+function completedTrainingSixday(s,q,prior){
+ // Strict conservative proof: six actual successful daily drills of this
+ // exact pair, within one original civil sixday. No elapsed-time award.
+ if(q.day<5||!W.calendarTicks(q.day,1,Realm.peek(s)?.calendarAnchor||null).sixdays.includes(q.day+1))return [];
+ const rows=prior.filter(x=>x.source.pairSeal===q.pairSeal&&x.source.approach==='drill'&&x.source.check?.success&&
+  x.source.day>=q.day-5&&x.source.day<q.day);
+ return rows.length===5&&new Set(rows.map(x=>x.source.day)).size===5?rows.map(x=>x.seal):[];
+}
+function consequence(r,q,check,week){
  // A respected real refusal is distinct from failure of an accepted
  // interaction, or the human declining to initiate. It grants only the
  // original respected_refusal event.
  if(!q.humanChoice.accepted)return null;
  if(!q.possible||q.beastChoice.outcome!=='accepted')return B.applyEvent(r,'respected_refusal',1);
- return check.success?B.applyEvent(r,q.law.event,1):null;
+ return check.success&&(q.approach!=='drill'||week.length===5)?B.applyEvent(r,q.law.event,1):null;
 }
 function replay(s,p){
  if(!Pair.verify(s,p))return null;
@@ -57,7 +72,7 @@ function replay(s,p){
  const rows=p.originalBondInteractions;
  if(rows===undefined)return pairs;
  if(!Array.isArray(rows)||rows.length>960)return null;
- const seen=new Set(),days=new Set();let previousMinute=0;
+ const seen=new Set(),days=new Set(),prior=[];let previousMinute=0;
  for(const row of rows){
   const q=row?.source,pair=pairs.get(q?.pairSeal),b=s.beasts?.[q?.beastId],
    arr=p.originalSapientArrangements?.find(x=>x.seal===q?.arrangementHash),sh=q?.shift;
@@ -67,7 +82,7 @@ function replay(s,p){
    q.beastId!==pair.base.source.beastId||q.beastSeal!==b.sapientLife.sourceHash||
    arr?.source.beastId!==q.beastId||!Pair.revision(arr,q.minute,q.arrangementRevision)||
    !int(q.minute,Math.max(pair.last,previousMinute),s.world.minutes)||q.day!==Math.floor(q.minute/1440)||
-   !['gentle','play'].includes(q.approach)||!witnessValid(p,b,q)||
+   !['gentle','play','drill'].includes(q.approach)||!witnessValid(p,b,q)||
    q.witnessHash!==hash(q.witness)||seen.has(q.witnessHash)||days.has(q.pairSeal+':'+q.day)||
    q.contact?.type!=='personally-witnessed-contact'||q.contact.willingness!==true||q.contact.location!==q.site||
    !int(q.contact.minute,Math.max(0,q.minute-60),q.minute)||
@@ -88,8 +103,18 @@ function replay(s,p){
   const rng={rngState:q.humanChoice.rngAfter},accepted=q.humanChoice.accepted&&possible&&q.beastChoice.outcome==='accepted',
    check=accepted?checkRecord(C.die(rng,20),sp):null;
   if(!eq(q.check,check)||q.humanRngAfter!==rng.rngState)return null;
-  const event=consequence(pair.bond,q,check);
+  const week=q.approach==='drill'&&check?.success?completedTrainingSixday(s,q,prior):[];
+  if(q.approach==='drill'){
+   const body=s.table?.combatants?.['npc_'+p.id],v=q.physical;
+   if(!body?.npcOrigin?.seal||v?.combatSeal!==body.npcOrigin.seal||
+    !int(v.staminaBefore,sp.humanCost,v.maxStamina)||v.staminaAfter!==v.staminaBefore-(q.humanChoice.accepted?sp.humanCost:0)||
+    !int(v.beastFatigueBefore,0,69)||v.beastFatigueBefore!==q.welfare.needs.fatigue||
+    v.beastFatigueAfter!==v.beastFatigueBefore+(accepted?sp.fatigueCost:0)||
+    !eq(v.wounds,[0,0,0])||q.minute%1440<480||q.minute%1440+sp.minutes>1080||!eq(q.trainingPredecessors,week))return null;
+  }else if(q.physical!==undefined||q.trainingPredecessors!==undefined)return null;
+  const event=consequence(pair.bond,q,check,week);
   if(!eq(q.event,event)||!eq(q.after,pair.bond))return null;
+  prior.push(row);
   pair.head=row.seal;pair.last=q.minute+sp.minutes;previousMinute=q.minute;seen.add(q.witnessHash);days.add(q.pairSeal+':'+q.day);
  }
  return pairs;
@@ -117,12 +142,22 @@ function interact(s,{actorId,beastId,witnessIndex,...extra}={}){
    pairSeal:pair.base.seal,arrangementHash:arr.seal,arrangementRevision:rev,site,minute,day,
    contact:structuredClone(contact),shift:structuredClone(present.presence),witness,witnessHash:hash(witness),
    approach:d?.approach,welfare:welfare(b),before:structuredClone(pair.bond),noMagicOrSync:true};
- if(!['gentle','play'].includes(q.approach)||!witnessValid(p,b,q)||!Pair.revision(arr,minute,rev)||
+ if(!['gentle','play','drill'].includes(q.approach)||!witnessValid(p,b,q)||!Pair.revision(arr,minute,rev)||
   minute<pair.last||rows.length>=960||rows.some(x=>x.source.witnessHash===q.witnessHash||
    x.source.pairSeal===q.pairSeal&&x.source.day===day))
-  throw Error('Fresh original gentle or play opportunity and unused independent pair day required');
+  throw Error('Fresh original gentle, play or drill opportunity and unused independent pair day required');
  q.law=mode(p,b,pair.bond,q);q.possible=opportunity(s,b,pair.bond,q);
  if(minute%1440+q.law.minutes>1440)throw Error('Complete original interaction within the witnessed day');
+ let body=null;
+ if(q.approach==='drill'){
+  body=s.table?.combatants?.['npc_'+p.id];
+  if(!body||!Health.currentNpcWoundCondition(s,p.actorId)||body.npcOrigin.location!==site||body.status!=='ok'||
+   body.wounds.some(x=>x!==0)||body.stamina<q.law.humanCost||
+   !int(b.needs.fatigue,0,69)||Higher.usedDay(p,day)||minute%1440<480||minute%1440+q.law.minutes>1080)
+   throw Error('Actual original physical bodies and unused safe discipline day required for cooperative drill');
+  q.physical={combatSeal:body.npcOrigin.seal,staminaBefore:body.stamina,maxStamina:body.maxStamina,
+   beastFatigueBefore:b.needs.fatigue,wounds:[...body.wounds]};
+ }
  q.humanChoice=Arr.humanChoice(p,q.witnessHash);
  q.beastChoice=q.humanChoice.accepted&&q.possible?Social.sapientChoice(b.sapientLife,Agency.profile(s,b).disposition):null;
  q.check=null;
@@ -131,7 +166,14 @@ function interact(s,{actorId,beastId,witnessIndex,...extra}={}){
   q.check=checkRecord(actual.roll,q.law);
  }
  q.humanRngAfter=p.rngState;
- q.event=consequence(pair.bond,q,q.check);q.after=structuredClone(pair.bond);
+ let week=[];
+ if(body){
+  if(q.humanChoice.accepted)body.stamina-=q.law.humanCost;
+  if(q.check)b.needs.fatigue+=q.law.fatigueCost;
+  q.physical.staminaAfter=body.stamina;q.physical.beastFatigueAfter=b.needs.fatigue;
+  week=q.check?.success?completedTrainingSixday(s,q,rows):[];q.trainingPredecessors=week;
+ }
+ q.event=consequence(pair.bond,q,q.check,week);q.after=structuredClone(pair.bond);
  const seal=hash(q);rows.push({source:q,seal});p.originalBondInteractions=rows;
  E.advance(s,q.law.minutes);W.finalizeTime(s,minute);
  if(!verify(s,p))throw Error('Original independent pair interaction failed replay');
@@ -143,4 +185,4 @@ function privateStatus(s,p){
  return [...map.values()].map(x=>({beastId:x.base.source.beastId,sourceHash:x.base.seal,head:x.head,
   bond:structuredClone(x.bond),noMagicOrSync:true,privateToGM:true}));
 }
-module.exports={ORIGIN,WITNESS,verify,current,interact,privateStatus};
+module.exports={ORIGIN,WITNESS,verify,current,interact,privateStatus,completedTrainingSixday};
