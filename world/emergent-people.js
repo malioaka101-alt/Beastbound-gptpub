@@ -258,6 +258,7 @@ function verify(w,p){
   !Number.isFinite(p.fatigue)||p.fatigue<0||p.fatigue>100||
   !Number.isInteger(p.rngState)||p.rngState<1||
   !Careers.verify(p)||
+  !require('../rules/independent-sapient-terrestrial-journey').structure(p)||
   typeof p.profession!=='string'||p.profession.length<5||
   typeof p.purpose!=='string'||p.purpose.length<15)return false;
  return true;
@@ -545,8 +546,16 @@ function presence(w,id,location,day,minute){
  if(typeof id!=='string'||!id.startsWith('emergent:')||
   !Number.isInteger(day))return null;
  const p=w.emergentPeople?.people?.[id.slice('emergent:'.length)];
- if(!verify(w,p)||p.actorId!==id||p.status!=='active'||
-  !supportedSite(w,location,p.regionId))return null;
+ if(!verify(w,p)||p.actorId!==id||p.status!=='active')return null;
+ const visitor=require('../rules/independent-sapient-terrestrial-journey'),
+  queryMinute=minute===undefined?day*1440:day*1440+minute,
+  visiting=visitor.position(p,queryMinute);
+ if(visiting?.invalid||visiting?.inTransit)return null;
+ if(visiting?.arrived){
+  if(visiting.location!==location)return null;
+  return visitor.visitorPresence(p,queryMinute,location);
+ }
+ if(!supportedSite(w,location,p.regionId))return null;
  if(p.originalRiftRealmJourney){const walk=require('../rules/independent-original-rift-realm-walking');
   if(minute===undefined?walk.awayDuring(p,day*1440,(day+1)*1440):walk.awayAt(p,day*1440+minute))return null;
  }
@@ -567,6 +576,11 @@ function presence(w,id,location,day,minute){
 function live(w,p,day,s=null){
  if(!verify(w,p))throw Error('Unverified independent person cannot act');
  if(p.lastTickDay>=day)return;
+ if(require('../rules/independent-sapient-terrestrial-journey').awayDuring(p,p.lastTickDay*1440,day*1440)){
+  p.lastTickDay=day;p.shift=shift(p,day,w);
+  p.history.push({day,type:'independent-life',choice:'verified-independent-terrestrial-visitor-absence-from-home-work',regionId:p.regionId,observed:false});
+  if(p.history.length>24)p.history.shift();return;
+ }
  if(p.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(p,p.lastTickDay*1440,day*1440)){
   // No simultaneous mortal work, wages, relocation or inferred foreign rest.
   p.lastTickDay=day;p.shift=shift(p,day,w);
