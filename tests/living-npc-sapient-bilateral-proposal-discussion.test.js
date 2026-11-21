@@ -195,16 +195,25 @@ for(let n=0;n<80;n++){
     const before=E.exportGame(travel),humanRng=traveler.rngState,
       beastRng=companion.sapientLife.rngState;
     const route=Route.routeStatus(travel,traveler,companion,'crossing');
-    A.equal(route.proposalEligible,true,'Original linked forest–crossing preflight requires genuine eligibility: '+JSON.stringify(route));
-    A.equal(route.from,'forest');A.equal(route.to,'crossing');
-    A.equal(route.minutes,75);A.equal(route.stamina,4);A.equal(route.crossesRegion,true);
-    A.equal(route.requiresIndependentlyVerifiedArrivalAndNewLocationProof,true);
+    const originalHumanBody=travel.table.combatants['npc_'+traveler.id];
+    A.ok(originalHumanBody?.npcOrigin,'Original witnessed physically registered human is required');
+    if(originalHumanBody.stamina<TravelLaw.legSpec('crossing').stamina){
+     A.equal(route.proposalEligible,false,'The original 4-Stamina journey cannot be undertaken on unearned endurance');
+     A.equal(route.reason,'insufficient-original-human-stamina');
+     console.log('INDEPENDENT ORIGINAL LINKED TRAVEL REFUSED BY ACTUAL STAMINA '+JSON.stringify({
+      existingHumanStamina:originalHumanBody.stamina,required:4,noInventedBodyOrRest:true}));
+    }else{
+     A.equal(route.proposalEligible,true,'Original linked forest–crossing preflight requires genuine eligibility: '+JSON.stringify(route));
+     A.equal(route.from,'forest');A.equal(route.to,'crossing');
+     A.equal(route.minutes,75);A.equal(route.stamina,4);A.equal(route.crossesRegion,true);
+     A.equal(route.requiresIndependentlyVerifiedArrivalAndNewLocationProof,true);
+     console.log('INDEPENDENT ORIGINAL LINKED CROSS-REGION TRAVEL PREFLIGHT PASS '+JSON.stringify({
+      from:route.from,to:route.to,minutes:route.minutes,stamina:route.stamina,
+      noAssignedConsentOrMovement:true}));
+    }
     A.equal(Route.routeStatus(travel,traveler,companion,'academy').reason,'not-one-original-linked-leg');
     A.equal(E.exportGame(travel),before,'Actual route preflight is private and purely read-only');
     A.equal(traveler.rngState,humanRng);A.equal(companion.sapientLife.rngState,beastRng);
-    console.log('INDEPENDENT ORIGINAL LINKED CROSS-REGION TRAVEL PREFLIGHT PASS '+JSON.stringify({
-     from:route.from,to:route.to,minutes:route.minutes,stamina:route.stamina,
-     noAssignedConsentOrMovement:true}));
    }
 
 
