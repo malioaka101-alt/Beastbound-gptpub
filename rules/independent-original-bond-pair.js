@@ -66,8 +66,7 @@ function verify(s,p){
     arr?.source.beastId!==q.beastId||!revision(arr,q.minute,q.arrangementRevision)||
     q.contact?.type!=='personally-witnessed-contact'||q.contact.willingness!==true||
     q.contact.location!==q.site||!int(q.contact.minute,Math.max(0,q.minute-60),q.minute)||
-    (q.contact.meetingHash!==b.sapientLife.source.encounterHash&&
-     !b.sapientLife.triedEncounters.includes(q.contact.meetingHash))||
+    !Person.contactProof(b,q.contact)||
     !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
     sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
     sh.scheduledAtDay!==sh.fromDay||sh.throughDay-sh.fromDay!==5||
@@ -76,9 +75,7 @@ function verify(s,p){
     days.has(q.beastId+':'+q.day)||pairs.has(q.beastId)||
     !Arrangement.verifyHuman(q.humanChoice,q.witnessHash)||q.humanChoice.personality!==p.personality||
     q.noPartnershipOrMagic!==true)return false;
-   const retained=b.sapientLife.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===q.contact.meetingHash);
-   if(retained&&!eq(retained,q.contact)||
-    !retained&&b.sapientLife.history.length&&q.contact.day>=b.sapientLife.history[0].day)return false;
+   
    if(q.humanChoice.accepted){
     const d=q.beastChoice;
     if(!d||d.disposition!==Agency.profile(s,b).disposition||!int(d.rngBefore,1,4294967295)||
