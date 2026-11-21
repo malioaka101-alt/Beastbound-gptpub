@@ -59,6 +59,29 @@ A.deepEqual(night.source.after.wounds,[
 A.equal(night.source.site,'ruins');
 A.equal(night.source.noAdditionalPlayerTimeOrFreePower,true);
 A.equal(Field.verifiedNight(s,p,night.source),true);
+const independentlyRefusedOrFailed=
+ (p.originalRiftglassFieldRest?.attempts||[]).filter(x=>
+  !x.source.shelterSurveySucceeded||!x.source.nightAccepted);
+A.ok(independentlyRefusedOrFailed.length>=1,
+ 'Original personal Riftglass surveying must also preserve truly unsuccessful/declined nights');
+for(const refused of independentlyRefusedOrFailed){
+ const r=refused.source;
+ A.equal(r.scoutStaminaSpent,Wilderness.STAMINA,
+  'A failed independently chosen Survival survey still spends real physical Stamina');
+ A.equal(r.staminaAfterSurvey,r.staminaBefore-Wilderness.STAMINA);
+ A.equal((p.originalOffscreenCombatNights||[]).some(x=>
+  x.source.originalFieldSurveyHash===refused.seal),false,
+  'Neither a failed outdoor survey nor a personally refused sleep creates overnight wound/Stamina recovery');
+ if(!r.shelterSurveySucceeded){
+  A.equal(r.nightChoice,null,
+   'No original person may be asked to sleep in a site that failed the source-owner Survival survey');
+  A.equal(r.validUntilMinute,null,
+   'An unsuccessful survey cannot yield an 18-hour free refuge');
+ }else{
+  A.equal(r.nightChoice?.accepted,false,
+   'A genuine refusal must be preserved rather than coerced into resting');
+ }
+}
 A.equal((p.originalOvernightRestDecisions||[]).length,0,
  'Non-settlement verified field night is not a made-up city room');
 A.deepEqual(p.knownTechniques,[]);
