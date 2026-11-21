@@ -25,7 +25,7 @@ function preflight(s,p={}){
   throw Error('A present encounter or battle must be resolved before scouting a rest site');
  const loc=E.LOCATIONS[s.world?.location],cfg=SITES[loc?.biome];
  if(!loc||!cfg||!Array.isArray(loc.spawns)||!loc.spawns.length)
-  throw Error('This procedure requires actual surveyed woodland, wetland, upland, or Riftglass exterior wardstone terrain; other places need their own witnessed local shelter');
+  throw Error('This procedure requires actual nearby open woodland, wetland or upland terrain (or a genuinely surveyed Riftglass exterior wardline); other places need their own witnessed local shelter');
  const status=s.table?.combatants?.player?.status;
  if(['incapacitated','knocked_out','rehabilitating','dying','dead'].includes(status))
   throw Error('An incapacitated character cannot independently scout a campsite');
