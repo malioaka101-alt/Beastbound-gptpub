@@ -67,14 +67,24 @@ for(let n=0;n<96;n++){
   pre=E.exportGame(s);
  A.throws(()=>R.act(s,{system:'origin',operation:'npcLineageScreen',params:premature}),/completed original mapping/);
  A.equal(E.exportGame(s),pre);
- const map=R.act(s,{system:'origin',operation:'npcLineageMap',params:observe(Lineage.MAP)});
- if(!map.mapped)continue;
- counts.mapped++;
- for(const axis of Lineage.AXES){
+ function nextDay(){
   const old=s.world.minutes,next=(Math.floor(old/1440)+1)*1440+600;
   E.advance(s,next-old);World.finalizeTime(s,old);
-  if(!Presence.resolve(Realm.peek(s),p.actorId,site,Math.floor(next/1440),600)?.presence||
-   p.status!=='active'||body.status!=='ok'||body.wounds.some(x=>x!==0)||body.stamina<1)break;
+  return !!Presence.resolve(Realm.peek(s),p.actorId,site,Math.floor(next/1440),600)?.presence&&
+   p.status==='active'&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=1;
+ }
+ let map=null;
+ // No assumption that one check can produce three mapping points. Allow the
+ // same person repeated days of actual research and naturally occurring rest.
+ for(let day=0;day<24;day++){
+  if(day&&!nextDay())break;
+  map=R.act(s,{system:'origin',operation:'npcLineageMap',params:observe(Lineage.MAP)});
+  if(map.mapped)break;
+ }
+ if(!map?.mapped)continue;
+ counts.mapped++;
+ for(const axis of Lineage.AXES){
+  if(!nextDay())break;
   // Incorrect clinical values are not a supplied modifier or an acceptable
   // baseline: the source adapter reads original anatomy and exact evidence.
   const fake={...observe(Lineage.SCREEN,{axis,...clinical,measuredHumanOriginCapacity:99}),axis},
