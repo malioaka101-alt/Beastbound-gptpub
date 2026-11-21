@@ -28,7 +28,11 @@ const QUICK=[
  'soul-shared-original-resonance-lattice-three-npc.test.js',
  'soul-shared-own-perception-and-lattice-repair-parity.test.js',
  'living-npc-original-soul-lattice-three-live.test.js',
- 'body-shared-original-nerve-sense-four-npc.test.js'
+ 'body-shared-original-nerve-sense-four-npc.test.js',
+ 'arcane-shared-original-second-circle-npc.test.js',
+ 'arcane-shared-original-third-circle-npc.test.js',
+ 'living-npc-sapient-bilateral-proposal-discussion.test.js',
+ 'voluntary-beast-social-arrangements.test.js'
 ];
 // These sources were MEASURED on GitHub Actions at >10s, several >350s.
 // They remain in every ready-for-review full regression and are NOT marked
