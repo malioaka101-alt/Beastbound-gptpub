@@ -522,6 +522,8 @@ function earnedEvidence(w,actorId,s=null){
      'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===6?'Rift Adaptation VI':
+    originalMilestones.rift.step===5?'Pocket Architecture V':
     originalMilestones.rift.step===4?'Boundary Weaving IV':
     originalMilestones.rift.step===3?'Fold Step III':
     originalMilestones.rift.step===2?'Rift Anchor II':
