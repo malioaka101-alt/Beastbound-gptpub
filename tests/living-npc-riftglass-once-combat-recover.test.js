@@ -108,4 +108,4 @@ forgedPlace.originalRiftglassRecover.seal=
  hash(forgedPlace.originalRiftglassRecover.source);
 A.equal(Recovery.verify(falsePlace,forgedPlace),false,
  'A resealed alternative location is not authentic source-owned Riftglass rest');
-console.log('Authentic Riftglass independent rest DAY => exactly ONE original Combat Recover, no overnight campsite, replay/import/forged-recovery rejection PASS');
+console.log('Authentic Riftglass chosen REST => one original Combat Recover per genuine night charge; no invented campsite, forged recovery or free second charge; replay/import/rehashed receipt rejection PASS');
