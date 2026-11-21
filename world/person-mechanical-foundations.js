@@ -512,6 +512,9 @@ function earnedEvidence(w,actorId,s=null){
       .privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
      {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientRenewedContacts!==undefined?
+     {sourceVerifiedRenewedSapientContacts:require('../rules/independent-sapient-followup')
+      .privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
      {sourceVerifiedProposalDiscussions:require('../rules/independent-sapient-proposal-discussions')
       .privateStatus(s,actor)}:{}),
