@@ -34,9 +34,21 @@ function witnessValid(p,b,q){
   text(d.explainedOriginalIndividualGradeAssessment)&&text(d.individualInformedExaminationChoice)&&
   text(d.examinationSafetyAndLimits)&&d.noInferredGradeOrForcedExamination===true;
 }
+function actualOriginalFacilityPresence(s,p,b,q){
+ const Visit=require('./independent-sapient-terrestrial-journey'),
+  pos=Visit.position(p,q.minute);
+ // Original native habitats and accredited facilities are different.
+ // Do not fabricate a beast at crossing from a forest sighting, or
+ // accept a written Grade exam without an actual signed physical visit.
+ return !!pos?.arrived&&pos.location===q.site&&
+  Visit.verify(s,p)&&
+  eq(q.shift,Visit.visitorPresence(p,q.minute,q.site))&&
+  b.sapientLife?.terrestrialJourneyReceipts?.some(x=>x.seal===pos.sourceHash);
+}
 function physical(s,p,b,q,minute){
  const pair=Interaction.currentAt(s,p,q.pairSeal,minute),arr=p.originalSapientArrangements?.find(x=>x.seal===q.arrangementHash);
- if(!pair||pair.base.source.beastId!==b.id||pair.bond.fractured||
+ if(!actualOriginalFacilityPresence(s,p,b,q)||
+  !pair||pair.base.source.beastId!==b.id||pair.bond.fractured||
   pair.bond.willingness<30||arr?.source.beastId!==b.id||
   !Pair.revision(arr,minute,q.arrangementRevision)||b.sapience<3||
   !Person.verify(b)||!q.welfare||!Arr.safe({...b,...q.welfare}))return false;
@@ -107,7 +119,8 @@ function replay(s,p){
 function paidSource(s,p,b,row){
  try{
   const q=row?.source,d=q?.witness?.details;
-  if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||!q.accepted||
+  if(!q||!actualOriginalFacilityPresence(s,p,b,q)||
+   row.seal!==hash(q)||q.origin!==ORIGIN||!q.accepted||
    q.actorId!==p?.actorId||q.humanHash!==p.originHash||q.beastId!==b?.id||
    q.beastHash!==b?.sapientLife?.sourceHash||!eq(q.calibration,b.gradeCalibration)||
    !['academy','crossing'].includes(q.site)||q.form!==b.evolutionStage||
