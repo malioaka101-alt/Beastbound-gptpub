@@ -9,7 +9,7 @@ const {spawnSync}=require('node:child_process');
 const path=require('node:path');
 const source=path.join(__dirname,'living-npc-sapient-bilateral-proposal-discussion.test.js');
 const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
- actualPairInteractions:0,successfulPairChecks:0,earnedOriginalEvents:0,
+ actualPairInteractions:0,pairsWithRepeatedInteractions:0,successfulPairChecks:0,earnedOriginalEvents:0,
  unforcedRefusals:0,worldSamples:[]};
 for(let i=0;i<24;i++){
  const seed=927801+i*47;
@@ -33,13 +33,14 @@ for(let i=0;i<24;i++){
  const result=JSON.parse(pair[pair.length-1][1]);
  summary.genuinelyAcceptedRenewals+=result.freelyRenewed||0;
  summary.unforcedRefusals+=result.actualDaysTried-result.freelyRenewed;
- if(result.actualInteraction){
-  summary.actualPairInteractions++;
-  if(result.actualInteraction.checkSucceeded)summary.successfulPairChecks++;
-  if(result.actualInteraction.event)summary.earnedOriginalEvents++;
- }
+ const interactions=result.actualInteractions||[result.actualInteraction].filter(Boolean);
+ summary.actualPairInteractions+=interactions.length;
+ if(interactions.length>1)summary.pairsWithRepeatedInteractions++;
+ summary.successfulPairChecks+=interactions.filter(x=>x.checkSucceeded).length;
+ summary.earnedOriginalEvents+=interactions.filter(x=>x.event!==null).length;
  summary.worldSamples.push({seed,days:result.actualDaysTried,renewed:result.freelyRenewed,
   actualEvent:result.actualInteraction?.event??null,
+  observedInteractions:interactions.length,earnedEvents:interactions.filter(x=>x.event!==null).length,
   success:result.actualInteraction?.checkSucceeded??false});
 }
 A.ok(summary.genuineWorlds>=4,'Multiple genuinely independent source-backed human–beast pairs must exist in distinct worlds; no automatic pair is authored');
