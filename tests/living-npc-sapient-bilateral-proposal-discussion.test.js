@@ -16,6 +16,7 @@ const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation
 A.deepEqual(Bond.contractSpec({grade:4,sapience:3,depth:'deep',will:2,contractLore:2,soulDB:3,soulPhase:3,usedCapacity:2}),{
  depth:'deep',load:4,capacity:7,usedCapacity:2,overCapacity:false,dc:20,modifier:7,stability:80,base:70,link:'10 km'});
 A.equal(Bond.contractSpec({grade:9,sapience:3,depth:'covenant',will:0,usedCapacity:0}).overCapacity,true);
+A.equal(Bond.syncReadiness(Bond.create({human:'h',beast:'b',start:'unfamiliar',sapience:3}),1).numericReady,false);
 A.deepEqual(Sync.practiceSpec(1,16,1,35,2),{humanCost:3,fatigueCost:3,energyCost:0,minutes:30,dc:13,modifier:8});
 A.deepEqual(Sync.practiceSpec(3,14,0,0,-1),{humanCost:5,fatigueCost:4,energyCost:2,minutes:40,dc:17,modifier:1});
 
@@ -49,7 +50,7 @@ const demand=People.sourceDemand(w,region);
 A.ok(demand);
 let mutual=null,humanRefusal=0,beastRefusal=0,results=[],agreed=null,finalResults=[];
 const pairCounts={recorded:0,declined:0};
-for(let n=0;n<40;n++){
+for(let n=0;n<80;n++){
  const p=People._debug.make(w,roster,day,demand);p.shift=People.shift(p,day,w);
  const terms={beastId:b.id,id:'individual_proposal_'+n,kind:'voluntary habitat conversation',
   purpose:'An offer to explore possible cooperative habitat observations without committing either party.',
@@ -174,6 +175,8 @@ for(let n=0;n<40;n++){
    if(out.recorded){
     A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:sr}),/willingness at least 50/);
     A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairReview',params:sr}),/Current actual original magical contract/);
+    A.throws(()=>R.act(ss,{system:'bond',operation:'npcSyncPractice',params:sr}),/Actual existing original independent magical contract/);
+    A.throws(()=>R.act(ss,{system:'bond',operation:'npcSyncPractice',params:{...sr,targetStage:10}}),/no outcome or affinity/);
    }else A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:sr}),/recognised pair/);
    A.equal(E.exportGame(ss),sbefore);A.equal(Interact.activeForBeast(ss,sb.id),null);
 
