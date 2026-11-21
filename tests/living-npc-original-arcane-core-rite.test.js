@@ -136,6 +136,7 @@ function fixture(want,seed){
  }
  throw Error('A disposable person with this independently determined Arcane outcome was not found: '+want);
 }
+if(require.main===module){
 for(const [want,seed] of [['ignited',985100],['declined',985300],
  ['stalled',985500],['backlash',985700]]){
  const {s,p,c,today,initialRng}=fixture(want,seed);
@@ -220,3 +221,6 @@ for(const [want,seed] of [['ignited',985100],['declined',985300],
  if(want!=='declined'){A.ok(last);A.equal(Object.hasOwn(last.details,'roll'),false);}
 }
 console.log('Verified independent original Arcane Mana Core: distinct 40-point/2-method rite, exact original Core check, true personal choice, original mana only on success, proper setbacks/wound, private replay and no free Circle PASS');
+
+}
+module.exports={fixture};
