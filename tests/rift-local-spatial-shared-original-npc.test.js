@@ -64,4 +64,35 @@ require('./rift-boundary-weaving.test.js');
 require('./rift-pocket-architecture.test.js');
 require('./rift-adaptation.test.js');
 require('./rift-realm-walking.test.js');
+const Domain=require('../rules/independent-original-rift-boundary-domain'),
+ PC=require('../rules/rift-boundary-domain'),
+ Mana=require('../rules/independent-arcane-external-mana');
+A.deepEqual(PC.domainSpec(4,12,3,1,16,0),{dc:27,modifier:3,mana:18,stamina:13,minutes:120});
+A.equal(Mana.current(s,{}),null);
+A.throws(()=>R.act(s,{system:'rift',operation:'npcBoundaryDomain',
+ params:{actorId:'emergent:person_0',witnessIndex:0,success:true}}),/fresh measured Domain witness/);
+A.equal(E.exportGame(s),before);
+A.throws(()=>R.act(s,{system:'rift',operation:'npcBoundaryDomain',
+ params:{actorId:'emergent:person_0',witnessIndex:0}}),/original exterior individual required|fresh measured Domain witness/);
+A.equal(E.exportGame(s),before);
+// Isolated receipt-law fixture only, NOT a character, original reservoir,
+// formed Domain, earned Circle or actual cross-system payment.
+const actor={actorId:'emergent:person_1',originHash:'1'.repeat(64)},
+ debit={origin:Mana.ORIGIN,purpose:Mana.PURPOSE,actorId:actor.actorId,identityOriginHash:actor.originHash,
+ owner:'second',stage:2,minute:100,endMinute:220,witnessHash:'2'.repeat(64),
+ manaBefore:25,capacity:25,amount:18,manaAfter:7,noSeparateReserve:true},
+ debitRow={source:debit,seal:hash(debit)},
+ consumer={actorId:actor.actorId,accepted:true,minute:100,actualMinutes:120,witnessHash:debit.witnessHash,
+ manaSpent:18,manaOwner:'second',manaDebitSeal:debitRow.seal};
+actor.originalRiftBoundaryDomains={rows:[{source:consumer,seal:hash(consumer)}]};
+A.equal(Mana.validRow(s,actor,debitRow,'second',2,25,25,90),true);
+A.equal(Mana.validRow(s,actor,debitRow,'second',2,24,25,90),false);
+A.equal(Mana.validRow(s,actor,debitRow,'matrix',2,25,25,90),false);
+A.equal(Mana.validRow(s,actor,debitRow,'second',2,25,25,101),false);
+A.equal(Mana.proof(s,actor,debitRow.seal,'second',debit.witnessHash,100),false);
+A.equal(Domain.verify(s,actor),false);
+consumer.accepted=false;actor.originalRiftBoundaryDomains.rows[0].seal=hash(consumer);
+A.equal(Mana.validRow(s,actor,debitRow,'second',2,25,25,90),false);
+require('./rift-boundary-domain.test.js');
+
 console.log('Original Fold III and Weave IV shared original local spatial laws, player parity and independent source gates PASS');
