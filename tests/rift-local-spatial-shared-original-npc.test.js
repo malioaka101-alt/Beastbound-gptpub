@@ -25,6 +25,12 @@ for(const operation of ['npcFoldStep','npcWeaveBoundary','npcPocketBuild','npcAd
  A.throws(()=>R.act(s,{system:'rift',operation,params:{actorId:'emergent:person_0',witnessIndex:0}}),/exterior Rift practitioner|required|actor and witness only/);
  A.equal(E.exportGame(s),before);
 }
+A.throws(()=>R.act(s,{system:'rift',operation:'npcPocketTransfer',
+ params:{actorId:'emergent:person_0',witnessIndex:0,transferred:true}}),/fresh original pocket material/);
+A.equal(E.exportGame(s),before);
+A.throws(()=>R.act(s,{system:'rift',operation:'npcPocketTransfer',
+ params:{actorId:'emergent:person_0',witnessIndex:0}}),/original spatial practitioner required|fresh original pocket material/);
+A.equal(E.exportGame(s),before);
 require('./rift-fold-step.test.js');
 require('./rift-boundary-weaving.test.js');
 require('./rift-pocket-architecture.test.js');
