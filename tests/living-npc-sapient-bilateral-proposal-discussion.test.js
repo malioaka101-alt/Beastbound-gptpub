@@ -7,7 +7,8 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Realm=require('../world/simulation'),People=require('../world/emergent-people'),
  Atlas=require('../world/atlas'),Person=require('../world/sapient-beast-persons'),
  Bridge=require('../rules/independent-sapient-proposal-discussions'),
- Foundation=require('../world/person-mechanical-foundations');
+ Foundation=require('../world/person-mechanical-foundations'),
+ Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const s=E.newGame({name:'Disposable independent sapient proposal',seed:927801,path:'undecided'});
 A.equal(E.dispatch(s,'travel forest').ok,true);
@@ -33,8 +34,8 @@ Object.assign(eco,{quality:75,pressure:14,water:80,forage:80});
 Object.assign(country,{prosperity:75,stability:80});
 const demand=People.sourceDemand(w,region);
 A.ok(demand);
-let mutual=null,humanRefusal=0,beastRefusal=0,results=[];
-for(let n=0;n<20;n++){
+let mutual=null,humanRefusal=0,beastRefusal=0,results=[],agreed=null,finalResults=[];
+for(let n=0;n<40;n++){
  const p=People._debug.make(w,roster,day,demand);p.shift=People.shift(p,day,w);
  const terms={beastId:b.id,id:'individual_proposal_'+n,kind:'voluntary habitat conversation',
   purpose:'An offer to explore possible cooperative habitat observations without committing either party.',
@@ -75,15 +76,68 @@ for(let n=0;n<20;n++){
  A.equal(view.verifiedPartners,null);
  A.equal(view.sourceVerifiedProposalDiscussions[0].observedOutcome,result.observedOutcome);
  results.push(result.observedOutcome);
- if(result.mutuallyInterested)mutual=p;
+ if(result.mutuallyInterested){
+  mutual=p;
+  const finalTerms={...terms,kind:'revocable voluntary habitat cooperation',
+   purpose:'Both independent participants voluntarily agree to a bounded habitat observation undertaking.',
+   humanDuty:'The human offers their own observation notes while retaining the right to withdraw.',
+   beastDuty:'The sapient person offers its own observations on terms it freely accepts without compelled labour.',
+   termination:'Either person can withdraw; material performance and unsettled duties require separate evidence.'};
+  C.event(s,'story',p.name+' considers the separately explained final terms, safeguards and right to refuse.',{
+   origin:Arrangement.WITNESS,actorId:p.actorId,beastId:b.id,location:site,
+   minute:s.world.minutes,contactHash:hash(contact),proposalHash:receipt.seal,terms:finalTerms,
+   comprehension:'The two separate individuals have understood the specific final voluntary terms and duties.',
+   communication:'Actual locally witnessed shared signs',
+   rightToRefuse:'Both retain their independent right to refuse now and withdraw later without compelled service.',
+   noAssumedSharedLanguage:true,noMagicalPromise:true});
+  const params={actorId:p.actorId,beastId:b.id,witnessIndex:s.log.length-1},
+   before=E.exportGame(s);
+  A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',
+   params:{...params,accepted:true}}),/no assigned consent/);
+  A.equal(E.exportGame(s),before);
+  const resolved=R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',params});
+  const entry=p.originalSapientArrangements[0];
+  A.equal(Arrangement.verify(s,p),true);
+  A.equal(entry.source.proposalHash,receipt.seal);
+  A.notEqual(entry.source.witnessHash,receipt.source.witnessHash);
+  A.equal(resolved.mutuallyAccepted,entry.source.outcome==='accepted');
+  A.equal(resolved.noMagicOwnershipOrCompelledService,true);
+  A.equal(s.table?.bondRecords?.[b.id],undefined);
+  finalResults.push(resolved.observedOutcome);
+  const after=E.exportGame(s);
+  A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',params}),
+   /already received/);
+  A.equal(E.exportGame(s),after);
+  if(resolved.mutuallyAccepted)agreed={p,entry};
+ }
  if(result.observedOutcome==='human-declined')humanRefusal++;
  if(['beast-declined','beast-proposed-changes'].includes(result.observedOutcome))beastRefusal++;
- if(mutual&&humanRefusal&&beastRefusal)break;
+ if(mutual&&humanRefusal&&beastRefusal&&agreed)break;
 }
 A.ok(mutual,'At least one genuinely mutually interested disposable pair');
 A.ok(humanRefusal>0,'A human must be free to refuse; beast draw not consumed');
 A.ok(beastRefusal>0,'The sapient person may refuse or request alternatives');
+A.ok(agreed,'Distinct natural participants should genuinely agree to final terms in this bounded sample');
+const arrView=Foundation.gmDossier(w,agreed.p.actorId,s).earnedEvidence.beastRelationships;
+A.equal(arrView.verifiedPartners,null);
+A.equal(arrView.sourceVerifiedSocialArrangements[0].status,'accepted');
 const save=E.exportGame(s),copy=E.importGame(save),cp=Realm.peek(copy).emergentPeople.people[mutual.id];
+const acceptedPerson=Realm.peek(copy).emergentPeople.people[agreed.p.id];
+A.equal(Arrangement.verify(copy,acceptedPerson),true);
+const bad=E.importGame(save),bp=Realm.peek(bad).emergentPeople.people[agreed.p.id],
+ fake=bp.originalSapientArrangements[0];
+fake.source.humanChoice.accepted=false;fake.seal=hash(fake.source);
+A.equal(Arrangement.verify(bad,bp),false,'Rehashed false human assent cannot create a cooperative arrangement');
+const expired=E.importGame(save);
+Time.advance(expired,8);
+A.equal(Arrangement.privateStatus(expired,Realm.peek(expired).emergentPeople.people[agreed.p.id])[0].status,'expired');
+const welfare=E.importGame(save),wp=Realm.peek(welfare).emergentPeople.people[agreed.p.id];
+welfare.beasts[b.id].condition=34;
+// Real original sixday welfare owner (disposable condition fixture).
+Arrangement.sixday(welfare,[Math.floor(welfare.world.minutes/1440)]);
+A.equal(Arrangement.privateStatus(welfare,wp)[0].status,'paused');
+A.equal(Arrangement.verify(welfare,wp),true);
+console.log('INDEPENDENT SAPient FINAL TERMS PASS '+JSON.stringify({finalResults,accepted:true,expiry:true,welfarePause:true}));
 A.equal(Bridge.verify(copy,cp),true);
 const forged=cp.originalSapientProposalDiscussions[0];
 forged.source.beastChoice.rngAfter=1;forged.seal=hash(forged.source);
