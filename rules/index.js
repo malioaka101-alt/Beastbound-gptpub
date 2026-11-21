@@ -697,6 +697,8 @@ function act(s,{system,operation,params={}}={}){
   case 'bond.socialNegotiate':return require('./beast-social-arrangements').negotiate(s,params);
   case 'bond.npcTerrestrialJourney':return require('./independent-sapient-terrestrial-journey').depart(s,params);
   case 'bond.npcTerrestrialProposal':return require('./independent-sapient-terrestrial-proposal').propose(s,params);
+  case 'bond.npcVisitorTerrestrialProposal':return require('./independent-sapient-terrestrial-visitor-proposal').propose(s,params);
+  case 'bond.npcVisitorTerrestrialJourney':return require('./independent-sapient-terrestrial-journey').depart(s,params);
   case 'bond.npcSapientFollowupContact':return require('./independent-sapient-followup').contact(s,params);
   case 'bond.npcSapientProposalDiscussion':return require('./independent-sapient-proposal-discussions').discuss(s,params);
   case 'bond.npcSyncPractice':return require('./independent-original-bond-interactions').sync(s,params);
