@@ -17,7 +17,16 @@ function identity(s,b){
 function plan(s,r,b){
  const a=b?.evolutionBranchAssessments?.[r.branchId];
  if(!a||!r.branching||!r.originAssessment||r.branching.seal!==r.originAssessment.branchSeal)return null;
- try{const verified=Branch.preRegister(s,b,a);
+ try{const verified=Branch.validated(a,b);
+  if(a.species!==b.species||a.evolutionStage!==b.evolutionStage){
+   // The immutable original branch can remain historical after one actual
+   // same-species transformation. This never grants a current opportunity.
+   const h=b.evolutionHistory?.find(x=>x.old?.species===a.species&&x.old.evolutionStage===a.evolutionStage),
+    winner=h&&s.table?.evolution?.[b.id+'/'+h.branchId];
+   if(!h||!winner?.evolved||winner.appliedFormSummary?.newForm!==h.form||
+    winner.appliedFormSummary?.newSpecies!==b.species||winner.branchAttemptOutcome?.seal!==h.branchWorldSource||
+    !(r===winner||r.blocked&&r.closedBy===b.id+'/'+h.branchId))return null;
+  }
   if(!verified||verified.seal!==r.branching.seal||hash(r.branching.source)!==verified.seal)return null;
   return verified;}catch{return null;}
 }
