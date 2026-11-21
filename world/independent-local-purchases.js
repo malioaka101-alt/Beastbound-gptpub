@@ -106,6 +106,38 @@ function verifyPersonal(p){
    return {valid:false,spentScales:spent,receivedScales:0};
   seenSales.add(row.sourceHash);
  }
+ // Actual original non-consumable examination service is a paid use of
+ // the SAME physical Scales; it does not issue goods, a licence or a Grade
+ // merely because it was purchased. The assessment owner separately replays
+ // its own private choices, biological calibration and actual d20 result.
+ const examOrigin='source-paid-independent-original-numeric-beast-grade-exam-v1',
+  originalExamFee=100,examRows=p?.originalIndependentGradeExams||[];
+ if(!Array.isArray(examRows)||examRows.length>480)
+  return {valid:false,spentScales:spent,receivedScales:received};
+ const usedGradeWitnesses=new Set();
+ for(const row of examRows){
+  const q=row?.source;
+  if(!q||row.seal!==hash(q)||q.origin!==examOrigin||
+   q.actorId!==p.actorId||q.humanHash!==p.originHash||
+   !Number.isInteger(q.minute)||q.minute<0||
+   q.endMinute!==q.minute+q.actualMinutes||
+   q.accepted!==Boolean(q.humanChoice?.accepted&&q.beastChoice?.outcome==='accepted')||
+   !Number.isInteger(q.cashBefore)||q.cashBefore<0||
+   q.cashAfter!==q.cashBefore-(q.accepted?originalExamFee:0)||
+   q.feeScales!==(q.accepted?originalExamFee:0)||
+   (q.accepted&&q.cashBefore<originalExamFee)||
+   q.actualMinutes!==(q.accepted?120:5)||
+   !['academy','crossing'].includes(q.site)||
+   typeof q.witnessHash!=='string'||q.witnessHash.length!==64||
+   usedGradeWitnesses.has(q.witnessHash))
+    return {valid:false,spentScales:spent,receivedScales:received};
+  if(q.accepted){
+   if(!Number.isSafeInteger(spent+originalExamFee))
+    return {valid:false,spentScales:spent,receivedScales:received};
+   spent+=originalExamFee;
+  }
+  usedGradeWitnesses.add(q.witnessHash);
+ }
  return {valid:true,spentScales:spent,receivedScales:received};
 }
 function nextOwnerRng(n){
