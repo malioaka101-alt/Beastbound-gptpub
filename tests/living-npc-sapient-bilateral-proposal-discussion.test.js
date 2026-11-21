@@ -81,7 +81,7 @@ for(let n=0;n<40;n++){
  A.equal(s.player.partnerIds.includes(b.id),false);
  const saved=E.exportGame(s);
  A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientProposalDiscussion',params:req}),
-  /do not reroll willingness/);
+  /do not reroll willingness|fresh, voluntary, comprehended proposal/);
  A.equal(E.exportGame(s),saved);
  const view=Foundation.gmDossier(w,p.actorId,s).earnedEvidence.beastRelationships;
  A.equal(view.verifiedPartners,null);
@@ -117,7 +117,7 @@ for(let n=0;n<40;n++){
   finalResults.push(resolved.observedOutcome);
   const after=E.exportGame(s);
   A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',params}),
-   /already received/);
+   /already received|Separate current informed final terms/);
   A.equal(E.exportGame(s),after);
   if(resolved.mutuallyAccepted){
    agreed={p,entry};
@@ -153,7 +153,7 @@ for(let n=0;n<40;n++){
     A.equal(v.verifiedPartners,null);A.equal(v.sourceVerifiedUncommittedPairs.length,1);
    }else{pairCounts.declined++;A.equal(row.bond,null);}
    const afterPair=E.exportGame(s);
-   A.throws(()=>R.act(s,{system:'bond',operation:'npcPairRecord',params:request}),/no repeated decision/);
+   A.throws(()=>R.act(s,{system:'bond',operation:'npcPairRecord',params:request}),/no repeated decision|current voluntary arrangement required/);
    A.equal(E.exportGame(s),afterPair);
    const pairCopy=E.importGame(afterPair),pairP=Realm.peek(pairCopy).emergentPeople.people[p.id];
    A.equal(Pair.verify(pairCopy,pairP),true);
@@ -225,7 +225,7 @@ A.equal(welfare.table?.bondRecords?.[b.id],undefined);
 A.equal(welfare.player.partnerIds.includes(b.id),false);
 const reviewedSave=E.exportGame(welfare);
 A.throws(()=>R.act(welfare,{system:'bond',operation:'npcSapientArrangementReview',params:reviewParams}),
- /open same-terms arrangement and unused review day/);
+ /open same-terms arrangement and unused review day|Separate current informed final terms/);
 A.equal(E.exportGame(welfare),reviewedSave);
 const reviewCopy=E.importGame(reviewedSave),
  reviewPerson=Realm.peek(reviewCopy).emergentPeople.people[agreed.p.id];
