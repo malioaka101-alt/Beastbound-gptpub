@@ -187,6 +187,12 @@ function privateStatus(s,p){
   originalOneRecoverActuallyUsed:!!p.originalRiftglassRecover,
   sourceVerifiedOneRecoverGain:
    p.originalRiftglassRecover?.source?.actualOriginalRecoverGain??0,
+  sourceVerifiedTotalRecoverGain:
+   (p.originalRiftglassRecover?.source?.actualOriginalRecoverGain||0)+
+   (p.originalRiftglassRecover?.renewals||[]).reduce((total,row)=>
+    total+row.source.actualOriginalRecoverGain,0),
+  originalRecoverRenewalsAfterActualNights:
+   p.originalRiftglassRecover?.renewals?.length||0,
   furtherOriginalRecoverNeedsRealNight:
    (body.recoverUses||0)>=1,
   hasActualVerifiedRiftglassSafeSleep:
