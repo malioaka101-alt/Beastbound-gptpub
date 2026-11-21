@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/living-terrestrial-positive-arrival.yml'
       - 'rules/independent-sapient-terrestrial-journey.js'
+      - 'rules/independent-sapient-terrestrial-return-preflight.js'
       - 'world/emergent-people.js'
       - 'world/sapient-beast-persons.js'
       - 'rules/independent-sapient-terrestrial-proposal.js'
