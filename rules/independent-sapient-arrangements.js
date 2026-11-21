@@ -69,8 +69,7 @@ function verifyDecision(s,p,b,q,review=false){
   q.contact.type!=='personally-witnessed-contact'||q.contact.location!==q.site||
   !Number.isInteger(q.contact.minute)||q.contact.minute>q.minute||
   q.minute-q.contact.minute>60||
-  (q.contact.meetingHash!==b.sapientLife.source.encounterHash&&
-   !b.sapientLife.triedEncounters.includes(q.contact.meetingHash))||
+  !Person.contactProof(b,q.contact)||
   !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
   sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
   sh.scheduledAtDay!==sh.fromDay||sh.throughDay-sh.fromDay!==5||
@@ -79,10 +78,7 @@ function verifyDecision(s,p,b,q,review=false){
   !verifyHuman(q.humanChoice,q.witnessHash)||
   q.noMagicOwnershipOrCompelledService!==true||
   q.noExecutedWorkPaymentOrCivicRecognition!==true)return false;
- const retained=b.sapientLife.history.find(x=>x.type==='personally-witnessed-contact'&&
-  x.meetingHash===q.contact.meetingHash);
- if(retained&&!eq(retained,q.contact))return false;
- if(!retained&&b.sapientLife.history.length&&q.contact.day>=b.sapientLife.history[0].day)return false;
+ 
  if(q.humanChoice.accepted){
   const d=q.beastChoice;
   if(!d||d.disposition!==Agency.profile(s,b).disposition||
