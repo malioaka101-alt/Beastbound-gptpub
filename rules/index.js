@@ -293,6 +293,8 @@ function act(s,{system,operation,params={}}={}){
   case 'body.nerveStatus':return require('./body-nerve-sense').status(s);
   case 'body.npcNerveWork':return require('./independent-original-body-nerve-sense-four').work(s,params);
   case 'body.npcLivingPhysiqueWork':return require('./independent-original-body-living-physiques').work(s,params);
+  case 'body.npcAdaptiveAssume':return require('./independent-original-body-living-physiques').assume(s,params);
+  case 'body.npcAdaptiveRelease':return require('./independent-original-body-living-physiques').release(s,params);
   case 'body.nerveMap':return require('./body-nerve-sense').map(s,params);
   case 'body.nerveExtend':return require('./body-nerve-sense').extend(s,params);
   case 'body.nervePractice':return require('./body-nerve-sense').practice(s,params);
