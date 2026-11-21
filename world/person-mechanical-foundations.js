@@ -287,6 +287,8 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedRiftExterior=s?.table?.realm===w&&actor.originalRiftMeasuredSense?
    require('../rules/independent-original-rift-sense-observation')
     .privateStatus(s,actor):null;
+  const verifiedRiftLocal=s?.table?.realm===w&&actor.originalRiftLocalSpatial?
+   require('../rules/independent-original-rift-local-spatial').privateStatus(s,actor):null;
   const verifiedRiftAnchorTwo=s?.table?.realm===w&&actor.originalRiftExteriorAnchor?
    require('../rules/independent-original-rift-exterior-anchor-two')
     .privateStatus(s,actor):null;
@@ -357,7 +359,7 @@ function earnedEvidence(w,actorId,s=null){
    }
   }
   if(earnedOther.rift?.step===1){
-   originalMilestones.rift.step=verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1;
+   originalMilestones.rift.step=verifiedRiftLocal?.earnedStep??(verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1);
    if(verifiedRiftAnchorTwo?.verifiedRiftStep===2)
     originalMilestones.rift.originalExteriorAnchor=
      structuredClone(verifiedRiftAnchorTwo.provenRiftglassAnchor);
@@ -462,6 +464,7 @@ function earnedEvidence(w,actorId,s=null){
    originalSoulResonanceLatticeThree:verifiedSoulThree,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
    originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
+   originalRiftLocalSpatial:verifiedRiftLocal,
    originalRiftglassFieldRefuge:verifiedRiftFieldRest,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
@@ -516,6 +519,8 @@ function earnedEvidence(w,actorId,s=null){
      'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===4?'Boundary Weaving IV':
+    originalMilestones.rift.step===3?'Fold Step III':
     originalMilestones.rift.step===2?'Rift Anchor II':
     originalMilestones.rift.step===1?'Rift Sense I':null
    ].filter(Boolean).join(', ')||
