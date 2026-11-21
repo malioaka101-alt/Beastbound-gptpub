@@ -422,7 +422,10 @@ function earnedEvidence(w,actorId,s=null){
     recoveryStatusNotClinicalWoundDiagnosis:true,
     woundDetailsNotEstablished:!currentCombat,
     liveCombatSource:currentCombat,
-    liveWoundsFromOriginalCombatOnly:!!currentCombat},
+    liveWoundsFromOriginalCombatOnly:!!currentCombat,
+    independentlyWitnessedVisitorHumanNights:
+     inMatchingGame&&actor.originalVisitorNightRestReceipts!==undefined?
+      require('../rules/independent-original-visitor-night-rest').privateStatus(s,actor):null},
    profession:career?{
     competenceRank:career.competenceRank,skillPoints:career.skillPoints,
     completedWorkChecks:career.workCount,successfulWorkChecks:career.successes,

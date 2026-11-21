@@ -482,6 +482,16 @@ for(let n=0;n<80;n++){
         'Remote human sleep does not change the player beyond the real original passing world time');
        A.equal(VisitorNight.verify(nightWorld,nightPerson),true);
        A.equal(Journey.verify(nightWorld,nightPerson),true);
+       const privateNight=R.act(nightWorld,{system:'health',
+        operation:'npcVisitorNightStatus',params:{actorId:nightPerson.actorId}});
+       A.equal(privateNight.privateToGM,true);
+       A.equal(privateNight.originalNightHistoryCount,1);
+       A.equal(privateNight.lastOriginalNight.individuallyAccepted,nightResult.freelyAccepted);
+       A.equal(privateNight.lastOriginalNight.site,'crossing');
+       A.equal(privateNight.lastOriginalNight.originalHumanNightMinutes,
+        nightResult.elapsedMinutes);
+       A.equal(privateNight.noTimeOrRngOrWoundOrStaminaOrFeeChanged,true);
+       A.equal(privateNight.noBeastSleepOrMedicalCareOrMagicGranted,true);
        A.equal(nightPerson.originalVisitorNightRestReceipts.length,1);
        A.equal(nightPerson.originalOvernightRestDecisions.length,1);
        A.equal(nightCombat.stamina,

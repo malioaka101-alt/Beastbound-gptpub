@@ -85,7 +85,8 @@ function verify(s,p){
    q.accepted!==original.source.accepted||
    original.result?.accepted!==q.accepted||
    q.endMinute!==q.startMinute+(q.accepted?480:5)||
-   !int(q.originalCombatEntrySeal?.length,64,64)||
+   q.originalCombatEntrySeal!==
+    s.table?.combatants?.['npc_'+p.id]?.npcOrigin?.seal||
    q.noAdditionalHumanOrBeastNightOrMedicalTreatment!==true||
    witnessSet.has(q.witnessHash)||nightSet.has(q.originalHumanNightSourceHash))
    return false;
@@ -157,4 +158,39 @@ function latestAcceptedAfter(s,p,journey){
  return p.originalOvernightRestDecisions.find(x=>
   x.sourceHash===selected.source.originalHumanNightSourceHash)||null;
 }
-module.exports={ORIGIN,WITNESS,context,verify,record,rest,latestAcceptedAfter};
+function privateStatus(s,p){
+ if(!verify(s,p))throw Error('The original visiting person's independently chosen nights failed source audit');
+ return (p.originalVisitorNightRestReceipts||[]).map(row=>{
+  const q=row.source,physical=p.originalOvernightRestDecisions.find(x=>
+   x.sourceHash===q.originalHumanNightSourceHash)?.result;
+  return {privateToGM:true,actorId:p.actorId,site:q.site,
+   startMinute:q.startMinute,endedMinute:q.endMinute,
+   individuallyAccepted:q.accepted,originalHumanNightMinutes:q.endMinute-q.startMinute,
+   originalCombatLightWoundsBefore:physical?.woundsBefore?.[0]??null,
+   originalCombatLightWoundsAfter:physical?.woundsAfter?.[0]??null,
+   originalHumanStaminaBefore:physical?.staminaBefore??null,
+   originalHumanStaminaAfter:physical?.staminaAfter??null,
+   originalArrivalSourceHash:q.originalArrivalSeal,
+   realRoomWitnessHash:q.witnessHash,sourceHash:row.seal,
+   noPresumedPaidRoomOrRestForSapientCompanion:true};
+ });
+}
+function status(s,{actorId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId))
+  throw Error('Only an authenticated independent human source ID, not a chosen room or recovery');
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)];
+ if(!p||p.actorId!==actorId||!People.verify(w,p))
+  throw Error('A real original independent human is required');
+ const rows=privateStatus(s,p),current=context(s,actorId);
+ return {privateToGM:true,actorId,
+  actualSourceVerifiedVisitingSite:current?.site??null,
+  originalPersonallyChosenNights:rows,
+  originalNightHistoryCount:rows.length,
+  lastOriginalNight:rows.at(-1)??null,
+  currentSafeRoomNotInferredFromTownOrPastHistory:true,
+  newWitnessAndFreshIndividualNightChoiceRequired:true,
+  noTimeOrRngOrWoundOrStaminaOrFeeChanged:true,
+  noBeastSleepOrMedicalCareOrMagicGranted:true};
+}
+module.exports={ORIGIN,WITNESS,context,verify,record,rest,latestAcceptedAfter,privateStatus,status};
