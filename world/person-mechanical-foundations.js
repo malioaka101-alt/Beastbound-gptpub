@@ -267,6 +267,8 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedBodyThree=s?.table?.realm===w&&actor.originalBodyOrganCycleThree?
    require('../rules/independent-original-body-organ-cycle-three')
     .privateStatus(s,actor):null;
+  const verifiedLivingPhysiques=s?.table?.realm===w&&actor.originalBodyLivingPhysiques?
+   require('../rules/independent-original-body-living-physiques').privateStatus(s,actor):null;
   const verifiedBodyFour=s?.table?.realm===w&&actor.originalBodyNerveSenseFour?
    require('../rules/independent-original-body-nerve-sense-four')
     .privateStatus(s,actor):null;
@@ -337,6 +339,12 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.body.completedCycles?.length===3){
    originalMilestones.body.completedCycles.push('Nerve-Sense Cycle');
    originalMilestones.body.realCombatBodyStaminaBonus+=verifiedBodyFour.sourceVerifiedStaminaCapacityGain;
+  }
+  if(verifiedLivingPhysiques&&originalMilestones.body.completedCycles?.includes('Organ Cycle')){
+   for(const v of verifiedLivingPhysiques.cycles.filter(x=>x.completed)){
+    originalMilestones.body.completedCycles.push(v.name);
+    originalMilestones.body.realCombatBodyStaminaBonus+=v.sourceVerifiedCapacityGain;
+   }
   }
   if(earnedOther.rift?.step===1){
    originalMilestones.rift.step=verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1;
@@ -436,6 +444,7 @@ function earnedEvidence(w,actorId,s=null){
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalBodyOrganCycleThree:verifiedBodyThree,
    originalBodyNerveSenseFour:verifiedBodyFour,
+   originalBodyLivingPhysiques:verifiedLivingPhysiques,
    originalSoulMindBodyThreading:verifiedSoulTwo,
    originalSoulResonanceLatticeThree:verifiedSoulThree,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
@@ -483,7 +492,10 @@ function earnedEvidence(w,actorId,s=null){
     originalMilestones.soul.phase===3?'Soul Phase III Resonance Lattice':
     originalMilestones.soul.phase===2?'Soul Phase II Threading':
     originalMilestones.soul.phase===1?'Soul Phase I':null,
-    originalMilestones.body.completedCycles?.length===4?
+    originalMilestones.body.completedCycles?.includes('Evolved Physique Cycle')?'Body Evolved Physique Cycle VII':
+    originalMilestones.body.completedCycles?.includes('Adaptive Physique Cycle')?'Body Adaptive Physique Cycle VI':
+    originalMilestones.body.completedCycles?.includes('Blood-Essence Cycle')?'Body Blood-Essence Cycle V':
+    originalMilestones.body.completedCycles?.includes('Nerve-Sense Cycle')?
      'Body Nerve–Sense Cycle IV':
     originalMilestones.body.completedCycles?.length===3?
      'Body Integrated Organ Cycle III':
