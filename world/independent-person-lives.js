@@ -117,6 +117,12 @@ function enroll(s,p={}){
 }
 function daily(w,q,day,s){
  if(!verifyEntry(w,q)||day<=q.lastDay)return null;
+ const actualPerson=w.emergentPeople.people[q.id];
+ if(actualPerson.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(actualPerson,(day-1)*1440,day*1440)){
+  // The foreign interval is real. This local-life owner has no source for
+  // foreign sleep, training, employment or social activity. No RNG spent.
+  q.lastDay=day;return null;
+ }
  // Only real original human wound combatants gate ordinary day-by-day life.
  // Do not create an injury pool or invent medical healing in this owner.
  const condition=require('../rules/unified')
