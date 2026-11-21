@@ -423,6 +423,9 @@ function earnedEvidence(w,actorId,s=null){
     woundDetailsNotEstablished:!currentCombat,
     liveCombatSource:currentCombat,
     liveWoundsFromOriginalCombatOnly:!!currentCombat,
+    independentlyWitnessedVisitorSapientWelfare:
+     inMatchingGame&&actor.originalSapientVisitorRefugeChoices!==undefined?
+      require('../rules/independent-sapient-visitor-welfare').privateStatus(s,actor):null,
     independentlyWitnessedVisitorHumanNights:
      inMatchingGame&&actor.originalVisitorNightRestReceipts!==undefined?
       require('../rules/independent-original-visitor-night-rest').privateStatus(s,actor):null},

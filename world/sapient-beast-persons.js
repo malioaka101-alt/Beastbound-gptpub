@@ -188,6 +188,7 @@ function verify(b){
   l.triedEncounters.some(x=>typeof x!=='string'||!/^[a-f0-9]{64}$/.test(x))||
   !Array.isArray(l.history)||l.history.length>HISTORY||!verifyContacts(b,l)||
   !verifyTerrestrialBeastReceipts(b,l)||
+  !require('../rules/independent-sapient-visitor-welfare').structure(b)||
   !Practice.verify(l.practice,'sapient:'+b.id,l.sourceHash,aptitude(b))||
   l.noImposedProfession!==true||l.noInferredSociety!==true)
   return false;

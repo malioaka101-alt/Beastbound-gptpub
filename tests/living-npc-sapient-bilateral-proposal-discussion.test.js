@@ -17,6 +17,7 @@ const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
 const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
 const VisitorNight=require('../rules/independent-original-visitor-night-rest');
+const VisitorBeastWelfare=require('../rules/independent-sapient-visitor-welfare');
 const GradeDiscussion=require('../rules/independent-original-grade-diagnostic-discussion');
 const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
@@ -515,6 +516,92 @@ for(let n=0;n<80;n++){
         originalMinutes:nightResult.elapsedMinutes,
         preservedOriginalJourney:true,restoredHumanStamina:nightCombat.stamina,
         noUnverifiedInnCostBeastRestOrMagicalPower:true}));
+       // An independently travelling sapient beast remains a PERSON.
+       // Separate refuge and personal choice, never an inferred bed, meal,
+       // or human-granted bodily permission. Run on a genuine arrived fork.
+       const welfareWorld=E.importGame(E.exportGame(js)),
+        welfarePerson=Realm.peek(welfareWorld).emergentPeople.people[jp.id],
+        welfareBeast=welfareWorld.beasts[jb.id],
+        welfareArrival=Journey.position(welfarePerson,welfareWorld.world.minutes);
+       const priorWelfareMinute=welfareWorld.world.minutes;
+       let welfareEvening=Math.floor(priorWelfareMinute/1440)*1440+16*60+30;
+       if(welfareEvening<priorWelfareMinute)welfareEvening+=1440;
+       E.advance(welfareWorld,welfareEvening-priorWelfareMinute);
+       Time.finalizeTime(welfareWorld,priorWelfareMinute);
+       const welfareShift=Journey.visitorPresence(welfarePerson,
+        welfareWorld.world.minutes,'crossing');
+       const welfareScene=welfarePerson.name+' and '+welfareBeast.name+
+        ' are observed at the true crossing: the sapient individual separately considers resting in personally accessible safe sheltered cover, without a promised room, food, medicine or compulsory stay.';
+       welfareWorld.chatRuntime||={};welfareWorld.chatRuntime.scene=welfareScene;
+       C.event(welfareWorld,'story',welfareScene,{
+        origin:VisitorBeastWelfare.WITNESS,actorId:welfarePerson.actorId,
+        beastId:welfareBeast.id,humanOriginHash:welfarePerson.originHash,
+        beastPersonSourceHash:welfareBeast.sapientLife.sourceHash,
+        site:'crossing',minute:welfareWorld.world.minutes,
+        physicalOriginalJourneySeal:Journey.position(welfarePerson,welfareWorld.world.minutes).sourceHash,
+        physicalOriginalVisitorPresenceHash:welfareShift.hash,
+        individualSafeRefugeObserved:
+         'The original sapient individual is physically observed beside separate sheltered cover in the crossing area with legitimate safe personal access to pause.',
+        beastPersonalFreedomAndCommunication:
+         'The individual sapient being personally understands that this is an optional independent rest and may choose not to use this shelter.',
+        noGuaranteeOfHumanOrBeastAccommodation:
+         'This observed cover is not a provisioned room, approved veterinary station or evidence of accommodation rights for someone else.',
+        noSpeciesDietOrFoodSourceInferred:true,
+        noMedicalTreatmentOrMagicalBond:true,
+        noHumanSleepOrCompelledBeastRest:true,
+        privateToGM:true});
+       const welfareArgs={actorId:welfarePerson.actorId,beastId:welfareBeast.id,
+        witnessIndex:welfareWorld.log.length-1},
+        priorBeastWelfare=welfareBeast.needs.fatigue,
+        priorBeastFood=welfareBeast.needs.hunger,
+        priorBeastRng=welfareBeast.sapientLife.rngState,
+        priorHumanRng=welfarePerson.rngState,
+        priorHumanStamina=welfareWorld.table.combatants['npc_'+welfarePerson.id].stamina,
+        playerBeforeWelfare=structuredClone(welfareWorld.player),
+        beforeWelfare=E.exportGame(welfareWorld);
+       A.throws(()=>R.act(welfareWorld,{system:'bond',operation:'npcVisitorBeastRefuge',
+        params:{...welfareArgs,freelyRested:true}}),
+        /no caller choice, fatigue, care supplies or site/);
+       A.equal(E.exportGame(welfareWorld),beforeWelfare);
+       const beastRespite=R.act(welfareWorld,{system:'bond',
+        operation:'npcVisitorBeastRefuge',params:welfareArgs});
+       A.equal(beastRespite.privateToGM,true);
+       A.equal(beastRespite.noHumanRestOrStaminaOrBeastFoodOrOtherTreatment,true);
+       A.equal(beastRespite.noContractSyncGradeOrAssumedShelter,true);
+       A.equal(beastRespite.elapsedMinutes,beastRespite.freelyRested?480:5);
+       A.equal(welfareBeast.sapientLife.rngState!==priorBeastRng,true);
+       A.equal(welfarePerson.rngState,priorHumanRng);
+       A.equal(welfareWorld.table.combatants['npc_'+welfarePerson.id].stamina,
+        priorHumanStamina);
+       A.equal(welfareBeast.needs.fatigue,
+        beastRespite.freelyRested?Math.max(0,priorBeastWelfare-8):priorBeastWelfare);
+       A.equal(welfareBeast.needs.hunger,priorBeastFood);
+       A.equal(VisitorBeastWelfare.verify(welfareWorld,welfarePerson),true);
+       A.equal(Person.verify(welfareBeast),true);
+       A.equal(Journey.verify(welfareWorld,welfarePerson),true);
+       A.equal(welfarePerson.originalSapientVisitorRefugeChoices.length,1);
+       A.equal(welfareBeast.sapientLife.originalVisitorRefugeChoices.length,1);
+       const worldTimeOnly=E.importGame(beforeWelfare);
+       E.advance(worldTimeOnly,beastRespite.elapsedMinutes);
+       Time.finalizeTime(worldTimeOnly,welfareEvening);
+       A.deepEqual(welfareWorld.player,worldTimeOnly.player,
+        'The visiting beast cannot grant human benefits except ordinary world-time effects');
+       const welfareSave=E.exportGame(welfareWorld),
+        welfareReload=E.importGame(welfareSave),
+        restoredPerson=Realm.peek(welfareReload).emergentPeople.people[jp.id];
+       A.equal(VisitorBeastWelfare.verify(welfareReload,restoredPerson),true);
+       A.equal(E.exportGame(welfareReload),welfareSave);
+       const welfareTamper=E.importGame(welfareSave),
+        welfareTamperPerson=Realm.peek(welfareTamper).emergentPeople.people[jp.id],
+        welfareRow=welfareTamperPerson.originalSapientVisitorRefugeChoices[0];
+       welfareRow.source.accepted=!welfareRow.source.accepted;
+       welfareRow.seal=hash(welfareRow.source);
+       A.equal(VisitorBeastWelfare.verify(welfareTamper,welfareTamperPerson),false,
+        'Even a resealed invented beast choice cannot replace the saved individual RNG proof');
+       console.log('INDEPENDENT VISITING SAPIENT PERSONAL REFUGE '+JSON.stringify({
+        trueArrival:welfareArrival.location,individualChoice:beastRespite.observedChoice,
+        sourceFatigueReduction:beastRespite.sourceOwnedFatigueReduction,
+        noAddedHumanBeastSocialContractOrFood:true}));
        // A distinct real-world disposable visitor can DISCUSS a genuinely
        // funded market service with the original independent merchant.
        // Signed crossing arrival proves the worker is present without
