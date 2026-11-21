@@ -101,6 +101,7 @@ function verify(s,p){
   w=Realm.peek(s),life=w?.independentPersonLives?.people?.[p.id];
  if(!prior||!Three.verify(s,p)||!Early.verify(s,p)||
   !body?.npcOrigin?.seal||!life||!Lives.verifyEntry(w,life)||
+  !Health.currentNpcWoundCondition(s,p.actorId)||
   !r||r.origin!==ORIGIN||r.originalOrganSourceHash!==prior||
   !Array.isArray(r.sessions)||r.sessions.length<1||r.sessions.length>480)return false;
  const sim=blank(),used=new Set(),
@@ -116,7 +117,9 @@ function verify(s,p){
    !int(q.minute,lastEnd,s.world.minutes)||Math.floor(q.minute/1440)!==q.day||
    !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
    sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
-   sh.fromDay>q.day||sh.throughDay<q.day||
+   sh.fromDay>q.day||sh.throughDay<q.day||sh.throughDay-sh.fromDay!==5||
+   sh.scheduledAtDay!==sh.fromDay||
+   q.witness?.day!==q.day+1||q.witness?.time!==E.clock({world:{minutes:q.minute}})||
    q.witnessHash!==hash(q.witness)||used.has(q.witnessHash)||
    !witnessValid(q.witness,p,q.kind,q.site,sim.plan)||
    !eligible(q.kind,sim,q.witness)||
@@ -164,7 +167,8 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
   !previous(p)||!Three.verify(s,p)||!verify(s,p)||
   !present?.presence||present.presence.hash!==p.shift?.hash||
   body?.npcOrigin?.location!==site||
-  !Places.location(s)||s.battle||s.encounter||body.status!=='ok'||
+  !Places.location(s)||s.battle||s.encounter||
+  !Health.currentNpcWoundCondition(s,actorId)||body.status!=='ok'||
   body.stamina<1||body.wounds.some(x=>x!==0)||
   typeof s.chatRuntime?.scene!=='string'||!s.chatRuntime.scene.includes(p.name))
   throw Error('A genuinely present independent uninjured Organ III adult and original anatomical witness are required');
