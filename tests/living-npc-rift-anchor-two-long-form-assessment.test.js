@@ -79,7 +79,46 @@ for(let i=0;i<14;i++){
   (completed?100:0);
  if(!prime||score>prime.score)
   prime={score,seed,s,p,completed};
- reports.push({seed,originalRiftReading:!!p.originalRiftMeasuredSense?.successfulReading,
+ // Only the original completed II actor receives this disposable observed
+ // local geometry opportunity. Never award II or an extra rest for the test.
+ let localSpatial=null;
+ if(completed&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=2){
+  const Local=require('../rules/independent-original-rift-local-spatial'),
+   Fold=require('../rules/rift-fold-step'),Weave=require('../rules/rift-boundary-weaving'),
+   PCAnchor=require('../rules/rift-anchors'),Core=require('../rules/core'),
+   Presence=require('../world/person-presence'),now=s.world.minutes,dayNow=Math.floor(now/1440);
+  if(Presence.resolve(Realm.peek(s),p.actorId,'ruins',dayNow,now%1440)?.presence){
+   const description='A bounded original exterior spatial geometry is explicitly observed in this disposable test witness, with no claim of passage or hidden power.',
+    from='At the actual surveyed exterior path marker of this disposable test scene.',
+    to='At a separately measured unobstructed marker three metres along the same exterior path.';
+   s.chatRuntime.scene=p.name+' examines two actual local exterior positions and their failure boundary.';
+   Core.event(s,'story',s.chatRuntime.scene,{origin:Fold.WITNESS,actorId:p.actorId,location:'ruins',anchorId:PCAnchor.SITE,
+    fromObservedPosition:from,toObservedPosition:to,lineOfEffectMeasurement:description,
+    independentObstructionTest:description,energyAndPhysicalLimit:description,measuredPressureCountertest:description,
+    measuredDistanceMetres:3,safeRangeMetres:3,lineOfEffectClear:true,crossesSealedBoundary:false,crossesWorldLocation:false});
+   const first=Rules.act(s,{system:'rift',operation:'npcFoldStep',params:{actorId:p.actorId,witnessIndex:s.log.length-1}});
+   A.equal(Local.verify(s,p),true);
+   const row=p.originalRiftLocalSpatial.sessions.at(-1).source;
+   A.equal(row.staminaSpent,row.accepted?2:0);
+   A.equal(row.after.step,first.success?3:2);
+   if(first.success&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=4){
+    s.chatRuntime.scene=p.name+' examines an original small local boundary segment, without opening any portal.';
+    Core.event(s,'story',s.chatRuntime.scene,{origin:Weave.WITNESS,location:'ruins',actorId:p.actorId,
+     boundaryId:'riftglass_wardline',segmentId:'individual_local_exterior_segment',mode:'reinforce',areaSquareMetres:3,supportMinutes:60,
+     originalSpatialFabric:description,observedLocalChange:description,independentPressureCountertest:description,actualEnergyLimit:description,
+     crossesBoundary:false,opensPortal:false,globalSealChanged:false});
+    const second=Rules.act(s,{system:'rift',operation:'npcWeaveBoundary',params:{actorId:p.actorId,witnessIndex:s.log.length-1,minutes:60}});
+    A.equal(Local.verify(s,p),true);A.equal(Local.privateStatus(s,p).earnedStep,second.success?4:3);
+   }
+   const saved=E.exportGame(s),copy=E.importGame(saved),cp=Realm.peek(copy).emergentPeople.people[p.id];
+   A.equal(Local.verify(copy,cp),true);
+   const bad=cp.originalRiftLocalSpatial.sessions[0];
+   bad.source.after.step=9;bad.seal=require('node:crypto').createHash('sha256').update(JSON.stringify(bad.source)).digest('hex');
+   A.equal(Local.verify(copy,cp),false);
+   localSpatial=Local.privateStatus(s,p);
+  }
+ }
+ reports.push({seed,localSpatial,originalRiftReading:!!p.originalRiftMeasuredSense?.successfulReading,
   firstSenseAttempts:p.originalRiftMeasuredSense?.attempts?.length||0,
   measuredAnchorChecks:accepted.length,axisGrowth:gained.length,
   axes:p.originalRiftExteriorAnchor?.axes||null,
