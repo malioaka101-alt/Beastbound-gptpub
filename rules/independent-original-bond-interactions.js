@@ -78,7 +78,23 @@ function replay(s,p){
    !Arr.safe({...b,...q.welfare})||!eq(q.before,pair.bond)||
    !Arr.verifyHuman(q.humanChoice,q.witnessHash)||q.humanChoice.personality!==p.personality||
    q.noMagicOrSync!==true)return null;
-  }}
+  const sp=mode(p,b,pair.bond,q),possible=opportunity(s,b,pair.bond,q);
+  if(!eq(q.law,sp)||q.possible!==possible||q.minute+sp.minutes>s.world.minutes)return null;
+  if(q.humanChoice.accepted&&possible){
+   const d=q.beastChoice;
+   if(!d||d.disposition!==Agency.profile(s,b).disposition||!int(d.rngBefore,1,4294967295)||
+    !eq(d,Social.sapientChoice({rngState:d.rngBefore},d.disposition)))return null;
+  }else if(q.beastChoice!==null)return null;
+  const rng={rngState:q.humanChoice.rngAfter},accepted=q.humanChoice.accepted&&possible&&q.beastChoice.outcome==='accepted',
+   check=accepted?checkRecord(C.die(rng,20),sp):null;
+  if(!eq(q.check,check)||q.humanRngAfter!==rng.rngState)return null;
+  const event=consequence(pair.bond,q,check);
+  if(!eq(q.event,event)||!eq(q.after,pair.bond))return null;
+  pair.head=row.seal;pair.last=q.minute+sp.minutes;previousMinute=q.minute;seen.add(q.witnessHash);days.add(q.pairSeal+':'+q.day);
+ }
+ return pairs;
+}
+function verify(s,p){try{return replay(s,p)!==null;}catch{return false;}}
 function current(s,p,seal){const map=replay(s,p);if(!map)throw Error('Original independent pair interaction history altered');return map.get(seal)||null;}
 function interact(s,{actorId,beastId,witnessIndex,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
