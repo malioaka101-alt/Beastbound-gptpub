@@ -336,6 +336,7 @@ for(let n=0;n<80;n++){
        A.equal(homeward.noMovementOrConsentOrGrade,true);
        A.equal(ReturnPreflight.routeStatus(js,jp,jb,'ruins').reason,
         'not-one-original-linked-leg','No fictional direct crossing-to-ruins exit');
+       A.equal(E.exportGame(js),beforeReturn,'No eligibility inspection may roll, replenish, relocate or consent');
        if(homeward.proposalEligible){
         A.equal(homeward.from,'crossing');
         A.equal(homeward.to,'forest');
@@ -457,7 +458,6 @@ for(let n=0;n<80;n++){
          'independent-sapient-person-not-currently-present-and-fit'].includes(homeward.reason),
          'A genuine initial arrival may be unable to consider a new route only for explicit actual source limitations: '+homeward.reason);
        }
-       A.equal(E.exportGame(js),beforeReturn,'No eligibility inspection may roll, replenish, relocate or consent');
        console.log('INDEPENDENT ORIGINAL VISITOR RETURN PREFLIGHT '+JSON.stringify({
         eligible:homeward.proposalEligible,reason:homeward.reason??null,
         genuineStart:'crossing',nextOriginalEdge:'forest',
