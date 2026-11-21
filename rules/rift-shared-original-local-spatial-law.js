@@ -15,4 +15,13 @@ function weaveSpec(area,minutes,strain,pressure,attribute,rank){
   modifier:Math.floor((attribute-10)/2)+2*rank,stamina:3+Math.ceil(minutes/120),minutes};
 }
 const strainAdded=check=>check.degree==='severe failure'?6:0;
-module.exports=Object.freeze({pressureAdjust,pressureIdentity,foldSpec,weaveSpec,strainAdded});
+function pocketSpec(capacity,minutes,strain,pressure,attribute,rank){
+ return {dc:19+Math.ceil(capacity/2)+pressure+Math.floor(strain/12),
+  modifier:Math.floor((attribute-10)/2)+2*rank,stamina:5+Math.ceil(minutes/180),minutes};
+}
+function adaptationSpec(progress,minutes,strain,pressure,attribute,rank){
+ return {dc:18+pressure+Math.floor(strain/12)-(progress===2?1:0),
+  modifier:Math.floor((attribute-10)/2)+2*rank,stamina:3+Math.ceil(minutes/90),minutes};
+}
+const pocketStrainAdded=check=>check.degree==='severe failure'?8:0;
+module.exports=Object.freeze({pressureAdjust,pressureIdentity,foldSpec,weaveSpec,pocketSpec,adaptationSpec,strainAdded,pocketStrainAdded});
