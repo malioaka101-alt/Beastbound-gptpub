@@ -37,8 +37,10 @@ function lawAt(s,p,b,q){
   q.fromRegion!==Atlas.LOCATION_REGION[q.from]||
   q.toRegion!==Atlas.LOCATION_REGION[q.to]||
   !eq(q.law,Original.legSpec(q.to))||
-  !eq(q.originalShift,{...shift,hash:shift?.hash})||
-  shift?.actorId!==p.actorId||shift.originHash!==p.originHash||
+  shift?.source!==People.SHIFT||shift.npcId!==p.actorId||
+  shift.actorId!==p.actorId||shift.personId!==p.id||
+  shift.originHash!==p.originHash||shift.name!==p.name||
+  shift.profession!==p.profession||shift.polity!==p.polity||
   shift.location!==q.from||shift.fromDay>q.day||shift.throughDay<q.day||
   shift.scheduledAtDay!==shift.fromDay||shift.throughDay-shift.fromDay!==5||
   hash(Object.fromEntries(Object.entries(shift).filter(([k])=>k!=='hash')))!==shift.hash||
