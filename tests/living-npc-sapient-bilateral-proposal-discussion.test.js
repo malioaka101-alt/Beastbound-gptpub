@@ -11,6 +11,10 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
 const Pair=require('../rules/independent-original-bond-pair');
 const Follow=require('../rules/independent-sapient-followup'),Presence=require('../world/person-presence');
+const Route=require('../rules/independent-sapient-terrestrial-preflight'),TravelLaw=require('../rules/travel-shared-original-law');
+A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
+A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
+A.deepEqual(TravelLaw.legSpec('ruins'),{minutes:145,stamina:4});
 const Interact=require('../rules/independent-original-bond-interactions'),Witness=require('../rules/bond-witness');
 A.deepEqual(Witness.interactionSpec('gentle',16,0,true,0,3),{event:'gentle_treatment',minutes:15,dc:21,modifier:3});
 const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation');
@@ -172,6 +176,13 @@ for(let n=0;n<80;n++){
    A.equal(out.recorded,row.source.accepted);A.equal(s.table?.bondRecords?.[b.id],undefined);
    A.equal(s.player.partnerIds.includes(b.id),false);
    A.equal(Arrangement.privateStatus(s,p)[0].status,'accepted');
+   const beforeRoute=E.exportGame(s),beforeHuman=p.rngState,beforeBeast=b.sapientLife.rngState;
+   A.equal(Route.routeStatus(s,p,b,site).reason,'not-one-original-linked-leg');
+   A.equal(Route.routeStatus(s,p,b,'academy').reason,'not-one-original-linked-leg');
+   A.equal(Route.routeStatus(s,p,b,'crossing').reason,'original-encounter-or-combat-unresolved');
+   A.equal(E.exportGame(s),beforeRoute,'A private travel proposal preflight may not manufacture movement, route choice or old combat condition');
+   A.equal(p.rngState,beforeHuman);A.equal(b.sapientLife.rngState,beforeBeast);
+
    // An actual recognised but unfamiliar pair cannot bypass earned
    // willingness by presenting a fresh magical offer or a caller outcome.
    const ss=E.importGame(E.exportGame(s)),sp=Realm.peek(ss).emergentPeople.people[p.id],sb=ss.beasts[b.id];
