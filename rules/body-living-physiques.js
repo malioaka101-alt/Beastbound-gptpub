@@ -845,14 +845,13 @@ function tissuePractice(s,p={},kind='tissue-work'){
   throw Error('Independent witnessed original tissue function and physical limit must match this individual anatomy');
  const hash=digest(witness);
  if(tissueKnownWitness(s,hash))throw Error('An individual tissue experiment cannot be rolled twice');
- const spent=kind==='tissue-care'?2:SPEC[p.cycle].energy;
+ const mode=Law.checkSpec(p.cycle,kind==='tissue-care'?'care':'work',
+  s.player.attributes?.con??10,s.player.skills?.survival?.rank||0,t.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original body has insufficient real Stamina for this work');
  const start=s.world.minutes,minutes=p.minutes??60,before=t.strain;
  s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(t.strain/3),
-  dc:kind==='tissue-care'?15:SPEC[p.cycle].dc,
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,
   label:'Personally witnessed '+SPEC[p.cycle].name+' individual '+p.id+' '+kind});
  const event=structuredClone(s.log.at(-1)),earned=
   kind==='tissue-work'&&check.success?check.progress:0;
