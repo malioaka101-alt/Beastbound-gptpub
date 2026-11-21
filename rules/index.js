@@ -679,6 +679,7 @@ function act(s,{system,operation,params={}}={}){
   case 'research.proof':return ResearchGuard.proof(s,params);
   case 'research.replication':return ResearchGuard.replication(s,params);
   case 'research.status':return {project:R.publicCard(R.get(s,params.id))};
+  case 'evolution.npcNativeRite':return require('./independent-original-native-evolution').attempt(s,params);
   case 'evolution.npcMaturityEnroll':return require('./independent-original-beast-maturity').enroll(s,params);
   case 'evolution.authorBranch':return require('./evolution-branch-web').branch(s,params);
   case 'evolution.branchWebStatus':return require('./evolution-branch-web').status(s,params);
