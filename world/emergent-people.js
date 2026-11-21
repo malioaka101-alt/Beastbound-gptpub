@@ -553,7 +553,14 @@ function presence(w,id,location,day,minute){
  if(visiting?.invalid||visiting?.inTransit)return null;
  if(visiting?.arrived){
   if(visiting.location!==location)return null;
-  return visitor.visitorPresence(p,queryMinute,location);
+  const first=(p.originalSapientTerrestrialJourneys||[]).find(x=>x.source.departed),
+   home=first?.source.from,
+   afterRealHomecoming=visiting.location===home&&
+    day>Math.floor(visiting.arrivalMinute/1440);
+  // The signed homecoming day itself never creates a completed paid shift.
+  // Ordinary attendance may resume only on a LATER original day, with the
+  // same independent source person, actual work shift and normal ecology.
+  if(!afterRealHomecoming)return visitor.visitorPresence(p,queryMinute,location);
  }
  if(!supportedSite(w,location,p.regionId))return null;
  if(p.originalRiftRealmJourney){const walk=require('../rules/independent-original-rift-realm-walking');
