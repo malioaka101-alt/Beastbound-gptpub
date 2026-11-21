@@ -165,7 +165,132 @@ function verify(s,p){
     tissueView(individualTissue(sim[cycle],q.witness)))))return false;
   used.add(q.witnessHash);lastDay=q.day;lastEnd=q.minute+q.actualMinutes;
  }
- return eq(r.cycles,sim)&&r.lastAttemptDay===lastDay;
+ return eq(r.cycles,sim)&&r.lastAttemptDay===lastDay&&expressionVerify(s,p,r,body);
+}
+// Temporary expression is a distinct action, not another refinement day.
+// Formation and current strain are read from the original historical ledger.
+const EXPRESSION='source-witnessed-independent-adaptive-expression-v1';
+function expressionState(rows,minute){
+ let active=null,ready=0,last=null;
+ for(const row of rows||[]){
+  const q=row.source;
+  if(!q.accepted)continue;
+  if(q.kind==='assume'){
+   active=q.check.success?row:null;ready=q.cooldownUntil;last=row;
+  }else{active=null;ready=q.cooldownUntil;}
+ }
+ return {active:!!active&&minute>=active.source.activeFrom&&minute<active.source.activeUntil,
+  activationSeal:active?.seal??null,expiresAtMinute:active?.source.activeUntil??null,
+  nextAvailableAtMinute:ready,cooldownRemaining:Math.max(0,ready-minute),
+  mentalEffects:Law.ADAPTIVE_MENTAL,noAutomaticResistanceOrImmunity:true};
+}
+function expressionWitness(w,p,kind,site,minute){
+ const d=w?.details;
+ return w?.type==='story'&&text(w.text,16)&&w.text.includes(p.name)&&
+  w.day===Math.floor(minute/1440)+1&&w.time===E.clock({world:{minutes:minute}})&&
+  d?.actorId===p.actorId&&d.location===site&&d.cycle===6&&
+  d.origin===(kind==='assume'?PC.ASSUME:PC.RELEASE)&&
+  (kind==='assume'?text(d.environmentObserved)&&text(d.safeReversionCounter)&&int(d.safeMinutes,1,1000000):
+   text(d.observedReturn)&&text(d.independentFailureLimit));
+}
+function historicalAdaptive(r,minute){
+ const prior=r.sessions.filter(x=>x.source.cycle===6&&
+  x.source.minute+x.source.actualMinutes<=minute);
+ const win=prior.find(x=>x.source.kind==='form'&&x.source.accepted&&x.source.check?.success);
+ if(!win)return null;
+ return {formationSeal:win.seal,strain:prior.at(-1).source.after.strain};
+}
+function expressionVerify(s,p,r,body){
+ const rows=r.expressions;if(rows===undefined)return true;
+ if(!Array.isArray(rows)||rows.length>480)return false;
+ const used=new Set(r.sessions.map(x=>x.source.witnessHash)),history=[];
+ let end=0;
+ for(const row of rows){
+  const q=row?.source,sh=q?.shift;
+  if(!q||row.seal!==hash(q)||q.origin!==EXPRESSION||
+   q.actorId!==p.actorId||q.identityOriginHash!==p.originHash||
+   q.combatSeal!==body.npcOrigin.seal||!['assume','release'].includes(q.kind)||
+   !int(q.minute,end,s.world.minutes-1)||q.day!==Math.floor(q.minute/1440)||
+   r.sessions.some(x=>x.source.minute<q.minute+1&&x.source.minute+x.source.actualMinutes>q.minute)||
+   !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
+   sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
+   sh.fromDay>q.day||sh.throughDay<q.day||sh.throughDay-sh.fromDay!==5||sh.scheduledAtDay!==sh.fromDay||
+   !expressionWitness(q.witness,p,q.kind,q.site,q.minute)||q.witnessHash!==hash(q.witness)||used.has(q.witnessHash)||
+   !int(q.rngBefore,1,4294967295)||q.personality!==p.personality||
+   !int(q.fatigue,0,100)||q.chance!==Early.chance({personality:q.personality,fatigue:q.fatigue})||
+   !int(q.staminaBefore,1)||!int(q.maxBefore,q.staminaBefore)||q.maxAfter!==q.maxBefore||
+   !eq(q.woundsBefore,[0,0,0])||q.mentalEffects!==Law.ADAPTIVE_MENTAL||
+   q.noAutomaticResistanceOrAbility!==true)return false;
+  const old=expressionState(history,q.minute),earned=historicalAdaptive(r,q.minute);
+  if(!earned||!eq(earned,q.earned)||q.kind==='assume'&&(old.active||old.cooldownRemaining)||
+   q.kind==='release'&&(!old.active||q.activationSeal!==old.activationSeal))return false;
+  const roll={rngState:q.rngBefore};
+  if(q.choice!==Core.die(roll,100)||q.accepted!==(q.choice<=q.chance))return false;
+  let check=null,spent=0,injury=false,window=null;
+  if(q.kind==='assume'){
+   if(q.duration!==q.witness.details.safeMinutes||q.activationSeal!==null)return false;
+   const mode=Law.adaptiveSpec(q.duration,p.mechanicalFoundation.baselineAttributes.con,0,earned.strain);
+   if(q.staminaBefore<mode.cost)return false;
+   if(q.accepted){
+    check=checkRecord(Core.die(roll,20),mode);spent=mode.cost;
+    injury=check.degree==='severe failure';window=Law.adaptiveWindow(q.minute,q.duration,check.success);
+   }
+  }else{
+   if(q.duration!==null)return false;
+   if(q.accepted)window={activeFrom:null,activeUntil:null,cooldownUntil:Law.releaseCooldown(q.minute)};
+  }
+  if(!eq(q.check,check)||q.rngAfter!==roll.rngState||q.staminaSpent!==spent||
+   q.staminaAfter!==q.staminaBefore-spent||!eq(q.woundsAfter,injury?[1,0,0]:[0,0,0])||
+   q.activeFrom!==(window?.activeFrom??null)||q.activeUntil!==(window?.activeUntil??null)||
+   q.cooldownUntil!==(window?.cooldownUntil??null))return false;
+  used.add(q.witnessHash);history.push(row);end=q.minute+1;
+ }
+ return true;
+}
+function expression(s,{actorId,witnessIndex,minutes,...extra}={},kind){
+ if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
+  !int(witnessIndex,0,s.log.length-1))throw Error('Original independent adaptive expression accepts actorId, witnessIndex and measured duration only');
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  body=s.table?.combatants?.['npc_'+p?.id],r=p?.originalBodyLivingPhysiques,
+  start=s.world.minutes,day=Math.floor(start/1440),site=s.world.location,
+  present=p&&Presence.resolve(w,actorId,site,day,start%1440),
+  witness=structuredClone(s.log[witnessIndex]),earned=r&&historicalAdaptive(r,start);
+ if(!p||!People.verify(w,p)||p.status!=='active'||!earned||!verify(s,p)||
+  !present?.presence||body?.npcOrigin?.location!==site||!Places.location(s)||
+  s.battle||s.encounter||body.status!=='ok'||body.stamina<1||body.wounds.some(x=>x!==0)||
+  !s.chatRuntime?.scene?.includes(p.name)||!expressionWitness(witness,p,kind,site,start)||
+  (kind==='assume'?minutes!==witness.details.safeMinutes:minutes!==undefined))
+  throw Error('Actual present uninjured adult with verified Adaptive VI and fresh measured original witness required');
+ const rows=r.expressions||[],witnessHash=hash(witness),old=expressionState(rows,start);
+ if(rows.length>=480||[...rows,...r.sessions].some(x=>x.source.witnessHash===witnessHash)||
+  r.sessions.some(x=>x.source.minute<start+1&&x.source.minute+x.source.actualMinutes>start)||
+  (kind==='assume'?(old.active||old.cooldownRemaining):!old.active))
+  throw Error('Original adaptive expression is active, recovering, unavailable or witness already used');
+ const mode=kind==='assume'?Law.adaptiveSpec(minutes,p.mechanicalFoundation.baselineAttributes.con,0,earned.strain):null;
+ if(mode&&body.stamina<mode.cost)throw Error('Actual available Combat Stamina required for measured adaptive duration');
+ const rngBefore=p.rngState,chance=Early.chance(p),choice=Core.die(p,100),accepted=choice<=chance,
+  staminaBefore=body.stamina,maxBefore=body.maxStamina,woundsBefore=[...body.wounds];
+ let check=null,spent=0,window=null;
+ if(accepted&&mode){
+  const roll=Core.check(s,{modifier:mode.modifier,dc:mode.dc,independentRngOwner:p,
+   privateDisplay:true,label:p.name+' original witnessed adaptive expression'});
+  check=checkRecord(roll.roll,mode);spent=mode.cost;body.stamina-=spent;
+  if(check.degree==='severe failure')Combat.harm(s,body,2);
+  window=Law.adaptiveWindow(start,minutes,check.success);
+ }else if(accepted)window={activeFrom:null,activeUntil:null,cooldownUntil:Law.releaseCooldown(start)};
+ const source={origin:EXPRESSION,kind,actorId,identityOriginHash:p.originHash,combatSeal:body.npcOrigin.seal,
+  minute:start,day,site,shift:structuredClone(present.presence),witness,witnessHash,earned,
+  duration:kind==='assume'?minutes:null,activationSeal:kind==='release'?old.activationSeal:null,
+  rngBefore,rngAfter:p.rngState,personality:p.personality,fatigue:p.fatigue,chance,choice,accepted,check,
+  staminaBefore,staminaSpent:spent,staminaAfter:body.stamina,maxBefore,maxAfter:body.maxStamina,
+  woundsBefore,woundsAfter:[...body.wounds],activeFrom:window?.activeFrom??null,
+  activeUntil:window?.activeUntil??null,cooldownUntil:window?.cooldownUntil??null,
+  mentalEffects:Law.ADAPTIVE_MENTAL,noAutomaticResistanceOrAbility:true};
+ r.expressions=[...rows,{source,seal:hash(source)}];
+ E.advance(s,1);World.finalizeTime(s,start);
+ if(!verify(s,p))throw Error('Original independent adaptation failed historical replay');
+ return {actorId,independentlyAccepted:accepted,formed:kind==='assume'&&!!check?.success,
+  released:kind==='release'&&accepted,elapsedMinutes:1,...expressionState(r.expressions,s.world.minutes)};
 }
 function work(s,{actorId,witnessIndex,minutes,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
@@ -245,6 +370,9 @@ function privateStatus(s,p){
   formationSourceHash:v.formationSourceHash,sourceVerifiedCapacityGain:v.completed?Law.SPEC[k].bonus:0,
   individuallyObservedTissues:(v.tissues||[]).map(t=>({id:t.id,tissue:t.tissue,observedFunction:t.realFunction,
    practicePoints:t.points,strain:t.strain,sourceHash:t.mapSourceHash,noAutomaticAbility:true}))})),
-  witnessedDecisions:r?.sessions.length||0,noActiveAdaptiveExpressionOrEvolvedUpkeepEstablished:true};
+  witnessedDecisions:r?.sessions.length||0,
+  ...(r?.cycles?.[6]?.completed?{currentAdaptiveExpression:expressionState(r.expressions,s.world.minutes)}:{}),
+  noEvolvedUpkeepEstablished:true};
 }
-module.exports={ORIGIN,verify,work,privateStatus};
+module.exports={ORIGIN,EXPRESSION,verify,work,privateStatus,
+ assume:(s,p)=>expression(s,p,'assume'),release:(s,p)=>expression(s,p,'release')};
