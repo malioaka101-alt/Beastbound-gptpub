@@ -41,6 +41,7 @@ const QUICK=[
  'rift-local-spatial-shared-original-npc.test.js',
  'living-npc-sapient-bilateral-proposal-discussion.test.js',
  'living-independent-original-grade-fee-money-law.test.js',
+ 'living-original-terrestrial-travel-law.test.js',
  'voluntary-beast-social-arrangements.test.js'
 ];
 // These sources were MEASURED on GitHub Actions at >10s, several >350s.
