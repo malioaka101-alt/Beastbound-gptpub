@@ -13,6 +13,7 @@ const Pair=require('../rules/independent-original-bond-pair');
 const Follow=require('../rules/independent-sapient-followup'),Presence=require('../world/person-presence');
 const Route=require('../rules/independent-sapient-terrestrial-preflight'),TravelLaw=require('../rules/travel-shared-original-law');
 const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
+const Journey=require('../rules/independent-sapient-terrestrial-journey');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('ruins'),{minutes:145,stamina:4});
@@ -273,6 +274,66 @@ for(let n=0;n<80;n++){
      forged.source.outcome=source.outcome==='human-refused'?'both-consider-leg':'human-refused';
      forged.seal=hash(forged.source);
      A.equal(Terrestrial.verify(f,fp),false,'A rehashed falsely agreed route proposal cannot produce consent');
+     if(chosen.bothSeparatelyInterested){
+      const js=E.importGame(chosenSave),jw=Realm.peek(js),
+       jp=jw.emergentPeople.people[traveler.id],jb=js.beasts[companion.id],
+       physicallyBefore=E.exportGame(js),initialHour=js.world.minutes,
+       humanBody=js.table.combatants['npc_'+traveler.id],
+       humanStamina=humanBody.stamina,worldRng=js.rngState,playerSite=js.world.location,
+       originalVisitorDay=Math.floor(js.world.minutes/1440);
+      const departureScene=jp.name+' and '+jb.name+' remain separately able to refuse, or to set out on their previously considered physical forest-to-crossing path.';
+      js.chatRuntime||={};js.chatRuntime.scene=departureScene;
+      C.event(js,'story',departureScene,{
+       origin:Journey.WITNESS,actorId:jp.actorId,beastId:jb.id,
+       proposalSeal:receipt.seal,from:'forest',to:'crossing',
+       actualFreshDepartureDecision:true,noAssumedFutureConsentOrOwnedBeast:true,
+       originalRouteMinutes:75,originalHumanStaminaCost:4,
+       currentInformedDepartureAndReturnFreedom:'Either participant is free to remain in the forest, or to stop consenting to further linked legs or a future return.',
+       originalRouteConditionsAndKnownHazards:'They have an original connected walking route and know travel may involve variable weather, fatigue and ordinary dangers.',
+       actualIndividualBeastMovementAbility:'The sapient person is actually mobile and present, with no invented flight, portal, ownership or saddled transport.',
+       noCompelledUnsafeWeatherOrHazardBypass:true});
+      const actual={actorId:jp.actorId,beastId:jb.id,
+       proposalSeal:receipt.seal,witnessIndex:js.log.length-1},
+       beforeDeparture=E.exportGame(js);
+      A.throws(()=>R.act(js,{system:'bond',operation:'npcTerrestrialJourney',
+       params:{...actual,arrival:'academy'}}),/no chosen assent, arrival, stamina or location/);
+      A.equal(E.exportGame(js),beforeDeparture);
+      const journey=R.act(js,{system:'bond',operation:'npcTerrestrialJourney',
+       params:actual}),e=jp.originalSapientTerrestrialJourneys[0].source;
+      A.equal(journey.departureConsent,e.departed);
+      A.equal(Journey.verify(js,jp),true);
+      A.equal(Person.verify(jb),true);
+      A.equal(js.rngState,worldRng);
+      A.equal(js.world.location,playerSite);
+      A.equal(js.player.partnerIds.includes(jb.id),false);
+      A.equal(journey.actualHumanStaminaPaid,e.departed?4:0);
+      A.equal(js.world.minutes,initialHour+(e.departed?75:0));
+      A.equal(humanBody.stamina,humanStamina-(e.departed?4:0));
+      if(e.departed){
+       A.equal(jb.location,'crossing');
+       A.equal(Journey.position(jp,js.world.minutes).location,'crossing');
+       A.equal(Presence.resolve(Realm.peek(js),jp.actorId,'forest',originalVisitorDay,js.world.minutes%1440),null);
+       A.ok(Presence.resolve(Realm.peek(js),jp.actorId,'crossing',originalVisitorDay,js.world.minutes%1440)?.presence,
+        'Actual independently visited crossing location is exclusively visible in source-backed individual presence');
+       A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
+       A.equal(js.table.combatants['npc_'+traveler.id].npcOrigin.location,'forest',
+        'Original combat source entry never falsely claims it was created at the destination');
+      }else{
+       A.equal(jb.location,'forest');A.equal(Journey.position(jp,js.world.minutes),null);
+       A.equal(js.world.minutes,initialHour);
+      }
+      const savedTrip=E.exportGame(js),tripCopy=E.importGame(savedTrip),
+       tripPerson=Realm.peek(tripCopy).emergentPeople.people[jp.id];
+      A.equal(Journey.verify(tripCopy,tripPerson),true);
+      const fakeTrip=tripPerson.originalSapientTerrestrialJourneys[0];
+      fakeTrip.source.departed=!e.departed;
+      fakeTrip.seal=hash(fakeTrip.source);
+      A.equal(Journey.verify(tripCopy,tripPerson),false,'Resealed fabricated travel cannot bypass two current personal choices');
+      console.log('INDEPENDENT ORIGINAL ACTUAL TERRESTRIAL JOURNEY '+JSON.stringify({
+       departed:e.departed,arrival:e.departed?'crossing':null,
+       actualMinutes:journey.actualMinutes,staminaPaid:journey.actualHumanStaminaPaid,
+       playerLocationUnchanged:true,noAutomaticBondOrGrade:true}));
+     }
      console.log('INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL '+JSON.stringify({
       result:chosen.outcome,originalMinutes:75,humanStaminaCostIfTraveled:4,
       humanChoice:source.humanChoice.accepted,beastChoice:source.beastChoice?.outcome??null,
