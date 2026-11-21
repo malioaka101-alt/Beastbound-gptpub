@@ -376,12 +376,16 @@ function night(s,ctx){
  const originalNight=p.originalOffscreenCombatNights.at(-1);
  const qi=require('./independent-meridian-night-qi').afterNight(s,p,
   originalNight);
- const soulReserve=p.originalSoulLatticeThree!==undefined?
+ const soulReserve=p.originalSoulHigherArchitecture!==undefined?
+  require('../rules/independent-original-higher-architectures').afterNight(s,p,originalNight,'soul'):
+  p.originalSoulLatticeThree!==undefined?
   require('../rules/independent-original-soul-lattice-three')
    .afterNight(s,p,originalNight):
   require('../rules/independent-original-soul-thread-two')
    .afterNight(s,p,originalNight);
- const arcaneMana=p.originalArcaneMatrix!==undefined?
+ const arcaneMana=p.originalArcaneHigherArchitecture!==undefined?
+  require('../rules/independent-original-higher-architectures').afterNight(s,p,originalNight,'arcane'):
+  p.originalArcaneMatrix!==undefined?
   require('../rules/independent-original-arcane-matrix-three')
    .afterNight(s,p,originalNight):
   require('../rules/independent-original-arcane-circle-two')
@@ -495,7 +499,8 @@ function afterDaily(s,w,life,activity,day){
  // Witnessed original Nerve–Sense work already owns this person's
  // daylight discipline decision; no duplicate autonomous power practice.
  if(ctx.actor.originalBodyNerveSenseFour?.lastAttemptDay===ctx.workDay||
-  ctx.actor.originalBodyLivingPhysiques?.lastAttemptDay===ctx.workDay)return null;
+  ctx.actor.originalBodyLivingPhysiques?.lastAttemptDay===ctx.workDay||
+  ['originalSoulHigherArchitecture','originalArcaneHigherArchitecture'].some(k=>ctx.actor[k]?.sessions.some(x=>x.source.day===ctx.workDay)))return null;
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
   system==='rift'&&ctx.site!=='ruins')return null;
