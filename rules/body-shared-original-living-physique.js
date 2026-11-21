@@ -19,7 +19,7 @@ function checkSpec(cycle,kind,con,verifiedSurvivalRank,strain){
  const sp=SPEC[cycle];
  if(!sp||!['work','care','form','repeat'].includes(kind))
   throw Error('Original individual physique procedure required');
- return {dc:kind==='care'?REPAIR_DC:['form','repeat'].includes(kind)?sp.dc+3:sp.dc,
+ return {dc:kind==='care'?REPAIR_DC:kind==='form'?sp.dc+3:kind==='repeat'?sp.dc+1:sp.dc,
   cost:kind==='care'?2:['form','repeat'].includes(kind)?sp.energy+2:sp.energy,
   modifier:Math.floor((con-10)/2)+2*verifiedSurvivalRank-Math.floor(strain/3)};
 }
