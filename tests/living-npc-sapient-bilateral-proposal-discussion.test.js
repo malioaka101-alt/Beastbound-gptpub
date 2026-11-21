@@ -438,6 +438,118 @@ for(let n=0;n<80;n++){
         visitorAccepted:negotiated.workerAccepted,mutuallyAccepted:negotiated.accepted,
         homeRegionPreserved:true,merchantFundsNotMinted:true,
         wagePaid:0,notYetPerformedWork:true,noAutomaticGrade:true}));
+       // Each accepted deal still needs a genuinely new worker-owned
+       // decision to DO the particular already agreed real stock-care job.
+       // A work choice is not a chosen d20 success; a completed check
+       // is not money. Its original source receipt must be paid only if
+       // genuinely successful, by the same existing merchant.
+       const earning=E.importGame(E.exportGame(marketplace)),
+        earnedWorld=Realm.peek(earning),earnedWorker=earnedWorld.emergentPeople.people[mp.id],
+        earnedBeast=earning.beasts[mb.id],earnedSeller=earnedWorld.localProvisioner;
+       let paidVisitor=false;
+       let originalOffer=negotiated;
+       let currentAgreementId=merchantOfferId;
+       for(let offerIndex=0;offerIndex<8;offerIndex++){
+        if(offerIndex>0){
+         const currentDay=Math.floor(earning.world.minutes/1440),
+          nextRealMerchantTick=6*Math.ceil((currentDay+1)/6);
+         Time.advance(earning,nextRealMerchantTick-currentDay);
+         const newDay=Math.floor(earning.world.minutes/1440);
+         A.equal(earnedWorld.lastTickDay,newDay);
+         if(!Journey.position(earnedWorker,earning.world.minutes)?.arrived||
+          Journey.position(earnedWorker,earning.world.minutes).location!=='crossing'||
+          earnedSeller.fundsScales<137){
+          console.log('INDEPENDENT ORIGINAL VISITOR MERCHANT SERVICE DEFERRED '+JSON.stringify({
+           reason:'actual-visitor-left-or-real-merchant-no-longer-funded',unforced:true}));
+          break;
+         }
+         currentAgreementId=merchantOfferId+'-day-'+newDay;
+         const fresh={...proposal,id:currentAgreementId,day:newDay,
+          throughDay:newDay+2,witness:earnedSeller.seller+' and '+earnedWorker.name+
+          ' genuinely reconsider separate fresh visitor stock-service terms on an actual later market sixday, free to decline without pay.'};
+         originalOffer=MerchantTerms.negotiate(earnedWorld,earnedWorker,fresh);
+         A.equal(MerchantTerms.verify(earnedWorld),true);
+         A.equal(earnedWorker.cashScales,0,'No late offer may assign physical merchant cash');
+         console.log('INDEPENDENT ORIGINAL VISITOR LATER MERCHANT OFFER '+JSON.stringify({
+          offerIndex,day:newDay,merchantAccepted:originalOffer.merchantAccepted,
+          workerAccepted:originalOffer.workerAccepted,
+          mutuallyAccepted:originalOffer.accepted,noForcedEmployment:true}));
+        }
+        if(!originalOffer.accepted)continue;
+        const action={actorId:earnedWorker.actorId,agreementId:currentAgreementId},
+         beforeDoing=E.exportGame(earning),beforeCoins=earning.player.coins,
+         beforeSeller=earnedSeller.fundsScales,workerBefore=earnedWorker.cashScales;
+        A.throws(()=>R.act(earning,{system:'bond',operation:'npcVisitorMerchantWork',
+         params:{...action,success:true}}),
+         /only their original accepted current market-service agreement/);
+        A.equal(E.exportGame(earning),beforeDoing,'The engine must reject chosen visitor-work success before rolling');
+        const workerDecision=R.act(earning,{system:'bond',
+         operation:'npcVisitorMerchantWork',params:action}),
+         actualRow=earnedSeller.serviceTerms.find(x=>x.id===currentAgreementId),
+         effort=actualRow.visitorAttempts?.at(-1);
+        A.ok(effort,'One original source-sealed independent worker choice must be recorded');
+        A.equal(!!effort.source.accepted,workerDecision.independentlyAcceptedWork);
+        A.equal(workerDecision.workAttempted,!!effort.source.work);
+        A.equal(earnedSeller.fundsScales,beforeSeller);
+        A.equal(earnedWorker.cashScales,workerBefore);
+        A.equal(earning.player.coins,beforeCoins);
+        A.equal(Career.verify(earnedWorker),true);
+        A.equal(MerchantTerms.verify(earnedWorld),true);
+        A.equal(Journey.verify(earning,earnedWorker),true);
+        A.equal(E.exportGame(E.importGame(E.exportGame(earning))),
+         E.exportGame(earning));
+        console.log('INDEPENDENT ORIGINAL VISITOR WORK CHOICE '+JSON.stringify({
+         independentlyAccepted:workerDecision.independentlyAcceptedWork,
+         realWorkRoll:workerDecision.workAttempted,
+         realWorkSuccess:workerDecision.workSuccess,
+         noCompelledPerformance:true,noPrematureWages:true}));
+        if(!workerDecision.workSuccess)continue;
+        const payRequest={actorId:earnedWorker.actorId,
+         agreementId:currentAgreementId,workHash:workerDecision.workHash},
+         beforePay=E.exportGame(earning);
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcVisitorMerchantSettle',params:{...payRequest,amountScales:99999}}),
+         /not a chosen amount or success/);
+        A.equal(E.exportGame(earning),beforePay);
+        const payment=R.act(earning,{system:'bond',
+         operation:'npcVisitorMerchantSettle',params:payRequest});
+        A.equal(payment.paidScales,137);
+        A.equal(earnedWorker.cashScales,workerBefore+137);
+        A.equal(earnedSeller.fundsScales,beforeSeller-137);
+        A.equal(earnedWorker.cashScales+earnedSeller.fundsScales,
+         workerBefore+beforeSeller,'Original 137 Scales changed owners exactly once');
+        A.equal(earning.player.coins,beforeCoins);
+        A.equal(MerchantTerms.verify(earnedWorld),true);
+        A.equal(Career.verify(earnedWorker),true);
+        A.equal(GradePreflight.routeStatus(earning,earnedWorker,earnedBeast).assessmentEligible,false,
+         'Real earned Grade-fee money cannot create an earlier individual numerical calibration or exam consent');
+        const afterPayment=E.exportGame(earning);
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcVisitorMerchantSettle',params:payRequest}),
+         /Only one authentic|real visiting worker|settled|previously|genuine/i);
+        A.equal(E.exportGame(earning),afterPayment,
+         'Duplicate visitor merchant payment may not debit the same real owner twice');
+        const restored=E.importGame(afterPayment),
+         restoredWorld=Realm.peek(restored),restoredWorker=restoredWorld.emergentPeople.people[earnedWorker.id];
+        A.equal(Career.verify(restoredWorker),true);
+        A.equal(MerchantTerms.verify(restoredWorld),true);
+        A.equal(Journey.verify(restored,restoredWorker),true);
+        A.equal(E.exportGame(restored),afterPayment);
+        restoredWorker.cashScales++;
+        A.equal(Career.verify(restoredWorker),false,'The original worker cannot invent one Scale after a verified payout');
+        paidVisitor=true;
+        console.log('INDEPENDENT ORIGINAL VISITOR REAL FUNDED MERCHANT WAGE '+JSON.stringify({
+         workerPersonallyEarnedScales:137,sellerPersonallySpentScales:137,
+         sameOriginalWorkHash:workerDecision.workHash,
+         actualIndependentChoice:true,actualOriginalSuccessfulD20:true,
+         noPlayerPurseChange:true,stillNoIndividualNumericGradeOrExam:true}));
+        break;
+       }
+       if(!paidVisitor)
+        console.log('INDEPENDENT ORIGINAL VISITOR NO FUNDED WAGE '+JSON.stringify({
+         authenticRejectionsAndFailedWork:true,
+         notFabricating100ScalesOrAnExam:true}));
+
 
 
        A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
