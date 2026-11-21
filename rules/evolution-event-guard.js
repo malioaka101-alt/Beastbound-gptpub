@@ -13,6 +13,7 @@ function event(s,p={}){
  if(!b||!r.originAssessment||r.evolved||r.blocked||
     r.originAssessment.species!==b.species||r.originAssessment.evolutionStage!==b.evolutionStage)
   throw Error('Evolution Event requires an active, authenticated current-form branch');
+ require('./independent-original-beast-maturity').requireOrdinary(r);
  if(s.battle)throw Error('Evolution transformation cannot be attempted during combat');
  if(!s.player.partnerIds?.includes(b.id)&&s.encounter?.beastId!==b.id||
     b.away===true||(b.location&&b.location!==s.world.location))
