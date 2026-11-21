@@ -18,6 +18,8 @@ const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-p
 const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
 const VisitorNight=require('../rules/independent-original-visitor-night-rest');
 const VisitorBeastWelfare=require('../rules/independent-sapient-visitor-welfare');
+const VisitorFoodTrade=require('../rules/independent-visitor-ration-trade');
+const LocalPurchases=require('../world/independent-local-purchases');
 const GradeDiscussion=require('../rules/independent-original-grade-diagnostic-discussion');
 const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
@@ -808,6 +810,32 @@ for(let n=0;n<80;n++){
         A.equal(earnedSeller.fundsScales,beforeSeller-137);
         A.equal(earnedWorker.cashScales+earnedSeller.fundsScales,
          workerBefore+beforeSeller,'Original 137 Scales changed owners exactly once');
+        // A legitimately paid crossing visitor must still meet the
+        // existing original market's independently quoted FOOD price.
+        // A 137-Scale wage is not a licence to invent 800+ Scales or food.
+        const savedBeforeRations=E.exportGame(earning),
+         foodReadiness=R.act(earning,{system:'bond',
+          operation:'npcVisitorRationReadiness',params:{
+           actorId:earnedWorker.actorId,beastId:earnedBeast.id}});
+        A.equal(foodReadiness.privateToGM,true);
+        A.equal(foodReadiness.noPurchaseOrAnimalFeedingOrFundsCreated,true);
+        A.equal(E.exportGame(earning),savedBeforeRations);
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcVisitorRationReadiness',params:{
+          actorId:earnedWorker.actorId,beastId:earnedBeast.id,priceScales:1}}),
+         /no chosen price, funds, grade, outcome or inventory/);
+        A.equal(E.exportGame(earning),savedBeforeRations);
+        A.equal(LocalPurchases.verify(Realm.peek(earning)),true);
+        if(foodReadiness.reason==='insufficient-actual-individually-earned-scales'){
+         A.ok(foodReadiness.priceScales>earnedWorker.cashScales,
+          'The real existing original price may exceed a legitimately earned wage');
+         A.equal(foodReadiness.canOffer,false);
+        }
+        console.log('INDEPENDENT ORIGINAL VISITOR REAL FUNDED FOOD MARKET PREFLIGHT '+JSON.stringify({
+         currentRealBuyerScales:earnedWorker.cashScales,
+         actualOriginalSellerQuoteScales:foodReadiness.priceScales??null,
+         canActuallyPay:foodReadiness.canOffer,
+         noFakeFreeFoodOrFunds:true}));
         const beforeGradeFunding=E.exportGame(earning),
          actualSourceFunding=R.act(earning,{system:'bond',
           operation:'npcGradeFunding',

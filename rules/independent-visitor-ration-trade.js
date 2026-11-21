@@ -68,6 +68,7 @@ function readOnly(s,actorId,beastId){
   v.sellerNpcId!=='otto'||v.location!=='crossing'||
   v.item!=='clean_rations'?'no-original-physical-provisioner':
   !Number.isSafeInteger(v.stock)||v.stock<1?'original-seller-out-of-stock':
+  !int(w.ticks?.sixdays,1)?'original-sixday-market-ledger-not-yet-established':
   !int(p.cashScales,0,1000000000)?'human-earned-cash-not-established':null;
  if(reason)return {privateToGM:true,canOffer:false,reason,
   noPurchaseOrAnimalFeedingOrFundsCreated:true};
@@ -113,7 +114,7 @@ function verify(s,p){
    q.endMinute!==q.minute+q.actualMinutes||
    q.endMinute>s.world.minutes||
    q.noInferredEatingOrAnimalConsent!==true||
-   q.noSecondMerchantOrWalletOrInventedCurrency===false||
+   q.noSecondMerchantOrWalletOrInventedCurrency!==true||
    seen.has(q.witnessHash)||days.has(q.beastId+':'+q.day)||
    (q.accepted?!paid||paid.origin!==Market.ORIGIN||
     paid.source?.visitorSource?.intentId!==q.intentId||
@@ -187,6 +188,12 @@ function buy(s,{actorId,beastId,witnessIndex,...extra}={}){
   noAutomaticBeastFoodOrHealthOrTrustOrPartnership:true,
   noCurrencyOrStockCreated:true};
 }
+function status(s,{actorId,beastId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string')
+  throw Error('Only real existing visitor and individual beast IDs; no chosen price, funds, grade, outcome or inventory');
+ return readOnly(s,actorId,beastId);
+}
 function privateStatus(s,p){
  if(!verify(s,p))throw Error('Private original visiting human purchasing choices are altered');
  return (p.originalVisitorRationRequests||[]).map(row=>({
@@ -198,4 +205,4 @@ function privateStatus(s,p){
   sourceHash:row.seal,noBeastConsumptionOrOwnershipGranted:true
  }));
 }
-module.exports={ORIGIN,WITNESS,id,verify,readOnly,buy,privateStatus};
+module.exports={ORIGIN,WITNESS,id,verify,readOnly,status,buy,privateStatus};

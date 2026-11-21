@@ -428,6 +428,9 @@ function earnedEvidence(w,actorId,s=null){
     independentlyWitnessedVisitorSapientWelfare:
      inMatchingGame&&actor.originalSapientVisitorRefugeChoices!==undefined?
       require('../rules/independent-sapient-visitor-welfare').privateStatus(s,actor):null,
+    sourceVerifiedIndividualRationPurchases:
+     inMatchingGame&&actor.originalVisitorRationRequests!==undefined?
+      require('../rules/independent-visitor-ration-trade').privateStatus(s,actor):null,
     independentlyWitnessedVisitorHumanNights:
      inMatchingGame&&actor.originalVisitorNightRestReceipts!==undefined?
       require('../rules/independent-original-visitor-night-rest').privateStatus(s,actor):null},

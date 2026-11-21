@@ -356,6 +356,8 @@ function act(s,{system,operation,params={}}={}){
   case 'health.npcVisitorNightStatus':return require('./independent-original-visitor-night-rest').status(s,params);
   case 'bond.npcVisitorBeastRefuge':return require('./independent-sapient-visitor-welfare').rest(s,params);
   case 'bond.npcVisitorBeastWelfareStatus':return require('./independent-sapient-visitor-welfare').beastStatus(s,params);
+  case 'bond.npcVisitorRationReadiness':return require('./independent-visitor-ration-trade').status(s,params);
+  case 'bond.npcVisitorRationPurchase':return require('./independent-visitor-ration-trade').buy(s,params);
   case 'health.linkWitnessedHuman':return Unified.linkWitnessedHuman(s,params);
   case 'health.migrateLegacy':return LegacyInjury.migrate(s,params);
   case 'health.linkBeast':throw Error('Beast combatant measurements must come from the current saved individual combat assessment via combat.begin');
