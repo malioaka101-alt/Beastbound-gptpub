@@ -695,6 +695,7 @@ function act(s,{system,operation,params={}}={}){
   case 'evolution.eligibility':return EvolutionDisclosure.view(s,params);
   case 'bond.socialDraft':return require('./beast-social-arrangements').draft(s,params);
   case 'bond.socialNegotiate':return require('./beast-social-arrangements').negotiate(s,params);
+  case 'bond.npcTerrestrialJourney':return require('./independent-sapient-terrestrial-journey').depart(s,params);
   case 'bond.npcTerrestrialProposal':return require('./independent-sapient-terrestrial-proposal').propose(s,params);
   case 'bond.npcSapientFollowupContact':return require('./independent-sapient-followup').contact(s,params);
   case 'bond.npcSapientProposalDiscussion':return require('./independent-sapient-proposal-discussions').discuss(s,params);
