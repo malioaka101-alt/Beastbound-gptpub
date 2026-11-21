@@ -11,6 +11,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Cosmos=require('../world/cosmology-ledger');
 const SOURCE='earned-rift-pocket-architecture-v-v1',
  WITNESS='gm-observed-anchored-rift-pocket-v-v1';
+const Local=require('./rift-shared-original-local-spatial-law');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const int=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b;
 const slug=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{3,65}$/.test(x);
@@ -234,11 +235,10 @@ function build(s,p={}){
  const attr=C.int(s.player.attributes.int,'earned Int',1,30),
   rank=C.int(s.player.skills.arcana.rank,'earned Arcana',0,5),
   modifier=Math.floor((attr-10)/2)+rank*2,
-  risk=pressure(s).risk,dc=19+Math.ceil(d.capacityUnits/2)+risk+
-   Math.floor(strain/12);
+  risk=pressure(s).risk,dc=Local.pocketSpec(d.capacityUnits,minutes,strain,risk,attr,rank).dc;
  const check=C.check(s,{modifier,dc,label:'Source-measured Rift Pocket Architecture V'});
  const rollEvent=structuredClone(s.log.at(-1)),
-  added=check.degree==='severe failure'?8:0;
+  added=Local.pocketStrainAdded(check);
  U.applyItems(s,plan);
  if(added){Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});}
  s.player.stamina-=staminaSpent;s.table.combatants.player.stamina=s.player.stamina;
@@ -319,4 +319,4 @@ function transfer(s,p={}){
   item:p.item,units:p.units,pocketContents:{...space.contents},
   staminaSpent:1,minutes:5,noDuplication:true,noPortal:true};
 }
-module.exports={SOURCE,WITNESS,build,transfer,status,verify};
+module.exports={SOURCE,WITNESS,build,transfer,status,verify,witness};
