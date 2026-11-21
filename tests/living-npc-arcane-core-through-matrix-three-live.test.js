@@ -40,7 +40,7 @@ for(const {s,p,today,seed,intelligence} of sample.slice(0,3)){
  acceptedNights++;
  A.equal(Health.verifyNpcNightHistory(s,p.actorId),true);
  let days=0;
- for(let i=0;i<60;i++){
+ for(let i=0;i<120;i++){
   const t=s.world.minutes;E.advance(s,30*1440);World.finalizeTime(s,t);days+=30;
   if(p.originalArcaneMatrix?.completed)break;
  }
@@ -80,6 +80,7 @@ for(const {s,p,today,seed,intelligence} of sample.slice(0,3)){
   nightHashes.add(q.originalNightSourceHash);
   A.equal(Offscreen.verifyNights(s,p,[q.originalNight]),true);
   A.equal(q.manaAfter,Math.min(q.manaCapacity,q.manaBefore+12));
+  A.ok(q.manaAfter>q.manaBefore,'Full Mana nights remain physical rest, not empty energy-ledger entries');
  }
  const d=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
  A.equal(d.originalPowerMilestones.arcane.circles,three?.completed?3:two?.completed?2:p.originalArcaneCore.circles);
