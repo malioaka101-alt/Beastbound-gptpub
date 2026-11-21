@@ -224,6 +224,26 @@ function map(s,p={}){
 const METHODS=Object.freeze({physical:['wis','medicine'],
  energetic:['int','arcana'],spiritual:['wis','cultivation'],
  'trait-conflict':['int','research']});
+// Original clinical caution law, reused with a verified individual body
+// snapshot. Missing anatomy is NOT an ordinary healthy baseline.
+function screeningRisks(axis,q,body,details){
+ const {origin:o,evolutionStability,soulStability,externalThroughput}=body,risk=[];
+ if(!AXES.includes(axis)||!o||!integer(o.capacity,0,100)||!integer(o.load,0,100)||
+  !Array.isArray(o.stableTraits)||o.load>o.capacity)throw Error('Existing human Origin load or inherited anatomy is inconsistent');
+ if(o.load+q.integrationLoad>o.capacity)risk.push('Original human biological Origin capacity is already insufficient');
+ if(axis==='physical'&&evolutionStability<60)risk.push('Actually recorded human evolutionary stability requires recovery');
+ if(axis==='spiritual'&&soulStability<65)risk.push('Original individual soul integrity needs observed care');
+ if(axis==='trait-conflict'&&o.stableTraits.length&&!details?.measuredExistingTraitInteractions)
+  risk.push('Existing integrated trait interactions have not been independently examined');
+ if(axis==='energetic'&&q.energyMode!=='metabolic'&&!externalThroughput)
+  risk.push('No established external magical or meridian energy throughput');
+ return risk;
+}
+function screeningSpec(load,minutes,attribute,rank,aptitudeModifier,risks){
+ return {dc:15+Math.min(4,load)+Math.min(3,risks.length),stamina:Math.ceil(minutes/120),
+  modifier:Math.floor((attribute-10)/2)+2*rank+aptitudeModifier};
+}
+const screenResult=(check,risks)=>check.success?(risks.length?'caution':'promising'):'inconclusive';
 function screen(s,p={}){
  if(!only(p,['sourceId','axis','witnessIndex','minutes'])||
   !id(p.sourceId)||!AXES.includes(p.axis)||
@@ -237,35 +257,21 @@ function screen(s,p={}){
  const seen=witness(s,p.witnessIndex,SCREEN,p.sourceId,p.axis),wHash=hash(seen);
  if(Object.values(r.screens).flat().some(a=>a.source.witnessHash===wHash))
   throw Error('An original clinical compatibility observation cannot be rolled twice');
- const risk=[],pchar=s.player,o=pchar.origin;
- if(!o||!integer(o.capacity,0,100)||!integer(o.load,0,100)||
-  !Array.isArray(o.stableTraits)||o.load>o.capacity)
-  throw Error('Existing human Origin load or inherited anatomy is inconsistent');
- if(o.load+q.integrationLoad>o.capacity)
-  risk.push('Original human biological Origin capacity is already insufficient');
- if(p.axis==='physical'&&(pchar.humanEvolution?.stability??0)<60)
-  risk.push('Actually recorded human evolutionary stability requires recovery');
- if(p.axis==='spiritual'&&(pchar.soul?.stability??0)<65)
-  risk.push('Original individual soul integrity needs observed care');
- if(p.axis==='trait-conflict'&&o.stableTraits.length&&
-    !seen.details?.measuredExistingTraitInteractions)
-  risk.push('Existing integrated trait interactions have not been independently examined');
- if(p.axis==='energetic'&&q.energyMode!=='metabolic'&&
-   !pchar.arcane?.coreIgnited&&!pchar.meridian?.stage)
-  risk.push('No established external magical or meridian energy throughput');
- // That last finding is a contextual caution, never a blanket requirement
- // that ordinary inherited biological traits have a Mana Core or a teacher.
+ const pchar=s.player,risk=screeningRisks(p.axis,q,{origin:pchar.origin,
+  evolutionStability:pchar.humanEvolution?.stability??0,soulStability:pchar.soul?.stability??0,
+  externalThroughput:!!(pchar.arcane?.coreIgnited||pchar.meridian?.stage)},seen.details);
  const minutes=p.minutes??90,staminaSpent=Math.ceil(minutes/120);
  if(!integer(pchar.stamina,staminaSpent,100000))
   throw Error('Actual stamina is needed for lineage compatibility measurement');
  archive(s,q.observation);archive(s,seen);
  const method=METHODS[p.axis],start=s.world.minutes,
   aptitude=Potential.originAxis(s,p.axis);
- const check=C.check(s,{modifier:modifier(s,method[0],method[1])+aptitude.modifier,
-  dc:15+Math.min(4,q.integrationLoad)+Math.min(3,risk.length),
+ const mode=screeningSpec(q.integrationLoad,minutes,pchar.attributes[method[0]],pchar.skills?.[method[1]]?.rank??0,aptitude.modifier,risk);
+ const check=C.check(s,{modifier:mode.modifier,
+  dc:mode.dc,
   label:'Original individual Origin '+p.axis+' compatibility'});
  const rollEvent=structuredClone(s.log.at(-1));
- const result=check.success?(risk.length?'caution':'promising'):'inconclusive';
+ const result=screenResult(check,risk);
  const src={origin:ORIGIN,kind:'screen',axis:p.axis,
   sourceId:p.sourceId,minute:start,minutes,staminaSpent,witness:seen,
   witnessHash:wHash,potentialAptitude:aptitude,
@@ -297,5 +303,5 @@ function status(s){
   noAutomaticOriginTraitOrHumanEvolution:true};
 }
 module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,
- hash,gmSource,witness,records,checkIntegrity,witnessed,archive,mappingSpec,
+ hash,gmSource,witness,records,checkIntegrity,witnessed,archive,mappingSpec,METHODS,screeningRisks,screeningSpec,screenResult,
  map,screen,status,verify};
