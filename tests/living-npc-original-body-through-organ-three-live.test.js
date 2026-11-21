@@ -425,3 +425,64 @@ if(advanced.cycles[6]?.completed){
  }
 }
 console.log('INDEPENDENT ADAPTIVE VI EXPRESSION ASSESSMENT '+JSON.stringify({earned:!!advanced.cycles[6]?.completed,counts:adaptCounts}));
+
+
+// Evolved VII care uses actual separately accepted physical provisions.
+// Only perform it if this very person's previous original live history
+// genuinely achieved VII. Never replace missing stock with a fixture grant.
+const Custody=require('../rules/independent-material-custody'),
+ upkeepCounts={offered:0,received:0,accepted:0,declined:0,confirmed:0};
+if(advanced.cycles[7]?.completed){
+ for(let i=0;i<45;i++){
+  const old=s.world.minutes,target=(Math.floor(old/1440)+1)*1440+600;
+  E.advance(s,target-old);World.finalizeTime(s,old);
+  const dayNow=Math.floor(s.world.minutes/1440);
+  if(!Presence.resolve(Realm.peek(s),p.actorId,IVsite,dayNow,600)?.presence||
+   s.world.location!==IVsite||originalCombat.status!=='ok'||originalCombat.wounds.some(x=>x!==0)||
+   originalCombat.stamina<2)continue;
+  if(!Custody.canConsume(s,p,{clean_rations:1})){
+   if(!s.player.inventory.clean_rations)break;
+   s.chatRuntime.scene=p.name+' considers an actual offered clean ration, with no obligation.';
+   Core.event(s,'story',s.chatRuntime.scene,{origin:Custody.OFFER,actorId:p.actorId,location:IVsite,items:{clean_rations:1}});
+   const gift=Rules.act(s,{system:'material',operation:'offerToPerson',params:{actorId:p.actorId,witnessIndex:s.log.length-1}});
+   upkeepCounts.offered++;if(gift.accepted)upkeepCounts.received++;else continue;
+  }
+  const beforeFood=Custody.held(s,p).clean_rations,beforeMax=originalCombat.maxStamina,
+   playerFood=s.player.inventory.clean_rations||0,minute=s.world.minutes;
+  s.chatRuntime.scene=p.name+' considers the genuinely earned constitution and its compatible nourishment needs.';
+  Core.event(s,'story',s.chatRuntime.scene,{origin:PCPhysique.SUSTAIN,actorId:p.actorId,cycle:7,location:IVsite,
+   actualMetabolicDemand:'Actual compatible individual constitution is examined under measured physiological demands in this disposable procedure.',
+   independentFailureLimit:'Finite observed metabolic capacity and a specific safe stopping point are independently observed.',
+   observedFoodCompatibility:'The actually held clean ration is examined and confirmed compatible with this specific constitution.',
+   supportedMinutes:120});
+  const result=Rules.act(s,{system:'body',operation:'npcLivingPhysiqueWork',params:{actorId:p.actorId,witnessIndex:s.log.length-1,minutes:60}}),
+   q=advanced.sessions.at(-1).source;
+  A.equal(Physique.verify(s,p),true);
+  A.equal(Custody.verify(s,p),true);
+  A.equal(originalCombat.maxStamina,beforeMax);
+  A.equal(s.player.inventory.clean_rations||0,playerFood);
+  A.deepEqual(q.before,q.after);
+  if(q.accepted){
+   upkeepCounts.accepted++;
+   A.equal(q.staminaSpent,2);A.equal(q.check.dc,18);
+   A.equal(Custody.held(s,p).clean_rations||0,beforeFood-1);
+   A.equal(Custody.debitProof(s,p,q.foodDebitSeal,{clean_rations:1},'body-upkeep',q.witnessHash,minute),true);
+  }else{upkeepCounts.declined++;A.equal(Custody.held(s,p).clean_rations,beforeFood);}
+  if(result.confirmedMaintenance){
+   upkeepCounts.confirmed++;
+   const status=Physique.privateStatus(s,p).constitutionMaintenance;
+   A.equal(status.currentlyObserved,true);A.equal(status.observedSupportUntil,minute+180);
+   const save=E.exportGame(s),copy=E.importGame(save),cp=Realm.peek(copy).emergentPeople.people[p.id];
+   A.equal(Physique.verify(copy,cp),true);
+   const bad=cp.originalBodyLivingPhysiques.sessions.find(x=>x.source.kind==='sustain'&&x.source.check?.success);
+   bad.source.foodDebitSeal='0'.repeat(64);bad.seal=hash(bad.source);
+   A.equal(Physique.verify(copy,cp),false,'Unsupported provision consumption cannot confirm maintenance');
+   const at=s.world.minutes;
+   E.advance(s,121);World.finalizeTime(s,at);
+   const expired=Physique.privateStatus(s,p).constitutionMaintenance;
+   A.equal(expired.currentlyObserved,false);A.equal(expired.permanentConstitution,true);
+   break;
+  }
+ }
+}
+console.log('INDEPENDENT EVOLVED VII METABOLIC MAINTENANCE '+JSON.stringify({earned:!!advanced.cycles[7]?.completed,counts:upkeepCounts}));
