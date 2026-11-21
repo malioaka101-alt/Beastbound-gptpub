@@ -561,6 +561,25 @@ for(let n=0;n<80;n++){
         A.equal(actualSourceFunding.actualOriginalAccreditedFacilityPresence,true);
         A.equal(actualSourceFunding.originalGradeReadinessCurrentlyEligible,false);
         A.equal(actualSourceFunding.numericGradeNotInferredFromWageOrRarity,true);
+        const assaySite=R.act(earning,{system:'bond',
+         operation:'npcGradeCalibrationReadiness',
+         params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id}});
+        A.equal(assaySite.privateToGM,true);
+        A.equal(assaySite.calibrationSiteEligible,true,
+         'A truly funded, safely co-present original visitor is eligible to consider a separate assay source');
+        A.equal(assaySite.site,'crossing');
+        A.equal(assaySite.genuinePriorCalibrationStillMissing,true);
+        A.equal(assaySite.noNumericGradeOrAssayCreated,true);
+        A.equal(assaySite.noTimeRngFeeOrConsentSpent,true);
+        A.equal(assaySite.requiresSeparateActualIndividualAssaySource,true);
+        A.equal(assaySite.requiresIndependentInformedHumanAndSapientAssayChoice,true);
+        A.equal(E.exportGame(earning),beforeGradeFunding,
+         'An assay-site preflight must never invent the individual numerical Grade');
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcGradeCalibrationReadiness',
+         params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id,grade:9}}),
+         /no caller Grade, assay result, fee, or consent/);
+        A.equal(E.exportGame(earning),beforeGradeFunding);
         A.equal(actualSourceFunding.noFeeDebitedOrGradeAssignedOrExamChoice,true);
         A.equal(E.exportGame(earning),beforeGradeFunding,
          'Original independently earned Grade funding inspection must not spend time, source Scales or RNG');
