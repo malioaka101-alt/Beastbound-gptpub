@@ -136,4 +136,4 @@ function privateStatus(s,p){
   beastId:x.source.beastId,sourceHash:x.seal,bond:structuredClone(x.bond),
   noPartnershipOrMagic:true,privateToGM:true}));
 }
-module.exports={ORIGIN,WITNESS,verify,record,privateStatus};
+module.exports={ORIGIN,WITNESS,verify,record,privateStatus,revision};
