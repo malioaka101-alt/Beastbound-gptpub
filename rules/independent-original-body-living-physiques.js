@@ -1,0 +1,212 @@
+'use strict';
+// Source-backed individual Blood V, Adaptive VI and Evolved VII work.
+// Original V and VI can develop after Organ III in either order. VII needs
+// the actual earned IV, V and VI proofs. Forming VI or VII does NOT start
+// an adaptive transformation, grant upkeep, free tissue abilities or traits.
+const Crypto=require('node:crypto'),E=require('../engine'),Core=require('./core'),
+ Combat=require('./combat'),World=require('./world'),Health=require('./unified'),
+ PC=require('./body-living-physiques'),Law=require('./body-shared-original-living-physique'),
+ Three=require('./independent-original-body-organ-cycle-three'),
+ Four=require('./independent-original-body-nerve-sense-four'),
+ Early=require('./independent-original-discipline-preparation'),
+ Realm=require('../world/simulation'),People=require('../world/emergent-people'),
+ Lives=require('../world/independent-person-lives'),Presence=require('../world/person-presence'),
+ Places=require('../world/lived-places');
+const ORIGIN='source-earned-independent-witnessed-living-physique-v1',
+ hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
+ int=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b,
+ text=(v,min=25)=>typeof v==='string'&&v.trim().length>=min&&v.length<=900,
+ eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+const prior=p=>p?.originalBodyOrganCycleThree?.completed?
+ p.originalBodyOrganCycleThree.originalCycleThreeSourceHash:null;
+const kindOf=w=>({[PC.MAP]:'map',[PC.WORK]:'work',[PC.CARE]:'care',
+ [PC.FORM]:'form',[PC.REPEAT]:'repeat'})[w?.details?.origin];
+function witnessValid(w,p,cycle,kind,site,minute){
+ const d=w?.details,sp=Law.SPEC[cycle];
+ if(!sp||w?.type!=='story'||!text(w.text,16)||!w.text.includes(p.name)||
+  w.day!==Math.floor(minute/1440)+1||w.time!==E.clock({world:{minutes:minute}})||
+  d?.actorId!==p.actorId||d.location!==site||d.cycle!==cycle||kindOf(w)!==kind)
+  return false;
+ if(kind==='map')return typeof d.designId==='string'&&/^[a-z][a-z0-9_-]{2,75}$/.test(d.designId)&&
+  ['method','actualTissues','metabolicSupport','failureLimit','reversion',
+   'independentCountertest',...sp.sources].every(k=>text(d[k]));
+ if(kind==='work'||kind==='care')
+  return ['observedBodyResponse','physicalLimit'].every(k=>text(d[k]));
+ if(kind==='form')return ['integratedFunction','failureCounter','metabolicTradeoff'].every(k=>text(d[k]));
+ return kind==='repeat'&&['observedWholeBodyResponse','independentFailureLimit',
+  'metabolicDemand','targetedTissues'].every(k=>text(d[k]));
+}
+function support(p,cycles,cycle,day){
+ if(cycle!==7)return null;
+ const n=p.originalBodyNerveSenseFour,
+  win=n?.sessions?.find(x=>x.seal===n.completionSourceHash);
+ if(!n?.completed||!win||win.source.day>=day||
+  !cycles[5]?.completed||!cycles[6]?.completed)return null;
+ return {nerve:n.completionSourceHash,blood:cycles[5].formationSourceHash,
+  adaptive:cycles[6].formationSourceHash};
+}
+function eligible(cycles,cycle,kind){
+ const r=cycles[cycle];if(kind==='map')return !r;
+ if(!r)return false;
+ if(kind==='work')return !r.completed&&r.points<Law.GOAL&&r.strain<5;
+ if(kind==='care')return r.strain>0;
+ if(kind==='form')return !r.completed&&Law.ready(r.points,r.strain);
+ return kind==='repeat'&&r.completed&&r.strain<=2;
+}
+function blank(){return {points:0,strain:0,completed:false,formationSourceHash:null,mapSourceHash:null};}
+function state(r){return r?structuredClone(r):null;}
+function decisionSpec(p,cycle,kind,strain){
+ return kind==='map'?{dc:null,cost:0,modifier:0}:
+  Law.checkSpec(cycle,kind,p.mechanicalFoundation.baselineAttributes.con,0,strain);
+}
+function checkRecord(roll,sp){
+ const margin=roll+sp.modifier+Core.naturalAdjustment(roll)-sp.dc;
+ return {roll,modifier:sp.modifier,dc:sp.dc,margin,degree:Core.degree(margin),success:margin>=0};
+}
+function update(r,kind,check){
+ let injury=false,gain=0;
+ if(kind==='work'){
+  const n=Law.workState(r.points,r.strain,check);
+  r.points=n.points;r.strain=n.strain;injury=n.strainAdded>0;
+ }else if(kind==='care')r.strain=Law.repaired(r.strain,check);
+ else if(kind==='repeat'){
+  if(check.degree==='severe failure'){r.strain=Math.min(100,r.strain+3);injury=true;}
+ }else if(kind==='form'&&check.success)r.completed=true;
+ return {injury};
+}
+// Exclude receipt seals when comparing pre/post mechanical values; the
+// winning receipt itself is separately referenced and checked.
+function publicState(r){
+ if(!r)return null;
+ return {points:r.points,strain:r.strain,completed:r.completed};
+}
+function verify(s,p){
+ const r=p?.originalBodyLivingPhysiques;if(r===undefined)return true;
+ const organ=prior(p),body=s.table?.combatants?.['npc_'+p.id],
+  w=Realm.peek(s),life=w?.independentPersonLives?.people?.[p.id];
+ if(!organ||!Three.verify(s,p)||!Four.verify(s,p)||!Early.verify(s,p)||
+  !body?.npcOrigin?.seal||!life||!Lives.verifyEntry(w,life)||!Health.currentNpcWoundCondition(s,p.actorId)||
+  !r||r.origin!==ORIGIN||r.organSourceHash!==organ||
+  !Array.isArray(r.sessions)||!r.sessions.length||r.sessions.length>480)return false;
+ const sim={},used=new Set();let lastDay=p.originalBodyOrganCycleThree.lastAttemptDay,lastEnd=0;
+ for(const row of r.sessions){
+  const q=row?.source,cycle=q?.cycle,sp=Law.SPEC[cycle],sh=q?.shift;
+  if(!q||!sp||q.origin!==ORIGIN||row.seal!==hash(q)||
+   q.actorId!==p.actorId||q.identityOriginHash!==p.originHash||
+   q.foundationSeal!==p.mechanicalFoundation.seal||q.combatSeal!==body.npcOrigin.seal||
+   q.organSourceHash!==organ||!int(q.day)||q.day<=lastDay||
+   p.originalBodyNerveSenseFour?.sessions.some(x=>x.source.day===q.day)||
+   !int(q.minute,lastEnd,s.world.minutes)||Math.floor(q.minute/1440)!==q.day||
+   !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
+   sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
+   sh.scheduledAtDay!==sh.fromDay||sh.throughDay-sh.fromDay!==5||
+   sh.fromDay>q.day||sh.throughDay<q.day||
+   q.witnessHash!==hash(q.witness)||used.has(q.witnessHash)||
+   !witnessValid(q.witness,p,cycle,q.kind,q.site,q.minute)||
+   !eligible(sim,cycle,q.kind)||!eq(q.before,publicState(sim[cycle]))||
+   !eq(q.supportingProof,support(p,sim,cycle,q.day))||
+   (cycle===7&&!q.supportingProof)||
+   q.mapSourceHash!==(sim[cycle]?.mapSourceHash??null)||
+   q.originalFormationProof!==(q.kind==='repeat'?sim[cycle].formationSourceHash:null)||
+   !int(q.rngBefore,1,4294967295)||q.personality!==p.personality||
+   q.chance!==Early.chance({personality:q.personality,fatigue:q.fatigue})||
+   !int(q.staminaBefore,1)||!int(q.maxBefore,q.staminaBefore)||!eq(q.woundsBefore,[0,0,0])||
+   q.noNewSpeciesTraitOrAdaptiveExpressionOrTechnique!==true)return false;
+  const rr={rngState:q.rngBefore},map=q.kind==='map';
+  if(q.choice!==Core.die(rr,100)||q.accepted!==(q.choice<=q.chance)||
+   (map?q.plannedMinutes!==0:!int(q.plannedMinutes,['form','repeat'].includes(q.kind)?30:15,480))||
+   q.minute%1440<480||q.minute%1440+Math.max(5,q.plannedMinutes)>1080)return false;
+  const mode=decisionSpec(p,cycle,q.kind,sim[cycle]?.strain||0);
+  let check=null,spent=0,injury=false,gain=0;
+  if(q.accepted){
+   if(map){sim[cycle]=blank();sim[cycle].mapSourceHash=row.seal;}
+   else{
+    spent=mode.cost;check=checkRecord(Core.die(rr,20),mode);
+    injury=update(sim[cycle],q.kind,check).injury;
+    if(q.kind==='form'&&check.success){gain=sp.bonus;sim[cycle].formationSourceHash=row.seal;}
+   }
+  }
+  if(q.actualMinutes!==(q.accepted?q.plannedMinutes:5)||q.minute+q.actualMinutes>s.world.minutes||
+   !eq(q.check,check)||q.rngAfter!==rr.rngState||q.staminaSpent!==spent||
+   q.staminaBefore<spent||q.staminaAfter!==q.staminaBefore-spent||
+   q.maxAfter!==q.maxBefore+gain||!eq(q.woundsAfter,injury?[1,0,0]:[0,0,0])||
+   !eq(q.after,publicState(sim[cycle])))return false;
+  used.add(q.witnessHash);lastDay=q.day;lastEnd=q.minute+q.actualMinutes;
+ }
+ return eq(r.cycles,sim)&&r.lastAttemptDay===lastDay;
+}
+function work(s,{actorId,witnessIndex,minutes,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
+  !int(witnessIndex,0,s.log.length-1))throw Error('Original witnessed physique accepts actorId, witnessIndex and minutes only');
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  body=s.table?.combatants?.['npc_'+p?.id],life=w?.independentPersonLives?.people?.[p?.id],
+  start=s.world.minutes,day=Math.floor(start/1440),minute=start%1440,site=s.world.location,
+  present=p&&Presence.resolve(w,actorId,site,day,minute),
+  wit=structuredClone(s.log[witnessIndex]),cycle=wit?.details?.cycle,kind=kindOf(wit);
+ if(!p||!People.verify(w,p)||!life||!Lives.verifyEntry(w,life)||!life.interests.includes('body')||
+  p.status!=='active'||p.ageBand!=='adult, exact birthday not established'||
+  !prior(p)||!Three.verify(s,p)||!Four.verify(s,p)||!verify(s,p)||
+  !present?.presence||body?.npcOrigin?.location!==site||
+  !Places.location(s)||s.battle||s.encounter||!Health.currentNpcWoundCondition(s,actorId)||
+  body.status!=='ok'||body.stamina<1||body.wounds.some(x=>x!==0)||
+  !s.chatRuntime?.scene?.includes(p.name))
+  throw Error('Actual present original Organ III adult, consistent uninjured body and independent individual witness required');
+ const r=p.originalBodyLivingPhysiques||{origin:ORIGIN,organSourceHash:prior(p),
+  cycles:{},sessions:[],lastAttemptDay:-1},
+  map=kind==='map',rec=r.cycles[cycle],proof=support(p,r.cycles,cycle,day),
+  planned=map?0:minutes??(['form','repeat'].includes(kind)?90:60);
+ if(r.lastAttemptDay>=day||p.originalBodyOrganCycleThree.lastAttemptDay>=day||
+  p.originalBodyNerveSenseFour?.lastAttemptDay>=day||p.meridianTraining?.lastAttemptDay>=day||
+  Object.values(p.originalEarlyDisciplinePreparation||{}).some(x=>x.lastAttemptDay>=day)||
+  r.sessions.length>=480)throw Error('Another original personal discipline decision already occupies this day');
+ if(!witnessValid(wit,p,cycle,kind,site,start)||!eligible(r.cycles,cycle,kind)||
+  (cycle===7&&!proof)||r.sessions.some(x=>x.source.witnessHash===hash(wit))||
+  (map?minutes!==undefined&&minutes!==0:!int(planned,['form','repeat'].includes(kind)?30:15,480))||
+  minute<480||minute+Math.max(5,planned)>1080)
+  throw Error('Fresh authentic individual tissue/function witness and original stage prerequisites required; VII requires earned IV, V and VI');
+ const mode=decisionSpec(p,cycle,kind,rec?.strain||0);
+ if(body.stamina<mode.cost)throw Error('Original physiology procedure requires actual available Combat Stamina');
+ const rngBefore=p.rngState,chance=Early.chance(p),choice=Core.die(p,100),accepted=choice<=chance,
+  before=publicState(rec),staminaBefore=body.stamina,maxBefore=body.maxStamina,woundsBefore=[...body.wounds],
+  mapSourceHash=rec?.mapSourceHash??null,
+  originalFormationProof=kind==='repeat'?rec.formationSourceHash:null;
+ let check=null,spent=0;
+ if(accepted){
+  if(map)r.cycles[cycle]=blank();
+  else{
+   const roll=Core.check(s,{modifier:mode.modifier,dc:mode.dc,
+    independentRngOwner:p,privateDisplay:true,label:p.name+' original '+Law.SPEC[cycle].name+' '+kind});
+   check=checkRecord(roll.roll,mode);spent=mode.cost;body.stamina-=spent;
+   const changed=update(rec,kind,check);
+   if(changed.injury)Combat.harm(s,body,2);
+   if(kind==='form'&&check.success)body.maxStamina+=Law.SPEC[cycle].bonus;
+  }
+ }
+ const q={origin:ORIGIN,actorId,identityOriginHash:p.originHash,
+  foundationSeal:p.mechanicalFoundation.seal,combatSeal:body.npcOrigin.seal,
+  organSourceHash:r.organSourceHash,cycle,kind,site,shift:structuredClone(present.presence),
+  supportingProof:proof,mapSourceHash,originalFormationProof,witness:wit,witnessHash:hash(wit),
+  day,minute:start,plannedMinutes:planned,actualMinutes:accepted?planned:5,
+  rngBefore,rngAfter:p.rngState,personality:p.personality,fatigue:p.fatigue,
+  chance,choice,accepted,check,before,after:publicState(r.cycles[cycle]),
+  staminaBefore,staminaSpent:spent,staminaAfter:body.stamina,maxBefore,maxAfter:body.maxStamina,
+  woundsBefore,woundsAfter:[...body.wounds],noNewSpeciesTraitOrAdaptiveExpressionOrTechnique:true};
+ const seal=hash(q);
+ if(accepted&&map)r.cycles[cycle].mapSourceHash=seal;
+ if(accepted&&kind==='form'&&check.success)rec.formationSourceHash=seal;
+ r.sessions.push({source:q,seal});r.lastAttemptDay=day;p.originalBodyLivingPhysiques=r;
+ E.advance(s,q.actualMinutes);World.finalizeTime(s,start);
+ if(!verify(s,p))throw Error('Original independent individual physique evidence failed replay');
+ return {actorId,cycle,observedAction:kind,independentlyAccepted:accepted,
+  formed:r.cycles[cycle]?.completed===true,elapsedMinutes:q.actualMinutes,
+  noNewSpeciesTraitOrAdaptiveExpressionOrTechnique:true};
+}
+function privateStatus(s,p){
+ if(!verify(s,p))throw Error('Original individual Body physique evidence altered');
+ const r=p.originalBodyLivingPhysiques;
+ return {privateToGM:true,cycles:Object.entries(r?.cycles||{}).map(([k,v])=>({
+  cycle:Number(k),name:Law.SPEC[k].name,points:v.points,strain:v.strain,completed:v.completed,
+  formationSourceHash:v.formationSourceHash,sourceVerifiedCapacityGain:v.completed?Law.SPEC[k].bonus:0})),
+  witnessedDecisions:r?.sessions.length||0,noActiveAdaptiveExpressionOrEvolvedUpkeepEstablished:true};
+}
+module.exports={ORIGIN,verify,work,privateStatus};
