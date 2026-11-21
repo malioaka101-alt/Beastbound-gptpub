@@ -15,6 +15,7 @@ const Route=require('../rules/independent-sapient-terrestrial-preflight'),Travel
 const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
+const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
@@ -325,6 +326,31 @@ for(let n=0;n<80;n++){
        A.equal(Presence.resolve(Realm.peek(js),jp.actorId,'forest',originalVisitorDay,js.world.minutes%1440),null);
        A.ok(Presence.resolve(Realm.peek(js),jp.actorId,'crossing',originalVisitorDay,js.world.minutes%1440)?.presence,
         'Actual independently visited crossing location is exclusively visible in source-backed individual presence');
+       // This GM-private examination gate reads the actual independent
+       // visitor's signed CROSSING presence, although the player remains in
+       // the FOREST. A genuine arrival does not create a personal 100-Scale
+       // fee, independent numeric calibration, examiner or either assent.
+       const preGradeCopy=E.exportGame(js),
+        gradeReady=R.act(js,{system:'bond',operation:'npcGradeReadiness',
+         params:{actorId:jp.actorId,beastId:jb.id}});
+       A.equal(gradeReady.privateToGM,true);
+       A.equal(gradeReady.noMoneyTimeRngConsentOrGrade,true);
+       A.equal(gradeReady.assessmentEligible,false);
+       A.ok(!['no-real-accredited-original-facility-arrival',
+        'absent-original-individual-visitor-presence',
+        'no-real-safe-independent-sapient-at-facility'].includes(gradeReady.reason),
+        'A real completed crossing visit cannot be confused with the player staying at the forest');
+       A.equal(E.exportGame(js),preGradeCopy,
+        'Read-only examination readiness never spends the original fee or draws consent');
+       A.throws(()=>R.act(js,{system:'bond',operation:'npcGradeReadiness',
+        params:{actorId:jp.actorId,beastId:jb.id,grade:9}}),
+        /only actual actorId and beastId/);
+       A.equal(E.exportGame(js),preGradeCopy);
+       console.log('INDEPENDENT ORIGINAL REAL VISITOR GRADE READINESS '+JSON.stringify({
+        realFacility:'crossing',playerRemains:js.world.location,
+        eligible:gradeReady.assessmentEligible,reason:gradeReady.reason,
+        noAutomaticGradeOrFee:true}));
+
        A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
        A.equal(js.table.combatants['npc_'+traveler.id].npcOrigin.location,'forest',
         'Original combat source entry never falsely claims it was created at the destination');
@@ -504,6 +530,9 @@ for(let n=0;n<80;n++){
           A.equal(Journey.position(ap,arrived.world.minutes).location,'forest');
           A.equal(Presence.resolve(Realm.peek(arrived),ap.actorId,'crossing',
            Math.floor(arrived.world.minutes/1440),arrived.world.minutes%1440),null);
+          A.equal(GradePreflight.routeStatus(arrived,ap,arrived.beasts[db.id]).reason,
+           'no-real-accredited-original-facility-arrival',
+           'A physically returned person cannot retain phantom remote facility Grade eligibility');
           A.equal(Presence.resolve(Realm.peek(arrived),ap.actorId,'forest',
            Math.floor(arrived.world.minutes/1440),arrived.world.minutes%1440)?.presence?.source,
            People.SHIFT);
