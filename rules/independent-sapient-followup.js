@@ -106,4 +106,11 @@ function contact(s,{actorId,beastId,witnessIndex,...extra}={}){
  return {actorId,beastId,newContact:willing,minutes:source.minutes,
   freelyRefused:!willing,noOwnershipOrCompelledPartnership:true};
 }
-module.exports={ORIGIN,WITNESS,verify,contact};
+function privateStatus(s,p){
+ if(!verify(s,p))throw Error('Actual independent renewed sapient contact source altered');
+ return (p.originalSapientRenewedContacts||[]).map(x=>({beastId:x.source.beastId,
+  day:x.source.day,actualMinute:x.source.minute,
+  freelyContinued:x.source.contact.willingness,sourceHash:x.seal,
+  noLegalDutyOrMagicalOwnership:true,privateToGM:true}));
+}
+module.exports={ORIGIN,WITNESS,verify,contact,privateStatus};
