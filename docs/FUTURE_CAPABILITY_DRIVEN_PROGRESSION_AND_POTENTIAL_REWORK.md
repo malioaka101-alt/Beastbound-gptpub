@@ -155,4 +155,33 @@ Create many other original constitutions, mutations and family powers before cal
 - Combat in asymmetric prodigy, average, high-stage, non-tamer and human–beast fights exhibits real capability differences, grounded counters, original resource/wound consequences and no universal auto-wins. NPC combat decisions remain independently source-honest and historically compatible.
 - Existing campaign characters, facts and previous outcomes remain unchanged unless user explicitly approves migration.
 
+## 11. Existing intermediate milestones and nine mastery degrees — deferred integration and redesign (21 November 2026)
+
+**Explicit user scope decision:** Integrate and revise these existing systems as part of **future rework #189**, NOT the current Unified Living Character #177 / PR #188. Do not extend #177's acceptance requirements to include all mastery degrees or bridge milestones. Preserve the original implementation until the rework is approved and separately undertaken.
+
+### Existing source baseline (not new proposals)
+- `docs/LIFELONG_MASTERY_AND_MIDDLE_STAGES.md` (7 November 2026), `rules/mastery-lifepath.js`, `tests/lifelong-mastery.test.js` and the original rankings practice/bridge/detail routes retain nine within-stage mastery degrees: Awareness, Reliable basics, Repeatability, Applied fluency, Stabilised practice, Adaptation, Integrated control, Independent innovation, Peak mastery. Current nominal 90 earned points per degree, escalating challenge, demonstrated successful method diversity, exceptional x2/x3 aptitude factors, distinct bridge trial; **not elapsed-time/age/sessions gates**.
+- Three distinct middle milestones per original ladder, with canonical major stages unchanged:
+  - Meridian (after III/V/VII): Gate-Weave Consolidation, Living Circulation Synthesis, Constitutional Resonance.
+  - Arcane (III/V/VII): Circle-Lattice Stabilisation, Field-Matrix Coherence, Astral Circuit Synthesis.
+  - Soul (II/IV/V): Spirit-Thread Tempering, Inner Pattern Consolidation, Sanctuary Resonance Integration.
+  - Body (II/IV/V): Marrow-Tissue Harmonisation, Sense-Organ Integration, Blood-Essence Consolidation.
+  - Rift (III/V/VI): Anchored Fold Stabilisation, Boundary-Space Integration, Realm-Pressure Harmonisation.
+  - Origin (II/IV/VI): Lineage Acceptance Trials, Trait-Pattern Consolidation, Ancestral Expression Synthesis.
+  - Human evolution (II/IV/V): Awakened Constitution Stabilisation, Transformed Form Integration, Ascendant Adaptation Synthesis.
+  - Pair Sync (III/VI/VIII): Reciprocal Pattern Alignment, Paired Manifestation Refinement, Shared Evolution Readiness.
+  - Specialist (II/IV/V): School Technique Integration, Independent Method Synthesis, Original Discipline Architecture.
+  - General professional ranks (1/3/4): Independent Foundations, Applied Judgement, Integrated Masterwork.
+  - Preserve distinct beast individual development studies and material quality verification milestones (not automatic Grade, Level, evolution or magical upgrades).
+- **Known integration gap at current audit:** `mastery-lifepath.js:stage` only qualifies supernatural paths at original first-stage milestones. The original advanced discipline owners have since grown, but are not uniformly connected to advanced mastery eligibility. Mastery practice and records are still primarily player-owned (`s.player`, `s.table.lifelongMastery`); NPC daily progression and dossiers do not yet execute these degrees or bridges. A listed milestone is not an actually earned advancement.
+
+### Rework deliverables
+1. Audit original major-stage source prerequisites and all nine internal mastery degrees plus every interstitial milestone. Preserve the separate identities, earned history and canonical numbering of each path; do not turn unique disciplines into an interchangeable XP ladder.
+2. Integrate mastery eligibility with authenticated **actual** advanced-stage source owners for PCs, NPCs and applicable independent beasts/pairs/specialists. Move to actor-specific records and real relevant ability/application evidence, private independent decisions and skill. No rerolls, imaginary advanced ranks, or compulsory partnership.
+3. Rework the current 90-point/depth and ×1–3 learning rules together with grouped potential, constitutions, rare inherited techniques, actual insight, opportunity and performance. Exact new requirements remain to be designed. Let authentic exceptional capability advance rapidly; no calendar, minimum age or session quota. Preserve meaningful mastery breadth without forcing repetitive grind.
+4. Give each degree and bridge a mechanically meaningful, source-specific distinction in proficiency, control, efficiency, technique, integration and applicable combat or professional performance. Decide in the redesign which bridge is a separate achievement versus prerequisite; do not silently impose new compulsory rank gates on old saves. Major stage, internal mastery, individual grade, power output and learned arts remain distinct. Mastery alone cannot grant an unearned new major stage, beast evolution or technique.
+5. Verify PC/NPC parity, individual variation at the same major rank, genuinely earned bridge advancement, extraordinary aptitude and lower-potential success paths, actual combat interactions, two-party consent, save migration without rerolling, performance, private knowledge and full regression. Preserve all existing earned records and clearly version any change to their meaning.
+
+**Ordering:** Include this audit in §9 step 1 and the implementation alongside steps 4–6; finish before accepting the future rework. No change to current mastery or #177 mechanics is authorised by this planning addition.
+
 **Deferred by user instruction. Return now to Unified Living Character #177 / PR #188.**
