@@ -466,7 +466,10 @@ function earnedEvidence(w,actorId,s=null){
     reason:verifiedWeapon?
      'Accepted and source-owned weapon; present readiness still requires live encounter evidence':
      'Verified materials are not proof of equipped tools, weapons or armor'},
-   beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
+   beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established',
+    ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
+     {sourceVerifiedProposalDiscussions:require('../rules/independent-sapient-proposal-discussions')
+      .privateStatus(s,actor)}:{})},
    sourceStatus:[
     verifiedMeridian?.originalMeridianStageEarned>=1?
      'Meridian Stage '+verifiedMeridian.originalMeridianStageEarned:null,
