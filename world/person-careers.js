@@ -49,7 +49,8 @@ function verifyVisitorServiceWork(p,r){
  const d=p.career?.authoredDuties?.find(x=>x.id===q.task?.authoredDutyId),
   pos=require('../rules/independent-sapient-terrestrial-journey')
    .position(p,v?.minute);
- return !!v&&!!d&&d.status!=='retired'&&
+ // Retiring a job later never erases genuinely completed prior work.
+ return !!v&&!!d&&
   d.source?.visitorSite==='crossing'&&
   v.arrivalSeal===d.source.visitorArrivalSeal&&
   v.arrivalSeal===pos?.sourceHash&&pos?.arrived&&pos.location==='crossing'&&

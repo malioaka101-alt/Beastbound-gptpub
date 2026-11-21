@@ -288,6 +288,41 @@ function negotiate(w,p,args={}){
   noForcedWork:true,noFundsTransferred:true,
   noWorkCredited:true,noGuaranteedOutcome:true};
 }
+function visitorWorkStatus(s,{actorId,agreementId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||
+  typeof agreementId!=='string')
+  throw Error('Read-only visitor work inspection requires exact original visitor actor and existing agreement only');
+ const deny=reason=>({privateToGM:true,eligible:false,reason,
+  noWorkDecisionOrOriginalRollOrFeeOrClock:true});
+ const w=require('./simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  v=w?.localProvisioner,
+  row=v?.serviceTerms?.find(x=>x.id===agreementId&&x.workerId===p?.id&&x.accepted),
+  minute=s.world.minutes,day=Math.floor(minute/1440),
+  Visit=require('../rules/independent-sapient-terrestrial-journey'),
+  pos=Visit.position(p,minute);
+ if(!p||!row||row.settlement)return deny('no-unsettled-mutually-agreed-original-service');
+ if(!originalWorker(w,p)||!verify(w)||p.status!=='active')
+  return deny('unverified-or-recovering-original-worker');
+ if(day!==w.lastTickDay||day<row.source.day||day>row.source.throughDay)
+  return deny('merchant-has-no-original-confirmed-workday');
+ if(p.regionId===v.regionId||!pos?.arrived||pos.location!=='crossing'||
+  !Visit.verify(s,p))
+  return deny('no-source-verified-independent-visitor-at-original-market');
+ if(!People.presence(w,actorId,'crossing',day,minute%1440))
+  return deny('original-visitor-not-physically-present');
+ if(minute%1440<8*60||minute%1440>=18*60)
+  return deny('market-not-actually-in-daytime-work-shift');
+ if((row.visitorAttempts||[]).some(x=>x.source.day===day))
+  return deny('original-visitor-already-made-one-work-choice-today');
+ if(require('../rules/unified').currentNpcWoundCondition(s,actorId)?.
+   workAndOrdinaryPracticeBlocked)
+  return deny('original-individual-combat-condition-blocks-work');
+ return {privateToGM:true,eligible:true,actorId,agreementId,
+  actualMarket:'crossing',sourceArrivalSeal:pos.sourceHash,
+  noWorkDecisionOrOriginalRollOrFeeOrClock:true};
+}
 function performVisitorService(s,{actorId,agreementId,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||
   !/^emergent:person_[0-9]+$/.test(actorId)||
@@ -301,17 +336,9 @@ function performVisitorService(s,{actorId,agreementId,...extra}={}){
   minute=s.world.minutes,
   pos=require('../rules/independent-sapient-terrestrial-journey')
    .position(p,minute);
- if(!p||!row||row.settlement||!originalWorker(w,p)||
-  !verify(w)||p.status!=='active'||day!==w.lastTickDay||
-  day<row.source.day||day>row.source.throughDay||
-  p.regionId===v.regionId||!pos?.arrived||pos.location!=='crossing'||
-  !require('../rules/independent-sapient-terrestrial-journey').verify(s,p)||
-  !People.presence(w,actorId,'crossing',day,minute%1440)||
-  minute%1440<8*60||minute%1440>=18*60||
-  (row.visitorAttempts||[]).some(x=>x.source.day===day)||
-  require('../rules/unified').currentNpcWoundCondition(s,actorId)?.
-   workAndOrdinaryPracticeBlocked)
-  throw Error('A new original market service opportunity requires an independently fit, genuinely present visitor and already mutually accepted, unsettled employer terms');
+ const readiness=visitorWorkStatus(s,{actorId,agreementId});
+ if(!readiness.eligible)
+  throw Error('Original independent visitor work currently unlawful: '+readiness.reason);
  const fatigueBefore=p.fatigue,
   willingness=Math.max(.12,Math.min(.88,.54+
     (p.career.aptitude-5)*.03-(fatigueBefore>70?.21:fatigueBefore>40?.10:0))),
@@ -410,4 +437,4 @@ function workerTerms(w,p){
    notCompulsoryWork:true,noPayUntilActualSuccessfulWork:true}));
 }
 module.exports={ORIGIN,SETTLEMENT,VISITOR_WORK,negotiate,
- performVisitorService,settleVisitorService,settle,verify,workerTerms};
+ visitorWorkStatus,performVisitorService,settleVisitorService,settle,verify,workerTerms};

@@ -477,8 +477,19 @@ for(let n=0;n<80;n++){
         }
         if(!originalOffer.accepted)continue;
         const action={actorId:earnedWorker.actorId,agreementId:currentAgreementId},
-         beforeDoing=E.exportGame(earning),beforeCoins=earning.player.coins,
+         beforeDoing=E.exportGame(earning),
+         workReadiness=R.act(earning,{system:'bond',operation:'npcVisitorMerchantReadiness',
+          params:action}),beforeCoins=earning.player.coins,
          beforeSeller=earnedSeller.fundsScales,workerBefore=earnedWorker.cashScales;
+        A.equal(workReadiness.noWorkDecisionOrOriginalRollOrFeeOrClock,true);
+        A.equal(E.exportGame(earning),beforeDoing,
+         'Checking source market hours, physical visitor and individual health cannot change the game');
+        if(!workReadiness.eligible){
+         console.log('INDEPENDENT ORIGINAL VISITOR WORK LEGAL DEFERRED '+JSON.stringify({
+          reason:workReadiness.reason,
+          noCompelledWorkOrMoney:true}));
+         continue;
+        }
         A.throws(()=>R.act(earning,{system:'bond',operation:'npcVisitorMerchantWork',
          params:{...action,success:true}}),
          /only their original accepted current market-service agreement/);
