@@ -31,7 +31,7 @@ function structure(b){
  const rows=b?.sapientLife?.originalIndividualDietPlans;
  if(rows===undefined)return true;
  if(!Array.isArray(rows)||rows.length>90)return false;
- let previous=-1;const seen=new Set(),forms=new Set();
+ let previous=-1;const seen=new Set(),acceptedForms=new Set(),days=new Set();
  for(const row of rows){
   const q=row?.source,def=E.SPECIES[q?.beastSpecies];
   if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||
@@ -52,15 +52,16 @@ function structure(b){
    (q.accepted?!equal(q.plan,planFrom(q)):q.plan!==null)||
    q.noFundsFoodBiologicalGradeOrTreatmentCreated!==true||
    q.futureEatingRequiresSeparateRealOwnerAndConsent!==true||
-   seen.has(q.witnessHash)||forms.has(q.beastSpecies+':'+q.beastForm))
+   seen.has(q.witnessHash)||days.has(q.day)||(
+    q.accepted&&acceptedForms.has(q.beastSpecies+':'+q.beastForm)))
    return false;
   if(q.humanChoice.accepted){
    if(!q.beastChoice||!int(q.beastChoice.rngBefore,1,4294967295)||
     !equal(q.beastChoice,Social.sapientChoice({rngState:q.beastChoice.rngBefore},
       q.beastChoice.disposition)))return false;
   }else if(q.beastChoice!==null)return false;
-  previous=q.minute;seen.add(q.witnessHash);
-  forms.add(q.beastSpecies+':'+q.beastForm);
+  previous=q.minute;seen.add(q.witnessHash);days.add(q.day);
+  if(q.accepted)acceptedForms.add(q.beastSpecies+':'+q.beastForm);
  }
  return true;
 }
@@ -175,7 +176,9 @@ function discuss(s,{actorId,beastId,witnessIndex,...extra}={}){
   at=current(s,p,b,now),event=structuredClone(s.log[witnessIndex]);
  if(!at||!verify(s,p)||b.welfareCarePlan||
   p.originalSapientVisitorDietDiscussions?.some(x=>
-   x.source.beastId===beastId&&x.source.beastSpecies===b.species)||
+   x.source.beastId===beastId&&(
+    x.source.day===day||
+    x.source.beastSpecies===b.species&&x.source.accepted))||
   !s.chatRuntime?.scene?.includes(event.text))
   throw Error('Real original named provisioner, unauthorised individual diet and separate observed serving conversation required');
  const q={origin:ORIGIN,actorId,humanHash:p.originHash,
