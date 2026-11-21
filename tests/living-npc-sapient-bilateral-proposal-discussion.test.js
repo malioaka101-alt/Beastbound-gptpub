@@ -179,9 +179,34 @@ for(let n=0;n<80;n++){
    const beforeRoute=E.exportGame(s),beforeHuman=p.rngState,beforeBeast=b.sapientLife.rngState;
    A.equal(Route.routeStatus(s,p,b,site).reason,'not-one-original-linked-leg');
    A.equal(Route.routeStatus(s,p,b,'academy').reason,'not-one-original-linked-leg');
-   A.equal(Route.routeStatus(s,p,b,'crossing').reason,'cross-region-route-needs-separate-original-journey-owner');
+   A.equal(Route.routeStatus(s,p,b,'crossing').reason,'original-encounter-or-combat-unresolved');
    A.equal(E.exportGame(s),beforeRoute,'A private travel proposal preflight may not manufacture movement, route choice or old combat condition');
    A.equal(p.rngState,beforeHuman);A.equal(b.sapientLife.rngState,beforeBeast);
+   if(out.recorded){
+    const travel=E.importGame(E.exportGame(s)),tw=Realm.peek(travel),
+     traveler=tw.emergentPeople.people[p.id],companion=travel.beasts[b.id];
+    if(travel.encounter)A.equal(E.dispatch(travel,'leave').ok,true);
+    require('../rules/unified').ensurePlayer(travel);
+    travel.chatRuntime||={};
+    const actualWitness=traveler.name+' is presently witnessed uninjured, unarmed and unarmoured at the actual forest location, without an imposed travel agreement.';
+    travel.chatRuntime.scene=actualWitness;
+    R.act(travel,{system:'health',operation:'linkWitnessedHuman',
+     params:{npcId:traveler.actorId,witness:actualWitness}});
+    const before=E.exportGame(travel),humanRng=traveler.rngState,
+      beastRng=companion.sapientLife.rngState;
+    const route=Route.routeStatus(travel,traveler,companion,'crossing');
+    A.equal(route.proposalEligible,true,'Original adjacent forest–crossing exit is valid even across atlas region boundary');
+    A.equal(route.from,'forest');A.equal(route.to,'crossing');
+    A.equal(route.minutes,75);A.equal(route.stamina,4);A.equal(route.crossesRegion,true);
+    A.equal(route.requiresIndependentlyVerifiedArrivalAndNewLocationProof,true);
+    A.equal(Route.routeStatus(travel,traveler,companion,'academy').reason,'not-one-original-linked-leg');
+    A.equal(E.exportGame(travel),before,'Actual route preflight is private and purely read-only');
+    A.equal(traveler.rngState,humanRng);A.equal(companion.sapientLife.rngState,beastRng);
+    console.log('INDEPENDENT ORIGINAL LINKED CROSS-REGION TRAVEL PREFLIGHT PASS '+JSON.stringify({
+     from:route.from,to:route.to,minutes:route.minutes,stamina:route.stamina,
+     noAssignedConsentOrMovement:true}));
+   }
+
 
    // An actual recognised but unfamiliar pair cannot bypass earned
    // willingness by presenting a fresh magical offer or a caller outcome.
