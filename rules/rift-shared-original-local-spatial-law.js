@@ -24,4 +24,10 @@ function adaptationSpec(progress,minutes,strain,pressure,attribute,rank){
   modifier:Math.floor((attribute-10)/2)+2*rank,stamina:3+Math.ceil(minutes/90),minutes};
 }
 const pocketStrainAdded=check=>check.degree==='severe failure'?8:0;
-module.exports=Object.freeze({pressureAdjust,pressureIdentity,foldSpec,weaveSpec,pocketSpec,adaptationSpec,strainAdded,pocketStrainAdded});
+function walkSpec(kind,minutes,risk,attribute,rank){
+ if(!['prepare','enter','return'].includes(kind))throw Error('Original selected realm action required');
+ return {dc:(kind==='enter'?19:18)+risk,
+  modifier:Math.floor((attribute-10)/2)+2*rank,stamina:kind==='enter'?5:4,minutes};
+}
+
+module.exports=Object.freeze({pressureAdjust,pressureIdentity,foldSpec,weaveSpec,pocketSpec,adaptationSpec,walkSpec,strainAdded,pocketStrainAdded});
