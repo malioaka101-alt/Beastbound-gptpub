@@ -12,6 +12,7 @@ const Crypto=require('node:crypto'),E=require('../engine'),Core=require('./core'
  Realm=require('../world/simulation'),People=require('../world/emergent-people'),
  Lives=require('../world/independent-person-lives'),Presence=require('../world/person-presence'),
  Places=require('../world/lived-places');
+const Custody=require('./independent-material-custody');
 const ORIGIN='source-earned-independent-witnessed-living-physique-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
  int=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b,
@@ -21,7 +22,7 @@ const prior=p=>p?.originalBodyOrganCycleThree?.completed?
  p.originalBodyOrganCycleThree.originalCycleThreeSourceHash:null;
 const kindOf=w=>({[PC.MAP]:'map',[PC.WORK]:'work',[PC.CARE]:'care',
  [PC.FORM]:'form',[PC.REPEAT]:'repeat',[PC.TISSUE]:'tissue-map',
- [PC.TISSUE_WORK]:'tissue-work',[PC.TISSUE_CARE]:'tissue-care'})[w?.details?.origin];
+ [PC.TISSUE_WORK]:'tissue-work',[PC.TISSUE_CARE]:'tissue-care',[PC.SUSTAIN]:'sustain'})[w?.details?.origin];
 function witnessValid(w,p,cycle,kind,site,minute){
  const d=w?.details,sp=Law.SPEC[cycle];
  if(!sp||w?.type!=='story'||!text(w.text,16)||!w.text.includes(p.name)||
@@ -31,6 +32,7 @@ function witnessValid(w,p,cycle,kind,site,minute){
  if(kind==='map')return typeof d.designId==='string'&&/^[a-z][a-z0-9_-]{2,75}$/.test(d.designId)&&
   ['method','actualTissues','metabolicSupport','failureLimit','reversion',
    'independentCountertest',...sp.sources].every(k=>text(d[k]));
+ if(kind==='sustain')return cycle===7&&['actualMetabolicDemand','independentFailureLimit','observedFoodCompatibility'].every(k=>text(d[k]))&&int(d.supportedMinutes,1,1000000);
  if(kind==='tissue-map')return /^[a-z][a-z0-9_-]{2,75}$/.test(d.tissueId||'')&&
   ['tissue','realFunction','metabolicTradeoff','failureLimit','observedTissue','independentCountertest'].every(k=>text(d[k]));
  if(kind==='tissue-work'||kind==='tissue-care')return /^[a-z][a-z0-9_-]{2,75}$/.test(d.tissueId||'')&&
@@ -56,6 +58,7 @@ const individualTissue=(r,w)=>r?.tissues?.find(t=>t.id===w?.details?.tissueId);
 function eligible(cycles,cycle,kind,w){
  const r=cycles[cycle];if(kind==='map')return !r;
  if(!r)return false;
+ if(kind==='sustain')return cycle===7&&r.completed;
  if(tissueKind(kind)){const t=individualTissue(r,w);
   return kind==='tissue-map'?!t&&(r.tissues?.length||0)<180:
    !!t&&(kind==='tissue-work'?t.strain<5:t.strain>0);}
@@ -68,6 +71,7 @@ function blank(){return {points:0,strain:0,completed:false,formationSourceHash:n
 function state(r){return r?structuredClone(r):null;}
 function decisionSpec(p,cycle,kind,strain){
  return mapKind(kind)?{dc:null,cost:0,modifier:0}:
+  kind==='sustain'?Law.sustainSpec(p.mechanicalFoundation.baselineAttributes.con,0,strain):
   Law.checkSpec(cycle,kind==='tissue-work'?'work':kind==='tissue-care'?'care':kind,
    p.mechanicalFoundation.baselineAttributes.con,0,strain);
 }
@@ -135,7 +139,7 @@ function verify(s,p){
    !eq(q.supportingProof,support(p,sim,cycle,q.day))||
    (cycle===7&&!q.supportingProof)||
    q.mapSourceHash!==(sim[cycle]?.mapSourceHash??null)||
-   q.originalFormationProof!==(q.kind==='repeat'?sim[cycle].formationSourceHash:null)||
+   q.originalFormationProof!==(['repeat','sustain'].includes(q.kind)?sim[cycle].formationSourceHash:null)||
    !int(q.rngBefore,1,4294967295)||q.personality!==p.personality||
    q.chance!==Early.chance({personality:q.personality,fatigue:q.fatigue})||
    !int(q.staminaBefore,1)||!int(q.maxBefore,q.staminaBefore)||!eq(q.woundsBefore,[0,0,0])||
@@ -155,6 +159,9 @@ function verify(s,p){
     if(q.kind==='form'&&check.success){gain=sp.bonus;sim[cycle].formationSourceHash=row.seal;}
    }
   }
+  if(q.kind==='sustain'&&(q.supportedMinutes!==q.witness.details.supportedMinutes||
+   q.maintainedUntil!==Law.sustainedUntil(q.minute,q.plannedMinutes,q.supportedMinutes,!!check?.success)||
+   (q.accepted?!Custody.debitProof(s,p,q.foodDebitSeal,{clean_rations:1},'body-upkeep',q.witnessHash,q.minute):q.foodDebitSeal!==null)))return false;
   if(q.actualMinutes!==(q.accepted?q.plannedMinutes:5)||q.minute+q.actualMinutes>s.world.minutes||
    !eq(q.check,check)||q.rngAfter!==rr.rngState||q.staminaSpent!==spent||
    q.staminaBefore<spent||q.staminaAfter!==q.staminaBefore-spent||
@@ -324,15 +331,17 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
   throw Error('Fresh authentic individual tissue/function witness and original stage prerequisites required; VII requires earned IV, V and VI');
  const mode=decisionSpec(p,cycle,kind,(tissue?individual?.strain:rec?.strain)||0);
  if(body.stamina<mode.cost)throw Error('Original physiology procedure requires actual available Combat Stamina');
+ if(kind==='sustain'&&!Custody.canConsume(s,p,{clean_rations:1}))throw Error('Actual individually held compatible clean ration required for Evolved VII upkeep');
  const rngBefore=p.rngState,chance=Early.chance(p),choice=Core.die(p,100),accepted=choice<=chance,
   before=publicState(rec),tissueBefore=tissueView(individual),staminaBefore=body.stamina,maxBefore=body.maxStamina,woundsBefore=[...body.wounds],
   mapSourceHash=rec?.mapSourceHash??null,
-  originalFormationProof=kind==='repeat'?rec.formationSourceHash:null;
- let check=null,spent=0;
+  originalFormationProof=['repeat','sustain'].includes(kind)?rec.formationSourceHash:null;
+ let check=null,spent=0,foodDebitSeal=null;
  if(accepted){
   if(kind==='map')r.cycles[cycle]=blank();
   else if(kind==='tissue-map')mapTissue(rec,wit,null);
   else{
+   if(kind==='sustain')foodDebitSeal=Custody.consume(s,p,{clean_rations:1},'body-upkeep',wit);
    const roll=Core.check(s,{modifier:mode.modifier,dc:mode.dc,
     independentRngOwner:p,privateDisplay:true,label:p.name+' original '+Law.SPEC[cycle].name+' '+kind});
    check=checkRecord(roll.roll,mode);spent=mode.cost;body.stamina-=spent;
@@ -349,6 +358,8 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
   rngBefore,rngAfter:p.rngState,personality:p.personality,fatigue:p.fatigue,
   chance,choice,accepted,check,before,after:publicState(r.cycles[cycle]),
   ...(tissue?{tissueBefore,tissueAfter:tissueView(individualTissue(rec,wit))}:{}),
+  ...(kind==='sustain'?{foodDebitSeal,supportedMinutes:wit.details.supportedMinutes,
+   maintainedUntil:Law.sustainedUntil(start,planned,wit.details.supportedMinutes,!!check?.success)}:{}),
   staminaBefore,staminaSpent:spent,staminaAfter:body.stamina,maxBefore,maxAfter:body.maxStamina,
   woundsBefore,woundsAfter:[...body.wounds],noNewSpeciesTraitOrAdaptiveExpressionOrTechnique:true};
  const seal=hash(q);
@@ -360,7 +371,14 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
  if(!verify(s,p))throw Error('Original independent individual physique evidence failed replay');
  return {actorId,cycle,observedAction:kind,independentlyAccepted:accepted,
   formed:r.cycles[cycle]?.completed===true,elapsedMinutes:q.actualMinutes,
+  ...(kind==='sustain'?{confirmedMaintenance:!!check?.success,actualRationConsumed:accepted,maintainedUntil:q.maintainedUntil}:{}),
   noNewSpeciesTraitOrAdaptiveExpressionOrTechnique:true};
+}
+function maintenance(s,r){
+ const last=r.sessions.filter(x=>x.source.kind==='sustain'&&x.source.check?.success).at(-1)?.source;
+ return {earned:true,permanentConstitution:true,currentlyObserved:!!last&&s.world.minutes<=last.maintainedUntil,
+  ...(last?{lastSupportedMinute:last.minute+last.actualMinutes,observedSupportUntil:last.maintainedUntil}:{}),
+  noAutoLossOfEarnedAnatomy:true};
 }
 function privateStatus(s,p){
  if(!verify(s,p))throw Error('Original individual Body physique evidence altered');
@@ -372,7 +390,7 @@ function privateStatus(s,p){
    practicePoints:t.points,strain:t.strain,sourceHash:t.mapSourceHash,noAutomaticAbility:true}))})),
   witnessedDecisions:r?.sessions.length||0,
   ...(r?.cycles?.[6]?.completed?{currentAdaptiveExpression:expressionState(r.expressions,s.world.minutes)}:{}),
-  noEvolvedUpkeepEstablished:true};
+  ...(r?.cycles?.[7]?.completed?{constitutionMaintenance:maintenance(s,r)}:{noEvolvedUpkeepEstablished:true})};
 }
 module.exports={ORIGIN,EXPRESSION,verify,work,privateStatus,
  assume:(s,p)=>expression(s,p,'assume'),release:(s,p)=>expression(s,p,'release')};
