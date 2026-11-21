@@ -19,8 +19,12 @@ function routeStatus(s,p,b,destination){
   day=Math.floor(s.world.minutes/1440),minute=s.world.minutes%1440;
  if(!here||!to||!here.exits.includes(destination)||from===destination)
   return deny('not-one-original-linked-leg');
- if(!Atlas.LOCATION_REGION[from]||Atlas.LOCATION_REGION[from]!==Atlas.LOCATION_REGION[destination])
-  return deny('cross-region-route-needs-separate-original-journey-owner');
+ // An ORIGINAL linked exit may cross a regional boundary (forest → crossing
+ // does). The original route remains 75 minutes in that case. Region change
+ // requires an independently verified visitor-presence owner ON ARRIVAL,
+ // not a fictional extra route or a different travel cost.
+ if(!Atlas.LOCATION_REGION[from]||!Atlas.LOCATION_REGION[destination])
+  return deny('original-region-for-linked-sites-unverified');
  if(s.battle||s.encounter)return deny('original-encounter-or-combat-unresolved');
  if(!People.verify(w,p)||p.status!=='active'||p.ageBand!=='adult, exact birthday not established')
   return deny('original-adult-human-unavailable');
@@ -47,6 +51,9 @@ function routeStatus(s,p,b,destination){
  if(body.stamina<law.stamina)return deny('insufficient-original-human-stamina');
  return {privateToGM:true,proposalEligible:true,from,to:destination,
   ...law,originalHumanActorId:p.actorId,independentBeastId:b.id,
+  fromRegion:Atlas.LOCATION_REGION[from],toRegion:Atlas.LOCATION_REGION[destination],
+  crossesRegion:Atlas.LOCATION_REGION[from]!==Atlas.LOCATION_REGION[destination],
+  requiresIndependentlyVerifiedArrivalAndNewLocationProof:true,
   humanShiftHash:seen.presence.hash,actualOriginalCombatEntrySeal:body.npcOrigin.seal,
   noMovementOrConsentOrGrade:true};
 }
