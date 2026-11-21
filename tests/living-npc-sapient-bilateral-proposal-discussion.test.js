@@ -357,8 +357,12 @@ for(let n=0;n<80;n++){
        // rewriting their home polity, physical body or former career.
        // An authored duty is NOT employment, a successful roll or a wage;
        // both merchant and worker retain independent saved RNG decisions.
-       const marketplace=E.importGame(E.exportGame(js));
-       Time.advance(marketplace,1);
+       const marketplace=E.importGame(E.exportGame(js)),
+        priorMarketDay=Math.floor(marketplace.world.minutes/1440),
+        nextOriginalTick=6*Math.ceil((priorMarketDay+1)/6);
+       // The original merchant's confirmed service ledger uses a source-
+       // consistent world tick, not a chosen fictional next-day employer.
+       Time.advance(marketplace,nextOriginalTick-priorMarketDay);
        const mw=Realm.peek(marketplace),
         mp=mw.emergentPeople.people[jp.id],
         mb=marketplace.beasts[jb.id],
@@ -371,6 +375,8 @@ for(let n=0;n<80;n++){
         dutyRole='Independently witnessed real crossing stock-care service',
         dutyWitness=mp.name+' and '+merchant.seller+
          ' are actually present at the original crossing market; caring for finite physical provisions is proposed, not yet hired or performed.';
+       A.equal(mw.lastTickDay,marketDay,
+        'The existing merchant consent ledger must have reached the true original sixday market date');
        A.equal(marketArrival.location,'crossing');
        A.equal(mb.location,'crossing');
        A.equal(marketplace.world.location,playerSite);
