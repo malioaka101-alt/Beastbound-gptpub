@@ -195,7 +195,7 @@ for(let n=0;n<80;n++){
     const before=E.exportGame(travel),humanRng=traveler.rngState,
       beastRng=companion.sapientLife.rngState;
     const route=Route.routeStatus(travel,traveler,companion,'crossing');
-    A.equal(route.proposalEligible,true,'Original adjacent forest–crossing exit is valid even across atlas region boundary');
+    A.equal(route.proposalEligible,true,'Original linked forest–crossing preflight requires genuine eligibility: '+JSON.stringify(route));
     A.equal(route.from,'forest');A.equal(route.to,'crossing');
     A.equal(route.minutes,75);A.equal(route.stamina,4);A.equal(route.crossesRegion,true);
     A.equal(route.requiresIndependentlyVerifiedArrivalAndNewLocationProof,true);
