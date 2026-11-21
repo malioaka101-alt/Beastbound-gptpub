@@ -196,7 +196,7 @@ function verifyDuty(p,d){
 }
 function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
  institutionId=null,day,witness,observedSceneDay=null,
- visitorSite=null,visitorMinute=null}={}){
+ visitorSite=null,visitorMinute=null}={},verifiedWorld=null){
  const c=ensure(p);
  if(c.authoredDuties===undefined)c.authoredDuties=[]; // Backfill prior valid lives.
  const Visit=require('../rules/independent-sapient-terrestrial-journey'),
@@ -204,7 +204,10 @@ function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
    visitorSite==='crossing'?Atlas.LOCATION_REGION[visitorSite]:null,
   sourcePosition=visitorSite&&Number.isInteger(visitorMinute)?
    Visit.position(p,visitorMinute):null,
-  authorizedVisitor=!!(loc&&loc!==p.regionId&&
+  authorizedVisitor=!!(verifiedWorld&&
+   verifiedWorld.world?.minutes===visitorMinute&&
+   require('./simulation').peek(verifiedWorld)===w&&
+   Visit.verify(verifiedWorld,p)&&loc&&loc!==p.regionId&&
    sourcePosition?.arrived&&sourcePosition.location===visitorSite&&
    Math.floor(visitorMinute/1440)===day&&
    require('./emergent-people').presence(w,p.actorId,visitorSite,day,
