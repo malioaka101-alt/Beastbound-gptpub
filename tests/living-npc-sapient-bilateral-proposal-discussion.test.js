@@ -10,6 +10,7 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Foundation=require('../world/person-mechanical-foundations'),
  Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
 const Pair=require('../rules/independent-original-bond-pair');
+const Follow=require('../rules/independent-sapient-followup'),Presence=require('../world/person-presence');
 const Interact=require('../rules/independent-original-bond-interactions'),Witness=require('../rules/bond-witness');
 A.deepEqual(Witness.interactionSpec('gentle',16,0,true,0,3),{event:'gentle_treatment',minutes:15,dc:21,modifier:3});
 const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation');
@@ -226,6 +227,56 @@ for(let n=0;n<80;n++){
     A.equal(row.bond.contract,null);
     const v=Foundation.gmDossier(w,p.actorId,s).earnedEvidence.beastRelationships;
     A.equal(v.verifiedPartners,null);A.equal(v.sourceVerifiedUncommittedPairs.length,1);
+    // A different disposable copy moves the ORIGINAL world by one real day.
+    // The sapient person is never teleported or presumed available. The
+    // new opportunity exists only if both source histories still show them
+    // genuinely present and safe; both draw NEW private choices.
+    const fs=E.importGame(E.exportGame(s)),first=fs.world.minutes;
+    Time.advance(fs,1);
+    const fw=Realm.peek(fs),fp=fw.emergentPeople.people[p.id],fb=fs.beasts[b.id],
+     fday=Math.floor(fs.world.minutes/1440),
+     fhere=Presence.resolve(fw,fp.actorId,site,fday,fs.world.minutes%1440);
+    if(fhere?.presence&&fb.away===false&&fb.location===site&&fb.condition>=55&&
+       Arrangement.privateStatus(fs,fp)[0].status==='accepted'){
+     const scene=fp.name+' and '+fb.name+
+       ' are both visibly present for a genuinely new, nonbinding local conversation in their established habitat.';
+     fs.chatRuntime.scene=scene;
+     C.event(fs,'story',scene,{origin:Follow.WITNESS,actorId:fp.actorId,beastId:fb.id,
+      location:site,pairSeal:row.seal,arrangementHash:entry.seal,
+      actualRenewedCoPresence:true,noAssignedBeastConsentOrOwnership:true,
+      unconditionalRefusalAndCommunication:'Both individuals can refuse this entirely new conversation with no imposed obligation.',
+      currentRealSharedActivity:'The previously known pair physically meet again during the actual next daily local opportunity.',
+      contactStatus:'new-independent-choices'});
+     const request={actorId:fp.actorId,beastId:fb.id,witnessIndex:fs.log.length-1},
+      originalWorldRng=fs.rngState,prepared=E.exportGame(fs);
+     A.throws(()=>R.act(fs,{system:'bond',operation:'npcSapientFollowupContact',params:{...request,accepted:true}}),
+      /no chosen consent or outcome/);
+     A.equal(E.exportGame(fs),prepared);
+     const fresh=R.act(fs,{system:'bond',operation:'npcSapientFollowupContact',params:request}),
+      recent=fp.originalSapientRenewedContacts[0],raw=fb.sapientLife.contactReceipts.at(-1);
+     A.equal(Follow.verify(fs,fp),true);A.equal(Person.verify(fb),true);A.equal(Pair.verify(fs,fp),true);
+     A.equal(fresh.newContact,raw.source.contact.willingness);
+     A.equal(fs.world.minutes-first,1440+fresh.minutes);
+     A.equal(fs.rngState,originalWorldRng);
+     A.equal(raw.source.encounterHash,hash(raw.source.witness));
+     A.equal(raw.source.contact.meetingHash,raw.source.witnessHash);
+     A.equal(Person.contactProof(fb,raw.source.contact),true);
+     const after=E.exportGame(fs);
+     A.throws(()=>R.act(fs,{system:'bond',operation:'npcSapientFollowupContact',params:request}),
+      /unused renewed contact day|fresh local follow-up scene|Genuine known/);
+     A.equal(E.exportGame(fs),after);
+     const fc=E.importGame(after),fpc=Realm.peek(fc).emergentPeople.people[p.id],
+      fbc=fc.beasts[b.id];
+     A.equal(Follow.verify(fc,fpc),true);
+     fbc.sapientLife.contactReceipts.at(-1).source.contact.willingness=!fresh.newContact;
+     fbc.sapientLife.contactReceipts.at(-1).seal=hash(fbc.sapientLife.contactReceipts.at(-1).source);
+     fbc.sapientLife.contactHead=fbc.sapientLife.contactReceipts.at(-1).seal;
+     A.equal(Person.verify(fbc),false,'Rehashed fake renewed assent cannot pass the original individual beast RNG');
+     console.log('INDEPENDENT RENEWED REAL SAPient CONTACT '+JSON.stringify({freelyAccepted:fresh.newContact,minute:recent.source.minute,actualDay:fday}));
+    }else{
+     A.equal(Follow.verify(fs,fp),true);
+     console.log('INDEPENDENT RENEWED SAPient CONTACT NOT ASSUMED: individual not source-present on the actual next day');
+    }
     // Branch a disposable copy: the other social fixtures retain their
     // original moment and personal RNGs. No favourable response assigned.
     const cs=E.importGame(E.exportGame(s)),cp=Realm.peek(cs).emergentPeople.people[p.id],cb=cs.beasts[b.id];
