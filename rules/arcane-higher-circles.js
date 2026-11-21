@@ -27,6 +27,7 @@ const SPEC=Object.freeze({
   basis:'An individually observed local physical Mana network with isolation and actual feedback failure bounds',
   sourceFields:['physicalNetwork','feedbackIsolation']}
 });
+const Law=require('./higher-architecture-shared-original-law');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const int=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b;
 const prose=(x,a=12,b=900)=>typeof x==='string'&&x.trim().length>=a&&x.trim().length<=b;
@@ -245,16 +246,13 @@ function work(s,p={}){
   throw Error('Actual geometry response and independent resistance must be witnessed');
  if(r.attempts.some(t=>t.source.witnessHash===hash(e)))
   throw Error('The witnessed Arcane practice cannot be rolled twice');
- const minutes=p.minutes??60,mana=spec.minuteCost,
-  stamina=Math.ceil(minutes/120)+1;
+ const minutes=p.minutes??60,mode=Law.arcaneHigher(spec,'practice',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!int(s.player.mana,mana,100000)||
   !int(s.player.stamina,stamina,100000))
   throw Error('The original Core lacks actual available Mana or Stamina for this work');
  const start=s.world.minutes;s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
-   2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/30)-2,
-  dc:spec.dc,label:'Earned Arcane '+spec.name+' physical calibration'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Earned Arcane '+spec.name+' physical calibration'});
  const ev=structuredClone(s.log.at(-1)),earned=check.success?check.progress:0,
   strainAdded=check.degree==='severe failure'?3:0;
  if(strainAdded)a.coreStability=Math.max(1,a.coreStability-3);
@@ -285,15 +283,13 @@ function repair(s,p={}){
   throw Error('Observed structural injury and a credible restoration are required');
  if(r.repairs.some(t=>t.source.witnessHash===hash(e)))
   throw Error('This exact original Arcane structural repair has already been resolved');
- const mana=2,minutes=p.minutes??60,stamina=1+Math.ceil(minutes/120);
+ const minutes=p.minutes??60,mode=Law.arcaneHigher(SPEC[p.stage],'repair',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!int(s.player.mana,mana,100000)||!int(s.player.stamina,stamina,100000))
   throw Error('Repair needs genuine Mana and physical effort');
  const start=s.world.minutes,prior=r.strain;
  s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
-   2*(s.player.skills.arcana?.rank||0),
-  dc:14,label:'Actual physical Arcane '+p.stage+' Circle interference repair'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Actual physical Arcane '+p.stage+' Circle interference repair'});
  const ev=structuredClone(s.log.at(-1));
  r.strain=check.success?Math.max(0,prior-2):prior;
  if(check.success)a.coreStability=Math.min(100,a.coreStability+1);
@@ -321,17 +317,14 @@ function complete(s,p={}){
   throw Error('A new independent live test of the actual original Circle and its physical limit is missing');
  if(r.tests.some(t=>t.source.witnessHash===hash(e)))
   throw Error('One structural breakthrough witness may not receive a second roll');
- const minutes=p.minutes??90,mana=spec.minuteCost+4,
-  stamina=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??90,mode=Law.arcaneHigher(spec,'form',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!int(s.player.mana,mana,100000)||
   !int(s.player.stamina,stamina,100000))
   throw Error('Real existing Mana and Stamina must fund a structural breakthrough');
  const start=s.world.minutes,oldMana=s.player.mana,oldMax=s.player.maxMana;
  s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
-   2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/30)-2,
-  dc:spec.dc+3,label:'Arcane '+spec.name+' independent physical integration'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Arcane '+spec.name+' independent physical integration'});
  const ev=structuredClone(s.log.at(-1));let cap=null;
  if(check.success){
   const next=Build.arcaneProfile(p.stage);
@@ -373,4 +366,4 @@ function status(s){
   abilityBoundary:'Higher Circles extend real architecture only; each spell, spiritual influence and environmental effect requires a distinct learned source'};
 }
 module.exports={ORIGIN,MAP,PRACTICE,TEST,REPAIR,SPEC,
- map,work,repair,complete,status,verify};
+ map,work,repair,complete,status,verify,originalLaw};
