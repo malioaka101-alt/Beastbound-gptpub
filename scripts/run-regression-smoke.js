@@ -30,6 +30,7 @@ const QUICK=[
  'living-npc-original-soul-lattice-three-live.test.js',
  'body-shared-original-nerve-sense-four-npc.test.js',
  'body-shared-original-living-physique-npc.test.js',
+ 'living-npc-material-custody.test.js',
  'arcane-shared-original-second-circle-npc.test.js',
  'arcane-shared-original-third-circle-npc.test.js',
  'higher-architecture-shared-original-npc.test.js',
