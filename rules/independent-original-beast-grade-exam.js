@@ -205,4 +205,11 @@ function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
   elapsedMinutes:q.actualMinutes,paidScales:q.feeScales,noGradeFromSpeciesRarity:true,
   noOwnershipOrMagicalBond:true};
 }
-module.exports={ORIGIN,WITNESS,verify,examine,paidSource};
+function privateStatus(s,p){
+ if(!verify(s,p))throw Error('Original independent paid Grade assessment history altered');
+ return (p.originalIndependentGradeExams||[]).map(x=>({beastId:x.source.beastId,
+  sourceHash:x.seal,observedOutcome:x.source.result,
+  examinedIndividualGrade:x.source.assessment?.grade??null,
+  feeScales:x.source.feeScales,privateToGM:true,noSpeciesRarityOrAutomaticContract:true}));
+}
+module.exports={ORIGIN,WITNESS,verify,examine,paidSource,privateStatus};
