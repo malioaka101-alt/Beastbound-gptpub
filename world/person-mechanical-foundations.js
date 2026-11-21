@@ -261,6 +261,10 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedArcaneThird=s?.table?.realm===w&&actor.originalArcaneMatrix?
    require('../rules/independent-original-arcane-matrix-three')
     .privateStatus(s,actor):null;
+  const verifiedArcaneHigher=s?.table?.realm===w&&actor.originalArcaneHigherArchitecture?
+   require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'arcane'):null;
+  const verifiedSoulHigher=s?.table?.realm===w&&actor.originalSoulHigherArchitecture?
+   require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'soul'):null;
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
    require('../rules/independent-original-body-cycle-two')
     .privateStatus(s,actor):null;
@@ -292,7 +296,7 @@ function earnedEvidence(w,actorId,s=null){
   // is only known after its source-replayed individual ignition rite.
   if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
    originalMilestones.arcane.coreIgnited=true;
-   originalMilestones.arcane.circles=verifiedArcaneThird?.sourceVerifiedThirdCircle?
+   originalMilestones.arcane.circles=verifiedArcaneHigher?verifiedArcaneHigher.earnedStage:verifiedArcaneThird?.sourceVerifiedThirdCircle?
     3:verifiedArcaneSecond?.sourceVerifiedSecondCircle?
     2:actor.originalArcaneCore.circles;
   }
@@ -301,7 +305,7 @@ function earnedEvidence(w,actorId,s=null){
   // NOT claim later phases, cycles, spatial steps or learned techniques.
   const earnedOther=verifiedOtherPreparation?.originalSourceEarnedFirstMilestones||{};
   if(earnedOther.soul?.phase===1){
-   originalMilestones.soul.phase=verifiedSoulThree?.verifiedSoulPhase===3?3:
+   originalMilestones.soul.phase=verifiedSoulHigher?verifiedSoulHigher.earnedStage:verifiedSoulThree?.verifiedSoulPhase===3?3:
     verifiedSoulTwo?.verifiedSoulPhase===2?2:1;
    originalMilestones.soul.soulReserve=earnedOther.soul.soulReserve;
    originalMilestones.soul.perceptionRangeMetres=earnedOther.soul.perceptionRangeMetres;
@@ -316,6 +320,10 @@ function earnedEvidence(w,actorId,s=null){
      verifiedSoulThree.actuallyFormedLattice.perceptionRangeMetres;
     originalMilestones.soul.originalResonanceLattice=
      structuredClone(verifiedSoulThree.actuallyFormedLattice);
+   }
+   if(verifiedSoulHigher){
+    originalMilestones.soul.soulReserve=verifiedSoulHigher.capacity;
+    originalMilestones.soul.perceptionRangeMetres=require('../rules/build').soulProfile(verifiedSoulHigher.earnedStage,{will:Math.floor((actor.mechanicalFoundation.baselineAttributes.wis-10)/2)}).perceptionRangeMetres;
    }
   }
   if(earnedOther.body?.completedCycle==='Muscle-Tendon Cycle'){
@@ -441,6 +449,8 @@ function earnedEvidence(w,actorId,s=null){
    originalOtherDisciplinePreparation:verifiedOtherPreparation,
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
    originalArcaneResonantMatrix:verifiedArcaneThird,
+   originalArcaneHigherArchitecture:verifiedArcaneHigher,
+   originalSoulHigherArchitecture:verifiedSoulHigher,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalBodyOrganCycleThree:verifiedBodyThree,
    originalBodyNerveSenseFour:verifiedBodyFour,
@@ -516,14 +526,14 @@ function earnedEvidence(w,actorId,s=null){
      (originalMilestones.arcane.circles>=2?
       require('../rules/build').arcaneProfile(originalMilestones.arcane.circles).mana:
       actor.originalArcaneCore.structuredMana):null,
-    arcaneAvailableMana:verifiedArcaneThird?.currentMana??
+    arcaneAvailableMana:verifiedArcaneHigher?.currentEnergy??verifiedArcaneThird?.currentMana??
      verifiedArcaneSecond?.currentMana??null,
     originalArcaneCircles:originalMilestones.arcane.circles,
     arcaneSpellStillUnproven:
      originalMilestones.arcane.coreIgnited===true,
     originalSoulReserveCapacity:originalMilestones.soul.phase>=1?
      originalMilestones.soul.soulReserve:null,
-    actualSoulReserveAvailable:verifiedSoulThree?.currentSoulReserve??
+    actualSoulReserveAvailable:verifiedSoulHigher?.currentEnergy??verifiedSoulThree?.currentSoulReserve??
      verifiedSoulTwo?.currentSoulReserve??null,
     originalSoulResonanceLattice:verifiedSoulThree?.actuallyFormedLattice||null,
     soulArtsStillUnproven:true,
