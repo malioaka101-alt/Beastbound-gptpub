@@ -34,6 +34,7 @@ for(let n=0;n<260&&!b;n++){
  if(s.encounter)A.equal(E.dispatch(s,'leave').ok,true);
 }
 A.ok(b,'Real independently willing sapient encounter required');
+A.ok(b.sapientLife.contactReceipts?.length,'An actual encounter produces an enduring original contact receipt');
 // Disposable numeric cognition observation only; no pair decision or trust is assigned.
 b.sapience=3;
 const w=Realm.ensure(s),roster=People.ensure(w),site=s.world.location,
@@ -164,6 +165,13 @@ for(let n=0;n<40;n++){
      actualCommunication:'Previously witnessed local communication and opportunity to decline.',
      unconditionalRightToRefuse:'Both participants retain space to refuse without any coercion or obligation.',
      noCompelledInteraction:true});
+    const iw=structuredClone(cs.log.at(-1)),drill={...iw.details,approach:'drill',
+     actualJointTimingAndSignalDrill:'The proposed concrete safe timing and signal exercise requires both actual physical bodies.',noMagicOrSyncExercise:true};
+    C.event(cs,'story',iw.text,drill);
+    const badDrill={actorId:cp.actorId,beastId:cb.id,witnessIndex:cs.log.length-1},noBody=E.exportGame(cs);
+    A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:badDrill}),/actual original physical bodies/i);
+    A.equal(E.exportGame(cs),noBody);
+    C.event(cs,'story',iw.text,iw.details);
     const ir={actorId:cp.actorId,beastId:cb.id,witnessIndex:cs.log.length-1},isave=E.exportGame(cs),irng=cs.rngState;
     A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:{...ir,event:'respected_refusal'}}),/no outcome or affinity/);
     A.equal(E.exportGame(cs),isave);
@@ -216,6 +224,26 @@ A.equal(arrView.sourceVerifiedSocialArrangements[0].status,'accepted');
 const save=E.exportGame(s),copy=E.importGame(save),cp=Realm.peek(copy).emergentPeople.people[mutual.id];
 const acceptedPerson=Realm.peek(copy).emergentPeople.people[agreed.p.id];
 A.equal(Arrangement.verify(copy,acceptedPerson),true);
+const older=E.importGame(save),olderPerson=Realm.peek(older).emergentPeople.people[agreed.p.id],olderBeast=older.beasts[b.id];
+// Isolated rolling-memory eviction fixture, NOT a new encounter, elapsed
+// life event or retroactively assigned consent. Exact actual archive remains.
+olderBeast.sapientLife.history=[];olderBeast.sapientLife.triedEncounters=[];
+A.equal(Person.verify(olderBeast),true);
+A.equal(Person.contactProof(olderBeast,contact),true);
+A.equal(Arrangement.verify(older,olderPerson),true);
+A.equal(Pair.verify(older,olderPerson),true);
+const archived=olderBeast.sapientLife.contactReceipts.find(x=>x.source.encounterHash===contact.meetingHash);
+archived.source.contact.willingness=false;archived.seal=hash(archived.source);olderBeast.sapientLife.contactHead=archived.seal;
+A.equal(Person.verify(olderBeast),false,'A resealed falsified original first-contact decision is rejected');
+const weeklyWorld=E.newGame({name:'Disposable sixday proof law',seed:87167}),
+ week={pairSeal:'pure_law_fixture',day:5,approach:'drill'};
+const five=Array.from({length:5},(_,day)=>({seal:'isolated_'+day,source:{pairSeal:week.pairSeal,day,approach:'drill',check:{success:true}}}));
+A.deepEqual(Interact.completedTrainingSixday(weeklyWorld,week,five),five.map(x=>x.seal));
+A.deepEqual(Interact.completedTrainingSixday(weeklyWorld,week,five.slice(1)),[]);
+A.deepEqual(Interact.completedTrainingSixday(weeklyWorld,{...week,day:6},five),[]);
+// Isolated counting-law rows convey no actual progress to any actor.
+A.equal(Object.keys(weeklyWorld.table?.realm?.emergentPeople?.people||{}).length,0);
+
 const bad=E.importGame(save),bp=Realm.peek(bad).emergentPeople.people[agreed.p.id],
  fake=bp.originalSapientArrangements[0];
 fake.source.humanChoice.accepted=false;fake.seal=hash(fake.source);
