@@ -51,6 +51,8 @@ function routeStatus(s,p,b){
  try{calibration=Grade.gradeReference(s,b);}catch{
   return deny('no-pre-established-numeric-individual-grade-calibration');
  }
+ if(calibration.worldMinute>=minute)
+  return deny('individual-calibration-must-predate-the-original-examination');
  if(b.contractGradeAssessment?.grade===calibration.grade&&
   b.contractGradeAssessment?.species===b.species&&
   b.contractGradeAssessment?.evolutionStage===b.evolutionStage)
@@ -68,6 +70,31 @@ function routeStatus(s,p,b){
   requiresSeparatelyWitnessedIndependentHumanAndBeastChoice:true,
   requiresOriginalPrivateD20AfterMutualAssent:true,
   noMoneyTimeRngConsentOrGrade:true};
+}
+// Source-only location gate for establishing a genuinely prior individual
+// measurement. This is NOT an assay, measured Grade, appointment, examiner,
+// free equipment, fee payment, NPC decision, or authority to select 1–9.
+// It reuses the full travelling human/sapient relationship and funding gates
+// rather than inferring that a beast is at the PLAYER's current location.
+function calibrationSiteReadiness(s,{actorId,beastId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string')
+  throw Error('Only source-identifiable independent human and beast; no caller Grade, assay result, fee, or consent');
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  b=s.beasts?.[beastId],route=routeStatus(s,p,b),
+  base={privateToGM:true,actorId,beastId,calibrationSiteEligible:false,
+   noNumericGradeOrAssayCreated:true,noTimeRngFeeOrConsentSpent:true,
+   requiresSeparateActualIndividualAssaySource:true,
+   requiresIndependentInformedHumanAndSapientAssayChoice:true,
+   notAnAccreditedExamOrMagicalPartnership:true};
+ if(route.reason!=='no-pre-established-numeric-individual-grade-calibration')
+  return {...base,reason:route.assessmentEligible?
+   'already-has-prior-numeric-calibration':route.reason};
+ const site=Visit.position(p,s.world.minutes)?.location;
+ return {...base,calibrationSiteEligible:true,site,
+  originalIndividualScalesAtLeast100:true,
+  genuinePriorCalibrationStillMissing:true,
+  sourceRequirements:'An actual individual-specific numerically measured, origin-authenticated prior assessment with distinct physical evidence and mutual assent; never a species-rarity conversion or a caller-supplied Grade'};
 }
 function status(s,{actorId,beastId,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||
@@ -132,4 +159,4 @@ function fundingStatus(s,{actorId,beastId,...extra}={}){
   readinessBlocker:gradeGate.reason??null,
   numericGradeNotInferredFromWageOrRarity:true};
 }
-module.exports={routeStatus,status,fundingStatus};
+module.exports={routeStatus,status,fundingStatus,calibrationSiteReadiness};
