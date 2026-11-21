@@ -34,7 +34,7 @@ function verify(s,p){
   if(!r||row.seal!==hash(r)||r.origin!==ORIGIN||r.actorId!==p.actorId||
    r.actorHash!==p.originHash||r.beastHash!==b?.sapientLife?.sourceHash||
    !b||!Person.verify(b)||!q||q.origin!==ORIGIN||q.actorId!==p.actorId||
-   q.humanHash!==p.originHash||q.beastId!==b.id||r.witnessHash!==q.witnessHash||
+   q.humanHash!==p.originHash||q.humanChoice?.personality!==p.personality||q.beastId!==b.id||r.witnessHash!==q.witnessHash||
    !eq(r.contact,q.contact)||r.contactSeal!==hash(q)||
    !int(r.minute,last+1,s.world.minutes)||r.minute!==q.minute||
    r.day!==Math.floor(r.minute/1440)||r.day!==q.contact.day||
