@@ -265,6 +265,8 @@ function earnedEvidence(w,actorId,s=null){
    require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'arcane'):null;
   const verifiedSoulHigher=s?.table?.realm===w&&actor.originalSoulHigherArchitecture?
    require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'soul'):null;
+  const verifiedMaterialCustody=s?.table?.realm===w&&actor.originalMaterialCustody?
+   require('../rules/independent-material-custody').held(s,actor):null;
   const verifiedOriginResearch=s?.table?.realm===w&&actor.originalOriginPatternResearch?
    require('../rules/independent-original-origin-research').privateStatus(s,actor):null;
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
@@ -455,6 +457,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalArcaneHigherArchitecture:verifiedArcaneHigher,
    originalOriginPatternResearch:verifiedOriginResearch,
+   originalOwnedMaterials:verifiedMaterialCustody,
    originalSoulHigherArchitecture:verifiedSoulHigher,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalBodyOrganCycleThree:verifiedBodyThree,
