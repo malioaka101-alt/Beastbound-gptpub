@@ -631,14 +631,12 @@ function assume(s,p={}){
  const wHash=digest(witness);
  if(r.expressions.some(x=>x.source.witnessHash===wHash))
   throw Error('The same original adaptive experiment may not be repeated as a new attempt');
- const spent=Math.ceil(p.minutes/60)+1;
+ const mode=Law.adaptiveSpec(p.minutes,s.player.attributes.con??10,s.player.skills?.survival?.rank||0,r.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original stamina pool cannot support that measured adaptive duration');
  const start=s.world.minutes;s.player.stamina-=spent;
  s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:18,label:'Original verified living adaptive physiology under present conditions'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Original verified living adaptive physiology under present conditions'});
  const event=structuredClone(s.log.at(-1));
  const woundRiskRecorded=check.degree==='severe failure';
  if(woundRiskRecorded){
@@ -648,10 +646,8 @@ function assume(s,p={}){
   duration:p.minutes,staminaSpent:spent,
   witness,witnessHash:wHash,check:structuredClone(check),
   checkEvent:event,checkEventHash:digest(event),roll:check.roll,
-  formed:check.success,activeFrom:start+1,
-  activeUntil:check.success?start+1+p.minutes:null,
+  formed:check.success,...Law.adaptiveWindow(start,p.minutes,check.success),
   cooldownMinutes:ADAPTIVE_COOLDOWN,
-  cooldownUntil:start+1+(check.success?p.minutes:0)+ADAPTIVE_COOLDOWN,
   mentalEffects:ADAPTIVE_MENTAL,woundRiskRecorded};
  const receipt={origin:ORIGIN,source:src,seal:digest(src)};
  r.expressions.push(receipt);
@@ -679,7 +675,7 @@ function release(s,p={}){
  const start=s.world.minutes;
  const src={origin:ORIGIN,kind:'release',minute:start,
   activationSeal:last.seal,witness,witnessHash:wHash,
-  cooldownUntil:start+1+ADAPTIVE_COOLDOWN,
+  cooldownUntil:Law.releaseCooldown(start),
   mentalEffects:ADAPTIVE_MENTAL};
  r.expressions.push({origin:ORIGIN,source:src,seal:digest(src)});
  E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
