@@ -440,6 +440,9 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
   case 'rift.weaveStatus':return require('./rift-boundary-weaving').status(s);
   case 'rift.weaveBoundary':return require('./rift-boundary-weaving').weave(s,params);
+  case 'rift.npcRealmPrepare':return require('./independent-original-rift-realm-walking').prepare(s,params);
+  case 'rift.npcRealmEnter':return require('./independent-original-rift-realm-walking').enter(s,params);
+  case 'rift.npcRealmReturn':return require('./independent-original-rift-realm-walking').returnToAnchor(s,params);
   case 'rift.npcPocketTransfer':return require('./independent-original-rift-local-spatial').transfer(s,params);
   case 'rift.npcPocketBuild':return require('./independent-original-rift-local-spatial').pocket(s,params);
   case 'rift.npcAdaptExposure':return require('./independent-original-rift-local-spatial').adaptation(s,params);
