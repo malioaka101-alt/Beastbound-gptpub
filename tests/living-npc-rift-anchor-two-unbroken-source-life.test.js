@@ -66,7 +66,10 @@ for(const item of options){
   chargedAnchors=anchors.filter(x=>x.source.accepted),
   spent=chargedSense.length*SenseLaw.STAMINA_COST+
    chargedAnchors.length*Law.staminaCost(120),
-  trueOnceRecover=p.originalRiftglassRecover?.source?.actualOriginalRecoverGain||0,
+  trueOnceRecover=(p.originalRiftglassRecover?.source?.actualOriginalRecoverGain||0)+
+   (p.originalRiftglassRecover?.renewals||[]).reduce((sum,row)=>
+    sum+row.source.actualOriginalRecoverGain,0),
+  trulyRenewed=(p.originalRiftglassRecover?.renewals||[]).length,
   verifiedFieldNights=(p.originalOffscreenCombatNights||[]).filter(x=>
    x.source.site==='ruins'),
   fieldNightRecovery=verifiedFieldNights.reduce((sum,x)=>sum+
@@ -107,8 +110,10 @@ for(const item of options){
    Law.staminaCost(120));
   A.equal(d.originalRiftExteriorAnchorMarking.originalOneRecoverActuallyUsed,
    !!p.originalRiftglassRecover);
-  A.equal(d.originalRiftExteriorAnchorMarking.sourceVerifiedOneRecoverGain,
+  A.equal(d.originalRiftExteriorAnchorMarking.sourceVerifiedTotalRecoverGain,
    trueOnceRecover);
+  A.equal(d.originalRiftExteriorAnchorMarking.originalRecoverRenewalsAfterActualNights,
+   trulyRenewed);
   A.equal(d.originalRiftExteriorAnchorMarking.furtherOriginalRecoverNeedsRealNight,
    (body.recoverUses||0)>=1);
   A.equal(d.originalRiftExteriorAnchorMarking.actualPhysicalReadinessForAnotherAnchor,
@@ -121,7 +126,8 @@ for(const item of options){
    !formed);
  }
  const summary={seed,int:item.originalInt,initial:startingStamina,
-  remaining:body.stamina,originalSingleRecoverGain:trueOnceRecover,
+  remaining:body.stamina,originalTotalRecoverGain:trueOnceRecover,
+  originalRenewalsAfterRealNight:trulyRenewed,
   originalVerifiedFieldNights:verifiedFieldNights.length,
   originalFieldNightStaminaRestored:fieldNightRecovery,
   otherOriginalExertionOrDamage:
