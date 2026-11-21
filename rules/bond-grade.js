@@ -14,6 +14,12 @@ function gradeReference(s,b){
   throw Error('A pre-established independent numeric Grade calibration for this individual and current form is required');
  return x;
 }
+function examSpec(grade,wis,rank){
+ C.int(grade,'original individual numeric Grade',1,9);
+ C.int(wis,'earned Wisdom',1,30);C.int(rank,'earned Beastcraft',0,5);
+ return {dc:12+2*grade,modifier:Math.floor((wis-10)/2)+2*rank,
+  feeTalons:PRICE,feeScales:100,minutes:MINUTES,cooldownMinutes:COOLDOWN};
+}
 function assessment(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
     Object.keys(p).some(k=>k!=='beastId'))
@@ -50,8 +56,7 @@ function assessment(s,p={}){
   throw Error('One Talon in examination materials is required');
  const rank=C.int(s.player.skills?.beastcraft?.rank??0,'recorded Beastcraft rank',0,5);
  const wis=C.int(s.player.attributes?.wis,'recorded Wisdom',1,30);
- const modifier=Math.floor((wis-10)/2)+2*rank;
- const dc=12+2*calibration.grade;
+ const {modifier,dc}=examSpec(calibration.grade,wis,rank);
  s.player.coins=Number((s.player.coins-PRICE).toFixed(2));
  const checkedAtMinute=s.world.minutes;
  const check=C.check(s,{modifier,dc,label:'Individual beast Grade examination'});
@@ -89,4 +94,4 @@ function status(s,p={}){
  return {assessed:current,grade:current?a.grade:null,
   source:current?a.source:null,examAttempts:b.gradeExaminations?.length||0};
 }
-module.exports={assessment,status};
+module.exports={assessment,status,examSpec,gradeReference};
