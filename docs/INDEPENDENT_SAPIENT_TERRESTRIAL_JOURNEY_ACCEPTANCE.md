@@ -1,12 +1,22 @@
 # Independent human–sapient beast terrestrial journey — source-owner acceptance plan
 
-**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** acceptance design only; no independent terrestrial journey is implemented by this document.
+**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** source-verified original linked-leg preflight and freely decided travel proposals implemented. No actual independent journey or arrival implemented.
 
 ## Exact original source gap
 
 The original engine supports linked-location travel at 75 minutes per leg (145 when travelling to the ruins), deducting 4 player Stamina; active encounters and battles block player travel. The separate lived-places journey owner supports GM-adjudicated established destinations and hazards but explicitly does not grant NPC arrival.
 
-The original forest→crossing linked exit genuinely crosses Atlas region boundaries while remaining a valid ordinary **75-minute linked leg** under the original engine. An independent actor must still obtain an actual separately verified destination presence/visitor history; cross-region movement is not automatically illegal or an additional travel surcharge.\n\nReal native sapient meetings occur in native habitats such as the forest. The only original accredited individual Grade exam facilities are crossing and academy, both with **empty native spawn lists**. Independent humans have individually verified home-region work shifts; witnessing a person in a forest is not evidence of their later attendance at a distant academy. Sapient beasts independently depart on sixday boundaries. Therefore an existing relationship and sufficient wages do not establish co-presence at a facility. An independent journey owner is a hard prerequisite for a genuine paid Grade examination.
+The original forest→crossing linked exit genuinely crosses Atlas region boundaries while remaining a valid ordinary **75-minute linked leg** under the original engine. An independent actor must still obtain an actual separately verified destination presence/visitor history; cross-region movement is not automatically illegal or an additional travel surcharge.
+
+Real native sapient meetings occur in native habitats such as the forest. The only original accredited individual Grade exam facilities are crossing and academy, both with **empty native spawn lists**. Independent humans have individually verified home-region work shifts; witnessing a person in a forest is not evidence of their later attendance at a distant academy. Sapient beasts independently depart on sixday boundaries. Therefore an existing relationship and sufficient wages do not establish co-presence at a facility. An independent journey owner is a hard prerequisite for a genuine paid Grade examination.
+
+## Verified original partial source owners — 21 November 2026
+
+The original forest-to-crossing exit genuinely crosses an Atlas regional boundary without changing the original **75-minute / 4-human-Stamina** law. The nonmutating `independent-sapient-terrestrial-preflight.js` rejects physically absent and unfit actors rather than granting a clean wound body. [Actual 24-world run 44892017731](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44892017731) confirmed 17 legitimate read-only linked-leg preflights, two insufficient-Stamina refusals and one individual with an unregistrable original combat baseline.
+
+The `independent-sapient-terrestrial-proposal.js` owner now records a fresh original linked destination, current individual shift, original Combat source, cost, purpose, risks and withdrawal rights, then independently resolves new human and sapient beast personal choices. Proposal replay is source sealed and no destination location, journey cost, future consent, magical partnership or Grade is granted. [Real 24-world run 44892367392](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44892367392) **PASSED**: 17 independently witnessed proposals, four mutually willing to consider the route, ten human refusals and three beast refusals. [Focused engine run 44892367368](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44892367368) **PASSED** 35 short original source tests, not the entire six-shard suite.
+
+**Physical linked-leg departure, arrival, temporally exclusive visitor presence and independent return remain unfinished.** Proposals do not establish that anyone has travelled, much less that a Grade examiner has met a sapient beast at crossing or academy.
 
 ## Required original mechanical ownership
 
@@ -36,9 +46,10 @@ After actual independent arrival at crossing or academy, the existing Grade owne
 
 ## Engineering order
 
-1. Pure original route/presence preflight with negative source tests, **without** changing NPC locations.
-2. Bounded optional same-polity adjacent-leg independent journey with original sources, real cost and historical position; positive/refusal source replay.
-3. Genuine temporary attendance and independently accepted return integrated with world days, witness knowledge and commerce.
-4. Original actual Grade and then magical contract/Sync positive longitudinal acceptance.
+1. **Verified:** original physical route preflight, including low-Stamina refusal.
+2. **Verified:** fresh, voluntary two-person route proposal without time, expense or movement.
+3. **Pending:** source-owned first linked terrestrial leg with actual physical cost, elapsed time and independent arrival; cross-region forest to crossing is an original valid exit.
+4. **Pending:** mutually exclusive historical/local visitor presence, welfare, sixday ecology, voluntary return and player-knowledge separation.
+5. **Pending:** actual independently funded Grade and separate magical sealing and synchronisation, only after all original source prerequisites.
 
 **No existing campaign saves altered. No merger or ready-for-review status until the complete source-owner and six-shard acceptance tests pass.**
