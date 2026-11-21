@@ -17,6 +17,7 @@ const ORIGIN='source-earned-independent-original-pair-interaction-v1',
  eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b),
  int=(v,a=0,b=1000000000)=>Number.isInteger(v)&&v>=a&&v<=b,
  prose=x=>typeof x==='string'&&x.trim().length>=25&&x.length<=900;
+function exactMagicTerms(w){const d=w?.details;return [d?.exactContractBenefits,d?.exactContractObligations,d?.exactContractLimits,d?.independentWithdrawalTerms];}
 function checkRecord(roll,sp){
  const margin=roll+sp.modifier+C.naturalAdjustment(roll)-sp.dc;
  return {roll,modifier:sp.modifier,dc:sp.dc,margin,degree:C.degree(margin),success:margin>=0};
@@ -107,14 +108,15 @@ function replay(s,p){
    sh.fromDay>q.day||sh.throughDay<q.day||sh.throughDay-sh.fromDay!==5||sh.scheduledAtDay!==sh.fromDay||
    !Arr.safe({...b,...q.welfare})||!eq(q.before,pair.bond)||
    !Arr.verifyHuman(q.humanChoice,q.witnessHash)||q.humanChoice.personality!==p.personality||
-   q.noMagicOrSync!==!['seal','review'].includes(q.approach))return null;
+   q.noMagicOrSync!==(!['seal','review'].includes(q.approach)))return null;
   if(q.approach==='seal'){
    if(pair.bond.contract||pair.bond.fractured||pair.bond.willingness<50||!['light','standard','deep','covenant'].includes(q.depth))return null;
    const usedCapacity=[...pairs.values()].reduce((n,x)=>n+(x.bond.contract?.load||0),0),
     inputs=ContractLaw.inputs(s,p,b,q.minute,q.gradeAssessment,q.depth,usedCapacity);
    if(!inputs||!eq(inputs,q.contractInputs)||inputs.spec.overCapacity)return null;
   }else if(q.approach==='review'){
-   if(!pair.bond.contract||q.contractReceipt!==pair.contractReceipt)return null;
+   const sealed=prior.find(x=>x.seal===pair.contractReceipt);
+   if(!pair.bond.contract||q.contractReceipt!==pair.contractReceipt||!sealed||!eq(exactMagicTerms(q.witness),exactMagicTerms(sealed.source.witness)))return null;
   }else if(q.contractInputs!==undefined||q.gradeAssessment!==undefined)return null;
   const sp=mode(p,b,pair.bond,q),possible=q.approach==='review'?true:opportunity(s,b,pair.bond,q);
   if(q.approach==='seal'&&!possible)return null;
@@ -177,13 +179,14 @@ function interact(s,{actorId,beastId,witnessIndex,...extra}={},kind='friendly'){
   q.contractInputs=ContractLaw.inputs(s,p,b,minute,q.gradeAssessment,q.depth,usedCapacity);
   if(!q.contractInputs||q.contractInputs.spec.overCapacity)throw Error('Genuine current individual Grade, earned Soul capacity and available original contract load required');
  }else if(kind==='review'){
-  if(!pair.bond.contract||!pair.contractReceipt)throw Error('Current actual original magical contract required for independent continuation review');
+  const sealed=rows.find(x=>x.seal===pair.contractReceipt);
+  if(!pair.bond.contract||!pair.contractReceipt||!sealed||!eq(exactMagicTerms(witness),exactMagicTerms(sealed.source.witness)))throw Error('Current actual original magical contract and unchanged exact terms required for independent continuation review');
   q.contractReceipt=pair.contractReceipt;
  }
  if(!(kind==='friendly'?['gentle','play','drill'].includes(q.approach):q.approach===kind)||!witnessValid(p,b,q)||kind!=='review'&&!Pair.revision(arr,minute,rev)||
   minute<pair.last||rows.length>=960||rows.some(x=>x.source.witnessHash===q.witnessHash||
    x.source.pairSeal===q.pairSeal&&x.source.day===day))
-  throw Error('Fresh original gentle, play or drill opportunity and unused independent pair day required');
+  throw Error('Fresh original pair opportunity or exact contract terms and unused independent pair day required');
  q.law=mode(p,b,pair.bond,q);q.possible=kind==='review'?true:opportunity(s,b,pair.bond,q);
  if(kind==='seal'&&!q.possible)throw Error('Actual individual boundary or physical welfare prevents magical sealing');
  if(minute%1440+q.law.minutes>1440)throw Error('Complete original interaction within the witnessed day');
