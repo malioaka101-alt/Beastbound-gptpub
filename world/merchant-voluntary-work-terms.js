@@ -305,7 +305,11 @@ function visitorWorkStatus(s,{actorId,agreementId,...extra}={}){
  if(!p||!row||row.settlement)return deny('no-unsettled-mutually-agreed-original-service');
  if(!originalWorker(w,p)||!verify(w)||p.status!=='active')
   return deny('unverified-or-recovering-original-worker');
- if(day!==w.lastTickDay||day<row.source.day||day>row.source.throughDay)
+ // The original merchant and sixday market inventory are authoritative
+ // at their most recent world tick. This REAL date may fall between ticks;
+ // a new day inside the sixday interval is not an invented extra sixday.
+ if(day<w.lastTickDay||day>=w.lastTickDay+6||
+  day<row.source.day||day>row.source.throughDay)
   return deny('merchant-has-no-original-confirmed-workday');
  if(p.regionId===v.regionId||!pos?.arrived||pos.location!=='crossing'||
   !Visit.verify(s,p))
@@ -372,8 +376,12 @@ function performVisitorService(s,{actorId,agreementId,...extra}={}){
 }
 function settle(w,p,{agreementId,workHash,day}={},sourceWorld=null){
  const v=originalMerchant(w);
- if(!originalWorker(w,p)||!verify(w)||
-  !Number.isInteger(day)||day!==w.lastTickDay)
+ if(!originalWorker(w,p)||!verify(w)||!Number.isInteger(day)||
+  (sourceWorld?(
+   require('./simulation').peek(sourceWorld)!==w||
+   day!==Math.floor(sourceWorld.world?.minutes/1440)||
+   day<w.lastTickDay||day>=w.lastTickDay+6):
+   day!==w.lastTickDay))
   throw Error('A genuine original merchant and independently present worker must settle at an actual day');
  const row=v.serviceTerms?.find(x=>x.id===agreementId&&
   x.workerId===p.id&&x.accepted);

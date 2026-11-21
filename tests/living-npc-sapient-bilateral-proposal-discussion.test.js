@@ -476,6 +476,25 @@ for(let n=0;n<80;n++){
           mutuallyAccepted:originalOffer.accepted,noForcedEmployment:true}));
         }
         if(!originalOffer.accepted)continue;
+        // This agreement is valid over a bounded original multi-day window,
+        // NOT compulsory labour on the day it was signed. Every later
+        // opportunity advances actual global time and draws the SAME
+        // independent person's next unassigned work choice only ONCE per
+        // actual day. A closed market never causes a fake work roll.
+        const merchantTerm=earnedSeller.serviceTerms.find(x=>x.id===currentAgreementId);
+        for(let workDayIndex=0;workDayIndex<3;workDayIndex++){
+         if(workDayIndex>0){
+          const prior=earning.world.minutes,
+           dayNow=Math.floor(prior/1440),
+           nextOpen=(dayNow+1)*1440+9*60;
+          if(dayNow+1>merchantTerm.source.throughDay)break;
+          E.advance(earning,nextOpen-prior);
+          Time.finalizeTime(earning,prior);
+          A.equal(earning.world.minutes,nextOpen);
+          A.equal(earnedWorker.cashScales,0,
+           'A later real market day has no gifted wage or stamina recovery');
+          A.equal(earnedBeast.location,'crossing');
+         }
         const action={actorId:earnedWorker.actorId,agreementId:currentAgreementId},
          beforeDoing=E.exportGame(earning),
          workReadiness=R.act(earning,{system:'bond',operation:'npcVisitorMerchantReadiness',
@@ -555,6 +574,8 @@ for(let n=0;n<80;n++){
          actualIndependentChoice:true,actualOriginalSuccessfulD20:true,
          noPlayerPurseChange:true,stillNoIndividualNumericGradeOrExam:true}));
         break;
+        } // End separate real per-day work choices for this one voluntary term.
+        if(paidVisitor)break;
        }
        if(!paidVisitor)
         console.log('INDEPENDENT ORIGINAL VISITOR NO FUNDED WAGE '+JSON.stringify({

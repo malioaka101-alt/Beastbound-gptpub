@@ -700,7 +700,13 @@ function payVerifiedTradeWork(w,p,{workHash,amountScales,day,witness}={},sourceW
   vendor.location!=='crossing'||vendor.regionId!=='morrowfen_basin'||
   seller.location!=='crossing'||seller.profession!=='Beast provisioner'||
   p.status!=='active'||
-  !Number.isInteger(day)||day!==w.lastTickDay||
+  !Number.isInteger(day)||
+  (sourceWorld?(
+   p.regionId===vendor.regionId||
+   require('./simulation').peek(sourceWorld)!==w||
+   day!==Math.floor(sourceWorld.world?.minutes/1440)||
+   day<w.lastTickDay||day>=w.lastTickDay+6):
+   day!==w.lastTickDay)||
   !Number.isInteger(amountScales)||amountScales<1||
   !Number.isInteger(vendor.fundsScales)||
   amountScales>vendor.fundsScales||
@@ -1065,7 +1071,8 @@ function work(w,p,day,context='independent-duty',assistance=null,visitorService=
    q.source.workMethod!==d.method||d.domain!=='trade'||
    d.regionId!=='morrowfen_basin'||
    !Number.isInteger(sourceMinute)||Math.floor(sourceMinute/1440)!==day||
-   day!==w.lastTickDay||day<q.source.day||day>q.source.throughDay||
+   day<w.lastTickDay||day>=w.lastTickDay+6||
+   day<q.source.day||day>q.source.throughDay||
    sourceMinute%1440<8*60||sourceMinute%1440>=18*60||
    !require('./emergent-people').presence(w,p.actorId,'crossing',day,
      sourceMinute%1440)||
