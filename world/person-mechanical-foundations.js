@@ -469,6 +469,9 @@ function earnedEvidence(w,actorId,s=null){
    beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established',
     ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
      {sourceVerifiedProposalDiscussions:require('../rules/independent-sapient-proposal-discussions')
+      .privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientArrangements!==undefined?
+     {sourceVerifiedSocialArrangements:require('../rules/independent-sapient-arrangements')
       .privateStatus(s,actor)}:{})},
    sourceStatus:[
     verifiedMeridian?.originalMeridianStageEarned>=1?
