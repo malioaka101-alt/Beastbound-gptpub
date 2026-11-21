@@ -547,6 +547,9 @@ function presence(w,id,location,day,minute){
  const p=w.emergentPeople?.people?.[id.slice('emergent:'.length)];
  if(!verify(w,p)||p.actorId!==id||p.status!=='active'||
   !supportedSite(w,location,p.regionId))return null;
+ if(p.originalRiftRealmJourney){const walk=require('../rules/independent-original-rift-realm-walking');
+  if(minute===undefined?walk.awayDuring(p,day*1440,(day+1)*1440):walk.awayAt(p,day*1440+minute))return null;
+ }
  const sh=p.shift;
  if(p.origin===GM_ORIGIN&&(!gmOnSite(p,day)||
   minute!==undefined&&(minute<8*60||minute>=18*60)))return null;
@@ -564,6 +567,12 @@ function presence(w,id,location,day,minute){
 function live(w,p,day,s=null){
  if(!verify(w,p))throw Error('Unverified independent person cannot act');
  if(p.lastTickDay>=day)return;
+ if(p.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(p,p.lastTickDay*1440,day*1440)){
+  // No simultaneous mortal work, wages, relocation or inferred foreign rest.
+  p.lastTickDay=day;p.shift=shift(p,day,w);
+  p.history.push({day,type:'independent-life',choice:'foreign-realm-absence-no-assumed-duty',regionId:p.regionId,observed:false});
+  if(p.history.length>24)p.history.shift();return;
+ }
  // Same physical person, same original wound record. Ordinary fatigue
  // recovery must never erase real wounds or permit work after death.
  const combatCondition=s?
