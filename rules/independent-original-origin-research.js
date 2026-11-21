@@ -204,4 +204,18 @@ function privateStatus(s,p){
   ...(r.screens?{compatibilityResults:{...r.screens},allFourPromising:Lineage.AXES.every(k=>r.screens[k]==='promising')}:{} )})),
   noRightsTransferOrSeedingOrTrait:true};
 }
-module.exports={ORIGIN,SCREEN,verify,work,screen:(s,p)=>work(s,p,true),privateStatus};
+// Internal proof only: each actual compatibility axis is linked to its
+// accepted original receipt and complete mapping. No public latent data.
+function integrationProof(s,p,id){
+ const state=replay(s,p),info=source(s,p,id),r=state?.[id];
+ if(!info||r?.progress!==3||!Lineage.AXES.every(k=>r.screens?.[k]==='promising'||
+  (k==='energetic'&&info.q.energyMode==='metabolic'&&r.screens?.[k]==='caution')))return null;
+ const screens={};
+ for(const axis of Lineage.AXES){
+  const row=p.originalOriginPatternResearch.sessions.filter(x=>x.source.origin===SCREEN&&x.source.sourceId===id&&x.source.axis===axis&&x.source.accepted).at(-1);
+  if(!row||row.source.result!==r.screens[axis])return null;
+  screens[axis]=row.seal;
+ }
+ return {mappingSeal:r.mappingSeal,screens,sourceSeal:info.z.seal};
+}
+module.exports={ORIGIN,SCREEN,verify,work,screen:(s,p)=>work(s,p,true),privateStatus,integrationProof};
