@@ -90,31 +90,72 @@ A.equal(worked.noOtherMindReadingOrUnlearnedArt,true);
 A.equal(worked.offscreenOpportunity.kind,'soul');
 A.equal(worked.originalShiftHash,worked.offscreenOpportunity.originalShiftHash);
 A.equal(worked.originalSceneHash,hash(worked.offscreenOpportunity));
-// Continue the SAME genuine person into the unforced high-risk future.
-// A Phase III original DC17 check may legitimately yield NO progress and
-// severe interference. Without independently witnessed clinical identity
-// correction, this is a real mechanical deadlock, NOT a free recovery.
-// Pin that legitimate failure as a replayable regression rather than
-// incorrectly requiring this particular unchosen NPC to be a prodigy.
+// Continue the original independent person's life, including actual
+// severe interference. New own-soul diagnostics MUST be separately paid
+// and checked before the original DC14 correction may be attempted.
+// No synthetic physician, observed success, or changed personal RNG.
 for(let n=0;n<420;n++){
  const at=s.world.minutes;
  E.advance(s,1440);World.finalizeTime(s,at);
 }
-const lifeResult=p.originalSoulLatticeThree;
-const acceptedChecks=lifeResult?.sessions?.filter(x=>
- x.source.kind==='practice'&&x.source.accepted)||[];
+const lifeResult=p.originalSoulLatticeThree,
+ Law=require('../rules/soul-shared-original-resonance-lattice'),
+ Senses=require('../rules/first-stage-senses'),
+ checks=lifeResult.sessions.filter(x=>x.source.origin===Lattice.ORIGIN),
+ acceptedChecks=checks.filter(x=>x.source.kind==='practice'&&x.source.accepted),
+ diagnoses=checks.filter(x=>x.source.kind==='diagnose'&&x.source.accepted),
+ repairs=checks.filter(x=>x.source.kind==='repair'&&x.source.accepted),
+ successfulRepairs=repairs.filter(x=>x.source.check.success);
 A.ok(acceptedChecks.length>=2,'Personal original life must have resolved genuine Soul practice');
-A.ok(lifeResult.strain>=5,
- 'This original seeded NPC legitimately failed with serious untreated identity interference');
-A.equal(lifeResult.formed,false,
- 'Unrepaired original clinical interference cannot be promoted to Soul III');
-A.equal(lifeResult.earnedProof,null);
-A.equal(lifeResult.sessions.filter(x=>x.source.kind==='repair').length,0,
- 'An unsigned clinical repair never appears from ordinary practice/rest');
-A.equal(lifeResult.sessions.filter(x=>x.source.kind==='form').length,0,
- 'The final formation rite needs actual stable prior structure and source requirements');
-A.equal(lifeResult.sessions.filter(x=>x.source.origin===Lattice.NIGHT).length>0,true,
- 'Actual original rest still restores ONLY reserve, not interference');
+A.ok(acceptedChecks.some(x=>x.source.strainAfter>=5),
+ 'The original seeded person must actually experience serious interference before clinical action');
+A.ok(diagnoses.length>=1,'The same person must undertake a separate genuine own-pattern diagnostic check');
+A.ok(repairs.length>=1,'A successful own-pattern diagnosis must precede a real independently accepted repair check');
+const spec=Senses.ownSoulPerceptionSpec(p.mechanicalFoundation.baselineAttributes.wis,0,true);
+for(const row of diagnoses){
+ const q=row.source;
+ A.equal(q.check.dc,spec.dc);
+ A.equal(q.check.modifier,spec.modifier);
+ A.equal(q.actualMinutes,spec.minutes);
+ A.equal(q.reserveSpent,spec.reserveCost);
+ A.equal(q.staminaSpent,0);
+ A.equal(q.strainAfter,q.strainBefore);
+ A.equal(q.stabilityAfter,q.stabilityBefore);
+ A.equal(q.pointsAfter,q.pointsBefore);
+ A.equal(!!q.diagnosticReport,q.check.success);
+ if(q.check.success){
+  A.equal(q.diagnosticReport.actorId,p.actorId);
+  A.equal(q.diagnosticReport.measuredStrain,q.strainBefore);
+  A.equal(q.diagnosticReport.noOtherMindOrExternalClinicianAssumed,true);
+  A.equal(q.diagnosticReport.noHealingOrFormationAward,true);
+ }
+}
+const utilized=new Set();
+for(const row of repairs){
+ const q=row.source,d=diagnoses.find(x=>x.seal===q.originalDiagnosisSourceHash);
+ A.ok(d&&d.source.check.success&&d.source.day<q.day);
+ A.ok(!utilized.has(d.seal),'Each accepted correction consumes its own actual successful diagnostic receipt');
+ utilized.add(d.seal);
+ A.equal(d.source.diagnosticReport.measuredStrain,q.strainBefore);
+ A.equal(d.source.diagnosticReport.measuredStability,q.stabilityBefore);
+ A.equal(q.check.dc,Law.REPAIR_DC);
+ A.equal(q.reserveSpent,Law.REPAIR_RESERVE);
+ A.equal(q.staminaSpent,Law.repairStamina(q.actualMinutes));
+ const change=Law.repairState(q.strainBefore,q.stabilityBefore,q.check);
+ A.equal(q.strainAfter,change.strain);
+ A.equal(q.stabilityAfter,change.stability);
+ A.equal(q.pointsAfter,q.pointsBefore);
+}
+for(const row of checks.filter(x=>x.source.kind==='form')){
+ A.ok(row.source.pointsBefore>=Law.GOAL&&row.source.strainBefore<=2);
+}
+A.equal(lifeResult.formed,!!lifeResult.earnedProof);
+A.ok(lifeResult.sessions.some(x=>x.source.origin===Lattice.NIGHT),
+ 'Actual ordinary rest still restores reserve, not clinical interference');
+console.log('Original independent Soul III self-diagnosis and corrective checks: '+JSON.stringify({
+ diagnoses:diagnoses.length,successfulDiagnoses:diagnoses.filter(x=>x.source.check.success).length,
+ repairs:repairs.length,successfulRepairs:successfulRepairs.length,
+ points:lifeResult.points,strain:lifeResult.strain,formed:lifeResult.formed}));
 A.equal(Thread.verify(s,p),true);
 
 A.equal(Lattice.verify(s,p),true);
@@ -138,4 +179,18 @@ fp.originalSoulLatticeThree.sessions.find(x=>x.source.kind==='design').seal=
  hash(fp.originalSoulLatticeThree.sessions.find(x=>x.source.kind==='design').source);
 A.equal(Lattice.verify(falseSave,fp),false,
  'Resealing an invented personal Phase III map cannot bypass verified own Soul II anatomy');
-console.log('REAL independent Soul II -> observed original self-lattice III design through personally chosen safe sleep and genuine source-owned life days, save/replay/tamper PASS; seed '+seed);
+const forgedRepair=E.importGame(saved),fpr=Realm.peek(forgedRepair).emergentPeople.people[p.id],
+ counterfeit=fpr.originalSoulLatticeThree.sessions.find(x=>
+ x.source.kind==='repair'&&x.source.accepted);
+counterfeit.source.originalDiagnosisSourceHash='0'.repeat(64);
+counterfeit.seal=hash(counterfeit.source);
+A.equal(Lattice.verify(forgedRepair,fpr),false,
+ 'A resealed repair without a genuinely earlier successful own-pattern diagnosis is forbidden');
+const forgedDiagnosis=E.importGame(saved),fpd=Realm.peek(forgedDiagnosis).emergentPeople.people[p.id],
+ bad=fpd.originalSoulLatticeThree.sessions.find(x=>
+ x.source.kind==='diagnose'&&x.source.check?.success);
+bad.source.diagnosticReport.measuredStrain=0;
+bad.seal=hash(bad.source);
+A.equal(Lattice.verify(forgedDiagnosis,fpd),false,
+ 'A resealed fabricated own-interference measurement cannot establish repair or power');
+console.log('REAL independent Soul II -> original III personal design, actual self-diagnosis and separate source-paid DC14 self-repair checks, save/replay/forgery rejection PASS; seed '+seed);
