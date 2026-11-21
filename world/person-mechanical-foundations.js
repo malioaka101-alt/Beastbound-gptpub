@@ -504,7 +504,9 @@ function earnedEvidence(w,actorId,s=null){
     reason:verifiedWeapon?
      'Accepted and source-owned weapon; present readiness still requires live encounter evidence':
      'Verified materials are not proof of equipped tools, weapons or armor'},
-   beastRelationships:{verifiedPartners:null,reason:'Original independent magical contract not yet established',
+   beastRelationships:{verifiedPartners:inMatchingGame&&actor.originalBondInteractions!==undefined?
+     require('../rules/independent-original-bond-interactions').privateStatus(s,actor).filter(x=>x.bond.contract).map(x=>({beastId:x.beastId,contract:x.bond.contract,sourceHash:x.contractReceipt})):null,
+    reason:'Only actual original source-verified magical contracts are listed',
     ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
      {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
