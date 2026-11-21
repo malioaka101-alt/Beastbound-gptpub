@@ -109,6 +109,43 @@ function calibrationSiteReadiness(s,{actorId,beastId,...extra}={}){
   genuinePriorCalibrationStillMissing:true,
   sourceRequirements:'An actual individual-specific numerically measured, origin-authenticated prior assessment with distinct physical evidence and mutual assent; never a species-rarity conversion or a caller-supplied Grade'};
 }
+// Reusable GM-private specimen source inventory for an actually visited
+// Grade facility. These are the individual's CURRENT owner-reported bodily
+// facts, not calibrated instrument readings, an assessor, a numerical
+// institutional Grade, or authority to invent an in-world examination.
+function specimenEvidence(s,{actorId,beastId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string')
+  throw Error('Only the original human and beast: no chosen readings, numeric Grade, outcome, or examiner');
+ const funding=fundingStatus(s,{actorId,beastId}),
+  base={privateToGM:true,actorId,beastId,sourceSpecimenFactsKnown:false,
+   notAnAccreditedPhysicalMeasurement:true,
+   noNumericalGradeRubricOrCertification:true,
+   noTimeFeeRngConsentOrPartnershipChanged:true};
+ if(!funding.sourceFinancialHistoryVerified||
+    !funding.actualOriginalAccreditedFacilityPresence)
+  return {...base,reason:'no-verified-individual-source-and-actual-facility-co-presence'};
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  b=s.beasts?.[beastId],pos=Visit.position(p,s.world.minutes);
+ if(!p||!b||!People.verify(w,p)||!Person.verify(b)||!pos?.arrived||
+  b.location!==pos.location||b.away===true)
+  return {...base,reason:'individual-body-or-visit-source-not-current'};
+ return {...base,sourceSpecimenFactsKnown:true,site:pos.location,
+  originalVisitorJourneyHash:pos.sourceHash,
+  originalIndividualSapientPersonHash:b.sapientLife.sourceHash,
+  currentEngineFactsOnly:{
+   beastId:b.id,species:b.species,
+   qualitativeIndividualGrade:b.individualGrade,
+   evolutionStage:b.evolutionStage,
+   levelSeparateFromGrade:b.level,
+   sapience:b.sapience,
+   hpCurrent:b.hp,hpMaximum:b.maxHp,
+   energyCurrent:b.energy,energyMaximum:b.maxEnergy,
+   condition:b.condition,
+   needs:{hunger:b.needs?.hunger??null,fatigue:b.needs?.fatigue??null}
+  },
+  noDiagnosticAssentOrValidatedIndividualNumericGrade:true};
+}
 function status(s,{actorId,beastId,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||
   !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string')
@@ -172,4 +209,4 @@ function fundingStatus(s,{actorId,beastId,...extra}={}){
   readinessBlocker:gradeGate.reason??null,
   numericGradeNotInferredFromWageOrRarity:true};
 }
-module.exports={routeStatus,status,fundingStatus,calibrationSiteReadiness};
+module.exports={routeStatus,status,fundingStatus,calibrationSiteReadiness,specimenEvidence};

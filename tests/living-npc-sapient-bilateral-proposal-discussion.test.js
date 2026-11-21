@@ -561,6 +561,39 @@ for(let n=0;n<80;n++){
         A.equal(actualSourceFunding.actualOriginalAccreditedFacilityPresence,true);
         A.equal(actualSourceFunding.originalGradeReadinessCurrentlyEligible,false);
         A.equal(actualSourceFunding.numericGradeNotInferredFromWageOrRarity,true);
+        const evidence=R.act(earning,{system:'bond',
+         operation:'npcGradeSpecimenEvidence',
+         params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id}});
+        A.equal(evidence.privateToGM,true);
+        A.equal(evidence.sourceSpecimenFactsKnown,true);
+        A.equal(evidence.site,'crossing');
+        A.equal(evidence.originalIndividualSapientPersonHash,earnedBeast.sapientLife.sourceHash);
+        A.equal(evidence.currentEngineFactsOnly.beastId,earnedBeast.id);
+        A.equal(evidence.currentEngineFactsOnly.species,earnedBeast.species);
+        A.equal(evidence.currentEngineFactsOnly.evolutionStage,earnedBeast.evolutionStage);
+        A.equal(evidence.currentEngineFactsOnly.hpMaximum,earnedBeast.maxHp);
+        A.equal(evidence.currentEngineFactsOnly.energyMaximum,earnedBeast.maxEnergy);
+        A.equal(evidence.notAnAccreditedPhysicalMeasurement,true);
+        A.equal(evidence.noNumericalGradeRubricOrCertification,true);
+        A.equal(evidence.noDiagnosticAssentOrValidatedIndividualNumericGrade,true);
+        A.equal(evidence.noTimeFeeRngConsentOrPartnershipChanged,true);
+        A.equal(E.exportGame(earning),beforeGradeFunding,
+         'Original individual bodily source inventory cannot spend or award anything');
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcGradeSpecimenEvidence',
+         params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id,grade:9}}),
+         /no chosen readings, numeric Grade, outcome, or examiner/);
+        const falseGradeBeast=structuredClone(earnedBeast);
+        falseGradeBeast.gradeCalibration={grade:9,worldMinute:earning.world.minutes-1,
+         species:falseGradeBeast.species,
+         evolutionStage:falseGradeBeast.evolutionStage,
+         individualGrade:falseGradeBeast.individualGrade,
+         source:'Fabricated original Grade IX numerical specimen reading without accredited method'};
+        A.throws(()=>OriginalGrade.gradeReference(earning,falseGradeBeast),
+         /verified original individual measurement and accredited rubric/,
+         'A convincing numeric source string must never certify a real sapient Grade');
+        A.equal(E.exportGame(earning),beforeGradeFunding,
+         'A fabricated numerical calibration rejected without changes to real live worlds');
         const assaySite=R.act(earning,{system:'bond',
          operation:'npcGradeCalibrationReadiness',
          params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id}});

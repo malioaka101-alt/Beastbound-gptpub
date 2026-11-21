@@ -12,6 +12,15 @@ function gradeReference(s,b){
     x.species!==b.species||x.evolutionStage!==b.evolutionStage||
     x.individualGrade!==b.individualGrade)
   throw Error('A pre-established independent numeric Grade calibration for this individual and current form is required');
+ // A structured string, timestamp and number are not the authenticated
+ // independent biological measurement and institutional rubric required for
+ // a sapient person's real Grade. No positive original calibration source
+ // owner exists yet for such people. Fail closed rather than accepting an
+ // attractive caller-authored 1..9 or quietly mapping species rarity/level.
+ // This gate must only be opened by a future original source-owner verifier
+ // that replays a real earlier measured specimen and accepted rubric.
+ if(b.sapientLife)
+  throw Error('Independent sapient numeric Grade requires a verified original individual measurement and accredited rubric; a typed calibration is not source proof');
  return x;
 }
 function examSpec(grade,wis,rank){
