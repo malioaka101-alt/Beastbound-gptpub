@@ -36,7 +36,8 @@ for(let n=0;n<16;n++){
   integrationLoad:1,energyMode:'metabolic',rights:{mode:'unresolved',verified:false,originalProvenance:description},
   observation,observationHash:hash(observation),minute:s.world.minutes,location:s.world.location};
  s.table.originTraitSources||={};s.table.originTraitSources[id]={origin:Lineage.SOURCE,source:q,seal:hash(q)};
- A.equal(Lineage.gmSource(s,id).z.seal,hash(q));
+ A.equal(Lineage.gmSource(s,id,p.actorId).z.seal,hash(q));
+ A.throws(()=>Lineage.gmSource(s,id),/different individual/);
  s.chatRuntime.scene=p.name+' considers a bounded locally observed examination of that exact mechanism.';
  Core.event(s,'story',s.chatRuntime.scene,{origin:Lineage.MAP,sourceId:id,
   actorId:p.actorId,location:s.world.location,measuredIndividualResponse:description,independentFailureLimit:description});
