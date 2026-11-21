@@ -21,6 +21,23 @@ A.deepEqual(Sync.practiceSpec(1,16,1,35,2),{humanCost:3,fatigueCost:3,energyCost
 A.deepEqual(Sync.practiceSpec(3,14,0,0,-1),{humanCost:5,fatigueCost:4,energyCost:2,minutes:40,dc:17,modifier:1});
 
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+// Pure isolated original examination receipt-shape contract, not an
+// earned examination or power in any game.
+const isolatedBeast={species:'disposable_species',evolutionStage:'Base',individualGrade:'G3',
+ gradeCalibration:{grade:3,worldMinute:80,source:'Disposable original prior individual calibration with provenance',
+  species:'disposable_species',evolutionStage:'Base',individualGrade:'G3'},
+ gradeExaminations:[{worldMinute:360,facility:'academy',outcome:'verified',
+  check:{roll:18,dc:18,degree:'success'}}]};
+const source='Individual Grade 3 verified at academy after d20 18 vs DC 18, against prior independent calibration: '+
+ isolatedBeast.gradeCalibration.source;
+const validExam={grade:3,worldMinute:360,origin:'observed-independent-grade-exam',
+ facility:'academy',calibrationMinute:80,examCheck:{roll:18,dc:18},source,
+ species:isolatedBeast.species,evolutionStage:isolatedBeast.evolutionStage,
+ individualGrade:isolatedBeast.individualGrade};
+A.equal(require('../rules/independent-original-bond-contract-law').gradeAt(isolatedBeast,validExam,360).grade,3);
+A.equal(require('../rules/independent-original-bond-contract-law').gradeAt(isolatedBeast,{...validExam,source:'A fabricated Grade test'},360),null);
+A.equal(require('../rules/independent-original-bond-contract-law').gradeAt({...isolatedBeast,gradeExaminations:[]},validExam,360),null);
+
 const s=E.newGame({name:'Disposable independent sapient proposal',seed:927801,path:'undecided'});
 A.equal(E.dispatch(s,'travel forest').ok,true);
 let b=null;
@@ -156,7 +173,7 @@ for(let n=0;n<80;n++){
    const ContractLaw=require('../rules/independent-original-bond-contract-law');
    A.deepEqual(ContractLaw.soulAt(ss,sp,ss.world.minutes),{phase:0,sourceSeal:null});
    const contractInput=ContractLaw.inputs(ss,sp,sb,ss.world.minutes,grade,'light',0);
-   A.ok(contractInput);A.equal(contractInput.spec.load,2);A.equal(contractInput.spec.dc,16);
+   A.equal(contractInput,null,'An arbitrary numeric grade field cannot replace the original paid Grade exam');
    C.event(ss,'story',sp.name+' considers the exact separately explained magical terms without implying readiness to accept.',{
     origin:Interact.SEAL,actorId:sp.actorId,beastId:sb.id,pairSeal:row.seal,
     arrangementHash:entry.seal,arrangementRevision:entry.seal,contactHash:hash(contact),
