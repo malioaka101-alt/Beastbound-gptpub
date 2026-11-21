@@ -8,7 +8,9 @@ const Crypto=require('node:crypto'),E=require('../engine'),C=require('./core'),
  Arr=require('./independent-sapient-arrangements'),Social=require('./beast-social-arrangements'),
  Agency=require('./beast-agency'),People=require('../world/emergent-people'),
  Realm=require('../world/simulation'),Presence=require('../world/person-presence'),
- Person=require('../world/sapient-beast-persons'),World=require('./world');
+ Person=require('../world/sapient-beast-persons'),World=require('./world'),
+ Visit=require('./independent-sapient-terrestrial-journey'),
+ Readiness=require('./independent-original-beast-grade-preflight');
 const ORIGIN='source-paid-independent-original-numeric-beast-grade-exam-v1',
  WITNESS='gm-witnessed-independent-original-facility-grade-assessment-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
@@ -153,13 +155,17 @@ function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
   typeof beastId!=='string'||!int(witnessIndex,0,s.log.length-1))
   throw Error('Exact independent candidate and witnessed original Grade assessment only; no selected grade, consent or success');
  const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],b=s.beasts?.[beastId],
-  minute=s.world.minutes,day=Math.floor(minute/1440),site=s.world.location,
-  present=p&&Presence.resolve(w,actorId,site,day,minute%1440),
+  minute=s.world.minutes,day=Math.floor(minute/1440),
+  // This independent person's source-arrival, NOT the player's map position,
+  // is the only lawful location of a private facility examination.
+  position=p&&Visit.position(p,minute),site=position?.arrived?position.location:null,
+  present=p&&site&&Presence.resolve(w,actorId,site,day,minute%1440),
+  ready=p&&b?Readiness.routeStatus(s,p,b):null,
   witness=structuredClone(s.log[witnessIndex]),d=witness?.details;
  if(!p||!People.verify(w,p)||!present?.presence||p.status!=='active'||
   !b?.sapientLife||!Person.verify(b)||b.owner!==null||b.away===true||
-  b.location!==site||s.encounter?.beastId!==beastId||s.battle||s.encounter?.threat||
-  !['crossing','academy'].includes(site)||p.cashScales<100||
+  b.location!==site||s.battle||s.encounter?.threat||
+  !ready?.assessmentEligible||!['crossing','academy'].includes(site)||p.cashScales<100||
   s.player.partnerIds?.includes(beastId)||s.table?.bondRecords?.[beastId]?.contract||
   !verify(s,p)||!Pair.verify(s,p)||!Interaction.verify(s,p))
   throw Error('Real co-present independent sapient individual, original examination facility, funds, verified pair and safe welfare required');
