@@ -9,6 +9,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Realm=require('../world/simulation');
 const SOURCE='earned-local-boundary-weaving-iv-v1',
  WITNESS='gm-observed-local-spatial-boundary-weave-v1';
+const Local=require('./rift-shared-original-local-spatial-law'),Exterior=require('./rift-shared-original-exterior-sense');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const int=(n,a=0,b=1000000000)=>Number.isInteger(n)&&n>=a&&n<=b;
 const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9_-]{3,65}$/.test(s);
@@ -38,11 +39,8 @@ function pressure(s){
   !int(ecology.pressure,0,100)||
   !['quiet','fading','surging','unstable'].includes(m.phase))
   throw Error('Existing independently changing Riftglass pressure is required');
- const danger=m.phase==='unstable'||m.seal<35?6:
-  m.phase==='surging'||m.charge>72||ecology.pressure>73?3:0;
- return {danger,sourceHash:hash({phase:m.phase,charge:m.charge,
-  seal:m.seal,pressure:ecology.pressure,worldSeed:world.worldSeed,
-  day:Math.floor(s.world.minutes/1440)})};
+ const snapshot=Exterior.snapshot(world,Math.floor(s.world.minutes/1440));
+ return {danger:Local.pressureAdjust(snapshot),sourceHash:Local.pressureIdentity(snapshot)};
 }
 function observed(s,index){
  if(!int(index,0,(s.log?.length||0)-1))
@@ -209,11 +207,10 @@ function weave(s,p={}){
    'earned Intelligence',1,30),
   skillRank=C.int(s.player.skills.arcana.rank,'earned Arcana',0,5),
   modifier=Math.floor((attributeScore-10)/2)+2*skillRank,
-  dc=18+Math.ceil(d.areaSquareMetres/4)+risk.danger+
-   Math.floor(strain/12);
+  dc=Local.weaveSpec(d.areaSquareMetres,time,strain,risk.danger,attributeScore,skillRank).dc;
  const c=C.check(s,{modifier,dc,label:'Genuinely witnessed local Rift Boundary Weaving IV'});
  const rollEvent=structuredClone(s.log.at(-1)),
-  strainAdded=c.degree==='severe failure'?6:0;
+  strainAdded=Local.strainAdded(c);
  if(strainAdded){Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});}
  s.player.stamina-=cost;s.table.combatants.player.stamina=s.player.stamina;
  const stepBefore=s.player.rift.step;
@@ -249,4 +246,4 @@ function weave(s,p={}){
   staminaSpent:cost,minutes:time,wounded:strainAdded>0,
   currentStep:s.player.rift.step,noPortalOpened:true,noGlobalWorldSealChanged:true};
 }
-module.exports={SOURCE,WITNESS,status,weave,verify,support,supportProof,earnedAt};
+module.exports={SOURCE,WITNESS,status,weave,verify,support,supportProof,earnedAt,observed};
