@@ -472,7 +472,14 @@ for(let n=0;n<80;n++){
        A.equal(nightResult.elapsedMinutes,nightResult.freelyAccepted?480:5);
        A.equal(nightWorld.world.minutes,evening+nightResult.elapsedMinutes);
        A.equal(nightWorld.world.location,playerPositionBeforeNight);
-       A.deepEqual(nightWorld.player,playerBeforeNight);
+       // Original midnight world ticks can legitimately recover the PLAYER's
+       // ordinary +5 daily Stamina; the remote sleeper never adds a second
+       // recovery. Compare an IDENTICAL world-time-only progression.
+       const noVisitorRest=E.importGame(beforeNight);
+       E.advance(noVisitorRest,nightResult.elapsedMinutes);
+       Time.finalizeTime(noVisitorRest,evening);
+       A.deepEqual(nightWorld.player,noVisitorRest.player,
+        'Remote human sleep does not change the player beyond the real original passing world time');
        A.equal(VisitorNight.verify(nightWorld,nightPerson),true);
        A.equal(Journey.verify(nightWorld,nightPerson),true);
        A.equal(nightPerson.originalVisitorNightRestReceipts.length,1);

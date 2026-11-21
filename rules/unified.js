@@ -430,6 +430,7 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={},originalVisitor
    sourceHash:response.sourceHash,
    onlyOriginalCombatRecovery:restoredQi===0,
    originalSourceBoundQiRestored:restoredQi,
+   privateToGM:!!originalVisitor,
    noSupernaturalPowerGranted:true});
  return {actorId,freelyAccepted:response.source.accepted,
   elapsedMinutes:minutes,completedOriginalNight:response.source.accepted,
