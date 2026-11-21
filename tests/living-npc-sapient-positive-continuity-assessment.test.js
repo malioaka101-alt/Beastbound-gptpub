@@ -18,7 +18,8 @@ const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  actualVisitorNextLegProposals:0,mutuallyConsideredVisitorNextLegs:0,
  visitorNextLegHumanRefusals:0,visitorNextLegBeastRefusals:0,
  actualSecondLegDepartures:0,actualSecondLegRefusals:0,
- realReturnHomeContinuity:0,
+ realFacilityReadinessProbes:0,unfundedGradeReadiness:0,
+ noInferredNumericGradeOrExam:0,realReturnHomeContinuity:0,
  laterDayOffers:0,laterDayMutualOffers:0,laterDayHumanRefusals:0,
  laterDayBeastRefusals:0,laterDaySecondDepartures:0,
  laterDaySecondDepartureRefusals:0,laterDayVerifiedHomecomings:0,
@@ -45,6 +46,11 @@ for(let i=0;i<worldCount;i++){
   .map(x=>JSON.parse(x[1]));
  summary.originalPhysicalDepartures+=journeys.filter(x=>x.departed).length;
  summary.originalPhysicalDepartureRefusals+=journeys.filter(x=>!x.departed).length;
+ const gradeProbes=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL REAL VISITOR GRADE READINESS (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.realFacilityReadinessProbes+=gradeProbes.length;
+ summary.unfundedGradeReadiness+=gradeProbes.filter(x=>x.reason==='original-individual-fee-not-funded').length;
+ summary.noInferredNumericGradeOrExam+=gradeProbes.filter(x=>x.noAutomaticGradeOrFee===true).length;
  summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
  const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
@@ -115,6 +121,10 @@ if(worldCount>=96){
   'A full source-born sample must show actual later-day voluntary opportunities with independent human and beast refusal');
  A.ok(summary.laterDaySecondDepartures>0&&summary.laterDayVerifiedHomecomings>0,
   'A genuine independent later-day physically paid second leg and subsequent verified original homecoming must occur; do not assign assent or recovery');
+ A.ok(summary.realFacilityReadinessProbes>=summary.originalPhysicalDepartures,
+  'Every genuinely signed first arrival must be eligible for a separate original facility *read-only* assessment without moving the player');
+ A.equal(summary.realFacilityReadinessProbes,summary.noInferredNumericGradeOrExam,
+  'A real site-only Grade readiness query never mints an examination, consent, fee, individual numeric Grade or player knowledge');
 }
 A.ok(summary.actualSecondLegDepartures<=summary.mutuallyConsideredVisitorNextLegs,
  'A second actual journey cannot exceed the number of genuinely independently mutually considered visitor-site routes');
