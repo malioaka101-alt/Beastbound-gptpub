@@ -31,11 +31,20 @@ function verify(s,p){
  const secondProof=finalSecondReceipt(p),body=s.table?.combatants?.['npc_'+p.id];
  if(!secondProof||!body?.npcOrigin?.seal||
   r.originalSecondCircleSourceHash!==secondProof.seal)return false;
+ // The handoff is after all genuine Second Circle activity, including
+ // a later paid/verified Mana restoration. Never spend a night twice.
+ const lastSecond=p.originalArcaneCircleTwo.sessions.at(-1)?.source;
+ if(!lastSecond)return false;
+ const inheritedEnd=lastSecond.origin===Second.RECOVERY?
+  lastSecond.endMinute:lastSecond.startMinute+lastSecond.actualMinutes;
+ if(!Number.isInteger(inheritedEnd))return false;
  let mana=p.originalArcaneCircleTwo.manaRemaining,
   stability=p.originalArcaneCircleTwo.coreStability,
   points=0,completed=false,matrixIntegrity=null,priorDay=-1,
-  previousEnd=0,attempts=0;
- const nights=new Set(),Offscreen=require('../world/independent-original-power-days');
+  previousEnd=inheritedEnd,attempts=0;
+ const nights=new Set(p.originalArcaneCircleTwo.sessions.filter(x=>
+  x.source.origin===Second.RECOVERY).map(x=>x.source.originalNightSourceHash)),
+  Offscreen=require('../world/independent-original-power-days');
  for(const row of r.sessions){
   const q=row?.source;
   if(q?.origin===RECOVERY){
@@ -142,7 +151,7 @@ function afterDaily(s,ctx){
   body.status!=='ok'||body.wounds.some(x=>x!==0))
   return null;
  const prior=p.originalArcaneMatrix;
- if(prior?.lastAttemptDay>=ctx.workDay||
+ if(second.lastAttemptDay>=ctx.workDay||prior?.lastAttemptDay>=ctx.workDay||
   Object.values(p.originalEarlyDisciplinePreparation||{}).
    some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay)return null;
