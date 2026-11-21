@@ -27,6 +27,7 @@ const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  originalVisitorAfterHoursWorkDeferrals:0,originalVisitorWorkDecisions:0,
  originalVisitorWorkRefusals:0,originalVisitorRealWorkChecks:0,
  originalVisitorSuccessfulWorkChecks:0,originalVisitorEarnedPayments:0,
+ originalSameVisitorGradeFeeFunded:0,
  originalVisitorUnavailableWages:0,
  laterDayOffers:0,laterDayMutualOffers:0,laterDayHumanRefusals:0,
  laterDayBeastRefusals:0,laterDaySecondDepartures:0,
@@ -84,6 +85,12 @@ for(let i=0;i<worldCount;i++){
  summary.originalVisitorRealWorkChecks+=visitorChoices.filter(x=>x.realWorkRoll).length;
  summary.originalVisitorSuccessfulWorkChecks+=visitorChoices.filter(x=>x.realWorkSuccess).length;
  summary.originalVisitorEarnedPayments+=visitorPayments.length;
+ const gradeFunding=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL ACTUAL EARNED GRADE FEE FUNDING (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.originalSameVisitorGradeFeeFunded+=gradeFunding.filter(x=>
+  x.individuallyEarnedScales>=100&&x.originalMerchantPaidScales>=100&&
+  x.individualRealWageReceipts>0&&x.actualJointFacility&&
+  x.numericGradeStillUnestablished&&x.noExamOrContractOrForcedAssent).length;
  summary.originalVisitorUnavailableWages+=(child.stdout.match(/INDEPENDENT ORIGINAL VISITOR NO FUNDED WAGE/g)||[]).length;
  summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
  const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\{[^\n]+\})/g)]
@@ -169,6 +176,8 @@ if(worldCount>=96){
  A.ok(summary.originalVisitorEarnedPayments<=summary.originalVisitorSuccessfulWorkChecks&&
   summary.originalVisitorSuccessfulWorkChecks<=summary.originalVisitorRealWorkChecks,
   'Physical Scales can be transferred only after a truly independent real original successful work check');
+ A.equal(summary.originalSameVisitorGradeFeeFunded,summary.originalVisitorEarnedPayments,
+  'Every truly paid visitor must demonstrate the exact same individual human owns 100+ original merchant-earned Scales while the individual sapient remains genuinely at the facility, never implying a numeric Grade');
  A.ok(summary.originalVisitorEarnedPayments>0,
   'Across genuinely seeded independent original worlds, at least one actual visiting worker must freely accept and succeed at an original career work roll and earn a real source-conserved merchant payment; never assign consent, work success or cash');
  A.equal(summary.originalVisitorEarnedPayments+

@@ -706,6 +706,7 @@ function act(s,{system,operation,params={}}={}){
   case 'bond.npcVisitorMerchantWork':return require('../world/merchant-voluntary-work-terms').performVisitorService(s,params);
   case 'bond.npcVisitorMerchantSettle':return require('../world/merchant-voluntary-work-terms').settleVisitorService(s,params);
   case 'bond.npcGradeReadiness':return require('./independent-original-beast-grade-preflight').status(s,params);
+  case 'bond.npcGradeFunding':return require('./independent-original-beast-grade-preflight').fundingStatus(s,params);
   case 'bond.npcGradeExamine':return require('./independent-original-beast-grade-exam').examine(s,params);
   case 'bond.npcPairSeal':return require('./independent-original-bond-interactions').seal(s,params);
   case 'bond.npcPairReview':return require('./independent-original-bond-interactions').review(s,params);

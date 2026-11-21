@@ -548,6 +548,34 @@ for(let n=0;n<80;n++){
         A.equal(earnedSeller.fundsScales,beforeSeller-137);
         A.equal(earnedWorker.cashScales+earnedSeller.fundsScales,
          workerBefore+beforeSeller,'Original 137 Scales changed owners exactly once');
+        const beforeGradeFunding=E.exportGame(earning),
+         actualSourceFunding=R.act(earning,{system:'bond',
+          operation:'npcGradeFunding',
+          params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id}});
+        A.equal(actualSourceFunding.privateToGM,true);
+        A.equal(actualSourceFunding.sourceFinancialHistoryVerified,true);
+        A.equal(actualSourceFunding.individuallyFunded,true);
+        A.equal(actualSourceFunding.originalPersonalBalanceScales,137);
+        A.equal(actualSourceFunding.genuineSourcePaidMerchantWagesScales,137);
+        A.equal(actualSourceFunding.originalWageReceipts.length,1);
+        A.equal(actualSourceFunding.actualOriginalAccreditedFacilityPresence,true);
+        A.equal(actualSourceFunding.originalGradeReadinessCurrentlyEligible,false);
+        A.equal(actualSourceFunding.numericGradeNotInferredFromWageOrRarity,true);
+        A.equal(actualSourceFunding.noFeeDebitedOrGradeAssignedOrExamChoice,true);
+        A.equal(E.exportGame(earning),beforeGradeFunding,
+         'Original independently earned Grade funding inspection must not spend time, source Scales or RNG');
+        A.throws(()=>R.act(earning,{system:'bond',
+         operation:'npcGradeFunding',
+         params:{actorId:earnedWorker.actorId,beastId:earnedBeast.id,grade:9}}),
+         /no chosen Grade, money, exam success or consent/);
+        A.equal(E.exportGame(earning),beforeGradeFunding);
+        console.log('INDEPENDENT ORIGINAL ACTUAL EARNED GRADE FEE FUNDING '+JSON.stringify({
+         individuallyEarnedScales:actualSourceFunding.originalPersonalBalanceScales,
+         originalMerchantPaidScales:actualSourceFunding.genuineSourcePaidMerchantWagesScales,
+         individualRealWageReceipts:actualSourceFunding.originalWageReceipts.length,
+         actualJointFacility:actualSourceFunding.actualOriginalAccreditedFacilityPresence,
+         numericGradeStillUnestablished:!earnedBeast.gradeCalibration,
+         noExamOrContractOrForcedAssent:true}));
         A.equal(earning.player.coins,beforeCoins);
         A.equal(MerchantTerms.verify(earnedWorld),true);
         A.equal(Career.verify(earnedWorker),true);
