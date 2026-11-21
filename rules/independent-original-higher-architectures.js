@@ -188,7 +188,7 @@ function usedDay(p,day){
   p.originalMeridianSea,p.originalMeridianWeb,p.originalMeridianAdvanced,
   p.originalArcaneCircleTwo,p.originalArcaneMatrix,p.originalSoulThreadTwo,p.originalSoulLatticeThree,
   p.originalBodyCycleTwo,p.originalBodyOrganCycleThree,p.originalBodyNerveSenseFour,p.originalBodyLivingPhysiques,
-  p.originalRiftMeasuredSense,p.originalRiftExteriorAnchor,...Object.values(p.originalEarlyDisciplinePreparation||{})]
+  p.originalRiftMeasuredSense,p.originalRiftExteriorAnchor,p.originalOriginPatternResearch,...Object.values(p.originalEarlyDisciplinePreparation||{})]
   .some(r=>r?.lastAttemptDay>=day)||
   Object.values(keys).some(k=>p[k]?.sessions?.some(x=>x.source.origin===ORIGIN&&x.source.day>=day));
 }
