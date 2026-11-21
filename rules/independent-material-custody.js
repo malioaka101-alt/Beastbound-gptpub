@@ -8,6 +8,7 @@ const Crypto=require('node:crypto'),E=require('../engine'),Core=require('./core'
  People=require('../world/emergent-people'),Presence=require('../world/person-presence');
 const ORIGIN='source-owned-independent-human-material-custody-v1',
  OFFER='witnessed-independent-human-material-offer-v1',
+ POCKET_TRANSFER='witnessed-independent-original-pocket-material-transfer-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex'),
  eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b),
  int=(v,a=0,b=1000000000)=>Number.isInteger(v)&&v>=a&&v<=b;
@@ -25,13 +26,44 @@ function witnessValid(q,p){
   w.day===q.day+1&&w.time===E.clock({world:{minutes:q.minute}})&&
   d?.actorId===p.actorId&&d.location===q.site&&q.witnessHash===hash(w);
 }
+// A pocket's source seal is a real previously completed local construction.
+// This read checks the exact envelope; the original spatial owner separately
+// replays the actual check and physical prerequisites. No recursive verifier.
+function pocketSource(p,seal,id){
+ const r=p.originalRiftLocalSpatial?.sessions?.find(x=>x.seal===seal),
+  q=r?.source,d=q?.witness?.details;
+ if(!r||r.seal!==hash(q)||q.kind!=='pocket'||q.actorId!==p.actorId||!q.accepted||
+  q.check?.success!==true||d?.pocketId!==id||q.site!=='ruins'||
+  !int(q.plannedMinutes,180,480)||!int(d.capacityUnits,1,8)||!int(d.lifetimeHours,24,336))return null;
+ return {id,capacity:d.capacityUnits,opened:q.minute+q.plannedMinutes,
+  expiresAt:q.minute+q.plannedMinutes+d.lifetimeHours*60,site:q.site};
+}
+function pocketWitness(q,p,space){
+ const d=q.witness?.details;
+ return witnessValid(q,p)&&d.origin===POCKET_TRANSFER&&q.site===space.site&&
+  q.minute>=space.opened&&q.minute+5<=space.expiresAt&&
+  d.pocketId===space.id&&d.direction===q.direction&&d.item===q.item&&d.units===q.units&&
+  ['store','retrieve'].includes(q.direction)&&Object.hasOwn(E.RESOURCES,q.item)&&int(q.units,1,8);
+}
+function pocketMovement(bag,stock,space,item,direction,units){
+ const held=stockCount(bag,item),inside=stockCount(stock,item),store=direction==='store',
+  carriedAfter=held+(store?-units:units),insideAfter=inside+(store?units:-units);
+ if(!Core.conservedItems({sourceBefore:store?held:inside,sourceAfter:store?carriedAfter:insideAfter,
+  targetBefore:store?inside:held,targetAfter:store?insideAfter:carriedAfter,amount:units})||
+  Object.values(stock).reduce((a,b)=>a+b,0)+(store?units:-units)>space.capacity)return null;
+ return {carriedBefore:held,carriedAfter,insideBefore:inside,insideAfter};
+}
+function applyPocket(bag,stock,item,m){
+ if(m.carriedAfter)bag[item]=m.carriedAfter;else delete bag[item];
+ if(m.insideAfter)stock[item]=m.insideAfter;else delete stock[item];
+}
 function replay(s,p){
  const r=p?.originalMaterialCustody;
- if(r===undefined)return {};
+ if(r===undefined)return {bag:{},pockets:{}};
  const w=Realm.peek(s);
  if(!w||!People.verify(w,p)||r.origin!==ORIGIN||!Array.isArray(r.rows)||
   !r.rows.length||r.rows.length>960)return null;
- const bag={},used=new Set(),offerDays=new Set();let last=0;
+ const bag={},pockets={},used=new Set(),offerDays=new Set();let last=0;
  for(const row of r.rows){
   const q=row?.source;
   if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||q.actorId!==p.actorId||
@@ -70,15 +102,28 @@ function replay(s,p){
     if(left)bag[item]=left;else delete bag[item];
    }
    last=q.minute;
+  }else if(q.kind==='pocket-transfer'){
+   const space=pocketSource(p,q.pocketSeal,q.pocketId);
+   if(!space||!pocketWitness(q,p,space)||!eq(q.items,{[q.item]:q.units})||
+    q.minute+5>s.world.minutes||q.noItemCreation!==true)return null;
+   const stock=pockets[q.pocketId]||{};
+   if(!eq(q.pocketBefore,stock))return null;
+   const m=pocketMovement(bag,stock,space,q.item,q.direction,q.units);
+   if(!m||!eq(q.movement,m))return null;
+   applyPocket(bag,stock,q.item,m);pockets[q.pocketId]=stock;
+   if(!eq(q.pocketAfter,stock))return null;
+   last=q.minute+5;
   }else return null;
   if(!eq(bag,q.after))return null;
   used.add(q.witnessHash);
  }
- return bag;
+ return {bag,pockets};
 }
-function held(s,p){
- const bag=replay(s,p);if(!bag)throw Error('Original independent material custody source altered');
- return bag;
+function snapshot(s,p){
+ const state=replay(s,p);if(!state)throw Error('Original independent material custody source altered');
+ return state;
+}
+function held(s,p){return snapshot(s,p).bag;
 }
 function verify(s,p){try{return replay(s,p)!==null;}catch{return false;}}
 function offer(s,{actorId,witnessIndex,...extra}={}){
@@ -144,4 +189,38 @@ function debitProof(s,p,seal,items,purpose,witnessHash,minute){
  return !!q&&q.kind==='consume'&&q.purpose===purpose&&q.witnessHash===witnessHash&&
   q.minute===minute&&eq(q.items,items);
 }
-module.exports={ORIGIN,OFFER,verify,held,offer,canConsume,consume,debitProof};
+function pocketContents(s,p,id){return snapshot(s,p).pockets[id]||{};}
+function canMovePocket(s,p,space,details){
+ const {item,direction,units}=details;
+ if(!Object.hasOwn(E.RESOURCES,item)||!['store','retrieve'].includes(direction)||!int(units,1,8))return false;
+ const state=snapshot(s,p),stock=state.pockets[space.pocketId]||{};
+ return !!pocketMovement(state.bag,stock,space,item,direction,units);
+}
+// Internal deterministic transfer. The spatial owner establishes co-presence,
+// independent acceptance and real Stamina, then advances exactly five minutes.
+function movePocket(s,p,space,witness){
+ const minute=s.world.minutes,day=Math.floor(minute/1440),site=s.world.location,d=witness?.details,
+  proof=pocketSource(p,space.sourceSeal,space.pocketId),witnessHash=hash(witness),
+  r=p.originalMaterialCustody;
+ if(!proof||!r||r.rows.length>=960||r.rows.some(x=>x.source.witnessHash===witnessHash)||
+  !s.log.some(x=>hash(x)===witnessHash)||
+  !pocketWitness({witness,witnessHash,minute,day,site,direction:d?.direction,item:d?.item,units:d?.units},p,proof))
+  throw Error('Actual currently accessible original pocket and fresh individual material witness required');
+ const {bag,pockets}=snapshot(s,p),before=structuredClone(bag),stock=pockets[space.pocketId]||{},
+  pocketBefore=structuredClone(stock),m=pocketMovement(bag,stock,proof,d.item,d.direction,d.units);
+ if(!m)throw Error('Actual held or stored physical items and finite pocket space required');
+ applyPocket(bag,stock,d.item,m);
+ const source={origin:ORIGIN,kind:'pocket-transfer',actorId:p.actorId,identityOriginHash:p.originHash,
+  day,minute,site,witness:structuredClone(witness),witnessHash,pocketId:proof.id,pocketSeal:space.sourceSeal,
+  direction:d.direction,item:d.item,units:d.units,items:{[d.item]:d.units},before,after:bag,
+  pocketBefore,pocketAfter:stock,movement:m,noItemCreation:true};
+ const seal=hash(source);r.rows.push({source,seal});return seal;
+}
+function pocketTransferProof(s,p,seal,pocketSeal,witnessHash,minute){
+ if(!verify(s,p))return false;
+ const q=p.originalMaterialCustody?.rows.find(x=>x.seal===seal)?.source;
+ return !!q&&q.kind==='pocket-transfer'&&q.pocketSeal===pocketSeal&&
+  q.witnessHash===witnessHash&&q.minute===minute;
+}
+module.exports={ORIGIN,OFFER,POCKET_TRANSFER,verify,held,offer,canConsume,consume,debitProof,
+ pocketContents,canMovePocket,movePocket,pocketTransferProof};
