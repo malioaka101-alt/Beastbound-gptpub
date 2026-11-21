@@ -43,5 +43,7 @@ function adaptiveWindow(minute,duration,success){
   cooldownUntil:minute+1+(success?duration:0)+ADAPTIVE_COOLDOWN};
 }
 const releaseCooldown=minute=>minute+1+ADAPTIVE_COOLDOWN;
+function sustainSpec(con,survivalRank,strain){return {dc:18,cost:2,modifier:Math.floor((con-10)/2)+2*survivalRank-Math.floor(strain/3)};}
+const sustainedUntil=(minute,minutes,supported,success)=>success?minute+minutes+supported:null;
 module.exports={SPEC,GOAL,REPAIR_DC,checkSpec,workState,repaired,ready,
- ADAPTIVE_COOLDOWN,ADAPTIVE_MENTAL,adaptiveSpec,adaptiveWindow,releaseCooldown};
+ ADAPTIVE_COOLDOWN,ADAPTIVE_MENTAL,adaptiveSpec,adaptiveWindow,releaseCooldown,sustainSpec,sustainedUntil};
