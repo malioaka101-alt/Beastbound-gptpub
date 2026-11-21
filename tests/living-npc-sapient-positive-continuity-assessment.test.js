@@ -169,6 +169,8 @@ if(worldCount>=96){
  A.ok(summary.originalVisitorEarnedPayments<=summary.originalVisitorSuccessfulWorkChecks&&
   summary.originalVisitorSuccessfulWorkChecks<=summary.originalVisitorRealWorkChecks,
   'Physical Scales can be transferred only after a truly independent real original successful work check');
+ A.ok(summary.originalVisitorEarnedPayments>0,
+  'Across genuinely seeded independent original worlds, at least one actual visiting worker must freely accept and succeed at an original career work roll and earn a real source-conserved merchant payment; never assign consent, work success or cash');
  A.equal(summary.originalVisitorEarnedPayments+
   summary.originalVisitorUnavailableWages,summary.originalVisitorMarketOffers,
   'Every real first-visit source sample must either earn an independently chosen paid wage or acknowledge an unpaid visitor outcome');
