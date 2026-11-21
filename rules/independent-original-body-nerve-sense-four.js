@@ -175,6 +175,7 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
  const r=p.originalBodyNerveSenseFour||{...blank(),origin:ORIGIN,
   originalOrganSourceHash:previous(p),sessions:[],lastAttemptDay:-1,completionSourceHash:null};
  if(r.lastAttemptDay>=day||p.originalBodyOrganCycleThree.lastAttemptDay>=day||
+  p.originalBodyLivingPhysiques?.lastAttemptDay>=day||
   p.meridianTraining?.lastAttemptDay>=day||
   Object.values(p.originalEarlyDisciplinePreparation||{}).some(x=>x.lastAttemptDay>=day)||
   r.sessions.length>=480)throw Error('Another original personal discipline decision already occupies this day');
