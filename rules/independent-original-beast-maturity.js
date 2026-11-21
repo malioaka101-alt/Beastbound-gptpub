@@ -44,10 +44,14 @@ function replay(s,r,b){
  let last=q.startDay,head=l.seal;
  for(const row of l.rows){
   const a=row?.source,activity=a?.activity;
+  const retained=b.individualLife.history.find(x=>x.type==='offscreen-sixday'&&x.day===a?.day);
   if(!a||row.seal!==hash(a)||a.origin!==ORIGIN||a.previous!==head||
    a.beastId!==b.id||a.branchSeal!==q.branchSeal||a.lifeSeal!==q.lifeSeal||
-   !int(a.day,last+1,Math.floor(s.world.minutes/1440))||
-   !int(a.from,Math.max(last,a.day-6),a.day-1)||a.days!==a.day-a.from||
+   !int(a.day,last+1,Math.floor(s.world.minutes/1440))||a.day>b.individualLife.lastTickDay||
+   !s.table?.calendar?.sixdays?.includes(a.day)||
+   !int(a.previousLifeDay,b.individualLife.source.initialDay,a.day-1)||
+   a.from!==Math.max(last,a.previousLifeDay,a.day-6)||a.days!==a.day-a.from||
+   (retained&&hash(retained)!==a.activityHash)||
    activity?.type!=='offscreen-sixday'||activity.day!==a.day||
    !actions.has(activity.action)||activity.observed!==false||
    activity.ecologicalPressure!==true||a.activityHash!==hash(activity)||
@@ -100,7 +104,7 @@ function afterLife(s,b,previousDay,activity){
   if(from>=day||r.years>=r.requiredYears||l.rows.length>=4096)continue;
   const before=r.years,result=P.maturityAdvance(r,day-from,{documented:r.documented,daysPerYear:365}),
    q={origin:ORIGIN,previous:l.head,beastId:b.id,branchSeal:l.source.branchSeal,lifeSeal:l.source.lifeSeal,
-    day,from,days:day-from,activity:structuredClone(activity),activityHash:hash(activity),
+    day,from,previousLifeDay:previousDay,days:day-from,activity:structuredClone(activity),activityHash:hash(activity),
     before,after:result.years,rate:result.rate,noRiteOrNewForm:true};
   const seal=hash(q);l.rows.push({source:q,seal});l.lastDay=day;l.head=seal;
   if(!verify(s,r,b))throw Error('Original independent elapsed Maturity failed replay');
