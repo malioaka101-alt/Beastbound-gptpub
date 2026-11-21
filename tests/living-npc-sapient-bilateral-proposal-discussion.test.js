@@ -10,6 +10,8 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Foundation=require('../world/person-mechanical-foundations'),
  Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
 const Pair=require('../rules/independent-original-bond-pair');
+const Interact=require('../rules/independent-original-bond-interactions'),Witness=require('../rules/bond-witness');
+A.deepEqual(Witness.interactionSpec('gentle',16,0,true,0,3),{event:'gentle_treatment',minutes:15,dc:21,modifier:3});
 const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation');
 A.deepEqual(Bond.contractSpec({grade:4,sapience:3,depth:'deep',will:2,contractLore:2,soulDB:3,soulPhase:3,usedCapacity:2}),{
  depth:'deep',load:4,capacity:7,usedCapacity:2,overCapacity:false,dc:20,modifier:7,stability:80,base:70,link:'10 km'});
@@ -151,6 +153,42 @@ for(let n=0;n<40;n++){
     A.equal(row.bond.contract,null);
     const v=Foundation.gmDossier(w,p.actorId,s).earnedEvidence.beastRelationships;
     A.equal(v.verifiedPartners,null);A.equal(v.sourceVerifiedUncommittedPairs.length,1);
+    // Branch a disposable copy: the other social fixtures retain their
+    // original moment and personal RNGs. No favourable response assigned.
+    const cs=E.importGame(E.exportGame(s)),cp=Realm.peek(cs).emergentPeople.people[p.id],cb=cs.beasts[b.id];
+    C.event(cs,'story',cp.name+' offers a gentle voluntary conversation and gives the sapient person space to refuse.',{
+     origin:Interact.WITNESS,actorId:cp.actorId,beastId:cb.id,pairSeal:row.seal,
+     arrangementHash:entry.seal,arrangementRevision:entry.seal,contactHash:hash(contact),
+     location:site,approach:'gentle',
+     independentConcreteOpportunity:'Actual gentle approach to discuss shared observations without forcing any contact.',
+     actualCommunication:'Previously witnessed local communication and opportunity to decline.',
+     unconditionalRightToRefuse:'Both participants retain space to refuse without any coercion or obligation.',
+     noCompelledInteraction:true});
+    const ir={actorId:cp.actorId,beastId:cb.id,witnessIndex:cs.log.length-1},isave=E.exportGame(cs),irng=cs.rngState;
+    A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:{...ir,event:'respected_refusal'}}),/no outcome or affinity/);
+    A.equal(E.exportGame(cs),isave);
+    const interaction=R.act(cs,{system:'bond',operation:'npcPairInteract',params:ir}),
+     receipt=cp.originalBondInteractions[0],q=receipt.source;
+    A.equal(Interact.verify(cs,cp),true);A.equal(Pair.verify(cs,cp),true);
+    A.equal(cs.rngState,irng);A.equal(interaction.elapsedMinutes,15);
+    A.equal(q.before.trust,0);A.equal(q.after.contract,null);A.equal(q.after.syncStage,0);
+    const derived=structuredClone(q.before);
+    if(q.event)Bond.applyEvent(derived,q.event.event,1);
+    A.deepEqual(q.after,derived);
+    if(q.event?.event==='respected_refusal'){A.equal(q.after.willingness,3);A.equal(q.check,null);}
+    const after=E.exportGame(cs);
+    const freshIdx=cs.log.findIndex(x=>hash(x)===q.witnessHash);
+    if(freshIdx>=0){
+     A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:{...ir,witnessIndex:freshIdx}}),/unused independent pair day/);
+     A.equal(E.exportGame(cs),after);
+    }
+    const ci=E.importGame(after),ic=Realm.peek(ci).emergentPeople.people[p.id];
+    A.equal(Interact.verify(ci,ic),true);
+    ic.originalBondInteractions[0].source.after.trust=100;
+    ic.originalBondInteractions[0].seal=hash(ic.originalBondInteractions[0].source);
+    A.equal(Interact.verify(ci,ic),false);
+    console.log('INDEPENDENT ORIGINAL PAIR INTERACTION '+JSON.stringify({event:q.event?.event??null,accepted:interaction.accepted,success:interaction.successful}));
+
    }else{pairCounts.declined++;A.equal(row.bond,null);}
    const afterPair=E.exportGame(s);
    A.throws(()=>R.act(s,{system:'bond',operation:'npcPairRecord',params:request}),/no repeated decision|current voluntary arrangement required/);
