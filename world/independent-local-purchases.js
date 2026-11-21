@@ -177,7 +177,7 @@ function actualInterest(w,p,day){
 // An independently travelled human can consider the SAME already owned
 // ration and source-local original price. No invented demand posting or
 // home-region rewrite: signed live visitor arrival is their actual shift.
-function visitorPurchaseSource(w,p,q){
+function visitorPurchaseSource(w,p,q,sourceHash){
  const v=q?.visitorSource;
  if(!v)return false;
  const Visit=require('../rules/independent-sapient-terrestrial-journey'),
@@ -216,7 +216,7 @@ function visitorPurchaseSource(w,p,q){
   (p.originalVisitorRationRequests||[]).some(r=>
    r.source?.intentId===v.intentId&&
    r.source?.purchaseContextHash===v.purchaseContextHash&&
-   r.source?.purchaseSourceHash===q.purchaseSourceHashMarker&&
+   r.source?.purchaseSourceHash===sourceHash&&
    r.source?.accepted===true);
 }
 function verifyOne(w,row){
@@ -245,7 +245,7 @@ function verifyOne(w,row){
   q.independentOriginalPresence?.location!=='crossing'||
   q.independentOriginalPresence?.fromDay>q.day||
   q.independentOriginalPresence?.throughDay<q.day||
-  (q.visitorSource?(!visitorPurchaseSource(w,p,q)||
+  (q.visitorSource?(!visitorPurchaseSource(w,p,q,row.sourceHash)||
    q.originalDemandHash!==undefined||
    q.originalDemandSource!==undefined):
    (q.originalDemandHash!==hash(q.originalDemandSource)||
@@ -456,10 +456,6 @@ function buyVerifiedVisitor(s,p,b,{visitorIntent:it,quoted}={}){
   noCreditOrGoodsCreated:true,noCompulsoryPurchase:true,
   notUniversalPriceOrDemand:true};
  const row={id:q.id,origin:ORIGIN,source:q,sourceHash:hash(q)};
- // Marker is a source-owned reference to this SAME original retail sale;
- // it is never a second receipt, stock transfer or chosen new random result.
- q.purchaseSourceHashMarker=row.sourceHash;
- row.sourceHash=hash(q);
  if(!verifyPersonal(p).valid||
   (p.independentMarketPurchases||[]).some(x=>x.id===row.id))
   throw Error('Prior visitor purchase or person money source is invalid');
