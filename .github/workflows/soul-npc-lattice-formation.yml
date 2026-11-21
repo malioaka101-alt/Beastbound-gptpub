@@ -1,0 +1,24 @@
+name: Beastbound Soul III Original Formation Acceptance
+# Real independent lives, not a forced successful milestone or smoke test.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/soul-npc-lattice-formation.yml'
+      - 'tests/living-npc-soul-lattice-three-formation-assessment.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  soul-original-lattice-formation:
+    name: Authentic independent identity countertest and Soul III formation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay genuine original personal Soul development and final identity safeguards
+        run: node tests/living-npc-soul-lattice-three-formation-assessment.test.js
