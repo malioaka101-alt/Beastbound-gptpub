@@ -12,7 +12,7 @@ const ORIGIN='source-earned-independent-exact-origin-pattern-map-v1',
  text=(v,n=25)=>typeof v==='string'&&v.trim().length>=n&&v.length<=900;
 function source(s,p,id){
  try{
-  const {z,q}=Lineage.gmSource(s,id);
+  const {z,q}=Lineage.gmSource(s,id,p.actorId);
   // No source registered for the player or another subject is assumed to
   // establish this person's biological pattern or consent.
   if(q.observation.details?.actorId!==p.actorId)return null;
