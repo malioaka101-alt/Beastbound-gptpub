@@ -392,6 +392,131 @@ for(let n=0;n<80;n++){
         A.equal(E.exportGame(js),afterPropose);
         console.log('INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL '+JSON.stringify({
          result:considered.outcome,newChoices:true,noMovement:true}));
+        // A real refusal is not the end of an individual's life. On a
+        // separate disposable copy, allow the existing WORLD to pass
+        // ordinarily, then offer a freshly witnessed opportunity ONLY
+        // while the original still-revocable arrangement, physical health,
+        // separate real positions and genuine daytime route allow it.
+        // Never select, repeat on the same day, re-seed or alter an outcome.
+        // Keep the original arrived copy for the sixday visitor audit.
+        if(!considered.mutuallyInterested){
+         const dated=E.importGame(E.exportGame(js)),
+          dw=Realm.peek(dated),dp=dw.emergentPeople.people[jp.id],
+          db=dated.beasts[jb.id],dBody=dated.table.combatants['npc_'+jp.id];
+         for(let laterDay=1;laterDay<=6;laterDay++){
+          const beforeDate=dated.world.minutes;
+          Time.advance(dated,1);
+          const newRoute=ReturnPreflight.routeStatus(dated,dp,db,'forest');
+          if(!newRoute.proposalEligible){
+           console.log('INDEPENDENT ORIGINAL VISITOR LATER-DAY DEFERRED '+JSON.stringify({
+            laterDay,reason:newRoute.reason,unforced:true}));
+           break;
+          }
+          A.equal(Journey.position(dp,dated.world.minutes).location,'crossing');
+          A.equal(db.location,'crossing');
+          A.equal(dated.world.location,playerSite);
+          A.equal(newRoute.sourceArrivalHash,jp.originalSapientTerrestrialJourneys[0].seal);
+          const dayScene=dp.name+' and '+db.name+
+           ' freely revisit the possibility of the connected crossing-to-forest route on a later actual day, with neither travel nor continued cooperation assumed.';
+          dated.chatRuntime.scene=dayScene;
+          C.event(dated,'story',dayScene,{
+           origin:VisitorProposal.WITNESS,actorId:dp.actorId,beastId:db.id,
+           arrivalSeal:newRoute.sourceArrivalHash,from:'crossing',to:'forest',
+           arrangementSeal:entry.seal,pairSeal:row.seal,
+           combatSeal:dBody.npcOrigin.seal,
+           originalLinkedMinutes:75,originalHumanStamina:4,
+           separateNewHumanAndSapientChoices:true,
+           noInheritedReturnConsentOrGuaranteedJourney:true,
+           actualVisitorSitePurposeAndDestination:'This is a new, truly dated invitation to consider a short return along the established linked route from the crossing; no consent carries across days.',
+           currentRouteRisksAndWeather:'Actual world conditions: '+String(dated.world.weather)+
+            '. The originally linked walking route still has ordinary hazards, welfare and daylight restrictions.',
+           freshRightOfEachPersonToRefuse:'Either independently living traveller may decline consideration now, withdraw later or refuse to depart after a proposal.',
+           originalTerrestrialMeansNotTeleportOrMount:'No fictional portal, imposed ride or newly invented connection; the original linked forest exit must be walked.'});
+          const dayRequest={actorId:dp.actorId,beastId:db.id,
+           destination:'forest',witnessIndex:dated.log.length-1},
+           prior=E.exportGame(dated),humanBefore=dp.rngState,
+           beastBefore=db.sapientLife.rngState,worldBefore=dated.rngState;
+          const offered=R.act(dated,{system:'bond',
+           operation:'npcVisitorTerrestrialProposal',params:dayRequest}),
+           q=dp.originalSapientVisitorLegProposals.at(-1).source,
+           freshSeal=dp.originalSapientVisitorLegProposals.at(-1).seal;
+          A.equal(offered.mutuallyInterested,q.mutuallyInterested);
+          A.equal(q.humanChoice.rngBefore,humanBefore);
+          A.equal(q.beastChoice?.rngBefore??beastBefore,beastBefore);
+          A.equal(dated.rngState,worldBefore);
+          A.equal(dated.world.minutes,beforeDate+1440);
+          A.equal(Journey.verify(dated,dp),true);
+          A.equal(VisitorProposal.verify(dated,dp),true);
+          console.log('INDEPENDENT ORIGINAL LATER-DAY VISITOR PROPOSAL '+JSON.stringify({
+           laterDay,result:offered.outcome,originalElapsedDays:laterDay,
+           noAssignedConsent:true}));
+          if(!offered.mutuallyInterested)continue;
+          if(dated.world.minutes%1440+76>1440){
+           console.log('INDEPENDENT ORIGINAL LATER-DAY DEPARTURE DEFERRED '+JSON.stringify({
+            laterDay,reason:'original-daylight-limit'}));
+           continue;
+          }
+          const consideredMinute=dated.world.minutes;
+          E.advance(dated,1);Time.finalizeTime(dated,consideredMinute);
+          const departureScene=dp.name+' and '+db.name+
+           ' separately consider whether to start the actual later-day crossing-to-forest foot journey; either remains able to refuse.';
+          dated.chatRuntime.scene=departureScene;
+          C.event(dated,'story',departureScene,{
+           origin:Journey.WITNESS,actorId:dp.actorId,beastId:db.id,
+           proposalSeal:freshSeal,from:'crossing',to:'forest',
+           actualFreshDepartureDecision:true,
+           noAssumedFutureConsentOrOwnedBeast:true,
+           originalRouteMinutes:75,originalHumanStaminaCost:4,
+           currentInformedDepartureAndReturnFreedom:'Neither traveller is obliged to set off despite their independent agreement to consider this later-day proposal.',
+           originalRouteConditionsAndKnownHazards:'A genuinely linked walking exit still requires the original 75-minute passage, actual human Stamina and suitable weather without free bypass.',
+           actualIndividualBeastMovementAbility:'The original mobile sapient individual may walk, refuse or change plans without being made a mount or controlled property.',
+           noCompelledUnsafeWeatherOrHazardBypass:true});
+          const secondBefore=dated.world.minutes,staminaBefore=dBody.stamina,
+           actual=R.act(dated,{system:'bond',operation:'npcVisitorTerrestrialJourney',
+            params:{actorId:dp.actorId,beastId:db.id,
+             proposalSeal:freshSeal,witnessIndex:dated.log.length-1}}),
+           leg=dp.originalSapientTerrestrialJourneys.at(-1).source;
+          A.equal(Journey.verify(dated,dp),true);
+          A.equal(Person.verify(db),true);
+          A.equal(dated.world.minutes,secondBefore+(leg.departed?75:0));
+          A.equal(dBody.stamina,staminaBefore-(leg.departed?4:0));
+          A.equal(actual.departureConsent,leg.departed);
+          A.equal(dated.world.location,playerSite);
+          A.equal(db.location,leg.departed?'forest':'crossing');
+          A.equal(Journey.position(dp,dated.world.minutes).location,
+           leg.departed?'forest':'crossing');
+          console.log('INDEPENDENT ORIGINAL LATER-DAY SECOND JOURNEY '+JSON.stringify({
+           laterDay,departed:leg.departed,
+           humanStaminaPaid:actual.actualHumanStaminaPaid,
+           minutes:actual.actualMinutes,unforced:true}));
+          if(!leg.departed)continue;
+          // A genuine second-leg homecoming may resume only FUTURE
+          // source-owned life. No retroactive home wages or automatic rest.
+          const homeDay=Math.floor(dated.world.minutes/1440),homeCash=dp.cashScales;
+          A.equal(Journey.awayDuring(dp,(homeDay+1)*1440,
+           (homeDay+2)*1440),false);
+          A.equal(Presence.resolve(Realm.peek(dated),dp.actorId,'forest',homeDay,
+           dated.world.minutes%1440)?.presence?.source,Journey.VISITOR);
+          const arrived=E.importGame(E.exportGame(dated)),
+           ap=Realm.peek(arrived).emergentPeople.people[dp.id];
+          Time.advance(arrived,2);
+          A.equal(Journey.verify(arrived,ap),true);
+          A.equal(Journey.position(ap,arrived.world.minutes).location,'forest');
+          A.equal(Presence.resolve(Realm.peek(arrived),ap.actorId,'crossing',
+           Math.floor(arrived.world.minutes/1440),arrived.world.minutes%1440),null);
+          A.equal(Presence.resolve(Realm.peek(arrived),ap.actorId,'forest',
+           Math.floor(arrived.world.minutes/1440),arrived.world.minutes%1440)?.presence?.source,
+           People.SHIFT);
+          A.ok(ap.cashScales>=homeCash);
+          A.equal(E.exportGame(E.importGame(E.exportGame(arrived))),
+           E.exportGame(arrived));
+          console.log('INDEPENDENT ORIGINAL LATER-DAY VERIFIED HOMECOMING '+JSON.stringify({
+           laterDay,actualSecondJourney:true,restoredHomeShiftOnlyAfterArrival:true,
+           noFreeWagesOrGrade:true}));
+          break;
+         }
+        }
+
         if(considered.mutuallyInterested&&originalMinute%1440+76<=1440){
          // Actual one minute elapses before the separate *departure*
          // decision: an instantly copied proposal witness cannot serve as
