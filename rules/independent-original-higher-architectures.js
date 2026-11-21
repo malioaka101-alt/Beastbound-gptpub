@@ -38,7 +38,7 @@ function prior(s,p,system){
  }
  return null;
 }
-const endOf=q=>q.endMinute??(q.startMinute+q.actualMinutes);
+const endOf=q=>q.endMinute??((q.startMinute??q.minute)+q.actualMinutes);
 function owner(system,stage){return system==='soul'?Soul:stage===4?Dynamic:Arcane;}
 function operation(system,stage,origin){
  const o=owner(system,stage);
@@ -137,7 +137,11 @@ function replay(s,p,system,base){
  const used=new Set(),nights=new Set(base.history.filter(x=>x.source.originalNightSourceHash).map(x=>x.source.originalNightSourceHash));
  const Offscreen=require('../world/independent-original-power-days');
  for(const row of r.sessions){
-  const q=row?.source;
+  const q=row?.source,External=require('./independent-arcane-external-mana');
+  if(q?.origin===External.ORIGIN){
+   if(system!=='arcane'||!External.validRow(s,p,row,'higher',state.stage,state.energy,state.capacity,state.lastEnd))return null;
+   state.energy=q.manaAfter;state.lastEnd=q.endMinute;continue;
+  }
   if(!q||row.seal!==hash(q)||q.actorId!==p.actorId||q.system!==system||
    q.identityOriginHash!==p.originHash||q.combatSeal!==body.npcOrigin.seal)return null;
   if(q.origin===NIGHT){
