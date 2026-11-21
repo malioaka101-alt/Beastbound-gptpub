@@ -20,7 +20,8 @@ const ORIGIN='source-earned-independent-witnessed-living-physique-v1',
 const prior=p=>p?.originalBodyOrganCycleThree?.completed?
  p.originalBodyOrganCycleThree.originalCycleThreeSourceHash:null;
 const kindOf=w=>({[PC.MAP]:'map',[PC.WORK]:'work',[PC.CARE]:'care',
- [PC.FORM]:'form',[PC.REPEAT]:'repeat'})[w?.details?.origin];
+ [PC.FORM]:'form',[PC.REPEAT]:'repeat',[PC.TISSUE]:'tissue-map',
+ [PC.TISSUE_WORK]:'tissue-work',[PC.TISSUE_CARE]:'tissue-care'})[w?.details?.origin];
 function witnessValid(w,p,cycle,kind,site,minute){
  const d=w?.details,sp=Law.SPEC[cycle];
  if(!sp||w?.type!=='story'||!text(w.text,16)||!w.text.includes(p.name)||
@@ -30,6 +31,10 @@ function witnessValid(w,p,cycle,kind,site,minute){
  if(kind==='map')return typeof d.designId==='string'&&/^[a-z][a-z0-9_-]{2,75}$/.test(d.designId)&&
   ['method','actualTissues','metabolicSupport','failureLimit','reversion',
    'independentCountertest',...sp.sources].every(k=>text(d[k]));
+ if(kind==='tissue-map')return /^[a-z][a-z0-9_-]{2,75}$/.test(d.tissueId||'')&&
+  ['tissue','realFunction','metabolicTradeoff','failureLimit','observedTissue','independentCountertest'].every(k=>text(d[k]));
+ if(kind==='tissue-work'||kind==='tissue-care')return /^[a-z][a-z0-9_-]{2,75}$/.test(d.tissueId||'')&&
+  ['observedResponse','physicalLimit'].every(k=>text(d[k]));
  if(kind==='work'||kind==='care')
   return ['observedBodyResponse','physicalLimit'].every(k=>text(d[k]));
  if(kind==='form')return ['integratedFunction','failureCounter','metabolicTradeoff'].every(k=>text(d[k]));
@@ -45,9 +50,15 @@ function support(p,cycles,cycle,day){
  return {nerve:n.completionSourceHash,blood:cycles[5].formationSourceHash,
   adaptive:cycles[6].formationSourceHash};
 }
-function eligible(cycles,cycle,kind){
+const tissueKind=k=>['tissue-map','tissue-work','tissue-care'].includes(k);
+const mapKind=k=>k==='map'||k==='tissue-map';
+const individualTissue=(r,w)=>r?.tissues?.find(t=>t.id===w?.details?.tissueId);
+function eligible(cycles,cycle,kind,w){
  const r=cycles[cycle];if(kind==='map')return !r;
  if(!r)return false;
+ if(tissueKind(kind)){const t=individualTissue(r,w);
+  return kind==='tissue-map'?!t&&(r.tissues?.length||0)<180:
+   !!t&&(kind==='tissue-work'?t.strain<5:t.strain>0);}
  if(kind==='work')return !r.completed&&r.points<Law.GOAL&&r.strain<5;
  if(kind==='care')return r.strain>0;
  if(kind==='form')return !r.completed&&Law.ready(r.points,r.strain);
@@ -56,8 +67,9 @@ function eligible(cycles,cycle,kind){
 function blank(){return {points:0,strain:0,completed:false,formationSourceHash:null,mapSourceHash:null};}
 function state(r){return r?structuredClone(r):null;}
 function decisionSpec(p,cycle,kind,strain){
- return kind==='map'?{dc:null,cost:0,modifier:0}:
-  Law.checkSpec(cycle,kind,p.mechanicalFoundation.baselineAttributes.con,0,strain);
+ return mapKind(kind)?{dc:null,cost:0,modifier:0}:
+  Law.checkSpec(cycle,kind==='tissue-work'?'work':kind==='tissue-care'?'care':kind,
+   p.mechanicalFoundation.baselineAttributes.con,0,strain);
 }
 function checkRecord(roll,sp){
  const margin=roll+sp.modifier+Core.naturalAdjustment(roll)-sp.dc;
@@ -74,6 +86,21 @@ function update(r,kind,check){
  }else if(kind==='form'&&check.success)r.completed=true;
  return {injury};
 }
+// Individual tissue work is deliberately uncapped, unlike the six-point
+// whole-body cycle. It cannot complete a cycle or grant its capacity.
+function mapTissue(r,w,seal){
+ const d=w.details,t={id:d.tissueId,tissue:d.tissue.trim(),realFunction:d.realFunction.trim(),
+  metabolicTradeoff:d.metabolicTradeoff.trim(),failureLimit:d.failureLimit.trim(),
+  mapSourceHash:seal,points:0,strain:0};
+ (r.tissues||=[]).push(t);
+}
+function updateTissue(t,kind,check){
+ if(kind==='tissue-care'){t.strain=Law.repaired(t.strain,check);return false;}
+ if(check.success)t.points+=Core.progress(check.degree);
+ if(check.degree==='severe failure'){t.strain=Math.min(100,t.strain+3);return true;}
+ return false;
+}
+const tissueView=t=>t?{id:t.id,points:t.points,strain:t.strain,mapSourceHash:t.mapSourceHash}:null;
 // Exclude receipt seals when comparing pre/post mechanical values; the
 // winning receipt itself is separately referenced and checked.
 function publicState(r){
@@ -103,7 +130,8 @@ function verify(s,p){
    sh.fromDay>q.day||sh.throughDay<q.day||
    q.witnessHash!==hash(q.witness)||used.has(q.witnessHash)||
    !witnessValid(q.witness,p,cycle,q.kind,q.site,q.minute)||
-   !eligible(sim,cycle,q.kind)||!eq(q.before,publicState(sim[cycle]))||
+   !eligible(sim,cycle,q.kind,q.witness)||!eq(q.before,publicState(sim[cycle]))||
+   (tissueKind(q.kind)&&!eq(q.tissueBefore,tissueView(individualTissue(sim[cycle],q.witness))))||
    !eq(q.supportingProof,support(p,sim,cycle,q.day))||
    (cycle===7&&!q.supportingProof)||
    q.mapSourceHash!==(sim[cycle]?.mapSourceHash??null)||
@@ -112,17 +140,18 @@ function verify(s,p){
    q.chance!==Early.chance({personality:q.personality,fatigue:q.fatigue})||
    !int(q.staminaBefore,1)||!int(q.maxBefore,q.staminaBefore)||!eq(q.woundsBefore,[0,0,0])||
    q.noNewSpeciesTraitOrAdaptiveExpressionOrTechnique!==true)return false;
-  const rr={rngState:q.rngBefore},map=q.kind==='map';
+  const rr={rngState:q.rngBefore},map=mapKind(q.kind),tissue=tissueKind(q.kind);
   if(q.choice!==Core.die(rr,100)||q.accepted!==(q.choice<=q.chance)||
    (map?q.plannedMinutes!==0:!int(q.plannedMinutes,['form','repeat'].includes(q.kind)?30:15,480))||
    q.minute%1440<480||q.minute%1440+Math.max(5,q.plannedMinutes)>1080)return false;
-  const mode=decisionSpec(p,cycle,q.kind,sim[cycle]?.strain||0);
+  const mode=decisionSpec(p,cycle,q.kind,(tissue?individualTissue(sim[cycle],q.witness)?.strain:sim[cycle]?.strain)||0);
   let check=null,spent=0,injury=false,gain=0;
   if(q.accepted){
-   if(map){sim[cycle]=blank();sim[cycle].mapSourceHash=row.seal;}
+   if(q.kind==='map'){sim[cycle]=blank();sim[cycle].mapSourceHash=row.seal;}
+   else if(q.kind==='tissue-map')mapTissue(sim[cycle],q.witness,row.seal);
    else{
     spent=mode.cost;check=checkRecord(Core.die(rr,20),mode);
-    injury=update(sim[cycle],q.kind,check).injury;
+    injury=tissue?updateTissue(individualTissue(sim[cycle],q.witness),q.kind,check):update(sim[cycle],q.kind,check).injury;
     if(q.kind==='form'&&check.success){gain=sp.bonus;sim[cycle].formationSourceHash=row.seal;}
    }
   }
@@ -130,7 +159,10 @@ function verify(s,p){
    !eq(q.check,check)||q.rngAfter!==rr.rngState||q.staminaSpent!==spent||
    q.staminaBefore<spent||q.staminaAfter!==q.staminaBefore-spent||
    q.maxAfter!==q.maxBefore+gain||!eq(q.woundsAfter,injury?[1,0,0]:[0,0,0])||
-   !eq(q.after,publicState(sim[cycle])))return false;
+   !eq(q.after,publicState(sim[cycle]))||
+   (tissue&&!eq(q.tissueAfter,q.kind==='tissue-map'&&q.accepted?
+    {...tissueView(individualTissue(sim[cycle],q.witness)),mapSourceHash:null}:
+    tissueView(individualTissue(sim[cycle],q.witness)))))return false;
   used.add(q.witnessHash);lastDay=q.day;lastEnd=q.minute+q.actualMinutes;
  }
  return eq(r.cycles,sim)&&r.lastAttemptDay===lastDay;
@@ -153,32 +185,34 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
   throw Error('Actual present original Organ III adult, consistent uninjured body and independent individual witness required');
  const r=p.originalBodyLivingPhysiques||{origin:ORIGIN,organSourceHash:prior(p),
   cycles:{},sessions:[],lastAttemptDay:-1},
-  map=kind==='map',rec=r.cycles[cycle],proof=support(p,r.cycles,cycle,day),
+  map=mapKind(kind),rec=r.cycles[cycle],proof=support(p,r.cycles,cycle,day),
+  tissue=tissueKind(kind),individual=individualTissue(rec,wit),
   planned=map?0:minutes??(['form','repeat'].includes(kind)?90:60);
  if(r.lastAttemptDay>=day||p.originalBodyOrganCycleThree.lastAttemptDay>=day||
   p.originalBodyNerveSenseFour?.lastAttemptDay>=day||p.meridianTraining?.lastAttemptDay>=day||
   Object.values(p.originalEarlyDisciplinePreparation||{}).some(x=>x.lastAttemptDay>=day)||
   r.sessions.length>=480)throw Error('Another original personal discipline decision already occupies this day');
- if(!witnessValid(wit,p,cycle,kind,site,start)||!eligible(r.cycles,cycle,kind)||
+ if(!witnessValid(wit,p,cycle,kind,site,start)||!eligible(r.cycles,cycle,kind,wit)||
   (cycle===7&&!proof)||r.sessions.some(x=>x.source.witnessHash===hash(wit))||
   (map?minutes!==undefined&&minutes!==0:!int(planned,['form','repeat'].includes(kind)?30:15,480))||
   minute<480||minute+Math.max(5,planned)>1080)
   throw Error('Fresh authentic individual tissue/function witness and original stage prerequisites required; VII requires earned IV, V and VI');
- const mode=decisionSpec(p,cycle,kind,rec?.strain||0);
+ const mode=decisionSpec(p,cycle,kind,(tissue?individual?.strain:rec?.strain)||0);
  if(body.stamina<mode.cost)throw Error('Original physiology procedure requires actual available Combat Stamina');
  const rngBefore=p.rngState,chance=Early.chance(p),choice=Core.die(p,100),accepted=choice<=chance,
-  before=publicState(rec),staminaBefore=body.stamina,maxBefore=body.maxStamina,woundsBefore=[...body.wounds],
+  before=publicState(rec),tissueBefore=tissueView(individual),staminaBefore=body.stamina,maxBefore=body.maxStamina,woundsBefore=[...body.wounds],
   mapSourceHash=rec?.mapSourceHash??null,
   originalFormationProof=kind==='repeat'?rec.formationSourceHash:null;
  let check=null,spent=0;
  if(accepted){
-  if(map)r.cycles[cycle]=blank();
+  if(kind==='map')r.cycles[cycle]=blank();
+  else if(kind==='tissue-map')mapTissue(rec,wit,null);
   else{
    const roll=Core.check(s,{modifier:mode.modifier,dc:mode.dc,
     independentRngOwner:p,privateDisplay:true,label:p.name+' original '+Law.SPEC[cycle].name+' '+kind});
    check=checkRecord(roll.roll,mode);spent=mode.cost;body.stamina-=spent;
-   const changed=update(rec,kind,check);
-   if(changed.injury)Combat.harm(s,body,2);
+   const injury=tissue?updateTissue(individual,kind,check):update(rec,kind,check).injury;
+   if(injury)Combat.harm(s,body,2);
    if(kind==='form'&&check.success)body.maxStamina+=Law.SPEC[cycle].bonus;
   }
  }
@@ -189,10 +223,12 @@ function work(s,{actorId,witnessIndex,minutes,...extra}={}){
   day,minute:start,plannedMinutes:planned,actualMinutes:accepted?planned:5,
   rngBefore,rngAfter:p.rngState,personality:p.personality,fatigue:p.fatigue,
   chance,choice,accepted,check,before,after:publicState(r.cycles[cycle]),
+  ...(tissue?{tissueBefore,tissueAfter:tissueView(individualTissue(rec,wit))}:{}),
   staminaBefore,staminaSpent:spent,staminaAfter:body.stamina,maxBefore,maxAfter:body.maxStamina,
   woundsBefore,woundsAfter:[...body.wounds],noNewSpeciesTraitOrAdaptiveExpressionOrTechnique:true};
  const seal=hash(q);
- if(accepted&&map)r.cycles[cycle].mapSourceHash=seal;
+ if(accepted&&kind==='map')r.cycles[cycle].mapSourceHash=seal;
+ if(accepted&&kind==='tissue-map')individualTissue(rec,wit).mapSourceHash=seal;
  if(accepted&&kind==='form'&&check.success)rec.formationSourceHash=seal;
  r.sessions.push({source:q,seal});r.lastAttemptDay=day;p.originalBodyLivingPhysiques=r;
  E.advance(s,q.actualMinutes);World.finalizeTime(s,start);
@@ -206,7 +242,9 @@ function privateStatus(s,p){
  const r=p.originalBodyLivingPhysiques;
  return {privateToGM:true,cycles:Object.entries(r?.cycles||{}).map(([k,v])=>({
   cycle:Number(k),name:Law.SPEC[k].name,points:v.points,strain:v.strain,completed:v.completed,
-  formationSourceHash:v.formationSourceHash,sourceVerifiedCapacityGain:v.completed?Law.SPEC[k].bonus:0})),
+  formationSourceHash:v.formationSourceHash,sourceVerifiedCapacityGain:v.completed?Law.SPEC[k].bonus:0,
+  individuallyObservedTissues:(v.tissues||[]).map(t=>({id:t.id,tissue:t.tissue,observedFunction:t.realFunction,
+   practicePoints:t.points,strain:t.strain,sourceHash:t.mapSourceHash,noAutomaticAbility:true}))})),
   witnessedDecisions:r?.sessions.length||0,noActiveAdaptiveExpressionOrEvolvedUpkeepEstablished:true};
 }
 module.exports={ORIGIN,verify,work,privateStatus};
