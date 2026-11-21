@@ -23,5 +23,17 @@ const before=E.exportGame(s);
 A.throws(()=>R.act(s,{system:'body',operation:'npcLivingPhysiqueWork',
  params:{actorId:'emergent:person_0',witnessIndex:0,formed:true}}),/accepts actorId/);
 A.equal(E.exportGame(s),before);
+A.deepEqual(Law.adaptiveSpec(1,16,0,3),{dc:18,cost:2,modifier:2});
+A.deepEqual(Law.adaptiveSpec(61,16,2,3),{dc:18,cost:3,modifier:6});
+A.deepEqual(Law.adaptiveWindow(100,61,true),{activeFrom:101,activeUntil:162,cooldownUntil:170});
+A.deepEqual(Law.adaptiveWindow(100,61,false),{activeFrom:101,activeUntil:null,cooldownUntil:109});
+A.equal(Law.releaseCooldown(120),129);
+A.throws(()=>Law.adaptiveSpec(0,16,0,0),/Measured adaptive duration/);
+A.throws(()=>R.act(s,{system:'body',operation:'npcAdaptiveAssume',
+ params:{actorId:'emergent:person_0',witnessIndex:0,minutes:60,formed:true}}),/accepts actorId/);
+A.equal(E.exportGame(s),before);
+A.throws(()=>R.act(s,{system:'body',operation:'npcAdaptiveRelease',
+ params:{actorId:'emergent:person_0',witnessIndex:0}}),/verified Adaptive VI|accepts actorId/);
+A.equal(E.exportGame(s),before);
 require('./body-living-physiques.test.js');
 console.log('Original individual advanced Body V–VII PC law parity and NPC forged-stage/forced-result gates PASS');
