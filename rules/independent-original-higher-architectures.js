@@ -195,7 +195,8 @@ function usedDay(p,day){
   p.originalRiftMeasuredSense,p.originalRiftExteriorAnchor,p.originalOriginPatternResearch,p.originalOriginIntegrations,...Object.values(p.originalEarlyDisciplinePreparation||{})]
   .some(r=>r?.lastAttemptDay>=day)||
   Object.values(keys).some(k=>p[k]?.sessions?.some(x=>x.source.origin===ORIGIN&&x.source.day>=day))||
-  !!p.originalRiftBoundaryDomains?.rows?.some(x=>x.source.day>=day);
+  !!p.originalRiftBoundaryDomains?.rows?.some(x=>x.source.day>=day)||
+  !!p.originalBondInteractions?.some(x=>x.source.approach==='drill'&&x.source.day>=day);
 }
 function work(s,{actorId,witnessIndex,minutes,...extra}={},system){
  if(Object.keys(extra).length||!keys[system]||typeof actorId!=='string'||
