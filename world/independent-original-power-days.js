@@ -488,7 +488,7 @@ function afterDaily(s,w,life,activity,day){
  // A witnessed Domain already consumed this actor's original physical
  // discipline opportunity. No retroactive second practice or field night.
  if(ctx.actor.originalRiftBoundaryDomains?.rows?.some(x=>x.source.day===ctx.workDay)||
-  ctx.actor.originalBondInteractions?.some(x=>x.source.approach==='drill'&&x.source.day===ctx.workDay))return null;
+  ctx.actor.originalBondInteractions?.some(x=>['drill','sync'].includes(x.source.approach)&&x.source.day===ctx.workDay))return null;
  if(activity.source.action==='rest'){
   // An exterior Riftglass rest is NOT a settlement safe night. After
   // independently witnessed sensing, the person can still choose ONE
