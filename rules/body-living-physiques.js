@@ -908,7 +908,7 @@ function sustain(s,p={}){
  const wHash=digest(witness);
  if((r.upkeep||[]).some(x=>x.source.witnessHash===wHash))
   throw Error('A prior genuine constitutional care episode cannot be rerolled');
- const minutes=p.minutes??60,spent=2;
+ const minutes=p.minutes??60,mode=Law.sustainSpec(s.player.attributes?.con??10,s.player.skills?.survival?.rank||0,r.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original body lacks stamina for this actual self-care');
  // Physical stock is conserved through the SAME executor as gathering,
@@ -918,9 +918,7 @@ function sustain(s,p={}){
  const start=s.world.minutes;
  U.applyItems(s,foodPlan);
  s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:18,label:'Individually observed Evolved Physique metabolic maintenance'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Individually observed Evolved Physique metabolic maintenance'});
  const rollEvent=structuredClone(s.log.at(-1));
  const supportedMinutes=witness.details.supportedMinutes;
  const src={origin:ORIGIN,kind:'sustain',cycle:7,minute:start,minutes,
@@ -929,7 +927,7 @@ function sustain(s,p={}){
   witness,witnessHash:wHash,check:structuredClone(check),
   checkEvent:rollEvent,checkEventHash:digest(rollEvent),roll:check.roll,
   supportedMinutes,factuallySupported:check.success,
-  maintainedUntil:check.success?start+minutes+supportedMinutes:null};
+  maintainedUntil:Law.sustainedUntil(start,minutes,supportedMinutes,check.success)};
  r.upkeep||=[];r.upkeep.push({origin:ORIGIN,source:src,seal:digest(src)});
  E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
  if(!verify(s))throw Error('Saved metabolic care or original body resources cannot be reconciled');
