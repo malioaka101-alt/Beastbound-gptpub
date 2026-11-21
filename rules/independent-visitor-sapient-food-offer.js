@@ -47,7 +47,7 @@ function structure(b){
    !q.safeDietReference||q.safeDietReference.item!=='clean_rations'||
    q.safeDietReference.quantity!==1||
    q.noTransferWithoutTwoOriginalChoices!==true||
-   q.noBeastBondRankGradeOrFreeCare===false||
+   q.noBeastBondRankGradeOrFreeCare!==true||
    seals.has(q.witnessHash)||days.has(q.day)||!prose(q.witness.text))
    return false;
   if(q.humanChoice.accepted){

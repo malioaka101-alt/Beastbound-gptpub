@@ -61,7 +61,8 @@ function validateAccount(a,id){
      (record.origin!==ORIGIN&&
       record.origin!=='independent-personal-ration-use-v1'&&
       record.origin!=='genuine-independent-funded-local-ration-purchase-v1'&&
-      record.origin!==PERSON_SALE))
+      record.origin!==PERSON_SALE&&
+      record.origin!=='source-independent-original-visiting-sapient-ration-consumption-v1'))
    throw Error('A recipient’s material history must have authentic provenance');
   if(record.origin===ORIGIN){
    const {hash:seal,...source}=record;
@@ -109,6 +110,21 @@ function validateAccount(a,id){
      throw Error('An original funded purchase must credit exactly the paid-for material');
     sourceStep(record.item,record.heldBefore,record.heldAfter);
    }else historicalStep(record.item);
+  }else if(record.origin==='source-independent-original-visiting-sapient-ration-consumption-v1'){
+   const {hash:seal,...source}=record;
+   if(seal!==hash(source)||record.actorId!==id||
+    !/^beast_[0-9]+$/.test(record.beastId||'')||
+    record.item!=='clean_rations'||record.quantity!==1||
+    !Number.isInteger(record.day)||record.day<0||
+    !Number.isInteger(record.worldMinute)||record.worldMinute<0||
+    record.day!==Math.floor(record.worldMinute/1440)||
+    !/^[a-f0-9]{64}$/.test(record.offerSourceHash||'')||
+    !Number.isInteger(record.heldBefore)||record.heldBefore<1||
+    !Number.isInteger(record.remainingOwned)||record.remainingOwned<0||
+    record.remainingOwned!==record.heldBefore-1||
+    record.noAutomaticPartnerOrSkillOrMoney!==true)
+    throw Error('Independently accepted sapient feeding must consume the original human-owned physical ration');
+   sourceStep(record.item,record.heldBefore,record.remainingOwned);
   }else if(record.origin===PERSON_SALE){
    const q=record.source;
    if(!q||record.sourceHash!==hash(q)||q.origin!==PERSON_SALE||
@@ -208,6 +224,9 @@ function privateHoldingEvidence(w,actorId){
     step(record.item,record.heldBefore,record.heldAfter,
      record.hash,record.origin);
    else legacy.add(record.item);
+  }else if(record.origin==='source-independent-original-visiting-sapient-ration-consumption-v1'){
+   step(record.item,record.heldBefore,record.remainingOwned,
+    record.hash,record.origin);
   }else if(record.origin===PERSON_SALE){
    const q=record.source;
    step(q.item,q.sellerHeldBefore,q.sellerHeldAfter,

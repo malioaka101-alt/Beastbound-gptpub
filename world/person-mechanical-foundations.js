@@ -156,6 +156,12 @@ function earnedEvidence(w,actorId,s=null){
    originalSpecies:life.source.species,
    individuallySourceVerifiedVisitorWelfare:
     require('../rules/independent-sapient-visitor-welfare').beastStatus(s,{beastId}),
+   individuallySourcedVoluntaryFoodOffers:(life.originalVisitorRationOffers||[]).map(x=>({
+    privateToGM:true,originalSourceHash:x.seal,
+    independentlyAte:x.source.accepted,
+    genuinelyOwnedOneRationConsumed:x.source.foodConsumed,
+    originalHungerImprovement:x.source.hungerBefore-x.source.hungerAfter,
+    noForcedRelationshipOrCare:true})),
    autonomousEarnedWork:{
     sourceHash:practice.sourceHash,
     completedAttempts:practice.attempts,
@@ -428,6 +434,9 @@ function earnedEvidence(w,actorId,s=null){
     independentlyWitnessedVisitorSapientWelfare:
      inMatchingGame&&actor.originalSapientVisitorRefugeChoices!==undefined?
       require('../rules/independent-sapient-visitor-welfare').privateStatus(s,actor):null,
+    originalIndependentlyChosenVisitorBeastFood:
+     inMatchingGame&&actor.originalVisitorSapientFoodOffers!==undefined?
+      require('../rules/independent-visitor-sapient-food-offer').privateStatus(s,actor):null,
     sourceVerifiedIndividualRationPurchases:
      inMatchingGame&&actor.originalVisitorRationRequests!==undefined?
       require('../rules/independent-visitor-ration-trade').privateStatus(s,actor):null,

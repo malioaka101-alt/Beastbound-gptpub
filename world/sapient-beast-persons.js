@@ -189,6 +189,7 @@ function verify(b){
   !Array.isArray(l.history)||l.history.length>HISTORY||!verifyContacts(b,l)||
   !verifyTerrestrialBeastReceipts(b,l)||
   !require('../rules/independent-sapient-visitor-welfare').structure(b)||
+  !require('../rules/independent-visitor-sapient-food-offer').structure(b)||
   !Practice.verify(l.practice,'sapient:'+b.id,l.sourceHash,aptitude(b))||
   l.noImposedProfession!==true||l.noInferredSociety!==true)
   return false;
