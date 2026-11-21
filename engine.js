@@ -186,8 +186,9 @@
     target=resolveLocation(target);const here=LOCATIONS[s.world.location];
     if(!here)return fail(s,'Newly established places require the GM-judged world.travelTo operation; no legacy route or free transfer is implied.');
     if(!target||!here.exits.includes(target))return fail(s,`Travel must follow a linked route. From here: ${here.exits.map(x=>LOCATIONS[x].name).join(', ')}.`);
-    const old=s.world.location;s.world.location=target;s.flags.visited[target]=true;advance(s, target==='ruins'?145:75);
-    s.player.stamina=clamp(s.player.stamina-4,0,s.player.maxStamina);
+    const {minutes:routeMinutes,stamina:routeStamina}=require('./rules/travel-shared-original-law').legSpec(target);
+    const old=s.world.location;s.world.location=target;s.flags.visited[target]=true;advance(s,routeMinutes);
+    s.player.stamina=clamp(s.player.stamina-routeStamina,0,s.player.maxStamina);
     // Once the canonical wound model is active, legacy route exertion must
     // update the SAME living human combat stamina. Never invent recovery or
     // let travel silently strand the two stamina ledgers out of sync.
