@@ -95,13 +95,14 @@ function discuss(s,{actorId,beastId,witnessIndex,...extra}={}){
   wit=structuredClone(s.log[witnessIndex]),terms=wit?.details?.terms;
  if(!p||p.actorId!==actorId||!People.verify(w,p)||!present?.presence||
   p.status!=='active'||p.ageBand!=='adult, exact birthday not established'||
-  !b?.sapientLife||!Person.verify(b)||b.sapience<3||
+  !b?.sapientLife||!Person.verify(b)||
+  !(E.SPECIES[b.species]?.intelligence==='sapient'||Number.isInteger(b.sapience)&&b.sapience>=3)||
   b.location!==site||b.away===true||b.owner||s.player.partnerIds?.includes(b.id)||
   s.battle||s.encounter?.threat||s.encounter?.beastId!==beastId||
   !contact||!Number.isFinite(b.condition)||b.condition<55||
   !Number.isFinite(b.needs?.hunger)||b.needs.hunger>=75||
   !Number.isFinite(b.needs?.fatigue)||b.needs.fatigue>=75||
-  /hostile|terrified|panicked|fleeing|desperate/i.test(String(b.mood))||
+  /hostile|agitated|terrified|panicked|fleeing|desperate/i.test(String(b.mood))||
   ['captured','coerced','imprisoned','forced'].includes(String(b.relationship).toLowerCase())||
   !validateWitness(wit,p,b,site,minute,terms,contact)||!verify(s,p))
   throw Error('Both original independent persons must actually be present with a fresh, voluntary, comprehended proposal discussion');
