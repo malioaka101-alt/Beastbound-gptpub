@@ -77,4 +77,59 @@ function status(s,{actorId,beastId,...extra}={}){
   b=s.beasts?.[beastId];
  return routeStatus(s,p,b);
 }
-module.exports={routeStatus,status};
+
+// This read NEVER makes an examination eligible. It distinguishes one
+// independently lived person's PHYSICALLY earned Scales from the many
+// unproven other Grade prerequisites (calibration, relationship, welfare,
+// actual examiner and fresh two-person assent). Merchant accounting is
+// verified in both directions before attributing real work-paid funds.
+function fundingStatus(s,{actorId,beastId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+   !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string')
+  throw Error('Exact source human and beast only; no chosen Grade, money, exam success or consent');
+ const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  b=s.beasts?.[beastId],
+  Career=require('../world/person-careers'),
+  Merchant=require('../world/merchant-voluntary-work-terms');
+ const base={privateToGM:true,actorId,beastId,requiredPersonalScales:100,
+  noFeeDebitedOrGradeAssignedOrExamChoice:true,
+  noCreditFromAbstractCareerOrPlayerCoins:true,
+  notAReceivedInstitutionalCalibration:true};
+ if(!p||!b||!People.verify(w,p)||!Person.verify(b)||
+   !Career.verify(p)||!Career.verifyLocalTradePayments(w)||
+   !Merchant.verify(w))
+  return {...base,sourceFinancialHistoryVerified:false,
+    individuallyFunded:false,reason:'invalid-real-original-individual-or-payment-ledger'};
+ const workerRows=p.career?.tradePayments||[],
+  sellerRows=w.localProvisioner?.laborPayments||[];
+ const matched=workerRows.filter(x=>
+  sellerRows.some(y=>y.sourceHash===x.sourceHash&&
+    JSON.stringify(y)===JSON.stringify(x))&&
+  x.source?.sellerId==='otto'&&
+  x.source?.sourceCurrency==='Scales'&&
+  x.source?.work?.outcome?.success===true);
+ const paid=matched.reduce((sum,x)=>sum+x.amountScales,0),
+  pos=Visit.position(p,s.world.minutes),
+  site=pos?.arrived?pos.location:null,
+  visit=site&&['crossing','academy'].includes(site)&&
+   Presence.resolve(w,actorId,site,Math.floor(s.world.minutes/1440),
+    s.world.minutes%1440),
+  facilityPresent=!!visit?.presence&&
+   visit.presence.source===Visit.VISITOR&&
+   visit.presence.arrivedBy===pos.sourceHash&&
+   Visit.verify(s,p)&&b.location===site&&
+   b.sapientLife?.terrestrialJourneyReceipts?.some(x=>x.seal===pos.sourceHash),
+  balance=p.cashScales,
+  gradeGate=routeStatus(s,p,b);
+ return {...base,sourceFinancialHistoryVerified:true,
+  originalPersonalBalanceScales:balance,
+  genuineSourcePaidMerchantWagesScales:paid,
+  individuallyFunded:Number.isSafeInteger(balance)&&balance>=100,
+  originalWageReceipts:matched.map(x=>x.sourceHash),
+  sourcePaidIndividualWorker:matched.length>0,
+  actualOriginalAccreditedFacilityPresence:facilityPresent,
+  originalGradeReadinessCurrentlyEligible:gradeGate.assessmentEligible,
+  readinessBlocker:gradeGate.reason??null,
+  numericGradeNotInferredFromWageOrRarity:true};
+}
+module.exports={routeStatus,status,fundingStatus};
