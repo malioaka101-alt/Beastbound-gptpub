@@ -31,4 +31,17 @@ function workState(points,strain,check){
 }
 const repaired=(strain,check)=>check.success?Math.max(0,strain-2):strain;
 const ready=(points,strain)=>points===GOAL&&strain<=2;
-module.exports={SPEC,GOAL,REPAIR_DC,checkSpec,workState,repaired,ready};
+// Original temporary adaptive expression: not a permanent species trait.
+const ADAPTIVE_COOLDOWN=8,ADAPTIVE_MENTAL='identity and agency unchanged';
+function adaptiveSpec(duration,con,survivalRank,strain){
+ if(!Number.isInteger(duration)||duration<1||duration>1000000)throw Error('Measured adaptive duration required');
+ return {dc:18,cost:Math.ceil(duration/60)+1,
+  modifier:Math.floor((con-10)/2)+2*survivalRank-Math.floor(strain/3)};
+}
+function adaptiveWindow(minute,duration,success){
+ return {activeFrom:minute+1,activeUntil:success?minute+1+duration:null,
+  cooldownUntil:minute+1+(success?duration:0)+ADAPTIVE_COOLDOWN};
+}
+const releaseCooldown=minute=>minute+1+ADAPTIVE_COOLDOWN;
+module.exports={SPEC,GOAL,REPAIR_DC,checkSpec,workState,repaired,ready,
+ ADAPTIVE_COOLDOWN,ADAPTIVE_MENTAL,adaptiveSpec,adaptiveWindow,releaseCooldown};
