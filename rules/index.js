@@ -439,6 +439,8 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
   case 'rift.weaveStatus':return require('./rift-boundary-weaving').status(s);
   case 'rift.weaveBoundary':return require('./rift-boundary-weaving').weave(s,params);
+  case 'rift.npcPocketBuild':return require('./independent-original-rift-local-spatial').pocket(s,params);
+  case 'rift.npcAdaptExposure':return require('./independent-original-rift-local-spatial').adaptation(s,params);
   case 'rift.pocketStatus':return require('./rift-pocket-architecture').status(s);
   case 'rift.pocketBuild':return require('./rift-pocket-architecture').build(s,params);
   case 'rift.pocketTransfer':return require('./rift-pocket-architecture').transfer(s,params);
