@@ -155,6 +155,28 @@ function contactProof(b,contact){
  return (contact.meetingHash===l.source.encounterHash||l.triedEncounters.includes(contact.meetingHash))&&
   !!l.history[0]&&contact.day<l.history[0].day;
 }
+function verifyTerrestrialBeastReceipts(b,l){
+ const rows=l.terrestrialJourneyReceipts;if(rows===undefined)return true;
+ if(!Array.isArray(rows)||rows.length>24)return false;
+ let previous=-1;const seen=new Set();
+ for(const row of rows){
+  const q=row?.source;
+  if(!q||row.seal!==hash(q)||
+   q.origin!=='source-actual-independent-original-linked-terrestrial-leg-v1'||
+   q.beastId!==b.id||q.beastHash!==l.sourceHash||
+   !Number.isInteger(q.minute)||q.minute<=previous||
+   !Number.isInteger(q.arrivalMinute)||q.arrivalMinute<q.minute||
+   !EngineLocationLeg(q.from,q.to)||
+   q.afterBeastLocation!==(q.departed?q.to:q.from)||
+   q.noPlayerMovementOrPartnership!==true||
+   typeof q.witnessHash!=='string'||seen.has(q.witnessHash))return false;
+  seen.add(q.witnessHash);previous=q.minute;
+ }
+ return true;
+}
+function EngineLocationLeg(from,to){
+ return !!(E.LOCATIONS[from]?.exits?.includes(to)&&E.LOCATIONS[to]);
+}
 function verify(b){
  const l=b?.sapientLife;
  if(l===undefined)return true;
@@ -165,6 +187,7 @@ function verify(b){
   !Array.isArray(l.triedEncounters)||l.triedEncounters.length>24||
   l.triedEncounters.some(x=>typeof x!=='string'||!/^[a-f0-9]{64}$/.test(x))||
   !Array.isArray(l.history)||l.history.length>HISTORY||!verifyContacts(b,l)||
+  !verifyTerrestrialBeastReceipts(b,l)||
   !Practice.verify(l.practice,'sapient:'+b.id,l.sourceHash,aptitude(b))||
   l.noImposedProfession!==true||l.noInferredSociety!==true)
   return false;
