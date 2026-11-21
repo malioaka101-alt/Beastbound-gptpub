@@ -1,0 +1,23 @@
+name: Beastbound Arcane Original Real-Chain Acceptance
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/arcane-npc-real-chain.yml'
+      - 'tests/living-npc-arcane-core-through-matrix-three-live.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  arcane-original-real-chain:
+    name: Authentic personal Arcane Core to Third Circle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Replay original independent Circles and actual Mana nights
+        run: node tests/living-npc-arcane-core-through-matrix-three-live.test.js
