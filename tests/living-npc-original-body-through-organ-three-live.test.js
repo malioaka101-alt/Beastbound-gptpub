@@ -372,3 +372,56 @@ const tr=tp.originalBodyLivingPhysiques.sessions.find(x=>x.source.kind==='tissue
 if(tr){tr.source.check.dc=1;tr.seal=hash(tr.source);A.equal(Physique.verify(tc,tp),false);}
 console.log('INDIVIDUAL NPC BODY TISSUE ASSESSMENT '+JSON.stringify({counts:tissueCounts,
  tissues:advanced.cycles[tissueCycle].tissues||[],noExtraCapacity:true}));
+
+
+// Only a genuinely formed VI can attempt a temporary response. No fixture
+// grants stage VI. A failed or refused response is a valid outcome.
+const adaptCounts={attempt:0,refused:0,formed:0,released:0,releaseRefused:0,expired:0};
+if(advanced.cycles[6]?.completed){
+ for(let i=0;i<30;i++){
+  const old=s.world.minutes,target=(Math.floor(old/1440)+1)*1440+600;
+  E.advance(s,target-old);World.finalizeTime(s,old);
+  const now=s.world.minutes,dayNow=Math.floor(now/1440);
+  if(!Presence.resolve(Realm.peek(s),p.actorId,IVsite,dayNow,600)||
+   originalCombat.status!=='ok'||originalCombat.wounds.some(x=>x!==0)||
+   originalCombat.stamina<3)continue;
+  s.chatRuntime.scene=p.name+' is present for the measured reversible adaptive response.';
+  Core.event(s,'story',s.chatRuntime.scene,{origin:PCPhysique.ASSUME,actorId:p.actorId,
+   location:IVsite,cycle:6,safeMinutes:60,
+   environmentObserved:'The actual bounded local thermal and mechanical conditions are separately observed in this disposable test scene.',
+   safeReversionCounter:'The measured individual response has a finite stopping limit and a verified ordinary return procedure.'});
+  const result=Rules.act(s,{system:'body',operation:'npcAdaptiveAssume',params:{
+   actorId:p.actorId,witnessIndex:s.log.length-1,minutes:60}});
+  const q=advanced.expressions.at(-1).source;
+  A.equal(Physique.verify(s,p),true);
+  A.equal(q.maxBefore,q.maxAfter);
+  if(!q.accepted){adaptCounts.refused++;A.equal(q.staminaSpent,0);continue;}
+  adaptCounts.attempt++;A.equal(q.staminaSpent,2);A.equal(q.check.dc,18);
+  if(!result.formed)continue;
+  adaptCounts.formed++;
+  A.equal(result.active,true);A.equal(result.expiresAtMinute,now+61);
+  // Separate decision to revert, not a forced success.
+  s.chatRuntime.scene=p.name+' is present and considers returning to baseline.';
+  Core.event(s,'story',s.chatRuntime.scene,{origin:PCPhysique.RELEASE,actorId:p.actorId,
+   location:IVsite,cycle:6,
+   observedReturn:'Actual controlled response and ordinary baseline return are examined within this reversible procedure.',
+   independentFailureLimit:'Independent measured stopping conditions distinguish ordinary return from an unstable response.'});
+  const released=Rules.act(s,{system:'body',operation:'npcAdaptiveRelease',params:{
+   actorId:p.actorId,witnessIndex:s.log.length-1}});
+  A.equal(Physique.verify(s,p),true);
+  if(released.released){adaptCounts.released++;A.equal(released.active,false);A.equal(released.cooldownRemaining,8);}
+  else{adaptCounts.releaseRefused++;A.equal(released.active,true);}
+  const previous=s.world.minutes;
+  E.advance(s,Math.max(1,now+69-previous));World.finalizeTime(s,previous);
+  const view=Physique.privateStatus(s,p).currentAdaptiveExpression;
+  A.equal(view.active,false);A.equal(view.cooldownRemaining,0);
+  if(!released.released)adaptCounts.expired++;
+  const saved=E.exportGame(s),copy=E.importGame(saved),person=Realm.peek(copy).emergentPeople.people[p.id];
+  A.equal(Physique.verify(copy,person),true);
+  const tampered=person.originalBodyLivingPhysiques.expressions.find(x=>x.source.kind==='assume'&&x.source.check?.success);
+  tampered.source.activeUntil++;tampered.seal=hash(tampered.source);
+  A.equal(Physique.verify(copy,person),false,'Resealed fake adaptive duration rejected');
+  if(adaptCounts.released)break;
+ }
+}
+console.log('INDEPENDENT ADAPTIVE VI EXPRESSION ASSESSMENT '+JSON.stringify({earned:!!advanced.cycles[6]?.completed,counts:adaptCounts}));
