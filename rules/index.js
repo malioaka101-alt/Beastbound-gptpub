@@ -292,6 +292,7 @@ function act(s,{system,operation,params={}}={}){
   case 'body.organWork':return Disciplines.organWork(s,params);
   case 'body.nerveStatus':return require('./body-nerve-sense').status(s);
   case 'body.npcNerveWork':return require('./independent-original-body-nerve-sense-four').work(s,params);
+  case 'body.npcLivingPhysiqueWork':return require('./independent-original-body-living-physiques').work(s,params);
   case 'body.nerveMap':return require('./body-nerve-sense').map(s,params);
   case 'body.nerveExtend':return require('./body-nerve-sense').extend(s,params);
   case 'body.nervePractice':return require('./body-nerve-sense').practice(s,params);
