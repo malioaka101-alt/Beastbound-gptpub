@@ -31,8 +31,37 @@ A.equal(E.exportGame(s),before);
 A.throws(()=>R.act(s,{system:'rift',operation:'npcPocketTransfer',
  params:{actorId:'emergent:person_0',witnessIndex:0}}),/original spatial practitioner required|fresh original pocket material/);
 A.equal(E.exportGame(s),before);
+const Journey=require('../rules/independent-original-rift-realm-walking'),Crypto=require('node:crypto'),
+ hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+A.deepEqual(Law.walkSpec('prepare',90,3,16,0),{dc:21,modifier:3,stamina:4,minutes:90});
+A.deepEqual(Law.walkSpec('enter',10,6,16,0),{dc:25,modifier:3,stamina:5,minutes:10});
+A.deepEqual(Law.walkSpec('return',10,0,16,0),{dc:18,modifier:3,stamina:4,minutes:10});
+for(const op of ['npcRealmPrepare','npcRealmEnter','npcRealmReturn']){
+ A.throws(()=>R.act(s,{system:'rift',operation:op,params:{actorId:'emergent:person_0',routeId:'unseen_route',witnessIndex:0,crossed:true}}),/fresh action witness/);
+ A.equal(E.exportGame(s),before);
+ A.throws(()=>R.act(s,{system:'rift',operation:op,params:{actorId:'emergent:person_0',routeId:'unseen_route',witnessIndex:0}}),/original exterior human required|fresh action witness/);
+ A.equal(E.exportGame(s),before);
+}
+// Pure temporal scheduling fixture ONLY. The full original source owner
+// deliberately REJECTS this fabricated actor and no campaign stage is gained.
+const stub={actorId:'emergent:person_0',originHash:'0'.repeat(64),id:'person_0'};
+const row=(kind,minute,actualMinutes,success,accepted=true)=>{
+ const source={origin:Journey.ORIGIN,actorId:stub.actorId,identityOriginHash:stub.originHash,kind,minute,actualMinutes,accepted,check:accepted?{success}:null};
+ return {source,seal:hash(source)};
+};
+stub.originalRiftRealmJourney={origin:Journey.ORIGIN,rows:[
+ row('prepare',100,90,true),row('enter',200,10,false),row('enter',220,10,true),
+ row('return',240,5,false,false),row('return',250,10,true)]};
+A.equal(Journey.awayAt(stub,229),false);A.equal(Journey.awayAt(stub,230),true);
+A.equal(Journey.awayAt(stub,245),true);A.equal(Journey.awayAt(stub,259),true);
+A.equal(Journey.awayAt(stub,260),false);
+A.equal(Journey.awayDuring(stub,200,230),false);A.equal(Journey.awayDuring(stub,229,231),true);
+A.equal(Journey.awayDuring(stub,260,300),false);A.equal(Journey.verify(s,stub),false);
+stub.originalRiftRealmJourney.rows[2].source.minute=221;
+A.throws(()=>Journey.awayAt(stub,231),/Unverified independent realm location receipt/);
 require('./rift-fold-step.test.js');
 require('./rift-boundary-weaving.test.js');
 require('./rift-pocket-architecture.test.js');
 require('./rift-adaptation.test.js');
+require('./rift-realm-walking.test.js');
 console.log('Original Fold III and Weave IV shared original local spatial laws, player parity and independent source gates PASS');
