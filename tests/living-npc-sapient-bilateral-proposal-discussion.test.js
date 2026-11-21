@@ -12,6 +12,7 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
 const Pair=require('../rules/independent-original-bond-pair');
 const Follow=require('../rules/independent-sapient-followup'),Presence=require('../world/person-presence');
 const Route=require('../rules/independent-sapient-terrestrial-preflight'),TravelLaw=require('../rules/travel-shared-original-law');
+const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('ruins'),{minutes:145,stamina:4});
@@ -226,6 +227,57 @@ for(let n=0;n<80;n++){
     A.equal(Route.routeStatus(travel,traveler,companion,'academy').reason,'not-one-original-linked-leg');
     A.equal(E.exportGame(travel),before,'Actual route preflight is private and purely read-only');
     A.equal(traveler.rngState,humanRng);A.equal(companion.sapientLife.rngState,beastRng);
+    if(route.proposalEligible){
+     const actualScene=traveler.name+' and '+companion.name+
+      ' independently review the genuinely linked forest to crossing route while remaining physically in the forest.';
+     travel.chatRuntime.scene=actualScene;
+     C.event(travel,'story',actualScene,{
+      origin:Terrestrial.WITNESS,actorId:traveler.actorId,beastId:companion.id,
+      from:'forest',to:'crossing',arrangementSeal:entry.seal,
+      recognisedPairSeal:row.seal,originalHumanCombatSeal:originalHumanBody.npcOrigin.seal,
+      originalLinkedLegMinutes:75,originalHumanStaminaCost:4,
+      separateInformedHumanAndBeastChoices:true,noCompelledDepartureOrReturn:true,
+      noGuaranteedArrivingBeastOrHazardClearance:true,
+      actualInformedDestinationAndPurpose:'Both understand the genuine canal crossing is one original linked route away from their current shared forest.',
+      actualKnownRouteRisks:'The real route has ordinary fatigue, natural weather, possible hazards and no guaranteed safe arrival.',
+      individualRightToDecline:'Both people can decline travel now or reconsider separately without losing their recognised relationship.',
+      originalAvailableTravelMeans:'Existing ordinary terrestrial walking route, not any inferred flying transport, portal or compelled mount.'});
+     const parameters={actorId:traveler.actorId,beastId:companion.id,
+       destination:'crossing',witnessIndex:travel.log.length-1},
+      beforeProposal=E.exportGame(travel),pastWorldRng=travel.rngState,
+      beforeHumanRng=traveler.rngState,beforeBeastRng=companion.sapientLife.rngState,
+      presentStamina=originalHumanBody.stamina,oldMinute=travel.world.minutes;
+     A.throws(()=>R.act(travel,{system:'bond',operation:'npcTerrestrialProposal',
+       params:{...parameters,accepted:true}}),/no chosen consent, cost or movement/);
+     A.equal(E.exportGame(travel),beforeProposal);
+     const chosen=R.act(travel,{system:'bond',operation:'npcTerrestrialProposal',
+      params:parameters}),receipt=traveler.originalSapientTerrestrialProposals[0],
+      source=receipt.source;
+     A.equal(chosen.bothSeparatelyInterested,source.mutuallyInterested);
+     A.equal(Terrestrial.verify(travel,traveler),true);
+     A.equal(travel.rngState,pastWorldRng);A.equal(travel.world.minutes,oldMinute);
+     A.equal(originalHumanBody.stamina,presentStamina);A.equal(traveler.regionId,p.regionId);
+     A.equal(companion.location,site);A.equal(companion.owner,null);
+     A.equal(travel.player.partnerIds.includes(companion.id),false);
+     A.equal(source.humanChoice.rngBefore,beforeHumanRng);
+     A.equal(source.beastChoice?.rngBefore??beforeBeastRng,beforeBeastRng);
+     A.equal(Terrestrial.privateStatus(travel,traveler)[0].outcome,chosen.outcome);
+     const chosenSave=E.exportGame(travel),saved=E.importGame(chosenSave),
+      savedPerson=Realm.peek(saved).emergentPeople.people[traveler.id];
+     A.equal(Terrestrial.verify(saved,savedPerson),true);
+     A.throws(()=>R.act(travel,{system:'bond',operation:'npcTerrestrialProposal',params:parameters}),
+      /Distinct explicitly witnessed original linked-leg proposal|real uninjured independently co-present/);
+     A.equal(E.exportGame(travel),chosenSave);
+     const f=E.importGame(chosenSave),fp=Realm.peek(f).emergentPeople.people[traveler.id],
+      forged=fp.originalSapientTerrestrialProposals[0];
+     forged.source.outcome=source.outcome==='human-refused'?'both-consider-leg':'human-refused';
+     forged.seal=hash(forged.source);
+     A.equal(Terrestrial.verify(f,fp),false,'A rehashed falsely agreed route proposal cannot produce consent');
+     console.log('INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL '+JSON.stringify({
+      result:chosen.outcome,originalMinutes:75,humanStaminaCostIfTraveled:4,
+      humanChoice:source.humanChoice.accepted,beastChoice:source.beastChoice?.outcome??null,
+      actualMovement:false,noPlayerWorldRoll:true}));
+    }
     }
    }
 
