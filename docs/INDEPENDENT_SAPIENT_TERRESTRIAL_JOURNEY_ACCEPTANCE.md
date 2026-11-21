@@ -1,6 +1,6 @@
 # Independent human–sapient beast terrestrial journey — source-owner acceptance plan
 
-**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** source-verified original linked-leg preflight and freely decided travel proposals implemented. No actual independent journey or arrival implemented.
+**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** source-verified original linked-leg preflight and freely decided travel proposals passed. A first restricted same-day physical departure/arrival and visitor-position source owner is now **implemented, with genuine positive departure verification still pending**. No guaranteed return, independent multi-leg trip or Grade examination is claimed.
 
 ## Exact original source gap
 
@@ -9,6 +9,14 @@ The original engine supports linked-location travel at 75 minutes per leg (145 w
 The original forest→crossing linked exit genuinely crosses Atlas region boundaries while remaining a valid ordinary **75-minute linked leg** under the original engine. An independent actor must still obtain an actual separately verified destination presence/visitor history; cross-region movement is not automatically illegal or an additional travel surcharge.
 
 Real native sapient meetings occur in native habitats such as the forest. The only original accredited individual Grade exam facilities are crossing and academy, both with **empty native spawn lists**. Independent humans have individually verified home-region work shifts; witnessing a person in a forest is not evidence of their later attendance at a distant academy. Sapient beasts independently depart on sixday boundaries. Therefore an existing relationship and sufficient wages do not establish co-presence at a facility. An independent journey owner is a hard prerequisite for a genuine paid Grade examination.
+
+## Implemented physical first leg — positive acceptance pending
+
+The new `rules/independent-sapient-terrestrial-journey.js` gives a separate, fresh departure decision to each already interested participant. Human and beast keep reciprocal source receipts. If either refuses, there is no departure, travel cost, clock change or relocated body. Only a genuinely mutual new decision may carry a pair over an existing linked edge: **75 original minutes and 4 original human Combat Stamina**, with no invented beast metabolic cost (the original player linked-leg law does not charge such a cost). The player remains in their original location and has no new partnership.
+
+An actual completed leg replaces the human's home-local appearance with a single source-authenticated visitor presence at the true destination. The old shift and original Combat entry remain historically intact; visitor source is based on the **actual arrival day**. `world/emergent-people.js`, `world/independent-person-lives.js` and `world/independent-original-power-days.js` block simultaneous hometown labour, independent practice or remote cultivation while the person is physically travelling. The sapient individual's own source ledger also records the same leg and destination. `rules/independent-original-beast-grade-exam.js` now requires a verified original arrival source before treating the individual as present at crossing/academy.
+
+Current bounded restrictions are intentional: a linked leg must finish within its original calendar day; arrival does not automatically register return or a safe next leg. A separate 96-world `Beastbound Independent Actual Terrestrial Arrival` regression seeks an **actual independently accepted, successfully paid arrival**, and cannot be accepted merely because a proposal is mutually considered. This physical positive proof and the uninterrupted world-tick return and full six-shard tests remain unresolved.
 
 ## Verified original partial source owners — 21 November 2026
 
