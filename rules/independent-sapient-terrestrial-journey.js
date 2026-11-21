@@ -1,8 +1,8 @@
 'use strict';
-// First bounded truly physical independent linked leg. An original
-// "both consider" proposal is NOT departure assent: both people decide
-// again. No player travel, fictional route/Grade, second human body,
-// automatic scheduled return or speculative environmental bonus.
+// Source-owned independently chosen original physical linked legs. The first
+// original home leg and a later visitor-site proposal each need their OWN
+// witnessed proposal and fresh independent departure decision. Neither
+// older agreement nor an arrival supplies consent, travel or player knowledge.
 const Crypto=require('node:crypto'),E=require('../engine'),
  Realm=require('../world/simulation'),People=require('../world/emergent-people'),
  Person=require('../world/sapient-beast-persons'),Presence=require('../world/person-presence'),
@@ -50,7 +50,7 @@ function structure(p){
    q.fromRegion!==Atlas.LOCATION_REGION[q.from]||q.toRegion!==Atlas.LOCATION_REGION[q.to]||
    !eq(q.law,Travel.legSpec(q.to))||
    q.originalProposalSourceHash!==hash(q.originalProposalSource)||
-   q.originalProposalSource?.origin!==Proposal.ORIGIN||
+   ![Proposal.ORIGIN,'source-actually-considered-independent-terrestrial-visitor-next-leg-v1'].includes(q.originalProposalSource?.origin)||
    q.originalProposalSource?.actorId!==p.actorId||
    q.originalProposalSource?.beastId!==q.beastId||
    q.originalProposalSource?.from!==q.from||
@@ -114,11 +114,15 @@ function visitorPresence(p,minute,location){
  return {...body,hash:hash(body)};
 }
 function verify(s,p){
- if(!structure(p)||!Proposal.verify(s,p)||!People.verify(Realm.peek(s),p))return false;
+ const VisitorProposal=require('./independent-sapient-terrestrial-visitor-proposal');
+ if(!structure(p)||!Proposal.verify(s,p)||!VisitorProposal.verify(s,p)||
+  !People.verify(Realm.peek(s),p))return false;
  let previousEnd=-1,previousPlace=null;
  for(const row of p.originalSapientTerrestrialJourneys||[]){
   const q=row.source,b=s.beasts?.[q.beastId],
-   prop=p.originalSapientTerrestrialProposals?.find(x=>x.seal===q.proposalSeal),
+   prop=(q.originalProposalSource?.origin===VisitorProposal.ORIGIN?
+    p.originalSapientVisitorLegProposals:p.originalSapientTerrestrialProposals)
+    ?.find(x=>x.seal===q.proposalSeal),
    body=s.table?.combatants?.['npc_'+p.id],
    sh=q.originalShift;
   if(!b?.sapientLife||!Person.verify(b)||!prop||!eq(prop.source,q.originalProposalSource)||
@@ -139,6 +143,15 @@ function verify(s,p){
    q.afterHumanLocation!==(q.departed?q.to:q.from)||
    !b.sapientLife.terrestrialJourneyReceipts?.some(x=>x.seal===row.seal)||
    (previousPlace!==null&&q.from!==previousPlace))return false;
+  if(q.originalProposalSource.origin===VisitorProposal.ORIGIN){
+   const arrivedEarlier=p.originalSapientTerrestrialJourneys?.find(x=>
+    x.seal===q.originalProposalSource.arrivalSeal);
+   if(!arrivedEarlier?.source.departed||arrivedEarlier.source.to!==q.from||
+    arrivedEarlier.source.beastId!==q.beastId||
+    arrivedEarlier.source.arrivalMinute>q.originalProposalSource.minute||
+    arrivedEarlier.source.minute>=q.originalProposalSource.minute||
+    q.originalProposalSource.minute>=q.minute)return false;
+  }else if(q.originalProposalSource.origin!==Proposal.ORIGIN)return false;
   previousEnd=q.arrivalMinute;
   if(q.departed)previousPlace=q.to;
  }
@@ -155,11 +168,15 @@ function depart(s,{actorId,beastId,proposalSeal,witnessIndex,...extra}={}){
   !/^emergent:person_[0-9]+$/.test(actorId)||typeof beastId!=='string'||
   typeof proposalSeal!=='string'||!integer(witnessIndex,0,s.log.length-1))
   throw Error('Exact witnessed independent linked leg proposal only; no chosen assent, arrival, stamina or location');
- const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],b=s.beasts?.[beastId],
-  prop=p?.originalSapientTerrestrialProposals?.find(x=>x.seal===proposalSeal),
+ const VisitorProposal=require('./independent-sapient-terrestrial-visitor-proposal'),
+  VisitorRoute=require('./independent-sapient-terrestrial-return-preflight'),
+  w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],b=s.beasts?.[beastId],
+  visitor=p?.originalSapientVisitorLegProposals?.find(x=>x.seal===proposalSeal),
+  prop=visitor||p?.originalSapientTerrestrialProposals?.find(x=>x.seal===proposalSeal),
   minute=s.world.minutes,day=Math.floor(minute/1440),
   witness=structuredClone(s.log[witnessIndex]),
-  route=p&&b&&prop?Route.routeStatus(s,p,b,prop.source.to):null,
+  route=p&&b&&prop?(visitor?VisitorRoute.routeStatus(s,p,b,prop.source.to):
+   Route.routeStatus(s,p,b,prop.source.to)):null,
   body=s.table?.combatants?.['npc_'+p?.id],
   q={origin:ORIGIN,previous:p?.originalSapientTerrestrialJourneys?.at(-1)?.seal??p?.originHash,
    actorId,humanHash:p?.originHash,beastId,beastHash:b?.sapientLife?.sourceHash,
@@ -178,14 +195,19 @@ function depart(s,{actorId,beastId,proposalSeal,witnessIndex,...extra}={}){
   !structure(p)||!route?.proposalEligible||!verify(s,p)||
   prop.source.actorId!==actorId||prop.source.beastId!==beastId||
   prop.source.minute>minute||prop.source.day!==day||
-  s.world.location!==q.from||
+  (visitor?(!VisitorProposal.verify(s,p)||
+   prop.source.origin!==VisitorProposal.ORIGIN||
+   prop.source.minute>=minute||
+   position(p,minute)?.location!==q.from||
+   position(p,minute)?.sourceHash!==prop.source.arrivalSeal):
+   (prop.source.origin!==Proposal.ORIGIN||s.world.location!==q.from))||
   (p.originalSapientTerrestrialJourneys||[]).some(x=>x.source.proposalSeal===proposalSeal)||
-  position(p,minute)!==null||
+  (!visitor&&position(p,minute)!==null)||
   b.needs.hunger>=70||b.needs.fatigue>=70||b.condition<60||
   !witnessValid(p,b,q)||!s.chatRuntime?.scene?.includes(p.name)||
   !s.chatRuntime.scene.includes(b.name))
   throw Error('Only the same current still-willing, fit, source-present pair may make a separately witnessed original departure decision');
- if(q.minute%1440+q.law.minutes>1440)throw Error('First bounded genuine route must finish within its own original calendar day');
+ if(q.minute%1440+q.law.minutes>1440)throw Error('Every original physical linked leg must finish within its own original calendar day');
  q.humanChoice=Arr.humanChoice(p,q.witnessHash);
  q.beastChoice=q.humanChoice.accepted?Social.sapientChoice(b.sapientLife,q.beastDisposition):null;
  q.departed=!!(q.humanChoice.accepted&&q.beastChoice?.outcome==='accepted');
