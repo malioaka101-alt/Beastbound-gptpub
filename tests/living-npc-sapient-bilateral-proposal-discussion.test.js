@@ -710,6 +710,131 @@ for(let n=0;n<80;n++){
        falsifiedPlan.seal=hash(falsifiedPlan.source);
        A.equal(VisitorDiet.verify(falselyCertified,falsifiedPerson),false,
         'A resealed forged individual nutrition consent fails source-person replay and reciprocal sapient records');
+       // Independently establish physical nutrition on a disposable
+       // TRUE arrived world: the PLAYER must actually walk the original
+       // linked forest->crossing route, and only a real saved player ration
+       // may be personally offered to the signed visiting human. The
+       // human has a separate original custody RNG and may decline.
+       // After that, a fresh TWO-PERSON food decision may still decline.
+       // No successful gift, plan or eating decision is assigned by tests.
+       if(chosenDiet.freelyBothAgreedToPlan){
+        const giftWorld=E.importGame(dietSave),
+         giftPerson=Realm.peek(giftWorld).emergentPeople.people[jp.id],
+         giftBeast=giftWorld.beasts[jb.id],
+         originalPlayerRations=giftWorld.player.inventory?.clean_rations??0;
+        A.ok(originalPlayerRations>=1,
+         'The actual original player already owns a ration; none is minted');
+        A.equal(giftWorld.world.location,'forest');
+        A.equal(E.dispatch(giftWorld,'travel crossing').ok,true,
+         'The player must REALLY travel along an original physical route to give away their own ration');
+        A.equal(giftWorld.world.location,'crossing');
+        const originalNPCFood=Realm.peek(giftWorld).materialCustody?.
+         accounts?.[giftPerson.actorId]?.held?.clean_rations??0,
+         gift=R.act(giftWorld,{system:'social',operation:'materialHandoff',
+          params:{npcId:giftPerson.actorId,item:'clean_rations'}});
+        A.equal(gift.offered,true);
+        A.equal(gift.noAutomaticRelationship,true);
+        A.equal(gift.quantityMoved,gift.accepted?1:0);
+        A.equal(giftWorld.player.inventory.clean_rations,
+         originalPlayerRations-(gift.accepted?1:0));
+        const giftAccount=Realm.peek(giftWorld).materialCustody?.
+         accounts?.[giftPerson.actorId];
+        A.equal(giftAccount?.held?.clean_rations??0,
+         originalNPCFood+(gift.accepted?1:0));
+        const beforeBeastOfferHunger=giftBeast.needs.hunger;
+        const realFoodReady=R.act(giftWorld,{system:'bond',
+         operation:'npcVisitorFoodReadiness',params:{
+          actorId:giftPerson.actorId,beastId:giftBeast.id}});
+        A.equal(realFoodReady.canOffer,gift.accepted,
+         'Only a real source-accepted original player-to-human gift creates privately owned provisions');
+        A.equal(realFoodReady.noPlayerInventoryOrWageOrMerchantStockOrBeastHungerChanged,true);
+        if(gift.accepted){
+         A.equal(realFoodReady.actualOwnedUnits,originalNPCFood+1);
+         const giftFoodScene=giftPerson.name+' and '+giftBeast.name+
+          ' are physically observed at the genuine crossing. The human independently considers offering one previously and voluntarily accepted original player-owned clean ration, and the sapient individual may freely refuse, counter or eat it.';
+         giftWorld.chatRuntime.scene=giftFoodScene;
+         const giftShift=Journey.visitorPresence(giftPerson,
+          giftWorld.world.minutes,'crossing'),
+          foodProfile=require('../rules/bond-care').feedingProfile(giftWorld,giftBeast);
+         C.event(giftWorld,'story',giftFoodScene,{
+          origin:require('../rules/independent-visitor-sapient-food-offer').WITNESS,
+          actorId:giftPerson.actorId,beastId:giftBeast.id,
+          humanOriginHash:giftPerson.originHash,
+          beastPersonHash:giftBeast.sapientLife.sourceHash,
+          site:'crossing',minute:giftWorld.world.minutes,
+          originalSignedVisitHash:Journey.position(giftPerson,giftWorld.world.minutes).sourceHash,
+          originalVisitorShiftHash:giftShift.hash,
+          originalHeldRationBefore:giftAccount.held.clean_rations,
+          originalSpeciesDietSource:foodProfile.source,
+          understoodSeparateHumanOfferFreedom:
+           'The human has this original one-unit owned ration and personally understands that offering it is optional even when the beast is hungry.',
+          understoodSapientBeastChoiceFreedom:
+           'The independent sapient individual can personally decline, counter or take this precisely observed compatible one-serving ration.',
+          originalRationConsumptionOnlyIfBothAgree:
+           'No original owned ration is consumed, transferred or applied to any hunger condition unless both separate persons choose acceptance.',
+          noForcedFeedingOrBodilyConsent:true,
+          noGrantOfTrustHealthEnergyOrSync:true,
+          privateToGM:true});
+         const foodArgs={actorId:giftPerson.actorId,beastId:giftBeast.id,
+          witnessIndex:giftWorld.log.length-1},
+          beforeFood=E.exportGame(giftWorld),
+          humanRngBeforeGift=giftPerson.rngState,
+          beastRngBeforeGift=giftBeast.sapientLife.rngState,
+          ownedBeforeFood=giftAccount.held.clean_rations,
+          foodMinute=giftWorld.world.minutes;
+         A.throws(()=>R.act(giftWorld,{system:'bond',
+          operation:'npcVisitorFoodOffer',params:{...foodArgs,accepted:true}}),
+          /no chosen feeding or free food/);
+         A.equal(E.exportGame(giftWorld),beforeFood);
+         const foodEvent=R.act(giftWorld,{system:'bond',
+          operation:'npcVisitorFoodOffer',params:foodArgs});
+         A.equal(foodEvent.privateToGM,true);
+         A.equal(foodEvent.originalEightMinutes,8);
+         A.equal(foodEvent.noFreeFoodOrAutomaticPartnershipOrMagicOrMedicalTreatment,true);
+         A.equal(giftPerson.rngState!==humanRngBeforeGift,true);
+         A.equal(giftBeast.sapientLife.rngState!==beastRngBeforeGift,
+          giftPerson.originalVisitorSapientFoodOffers[0].source.humanChoice.accepted);
+         A.equal(giftWorld.world.minutes,foodMinute+8);
+         A.equal(foodEvent.originalHumanRationsConsumed,
+          foodEvent.personallyAccepted?1:0);
+         A.equal(giftAccount.held.clean_rations??0,
+          ownedBeforeFood-(foodEvent.personallyAccepted?1:0));
+         A.equal(giftBeast.needs.hunger,
+          Math.max(0,beforeBeastOfferHunger-
+           (foodEvent.personallyAccepted?20:0)));
+         A.equal(require('../rules/independent-visitor-sapient-food-offer').
+          verify(giftWorld,giftPerson),true);
+         A.equal(require('../rules/material-handoffs').
+          validateAccount(giftAccount,giftPerson.actorId),undefined);
+         A.equal(require('../world/independent-local-purchases').
+          verify(Realm.peek(giftWorld)),true);
+         A.equal(Person.verify(giftBeast),true);
+         A.equal(Journey.verify(giftWorld,giftPerson),true);
+         const savedGift=E.exportGame(giftWorld),
+          restoredGift=E.importGame(savedGift),
+          restoredGiftPerson=Realm.peek(restoredGift).emergentPeople.people[jp.id];
+         A.equal(require('../rules/independent-visitor-sapient-food-offer').
+          verify(restoredGift,restoredGiftPerson),true);
+         A.equal(E.exportGame(restoredGift),savedGift);
+         const fabricatedFeeding=E.importGame(savedGift),
+          falseFoodPerson=Realm.peek(fabricatedFeeding).emergentPeople.people[jp.id],
+          falseFoodRow=falseFoodPerson.originalVisitorSapientFoodOffers[0];
+         falseFoodRow.source.accepted=!falseFoodRow.source.accepted;
+         falseFoodRow.seal=hash(falseFoodRow.source);
+         A.equal(require('../rules/independent-visitor-sapient-food-offer').
+          verify(fabricatedFeeding,falseFoodPerson),false);
+         console.log('ACTUAL PERSON-OWNED ORIGINAL VISITOR SAPIENT RATION HANDOFF '+JSON.stringify({
+          originalPlayerRouteAndRation:true,
+          humanFreelyAcceptedMaterialGift:gift.accepted,
+          bothFreelyAcceptedLaterFood:foodEvent.personallyAccepted,
+          realOwnedUnitsConsumed:foodEvent.originalHumanRationsConsumed,
+          originalSapientHungerReduction:foodEvent.originalIndividualHungerReduced,
+          noImaginaryMerchantDiscountOrNewFood:true}));
+        }else{
+         A.equal(giftBeast.needs.hunger,beforeBeastOfferHunger);
+         console.log('REAL ORIGINAL PLAYER RATION GIFT DECLINED BY INDEPENDENT HUMAN');
+        }
+       }
        console.log('INDEPENDENT ORIGINAL INDIVIDUAL SAPIENT NUTRITION PLAN '+JSON.stringify({
         authenticSeller:'otto',actualNativeDiet:E.SPECIES[dietBeast.species].diet,
         independentlyAgreed:chosenDiet.freelyBothAgreedToPlan,
