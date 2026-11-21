@@ -40,6 +40,7 @@ const QUICK=[
  'living-native-beast-self-evolution.test.js',
  'rift-local-spatial-shared-original-npc.test.js',
  'living-npc-sapient-bilateral-proposal-discussion.test.js',
+ 'living-independent-original-grade-fee-money-law.test.js',
  'voluntary-beast-social-arrangements.test.js'
 ];
 // These sources were MEASURED on GitHub Actions at >10s, several >350s.
