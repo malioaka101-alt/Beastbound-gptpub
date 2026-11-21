@@ -40,6 +40,12 @@ function verify(s,p){
  const Offscreen=require('../world/independent-original-power-days');
  for(const row of r.sessions){
   const q=row?.source;
+  const External=require('./independent-arcane-external-mana');
+  if(q?.origin===External.ORIGIN){
+   const stage=completed?2:1,capacity=Build.arcaneProfile(stage).mana;
+   if(!External.validRow(s,p,row,'second',stage,mana,capacity,previousEnd))return false;
+   mana=q.manaAfter;previousEnd=q.endMinute;continue;
+  }
   if(q?.origin===RECOVERY){
    const originalNight=q.originalNight,
     originalHash=originalNight?.seal;
