@@ -9,6 +9,8 @@ on:
       - 'rules/independent-original-beast-grade-preflight.js'
       - 'rules/independent-original-beast-grade-exam.js'
       - 'rules/index.js'
+      - 'world/person-careers.js'
+      - 'world/merchant-voluntary-work-terms.js'
       - 'world/emergent-people.js'
       - 'world/sapient-beast-persons.js'
       - 'rules/independent-sapient-terrestrial-proposal.js'

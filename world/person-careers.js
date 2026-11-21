@@ -207,6 +207,7 @@ function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
   authorizedVisitor=!!(verifiedWorld&&
    verifiedWorld.world?.minutes===visitorMinute&&
    require('./simulation').peek(verifiedWorld)===w&&
+   w.emergentPeople?.people?.[p.id]===p&&
    Visit.verify(verifiedWorld,p)&&loc&&loc!==p.regionId&&
    sourcePosition?.arrived&&sourcePosition.location===visitorSite&&
    Math.floor(visitorMinute/1440)===day&&
