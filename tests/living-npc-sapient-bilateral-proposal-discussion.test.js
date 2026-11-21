@@ -14,6 +14,7 @@ const Follow=require('../rules/independent-sapient-followup'),Presence=require('
 const Route=require('../rules/independent-sapient-terrestrial-preflight'),TravelLaw=require('../rules/travel-shared-original-law');
 const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
+const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('ruins'),{minutes:145,stamina:4});
@@ -326,6 +327,34 @@ for(let n=0;n<80;n++){
        A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
        A.equal(js.table.combatants['npc_'+traveler.id].npcOrigin.location,'forest',
         'Original combat source entry never falsely claims it was created at the destination');
+       // A return-leg preflight reads the REAL visitor's crossing position,
+       // never the player's unchanged forest location. No second consent,
+       // return receipt, time cost or movement is manufactured by inspection.
+       const beforeReturn=E.exportGame(js),
+        homeward=ReturnPreflight.routeStatus(js,jp,jb,'forest');
+       A.equal(homeward.noMovementOrConsentOrGrade,true);
+       A.equal(ReturnPreflight.routeStatus(js,jp,jb,'ruins').reason,
+        'not-one-original-linked-leg','No fictional direct crossing-to-ruins exit');
+       if(homeward.proposalEligible){
+        A.equal(homeward.from,'crossing');
+        A.equal(homeward.to,'forest');
+        A.equal(homeward.minutes,75);
+        A.equal(homeward.stamina,4);
+        A.equal(homeward.sourceArrivalHash,jp.originalSapientTerrestrialJourneys[0].seal);
+        A.equal(homeward.requiresNewSeparateWitnessAndIndependentDecisions,true);
+       }else{
+        A.ok(['insufficient-original-human-stamina',
+         'no-current-revocable-mutual-travel-arrangement',
+         'original-linked-leg-must-finish-in-current-day',
+         'independent-sapient-person-not-currently-present-and-fit'].includes(homeward.reason),
+         'A genuine initial arrival may be unable to consider a new route only for explicit actual source limitations: '+homeward.reason);
+       }
+       A.equal(E.exportGame(js),beforeReturn,'No eligibility inspection may roll, replenish, relocate or consent');
+       console.log('INDEPENDENT ORIGINAL VISITOR RETURN PREFLIGHT '+JSON.stringify({
+        eligible:homeward.proposalEligible,reason:homeward.reason??null,
+        genuineStart:'crossing',nextOriginalEdge:'forest',
+        noNewDepartureOrConsent:true}));
+
        // Longitudinal owner acceptance: actual sixday world ticks on a
        // disposable copy of this genuinely self-decided physical arrival.
        // No second hometown body, unsourced salary or native forest foraging.
