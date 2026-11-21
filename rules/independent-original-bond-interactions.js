@@ -65,7 +65,7 @@ function replay(s,p){
    row.seal!==hash(q)||q.origin!==ORIGIN||q.previous!==pair.head||
    q.actorId!==p.actorId||q.humanSeal!==p.originHash||
    q.beastId!==pair.base.source.beastId||q.beastSeal!==b.sapientLife.sourceHash||
-   q.arrangementHash!==pair.base.source.arrangementHash||!Pair.revision(arr,q.minute,q.arrangementRevision)||
+   arr?.source.beastId!==q.beastId||!Pair.revision(arr,q.minute,q.arrangementRevision)||
    !int(q.minute,Math.max(pair.last,previousMinute),s.world.minutes)||q.day!==Math.floor(q.minute/1440)||
    !['gentle','play'].includes(q.approach)||!witnessValid(p,b,q)||
    q.witnessHash!==hash(q.witness)||seen.has(q.witnessHash)||days.has(q.pairSeal+':'+q.day)||
@@ -103,14 +103,14 @@ function interact(s,{actorId,beastId,witnessIndex,...extra}={}){
  const w=Realm.peek(s),p=w?.emergentPeople?.people?.[actorId.slice(9)],b=s.beasts?.[beastId],
   minute=s.world.minutes,day=Math.floor(minute/1440),site=s.world.location,
   present=p&&Presence.resolve(w,actorId,site,day,minute%1440),witness=structuredClone(s.log[witnessIndex]),d=witness?.details,
-  pair=p&&current(s,p,d?.pairSeal),arr=p?.originalSapientArrangements?.find(x=>x.seal===pair?.base.source.arrangementHash),
+  pair=p&&current(s,p,d?.pairSeal),arr=p?.originalSapientArrangements?.find(x=>x.seal===d?.arrangementHash),
   contact=b?.sapientLife?.history?.filter(x=>x.type==='personally-witnessed-contact'&&x.willingness&&
    x.location===site&&int(x.minute,Math.max(0,minute-60),minute)).at(-1);
  if(!p||!People.verify(w,p)||!present?.presence||p.status!=='active'||
   p.ageBand!=='adult, exact birthday not established'||!pair||pair.base.source.beastId!==beastId||
   !b?.sapientLife||!Person.verify(b)||!Arr.safe(b)||b.location!==site||b.away===true||
   b.owner!==null||s.player.partnerIds?.includes(beastId)||s.battle||s.encounter?.threat||
-  s.encounter?.beastId!==beastId||!contact||!arr||Arr.statusAt(arr,minute)!=='accepted')
+  s.encounter?.beastId!==beastId||!contact||arr?.source.beastId!==beastId||Arr.statusAt(arr,minute)!=='accepted')
   throw Error('Actual present independent recognised pair and current voluntary cooperation required');
  const rows=p.originalBondInteractions||[],rev=arr.events.at(-1)?.seal||arr.seal,
   q={origin:ORIGIN,previous:pair.head,actorId,humanSeal:p.originHash,beastId,beastSeal:b.sapientLife.sourceHash,
