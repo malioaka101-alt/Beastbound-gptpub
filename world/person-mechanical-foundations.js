@@ -267,6 +267,9 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedBodyThree=s?.table?.realm===w&&actor.originalBodyOrganCycleThree?
    require('../rules/independent-original-body-organ-cycle-three')
     .privateStatus(s,actor):null;
+  const verifiedBodyFour=s?.table?.realm===w&&actor.originalBodyNerveSenseFour?
+   require('../rules/independent-original-body-nerve-sense-four')
+    .privateStatus(s,actor):null;
   const verifiedSoulTwo=s?.table?.realm===w&&actor.originalSoulThreadTwo?
    require('../rules/independent-original-soul-thread-two')
     .privateStatus(s,actor):null;
@@ -329,6 +332,11 @@ function earnedEvidence(w,actorId,s=null){
    originalMilestones.body.originalToughnessGain=2;
    originalMilestones.body.originalCriticalWoundBoxGain=1;
    originalMilestones.body.realCombatBodyStaminaBonus=4;
+  }
+  if(verifiedBodyFour?.earnedNerveSenseCycle===true&&
+   originalMilestones.body.completedCycles?.length===3){
+   originalMilestones.body.completedCycles.push('Nerve-Sense Cycle');
+   originalMilestones.body.realCombatBodyStaminaBonus+=verifiedBodyFour.sourceVerifiedStaminaCapacityGain;
   }
   if(earnedOther.rift?.step===1){
    originalMilestones.rift.step=verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1;
@@ -427,6 +435,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalBodyOrganCycleThree:verifiedBodyThree,
+   originalBodyNerveSenseFour:verifiedBodyFour,
    originalSoulMindBodyThreading:verifiedSoulTwo,
    originalSoulResonanceLatticeThree:verifiedSoulThree,
    originalRiftExteriorBoundaryReading:verifiedRiftExterior,
@@ -468,6 +477,8 @@ function earnedEvidence(w,actorId,s=null){
     originalMilestones.soul.phase===3?'Soul Phase III Resonance Lattice':
     originalMilestones.soul.phase===2?'Soul Phase II Threading':
     originalMilestones.soul.phase===1?'Soul Phase I':null,
+    originalMilestones.body.completedCycles?.length===4?
+     'Body Nerve–Sense Cycle IV':
     originalMilestones.body.completedCycles?.length===3?
      'Body Integrated Organ Cycle III':
     originalMilestones.body.completedCycles?.length===2?
@@ -507,6 +518,9 @@ function earnedEvidence(w,actorId,s=null){
      {organs:{...verifiedBodyThree.organIntegration},
       staminaCapacityGain:2,toughnessGain:1,criticalWoundBoxGain:1,
       originalCombatSourceRequired:true,noAutomaticTechnique:true}:null,
+    originalBodyNeuralPhysiology:verifiedBodyFour?.earnedNerveSenseCycle?
+     {staminaCapacityGain:verifiedBodyFour.sourceVerifiedStaminaCapacityGain,
+      originalCombatSourceRequired:true,noAutomaticTechniqueOrBeastSense:true}:null,
     originalRiftSense:originalMilestones.rift.step>=1?
      structuredClone(originalMilestones.rift.originalLimitedSense):null,
     actualExteriorRiftglassReading:verifiedRiftExterior?.originalReading||null,
