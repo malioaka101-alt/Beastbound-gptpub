@@ -243,6 +243,9 @@ function afterNight(s,p,nightRow){
    x.source.originalNightSourceHash===nightRow.seal))return null;
  const capacity=Build.arcaneProfile(r.completed?2:1).mana,
   before=r.manaRemaining,after=Math.min(capacity,before+ORIGINAL_EIGHT_HOUR_MANA_RECOVERY);
+ // A full reservoir gains nothing. The genuine Combat night is already
+ // recorded by its owner; do not fill the bounded energy audit with no-op rows.
+ if(after===before)return null;
  const source={origin:RECOVERY,system:'arcane',actorId:p.actorId,
   originalFirstCircleSourceHash:r.originalFirstCircleSourceHash,
   originalNight:structuredClone(nightRow),originalNightSourceHash:nightRow.seal,
