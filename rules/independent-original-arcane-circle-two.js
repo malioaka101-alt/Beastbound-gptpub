@@ -25,8 +25,15 @@ function verify(s,p){
   r.originalFirstCircleSourceHash!==p.originalArcaneCore.originalCircleOneSourceHash||
   !Array.isArray(r.sessions)||r.sessions.length>480)
   return false;
+ // The first Circle receipt owns its actual formation time. A
+ // Second Circle practice or Mana night may not predate that event.
+ const first=p.originalEarlyDisciplinePreparation?.arcane?.sessions.find(x=>
+  x.seal===r.originalFirstCircleSourceHash);
+ if(!first||first.source?.outcome!=='circle-formed'||
+  first.source.target!=='circle1')return false;
  let mana=initialMana(),stability=initialStability,progress=0,
-  completed=false,prevDay=-1,previousEnd=0;
+  completed=false,prevDay=first.source.day,
+  previousEnd=first.source.startMinute+first.source.actualMinutes;
  const priorNights=new Set();
  const body=s.table?.combatants?.['npc_'+p.id];
  if(!body?.npcOrigin?.seal)return false;
@@ -114,7 +121,7 @@ function verify(s,p){
  }
  return r.integrity===progress&&r.manaRemaining===mana&&
   r.coreStability===stability&&r.completed===completed&&
-  r.lastAttemptDay===prevDay&&
+  r.lastAttemptDay===(prevDay===first.source.day?-1:prevDay)&&
   r.originalFirstCircleSourceHash===p.originalArcaneCore.originalCircleOneSourceHash;
 }
 function ensureLedger(s,p){
