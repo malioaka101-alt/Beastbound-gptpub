@@ -33,10 +33,33 @@ function soulAt(s,p,minute){
  return {phase,sourceSeal};
 }
 function gradeAt(b,assessment,minute){
- if(!assessment||!int(assessment.grade,1,9)||!int(assessment.worldMinute,0,minute)||
-  typeof assessment.source!=='string'||assessment.source.trim().length<18||
+ // An individual Grade field is NOT a measured Grade. The only current
+ // original numeric exam owner is rules/bond-grade.js; require its actual
+ // calibrated prior and successful, paid, 120-minute examination receipt.
+ const calibration=b?.gradeCalibration,exam=b?.gradeExaminations?.find(x=>
+  x.worldMinute===assessment?.worldMinute&&x.outcome==='verified'&&
+  x.facility===assessment?.facility&&x.check?.roll===assessment?.examCheck?.roll&&
+  x.check?.dc===assessment?.examCheck?.dc);
+ if(!assessment||assessment.origin!=='observed-independent-grade-exam'||
+  !int(assessment.grade,1,9)||!int(assessment.worldMinute,0,minute)||
+  assessment.worldMinute<120||
+  !['crossing','academy'].includes(assessment.facility)||
+  !exam||!int(exam.check.roll,1,20)||
+  exam.check.dc!==12+2*assessment.grade||
+  !int(calibration?.worldMinute,0,assessment.worldMinute-120)||
+  calibration?.grade!==assessment.grade||
+  calibration.species!==assessment.species||
+  calibration.evolutionStage!==assessment.evolutionStage||
+  calibration.individualGrade!==assessment.individualGrade||
+  assessment.calibrationMinute!==calibration.worldMinute||
   assessment.species!==b.species||assessment.evolutionStage!==b.evolutionStage||
-  assessment.individualGrade!==b.individualGrade)return null;
+  assessment.individualGrade!==b.individualGrade||
+  typeof calibration.source!=='string'||calibration.source.trim().length<18||
+  assessment.source!==('Individual Grade '+assessment.grade+
+   ' verified at '+assessment.facility+' after d20 '+exam.check.roll+
+   ' vs DC '+exam.check.dc+', against prior independent calibration: '+
+   calibration.source.trim().slice(0,120)))
+  return null;
  return {grade:assessment.grade,gradeSeal:hash(assessment)};
 }
 function inputs(s,p,b,minute,assessment,depth,usedCapacity){
