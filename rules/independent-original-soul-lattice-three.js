@@ -11,7 +11,8 @@ const Crypto=require('node:crypto'),Core=require('./core'),
  Combat=require('./combat'),Build=require('./build'),
  Early=require('./independent-original-discipline-preparation'),
  Thread=require('./independent-original-soul-thread-two'),
- Law=require('./soul-shared-original-resonance-lattice');
+ Law=require('./soul-shared-original-resonance-lattice'),
+ ThreadLaw=require('./soul-shared-original-threading');
 const ORIGIN='source-earned-independent-original-soul-lattice-three-v1',
  NIGHT='source-earned-independent-original-soul-lattice-three-night-v1',
  hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -85,6 +86,49 @@ function pendingDiagnosis(r){
  }
  return null;
 }
+// Re-exercise the original already-earned integrated mind/body/resonance
+// thread under a bounded, deliberately varied personal lattice response,
+// then stop the exercise. The actual original integrated check resolves
+// both control and safe independent stopping; failure supplies no witness.
+// No extra Phase II link or III structural point is awarded by this test.
+function formationCountertestSpec(will){
+ return {minutes:120,dc:ThreadLaw.DC,modifier:will,
+  reserveCost:ThreadLaw.RESERVE_COST,staminaCost:ThreadLaw.staminaCost(120)};
+}
+function formationReport(p,q,plan,structuralSourceHash){
+ return {origin:'source-tested-independent-soul-lattice-identity-stop-v1',
+  actorId:p.actorId,individualIdentityOriginHash:p.originHash,
+  originalThreadSourceHash:q.originalThreadSourceHash,
+  originalPersonalMapHash:hash(plan),
+  originalStructuralPracticeSourceHash:structuralSourceHash,
+  originalSceneHash:q.originalSceneHash,
+  location:q.offscreenOpportunity.privatePhysicalSite,day:q.day,
+  measuredPoints:q.pointsBefore,measuredStrain:q.strainBefore,
+  measuredStability:q.stabilityBefore,
+  procedure:'Vary bounded own resonance, maintain integrated mind-body-soul identity, then deliberately stop',
+  actualIntegratedControlAndStopCheck:{...q.check},
+  independentResponseVerified:true,identityBoundaryStopVerified:true,
+  noOtherMindOrNewThreadOrLatticeAward:true};
+}
+function countertestReady(row,points,strain,stability,site){
+ const q=row?.source,proof=q?.formationCountertest;
+ return q?.kind==='countertest'&&q.accepted===true&&q.check?.success===true&&
+  proof?.measuredPoints===points&&proof?.measuredStrain===strain&&
+  proof?.measuredStability===stability&&proof?.location===site;
+}
+function pendingCountertest(r){
+ for(let i=r.sessions.length-1;i>=0;i--){
+  const row=r.sessions[i],q=row.source;
+  if(!q.accepted)continue;
+  if(q.kind==='countertest')return q.check?.success?row:null;
+  if(q.kind==='form'||q.kind==='practice'||q.kind==='repair'||q.kind==='diagnose')return null;
+ }
+ return null;
+}
+function structuralSource(r){
+ return r.sessions.find(x=>x.source.kind==='practice'&&
+  x.source.accepted&&x.source.check?.success&&x.source.pointsAfter===Law.GOAL)?.seal||null;
+}
 function verify(s,p){
  const r=p?.originalSoulLatticeThree;
  if(r===undefined)return true;
@@ -98,7 +142,8 @@ function verify(s,p){
  if(!body?.npcOrigin?.seal)return false;
  let reserve=base.reserve,maximum=base.max,stability=base.stability,
   points=0,strain=0,mapped=false,formed=false,plan=null,
-  completedSeal=null,lastDay=-1,lastEnd=0,diagnosis=null;
+  completedSeal=null,lastDay=-1,lastEnd=0,diagnosis=null,
+  countertest=null,structureSeal=null;
  const processedNights=new Set();
  for(const row of r.sessions){
   const q=row?.source;
@@ -147,11 +192,16 @@ function verify(s,p){
   const requiresRepair=strain>=5||points>=Law.GOAL&&strain>2,
    diagnosed=diagnosisReady(diagnosis,strain,stability,
     q.offscreenOpportunity?.privatePhysicalSite),
+   countertested=countertestReady(countertest,points,strain,stability,
+    q.offscreenOpportunity?.privatePhysicalSite),
    expectedKind=!mapped?'design':requiresRepair?
-    (diagnosed?'repair':'diagnose'):points>=Law.GOAL?'form':'practice';
+    (diagnosed?'repair':'diagnose'):points>=Law.GOAL?
+     (countertested?'form':'countertest'):'practice';
   if(q.kind!==expectedKind||
    (q.kind==='repair'?q.originalDiagnosisSourceHash!==diagnosis?.seal:
-    q.originalDiagnosisSourceHash!=null))return false;
+    q.originalDiagnosisSourceHash!=null)||
+   (q.kind==='form'?q.originalFormationCountertestHash!==countertest?.seal:
+    q.originalFormationCountertestHash!=null))return false;
   const roller={rngState:q.rngBefore};
   if(q.choiceD100!==Core.die(roller,100)||
    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
@@ -163,16 +213,20 @@ function verify(s,p){
     if(!plan||JSON.stringify(q.personalBlueprint)!==
      JSON.stringify(plan))return false;
    }else{
-    const percept=perceptionSpec(p);
-    minutes=q.kind==='diagnose'?percept.minutes:q.kind==='form'?90:120;
-    cost=q.kind==='diagnose'?percept.reserveCost:q.kind==='form'?Law.FORMATION_RESERVE:
+    const percept=perceptionSpec(p),boundary=formationCountertestSpec(base.will);
+    minutes=q.kind==='diagnose'?percept.minutes:q.kind==='countertest'?
+     boundary.minutes:q.kind==='form'?90:120;
+    cost=q.kind==='diagnose'?percept.reserveCost:q.kind==='countertest'?
+     boundary.reserveCost:q.kind==='form'?Law.FORMATION_RESERVE:
      q.kind==='repair'?Law.REPAIR_RESERVE:Law.PRACTICE_RESERVE;
-    physicalCost=q.kind==='diagnose'?0:q.kind==='form'?Law.formationStamina(minutes):
+    physicalCost=q.kind==='diagnose'?0:q.kind==='countertest'?boundary.staminaCost:
+     q.kind==='form'?Law.formationStamina(minutes):
      q.kind==='repair'?Law.repairStamina(minutes):
       Law.practiceStamina(minutes);
     if(reserve<cost||q.staminaBefore<physicalCost||
      q.personalBlueprint!==null)return false;
-    const dc=q.kind==='diagnose'?percept.dc:q.kind==='form'?Law.FORMATION_DC:
+    const dc=q.kind==='diagnose'?percept.dc:q.kind==='countertest'?boundary.dc:
+     q.kind==='form'?Law.FORMATION_DC:
      q.kind==='repair'?Law.REPAIR_DC:Law.PRACTICE_DC,
      mod=q.kind==='diagnose'?percept.modifier:q.kind==='form'?
       Law.formationModifier(base.will,0,stability):base.will,
@@ -182,7 +236,15 @@ function verify(s,p){
     check={roll,dc,modifier:mod,margin,degree,success};
     if(JSON.stringify(q.check)!==JSON.stringify(check))return false;
     reserve-=cost;
-    if(q.kind==='diagnose'){
+    if(q.kind!=='countertest')countertest=null;
+    if(q.kind==='countertest'){
+     if(!structureSeal||!plan||!Law.formationReady(points,strain))return false;
+     const report=success?formationReport(p,q,plan,structureSeal):null;
+     if(JSON.stringify(q.formationCountertest)!==JSON.stringify(report))return false;
+     countertest=success?row:null;
+     stability=ThreadLaw.stabilityAfter(stability,check);
+     injury=degree==='severe failure';
+    }else if(q.kind==='diagnose'){
      if(strain===0||!plan)return false;
      const report=success?diagnosticReport(p,q,plan):null;
      if(JSON.stringify(q.diagnosticReport)!==JSON.stringify(report))return false;
@@ -191,6 +253,7 @@ function verify(s,p){
      const changed=Law.practiceState(points,strain,check);
      progressEarned=Law.earned(check);
      points=changed.points;strain=changed.strain;
+     if(points===Law.GOAL&&check.success)structureSeal=row.seal;
      if(changed.stabilityLost){
       stability=Math.max(1,stability-changed.stabilityLost);
       injury=true;
@@ -213,6 +276,7 @@ function verify(s,p){
    if(q.kind==='design'&&q.check!==null)return false;
   }else if(q.check!==null||q.personalBlueprint!==null)return false;
   if((q.kind!=='diagnose'||!q.accepted)&&q.diagnosticReport!=null)return false;
+  if((q.kind!=='countertest'||!q.accepted)&&q.formationCountertest!=null)return false;
   if(q.actualMinutes!==minutes||q.reserveSpent!==cost||
    q.staminaSpent!==physicalCost||
    q.staminaAfter!==q.staminaBefore-physicalCost||
@@ -270,6 +334,10 @@ function privateStatus(s,p){
    x.source.kind==='diagnose'&&x.source.accepted).length||0,
   sourceVerifiedRepairChecks:r?.sessions.filter(x=>
    x.source.kind==='repair'&&x.source.accepted).length||0,
+  sourceVerifiedFormationCountertests:r?.sessions.filter(x=>
+   x.source.kind==='countertest'&&x.source.accepted).length||0,
+  actualPendingFormationCountertest:r?
+   structuredClone(pendingCountertest(r)?.source.formationCountertest??null):null,
   currentSoulReserve:r?.reserveRemaining??null,
   maxSoulReserve:r?.maxReserve??null,
   actuallyFormedLattice:r?.earnedProof?structuredClone(r.earnedProof):null,
@@ -279,7 +347,10 @@ function afterDaily(s,ctx){
  const p=ctx.actor,body=ctx.body,base=initial(p);
  if(!base||!Thread.verify(s,p)||!Early.verify(s,p)||!verify(s,p)||
   p.originalSoulLatticeThree?.formed||
-  body.status!=='ok'||body.wounds.some(x=>x!==0))return null;
+  body.status!=='ok'||body.stamina<1||body.wounds.some(x=>x!==0)||
+  Object.values(p.originalEarlyDisciplinePreparation||{}).
+   some(x=>x.lastAttemptDay>=ctx.workDay)||
+  p.meridianTraining?.lastAttemptDay>=ctx.workDay)return null;
  const r=ensureLedger(s,p);
  if(r.sessions.length>=480||r.lastAttemptDay>=ctx.workDay||
   Object.values(p.originalEarlyDisciplinePreparation||{}).
@@ -287,17 +358,20 @@ function afterDaily(s,ctx){
   p.meridianTraining?.lastAttemptDay>=ctx.workDay)return null;
  const diagnosis=pendingDiagnosis(r),
   requiresRepair=r.strain>=5||r.points>=Law.GOAL&&r.strain>2,
+  countertest=pendingCountertest(r),
   kind=!r.mapped?'design':requiresRepair?
    (diagnosisReady(diagnosis,r.strain,r.soulStability,ctx.site)?'repair':'diagnose'):
-   r.points>=Law.GOAL?'form':'practice',
-  percept=perceptionSpec(p);
+   r.points>=Law.GOAL?
+    (countertestReady(countertest,r.points,r.strain,r.soulStability,ctx.site)?
+     'form':'countertest'):'practice',
+  percept=perceptionSpec(p),boundary=formationCountertestSpec(base.will);
  const cost=kind==='design'?0:kind==='diagnose'?percept.reserveCost:
-  kind==='form'?Law.FORMATION_RESERVE:
+  kind==='countertest'?boundary.reserveCost:kind==='form'?Law.FORMATION_RESERVE:
   kind==='repair'?Law.REPAIR_RESERVE:Law.PRACTICE_RESERVE;
  const physicalCost=kind==='design'||kind==='diagnose'?0:
-  kind==='form'?Law.formationStamina(90):
+  kind==='countertest'?boundary.staminaCost:kind==='form'?Law.formationStamina(90):
   kind==='repair'?Law.repairStamina(120):Law.practiceStamina(120);
- if(r.reserveRemaining<cost||body.stamina<physicalCost)return null;
+ if(r.reserveRemaining<cost||body.stamina<Math.max(1,physicalCost))return null;
  const choiceChance=Early.chance(p),rngBefore=p.rngState,
   choiceD100=Core.die(p,100),accepted=choiceD100<=choiceChance,
   beforeReserve=r.reserveRemaining,beforeMax=r.maxReserve,
@@ -311,7 +385,8 @@ function afterDaily(s,ctx){
    personalBlueprint=blueprint(p);
    r.personalBlueprint=personalBlueprint;r.mapped=true;
   }else{
-   const dc=kind==='diagnose'?percept.dc:kind==='form'?Law.FORMATION_DC:
+   const dc=kind==='diagnose'?percept.dc:kind==='countertest'?boundary.dc:
+    kind==='form'?Law.FORMATION_DC:
     kind==='repair'?Law.REPAIR_DC:Law.PRACTICE_DC,
     mod=kind==='diagnose'?percept.modifier:kind==='form'?
      Law.formationModifier(base.will,0,r.soulStability):base.will,
@@ -321,7 +396,11 @@ function afterDaily(s,ctx){
    check={roll:result.roll,dc:result.dc,modifier:result.modifier,
     margin:result.margin,degree:result.degree,success:result.success};
    r.reserveRemaining-=cost;body.stamina-=physicalCost;
-   if(kind==='diagnose'){
+   if(kind==='countertest'){
+    r.soulStability=ThreadLaw.stabilityAfter(r.soulStability,result);
+    injury=result.degree==='severe failure';
+    if(injury)Combat.harm(s,body,2);
+   }else if(kind==='diagnose'){
     // Original self perception expends reserve, measures only one's
     // own already established interference; no structural or healing gain.
    }else if(kind==='practice'){
@@ -352,8 +431,9 @@ function afterDaily(s,ctx){
    originalSceneHash:hash(witness),offscreenOpportunity:witness,
    day:ctx.workDay,startMinute:ctx.workDay*1440+600,
    actualMinutes:accepted?(kind==='design'?45:kind==='diagnose'?
-    percept.minutes:kind==='form'?90:120):5,
+    percept.minutes:kind==='countertest'?boundary.minutes:kind==='form'?90:120):5,
    ...(kind==='repair'?{originalDiagnosisSourceHash:diagnosis.seal}:{}),
+   ...(kind==='form'?{originalFormationCountertestHash:countertest.seal}:{}),
    rngBefore,rngAfter:p.rngState,
    personalityAtDecision:p.personality,fatigueAtDecision:p.fatigue,
    choiceChance,choiceD100,accepted,
@@ -373,6 +453,8 @@ function afterDaily(s,ctx){
    noOtherMindReadingOrUnlearnedArt:true};
  if(kind==='diagnose')source.diagnosticReport=accepted&&check?.success?
   diagnosticReport(p,source,r.personalBlueprint):null;
+ if(kind==='countertest')source.formationCountertest=accepted&&check?.success?
+  formationReport(p,source,r.personalBlueprint,structuralSource(r)):null;
  const seal=hash(source);r.sessions.push({source,seal});
  r.lastAttemptDay=ctx.workDay;
  if(r.formed){
@@ -418,4 +500,4 @@ function afterNight(s,p,nightRow){
  return {originalSoulReserveRestored:after-before,
   independentOriginalSoulNight:true};
 }
-module.exports={ORIGIN,NIGHT,verify,ensureLedger,privateStatus,afterDaily,afterNight};
+module.exports={ORIGIN,NIGHT,verify,ensureLedger,privateStatus,afterDaily,afterNight,formationCountertestSpec};
