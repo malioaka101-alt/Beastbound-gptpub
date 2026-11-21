@@ -279,9 +279,9 @@ for(let n=0;n<80;n++){
      // A refused meeting cannot be recycled as consent. Advance at most
      // four additional REAL days before the first original civil sixday,
      // when the independent beast may depart on its own ecology tick.
-     let tried=1,renewedYes=0,actualInteraction=null;
+     let tried=1,renewedYes=0,actualInteraction=null,actualInteractions=[];
      if(fresh.newContact)renewedYes++;
-     for(let nextDay=fday+1;nextDay<=5&&!actualInteraction;nextDay++){
+     for(let nextDay=fday+1;nextDay<=5;nextDay++){
       Time.advance(fs,1);
       const living=Realm.peek(fs),witnessedPerson=living.emergentPeople.people[p.id],
        nowDay=Math.floor(fs.world.minutes/1440),nowMinute=fs.world.minutes,
@@ -333,12 +333,20 @@ for(let n=0;n<80;n++){
        savedPerson=Realm.peek(lived).emergentPeople.people[p.id];
       A.equal(Interact.verify(lived,savedPerson),true);
       A.equal(Follow.verify(lived,savedPerson),true);
-      actualInteraction={freshlyAccepted:true,humanInitiated:exchange.independentlyInitiated,
+      const observed={freshlyAccepted:true,humanInitiated:exchange.independentlyInitiated,
        receivedByBeast:exchange.accepted,checkSucceeded:exchange.successful,
        event:exchange.observedEvent??null,day:nowDay};
+      actualInteraction||=observed;
+      actualInteractions.push(observed);
+      const rows=witnessedPerson.originalBondInteractions;
+      if(rows.length>1){
+       A.equal(rows.at(-1).source.previous,rows.at(-2).seal);
+       A.deepEqual(rows.at(-1).source.before,rows.at(-2).source.after);
+      }
      }
      console.log('INDEPENDENT EXTENDED REAL PAIR PROGRESSION '+JSON.stringify({
       actualDaysTried:tried,freelyRenewed:renewedYes,actualInteraction,
+      actualInteractions,originalEarnedEventCount:actualInteractions.filter(x=>x.event!==null).length,
       noInferredContractOrSync:true}));
      console.log('INDEPENDENT RENEWED REAL SAPient CONTACT '+JSON.stringify({freelyAccepted:fresh.newContact,minute:recent.source.minute,actualDay:fday}));
     }else{
