@@ -73,7 +73,7 @@ function witnessValid(s,p,q){
    return d.lawRef===undefined&&q.lawHash===null;
   }
   if(kind==='practice')return prose(d.measuredResponse,24)&&prose(d.resistance,24);
-  if(kind==='repair')return prose(d.damageObserved,24)&&prose(d.repairMethod,24);
+  if(kind==='repair')return prose(d.examinedFailure,24)&&prose(d.restorativeGeometry,24);
   return kind==='form'&&prose(d.independentCountertest,24)&&prose(d.limitObserved,24);
  }
  const sp=Soul.SPEC[stage];if(!sp)return false;
