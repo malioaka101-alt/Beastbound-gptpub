@@ -42,6 +42,26 @@ function credibleAssistance(a){
  const value=a.success?(['strong','exceptional'].includes(a.degree)?2:1):0;
  return a.support===value;
 }
+function verifyVisitorServiceWork(p,r){
+ const q=r?.source,v=q?.visitorService;
+ if(q?.context!=='independent-visitor-merchant-service')
+  return v===undefined;
+ const d=p.career?.authoredDuties?.find(x=>x.id===q.task?.authoredDutyId),
+  pos=require('../rules/independent-sapient-terrestrial-journey')
+   .position(p,v?.minute);
+ return !!v&&!!d&&d.status!=='retired'&&
+  d.source?.visitorSite==='crossing'&&
+  v.arrivalSeal===d.source.visitorArrivalSeal&&
+  v.arrivalSeal===pos?.sourceHash&&pos?.arrived&&pos.location==='crossing'&&
+  v.site==='crossing'&&v.actorId===p.actorId&&
+  Number.isInteger(v.minute)&&Math.floor(v.minute/1440)===q.day&&
+  /^[a-f0-9]{64}$/.test(v.agreementHash||'')&&
+  /^[a-z][a-z0-9_-]{6,69}$/.test(v.agreementId||'')&&
+  d.sourceHash===v.dutyHash&&q.regionId===d.regionId&&
+  q.task.regionId===d.regionId&&q.task.domain==='trade'&&
+  q.task.method===d.method&&q.task.authoredDutyId===d.id&&
+  q.task.activeOfferId===undefined;
+}
 function verify(p){
  const c=p?.career;
  if(c===undefined)return true; // Backward-compatible prior living people.
@@ -81,7 +101,9 @@ function verify(p){
    (r.source?.context==='locally-assisted-duty'?
     !credibleAssistance(r.source.assistance):
     r.source?.assistance!==undefined||
-     !['independent-duty','locally-witnessed-duty'].includes(r.source?.context))))return false;
+     !['independent-duty','locally-witnessed-duty',
+       'independent-visitor-merchant-service'].includes(r.source?.context))||
+   !verifyVisitorServiceWork(p,r)))return false;
  // GM-authored work is part of this *same* independently earned career, not
  // an extra salary engine or permission to fabricate institutional authority.
  if(c.authoredDuties!==undefined&&
@@ -669,14 +691,14 @@ function verifyTradePayment(p,e){
   work.day<=q.day&&
   e.workHash===q.workHash;
 }
-function payVerifiedTradeWork(w,p,{workHash,amountScales,day,witness}={}){
+function payVerifiedTradeWork(w,p,{workHash,amountScales,day,witness}={},sourceWorld=null){
  const c=ensure(p),vendor=w?.localProvisioner,
   seller=require('../engine.js').NPCS.otto;
  if(!vendor||vendor.origin!=='established-reedmarch-provisions-v1'||
   vendor.sellerNpcId!=='otto'||vendor.seller!==seller?.name||
   vendor.location!=='crossing'||vendor.regionId!=='morrowfen_basin'||
   seller.location!=='crossing'||seller.profession!=='Beast provisioner'||
-  p.status!=='active'||p.regionId!==vendor.regionId||
+  p.status!=='active'||
   !Number.isInteger(day)||day!==w.lastTickDay||
   !Number.isInteger(amountScales)||amountScales<1||
   !Number.isInteger(vendor.fundsScales)||
@@ -687,9 +709,28 @@ function payVerifiedTradeWork(w,p,{workHash,amountScales,day,witness}={}){
   witness.length>600||!witness.includes(vendor.seller))
   throw Error('A genuinely witnessed seller-funded local work transfer in existing Scales is required');
  const People=require('./emergent-people');
- if(!People.presence(w,p.actorId,vendor.location,day))
+ const visitorPay=p.regionId!==vendor.regionId,
+  position=visitorPay?require('../rules/independent-sapient-terrestrial-journey')
+   .position(p,sourceWorld?.world?.minutes):null;
+ if(visitorPay&&(!sourceWorld||
+   require('./simulation').peek(sourceWorld)!==w||
+   w.emergentPeople?.people?.[p.id]!==p||
+   sourceWorld.world.minutes%1440<8*60||
+   sourceWorld.world.minutes%1440>=18*60||
+   Math.floor(sourceWorld.world.minutes/1440)!==day||
+   !require('../rules/independent-sapient-terrestrial-journey')
+    .verify(sourceWorld,p)||
+   !position?.arrived||position.location!==vendor.location))
+  throw Error('Only the actual source-present and original journey-verified visiting employee may receive local merchant compensation');
+ if(!People.presence(w,p.actorId,vendor.location,day,
+   visitorPay?sourceWorld.world.minutes%1440:undefined))
   throw Error('The real worker must actually attend the living market shift');
  const completed=c.workReceipts.find(r=>r.sourceHash===workHash);
+ if(visitorPay&&(!completed||completed.source.context!=='independent-visitor-merchant-service'||
+   completed.source.visitorService?.site!==vendor.location||
+   completed.source.visitorService?.arrivalSeal!==position.sourceHash||
+   completed.source.visitorService?.actorId!==p.actorId))
+  throw Error('A foreign visitor payment requires the same actual visitor original work proof');
  if(!completed||completed.source?.outcome?.success!==true||
   completed.source?.task?.domain!=='trade'||
   completed.source?.regionId!==vendor.regionId||
@@ -883,10 +924,12 @@ function workplaceSafetyStatus(p){
  }));
 }
 
-function task(w,p,day=w.lastTickDay){
- const eco=w.ecosystems?.[p.regionId],host=w.countries?.[p.polity],
-  region=Atlas.R[p.regionId];
- if(!eco||!host||!region||region.polity!==p.polity||
+function task(w,p,day=w.lastTickDay,visitorDuty=null){
+ const workRegion=visitorDuty?.regionId||p.regionId,
+  workPolity=Atlas.R[workRegion]?.polity,
+  eco=w.ecosystems?.[workRegion],host=w.countries?.[workPolity],
+  region=Atlas.R[workRegion];
+ if(!eco||!host||!region||region.polity!==workPolity||
   ![eco.quality,eco.pressure,eco.water,eco.forage,host.stability,
    host.prosperity].every(Number.isFinite))
   throw Error('An independently lived profession requires actual current local conditions');
@@ -915,7 +958,9 @@ function task(w,p,day=w.lastTickDay){
  // to take it; existing work and rest remain available.
  const c=ensure(p);
  for(const duty of c.authoredDuties||[]){
-  if(duty.status==='available'&&duty.regionId===p.regionId&&
+  if(duty.status==='available'&&
+    (duty.regionId===p.regionId||
+     visitorDuty?.id===duty.id&&visitorDuty.regionId===duty.regionId)&&
     (duty.institutionId===null||
       w.institutions?.[duty.institutionId]?.status==='active'))
    {
@@ -930,14 +975,21 @@ function task(w,p,day=w.lastTickDay){
  // A newly witnessed person cannot be assigned the original procedural
  // trade template merely because their actual profession is unfamiliar.
  // Only duties independently established in their own source are playable.
- const credible=p.origin==='gm-witnessed-lived-person-v1'?
-  available.filter(d=>d.authoredDutyId):available;
- if(!credible.length)throw Error('This GM-established professional has no witnessed executable duty yet');
- const work=credible[Math.floor(draw(p)*credible.length)];
+ const credible=visitorDuty?
+  available.filter(d=>d.authoredDutyId===visitorDuty.id):
+  p.origin==='gm-witnessed-lived-person-v1'?
+   available.filter(d=>d.authoredDutyId):available;
+ if(!credible.length||visitorDuty&&credible.length!==1)
+  throw Error('Only the exact originally agreed, source-verified independent visitor trade duty can be attempted');
+ // Ordinary independent local duties still use their own task-selection RNG.
+ // A separately ACCEPTED visitor agreement already names its exact task;
+ // only an actual independent work choice and genuine d20 remain.
+ const work=visitorDuty?credible[0]:
+  credible[Math.floor(draw(p)*credible.length)];
  const pressure=eco.pressure>69?3:eco.quality<38?2:0,
   scarcity=eco.water<40||eco.forage<40?2:0,
   instability=host.stability<40?2:0;
- return {...work,regionId:p.regionId,polity:p.polity,
+ return {...work,regionId:workRegion,polity:workPolity,
   localGood:region.goods[0],
   context:{quality:eco.quality,pressure:eco.pressure,
    water:eco.water,forage:eco.forage,stability:host.stability,
@@ -983,11 +1035,48 @@ function currentCapability(p){
   noCultivationOrCombatPowerAward:true};
 }
 
-function work(w,p,day,context='independent-duty',assistance=null){
+function work(w,p,day,context='independent-duty',assistance=null,visitorService=null){
  if(p.status==='recovering')throw Error('A recovering worker cannot be compelled into another work check');
  if(!Number.isInteger(day)||day<0||
-   !['independent-duty','locally-witnessed-duty','locally-assisted-duty'].includes(context))
+   !['independent-duty','locally-witnessed-duty','locally-assisted-duty',
+     'independent-visitor-merchant-service'].includes(context))
   throw Error('Independent real work requires an actual witnessed or world source');
+ const visiting=context==='independent-visitor-merchant-service';
+ if(visiting!==!!visitorService)
+  throw Error('A visitor work check requires its exact separately accepted original merchant and physical visitor source');
+ let visitorDuty=null,visitorProof=null;
+ if(visiting){
+  const s=visitorService.world,merchant=w?.localProvisioner,
+   sourceMinute=s?.world?.minutes,
+   q=merchant?.serviceTerms?.find(x=>
+    x.id===visitorService.agreementId&&x.workerId===p.id&&
+    x.accepted&&x.settlement===null),
+   d=p.career?.authoredDuties?.find(x=>x.id===q?.source?.dutyId),
+   Visit=require('../rules/independent-sapient-terrestrial-journey'),
+   pos=Visit.position(p,sourceMinute);
+  if(!s||require('./simulation').peek(s)!==w||
+   w.emergentPeople?.people?.[p.id]!==p||
+   !Visit.verify(s,p)||!q||!d||d.status!=='available'||
+   d.source?.visitorSite!=='crossing'||
+   d.source.visitorArrivalSeal!==pos?.sourceHash||
+   !pos?.arrived||pos.location!=='crossing'||
+   q.source.dutySourceHash!==d.sourceHash||
+   q.source.workMethod!==d.method||d.domain!=='trade'||
+   d.regionId!=='morrowfen_basin'||
+   !Number.isInteger(sourceMinute)||Math.floor(sourceMinute/1440)!==day||
+   day!==w.lastTickDay||day<q.source.day||day>q.source.throughDay||
+   sourceMinute%1440<8*60||sourceMinute%1440>=18*60||
+   !require('./emergent-people').presence(w,p.actorId,'crossing',day,
+     sourceMinute%1440)||
+   (q.visitorAttempts||[]).some(x=>x.source.day===day)||
+   require('../rules/unified').currentNpcWoundCondition(s,p.actorId)?.
+    workAndOrdinaryPracticeBlocked)
+   throw Error('Independent market service needs a presently fit visitor, accepted real work terms, original market hours and one original service check per day');
+  visitorDuty=d;
+  visitorProof={agreementId:q.id,agreementHash:q.sourceHash,
+   dutyHash:d.sourceHash,actorId:p.actorId,
+   site:'crossing',arrivalSeal:pos.sourceHash,minute:sourceMinute};
+ }
  const assisted=context==='locally-assisted-duty';
  if((!assisted&&assistance!==null)||
     (assisted&&(!assistance||!['survival','diplomacy','crafting'].includes(assistance.skill)||
@@ -998,10 +1087,10 @@ function work(w,p,day,context='independent-duty',assistance=null){
   throw Error('Cooperative work needs an actual separately resolved and witnessed player skill check');
  const support=assisted&&assistance.success?
    (['strong','exceptional'].includes(assistance.degree)?2:1):0;
- const c=ensure(p),job=task(w,p,day),
+ const c=ensure(p),job=task(w,p,day,visitorDuty),
   innovation=require('./independent-innovations').workBonus(w,p,job.method),
-  local=w.ecosystems[p.regionId],
-  polity=w.countries[p.polity],
+  local=w.ecosystems[job.regionId],
+  polity=w.countries[job.polity],
   originalSkill=c.competenceRank,
   supportFromPeer=(c.peerGuidance||[]).slice().reverse().find(e=>
    e.accepted&&e.status==='accepted'&&
@@ -1046,7 +1135,8 @@ function work(w,p,day,context='independent-duty',assistance=null){
   c.demonstratedMethods[job.method]=(c.demonstratedMethods[job.method]||0)+1;
  }
  const receiptSource={origin:WORK,personId:p.id,personOriginHash:p.originHash,
-  day,context,regionId:p.regionId,profession:p.profession,task:job,
+  day,context,regionId:job.regionId,profession:p.profession,task:job,
+  ...(visitorProof?{visitorService:visitorProof}:{}),
   ...(innovation.methodId?{appliedLimitedMethodId:innovation.methodId,
    independentlyTestedMethodBonus:innovation.bonus}:{}),
   ...(supportFromPeer?{peerGuidanceHash:supportFromPeer.sourceHash,

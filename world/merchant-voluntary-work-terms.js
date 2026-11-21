@@ -8,7 +8,8 @@
 const Crypto=require('node:crypto'),E=require('../engine.js'),
  People=require('./emergent-people'),Careers=require('./person-careers');
 const ORIGIN='independent-original-local-trade-service-wage-terms-v1',
- SETTLEMENT='fulfilled-original-local-trade-service-wage-terms-v1';
+ SETTLEMENT='fulfilled-original-local-trade-service-wage-terms-v1',
+ VISITOR_WORK='personally-chosen-original-visitor-market-service-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 function seed(w){
  return Crypto.createHash('sha256').update(
@@ -59,6 +60,48 @@ function originalWorker(w,p){
    d.source?.visitorSite==='crossing'&&
    /^[a-f0-9]{64}$/.test(d.source?.visitorArrivalSeal||'')))
   return false;
+ return true;
+}
+function verifyVisitorAttempts(p,row){
+ const attempts=row.visitorAttempts;
+ if(attempts===undefined)return true;
+ if(!row.accepted||!Array.isArray(attempts)||attempts.length>16)return false;
+ let lastDay=-1;
+ for(const a of attempts){
+  const q=a?.source,step=q?.workerRngBefore&&draw(q.workerRngBefore),
+   pos=require('../rules/independent-sapient-terrestrial-journey')
+    .position(p,q?.minute),proof=q?.work;
+  if(!q||a.sourceHash!==hash(q)||q.origin!==VISITOR_WORK||
+   q.agreementId!==row.id||q.agreementHash!==row.sourceHash||
+   q.workerId!==p.id||q.workerOriginHash!==p.originHash||
+   !Number.isInteger(q.day)||q.day<=lastDay||
+   q.day<row.source.day||q.day>row.source.throughDay||
+   !Number.isInteger(q.minute)||Math.floor(q.minute/1440)!==q.day||
+   q.minute%1440<8*60||q.minute%1440>=18*60||
+   q.site!=='crossing'||!pos?.arrived||pos.location!==q.site||
+   q.arrivalSeal!==pos.sourceHash||
+   !Number.isInteger(q.fatigueBefore)||q.fatigueBefore<0||q.fatigueBefore>100||
+   q.willingness!==Math.max(.12,Math.min(.88,.54+
+     (p.career.aptitude-5)*.03-(q.fatigueBefore>70?.21:q.fatigueBefore>40?.10:0)))||
+   !step||step.after!==q.workerRngAfter||step.value!==q.workerDraw||
+   q.accepted!==(step.value<q.willingness))return false;
+  if(q.accepted){
+   if(!proof||q.workHash!==hash(proof)||
+    proof.origin!==Careers.WORK||proof.personId!==p.id||
+    proof.personOriginHash!==p.originHash||
+    proof.context!=='independent-visitor-merchant-service'||
+    proof.visitorService?.agreementHash!==row.sourceHash||
+    proof.visitorService?.agreementId!==row.id||
+    proof.visitorService?.arrivalSeal!==q.arrivalSeal||
+    proof.visitorService?.minute!==q.minute||
+    proof.task?.authoredDutyId!==row.source.dutyId||
+    proof.task?.method!==row.source.workMethod||
+    proof.regionId!=='morrowfen_basin'||
+    !p.career?.authoredDuties?.some(d=>d.id===row.source.dutyId&&
+      d.workProofHashes?.includes(q.workHash)))return false;
+  }else if(q.work!==null||q.workHash!==null)return false;
+  lastDay=q.day;
+ }
  return true;
 }
 function verifyOne(w,row,previousMerchantRng){
@@ -123,8 +166,10 @@ function verifyOne(w,row,previousMerchantRng){
  }else if(q.workerRngBefore!==null||q.workerRngAfter!==null||
   q.workerDraw!==null||q.workerWillingness!==null||
   q.workerAccepted!==false)return false;
- if(q.accepted!==(q.merchantAccepted&&q.workerAccepted))return false;
- if(!q.accepted)return row.settlement===null;
+ if(q.accepted!==(q.merchantAccepted&&q.workerAccepted)||
+  !verifyVisitorAttempts(p,row))return false;
+ if(!q.accepted)return row.settlement===null&&
+  (row.visitorAttempts===undefined||row.visitorAttempts.length===0);
  if(row.settlement===null)return true;
  const payment=row.settlement,s=payment?.source,
   merchantPayment=v.laborPayments?.find(x=>x.sourceHash===s?.paymentSourceHash),
@@ -243,7 +288,62 @@ function negotiate(w,p,args={}){
   noForcedWork:true,noFundsTransferred:true,
   noWorkCredited:true,noGuaranteedOutcome:true};
 }
-function settle(w,p,{agreementId,workHash,day}={}){
+function performVisitorService(s,{actorId,agreementId,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||
+  typeof agreementId!=='string')
+  throw Error('A real independent visitor may consider only their original accepted current market-service agreement');
+ const w=require('./simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice(9)],
+  v=originalMerchant(w),
+  row=v.serviceTerms?.find(x=>x.id===agreementId&&x.workerId===p?.id&&x.accepted),
+  day=Math.floor(s.world.minutes/1440),
+  minute=s.world.minutes,
+  pos=require('../rules/independent-sapient-terrestrial-journey')
+   .position(p,minute);
+ if(!p||!row||row.settlement||!originalWorker(w,p)||
+  !verify(w)||p.status!=='active'||day!==w.lastTickDay||
+  day<row.source.day||day>row.source.throughDay||
+  p.regionId===v.regionId||!pos?.arrived||pos.location!=='crossing'||
+  !require('../rules/independent-sapient-terrestrial-journey').verify(s,p)||
+  !People.presence(w,actorId,'crossing',day,minute%1440)||
+  minute%1440<8*60||minute%1440>=18*60||
+  (row.visitorAttempts||[]).some(x=>x.source.day===day)||
+  require('../rules/unified').currentNpcWoundCondition(s,actorId)?.
+   workAndOrdinaryPracticeBlocked)
+  throw Error('A new original market service opportunity requires an independently fit, genuinely present visitor and already mutually accepted, unsettled employer terms');
+ const fatigueBefore=p.fatigue,
+  willingness=Math.max(.12,Math.min(.88,.54+
+    (p.career.aptitude-5)*.03-(fatigueBefore>70?.21:fatigueBefore>40?.10:0))),
+  workerRngBefore=p.rngState,step=draw(workerRngBefore),
+  accepted=step.value<willingness;
+ p.rngState=step.after;
+ let work=null,workHash=null;
+ if(accepted){
+  const receipt=Careers.work(w,p,day,
+   'independent-visitor-merchant-service',null,
+   {world:s,agreementId});
+  workHash=receipt.receiptHash;
+  work=structuredClone(p.career.workReceipts.find(x=>x.sourceHash===workHash).source);
+ }
+ const q={origin:VISITOR_WORK,agreementId,agreementHash:row.sourceHash,
+  workerId:p.id,workerOriginHash:p.originHash,day,minute,
+  site:'crossing',arrivalSeal:pos.sourceHash,fatigueBefore,willingness,
+  workerRngBefore,workerRngAfter:step.after,workerDraw:step.value,
+  accepted,work,workHash};
+ row.visitorAttempts||=[];
+ row.visitorAttempts.push({source:q,sourceHash:hash(q)});
+ if(!verify(w)||!People.verify(w,p))
+  throw Error('Original individual visitor service and decision receipt failed independent source replay');
+ return {privateToGM:true,actorId,agreementId,
+  independentlyAcceptedWork:accepted,
+  workAttempted:!!work,
+  workSuccess:!!work?.outcome.success,workHash,
+  noGuaranteedJobSuccessOrPayment:true,
+  noNewWageUntilSeparateVerifiedSettlement:true,
+  noImpliedGradeOrMagicalBond:true};
+}
+function settle(w,p,{agreementId,workHash,day}={},sourceWorld=null){
  const v=originalMerchant(w);
  if(!originalWorker(w,p)||!verify(w)||
   !Number.isInteger(day)||day!==w.lastTickDay)
@@ -254,7 +354,14 @@ function settle(w,p,{agreementId,workHash,day}={}){
   typeof workHash!=='string'||!/^[a-f0-9]{64}$/.test(workHash))
   throw Error('Only one authentic mutually accepted and not yet settled agreement can pay real work');
  const q=row.source,
-  finished=p.career?.workReceipts?.find(x=>x.sourceHash===workHash);
+  finished=p.career?.workReceipts?.find(x=>x.sourceHash===workHash),
+  visitor=p.regionId!==v.regionId;
+ if(visitor&&(!sourceWorld||
+   require('./simulation').peek(sourceWorld)!==w||
+   Math.floor(sourceWorld.world.minutes/1440)!==day||
+   !row.visitorAttempts?.some(x=>x.source.accepted&&
+    x.source.workHash===workHash&&x.source.work?.outcome.success)))
+  throw Error('A real visiting worker must independently attempt and succeed at the originally accepted employer duty before any payment');
  if(!finished||finished.source.outcome?.success!==true||
   finished.source.task?.domain!=='trade'||
   finished.source.task.authoredDutyId!==q.dutyId||
@@ -267,7 +374,7 @@ function settle(w,p,{agreementId,workHash,day}={}){
  const witness=v.seller+' settles the independently accepted merchant service terms '+
   q.id+' after this real worker completed the agreed source-verified local trading duty; payment is authorised from existing seller-owned Scales only.';
  const paid=Careers.payVerifiedTradeWork(w,p,{
-  workHash,amountScales:q.amountScales,day,witness});
+  workHash,amountScales:q.amountScales,day,witness},sourceWorld);
  const payment=p.career.tradePayments.find(x=>x.workHash===workHash),
   record={origin:SETTLEMENT,agreementId:q.id,workerId:p.id,
    sellerId:'otto',amountScales:q.amountScales,
@@ -290,4 +397,5 @@ function workerTerms(w,p){
    day:x.source.day,throughDay:x.source.throughDay,
    notCompulsoryWork:true,noPayUntilActualSuccessfulWork:true}));
 }
-module.exports={ORIGIN,SETTLEMENT,negotiate,settle,verify,workerTerms};
+module.exports={ORIGIN,SETTLEMENT,VISITOR_WORK,negotiate,
+ performVisitorService,settle,verify,workerTerms};
