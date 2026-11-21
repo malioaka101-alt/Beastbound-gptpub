@@ -48,8 +48,17 @@ function originalMerchant(w){
 function originalWorker(w,p){
  if(!p||p.actorId!=='emergent:'+p.id||
   w?.emergentPeople?.people?.[p.id]!==p||
-  p.status!=='active'||p.regionId!=='morrowfen_basin'||
-  !People.verify(w,p)||!Careers.verify(p))return false;
+  p.status!=='active'||!People.verify(w,p)||!Careers.verify(p))
+  return false;
+ // A historically verified visiting employee must not lose their source-
+ // signed employment receipt merely because their home polity differs or
+ // they later RETURNED. Actual SITE presence remains an independent fresh
+ // requirement for negotiate and payment; this is identity verification.
+ if(p.regionId!=='morrowfen_basin'&&
+  !p.career?.authoredDuties?.some(d=>d.regionId==='morrowfen_basin'&&
+   d.source?.visitorSite==='crossing'&&
+   /^[a-f0-9]{64}$/.test(d.source?.visitorArrivalSeal||'')))
+  return false;
  return true;
 }
 function verifyOne(w,row,previousMerchantRng){
