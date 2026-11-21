@@ -1446,12 +1446,38 @@ function verifyNpcMeridian(s,person){
   bodyMilestone.kind!=='body-muscle-tendon-cycle-one'||
   bodyMilestone.maxStaminaAfter!==bodyMilestone.maxStaminaBefore+2))
   return false;
- const originalBodyMinute=bodyProof?.source?.startMinute,
-  bodyEarnedBefore=time=>originalBodyMinute!==undefined&&
-   Number.isInteger(originalBodyMinute)&&originalBodyMinute<time?2:0;
+ // Higher Body cycles also change the SAME physical reserve. Reconstruct
+ // their gains at the historical completion time, never from today's body.
+ // Every referenced receipt must first pass its own original source owner.
+ const gains=[];
+ if(bodyProof)gains.push({minute:bodyProof.source.startMinute,amount:2});
+ const organ=person.originalBodyOrganCycleThree,nerve=person.originalBodyNerveSenseFour,
+  living=person.originalBodyLivingPhysiques;
+ if(organ&&!require('./independent-original-body-organ-cycle-three').verify(s,person))return false;
+ if(nerve&&!require('./independent-original-body-nerve-sense-four').verify(s,person))return false;
+ if(living&&!require('./independent-original-body-living-physiques').verify(s,person))return false;
+ if(organ?.completed){
+  const q=organ.sessions.find(x=>x.seal===organ.originalCycleThreeSourceHash)?.source;
+  if(!q||!q.completedAfter)return false;
+  gains.push({minute:q.startMinute+q.actualMinutes,
+   amount:require('./body-shared-original-organ-cycle-three').STAMINA_GAIN});
+ }
+ if(nerve?.completed){
+  const q=nerve.sessions.find(x=>x.seal===nerve.completionSourceHash)?.source;
+  if(!q||!q.accepted||q.kind!=='form'||!q.check?.success)return false;
+  gains.push({minute:q.minute+q.actualMinutes,amount:require('./body-shared-original-nerve-sense').STAMINA_GAIN});
+ }
+ for(const [cycle,r] of Object.entries(living?.cycles||{})){
+  if(!r.completed)continue;
+  const q=living.sessions.find(x=>x.seal===r.formationSourceHash)?.source,
+   amount=require('./body-shared-original-living-physique').SPEC[cycle]?.bonus;
+  if(!q||q.cycle!==Number(cycle)||q.kind!=='form'||!q.accepted||!q.check?.success||!Number.isInteger(amount))return false;
+  gains.push({minute:q.minute+q.actualMinutes,amount});
+ }
+ const bodyEarnedBefore=time=>gains.reduce((n,g)=>n+(g.minute<time?g.amount:0),0);
  if(!combatant.npcOrigin.originalUnarmouredHumanBaseline||
   firstMaximum<1||
-  combatant.maxStamina<firstMaximum+(bodyMilestone?2:0)+
+  combatant.maxStamina<firstMaximum+bodyEarnedBefore(s.world.minutes+1)+
    (rec.earnedStage===1?Build.meridianProfile(1).bonuses.stamina:0))
   return false;
  for(const row of rec.sessions){
