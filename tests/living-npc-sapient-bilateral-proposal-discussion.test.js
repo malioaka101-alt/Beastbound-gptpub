@@ -510,6 +510,16 @@ for(let n=0;n<80;n++){
           A.ok(ap.cashScales>=homeCash);
           A.equal(E.exportGame(E.importGame(E.exportGame(arrived))),
            E.exportGame(arrived));
+          // Exact sealed two-sided source is not rewritten to make a return
+          // succeed. Attempting to re-seal an alternative departure after
+          // the genuine earned history must fail independent source replay.
+          const tampered=E.importGame(E.exportGame(dated)),
+           tp=Realm.peek(tampered).emergentPeople.people[dp.id],
+           falsified=tp.originalSapientTerrestrialJourneys.at(-1);
+          falsified.source.departed=false;
+          falsified.seal=hash(falsified.source);
+          A.equal(Journey.verify(tampered,tp),false,
+           'An invented re-sealed refusal cannot rewrite a genuinely independently agreed and paid return');
           console.log('INDEPENDENT ORIGINAL LATER-DAY VERIFIED HOMECOMING '+JSON.stringify({
            laterDay,actualSecondJourney:true,restoredHomeShiftOnlyAfterArrival:true,
            noFreeWagesOrGrade:true}));

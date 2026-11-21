@@ -110,6 +110,11 @@ A.ok(summary.genuinelyAcceptedRenewals>0,'At least one separate natural later-da
 if(worldCount>=96){
  A.ok(summary.originalPhysicalDepartures>0,'Across many genuine worlds at least one mutually consenting original physically paid linked-leg arrival must be verified; no assigned travel');
  A.ok(summary.originalPhysicalDepartureRefusals>0,'Fresh actual departure refusal remains meaningful despite earlier mutually considered route');
+ A.ok(summary.laterDayOffers>0&&summary.laterDayHumanRefusals>0&&
+  summary.laterDayBeastRefusals>0,
+  'A full source-born sample must show actual later-day voluntary opportunities with independent human and beast refusal');
+ A.ok(summary.laterDaySecondDepartures>0&&summary.laterDayVerifiedHomecomings>0,
+  'A genuine independent later-day physically paid second leg and subsequent verified original homecoming must occur; do not assign assent or recovery');
 }
 A.ok(summary.actualSecondLegDepartures<=summary.mutuallyConsideredVisitorNextLegs,
  'A second actual journey cannot exceed the number of genuinely independently mutually considered visitor-site routes');
