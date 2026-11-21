@@ -141,6 +141,21 @@ const METHOD=/^[a-z][a-z-]{3,39}$/;
 // livelihood, and explicitly has no invented clinical/beast/magic outcome.
 // New specialised physical effects require a separately verified original
 // world adapter, never permission from an unrestricted domain string.
+function verifyVisitorDuty(p,q){
+ if(q.visitorSite===undefined)
+  return q.visitorArrivalSeal===undefined&&q.visitorMinute===undefined&&
+   q.regionId===p.birthSource.regionId;
+ const Visit=require('../rules/independent-sapient-terrestrial-journey'),
+  pos=Visit.position(p,q.visitorMinute);
+ return q.visitorSite==='crossing'&&
+  q.regionId===Atlas.LOCATION_REGION[q.visitorSite]&&
+  q.regionId!==p.birthSource.regionId&&
+  Number.isInteger(q.visitorMinute)&&q.visitorMinute>=0&&
+  Math.floor(q.visitorMinute/1440)===q.day&&
+  pos?.arrived&&pos.location===q.visitorSite&&
+  pos.sourceHash===q.visitorArrivalSeal&&
+  /^[a-f0-9]{64}$/.test(q.visitorArrivalSeal||'');
+}
 function verifyDuty(p,d){
  const q=d?.source;
  if(!d||d.origin!==DUTY||d.sourceHash!==hash(q)||
@@ -150,6 +165,7 @@ function verifyDuty(p,d){
    q.domain!==d.domain||q.effect!==d.effect||
    q.institutionId!==d.institutionId||
    q.regionId!==d.regionId||q.day!==d.openedDay||
+   !verifyVisitorDuty(p,q)||
    Atlas.R[d.regionId]?.polity!==q.originalPolity||
    !/^[a-z][a-z0-9_-]{3,60}$/.test(d.id)||
    !METHOD.test(d.method)||
@@ -180,23 +196,41 @@ function verifyDuty(p,d){
  return true;
 }
 function authorDuty(w,p,{id,role,method,goal,domain,effect=null,
- institutionId=null,day,witness,observedSceneDay=null}={}){
+ institutionId=null,day,witness,observedSceneDay=null,
+ visitorSite=null,visitorMinute=null}={}){
  const c=ensure(p);
  if(c.authoredDuties===undefined)c.authoredDuties=[]; // Backfill prior valid lives.
- if(!w||!w.ecosystems?.[p.regionId]||!w.countries?.[p.polity]||
+ const Visit=require('../rules/independent-sapient-terrestrial-journey'),
+  loc=visitorSite===null?null:
+   visitorSite==='crossing'?Atlas.LOCATION_REGION[visitorSite]:null,
+  sourcePosition=visitorSite&&Number.isInteger(visitorMinute)?
+   Visit.position(p,visitorMinute):null,
+  authorizedVisitor=!!(loc&&loc!==p.regionId&&
+   sourcePosition?.arrived&&sourcePosition.location===visitorSite&&
+   Math.floor(visitorMinute/1440)===day&&
+   require('./emergent-people').presence(w,p.actorId,visitorSite,day,
+    visitorMinute%1440)?.arrivedBy===sourcePosition.sourceHash),
+  regionId=authorizedVisitor?loc:p.regionId,
+  polity=Atlas.R[regionId]?.polity;
+ if((visitorSite!==null&&!authorizedVisitor)||
+   (visitorSite===null&&visitorMinute!==null))
+  throw Error('Only a truly signed and presently situated individual visitor may accept a witnessed foreign market duty');
+ if(!w||!w.ecosystems?.[regionId]||!w.countries?.[polity]||
    !Number.isInteger(day)||day<p.birthSource.day||
   (day>w.lastTickDay&&observedSceneDay!==day)||
    !Array.isArray(c.authoredDuties)||c.authoredDuties.some(d=>d.id===id)||
    typeof witness!=='string'||witness.trim().length<24||
    (institutionId!==null&&(!Atlas.I[institutionId]||
-     Atlas.I[institutionId].polity!==p.polity||
+     Atlas.I[institutionId].polity!==polity||
      w.institutions?.[institutionId]?.status!=='active')))
   throw Error('An original local worker, established source and real existing employer are required');
  const source={origin:DUTY,personId:p.id,actorId:p.actorId,
   personOriginHash:p.originHash,id,role,method,goal,domain,effect,
-  regionId:p.regionId,originalPolity:p.polity,institutionId,day,witness};
+  regionId,originalPolity:polity,institutionId,day,witness,
+  ...(authorizedVisitor?{visitorSite,visitorMinute,
+   visitorArrivalSeal:sourcePosition.sourceHash}:{})};
  const duty={id,origin:DUTY,role,method,goal,domain,effect,institutionId,
-  regionId:p.regionId,openedDay:day,status:'available',ending:null,
+  regionId,openedDay:day,status:'available',ending:null,
   workProofHashes:[],source,sourceHash:hash(source)};
  if(!verifyDuty(p,duty))throw Error('Invalid authored work or unsupported effect; cannot create a free power or job');
  c.authoredDuties.push(duty);
