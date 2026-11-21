@@ -316,3 +316,59 @@ adrow.source.check.dc=1;adrow.seal=hash(adrow.source);
 A.equal(Physique.verify(adfake,adbad),false,'Rehashed cheap fake advanced physiology cannot grant actual advancement');
 console.log('ORIGINAL WITNESSED NPC BODY V–VII ASSESSMENT PASS '+JSON.stringify({
  counts,cycles:advanced.cycles,actualCapacityGain:bonus}));
+
+
+// Separate individual tissue development uses the actual earlier whole-body
+// map, NOT a new cycle or an additional capacity award.
+const tissueCycle=Object.keys(advanced.cycles).map(Number).find(x=>x===5)||Number(Object.keys(advanced.cycles)[0]);
+const tissueCounts={map:0,work:0,care:0,declined:0};
+const tissueId='individual_circulation_tissue';
+const tissueMax=originalCombat.maxStamina;
+for(let i=0;i<90;i++){
+ const old=s.world.minutes,target=(Math.floor(old/1440)+1)*1440+600;
+ E.advance(s,target-old);World.finalizeTime(s,old);
+ const dayNow=Math.floor(s.world.minutes/1440);
+ if(!Presence.resolve(Realm.peek(s),p.actorId,IVsite,dayNow,600)||
+  originalCombat.status!=='ok'||originalCombat.wounds.some(x=>x!==0)||
+  originalCombat.stamina<5)continue;
+ const rec=advanced.cycles[tissueCycle],t=rec.tissues?.find(x=>x.id===tissueId);
+ if(t?.points>=2&&t.strain===0)break;
+ const kind=!t?'tissue-map':t.strain>=5?'tissue-care':'tissue-work';
+ const origin=kind==='tissue-map'?PCPhysique.TISSUE:kind==='tissue-care'?PCPhysique.TISSUE_CARE:PCPhysique.TISSUE_WORK;
+ const details=kind==='tissue-map'?{
+  tissue:'The local existing circulation tissue examined in this individual under actual controlled load.',
+  realFunction:'Measured finite physical contribution to blood circulation and ordinary tissue oxygenation.',
+  metabolicTradeoff:'Measured existing metabolic demand limits continued exertion and requires normal supported rest.',
+  failureLimit:'Observed physical fatigue and loss of controlled function are independent boundaries on the experiment.',
+  observedTissue:'Distinct original tissue response is examined within the previously mapped whole body design.',
+  independentCountertest:'An independently observed controlled counterstimulus identifies finite original tissue response.'
+ }:{
+  observedResponse:'The mapped individual tissue displays an actual bounded response to the local controlled procedure.',
+  physicalLimit:'Measured fatigue and loss of ordinary tissue function bound the experiment and require stopping.'
+ };
+ s.chatRuntime.scene=p.name+' is present for an observed individual tissue procedure.';
+ Core.event(s,'story',s.chatRuntime.scene,{origin,location:IVsite,actorId:p.actorId,cycle:tissueCycle,tissueId,...details});
+ const result=Rules.act(s,{system:'body',operation:'npcLivingPhysiqueWork',
+  params:{actorId:p.actorId,witnessIndex:s.log.length-1,...(t?{minutes:60}:{})}});
+ const q=advanced.sessions.at(-1).source;
+ A.equal(Physique.verify(s,p),true);
+ A.deepEqual(q.before,q.after,'Individual tissue work cannot advance whole-body stage');
+ A.equal(q.maxBefore,q.maxAfter);A.equal(result.independentlyAccepted,q.accepted);
+ if(!q.accepted){tissueCounts.declined++;A.equal(q.staminaSpent,0);}
+ else if(kind==='tissue-map'){tissueCounts.map++;A.equal(q.check,null);}
+ else{
+  tissueCounts[kind==='tissue-care'?'care':'work']++;
+  const mode=PLaw.checkSpec(tissueCycle,kind==='tissue-care'?'care':'work',
+   p.mechanicalFoundation.baselineAttributes.con,0,q.tissueBefore.strain);
+  A.equal(q.check.dc,mode.dc);A.equal(q.staminaSpent,mode.cost);
+ }
+}
+A.equal(originalCombat.maxStamina,tissueMax);
+A.deepEqual(p.knownTechniques,[]);
+const tissueSave=E.exportGame(s),tc=E.importGame(tissueSave),
+ tp=Realm.peek(tc).emergentPeople.people[p.id];
+A.equal(Physique.verify(tc,tp),true);
+const tr=tp.originalBodyLivingPhysiques.sessions.find(x=>x.source.kind==='tissue-work'&&x.source.accepted);
+if(tr){tr.source.check.dc=1;tr.seal=hash(tr.source);A.equal(Physique.verify(tc,tp),false);}
+console.log('INDIVIDUAL NPC BODY TISSUE ASSESSMENT '+JSON.stringify({counts:tissueCounts,
+ tissues:advanced.cycles[tissueCycle].tissues||[],noExtraCapacity:true}));
