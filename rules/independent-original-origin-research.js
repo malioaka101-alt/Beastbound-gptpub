@@ -41,8 +41,7 @@ function clinicalAt(s,p,witness,minute){
   !text(d.independentBaselineMeasurement)||
   d.measuredHumanOriginCapacity!==b.capacity||d.measuredHumanOriginLoad!==b.load||
   d.measuredEvolutionStage!==b.evolutionStage||d.measuredEvolutionStability!==b.evolutionStability||
-  !eq(d.measuredStableHumanOriginTraits,[])||p.knownTechniques?.length||
-  p.originalOriginIntegrations||p.originalHumanEvolution)return null;
+  !eq(d.measuredStableHumanOriginTraits,[]))return null;
  if(!Early.verify(s,p)||!require('./disciplines').verifyNpcMeridian(s,p))return null;
  const ends=q=>q.endMinute??((q.startMinute??q.minute)+q.actualMinutes);
  const earlier=(row)=>row&&Number.isInteger(ends(row.source))&&ends(row.source)<=minute;
@@ -159,6 +158,7 @@ function work(s,{actorId,sourceId,witnessIndex,minutes=90,axis=null,...extra}={}
   prior=state[sourceId]?.progress||0,witnessHash=hash(wit);
  let spec,clinical=null,risks=null,clinicalLaw=null;
  if(screen){
+  if(p.originalOriginIntegrations||p.originalHumanEvolution)throw Error('Changed human anatomy requires its own source-specific clinical adapter');
   if(prior!==3||state[sourceId]?.screens?.[axis]==='promising')
    throw Error('Genuinely completed original mapping and an unresolved compatibility axis required');
   clinical=clinicalAt(s,p,wit,minute);
