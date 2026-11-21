@@ -1,0 +1,28 @@
+name: Beastbound Independent Actual Terrestrial Arrival
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/living-terrestrial-positive-arrival.yml'
+      - 'rules/independent-sapient-terrestrial-journey.js'
+      - 'world/emergent-people.js'
+      - 'world/sapient-beast-persons.js'
+      - 'rules/independent-sapient-terrestrial-proposal.js'
+      - 'tests/living-npc-sapient-bilateral-proposal-discussion.test.js'
+      - 'tests/living-npc-sapient-positive-continuity-assessment.test.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  first-real-arrival:
+    name: Original source-funded positive human and sapient physical linked leg
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Actually search 96 independent source-resolved worlds for paid and freely accepted arrival
+        env:
+          BEASTBOUND_SAPIENT_SAMPLE_WORLD_COUNT: '96'
+        run: node tests/living-npc-sapient-positive-continuity-assessment.test.js
