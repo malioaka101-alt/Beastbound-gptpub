@@ -27,7 +27,8 @@ const QUICK=[
  'independent-autonomous-offscreen-original-power.test.js',
  'soul-shared-original-resonance-lattice-three-npc.test.js',
  'soul-shared-own-perception-and-lattice-repair-parity.test.js',
- 'living-npc-original-soul-lattice-three-live.test.js'
+ 'living-npc-original-soul-lattice-three-live.test.js',
+ 'body-shared-original-nerve-sense-four-npc.test.js'
 ];
 // These sources were MEASURED on GitHub Actions at >10s, several >350s.
 // They remain in every ready-for-review full regression and are NOT marked
@@ -39,6 +40,7 @@ const EXPENSIVE=new Set([
  'living-npc-source-born-original-soul-first-stage.test.js',
  'living-npc-soul-lattice-three-formation-assessment.test.js',
  'living-npc-original-body-through-organ-three-live.test.js',
+ 'living-npc-arcane-core-through-matrix-three-live.test.js',
  'living-npc-rift-anchor-two-unbroken-source-life.test.js',
  'living-npc-rift-anchor-two-long-form-assessment.test.js',
  'professional-peers-longrun.test.js','adaptive-ambitions.test.js',
