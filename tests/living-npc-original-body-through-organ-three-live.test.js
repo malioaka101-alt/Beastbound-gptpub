@@ -125,3 +125,104 @@ row.source.check.dc=2;row.seal=hash(row.source);
 A.equal(Three.verify(counterfeit,fp),false,
  'Resealing an unreal easy organ DC never overrides source anatomy');
 console.log('REAL independently acting Body I→ 180-point Bone–Marrow II→ four-organ integrated Body III COMPLETE, +2 Stamina/+1 Toughness/+1 critical box, original overnight recovery, save/tamper PASS; seed '+seed+' days '+days);
+
+
+// Continue the exact previously earned Organ III person into the original
+// witnessed neural route. Clinical observations below are explicit authored
+// disposable test scenes (same witness boundary as the original player
+// owner), NOT inferred offscreen anatomy, compulsory consent or success.
+const Nerve=require('../rules/independent-original-body-nerve-sense-four'),
+ PCNerve=require('../rules/body-nerve-sense'),
+ NeuralLaw=require('../rules/body-shared-original-nerve-sense'),
+ Core=require('../rules/core'),Presence=require('../world/person-presence');
+const systems=[
+ {id:'peripheral',tissue:'Original peripheral sensory endings and afferent nerves examined in the same living individual.',
+  actualFunction:'Measured proprioceptive response remains bounded by physical conduction and original fatigue.'},
+ {id:'motor',tissue:'Original spinal motor control and existing tendon reflexes of this living human body.',
+  actualFunction:'Observed motor timing and deliberate controlled stopping remain within measurable physical limits.'},
+ {id:'autonomic',tissue:'Existing autonomic regulation pathways of the previously earned heart and lung integration.',
+  actualFunction:'Measured cardiac and breathing response to controlled exertion; no unlimited endurance.'}
+];
+const IVsite=s.world.location,priorMax=originalCombat.maxStamina;
+let actualMap=false,practiceCount=0,repairCount=0,formChecks=0,refusals=0,extended=false;
+for(let i=0;i<180&&!p.originalBodyNerveSenseFour?.completed;i++){
+ const beforeDay=s.world.minutes,target=(Math.floor(beforeDay/1440)+1)*1440+600;
+ E.advance(s,target-beforeDay);World.finalizeTime(s,beforeDay);
+ const now=Math.floor(s.world.minutes/1440);
+ if(!Presence.resolve(Realm.peek(s),p.actorId,IVsite,now,600)||
+  originalCombat.status!=='ok'||originalCombat.wounds.some(x=>x!==0)||
+  originalCombat.stamina<4)continue;
+ const r=p.originalBodyNerveSenseFour,plan=r?.plan;
+ let origin,details,minutes;
+ if(!plan){
+  origin=PCNerve.MAP;
+  details={name:'Personally witnessed original neural map',systems,
+   clinicalObservation:'Existing peripheral, spinal motor and autonomic responses are actually examined and distinguished.',
+   independentCountertest:'Controlled stimuli and local voluntary stopping identify distinct finite responses without new senses.',
+   metabolicLimit:'Ordinary oxygen, food, thermal balance and rest constrain the individual neural physiology.',
+   injuryLimit:'Real neural and physical fatigue and injury interrupt coordination and controlled responses.',
+   recovery:'Observed impairment requires genuine recovery or separately witnessed rehabilitation.'};
+ }else if(r.strain>=5||Object.values(r.progress).every(x=>x===2)&&r.strain>2){
+  origin=PCNerve.REPAIR;minutes=60;
+  details={observedDamage:'Actual strain remains from the recorded earlier failed neural work, with a measured degraded physical response.',
+   restorativeMethod:'Observed controlled rehabilitation, reduced stimulus and measured return of ordinary voluntary function.'};
+ }else if(NeuralLaw.ready(r.progress,r.integrated,r.strain)){
+  origin=PCNerve.FORM;minutes=90;
+  details={fullBodyResponse:'Observed integrated sensory, motor and autonomic response across all established personal regions.',
+   independentFailureLimit:'The independent controlled counterstimulus demonstrates finite response and physical stopping limits.'};
+ }else if(!extended&&practiceCount>0){
+  origin=PCNerve.MAP;
+  details={systems:[{id:'vestibular',
+   tissue:'Distinct existing vestibular hair cells and cranial sensory pathway examined in this individual.',
+   actualFunction:'Measured orientation under controlled vestibular load remains limited by ordinary dizziness.'}],
+   clinicalObservation:'The separately observed pre-existing vestibular pathway is distinguished from previous mapped regions.',
+   independentCountertest:'Controlled orientation changes demonstrate bounded vestibular response and ordinary physical failure limits.'};
+ }else{
+  origin=PCNerve.PRACTICE;minutes=60;
+  details={focus:'integrated',
+   measuredResponse:'The actual previously observed regions display bounded reflex, sensory and autonomic response under controlled exertion.',
+   fatigueLimit:'Controlled repetition measures the individual physical workload and the point at which fatigue limits integration.'};
+ }
+ s.chatRuntime.scene=p.name+' is actually present for a locally observed neural function and stopping-limit procedure.';
+ Core.event(s,'story',s.chatRuntime.scene,{
+  origin,location:IVsite,actorId:p.actorId,...details});
+ const witnessIndex=s.log.length-1,before=E.exportGame(s),rng=s.rngState;
+ const req={actorId:p.actorId,witnessIndex,...(minutes===undefined?{}:{minutes})};
+ if(!r){
+  A.throws(()=>Rules.act(s,{system:'body',operation:'npcNerveWork',params:{...req,success:true}}),/accepts actorId/);
+  A.equal(E.exportGame(s),before);
+ }
+ const result=Rules.act(s,{system:'body',operation:'npcNerveWork',params:req});
+ A.equal(Nerve.verify(s,p),true);
+ // NPC roll uses only the actor's own RNG. World simulation may use
+ // other independent sources; no player technique or capacity is awarded.
+ const receipt=p.originalBodyNerveSenseFour.sessions.at(-1),q=receipt.source;
+ A.equal(q.witnessHash,hash(q.witness));
+ A.equal(q.accepted,result.independentlyAccepted);
+ if(!q.accepted){refusals++;A.equal(q.staminaSpent,0);A.equal(q.check,null);}
+ else if(q.kind==='map'){actualMap=true;A.equal(q.check,null);}
+ else if(q.kind==='extend'){extended=true;A.equal(q.after.progress.vestibular,0);}
+ else if(q.kind==='practice'){practiceCount++;A.equal(q.check.dc,18);A.equal(q.staminaSpent,NeuralLaw.practiceStamina(minutes));}
+ else if(q.kind==='repair'){repairCount++;A.equal(q.check.dc,15);A.equal(q.staminaSpent,NeuralLaw.repairStamina(minutes));}
+ else if(q.kind==='form'){formChecks++;A.equal(q.check.dc,21);A.equal(q.staminaSpent,4);}
+}
+const IV=p.originalBodyNerveSenseFour;
+A.ok(actualMap,'Actual original Organ III adult must freely accept a separately witnessed original neural map');
+A.ok(practiceCount>0,'Actual neural work, not merely an anatomical title, must be observed');
+A.equal(Nerve.verify(s,p),true);
+A.equal(Three.verify(s,p),true);
+A.equal(originalCombat.maxStamina,priorMax+(IV.completed?1:0));
+A.deepEqual(p.knownTechniques,[]);
+const IVd=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
+A.equal(IVd.originalBodyNerveSenseFour.earnedNerveSenseCycle,IV.completed);
+A.equal(IVd.originalPowerMilestones.body.completedCycles.length,IV.completed?4:3);
+const IVsave=E.exportGame(s),IVcopy=E.importGame(IVsave),
+ IVp=Realm.peek(IVcopy).emergentPeople.people[p.id];
+A.equal(Nerve.verify(IVcopy,IVp),true);
+const IVfake=E.importGame(IVsave),IVbad=Realm.peek(IVfake).emergentPeople.people[p.id],
+ IVrow=IVbad.originalBodyNerveSenseFour.sessions.find(x=>x.source.kind==='practice'&&x.source.accepted);
+IVrow.source.check.dc=2;IVrow.seal=hash(IVrow.source);
+A.equal(Nerve.verify(IVfake,IVbad),false,'Resealed fake neural check cannot create original physiology');
+console.log('ORIGINAL WITNESSED NPC NERVE-SENSE IV ASSESSMENT PASS '+JSON.stringify({
+ actualMap,practiceCount,repairCount,formChecks,refusals,extended,formed:IV.completed,
+ progress:IV.progress,strain:IV.strain}));
