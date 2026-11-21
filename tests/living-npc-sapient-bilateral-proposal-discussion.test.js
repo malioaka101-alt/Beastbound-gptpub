@@ -120,7 +120,7 @@ for(let n=0;n<40;n++){
   finalResults.push(resolved.observedOutcome);
   const after=E.exportGame(s);
   A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',params}),
-   /already received|Separate current informed final terms/);
+   /already received|Separate current informed final terms|Real co-present willing persons/);
   A.equal(E.exportGame(s),after);
   if(resolved.mutuallyAccepted){
    agreed={p,entry};
@@ -146,6 +146,37 @@ for(let n=0;n<40;n++){
    A.equal(out.recorded,row.source.accepted);A.equal(s.table?.bondRecords?.[b.id],undefined);
    A.equal(s.player.partnerIds.includes(b.id),false);
    A.equal(Arrangement.privateStatus(s,p)[0].status,'accepted');
+   // An actual recognised but unfamiliar pair cannot bypass earned
+   // willingness by presenting a fresh magical offer or a caller outcome.
+   const ss=E.importGame(E.exportGame(s)),sp=Realm.peek(ss).emergentPeople.people[p.id],sb=ss.beasts[b.id];
+   const grade={grade:3,worldMinute:ss.world.minutes,species:sb.species,evolutionStage:sb.evolutionStage,
+    individualGrade:sb.individualGrade,source:'Explicit disposable prior numeric individual assessment, not rarity or transformation.'};
+   sb.contractGradeAssessment=grade;
+   const ContractLaw=require('../rules/independent-original-bond-contract-law');
+   A.deepEqual(ContractLaw.soulAt(ss,sp,ss.world.minutes),{phase:0,sourceSeal:null});
+   const contractInput=ContractLaw.inputs(ss,sp,sb,ss.world.minutes,grade,'light',0);
+   A.ok(contractInput);A.equal(contractInput.spec.load,2);A.equal(contractInput.spec.dc,16);
+   C.event(ss,'story',sp.name+' considers the exact separately explained magical terms without implying readiness to accept.',{
+    origin:Interact.SEAL,actorId:sp.actorId,beastId:sb.id,pairSeal:row.seal,
+    arrangementHash:entry.seal,arrangementRevision:entry.seal,contactHash:hash(contact),
+    location:site,approach:'seal',depth:'light',gradeAssessmentHash:hash(grade),
+    independentConcreteOpportunity:'Actual separately explained exact light magical connection offer without compelled service.',
+    actualCommunication:'Original local comprehended form of communication.',
+    unconditionalRightToRefuse:'Each independent person may refuse any magical contract.',
+    noCompelledInteraction:true,independentlyUnderstood:true,noOwnershipOrForcedObedience:true,
+    exactContractBenefits:'Finite link with no automatic learned ability or physical ownership.',
+    exactContractObligations:'Both must be free to accept or refuse any proposed collaborative activity.',
+    exactContractLimits:'Original measured light depth, not an unlimited command or storage mechanic.',
+    independentWithdrawalTerms:'Either independently may withdraw from further continuation.'});
+   const sr={actorId:sp.actorId,beastId:sb.id,witnessIndex:ss.log.length-1},sbefore=E.exportGame(ss);
+   A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:{...sr,sealed:true}}),/no outcome or affinity/);
+   A.equal(E.exportGame(ss),sbefore);
+   if(out.recorded){
+    A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:sr}),/willingness at least 50/);
+    A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairReview',params:sr}),/Current actual original magical contract/);
+   }else A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:sr}),/recognised pair/);
+   A.equal(E.exportGame(ss),sbefore);A.equal(Interact.activeForBeast(ss,sb.id),null);
+
    if(out.recorded){
     pairCounts.recorded++;
     A.equal(row.bond.compatibility,5);A.equal(row.bond.resonance,4);
@@ -291,7 +322,7 @@ A.equal(welfare.table?.bondRecords?.[b.id],undefined);
 A.equal(welfare.player.partnerIds.includes(b.id),false);
 const reviewedSave=E.exportGame(welfare);
 A.throws(()=>R.act(welfare,{system:'bond',operation:'npcSapientArrangementReview',params:reviewParams}),
- /open same-terms arrangement and unused review day|Separate current informed final terms/);
+ /open same-terms arrangement and unused review day|Separate current informed final terms|Real co-present willing persons/);
 A.equal(E.exportGame(welfare),reviewedSave);
 const reviewCopy=E.importGame(reviewedSave),
  reviewPerson=Realm.peek(reviewCopy).emergentPeople.people[agreed.p.id];
