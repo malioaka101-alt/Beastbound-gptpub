@@ -49,6 +49,42 @@ function safeCheck(s,params){
  try{return Core.check(s,{...params,privateDisplay:true});}
  finally{s.log.splice(0,s.log.length,...previous);}
 }
+// The practitioner measures their OWN established Phase II-linked pattern
+// with the original bounded Soul Perception check, not a generic strain
+// number masquerading as a clinician or a diagnosis. Only a successful
+// measurement of an existing source-earned mapped lattice supplies a new
+// independent, individual self-correction witness. Separate repair consumes
+// this witness and still must pass the original repair check.
+function perceptionSpec(p){
+ return require('./first-stage-senses').ownSoulPerceptionSpec(
+  p.mechanicalFoundation.baselineAttributes.wis,0,true);
+}
+function diagnosticReport(p,q,plan){
+ return {origin:'original-own-soul-perception-interference-countertest-v1',
+  actorId:p.actorId,individualIdentityOriginHash:p.originHash,
+  originalThreadSourceHash:q.originalThreadSourceHash,
+  originalSceneHash:q.originalSceneHash,
+  location:q.offscreenOpportunity.privatePhysicalSite,
+  day:q.day,measuredStrain:q.strainBefore,measuredStability:q.stabilityBefore,
+  ownResonanceCheck:{...q.check},
+  personallyMappedRetuningMethod:plan.repairMethod,
+  noOtherMindOrExternalClinicianAssumed:true,noHealingOrFormationAward:true};
+}
+function diagnosisReady(row,strain,stability,site){
+ const q=row?.source;
+ return q?.kind==='diagnose'&&q.accepted===true&&q.check?.success===true&&
+  q.diagnosticReport?.measuredStrain===strain&&
+  q.diagnosticReport?.measuredStability===stability&&
+  q.diagnosticReport?.location===site;
+}
+function pendingDiagnosis(r){
+ for(let i=r.sessions.length-1;i>=0;i--){
+  const row=r.sessions[i],q=row.source;
+  if(q.kind==='repair'&&q.accepted)return null;
+  if(q.kind==='diagnose'&&q.accepted&&q.check?.success)return row;
+ }
+ return null;
+}
 function verify(s,p){
  const r=p?.originalSoulLatticeThree;
  if(r===undefined)return true;
@@ -62,7 +98,7 @@ function verify(s,p){
  if(!body?.npcOrigin?.seal)return false;
  let reserve=base.reserve,maximum=base.max,stability=base.stability,
   points=0,strain=0,mapped=false,formed=false,plan=null,
-  completedSeal=null,lastDay=-1,lastEnd=0;
+  completedSeal=null,lastDay=-1,lastEnd=0,diagnosis=null;
  const processedNights=new Set();
  for(const row of r.sessions){
   const q=row?.source;
@@ -108,14 +144,14 @@ function verify(s,p){
    JSON.stringify(q.woundsBefore)!=='[0,0,0]'||
    !Array.isArray(q.woundsAfter)||q.woundsAfter.length!==3)
    return false;
-  const expectedKind=!mapped?'design':
-   strain>=5||points>=Law.GOAL&&strain>2?'repair':
-   points>=Law.GOAL?'form':'practice';
-  if(q.kind!==expectedKind)return false;
-  // Source verification must reject any invented clinical-repair row too.
-  // No independent original clinician/identity-countertest source exists yet.
-  // It is not enough merely to block creation in afterDaily.
-  if(q.kind==='repair')return false;
+  const requiresRepair=strain>=5||points>=Law.GOAL&&strain>2,
+   diagnosed=diagnosisReady(diagnosis,strain,stability,
+    q.offscreenOpportunity?.privatePhysicalSite),
+   expectedKind=!mapped?'design':requiresRepair?
+    (diagnosed?'repair':'diagnose'):points>=Law.GOAL?'form':'practice';
+  if(q.kind!==expectedKind||
+   (q.kind==='repair'?q.originalDiagnosisSourceHash!==diagnosis?.seal:
+    q.originalDiagnosisSourceHash!=null))return false;
   const roller={rngState:q.rngBefore};
   if(q.choiceD100!==Core.die(roller,100)||
    q.accepted!==(q.choiceD100<=q.choiceChance))return false;
@@ -127,25 +163,31 @@ function verify(s,p){
     if(!plan||JSON.stringify(q.personalBlueprint)!==
      JSON.stringify(plan))return false;
    }else{
-    minutes=q.kind==='form'?90:120;
-    cost=q.kind==='form'?Law.FORMATION_RESERVE:
+    const percept=perceptionSpec(p);
+    minutes=q.kind==='diagnose'?percept.minutes:q.kind==='form'?90:120;
+    cost=q.kind==='diagnose'?percept.reserveCost:q.kind==='form'?Law.FORMATION_RESERVE:
      q.kind==='repair'?Law.REPAIR_RESERVE:Law.PRACTICE_RESERVE;
-    physicalCost=q.kind==='form'?Law.formationStamina(minutes):
+    physicalCost=q.kind==='diagnose'?0:q.kind==='form'?Law.formationStamina(minutes):
      q.kind==='repair'?Law.repairStamina(minutes):
       Law.practiceStamina(minutes);
     if(reserve<cost||q.staminaBefore<physicalCost||
      q.personalBlueprint!==null)return false;
-    const dc=q.kind==='form'?Law.FORMATION_DC:
+    const dc=q.kind==='diagnose'?percept.dc:q.kind==='form'?Law.FORMATION_DC:
      q.kind==='repair'?Law.REPAIR_DC:Law.PRACTICE_DC,
-     mod=q.kind==='form'?
+     mod=q.kind==='diagnose'?percept.modifier:q.kind==='form'?
       Law.formationModifier(base.will,0,stability):base.will,
      roll=Core.die(roller,20),
      margin=roll+mod+Core.naturalAdjustment(roll)-dc,
-     degree=Core.degree(margin),success=margin>=0;
+     degree=Core.degree(margin,q.kind!=='diagnose'),success=margin>=0;
     check={roll,dc,modifier:mod,margin,degree,success};
     if(JSON.stringify(q.check)!==JSON.stringify(check))return false;
     reserve-=cost;
-    if(q.kind==='practice'){
+    if(q.kind==='diagnose'){
+     if(strain===0||!plan)return false;
+     const report=success?diagnosticReport(p,q,plan):null;
+     if(JSON.stringify(q.diagnosticReport)!==JSON.stringify(report))return false;
+     if(success)diagnosis=row;
+    }else if(q.kind==='practice'){
      const changed=Law.practiceState(points,strain,check);
      progressEarned=Law.earned(check);
      points=changed.points;strain=changed.strain;
@@ -157,6 +199,9 @@ function verify(s,p){
      if(strain===0)return false;
      const changed=Law.repairState(strain,stability,check);
      strain=changed.strain;stability=changed.stability;
+     // Each accepted repair consumes its own original diagnostic witness,
+     // even on failure. Another treatment requires another actual reading.
+     diagnosis=null;
     }else{
      if(!Law.formationReady(points,strain))return false;
      if(success){
@@ -167,6 +212,7 @@ function verify(s,p){
    }
    if(q.kind==='design'&&q.check!==null)return false;
   }else if(q.check!==null||q.personalBlueprint!==null)return false;
+  if((q.kind!=='diagnose'||!q.accepted)&&q.diagnosticReport!=null)return false;
   if(q.actualMinutes!==minutes||q.reserveSpent!==cost||
    q.staminaSpent!==physicalCost||
    q.staminaAfter!==q.staminaBefore-physicalCost||
@@ -219,6 +265,11 @@ function privateStatus(s,p){
   actuallyMappedPersonalLattice:r?.mapped||false,
   latticeProgress:r?.points||0,requiredStructuralProgress:Law.GOAL,
   sourceObservedInterference:r?.strain||0,
+  actuallyMeasuredOwnInterference:r?pendingDiagnosis(r)?.source.diagnosticReport??null:null,
+  sourceVerifiedDiagnosticChecks:r?.sessions.filter(x=>
+   x.source.kind==='diagnose'&&x.source.accepted).length||0,
+  sourceVerifiedRepairChecks:r?.sessions.filter(x=>
+   x.source.kind==='repair'&&x.source.accepted).length||0,
   currentSoulReserve:r?.reserveRemaining??null,
   maxSoulReserve:r?.maxReserve??null,
   actuallyFormedLattice:r?.earnedProof?structuredClone(r.earnedProof):null,
@@ -234,19 +285,16 @@ function afterDaily(s,ctx){
   Object.values(p.originalEarlyDisciplinePreparation||{}).
    some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay)return null;
- const kind=!r.mapped?'design':
-  r.strain>=5||r.points>=Law.GOAL&&r.strain>2?'repair':
-  r.points>=Law.GOAL?'form':'practice';
- // The ORIGINAL Phase III repair owner requires a NEW personally
- // witnessed clinical identity-interference diagnosis and correction.
- // Existing independent practice plus a numeric strain value is NOT a
- // diagnosis, a clinician or treatment. Until that specific evidence owner
- // is integrated, do not silently invent a restorative Soul intervention.
- if(kind==='repair')return null;
- const cost=kind==='design'?0:
+ const diagnosis=pendingDiagnosis(r),
+  requiresRepair=r.strain>=5||r.points>=Law.GOAL&&r.strain>2,
+  kind=!r.mapped?'design':requiresRepair?
+   (diagnosisReady(diagnosis,r.strain,r.soulStability,ctx.site)?'repair':'diagnose'):
+   r.points>=Law.GOAL?'form':'practice',
+  percept=perceptionSpec(p);
+ const cost=kind==='design'?0:kind==='diagnose'?percept.reserveCost:
   kind==='form'?Law.FORMATION_RESERVE:
   kind==='repair'?Law.REPAIR_RESERVE:Law.PRACTICE_RESERVE;
- const physicalCost=kind==='design'?0:
+ const physicalCost=kind==='design'||kind==='diagnose'?0:
   kind==='form'?Law.formationStamina(90):
   kind==='repair'?Law.repairStamina(120):Law.practiceStamina(120);
  if(r.reserveRemaining<cost||body.stamina<physicalCost)return null;
@@ -263,17 +311,20 @@ function afterDaily(s,ctx){
    personalBlueprint=blueprint(p);
    r.personalBlueprint=personalBlueprint;r.mapped=true;
   }else{
-   const dc=kind==='form'?Law.FORMATION_DC:
+   const dc=kind==='diagnose'?percept.dc:kind==='form'?Law.FORMATION_DC:
     kind==='repair'?Law.REPAIR_DC:Law.PRACTICE_DC,
-    mod=kind==='form'?
+    mod=kind==='diagnose'?percept.modifier:kind==='form'?
      Law.formationModifier(base.will,0,r.soulStability):base.will,
-    result=safeCheck(s,{modifier:mod,dc,
+    result=safeCheck(s,{modifier:mod,dc,risky:kind!=='diagnose',
      label:'Independent original Phase III own-soul resonance '+kind,
      independentRngOwner:p});
    check={roll:result.roll,dc:result.dc,modifier:result.modifier,
     margin:result.margin,degree:result.degree,success:result.success};
    r.reserveRemaining-=cost;body.stamina-=physicalCost;
-   if(kind==='practice'){
+   if(kind==='diagnose'){
+    // Original self perception expends reserve, measures only one's
+    // own already established interference; no structural or healing gain.
+   }else if(kind==='practice'){
     const changed=Law.practiceState(r.points,r.strain,result);
     gain=Law.earned(result);r.points=changed.points;r.strain=changed.strain;
     if(changed.stabilityLost){
@@ -300,7 +351,9 @@ function afterDaily(s,ctx){
    originalShiftHash:ctx.originalShiftHash,
    originalSceneHash:hash(witness),offscreenOpportunity:witness,
    day:ctx.workDay,startMinute:ctx.workDay*1440+600,
-   actualMinutes:accepted?(kind==='design'?45:kind==='form'?90:120):5,
+   actualMinutes:accepted?(kind==='design'?45:kind==='diagnose'?
+    percept.minutes:kind==='form'?90:120):5,
+   ...(kind==='repair'?{originalDiagnosisSourceHash:diagnosis.seal}:{}),
    rngBefore,rngAfter:p.rngState,
    personalityAtDecision:p.personality,fatigueAtDecision:p.fatigue,
    choiceChance,choiceD100,accepted,
@@ -318,6 +371,8 @@ function afterDaily(s,ctx){
    woundsBefore,woundsAfter:[...body.wounds],
    originalPhysicalBacklash:injury,
    noOtherMindReadingOrUnlearnedArt:true};
+ if(kind==='diagnose')source.diagnosticReport=accepted&&check?.success?
+  diagnosticReport(p,source,r.personalBlueprint):null;
  const seal=hash(source);r.sessions.push({source,seal});
  r.lastAttemptDay=ctx.workDay;
  if(r.formed){
