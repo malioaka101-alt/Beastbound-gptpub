@@ -213,7 +213,8 @@ for(let n=0;n<80;n++){
     A.ok(originalHumanBody?.npcOrigin,'Original witnessed physically registered human is required');
     if(originalHumanBody.stamina<TravelLaw.legSpec('crossing').stamina){
      A.equal(route.proposalEligible,false,'The original 4-Stamina journey cannot be undertaken on unearned endurance');
-     A.equal(route.reason,'insufficient-original-human-stamina');
+     A.ok(['insufficient-original-human-stamina','original-combat-body-not-fit-for-journey'].includes(route.reason),
+      'Zero original Stamina may first be rejected by the original wound owner, before the linked-leg cost check');
      console.log('INDEPENDENT ORIGINAL LINKED TRAVEL REFUSED BY ACTUAL STAMINA '+JSON.stringify({
       existingHumanStamina:originalHumanBody.stamina,required:4,noInventedBodyOrRest:true}));
     }else{
