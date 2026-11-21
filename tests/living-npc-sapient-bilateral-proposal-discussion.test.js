@@ -326,6 +326,41 @@ for(let n=0;n<80;n++){
        A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
        A.equal(js.table.combatants['npc_'+traveler.id].npcOrigin.location,'forest',
         'Original combat source entry never falsely claims it was created at the destination');
+       // Longitudinal owner acceptance: actual sixday world ticks on a
+       // disposable copy of this genuinely self-decided physical arrival.
+       // No second hometown body, unsourced salary or native forest foraging.
+       const later=E.importGame(E.exportGame(js)),lw=Realm.peek(later),
+        lp=lw.emergentPeople.people[jp.id],lb=later.beasts[jb.id],
+        priorCash=lp.cashScales,
+        priorHabitatPractice=JSON.stringify(lb.sapientLife.practice),
+        priorPlayerLocation=later.world.location,
+        oldDay=Math.floor(later.world.minutes/1440);
+       Time.advance(later,6);
+       const futureDay=Math.floor(later.world.minutes/1440),
+        futureMinute=later.world.minutes%1440;
+       A.equal(futureDay,oldDay+6,'Exactly six real world days advance');
+       A.equal(Journey.verify(later,lp),true,
+        'Actual visitor source provenance must survive six original world days');
+       A.equal(Person.verify(lb),true,
+        'Original sapient identity must survive non-native visitor world ticks');
+       A.equal(Journey.position(lp,later.world.minutes).location,'crossing',
+        'A world tick cannot automatically invent a return journey');
+       A.ok(Presence.resolve(lw,lp.actorId,'crossing',futureDay,futureMinute)?.presence,
+        'Actual arrived individual retains authentic destination visitor presence');
+       A.equal(Presence.resolve(lw,lp.actorId,'forest',futureDay,futureMinute),null,
+        'A visitor cannot simultaneously be at the original hometown shift');
+       A.equal(lp.cashScales,priorCash,
+        'Absent independent worker cannot gain an invented hometown wage');
+       A.equal(JSON.stringify(lb.sapientLife.practice),priorHabitatPractice,
+        'No native-forest study or forage progression at an accredited visitor facility');
+       A.equal(later.world.location,priorPlayerLocation,
+        'Independent visitor history never moves the player');
+       A.equal(E.exportGame(E.importGame(E.exportGame(later))),E.exportGame(later),
+        'Sixday visitor records must remain exact save/import stable');
+       console.log('INDEPENDENT ORIGINAL TERRESTRIAL VISITOR SIXDAY '+JSON.stringify({
+        originalArrival:'crossing',elapsedDays:6,homeWorkAbsent:true,
+        retainedActualVisitor:true,noFacilityForage:true,playerUnmoved:true}));
+
       }else{
        A.equal(jb.location,'forest');A.equal(Journey.position(jp,js.world.minutes),null);
        A.equal(js.world.minutes,initialHour);
