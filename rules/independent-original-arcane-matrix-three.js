@@ -35,8 +35,7 @@ function verify(s,p){
  // a later paid/verified Mana restoration. Never spend a night twice.
  const lastSecond=p.originalArcaneCircleTwo.sessions.at(-1)?.source;
  if(!lastSecond)return false;
- const inheritedEnd=lastSecond.origin===Second.RECOVERY?
-  lastSecond.endMinute:lastSecond.startMinute+lastSecond.actualMinutes;
+ const inheritedEnd=lastSecond.endMinute??(lastSecond.startMinute+lastSecond.actualMinutes);
  if(!Number.isInteger(inheritedEnd))return false;
  let mana=p.originalArcaneCircleTwo.manaRemaining,
   stability=p.originalArcaneCircleTwo.coreStability,
@@ -47,6 +46,12 @@ function verify(s,p){
   Offscreen=require('../world/independent-original-power-days');
  for(const row of r.sessions){
   const q=row?.source;
+  const External=require('./independent-arcane-external-mana');
+  if(q?.origin===External.ORIGIN){
+   const stage=completed?3:2,capacity=Build.arcaneProfile(stage).mana;
+   if(!External.validRow(s,p,row,'matrix',stage,mana,capacity,previousEnd))return false;
+   mana=q.manaAfter;previousEnd=q.endMinute;continue;
+  }
   if(q?.origin===RECOVERY){
    const night=q.originalNight,capacity=Build.arcaneProfile(completed?3:2).mana;
    if(row.seal!==hash(q)||!night||q.actorId!==p.actorId||
