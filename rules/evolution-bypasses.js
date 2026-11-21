@@ -20,6 +20,7 @@ function current(s,key){
  if(!b||!r.originAssessment||r.evolved||r.blocked||
     r.originAssessment.species!==b.species||r.originAssessment.evolutionStage!==b.evolutionStage)
   throw Error('Evolution shortcut requires a current, authenticated precommitted beast branch');
+ require('./independent-original-beast-maturity').requireOrdinary(r);
  if(s.battle)throw Error('Cannot conduct Maturity rites during combat');
  if(b.away===true||(b.location&&b.location!==s.world.location)||
     (s.encounter?.beastId!==b.id&&!s.player.partnerIds?.includes(b.id)))
