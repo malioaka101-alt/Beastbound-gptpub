@@ -13,6 +13,10 @@ const Pair=require('../rules/independent-original-bond-pair');
 const Interact=require('../rules/independent-original-bond-interactions'),Witness=require('../rules/bond-witness');
 A.deepEqual(Witness.interactionSpec('gentle',16,0,true,0,3),{event:'gentle_treatment',minutes:15,dc:21,modifier:3});
 const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation');
+const OriginalGrade=require('../rules/bond-grade'),
+ IndependentGrade=require('../rules/independent-original-beast-grade-exam');
+A.deepEqual(OriginalGrade.examSpec(3,16,0),{dc:18,modifier:3,feeTalons:1,feeScales:100,minutes:120,cooldownMinutes:8640});
+
 A.deepEqual(Bond.contractSpec({grade:4,sapience:3,depth:'deep',will:2,contractLore:2,soulDB:3,soulPhase:3,usedCapacity:2}),{
  depth:'deep',load:4,capacity:7,usedCapacity:2,overCapacity:false,dc:20,modifier:7,stability:80,base:70,link:'10 km'});
 A.equal(Bond.contractSpec({grade:9,sapience:3,depth:'covenant',will:0,usedCapacity:0}).overCapacity,true);
@@ -196,6 +200,16 @@ for(let n=0;n<80;n++){
     A.throws(()=>R.act(ss,{system:'bond',operation:'npcSyncPractice',params:{...sr,targetStage:10}}),/no outcome or affinity/);
    }else A.throws(()=>R.act(ss,{system:'bond',operation:'npcPairSeal',params:sr}),/recognised pair/);
    A.equal(E.exportGame(ss),sbefore);A.equal(Interact.activeForBeast(ss,sb.id),null);
+   const noMoney={actorId:sp.actorId,beastId:sb.id,witnessIndex:ss.log.length-1},gradeBefore=E.exportGame(ss);
+   A.throws(()=>R.act(ss,{system:'bond',operation:'npcGradeExamine',params:{...noMoney,grade:9}}),
+    /no selected grade, consent or success/);
+   A.equal(E.exportGame(ss),gradeBefore);
+   A.throws(()=>R.act(ss,{system:'bond',operation:'npcGradeExamine',params:noMoney}),
+    /original examination facility, funds, verified pair/);
+   A.equal(E.exportGame(ss),gradeBefore);
+   A.equal(IndependentGrade.verify(ss,sp),true);
+   A.equal(IndependentGrade.paidSource(ss,sp,sb,{source:{origin:IndependentGrade.ORIGIN,accepted:true},seal:'forged'}),false);
+
 
    if(out.recorded){
     pairCounts.recorded++;
