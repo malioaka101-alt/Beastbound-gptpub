@@ -23,6 +23,11 @@ const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  originalVisitorMarketOffers:0,originalVisitorMarketMutualOffers:0,
  originalVisitorMerchantRefusals:0,originalVisitorWorkerRefusals:0,
  originalVisitorMarketUnpaidProposals:0,
+ originalVisitorLaterOffers:0,originalVisitorMarketWorkDeferrals:0,
+ originalVisitorAfterHoursWorkDeferrals:0,originalVisitorWorkDecisions:0,
+ originalVisitorWorkRefusals:0,originalVisitorRealWorkChecks:0,
+ originalVisitorSuccessfulWorkChecks:0,originalVisitorEarnedPayments:0,
+ originalVisitorUnavailableWages:0,
  laterDayOffers:0,laterDayMutualOffers:0,laterDayHumanRefusals:0,
  laterDayBeastRefusals:0,laterDaySecondDepartures:0,
  laterDaySecondDepartureRefusals:0,laterDayVerifiedHomecomings:0,
@@ -62,6 +67,24 @@ for(let i=0;i<worldCount;i++){
  summary.originalVisitorWorkerRefusals+=merchantOffers.filter(x=>x.merchantAccepted&&!x.visitorAccepted).length;
  summary.originalVisitorMarketUnpaidProposals+=merchantOffers.filter(x=>x.wagePaid===0&&
   x.notYetPerformedWork&&x.noAutomaticGrade&&x.homeRegionPreserved).length;
+ const visitorLater=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR LATER MERCHANT OFFER (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const visitorDeferrals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR WORK LEGAL DEFERRED (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const visitorChoices=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR WORK CHOICE (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const visitorPayments=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR REAL FUNDED MERCHANT WAGE (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.originalVisitorLaterOffers+=visitorLater.length;
+ summary.originalVisitorMarketWorkDeferrals+=visitorDeferrals.length;
+ summary.originalVisitorAfterHoursWorkDeferrals+=visitorDeferrals.filter(x=>
+  x.reason==='market-not-actually-in-daytime-work-shift').length;
+ summary.originalVisitorWorkDecisions+=visitorChoices.length;
+ summary.originalVisitorWorkRefusals+=visitorChoices.filter(x=>!x.independentlyAccepted).length;
+ summary.originalVisitorRealWorkChecks+=visitorChoices.filter(x=>x.realWorkRoll).length;
+ summary.originalVisitorSuccessfulWorkChecks+=visitorChoices.filter(x=>x.realWorkSuccess).length;
+ summary.originalVisitorEarnedPayments+=visitorPayments.length;
+ summary.originalVisitorUnavailableWages+=(child.stdout.match(/INDEPENDENT ORIGINAL VISITOR NO FUNDED WAGE/g)||[]).length;
  summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
  const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
@@ -143,6 +166,12 @@ if(worldCount>=96){
   summary.originalVisitorMerchantRefusals+
   summary.originalVisitorWorkerRefusals,
   'The original merchant and independent visitor must decide separately, including fully unforced refusals');
+ A.ok(summary.originalVisitorEarnedPayments<=summary.originalVisitorSuccessfulWorkChecks&&
+  summary.originalVisitorSuccessfulWorkChecks<=summary.originalVisitorRealWorkChecks,
+  'Physical Scales can be transferred only after a truly independent real original successful work check');
+ A.equal(summary.originalVisitorEarnedPayments+
+  summary.originalVisitorUnavailableWages,summary.originalVisitorMarketOffers,
+  'Every real first-visit source sample must either earn an independently chosen paid wage or acknowledge an unpaid visitor outcome');
  A.equal(summary.realFacilityReadinessProbes,summary.noInferredNumericGradeOrExam,
   'A real site-only Grade readiness query never mints an examination, consent, fee, individual numeric Grade or player knowledge');
 }
