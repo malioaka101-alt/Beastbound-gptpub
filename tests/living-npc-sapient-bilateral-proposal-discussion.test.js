@@ -207,6 +207,13 @@ for(let n=0;n<80;n++){
    A.throws(()=>R.act(ss,{system:'bond',operation:'npcGradeExamine',params:noMoney}),
     /original examination facility, funds, verified pair/);
    A.equal(E.exportGame(ss),gradeBefore);
+   // This is an isolated private assessment visibility fixture, NOT an
+   // awarded examination. It must never leak through the player Grade pane.
+   const oldGrade=sb.contractGradeAssessment,oldExams=sb.gradeExaminations;
+   sb.contractGradeAssessment={...grade,origin:IndependentGrade.ORIGIN};
+   sb.gradeExaminations=[{origin:IndependentGrade.ORIGIN,outcome:'verified',worldMinute:ss.world.minutes}];
+   A.deepEqual(OriginalGrade.status(ss,{beastId:sb.id}),{assessed:false,examAttempts:0});
+   sb.contractGradeAssessment=oldGrade;sb.gradeExaminations=oldExams;
    A.equal(IndependentGrade.verify(ss,sp),true);
    A.equal(IndependentGrade.paidSource(ss,sp,sb,{source:{origin:IndependentGrade.ORIGIN,accepted:true},seal:'forged'}),false);
 
