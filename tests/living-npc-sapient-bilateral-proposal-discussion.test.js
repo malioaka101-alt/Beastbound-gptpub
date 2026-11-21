@@ -272,6 +272,71 @@ for(let n=0;n<80;n++){
      fbc.sapientLife.contactReceipts.at(-1).seal=hash(fbc.sapientLife.contactReceipts.at(-1).source);
      fbc.sapientLife.contactHead=fbc.sapientLife.contactReceipts.at(-1).seal;
      A.equal(Person.verify(fbc),false,'Rehashed fake renewed assent cannot pass the original individual beast RNG');
+
+     // A refused meeting cannot be recycled as consent. Advance at most
+     // four additional REAL days before the first original civil sixday,
+     // when the independent beast may depart on its own ecology tick.
+     let tried=1,renewedYes=0,actualInteraction=null;
+     if(fresh.newContact)renewedYes++;
+     for(let nextDay=fday+1;nextDay<=5&&!actualInteraction;nextDay++){
+      Time.advance(fs,1);
+      const living=Realm.peek(fs),witnessedPerson=living.emergentPeople.people[p.id],
+       nowDay=Math.floor(fs.world.minutes/1440),nowMinute=fs.world.minutes,
+       presentAgain=Presence.resolve(living,witnessedPerson.actorId,site,nowDay,nowMinute%1440);
+      if(!presentAgain?.presence||fb.away||fb.location!==site||fb.owner!==null||
+       !Arrangement.safe(fb)||Arrangement.statusAt(entry,nowMinute)!=='accepted')break;
+      const nextScene=witnessedPerson.name+' and '+fb.name+' independently encounter one another again in their real shared native habitat.';
+      fs.chatRuntime||={};fs.chatRuntime.scene=nextScene;
+      C.event(fs,'story',nextScene,{origin:Follow.WITNESS,actorId:witnessedPerson.actorId,
+       beastId:fb.id,location:site,pairSeal:row.seal,arrangementHash:entry.seal,
+       actualRenewedCoPresence:true,noAssignedBeastConsentOrOwnership:true,
+       unconditionalRefusalAndCommunication:'These two separately living people may refuse new communication without any earlier agreement binding them.',
+       currentRealSharedActivity:'The same independently scheduled human and non-departed beast actually meet at a later original world hour.',
+       contactStatus:'new-independent-choices'});
+      const freshRequest={actorId:witnessedPerson.actorId,beastId:fb.id,witnessIndex:fs.log.length-1},
+       newContact=R.act(fs,{system:'bond',operation:'npcSapientFollowupContact',params:freshRequest});
+      tried++;
+      A.equal(Follow.verify(fs,witnessedPerson),true);
+      A.equal(Person.verify(fb),true);
+      if(!newContact.newContact)continue;
+      renewedYes++;
+      const latest=fb.sapientLife.history.filter(x=>x.type==='personally-witnessed-contact'&&x.willingness).at(-1);
+      A.ok(latest&&fs.world.minutes-latest.minute<=60);
+      const interactionScene=witnessedPerson.name+' approaches '+fb.name+' gently, and both are explicitly free to refuse this separate exchange.';
+      fs.chatRuntime.scene=interactionScene;
+      C.event(fs,'story',interactionScene,{origin:Interact.WITNESS,actorId:witnessedPerson.actorId,
+       beastId:fb.id,pairSeal:row.seal,arrangementHash:entry.seal,
+       arrangementRevision:entry.seal,contactHash:hash(latest),location:site,
+       approach:'gentle',
+       independentConcreteOpportunity:'This new actual conversation provides an unforced moment for genuine gentle treatment in the observed habitat.',
+       actualCommunication:'The individual human and sapient beast are observed exchanging a fresh and separate non-coercive greeting.',
+       unconditionalRightToRefuse:'Both participants retain the right to refuse this treatment without any forced continuation or obligation.',
+       noCompelledInteraction:true});
+      const beforeEvent=E.exportGame(fs),originalRng=fs.rngState,
+       requestEvent={actorId:witnessedPerson.actorId,beastId:fb.id,witnessIndex:fs.log.length-1};
+      A.throws(()=>R.act(fs,{system:'bond',operation:'npcPairInteract',
+       params:{...requestEvent,affection:100}}),/no outcome or affinity/);
+      A.equal(E.exportGame(fs),beforeEvent);
+      const exchange=R.act(fs,{system:'bond',operation:'npcPairInteract',params:requestEvent}),
+       actualReceipt=witnessedPerson.originalBondInteractions.at(-1).source;
+      A.equal(Interact.verify(fs,witnessedPerson),true);
+      A.equal(Follow.verify(fs,witnessedPerson),true);
+      A.equal(fs.rngState,originalRng);
+      A.equal(actualReceipt.event?.event??null,exchange.observedEvent);
+      A.equal(actualReceipt.after.contract,null);
+      A.equal(actualReceipt.after.syncStage,0);
+      A.equal(fs.player.partnerIds.includes(fb.id),false);
+      const lived=E.importGame(E.exportGame(fs)),
+       savedPerson=Realm.peek(lived).emergentPeople.people[p.id];
+      A.equal(Interact.verify(lived,savedPerson),true);
+      A.equal(Follow.verify(lived,savedPerson),true);
+      actualInteraction={freshlyAccepted:true,humanInitiated:exchange.independentlyInitiated,
+       receivedByBeast:exchange.accepted,checkSucceeded:exchange.successful,
+       event:exchange.observedEvent??null,day:nowDay};
+     }
+     console.log('INDEPENDENT EXTENDED REAL PAIR PROGRESSION '+JSON.stringify({
+      actualDaysTried:tried,freelyRenewed:renewedYes,actualInteraction,
+      noInferredContractOrSync:true}));
      console.log('INDEPENDENT RENEWED REAL SAPient CONTACT '+JSON.stringify({freelyAccepted:fresh.newContact,minute:recent.source.minute,actualDay:fday}));
     }else{
      A.equal(Follow.verify(fs,fp),true);
