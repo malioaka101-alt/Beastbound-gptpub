@@ -42,9 +42,9 @@ for(let i=0;i<worldCount;i++){
  summary.originalPhysicalDepartures+=journeys.filter(x=>x.departed).length;
  summary.originalPhysicalDepartureRefusals+=journeys.filter(x=>!x.departed).length;
  summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
- const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\\{[^\\n]+\\})/g)]
+ const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
- const nextLegs=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL ACTUAL SECOND PHYSICAL TERRESTRIAL LEG (\\{[^\\n]+\\})/g)]
+ const nextLegs=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL ACTUAL SECOND PHYSICAL TERRESTRIAL LEG (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
  summary.actualVisitorNextLegProposals+=visitorProposals.length;
  summary.mutuallyConsideredVisitorNextLegs+=visitorProposals.filter(x=>
