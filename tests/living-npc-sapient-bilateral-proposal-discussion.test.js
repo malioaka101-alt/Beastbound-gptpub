@@ -392,7 +392,7 @@ for(let n=0;n<80;n++){
        A.equal(addedDuty.available,true);
        A.equal(Career.verify(mp),true);
        A.equal(mp.regionId,jp.regionId,
-        'Foreign merchant work cannot rewrite this individual's actual home region');
+        'Foreign merchant work cannot rewrite the individual home region');
        A.equal(mp.cashScales,0);
        const proposal={id:merchantOfferId,day:marketDay,
         dutyId,scope:dutyRole+
