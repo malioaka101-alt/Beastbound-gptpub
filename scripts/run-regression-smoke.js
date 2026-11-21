@@ -33,6 +33,7 @@ const QUICK=[
  'arcane-shared-original-second-circle-npc.test.js',
  'arcane-shared-original-third-circle-npc.test.js',
  'higher-architecture-shared-original-npc.test.js',
+ 'living-npc-original-origin-mapping.test.js',
  'living-npc-sapient-bilateral-proposal-discussion.test.js',
  'voluntary-beast-social-arrangements.test.js'
 ];
