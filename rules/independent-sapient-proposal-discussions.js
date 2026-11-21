@@ -49,8 +49,7 @@ function verify(s,p){
    q.contact?.type!=='personally-witnessed-contact'||
    q.contact.willingness!==true||q.contact.minute>q.minute||
    q.minute-q.contact.minute>60||
-   q.contact.meetingHash!==b.sapientLife.source.encounterHash&&
-    !b.sapientLife.triedEncounters.includes(q.contact.meetingHash)||
+   !Person.contactProof(b,q.contact)||
    !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
    sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.physicalSite||
    sh.scheduledAtDay!==sh.fromDay||sh.throughDay-sh.fromDay!==5||
@@ -66,11 +65,7 @@ function verify(s,p){
    q.noBondSyncOwnershipOrCompelledService!==true)return false;
   // Recent actual personally witnessed contact must reconcile. The beast's
   // original personal history is bounded; preserve the exact snapshot.
-  const retained=b.sapientLife.history.find(x=>x.type==='personally-witnessed-contact'&&
-   x.meetingHash===q.contact.meetingHash);
-  if(retained&&!eq(retained,q.contact))return false;
-  if(!retained&&b.sapientLife.history.length&&
-   q.contact.day>=b.sapientLife.history[0].day)return false;
+  
   if(q.humanChoice.interested){
    const d=q.beastChoice;
    if(!d||d.disposition!==Agency.profile(s,b).disposition||
