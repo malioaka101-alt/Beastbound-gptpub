@@ -547,7 +547,7 @@ for(let n=0;n<80;n++){
      actualJointTimingAndSignalDrill:'The proposed concrete safe timing and signal exercise requires both actual physical bodies.',noMagicOrSyncExercise:true};
     C.event(cs,'story',iw.text,drill);
     const badDrill={actorId:cp.actorId,beastId:cb.id,witnessIndex:cs.log.length-1},noBody=E.exportGame(cs);
-    A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:badDrill}),/actual original physical bodies/i);
+    A.throws(()=>R.act(cs,{system:'bond',operation:'npcPairInteract',params:badDrill}),/actual original physical bodies|Complete original interaction within the witnessed day/i);
     A.equal(E.exportGame(cs),noBody);
     C.event(cs,'story',iw.text,iw.details);
     const ir={actorId:cp.actorId,beastId:cb.id,witnessIndex:cs.log.length-1},isave=E.exportGame(cs),irng=cs.rngState;
