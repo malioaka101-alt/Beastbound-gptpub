@@ -512,6 +512,8 @@ function earnedEvidence(w,actorId,s=null){
       .privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
      {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientTerrestrialJourneys!==undefined?
+     {sourceVerifiedActualTerrestrialJourneys:require('../rules/independent-sapient-terrestrial-journey').privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientTerrestrialProposals!==undefined?
      {sourceVerifiedTerrestrialProposals:require('../rules/independent-sapient-terrestrial-proposal').privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientRenewedContacts!==undefined?
