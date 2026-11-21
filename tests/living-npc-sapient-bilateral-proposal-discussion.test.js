@@ -43,7 +43,10 @@ A.equal(require('../rules/independent-original-bond-contract-law').gradeAt(isola
 A.equal(require('../rules/independent-original-bond-contract-law').gradeAt(isolatedBeast,{...validExam,source:'A fabricated Grade test'},360),null);
 A.equal(require('../rules/independent-original-bond-contract-law').gradeAt({...isolatedBeast,gradeExaminations:[]},validExam,360),null);
 
-const s=E.newGame({name:'Disposable independent sapient proposal',seed:927801,path:'undecided'});
+const alternateSeed=process.env.BEASTBOUND_SAPIENT_SAMPLE_SEED;
+const sampledSeed=alternateSeed===undefined?927801:Number(alternateSeed);
+A.ok(Number.isSafeInteger(sampledSeed)&&sampledSeed>0&&sampledSeed<=4294967295);
+const s=E.newGame({name:'Disposable independent sapient proposal',seed:sampledSeed,path:'undecided'});
 A.equal(E.dispatch(s,'travel forest').ok,true);
 let b=null;
 for(let n=0;n<260&&!b;n++){
