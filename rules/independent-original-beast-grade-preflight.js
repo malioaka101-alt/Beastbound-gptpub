@@ -87,12 +87,23 @@ function calibrationSiteReadiness(s,{actorId,beastId,...extra}={}){
    requiresSeparateActualIndividualAssaySource:true,
    requiresIndependentInformedHumanAndSapientAssayChoice:true,
    notAnAccreditedExamOrMagicalPartnership:true};
- if(route.reason!=='no-pre-established-numeric-individual-grade-calibration')
+ // Field-calibration preflight does not award examination eligibility.
+ // The original exam additionally needs demonstrated willingness >=30.
+ // A real acknowledged but still-new pair may be ready to ask about an
+ // independently consented preliminary assay without yet being exam-ready.
+ const noPrior='no-pre-established-numeric-individual-grade-calibration',
+  earlyRelationship='no-current-mutually-revocable-examination-relationship',
+  arr=p?.originalSapientArrangements?.find(x=>
+   x.source.beastId===beastId&&Arr.statusAt(x,s.world.minutes)==='accepted'),
+  pair=p&&b&&Interaction.privateStatus(s,p).find(x=>x.beastId===beastId);
+ if(route.reason!==noPrior&&!(route.reason===earlyRelationship&&
+   pair&&!pair.bond.fractured&&arr&&pair.bond.willingness<30))
   return {...base,reason:route.assessmentEligible?
    'already-has-prior-numeric-calibration':route.reason};
  const site=Visit.position(p,s.world.minutes)?.location;
  return {...base,calibrationSiteEligible:true,site,
   originalIndividualScalesAtLeast100:true,
+  independentPairExamWillingnessConfirmed:!!(pair&&pair.bond.willingness>=30),
   genuinePriorCalibrationStillMissing:true,
   sourceRequirements:'An actual individual-specific numerically measured, origin-authenticated prior assessment with distinct physical evidence and mutual assent; never a species-rarity conversion or a caller-supplied Grade'};
 }
