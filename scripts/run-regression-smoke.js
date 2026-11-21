@@ -24,7 +24,10 @@ const QUICK=[
  'living-npc-original-body-force-combat.test.js',
  'meridian-npc-actual-sixday-serious-convalescence.test.js',
  'clinic-original-treatment-course-source.test.js',
- 'independent-autonomous-offscreen-original-power.test.js'
+ 'independent-autonomous-offscreen-original-power.test.js',
+ 'soul-shared-original-resonance-lattice-three-npc.test.js',
+ 'soul-shared-own-perception-and-lattice-repair-parity.test.js',
+ 'living-npc-original-soul-lattice-three-live.test.js'
 ];
 // These sources were MEASURED on GitHub Actions at >10s, several >350s.
 // They remain in every ready-for-review full regression and are NOT marked
