@@ -45,6 +45,7 @@ function structure(b){
    !Arr.verifyHuman(q.humanChoice,q.witnessHash)||
    !integer(q.humanChoice.rngBefore,1,4294967295)||
    !integer(q.witnessIndex,0)||q.witnessHash!==hash(q.witness)||
+   q.noTransferWithoutTwoOriginalChoices!==true||
    !q.safeDietReference||q.safeDietReference.item!=='clean_rations'||
    q.safeDietReference.quantity!==1||
    q.noTransferWithoutTwoOriginalChoices!==true||

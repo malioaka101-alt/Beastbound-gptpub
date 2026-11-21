@@ -205,6 +205,10 @@ function visitorPurchaseSource(w,p,q,sourceHash){
   old.source.arrivalMinute<=v.minute&&
   q.independentOriginalPresence?.hash===shift?.hash&&
   v.purchaseContextHash===check&&
+  // Original market source must match the independently recorded witness,
+  // prior body and species/individual provenance. The seller may not
+  // exchange goods using only a plausible 64-byte invented hash.
+  old.source.beastHash===v.beastHash&&
   Arr.verifyHuman(v.humanChoice,v.witnessHash)&&
   v.humanChoice.personality===p.personality&&
   v.humanChoice.accepted===true&&

@@ -63,6 +63,9 @@ function structure(b){
   previous=q.minute;seen.add(q.witnessHash);days.add(q.day);
   if(q.accepted)acceptedForms.add(q.beastSpecies+':'+q.beastForm);
  }
+ const accepted=rows.filter(x=>x.source.accepted);
+ if(accepted.length&&
+  !equal(b.welfareCarePlan,accepted.at(-1).source.plan))return false;
  return true;
 }
 function witnessValid(p,b,q){
@@ -144,10 +147,21 @@ function planVerified(s,b,plan){
  if(!b?.sapientLife||!Person.verify(b)||!plan||!structure(b))return false;
  const row=b.sapientLife.originalIndividualDietPlans?.find(x=>
   x.source.accepted&&equal(x.source.plan,plan));
- if(!row||plan.species!==b.species||
-  plan.evolutionStage!==b.evolutionStage||plan.quantity!==1||
-  !Array.isArray(plan.shelterLocations)||
-  !plan.shelterLocations.includes('crossing'))return false;
+ // The original bond-care provider returns a read-only FEEDING PROFILE
+ // {item,quantity,locations,source}. The original individual witnessed
+ // PLAN is stored with different but equivalent fields plus species/form
+ // and witnessed time. Compare exact projections, never caller text alone.
+ const fromOriginal=row?.source?.plan;
+ if(!row||!fromOriginal||!equal(b.welfareCarePlan,fromOriginal)||
+  fromOriginal.species!==b.species||
+  fromOriginal.evolutionStage!==b.evolutionStage||
+  fromOriginal.diet!==E.SPECIES[b.species]?.diet||
+  fromOriginal.quantity!==1||
+  !Array.isArray(fromOriginal.shelterLocations)||
+  !fromOriginal.shelterLocations.includes('crossing'))return false;
+ const profile={item:fromOriginal.foodItem,quantity:fromOriginal.quantity,
+  locations:fromOriginal.shelterLocations,source:fromOriginal.source};
+ if(!equal(plan,fromOriginal)&&!equal(plan,profile))return false;
  const p=Realm.peek(s)?.emergentPeople?.people?.[row.source.actorId?.slice(9)];
  return !!p&&verify(s,p);
 }
