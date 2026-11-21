@@ -289,6 +289,8 @@ function earnedEvidence(w,actorId,s=null){
   const verifiedRiftExterior=s?.table?.realm===w&&actor.originalRiftMeasuredSense?
    require('../rules/independent-original-rift-sense-observation')
     .privateStatus(s,actor):null;
+  const verifiedRiftDomain=s?.table?.realm===w&&actor.originalRiftBoundaryDomains?
+   require('../rules/independent-original-rift-boundary-domain').privateStatus(s,actor):null;
   const verifiedRiftJourney=s?.table?.realm===w&&actor.originalRiftRealmJourney?
    require('../rules/independent-original-rift-realm-walking').privateStatus(s,actor):null;
   const verifiedRiftLocal=s?.table?.realm===w&&actor.originalRiftLocalSpatial?
@@ -363,7 +365,7 @@ function earnedEvidence(w,actorId,s=null){
    }
   }
   if(earnedOther.rift?.step===1){
-   originalMilestones.rift.step=verifiedRiftJourney?.earnedStep??verifiedRiftLocal?.earnedStep??(verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1);
+   originalMilestones.rift.step=verifiedRiftDomain?.earnedStep??verifiedRiftJourney?.earnedStep??verifiedRiftLocal?.earnedStep??(verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1);
    if(verifiedRiftAnchorTwo?.verifiedRiftStep===2)
     originalMilestones.rift.originalExteriorAnchor=
      structuredClone(verifiedRiftAnchorTwo.provenRiftglassAnchor);
@@ -471,6 +473,7 @@ function earnedEvidence(w,actorId,s=null){
    originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
    originalRiftLocalSpatial:verifiedRiftLocal,
    originalRiftRealmJourney:verifiedRiftJourney,
+   originalRiftBoundaryDomains:verifiedRiftDomain,
    originalRiftglassFieldRefuge:verifiedRiftFieldRest,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
@@ -525,6 +528,7 @@ function earnedEvidence(w,actorId,s=null){
      'Body Bone–Marrow Cycle II':
     originalMilestones.body.completedCycles?.length===1?
      'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===8?'Boundary Domain VIII':
     originalMilestones.rift.step===7?'Realm Walking VII':
     originalMilestones.rift.step===6?'Rift Adaptation VI':
     originalMilestones.rift.step===5?'Pocket Architecture V':
