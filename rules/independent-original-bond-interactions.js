@@ -71,7 +71,8 @@ function completedTrainingSixday(s,q,prior){
  return rows.length===5&&new Set(rows.map(x=>x.source.day)).size===5?rows.map(x=>x.seal):[];
 }
 function syncEnergyProof(s,p,b,q){
- if(q.energyProof===null)return null;
+ if(q.energyProof===null)return q.witness?.details?.energyProofHash===undefined?null:false;
+ if(hash(q.energyProof)!==q.witness?.details?.energyProofHash)return false;
  const w=q.energyProof,d=w?.details,soul=ContractLaw.soulAt(s,p,q.minute);
  if(!soul||soul.phase<1||!soul.sourceSeal||w?.type!=='story'||!prose(w.text)||!w.text.includes(p.name)||
   w.day!==q.day+1||w.time!==E.clock({world:{minutes:q.minute}})||d?.origin!==ENERGY||
