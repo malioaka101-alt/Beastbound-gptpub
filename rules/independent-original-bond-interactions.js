@@ -71,33 +71,14 @@ function replay(s,p){
    q.witnessHash!==hash(q.witness)||seen.has(q.witnessHash)||days.has(q.pairSeal+':'+q.day)||
    q.contact?.type!=='personally-witnessed-contact'||q.contact.willingness!==true||q.contact.location!==q.site||
    !int(q.contact.minute,Math.max(0,q.minute-60),q.minute)||
-   (q.contact.meetingHash!==b.sapientLife.source.encounterHash&&!b.sapientLife.triedEncounters.includes(q.contact.meetingHash))||
+   !Person.contactProof(b,q.contact)||
    !sh||sh.hash!==hash(Object.fromEntries(Object.entries(sh).filter(([k])=>k!=='hash')))||
    sh.actorId!==p.actorId||sh.originHash!==p.originHash||sh.location!==q.site||
    sh.fromDay>q.day||sh.throughDay<q.day||sh.throughDay-sh.fromDay!==5||sh.scheduledAtDay!==sh.fromDay||
    !Arr.safe({...b,...q.welfare})||!eq(q.before,pair.bond)||
    !Arr.verifyHuman(q.humanChoice,q.witnessHash)||q.humanChoice.personality!==p.personality||
    q.noMagicOrSync!==true)return null;
-  const retained=b.sapientLife.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===q.contact.meetingHash);
-  if(retained&&!eq(retained,q.contact)||
-   !retained&&b.sapientLife.history.length&&q.contact.day>=b.sapientLife.history[0].day)return null;
-  const sp=mode(p,b,pair.bond,q),possible=opportunity(s,b,pair.bond,q);
-  if(!eq(q.law,sp)||q.possible!==possible||q.minute+sp.minutes>s.world.minutes)return null;
-  if(q.humanChoice.accepted&&possible){
-   const d=q.beastChoice;
-   if(!d||d.disposition!==Agency.profile(s,b).disposition||!int(d.rngBefore,1,4294967295)||
-    !eq(d,Social.sapientChoice({rngState:d.rngBefore},d.disposition)))return null;
-  }else if(q.beastChoice!==null)return null;
-  const rng={rngState:q.humanChoice.rngAfter},accepted=q.humanChoice.accepted&&possible&&q.beastChoice.outcome==='accepted',
-   check=accepted?checkRecord(C.die(rng,20),sp):null;
-  if(!eq(q.check,check)||q.humanRngAfter!==rng.rngState)return null;
-  const event=consequence(pair.bond,q,check);
-  if(!eq(q.event,event)||!eq(q.after,pair.bond))return null;
-  pair.head=row.seal;pair.last=q.minute+sp.minutes;previousMinute=q.minute;seen.add(q.witnessHash);days.add(q.pairSeal+':'+q.day);
- }
- return pairs;
-}
-function verify(s,p){try{return replay(s,p)!==null;}catch{return false;}}
+  }}
 function current(s,p,seal){const map=replay(s,p);if(!map)throw Error('Original independent pair interaction history altered');return map.get(seal)||null;}
 function interact(s,{actorId,beastId,witnessIndex,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
