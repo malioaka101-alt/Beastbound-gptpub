@@ -59,11 +59,11 @@ function applyPocket(bag,stock,item,m){
 }
 function replay(s,p){
  const r=p?.originalMaterialCustody;
- if(r===undefined)return {bag:{},pockets:{}};
+ if(r===undefined)return {bag:{},pockets:Object.create(null)};
  const w=Realm.peek(s);
  if(!w||!People.verify(w,p)||r.origin!==ORIGIN||!Array.isArray(r.rows)||
   !r.rows.length||r.rows.length>960)return null;
- const bag={},pockets={},used=new Set(),offerDays=new Set();let last=0;
+ const bag={},pockets=Object.create(null),used=new Set(),offerDays=new Set();let last=0;
  for(const row of r.rows){
   const q=row?.source;
   if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||q.actorId!==p.actorId||
@@ -97,6 +97,9 @@ function replay(s,p){
    if(!Object.hasOwn(purposes,q.purpose)||q.witness.details.origin!==purposes[q.purpose]||
     (q.purpose==='body-upkeep'&&(q.witness.details.cycle!==7||!eq(q.items,{clean_rations:1})))||
     (q.purpose==='rift-pocket-build'&&!eq(q.items,q.witness.details.materials))||q.noItemCreation!==true)return null;
+   const consumer=(q.purpose==='body-upkeep'?p.originalBodyLivingPhysiques?.sessions:p.originalRiftLocalSpatial?.sessions)?.find(x=>x?.source?.witnessHash===q.witnessHash);
+   if(!consumer||consumer.seal!==hash(consumer.source)||consumer.source.actorId!==p.actorId||consumer.source.minute!==q.minute||consumer.source.accepted!==true||
+    (q.purpose==='body-upkeep'?(consumer.source.kind!=='sustain'||consumer.source.foodDebitSeal!==row.seal):(consumer.source.kind!=='pocket'||consumer.source.materialDebitSeal!==row.seal)))return null;
    for(const [item,qty] of Object.entries(q.items)){
     const left=stockCount(bag,item)-qty;if(left<0)return null;
     if(left)bag[item]=left;else delete bag[item];
@@ -106,6 +109,9 @@ function replay(s,p){
    const space=pocketSource(p,q.pocketSeal,q.pocketId);
    if(!space||!pocketWitness(q,p,space)||!eq(q.items,{[q.item]:q.units})||
     q.minute+5>s.world.minutes||q.noItemCreation!==true)return null;
+   const consumer=p.originalRiftLocalSpatial?.transfers?.find(x=>x?.source?.custodySeal===row.seal);
+   if(!consumer||consumer.seal!==hash(consumer.source)||consumer.source.accepted!==true||consumer.source.actorId!==p.actorId||
+    consumer.source.witnessHash!==q.witnessHash||consumer.source.minute!==q.minute||consumer.source.pocketSeal!==q.pocketSeal)return null;
    const stock=pockets[q.pocketId]||{};
    if(!eq(q.pocketBefore,stock))return null;
    const m=pocketMovement(bag,stock,space,q.item,q.direction,q.units);
@@ -180,7 +186,8 @@ function consume(s,p,items,purpose,witness){
   day,minute,site,witness:structuredClone(witness),witnessHash,items:structuredClone(items),
   purpose,before,after,noItemCreation:true};
  const seal=hash(source);r.rows.push({source,seal});
- if(!verify(s,p))throw Error('Original material debit fails custody replay');
+ // The consuming original owner seals its linked receipt before any clock
+ // advancement; both ledgers must then pass the complete replay.
  return seal;
 }
 function debitProof(s,p,seal,items,purpose,witnessHash,minute){
