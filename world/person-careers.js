@@ -143,8 +143,7 @@ const METHOD=/^[a-z][a-z-]{3,39}$/;
 // world adapter, never permission from an unrestricted domain string.
 function verifyVisitorDuty(p,q){
  if(q.visitorSite===undefined)
-  return q.visitorArrivalSeal===undefined&&q.visitorMinute===undefined&&
-   q.regionId===p.birthSource.regionId;
+  return q.visitorArrivalSeal===undefined&&q.visitorMinute===undefined;
  const Visit=require('../rules/independent-sapient-terrestrial-journey'),
   pos=Visit.position(p,q.visitorMinute);
  return q.visitorSite==='crossing'&&
