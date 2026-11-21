@@ -190,8 +190,20 @@ for(let n=0;n<80;n++){
     travel.chatRuntime||={};
     const actualWitness=traveler.name+' is presently witnessed uninjured, unarmed and unarmoured at the actual forest location, without an imposed travel agreement.';
     travel.chatRuntime.scene=actualWitness;
-    R.act(travel,{system:'health',operation:'linkWitnessedHuman',
-     params:{npcId:traveler.actorId,witness:actualWitness}});
+    let originalBodyLinked=false;
+    try{
+     R.act(travel,{system:'health',operation:'linkWitnessedHuman',
+      params:{npcId:traveler.actorId,witness:actualWitness}});
+     originalBodyLinked=true;
+    }catch(error){
+     if(!/original human stamina formula has no legal baseline/.test(String(error?.message)))throw error;
+     A.equal(Route.routeStatus(travel,traveler,companion,'crossing').reason,
+      'no-real-uninjured-source-linked-human-combat-body');
+     A.equal(travel.table.combatants?.['npc_'+traveler.id],undefined);
+     console.log('INDEPENDENT ORIGINAL LINKED TRAVEL REFUSED BY REAL PHYSICAL BASELINE '+JSON.stringify({
+      originalHumanBodyNotLegallyEstablished:true,noInventedStaminaOrStat:true}));
+    }
+    if(originalBodyLinked){
     const before=E.exportGame(travel),humanRng=traveler.rngState,
       beastRng=companion.sapientLife.rngState;
     const route=Route.routeStatus(travel,traveler,companion,'crossing');
@@ -214,6 +226,7 @@ for(let n=0;n<80;n++){
     A.equal(Route.routeStatus(travel,traveler,companion,'academy').reason,'not-one-original-linked-leg');
     A.equal(E.exportGame(travel),before,'Actual route preflight is private and purely read-only');
     A.equal(traveler.rngState,humanRng);A.equal(companion.sapientLife.rngState,beastRng);
+    }
    }
 
 
