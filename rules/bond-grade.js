@@ -43,7 +43,7 @@ function assessment(s,p={}){
   throw Error('The beast independently declines examination or needs welfare care first');
  const calibration=gradeReference(s,b);
  const existing=b.contractGradeAssessment;
- if(existing&&existing.grade===calibration.grade&&
+ if(existing&&existing.origin!=='source-paid-independent-original-numeric-beast-grade-exam-v1'&&existing.grade===calibration.grade&&
     existing.species===b.species&&existing.evolutionStage===b.evolutionStage&&
     existing.individualGrade===b.individualGrade)
   throw Error('This individual already has a current numeric Grade assessment');
@@ -87,11 +87,13 @@ function assessment(s,p={}){
 function status(s,p={}){
  if(typeof p.beastId!=='string'||!s.beasts?.[p.beastId])
   throw Error('Unknown individual beast for Grade status');
- const b=s.beasts[p.beastId],a=b.contractGradeAssessment;
- if(!a)return {assessed:false,examAttempts:b.gradeExaminations?.length||0};
+ const b=s.beasts[p.beastId],a=b.contractGradeAssessment,
+  privatelyExamined='source-paid-independent-original-numeric-beast-grade-exam-v1',
+  knownAttempts=(b.gradeExaminations||[]).filter(x=>x.origin!==privatelyExamined).length;
+ if(!a||a.origin===privatelyExamined)return {assessed:false,examAttempts:knownAttempts};
  const current=a.species===b.species&&a.evolutionStage===b.evolutionStage&&
   a.individualGrade===b.individualGrade;
  return {assessed:current,grade:current?a.grade:null,
-  source:current?a.source:null,examAttempts:b.gradeExaminations?.length||0};
+  source:current?a.source:null,examAttempts:knownAttempts};
 }
 module.exports={assessment,status,examSpec,gradeReference};
