@@ -24,6 +24,10 @@ const reports=[];let actualAnchors=0,originalSuccessfulAxes=0,
  trulyCompleted=0,prime=null;
 for(let i=0;i<14;i++){
  const seed=973800+i*17,{s,p,day}=fixture('rift','breakthrough',seed);
+ // Explicit disposable PC-side material fixture, NOT NPC property, a gift,
+ // successful construction or historical acquisition claim. The same
+ // NPC must voluntarily receive actual stock and perform all original work.
+ s.player.inventory.moss_crystal=2;
  const first=Rules.act(s,{system:'discipline',operation:'npcOriginalFirstMilestone',
   params:{actorId:p.actorId,system:'rift'}});
  A.equal(first.observedOutcome,'breakthrough');
@@ -104,11 +108,80 @@ for(let i=0;i<14;i++){
    if(first.success&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=4){
     s.chatRuntime.scene=p.name+' examines an original small local boundary segment, without opening any portal.';
     Core.event(s,'story',s.chatRuntime.scene,{origin:Weave.WITNESS,location:'ruins',actorId:p.actorId,
-     boundaryId:'riftglass_wardline',segmentId:'individual_local_exterior_segment',mode:'reinforce',areaSquareMetres:3,supportMinutes:60,
+     boundaryId:'riftglass_wardline',segmentId:'individual_local_exterior_segment',mode:'reinforce',areaSquareMetres:3,supportMinutes:360,
      originalSpatialFabric:description,observedLocalChange:description,independentPressureCountertest:description,actualEnergyLimit:description,
      crossesBoundary:false,opensPortal:false,globalSealChanged:false});
     const second=Rules.act(s,{system:'rift',operation:'npcWeaveBoundary',params:{actorId:p.actorId,witnessIndex:s.log.length-1,minutes:60}});
     A.equal(Local.verify(s,p),true);A.equal(Local.privateStatus(s,p).earnedStep,second.success?4:3);
+    // A genuinely formed IV is not itself a pocket. Custody is acquired
+    // through the original voluntary material gift from finite test stock.
+    const Custody=require('../rules/independent-material-custody'),
+     Pocket=require('../rules/rift-pocket-architecture'),Adapt=require('../rules/rift-adaptation'),
+     here=()=>!!Presence.resolve(Realm.peek(s),p.actorId,'ruins',Math.floor(s.world.minutes/1440),s.world.minutes%1440)?.presence,
+     fit=cost=>here()&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=cost;
+    function offer(item,units){
+     s.chatRuntime.scene=p.name+' considers actual offered '+item+' material without obligation.';
+     Core.event(s,'story',s.chatRuntime.scene,{origin:Custody.OFFER,actorId:p.actorId,location:'ruins',items:{[item]:units}});
+     return Rules.act(s,{system:'material',operation:'offerToPerson',params:{actorId:p.actorId,witnessIndex:s.log.length-1}});
+    }
+    if(second.success&&fit(6)&&(s.player.inventory.moss_crystal||0)>=2&&offer('moss_crystal',2).accepted&&fit(6)){
+     s.chatRuntime.scene=p.name+' examines actual bounded pocket geometry and its personally held anchoring crystals.';
+     Core.event(s,'story',s.chatRuntime.scene,{origin:Pocket.WITNESS,actorId:p.actorId,location:'ruins',
+      boundaryId:'riftglass_wardline',segmentId:'individual_local_exterior_segment',pocketId:'individual_original_pocket',
+      capacityUnits:2,lifetimeHours:24,originalSpatialVolume:description,originalStableAnchoring:description,
+      independentCollapseCountertest:description,measuredEnergyAndMetabolicDemand:description,
+      ownershipAndMaterialProvenance:description,accessAndRetrievalLimit:description,
+      noLivingStorage:true,noPortalTransit:true,noRealmEntry:true,materials:{moss_crystal:2}});
+     const beforeCrystal=Custody.held(s,p).moss_crystal,pcCrystal=s.player.inventory.moss_crystal||0,
+      formedPocket=Rules.act(s,{system:'rift',operation:'npcPocketBuild',
+       params:{actorId:p.actorId,witnessIndex:s.log.length-1,minutes:180}});
+     A.equal(Local.verify(s,p),true);A.equal(Custody.verify(s,p),true);
+     A.equal(Custody.held(s,p).moss_crystal||0,beforeCrystal-(formedPocket.independentlyAccepted?2:0));
+     A.equal(s.player.inventory.moss_crystal||0,pcCrystal);
+     A.equal(Local.privateStatus(s,p).earnedStep,formedPocket.success?5:4);
+     if(formedPocket.success){
+      const pocketId='individual_original_pocket';
+      if(fit(1)&&s.player.inventory.clean_rations&&offer('clean_rations',1).accepted&&fit(1)){
+       for(const direction of ['store','retrieve']){
+        if(!fit(1))break;
+        const beforeCarried=Custody.held(s,p).clean_rations||0,
+         beforeInside=Custody.pocketContents(s,p,pocketId).clean_rations||0;
+        if(direction==='store'&&!beforeCarried||direction==='retrieve'&&!beforeInside)break;
+        s.chatRuntime.scene=p.name+' considers moving one real ration '+direction+' through the finite local pocket.';
+        Core.event(s,'story',s.chatRuntime.scene,{origin:Custody.POCKET_TRANSFER,actorId:p.actorId,location:'ruins',
+         pocketId,direction,item:'clean_rations',units:1});
+        const transfer=Rules.act(s,{system:'rift',operation:'npcPocketTransfer',
+         params:{actorId:p.actorId,witnessIndex:s.log.length-1}});
+        A.equal(Local.verify(s,p),true);A.equal(Custody.verify(s,p),true);
+        const moved=transfer.transferred?1:0,delta=direction==='store'?-moved:moved;
+        A.equal(Custody.held(s,p).clean_rations||0,beforeCarried+delta);
+        A.equal(Custody.pocketContents(s,p,pocketId).clean_rations||0,beforeInside-delta);
+       }
+      }
+      for(let k=0;k<2&&fit(4);k++){
+       s.chatRuntime.scene=p.name+' considers measured personal physiological exposure to original exterior pressure.';
+       Core.event(s,'story',s.chatRuntime.scene,{origin:Adapt.WITNESS,actorId:p.actorId,location:'ruins',
+        boundaryId:'riftglass_wardline',environment:'spatial-pressure',measuredIndividualHumanResponse:description,
+        observedEnergyRegulation:description,actualMetabolicSupply:description,independentUnaidedBaseline:description,
+        independentShearCountertest:description,recoveryObservation:description,noSpeciesConversion:true,noPortalAccess:true,
+        cannotNegateExtremePressure:true});
+       const exposure=Rules.act(s,{system:'rift',operation:'npcAdaptExposure',params:{actorId:p.actorId,witnessIndex:s.log.length-1,minutes:45}});
+       A.equal(Local.verify(s,p),true);
+       const after=Local.privateStatus(s,p);
+       A.ok(after.observedSpatialPressureExposures>=0&&after.observedSpatialPressureExposures<=2);
+       A.equal(after.earnedStep,after.observedSpatialPressureExposures===2?6:5);
+      }
+      const state=Local.privateStatus(s,p),opened=state.constructedPockets.find(x=>x.pocketId===pocketId);
+      const beforeExpiry=E.exportGame(s),copy=E.importGame(beforeExpiry),cp=Realm.peek(copy).emergentPeople.people[p.id];
+      A.equal(Local.verify(copy,cp),true);A.equal(Custody.verify(copy,cp),true);
+      const t=copy.world.minutes;
+      E.advance(copy,Math.max(1,opened.expiresAt-t));World.finalizeTime(copy,t);
+      const expired=Local.privateStatus(copy,cp).constructedPockets.find(x=>x.pocketId===pocketId);
+      A.equal(expired.active,false);A.equal(expired.expiredContentsInaccessible,true);
+      A.deepEqual(expired.contents,opened.contents);
+     }
+    }
+
    }
    const saved=E.exportGame(s),copy=E.importGame(saved),cp=Realm.peek(copy).emergentPeople.people[p.id];
    A.equal(Local.verify(copy,cp),true);
