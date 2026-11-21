@@ -100,6 +100,40 @@ function replay(s,p){
  }
  return local;
 }
+// A self-contained receipt proof for the original contract law. In this
+// function do NOT recurse into the full pair history: contract verification
+// itself reads the grade receipt, and the two ledgers audit each other at
+// the action gate and in GM-private status.
+function paidSource(s,p,b,row){
+ try{
+  const q=row?.source,d=q?.witness?.details;
+  if(!q||row.seal!==hash(q)||q.origin!==ORIGIN||!q.accepted||
+   q.actorId!==p?.actorId||q.humanHash!==p.originHash||q.beastId!==b?.id||
+   q.beastHash!==b?.sapientLife?.sourceHash||!eq(q.calibration,b.gradeCalibration)||
+   !['academy','crossing'].includes(q.site)||q.form!==b.evolutionStage||
+   q.species!==b.species||q.individualGrade!==b.individualGrade||
+   q.feeScales!==100||!int(q.cashBefore,100)||q.cashAfter!==q.cashBefore-100||
+   q.actualMinutes!==120||q.endMinute!==q.minute+120||q.endMinute>s.world.minutes||
+   !eq(q.spec,Original.examSpec(q.calibration.grade,p.mechanicalFoundation.baselineAttributes.wis,0))||
+   !witnessValid(p,b,q)||q.witnessHash!==hash(q.witness)||
+   !Arr.verifyHuman(q.humanChoice,q.witnessHash)||
+   q.humanChoice.rngBefore!==q.rngBefore||q.humanChoice.personality!==p.personality||
+   !q.humanChoice.accepted)return false;
+  const dChoice=q.beastChoice;
+  if(!dChoice||dChoice.disposition!==Agency.profile(s,b).disposition||
+   !int(dChoice.rngBefore,1,4294967295)||
+   !eq(dChoice,Social.sapientChoice({rngState:dChoice.rngBefore},dChoice.disposition)))return false;
+  const rng={rngState:q.humanChoice.rngAfter},roll=C.die(rng,20),
+   margin=roll+q.spec.modifier+C.naturalAdjustment(roll)-q.spec.dc,
+   check={roll,dc:q.spec.dc,modifier:q.spec.modifier,degree:C.degree(margin),success:margin>=0};
+  const exam={worldMinute:q.endMinute,facility:q.site,
+   outcome:check.success?'verified':'inconclusive',
+   check:{roll,dc:q.spec.dc,degree:check.degree},origin:ORIGIN,actorId:p.actorId,sourceSeal:row.seal};
+  return check.success&&q.result==='verified'&&q.humanRngAfter===rng.rngState&&
+   eq(q.check,check)&&eq(q.assessment,receiptAssessment(b,q))&&
+   (b.gradeExaminations||[]).some(x=>eq(x,exam));
+ }catch{return false;}
+}
 function verify(s,p){try{return replay(s,p)!==null;}catch{return false;}}
 function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
  if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
@@ -171,4 +205,4 @@ function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
   elapsedMinutes:q.actualMinutes,paidScales:q.feeScales,noGradeFromSpeciesRarity:true,
   noOwnershipOrMagicalBond:true};
 }
-module.exports={ORIGIN,WITNESS,verify,examine};
+module.exports={ORIGIN,WITNESS,verify,examine,paidSource};
