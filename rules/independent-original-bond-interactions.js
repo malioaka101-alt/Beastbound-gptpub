@@ -214,6 +214,9 @@ function interact(s,{actorId,beastId,witnessIndex,...extra}={},kind='friendly'){
   if(!['light','standard','deep','covenant'].includes(d?.depth))throw Error('Exact original contract depth required');
   q.depth=d.depth;q.gradeAssessment=structuredClone(b.contractGradeAssessment||null);
   const usedCapacity=privateStatus(s,p).reduce((n,x)=>n+(x.bond.contract?.load||0),0);
+  if(q.gradeAssessment?.origin===require('./independent-original-beast-grade-exam').ORIGIN&&
+   !require('./independent-original-beast-grade-exam').verify(s,p))
+   throw Error('Actual source-paid independent Grade examination failed original replay');
   q.contractInputs=ContractLaw.inputs(s,p,b,minute,q.gradeAssessment,q.depth,usedCapacity);
   if(!q.contractInputs||q.contractInputs.spec.overCapacity)throw Error('Genuine current individual Grade, earned Soul capacity and available original contract load required');
  }else if(kind==='sync'){
