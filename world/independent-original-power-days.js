@@ -33,7 +33,9 @@ function opportunity(s,w,life,activity,day){
  const id='npc_'+p.id,condition=require('../rules/unified').
   currentNpcWoundCondition(s,p.actorId),body=condition&&Combat.get(s,id);
  if(!body||!body.npcOrigin||body.status!=='ok')return null;
- const workDay=day-1,originalShift=People.shift(p,workDay,w),
+ const workDay=day-1;
+ if(p.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(p,workDay*1440,day*1440))return null;
+ const originalShift=People.shift(p,workDay,w),
   site=originalShift?.location;
  if(!site)return null;
  const loc=Lived.location(s,site);
