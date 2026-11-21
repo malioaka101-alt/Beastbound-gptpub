@@ -154,6 +154,8 @@ function earnedEvidence(w,actorId,s=null){
    individualOriginHash:life.sourceHash,
    witnessedEncounterHash:life.source.encounterHash,
    originalSpecies:life.source.species,
+   individuallySourceVerifiedVisitorWelfare:
+    require('../rules/independent-sapient-visitor-welfare').beastStatus(s,{beastId}),
    autonomousEarnedWork:{
     sourceHash:practice.sourceHash,
     completedAttempts:practice.attempts,

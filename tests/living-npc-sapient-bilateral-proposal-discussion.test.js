@@ -577,6 +577,15 @@ for(let n=0;n<80;n++){
         beastRespite.freelyRested?Math.max(0,priorBeastWelfare-8):priorBeastWelfare);
        A.equal(welfareBeast.needs.hunger,priorBeastFood);
        A.equal(VisitorBeastWelfare.verify(welfareWorld,welfarePerson),true);
+       const welfareView=R.act(welfareWorld,{system:'bond',
+        operation:'npcVisitorBeastWelfareStatus',
+        params:{beastId:welfareBeast.id}});
+       A.equal(welfareView.privateToGM,true);
+       A.equal(welfareView.sourceHistoryCount,1);
+       A.equal(welfareView.currentIndividualFatigue,welfareBeast.needs.fatigue);
+       A.equal(welfareView.sourceVerifiedIndependentVisitorRestHistory[0].outcome,
+        beastRespite.observedChoice);
+       A.equal(welfareView.noNewChoicesOrTimeOrMedicalTreatmentOrNutritionOrGrade,true);
        A.equal(Person.verify(welfareBeast),true);
        A.equal(Journey.verify(welfareWorld,welfarePerson),true);
        A.equal(welfarePerson.originalSapientVisitorRefugeChoices.length,1);

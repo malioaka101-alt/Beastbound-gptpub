@@ -145,7 +145,8 @@ function rest(s,{actorId,beastId,witnessIndex,...extra}={}){
   before:{hunger:b.needs.hunger,fatigue:b.needs.fatigue,
    condition:b.condition,energy:b.energy,hp:b.hp},
   noHumanStaminaOrBeastFoodOrMagicalResult:true};
- if(!witnessValid(p,b,q)||p.originalSapientVisitorRefugeChoices?.some(x=>x.source.day===day)||
+ if(!witnessValid(p,b,q)||p.originalSapientVisitorRefugeChoices?.some(x=>
+   x.source.day===day&&x.source.beastId===beastId)||
   b.sapientLife.originalVisitorRefugeChoices?.some(x=>x.source.day===day)||
   (p.originalSapientVisitorRefugeChoices||[]).length>=90)
   throw Error('Real separate beast refuge scene and one personal evening opportunity per day required');
@@ -182,5 +183,37 @@ function privateStatus(s,p){
   originalPhysicalJourneyHash:row.source.arrivalSeal,
   originalSourceHash:row.seal,noForcedFoodHealingOrMagicalPartner:true}));
 }
+function beastStatus(s,{beastId,...extra}={}){
+ if(Object.keys(extra).length||typeof beastId!=='string'||!beastId)
+  throw Error('Only the exact established independent sapient ID, not chosen health, grade, or rest');
+ const b=s.beasts?.[beastId];
+ if(!b?.sapientLife||!Person.verify(b))
+  throw Error('Real source-established living sapient person is required');
+ const rows=b.sapientLife.originalVisitorRefugeChoices||[],
+  w=Realm.peek(s);
+ const history=rows.map(row=>{
+  const q=row.source,p=w?.emergentPeople?.people?.[q.actorId.slice(9)];
+  if(!p||!verify(s,p))
+   throw Error('Beast welfare source lacks the exact original co-travelling human and reciprocal evidence');
+  return {privateToGM:true,beastId,observerActorId:q.actorId,
+   site:q.site,originalArrivalSeal:q.arrivalSeal,
+   minute:q.minute,endedMinute:q.endMinute,
+   outcome:q.outcome,
+   originalIndividualFatigueBefore:q.before.fatigue,
+   originalIndividualFatigueAfter:q.after.fatigue,
+   actualSourceOwnedRecovery:q.before.fatigue-q.after.fatigue,
+   originalIndependentDecisionSourceHash:row.seal,
+   noInferredFoodEnergyHealingOrConsent:true};
+ });
+ return {privateToGM:true,beastId,
+  actualBeastLocation:b.location??null,
+  currentIndividualCondition:b.condition,
+  currentIndividualHunger:b.needs?.hunger??null,
+  currentIndividualFatigue:b.needs?.fatigue??null,
+  sourceVerifiedIndependentVisitorRestHistory:history,
+  sourceHistoryCount:history.length,
+  actualUnprovenDietAndShelterForFutureDays:true,
+  noNewChoicesOrTimeOrMedicalTreatmentOrNutritionOrGrade:true};
+}
 module.exports={ORIGIN,WITNESS,RECOVERY_OWNER,RECOVERY_FATIGUE,
- structure,verify,rest,privateStatus};
+ structure,verify,rest,privateStatus,beastStatus};
