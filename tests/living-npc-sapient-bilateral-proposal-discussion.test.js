@@ -9,6 +9,7 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Bridge=require('../rules/independent-sapient-proposal-discussions'),
  Foundation=require('../world/person-mechanical-foundations'),
  Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
+const Pair=require('../rules/independent-original-bond-pair');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const s=E.newGame({name:'Disposable independent sapient proposal',seed:927801,path:'undecided'});
 A.equal(E.dispatch(s,'travel forest').ok,true);
@@ -24,6 +25,8 @@ for(let n=0;n<260&&!b;n++){
  if(s.encounter)A.equal(E.dispatch(s,'leave').ok,true);
 }
 A.ok(b,'Real independently willing sapient encounter required');
+// Disposable numeric cognition observation only; no pair decision or trust is assigned.
+b.sapience=3;
 const w=Realm.ensure(s),roster=People.ensure(w),site=s.world.location,
  region=Atlas.R[Atlas.LOCATION_REGION[site]],day=Math.floor(s.world.minutes/1440),
  contact=b.sapientLife.history.find(x=>x.type==='personally-witnessed-contact'&&x.willingness);
@@ -35,6 +38,7 @@ Object.assign(country,{prosperity:75,stability:80});
 const demand=People.sourceDemand(w,region);
 A.ok(demand);
 let mutual=null,humanRefusal=0,beastRefusal=0,results=[],agreed=null,finalResults=[];
+const pairCounts={recorded:0,declined:0};
 for(let n=0;n<40;n++){
  const p=People._debug.make(w,roster,day,demand);p.shift=People.shift(p,day,w);
  const terms={beastId:b.id,id:'individual_proposal_'+n,kind:'voluntary habitat conversation',
@@ -108,16 +112,59 @@ for(let n=0;n<40;n++){
   A.throws(()=>R.act(s,{system:'bond',operation:'npcSapientArrangementAccept',params}),
    /already received/);
   A.equal(E.exportGame(s),after);
-  if(resolved.mutuallyAccepted)agreed={p,entry};
+  if(resolved.mutuallyAccepted){
+   agreed={p,entry};
+   // Explicit disposable authored prior measurements ONLY. Recognition is a
+   // separate real bilateral decision, not assigned by the fixture.
+   C.event(s,'story',p.name+' and the sapient individual consider retaining their separately measured pair calibration without a contract.',{
+    origin:Pair.WITNESS,actorId:p.actorId,beastId:b.id,location:site,
+    arrangementHash:entry.seal,arrangementRevision:entry.seal,contactHash:hash(contact),
+    measuredSapience:b.sapience,measuredCompatibility:5,measuredResonance:4,
+    actualPriorBioSpiritualCalibration:'Disposable measured pair-specific biological and spiritual compatibility assessment.',
+    actualPriorEnergyCalibration:'Disposable measured pair-specific energy resonance assessment.',
+    independentlyUnderstoodTerms:'Both independently comprehend that this is only a record of prior measurements.',
+    rightToDeclineRecord:'Either individual may decline retaining the record without losing any previously accepted social terms.',
+    noAssignedAffectionOrWillingness:true,noMagicalContract:true});
+   const request={actorId:p.actorId,beastId:b.id,witnessIndex:s.log.length-1},
+    savedPair=E.exportGame(s),pc=s.rngState,pr=p.rngState,br=b.sapientLife.rngState;
+   A.throws(()=>R.act(s,{system:'bond',operation:'npcPairRecord',params:{...request,trust:100}}),/no assigned affinity or consent/);
+   A.equal(E.exportGame(s),savedPair);
+   const out=R.act(s,{system:'bond',operation:'npcPairRecord',params:request}),row=p.originalBondPairRecognitions[0];
+   A.equal(Pair.verify(s,p),true);A.equal(s.rngState,pc);
+   A.equal(row.source.humanChoice.rngBefore,pr);
+   A.equal(row.source.beastChoice?.rngBefore??br,br);
+   A.equal(out.recorded,row.source.accepted);A.equal(s.table?.bondRecords?.[b.id],undefined);
+   A.equal(s.player.partnerIds.includes(b.id),false);
+   A.equal(Arrangement.privateStatus(s,p)[0].status,'accepted');
+   if(out.recorded){
+    pairCounts.recorded++;
+    A.equal(row.bond.compatibility,5);A.equal(row.bond.resonance,4);
+    for(const k of ['trust','familiarity','affection','respect','loyalty','communication','coordination','willingness','syncStage','syncPoints'])
+     A.equal(row.bond[k],0);
+    A.equal(row.bond.contract,null);
+    const v=Foundation.gmDossier(w,p.actorId,s).earnedEvidence.beastRelationships;
+    A.equal(v.verifiedPartners,null);A.equal(v.sourceVerifiedUncommittedPairs.length,1);
+   }else{pairCounts.declined++;A.equal(row.bond,null);}
+   const afterPair=E.exportGame(s);
+   A.throws(()=>R.act(s,{system:'bond',operation:'npcPairRecord',params:request}),/no repeated decision/);
+   A.equal(E.exportGame(s),afterPair);
+   const pairCopy=E.importGame(afterPair),pairP=Realm.peek(pairCopy).emergentPeople.people[p.id];
+   A.equal(Pair.verify(pairCopy,pairP),true);
+   const fake=pairP.originalBondPairRecognitions[0];
+   if(fake.bond)fake.bond.trust=100;else{fake.source.accepted=true;fake.seal=hash(fake.source);}
+   A.equal(Pair.verify(pairCopy,pairP),false,'Recognition never establishes manufactured affection or assent');
+  }
  }
  if(result.observedOutcome==='human-declined')humanRefusal++;
  if(['beast-declined','beast-proposed-changes'].includes(result.observedOutcome))beastRefusal++;
- if(mutual&&humanRefusal&&beastRefusal&&agreed)break;
+ if(mutual&&humanRefusal&&beastRefusal&&agreed&&pairCounts.recorded&&pairCounts.declined)break;
 }
 A.ok(mutual,'At least one genuinely mutually interested disposable pair');
 A.ok(humanRefusal>0,'A human must be free to refuse; beast draw not consumed');
 A.ok(beastRefusal>0,'The sapient person may refuse or request alternatives');
 A.ok(agreed,'Distinct natural participants should genuinely agree to final terms in this bounded sample');
+A.ok(pairCounts.recorded>0&&pairCounts.declined>0,'Distinct pairs must genuinely accept and decline separately measured pair recognition');
+console.log('INDEPENDENT ORIGINAL UNCOMMITTED PAIR RECORD PASS '+JSON.stringify(pairCounts));
 const arrView=Foundation.gmDossier(w,agreed.p.actorId,s).earnedEvidence.beastRelationships;
 A.equal(arrView.verifiedPartners,null);
 A.equal(arrView.sourceVerifiedSocialArrangements[0].status,'accepted');
