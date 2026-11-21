@@ -10,6 +10,13 @@ const A=require('node:assert/strict'),Crypto=require('node:crypto'),
  Foundation=require('../world/person-mechanical-foundations'),
  Arrangement=require('../rules/independent-sapient-arrangements'),Time=require('../rules/world');
 const Pair=require('../rules/independent-original-bond-pair');
+const Bond=require('../rules/bonds'),Sync=require('../rules/bond-synchronisation');
+A.deepEqual(Bond.contractSpec({grade:4,sapience:3,depth:'deep',will:2,contractLore:2,soulDB:3,soulPhase:3,usedCapacity:2}),{
+ depth:'deep',load:4,capacity:7,usedCapacity:2,overCapacity:false,dc:20,modifier:7,stability:80,base:70,link:'10 km'});
+A.equal(Bond.contractSpec({grade:9,sapience:3,depth:'covenant',will:0,usedCapacity:0}).overCapacity,true);
+A.deepEqual(Sync.practiceSpec(1,16,1,35,2),{humanCost:3,fatigueCost:3,energyCost:0,minutes:30,dc:13,modifier:8});
+A.deepEqual(Sync.practiceSpec(3,14,0,0,-1),{humanCost:5,fatigueCost:4,energyCost:2,minutes:40,dc:17,modifier:1});
+
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const s=E.newGame({name:'Disposable independent sapient proposal',seed:927801,path:'undecided'});
 A.equal(E.dispatch(s,'travel forest').ok,true);
