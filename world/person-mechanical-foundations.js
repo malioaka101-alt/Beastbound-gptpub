@@ -506,7 +506,7 @@ function earnedEvidence(w,actorId,s=null){
      'Verified materials are not proof of equipped tools, weapons or armor'},
    beastRelationships:{verifiedPartners:null,reason:'Original independent magical contract not yet established',
     ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
-     {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-pair').privateStatus(s,actor)}:{}),
+     {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
      {sourceVerifiedProposalDiscussions:require('../rules/independent-sapient-proposal-discussions')
       .privateStatus(s,actor)}:{}),
