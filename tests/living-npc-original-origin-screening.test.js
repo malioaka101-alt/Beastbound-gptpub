@@ -22,6 +22,12 @@ A.deepEqual(Lineage.screeningSpec(1,121,16,1,2,['risk']),{dc:17,stamina:2,modifi
 A.equal(Lineage.screenResult({success:true},['risk']),'caution');
 A.equal(Lineage.screenResult({success:true},[]),'promising');
 A.equal(Lineage.screenResult({success:false},[]),'inconclusive');
+const PC=require('../rules/beast-origin-integration'),Integration=require('../rules/independent-original-origin-integration');
+A.deepEqual(PC.stageSpec(3,2,16,1,2),{dc:18,modifier:7,cost:3,minimum:30});
+A.deepEqual(PC.stageSpec(8,9,16,0,-1),{dc:23,modifier:2,cost:3,minimum:90});
+A.deepEqual(PC.stageConsequence(3,2,{success:true,degree:'success'}),{strainAdded:0,riskAdded:0,loadAdded:2});
+A.deepEqual(PC.stageConsequence(4,2,{success:false,degree:'failure'}),{strainAdded:3,riskAdded:10,loadAdded:0});
+A.deepEqual(PC.stageConsequence(6,2,{success:false,degree:'severe failure'}),{strainAdded:3,riskAdded:5,loadAdded:0});
 const counts={mapped:0,accepted:0,refused:0,promising:0,attemptsByAxis:{}};
 for(let n=0;n<96;n++){
  const s=E.newGame({name:'Disposable real Origin study',seed:937510+n*37}),
@@ -67,6 +73,14 @@ for(let n=0;n<96;n++){
   pre=E.exportGame(s);
  A.throws(()=>R.act(s,{system:'origin',operation:'npcLineageScreen',params:premature}),/completed original mapping/);
  A.equal(E.exportGame(s),pre);
+ for(const operation of ['npcIntegrationStage','npcIntegrationCare']){
+  A.throws(()=>R.act(s,{system:'origin',operation,params:{...premature,axis:undefined,succeeded:true}}),/fresh biological witness/);
+  A.equal(E.exportGame(s),pre);
+  const goodShape={actorId:p.actorId,sourceId:id,witnessIndex:premature.witnessIndex,minutes:90};
+  A.throws(()=>R.act(s,{system:'origin',operation,params:goodShape}),/completed mapping and four clinical sources/);
+  A.equal(E.exportGame(s),pre);
+ }
+ A.equal(Integration.verify(s,p),true);
  function nextDay(){
   const old=s.world.minutes,next=(Math.floor(old/1440)+1)*1440+600;
   E.advance(s,next-old);World.finalizeTime(s,old);
