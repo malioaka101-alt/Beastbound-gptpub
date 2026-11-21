@@ -6,6 +6,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),C=require('./core'
  Build=require('./build'),Thread=require('./soul-threading'),
  W=require('./world'),U=require('./unified'),Combat=require('./combat'),
  Places=require('../world/lived-places');
+const LatticeLaw=require('./soul-shared-original-resonance-lattice');
 const ORIGIN='earned-personal-soul-resonance-lattice-v1',
  MAP='witnessed-personal-soul-lattice-design-v1',
  PRACTICE='witnessed-personal-soul-resonance-repetition-v1',
@@ -16,7 +17,7 @@ const integer=(x,lo=0,hi=1000000000)=>Number.isInteger(x)&&x>=lo&&x<=hi;
 const phrase=(x,lo=12,hi=900)=>typeof x==='string'&&x.trim().length>=lo&&x.trim().length<=hi;
 const only=(p,allowed)=>p&&typeof p==='object'&&!Array.isArray(p)&&
  Object.keys(p).every(k=>allowed.includes(k));
-const GOAL=5;
+const GOAL=LatticeLaw.GOAL;
 function current(s){
  const p=s.player?.soul;
  if(!p||p.phase!==2)throw Error('Phase III Resonance Lattice needs a genuinely earned Phase II Soul Threading foundation');
@@ -170,7 +171,8 @@ function practice(s,p={}){
  const witnessHash=hash(wit);
  if(r.attempts.some(x=>x.source.witnessHash===witnessHash))
   throw Error('The same original soul practice witness cannot be rolled twice');
- const minutes=p.minutes??60,reserveSpent=2,staminaSpent=1+Math.ceil(minutes/120);
+ const minutes=p.minutes??60,reserveSpent=LatticeLaw.PRACTICE_RESERVE,
+  staminaSpent=LatticeLaw.practiceStamina(minutes);
  if(!integer(so.reserve,reserveSpent,10000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('Actual Soul reserve and physical Stamina are insufficient for independent practice');
@@ -178,13 +180,13 @@ function practice(s,p={}){
  so.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0),dc:17,
+  2*(s.player.skills?.cultivation?.rank||0),dc:LatticeLaw.PRACTICE_DC,
   label:'Personal Soul Phase III Resonance Lattice practice'});
  const checkEvent=structuredClone(s.log.at(-1));
- const earned=check.success?check.progress:0,
+ const earned=LatticeLaw.earned(check),
+  after=LatticeLaw.practiceState(r.points,r.strain,check),
   strainAdded=check.degree==='severe failure'?3:0;
- r.points=Math.min(GOAL,r.points+earned);
- r.strain=Math.min(100,r.strain+strainAdded);
+ r.points=after.points;r.strain=after.strain;
  if(strainAdded){
   so.stability=Math.max(1,so.stability-3);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
@@ -212,7 +214,8 @@ function repair(s,p={}){
   throw Error('Repair must demonstrate an actual measured interference and a real self-correction method');
  if(r.repairs.some(x=>x.source.witnessHash===hash(wit)))
   throw Error('One original soul repair cannot be rerolled');
- const minutes=p.minutes??60,reserveSpent=1,staminaSpent=1+Math.ceil(minutes/120);
+ const minutes=p.minutes??60,reserveSpent=LatticeLaw.REPAIR_RESERVE,
+  staminaSpent=LatticeLaw.repairStamina(minutes);
  if(!integer(so.reserve,reserveSpent,10000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('Actual Soul reserve and Stamina are insufficient for repair');
@@ -220,11 +223,11 @@ function repair(s,p={}){
  so.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0),dc:14,
+  2*(s.player.skills?.cultivation?.rank||0),dc:LatticeLaw.REPAIR_DC,
   label:'Observed personal Soul Resonance Lattice restoration'});
  const checkEvent=structuredClone(s.log.at(-1));
- r.strain=check.success?Math.max(0,oldStrain-2):oldStrain;
- if(check.success)so.stability=Math.min(100,so.stability+2);
+ const afterRepair=LatticeLaw.repairState(oldStrain,so.stability,check);
+ r.strain=afterRepair.strain;so.stability=afterRepair.stability;
  const source={origin:ORIGIN,kind:'repair',minute:at,minutes,
   reserveSpent,staminaSpent,witness:wit,witnessHash:hash(wit),
   check:structuredClone(check),checkEvent,checkEventHash:hash(checkEvent),
@@ -239,7 +242,7 @@ function complete(s,p={}){
  if(!only(p,['witnessIndex','minutes'])||!integer(p.minutes??90,30,480))
   throw Error('A real independent Soul Lattice formation test and time are required');
  const {p:so}=current(s),r=s.table?.soulArchitecture?.lattice;
- if(!r||!verify(s)||r.points<GOAL||r.strain>2)
+ if(!r||!verify(s)||!LatticeLaw.formationReady(r.points,r.strain))
   throw Error('The observed original Soul Lattice practice or interference control is incomplete');
  const wit=event(s,p.witnessIndex,FORM);
  if(!phrase(wit.details?.independentResponse,24,900)||
@@ -247,23 +250,26 @@ function complete(s,p={}){
   throw Error('Real stable personal soul resonance and a successful identity boundary countertest must be witnessed');
  if(r.transitions.some(x=>x.source.witnessHash===hash(wit)))
   throw Error('This actual original formation demonstration was already resolved');
- const minutes=p.minutes??90,reserveSpent=4,staminaSpent=2+Math.ceil(minutes/90);
+ const minutes=p.minutes??90,reserveSpent=LatticeLaw.FORMATION_RESERVE,
+  staminaSpent=LatticeLaw.formationStamina(minutes);
  if(!integer(so.reserve,reserveSpent,10000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('Soul lattice formation requires actually available Soul reserve and Stamina');
  const at=s.world.minutes,oldReserve=so.reserve,oldMaxReserve=so.maxReserve;
  so.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0)+Math.floor(so.stability/25)-2,
-  dc:21,label:'Soul Phase III Resonance Lattice independent identity boundary trial'});
+ const check=C.check(s,{modifier:LatticeLaw.formationModifier(
+  Math.floor(((s.player.attributes.wis??10)-10)/2),
+  s.player.skills?.cultivation?.rank||0,so.stability),
+  dc:LatticeLaw.FORMATION_DC,
+  label:'Soul Phase III Resonance Lattice independent identity boundary trial'});
  const checkEvent=structuredClone(s.log.at(-1));
  const willAtFormation=currentWill(s);let capacity=null;
  if(check.success){
   const next=profile(s,willAtFormation);
   so.phase=3;so.maxReserve=Math.max(oldMaxReserve,next.soulReserve);
   so.perceptionRange=next.perceptionRangeMetres;
-  so.resonanceLatticeIntegrity=1;
+  so.resonanceLatticeIntegrity=LatticeLaw.FORMATION_INTEGRITY;
   capacity={oldReserve,newReserve:so.reserve,
    oldMaxReserve,newMaxReserve:so.maxReserve,
    perceptionRange:so.perceptionRange};

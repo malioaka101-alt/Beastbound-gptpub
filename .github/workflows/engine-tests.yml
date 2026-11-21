@@ -1,87 +1,83 @@
 name: Beastbound Engine Tests
-# Three independent deterministic batches cover ALL discovered test files
-# exactly once, with a final cross-system gate. Unlike the older static
-# inventory, new tests are automatically included; skipped/failed batches
-# fail the unchanged required 'test' job. No push-trigger duplicate.
+# Draft PRs: fast edit-time checks, no repeated world-long full regressions.
+# Ready-for-review and explicit workflow_dispatch: COMPLETE regression for
+# the exact head, all *.test.js exactly once, required final 'test' gate.
+# GitHub itself prohibits merging a draft PR.
 on:
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
   workflow_dispatch:
 concurrency:
   group: beastbound-engine-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
+  edit-smoke:
+    name: edit-smoke
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fast source-parity, original Meridian and changed-file checks
+        run: node scripts/run-regression-smoke.js
+
   regression-batch:
     name: Regression batch ${{ matrix.batch }}
+    # Full regression remains mandatory BEFORE merge, not after every
+    # in-progress draft commit. Once ready, every new head reruns all tests.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        batch: [0, 1, 2]
+        batch: [0, 1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run complete assigned regression batch
-        shell: bash
-        run: node scripts/run-regression-batches.js --shards=3 --shard=${{ matrix.batch }}
+      - name: Run runtime-balanced FULL regression without duplicates
+        run: node scripts/run-regression-batches.js --shards=6 --shard=${{ matrix.batch }}
 
-  # Preserve the preexisting required GitHub check name 'test'. We use
-  # always() so a failed/cancelled matrix batch makes this check FAIL rather
-  # than silently treating a skipped final gate as approval.
   test:
     name: test
-    if: ${{ always() }}
-    needs: [regression-batch]
+    # Preserve the existing required check. It can only PASS on a
+    # ready-for-review PR or an explicit full workflow dispatch, NEVER
+    # merely because the rapid draft smoke passed.
+    if: ${{ always() && (github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false) }}
+    needs: [edit-smoke, regression-batch]
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - name: Reject incomplete, failed or cancelled regression batches
+      - name: Reject incomplete, failed or cancelled full regression
         shell: bash
         run: |
           if [[ "${{ needs.regression-batch.result }}" != "success" ]]; then
-            echo "::error::Not all source-grounded regression batches passed; merge blocked."
+            echo "::error::Required full regression did not pass on this exact head."
+            exit 1
+          fi
+          if [[ "${{ needs.edit-smoke.result }}" != "success" && "${{ needs.edit-smoke.result }}" != "skipped" ]]; then
+            echo "::error::Fast source-backed checks failed."
             exit 1
           fi
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify automatic full inventory coverage and no duplicate tests
-        shell: bash
-        run: node scripts/run-regression-batches.js --shards=3 --validate
-      - name: Final integration gate — original property custody, trade, organisations and world
-        shell: bash
-        run: |
-          node tests/group-purpose-sustained-independent-departure.test.js
-          node tests/group-purpose-independent-member-responses.test.js
-          node tests/group-member-persistent-dissent-agency.test.js
-          node tests/group-original-coordinator-setback-reconsideration.test.js
-          node tests/original-diplomatic-courier-public-provenance.test.js
-          node tests/diplomacy-genuine-bilateral-exploratory-contact.test.js
-          node tests/economy-existing-owned-material-assets.test.js
-          node tests/economy-real-physical-production-source.test.js
-          node tests/field-crafting.test.js
-          node tests/rank-depth-prototypes.test.js
-          node tests/voluntary-person-material-handoffs.test.js
-          node tests/live-provisioner-trade.test.js
-          node tests/economy-original-scarcity-market-quotations.test.js
-          node tests/economy-voluntary-original-merchant-worker-terms.test.js
-          node tests/economy-original-wholesale-transport-disruptions.test.js
-          node tests/economy-independent-regional-market-demand.test.js
-          node tests/economy-independent-funded-real-local-purchase.test.js
-          node tests/economy-independent-person-owned-material-sales.test.js
-          node tests/civic-original-records-remedy.test.js
-          node tests/civic-local-rights-and-sapient-standing.test.js
-          node tests/civic-independent-local-law-enactment.test.js
-          node tests/economy-original-paid-demand-price-pressure.test.js
-          node tests/economy-original-scarcity-market-quotations.test.js
-          node tests/living-career-real-merchant-payments.test.js
-          node tests/voluntary-person-material-handoffs.test.js
-          node tests/trade-original-interstate-corridor-history.test.js
-          node tests/living-career-real-merchant-payments.test.js
-          node tests/source-parity.test.js
-          node tests/source-coverage.test.js
+      - name: Verify complete unique test inventory and core source coverage
+        # Every test already ran in exactly one shard; do NOT run it again.
+        run: node scripts/run-regression-batches.js --shards=6 --validate

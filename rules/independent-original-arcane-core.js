@@ -11,6 +11,7 @@ const Crypto=require('node:crypto'),
  Early=require('./independent-original-discipline-preparation'),
  Potential=require('./potential-mechanics');
 const ORIGIN='original-source-independent-arcane-mana-core-ignition-v1';
+const CIRCLE='source-earned-original-independent-arcane-first-circle-v1';
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const chance=p=>{
  const c={curious:66,steady:59,independent:51,reserved:39}[p.personality];
@@ -20,6 +21,9 @@ const chance=p=>{
 };
 const DC=()=>Disc.KEYS.arcane.tracks.core[1]+2+3;
 const originalMana=()=>Build.arcaneProfile(0).mana;
+// A first-circle pattern comes from this individual's original human
+// foundation, not a claimed teacher, gifted formula or free spell.
+const circleGeometry=p=>'individual first-circle mana channel '+p.originHash.slice(0,24);
 function replay(s,p,q,roller,{points,methods,cooldown,body,priorSuccess}={}){
  if(priorSuccess||
   q.origin!==ORIGIN||q.system!=='arcane'||q.target!=='core'||
@@ -226,4 +230,90 @@ function practice(s,{actorId,...untrusted}={}){
   actualOriginalCheck:accepted,realBacklash:injury,
   noCircleSpellOrTechniqueAwarded:true};
 }
-module.exports={ORIGIN,hash,chance,replay,practice};
+
+// Stage I First Circle uses the existing player breakthrough DC, Core
+// progress/degree, body and aptitude after 100 genuine post-Core points and
+// two distinct original methods. One source-verified voluntary decision,
+// one die, exact physical backlash, no automatic learned spell.
+function replayCircle(s,p,q,roller,{points,methods,cooldown,body,
+ coreSourceHash,priorSuccess=false}={}){
+ const required=Disc.KEYS.arcane.tracks.circle1[0],
+  dc=Disc.KEYS.arcane.tracks.circle1[1]+5,
+  aptitude=Potential.bonus(p.mechanicalFoundation.unassessedPotential[
+   Potential.PRIMARY.arcane.circle1]),
+  next=Build.arcaneProfile(1);
+ if(priorSuccess||!coreSourceHash||
+  q.origin!==CIRCLE||q.system!=='arcane'||q.target!=='circle1'||
+  q.actorId!==p.actorId||q.individualOriginHash!==p.originHash||
+  q.originalFoundationSeal!==p.mechanicalFoundation.seal||
+  q.originalCombatEntrySeal!==body?.npcOrigin?.seal||
+  q.originalPriorCoreSourceHash!==coreSourceHash||
+  !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
+  !/^[a-f0-9]{64}$/.test(q.originalSceneHash||'')||
+  q.noLearnedSpellOrTechniqueGranted!==true||
+  q.originalSkillRankBonus!==0||points!==required||
+  Object.keys(methods).filter(k=>methods[k]>0).length<2||
+  q.pointsBefore!==points||
+  q.distinctMethodsBefore!==Object.keys(methods).length||
+  q.cooldownBefore!==cooldown||q.day<cooldown||
+  q.originalRiteDC!==dc||
+  q.originalPotentialDimension!==Potential.PRIMARY.arcane.circle1||
+  q.originalPotentialBonus!==aptitude||
+  q.insightSpent!==0||q.feeTalons!==0||
+  q.choiceChance!==chance({personality:q.personalityAtAttempt,
+   fatigue:q.fatigueAtAttempt})||
+  q.choiceD100!==Core.die(roller,100)||
+  q.accepted!==(q.choiceD100<=q.choiceChance))
+  return null;
+ let progress=points,methodsAfter={...methods},
+  end=cooldown,formed=false,outcome='declined';
+ if(!q.accepted){
+  if(q.actualMinutes!==5||q.check!==null||
+   q.woundsBefore!==null||q.woundsAfter!==null||
+   q.originalPhysicalBacklash!==false||
+   q.structuredManaAfter!==null||q.geometryAfter!==null||
+   q.channelsAfter!==null||q.maxComplexityAfter!==null)
+   return null;
+ }else{
+  const mod=Math.floor((p.mechanicalFoundation.baselineAttributes.int-10)/2)+
+   aptitude,roll=Core.die(roller,20),
+   margin=roll+mod+Core.naturalAdjustment(roll)-dc,
+   degree=Core.degree(margin),success=margin>=0;
+  if(q.actualMinutes!==180||!q.check||
+   q.check.roll!==roll||q.check.modifier!==mod||
+   q.check.dc!==dc||q.check.success!==success||
+   q.check.degree!==degree||
+   !Array.isArray(q.woundsBefore)||q.woundsBefore.length!==3||
+   q.woundsBefore.some(x=>x!==0)||
+   !Array.isArray(q.woundsAfter)||q.woundsAfter.length!==3)
+   return null;
+  if(success){
+   formed=true;outcome='circle-formed';progress=0;methodsAfter={};
+   if(q.structuredManaAfter!==next.mana||
+    q.geometryAfter!==circleGeometry(p)||
+    q.channelsAfter!==next.channels||
+    q.maxComplexityAfter!==next.maxComplexity||
+    q.originalPhysicalBacklash!==false||
+    q.woundsAfter.some(x=>x!==0))return null;
+  }else{
+   outcome=degree==='setback'||degree==='failure'?'stalled':'backlash';
+   if(degree==='setback')end=q.day+12;
+   else if(degree==='failure')end=q.day+24;
+   else{end=q.day+30;progress=Math.floor(points*.75);}
+   if(q.structuredManaAfter!==null||q.geometryAfter!==null||
+    q.channelsAfter!==null||q.maxComplexityAfter!==null||
+    q.originalPhysicalBacklash!==(degree==='severe failure')||
+    JSON.stringify(q.woundsAfter)!==JSON.stringify(
+     degree==='severe failure'?[1,0,0]:[0,0,0]))
+    return null;
+  }
+ }
+ if(q.outcome!==outcome||q.cooldownUntil!==end||
+  q.pointsAfter!==progress||
+  JSON.stringify(q.methodsAfter)!==JSON.stringify(methodsAfter)||
+  roller.rngState!==q.rngAfter)return null;
+ return {points:progress,methods:methodsAfter,cooldown:end,
+  formed,circleSourceHash:formed?hash(q):null};
+}
+
+module.exports={ORIGIN,CIRCLE,hash,chance,replay,replayCircle,circleGeometry,practice};

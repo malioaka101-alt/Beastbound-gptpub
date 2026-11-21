@@ -1,0 +1,28 @@
+name: Beastbound Endogenous Origin Real-Chain Verification
+# Separate longitudinal evidence, not a replacement for exact-head full regression.
+on:
+  push:
+    branches:
+      - feat/reuse-existing-full-meridian-ladder-for-all-actors-20261120
+    paths:
+      - '.github/workflows/origin-npc-real-chain.yml'
+      - 'tests/living-npc-origin-endogenous-long-form-assessment.test.js'
+      - 'rules/independent-original-origin-research.js'
+      - 'rules/independent-original-origin-integration.js'
+      - 'rules/beast-origin-integration.js'
+      - 'rules/beast-origin-lineage.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  origin-original-endogenous:
+    name: Verified individual research, compatibility and biological integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assess unforced complete Origin lifecycle
+        run: node tests/living-npc-origin-endogenous-long-form-assessment.test.js

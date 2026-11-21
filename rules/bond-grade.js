@@ -12,7 +12,22 @@ function gradeReference(s,b){
     x.species!==b.species||x.evolutionStage!==b.evolutionStage||
     x.individualGrade!==b.individualGrade)
   throw Error('A pre-established independent numeric Grade calibration for this individual and current form is required');
+ // A structured string, timestamp and number are not the authenticated
+ // independent biological measurement and institutional rubric required for
+ // a sapient person's real Grade. No positive original calibration source
+ // owner exists yet for such people. Fail closed rather than accepting an
+ // attractive caller-authored 1..9 or quietly mapping species rarity/level.
+ // This gate must only be opened by a future original source-owner verifier
+ // that replays a real earlier measured specimen and accepted rubric.
+ if(b.sapientLife)
+  throw Error('Independent sapient numeric Grade requires a verified original individual measurement and accredited rubric; a typed calibration is not source proof');
  return x;
+}
+function examSpec(grade,wis,rank){
+ C.int(grade,'original individual numeric Grade',1,9);
+ C.int(wis,'earned Wisdom',1,30);C.int(rank,'earned Beastcraft',0,5);
+ return {dc:12+2*grade,modifier:Math.floor((wis-10)/2)+2*rank,
+  feeTalons:PRICE,feeScales:100,minutes:MINUTES,cooldownMinutes:COOLDOWN};
 }
 function assessment(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
@@ -37,7 +52,7 @@ function assessment(s,p={}){
   throw Error('The beast independently declines examination or needs welfare care first');
  const calibration=gradeReference(s,b);
  const existing=b.contractGradeAssessment;
- if(existing&&existing.grade===calibration.grade&&
+ if(existing&&existing.origin!=='source-paid-independent-original-numeric-beast-grade-exam-v1'&&existing.grade===calibration.grade&&
     existing.species===b.species&&existing.evolutionStage===b.evolutionStage&&
     existing.individualGrade===b.individualGrade)
   throw Error('This individual already has a current numeric Grade assessment');
@@ -50,8 +65,7 @@ function assessment(s,p={}){
   throw Error('One Talon in examination materials is required');
  const rank=C.int(s.player.skills?.beastcraft?.rank??0,'recorded Beastcraft rank',0,5);
  const wis=C.int(s.player.attributes?.wis,'recorded Wisdom',1,30);
- const modifier=Math.floor((wis-10)/2)+2*rank;
- const dc=12+2*calibration.grade;
+ const {modifier,dc}=examSpec(calibration.grade,wis,rank);
  s.player.coins=Number((s.player.coins-PRICE).toFixed(2));
  const checkedAtMinute=s.world.minutes;
  const check=C.check(s,{modifier,dc,label:'Individual beast Grade examination'});
@@ -82,11 +96,13 @@ function assessment(s,p={}){
 function status(s,p={}){
  if(typeof p.beastId!=='string'||!s.beasts?.[p.beastId])
   throw Error('Unknown individual beast for Grade status');
- const b=s.beasts[p.beastId],a=b.contractGradeAssessment;
- if(!a)return {assessed:false,examAttempts:b.gradeExaminations?.length||0};
+ const b=s.beasts[p.beastId],a=b.contractGradeAssessment,
+  privatelyExamined='source-paid-independent-original-numeric-beast-grade-exam-v1',
+  knownAttempts=(b.gradeExaminations||[]).filter(x=>x.origin!==privatelyExamined).length;
+ if(!a||a.origin===privatelyExamined)return {assessed:false,examAttempts:knownAttempts};
  const current=a.species===b.species&&a.evolutionStage===b.evolutionStage&&
   a.individualGrade===b.individualGrade;
  return {assessed:current,grade:current?a.grade:null,
-  source:current?a.source:null,examAttempts:b.gradeExaminations?.length||0};
+  source:current?a.source:null,examAttempts:knownAttempts};
 }
-module.exports={assessment,status};
+module.exports={assessment,status,examSpec,gradeReference};

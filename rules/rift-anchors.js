@@ -9,9 +9,8 @@ const E=require('../engine.js'),C=require('./core'),W=require('./world'),
  U=require('./unified'),Combat=require('./combat'),
  Realm=require('../world/simulation'),Atlas=require('../world/atlas');
 const ORIGIN='earned-rift-anchor-marking-step-ii-v1';
-const SITE='riftglass_exterior_wardline';
-const FOCI=Object.freeze(['bearing','resonance','stability','integrated']);
-const AXES=Object.freeze(['bearing','resonance','stability']);
+const AnchorLaw=require('./rift-shared-original-anchor-law');
+const SITE=AnchorLaw.SITE,FOCI=AnchorLaw.FOCI,AXES=AnchorLaw.AXES;
 const SOURCE_OBS=Object.freeze([
  'Strongly irregular boundary pressure; maintaining distance from the sealed vault is prudent.',
  'Elevated, shifting spatial pressure along the known exterior wards.',
@@ -196,33 +195,28 @@ function mark(s,params={}){
   throw Error('Unreconciled earlier spatial-reference history cannot be silently rewritten');
  const work=old||{axes:initialAxes(),integrated:false,attempts:[],
   readingHash,originalObservation:structuredClone(previous),completed:false};
- const cost=2+Math.ceil(minutes/120);
+ const cost=AnchorLaw.staminaCost(minutes);
  if(!Number.isInteger(s.player.stamina)||s.player.stamina<cost||
    s.table?.combatants?.player&&s.table.combatants.player.stamina<cost)
   throw Error('This Rift anchor session requires actual remaining Stamina');
- const start=s.world.minutes,risk=env.risk,dc=risk==='unstable'?22:risk==='elevated'?20:18;
+ const start=s.world.minutes,dc=AnchorLaw.dc(env.v);
  const strain=s.player.rift.anchorStrain||0;
  C.int(strain,'recorded spatial strain',0,100);
  const check=C.check(s,{modifier:modifier(s)-Math.floor(strain/12),
   dc,label:'Rift Anchor II — '+focus+' spatial reference'});
  s.player.stamina-=cost;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const gained=check.progress;
- if(gained){
-  if(focus==='integrated'){
-   work.integrated=true;
-   for(const k of AXES)work.axes[k]=Math.min(2,work.axes[k]+
-     (check.degree==='exceptional'?2:1));
-  }else work.axes[focus]=Math.min(2,work.axes[focus]+gained);
- }
+ const grown=AnchorLaw.grow(work.axes,work.integrated,focus,check.degree);
+ const gained=grown.earned;
+ work.axes=grown.axes;work.integrated=grown.integrated;
  let backlash=null;
  if(check.degree==='severe failure'){
   backlash='spatial vertigo and shear strain';
-  s.player.rift.anchorStrain=Math.min(100,strain+8);
+  s.player.rift.anchorStrain=AnchorLaw.strainAfter(strain,check.degree,check.success);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
  }else if(check.success)
-  s.player.rift.anchorStrain=Math.max(0,strain-2);
+  s.player.rift.anchorStrain=AnchorLaw.strainAfter(strain,check.degree,check.success);
  const attempt={minute:start,minutes,focus,degree:check.degree,
   gained,staminaSpent:cost,roll:check.roll,
   readingHash,siteId:'riftglass_vault',
@@ -231,10 +225,8 @@ function mark(s,params={}){
  work.attempts.push(attempt);
  s.table||={};s.table.riftAnchorWork=work;
  let formed=false,integrity=null;
- if(work.integrated&&AXES.every(k=>work.axes[k]>=2)){
-  integrity=Math.max(40,Math.min(100,
-   60+Math.max(0,check.margin)*2-
-   (s.player.rift.anchorStrain||0)));
+ if(AnchorLaw.formed(work.axes,work.integrated)){
+  integrity=AnchorLaw.integrity(check.margin,s.player.rift.anchorStrain||0);
   const completedMinute=start+minutes;
   const proof={source:ORIGIN,siteId:SITE,readingHash,
    attemptsHash:digest(work.attempts),completedMinute,

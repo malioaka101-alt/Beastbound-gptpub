@@ -9,6 +9,7 @@ const ORIGIN='source-earned-fourth-arcane-dynamic-architecture-v1',
  PRACTICE='witnessed-dynamic-arcane-channel-calibration-v1',
  BREAKTHROUGH='witnessed-fourth-circle-live-geometry-reconfiguration-v1',
  REPAIR='witnessed-original-mana-matrix-repair-v1';
+const Law=require('./higher-architecture-shared-original-law');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const i=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b;
 const prose=(x,a=12,b=900)=>typeof x==='string'&&x.trim().length>=a&&x.trim().length<=b;
@@ -168,16 +169,13 @@ function work(s,p={}){
  const w=hash(e);
  if(l.attempts.some(x=>x.source.witnessHash===w))
   throw Error('One original Arcane exercise cannot be rerolled');
- const mana=3,minutes=p.minutes??60,stamina=Math.ceil(minutes/120)+1;
+ const minutes=p.minutes??60,mode=Law.arcaneFourth('practice',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!i(s.player.mana,mana,100000)||!i(s.player.stamina,stamina,100000))
   throw Error('Actual Mana and Stamina are insufficient to reconfigure this Circle');
  const before=s.world.minutes;
  s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const modifier=Math.floor((s.player.attributes.int-10)/2)+
-  2*(s.player.skills.arcana?.rank||0)+
-  Math.floor(a.coreStability/25)-2;
- const check=C.check(s,{modifier,dc:21,label:'Earned Fourth Circle live dynamic geometry calibration'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Earned Fourth Circle live dynamic geometry calibration'});
  const event=structuredClone(s.log.at(-1));
  const earned=check.success?check.progress:0,
   damage=check.degree==='severe failure'?3:0;
@@ -207,15 +205,13 @@ function repair(s,p={}){
  const w=hash(e);
  if(l.repairs.some(x=>x.source.witnessHash===w))
   throw Error('This exact Arcane repair was already attempted');
- const mana=2,minutes=p.minutes??60,stamina=1+Math.ceil(minutes/120);
+ const minutes=p.minutes??60,mode=Law.arcaneFourth('repair',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!i(s.player.mana,mana,100000)||!i(s.player.stamina,stamina,100000))
   throw Error('Repair requires actual Mana and physical effort');
  const before=s.world.minutes;
  s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
-  2*(s.player.skills.arcana?.rank||0),
-  dc:14,label:'Repair actual observed Mana matrix backlash'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Repair actual observed Mana matrix backlash'});
  const event=structuredClone(s.log.at(-1)),strainBefore=l.strain;
  l.strain=check.success?Math.max(0,strainBefore-2):strainBefore;
  if(check.success)a.coreStability=Math.min(100,a.coreStability+2);
@@ -243,15 +239,13 @@ function complete(s,p={}){
  const w=hash(e);
  if(l.transitions.some(x=>x.source.witnessHash===w))
   throw Error('The original live reconstruction cannot receive a second roll');
- const mana=8,minutes=p.minutes??90,stamina=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??90,mode=Law.arcaneFourth('form',minutes,s.player.attributes.int,s.player.skills.arcana?.rank||0,a.coreStability),mana=mode.energy,stamina=mode.stamina;
  if(!i(s.player.mana,mana,100000)||!i(s.player.stamina,stamina,100000))
   throw Error('The intact three-channel core cannot sustain a real Fourth Circle without reserves');
  const before=s.world.minutes,oldMana=s.player.mana,oldMax=s.player.maxMana;
  s.player.mana-=mana;s.player.stamina-=stamina;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor((s.player.attributes.int-10)/2)+
-  2*(s.player.skills.arcana?.rank||0)+Math.floor(a.coreStability/25)-2,
-  dc:24,label:'Fourth Circle Dynamic Architecture independent live test'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Fourth Circle Dynamic Architecture independent live test'});
  const event=structuredClone(s.log.at(-1));let capacity=null;
  if(check.success){
   const profile=Build.arcaneProfile(4);

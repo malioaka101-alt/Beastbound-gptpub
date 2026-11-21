@@ -375,7 +375,7 @@ function sixday(s,days){
    if(!loc||!loc.spawns?.includes(b.species)){
     life.lastTickDay=day;continue;
    }
-   const originalLocation=b.location,originalHunger=b.needs.hunger;
+   const originalLocation=b.location,originalHunger=b.needs.hunger,previousLifeDay=life.lastTickDay;
    const p=draw(life),tired=b.needs.fatigue>=50,
     hungry=b.needs.hunger>=45,
     shortage=eco.forage<35||eco.water<30,
@@ -419,6 +419,7 @@ function sixday(s,days){
    memory(life,{type:'offscreen-sixday',day,action,
     fromLocation:originalLocation,location:b.location,
     ecologicalPressure:true,observed:false});
+   require('../rules/independent-original-beast-maturity').afterLife(s,b,previousLifeDay,life.history.at(-1));
    // Only independently completed and biologically meaningful behaviour
    // may teach the animal. A sixday of sleeping or hunger alone earns none.
    if(action==='independently-foraged'&&

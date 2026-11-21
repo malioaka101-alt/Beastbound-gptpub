@@ -7,6 +7,7 @@
 const Crypto=require('node:crypto'),E=require('../engine.js'),C=require('./core'),
  D=require('./disciplines'),U=require('./unified'),Combat=require('./combat'),
  World=require('./world'),Places=require('../world/lived-places');
+const Law=require('./body-shared-original-nerve-sense');
 const SOURCE='earned-neural-physique-refinement-v1',
  MAP='witnessed-original-human-neural-anatomy-v1',
  PRACTICE='witnessed-original-neural-function-adaptation-v1',
@@ -104,18 +105,13 @@ function verify(s){
     a.earned!==(a.check.success?a.check.progress:0)||
     a.strainAdded!==(a.check.degree==='severe failure'?3:0)||
     !a.after||typeof a.after!=='object')return false;
-   if(a.focus==='integrated'&&a.earned)integrated=true;
-   if(a.earned){
-    for(const id of Object.keys(progress))
-     if(a.focus===id||a.focus==='integrated')
-      progress[id]=Math.min(2,progress[id]+(a.focus==='integrated'?
-       (a.check.degree==='exceptional'?2:1):a.earned));
-   }
+   const grown=Law.grow(progress,integrated,a.focus,a.check);
+   Object.assign(progress,grown.progress);integrated=grown.integrated;
    if(hash(a.after)!==hash(progress))return false;
    strain=Math.min(100,strain+a.strainAdded);
   }else if(kind==='repair'){
    if(a.strainBefore!==strain||
-    a.strainAfter!==(a.check.success?Math.max(0,strain-2):strain))
+    a.strainAfter!==Law.repaired(strain,a.check))
     return false;
    strain=a.strainAfter;
   }else{
@@ -126,7 +122,7 @@ function verify(s){
     if(success)return false;
     success=r;
     if(a.capacity?.oldMaxStamina===undefined||
-     a.capacity.newMaxStamina!==a.capacity.oldMaxStamina+1||
+     a.capacity.newMaxStamina!==a.capacity.oldMaxStamina+Law.STAMINA_GAIN||
      a.capacity.newStamina!==a.capacity.oldStamina-a.staminaSpent||
      !int(a.capacity.oldStamina,a.staminaSpent,100000))
      return false;
@@ -226,25 +222,19 @@ function practice(s,p={}){
   throw Error('Neural adaptation needs measured reaction and a genuine fatigue threshold');
  if(r.attempts.some(x=>x.source.witnessHash===hash(e)))
   throw Error('The original neural training event cannot be rolled twice');
- const minutes=p.minutes??60,staminaSpent=Math.ceil(minutes/90)+1;
+ const minutes=p.minutes??60,staminaSpent=Law.practiceStamina(minutes);
  if(!int(player.stamina,staminaSpent,100000))
   throw Error('Physical neural training requires real current Stamina');
  const minute=s.world.minutes;
  player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=player.stamina;
  const check=C.check(s,{modifier:Math.floor(((player.attributes?.con??10)-10)/2)+
-  2*(player.skills?.survival?.rank||0),dc:18,
+  2*(player.skills?.survival?.rank||0),dc:Law.PRACTICE_DC,
   label:'Physically observed Nerve–Sense integration'});
  const rollEvent=structuredClone(s.log.at(-1));
- const earned=check.success?check.progress:0,
-  strainAdded=check.degree==='severe failure'?3:0;
- if(earned){
-  if(p.focus==='integrated')r.integrated=true;
-  for(const id of Object.keys(r.progress))
-   if(id===p.focus||p.focus==='integrated')
-    r.progress[id]=Math.min(2,r.progress[id]+(p.focus==='integrated'?
-      (check.degree==='exceptional'?2:1):earned));
- }
+ const grown=Law.grow(r.progress,r.integrated,p.focus,check),
+  earned=grown.earned,strainAdded=grown.strainAdded;
+ r.progress=grown.progress;r.integrated=grown.integrated;
  r.strain=Math.min(100,r.strain+strainAdded);
  if(strainAdded){
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
@@ -273,17 +263,17 @@ function repair(s,p={}){
   throw Error('Original nerve injury and credible physical restoration need an independent witness');
  if(r.repairs.some(x=>x.source.witnessHash===hash(e)))
   throw Error('One neural injury treatment may not be rolled twice');
- const minutes=p.minutes??60,staminaSpent=Math.ceil(minutes/120)+1;
+ const minutes=p.minutes??60,staminaSpent=Law.repairStamina(minutes);
  if(!int(player.stamina,staminaSpent,100000))
   throw Error('Nerve recovery requires real physical Stamina');
  const minute=s.world.minutes,old=r.strain;
  player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=player.stamina;
  const check=C.check(s,{modifier:Math.floor(((player.attributes?.con??10)-10)/2)+
-  2*(player.skills?.survival?.rank||0),dc:15,
+  2*(player.skills?.survival?.rank||0),dc:Law.REPAIR_DC,
   label:'Source-observed neural and metabolic injury therapy'});
  const rollEvent=structuredClone(s.log.at(-1));
- r.strain=check.success?Math.max(0,r.strain-2):r.strain;
+ r.strain=Law.repaired(r.strain,check);
  const source={origin:SOURCE,kind:'repair',minute,minutes,staminaSpent,
   check:structuredClone(check),checkEvent:rollEvent,
   checkEventHash:hash(rollEvent),roll:check.roll,
@@ -298,8 +288,7 @@ function finish(s,p={}){
  if(!only(p,['witnessIndex','minutes'])||!int(p.minutes??90,30,480))
   throw Error('Whole-body neural integration requires a separate observed physical trial');
  const {p:player,body}=context(s),r=s.table.bodyRefinement?.neural;
- if(!r||!verify(s)||!r.integrated||
-  Object.values(r.progress).some(x=>x!==2)||r.strain>2)
+ if(!r||!verify(s)||!Law.ready(r.progress,r.integrated,r.strain))
   throw Error('The original observed nerve regions must all be physically integrated without unresolved overload');
  const e=witness(s,p.witnessIndex,FORM);
  if(!phrase(e.details?.fullBodyResponse,25,900)||
@@ -307,19 +296,19 @@ function finish(s,p={}){
   throw Error('An independently tested whole-body neural response and actual functional limit must be witnessed');
  if(r.tests.some(x=>x.source.witnessHash===hash(e)))
   throw Error('One original nerve breakthrough trial cannot be rerolled');
- const minutes=p.minutes??90,staminaSpent=3+Math.ceil(minutes/90);
+ const minutes=p.minutes??90,staminaSpent=Law.formationStamina(minutes);
  if(!int(player.stamina,staminaSpent,100000))
   throw Error('Real stamina is needed to sustain a whole-body nervous system trial');
  const minute=s.world.minutes,oldStamina=player.stamina,oldMaxStamina=player.maxStamina;
  player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=player.stamina;
  const check=C.check(s,{modifier:Math.floor(((player.attributes?.con??10)-10)/2)+
-  2*(player.skills?.survival?.rank||0),dc:21,
+  2*(player.skills?.survival?.rank||0),dc:Law.FORMATION_DC,
   label:'Independent full-body Nerve–Sense Cycle integration'});
  const rollEvent=structuredClone(s.log.at(-1));let capacity=null;
  if(check.success){
   body.cycles.push('Nerve-Sense Cycle');
-  player.maxStamina+=1;
+  player.maxStamina+=Law.STAMINA_GAIN;
   if(s.table?.combatants?.player)s.table.combatants.player.maxStamina=player.maxStamina;
   capacity={oldStamina,newStamina:player.stamina,
    oldMaxStamina,newMaxStamina:player.maxStamina};

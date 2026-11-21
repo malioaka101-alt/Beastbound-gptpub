@@ -7,6 +7,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Atlas=require('./atlas'),Practice=require('./earned-individual-practice'),
  Agency=require('../rules/beast-agency'),C=require('../rules/core');
 const ORIGIN='genuine-encounter-sapient-person-v1',
+ FOLLOWUP='source-witnessed-independent-renewed-sapient-contact-v1',
  ACTIVITY='autonomous-sapient-person-activity-v1',
  DAY=1440,HISTORY=24;
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -82,6 +83,100 @@ function make(s,b,ev){
   practice:Practice.make('sapient:'+b.id,sourceHash,aptitude(b)),
   noImposedProfession:true,noInferredSociety:true};
 }
+// Keep actual original contact decisions beyond the rolling narrative
+// memory. No retroactive draws or invented meetings for legacy saves.
+function verifyContacts(b,l){
+ const rows=l.contactReceipts;if(rows===undefined)return true;
+ if(!Array.isArray(rows)||rows.length>4096)return false;
+ const seen=new Set();let head=l.sourceHash,last=-1;
+ for(const row of rows){
+  const q=row?.source,e=q?.encounter,contact=q?.contact,d=e?.details;
+  if(q?.origin===FOLLOWUP){
+   const w=q.witness,d=w?.details,human=require('../rules/independent-sapient-arrangements');
+   if(row.seal!==hash(q)||q.previous!==head||q.personSeal!==l.sourceHash||
+    q.beastId!==b.id||q.encounterHash!==hash(w)||seen.has(q.encounterHash)||
+    w?.type!=='story'||w.day!==Math.floor(q.minute/DAY)+1||
+    w.time!==E.clock({world:{minutes:q.minute}})||q.witnessHash!==hash(w)||
+    d?.origin!=='gm-witnessed-independent-renewed-sapient-contact-v1'||
+    d.actorId!==q.actorId||d.beastId!==b.id||d.location!==q.location||
+    d.actualRenewedCoPresence!==true||d.noAssignedBeastConsentOrOwnership!==true||
+    typeof d.unconditionalRefusalAndCommunication!=='string'||
+    d.unconditionalRefusalAndCommunication.trim().length<25||
+    !human.verifyHuman(q.humanChoice,q.witnessHash)||
+    contact?.type!=='personally-witnessed-contact'||
+    contact.meetingHash!==q.encounterHash||contact.minute!==q.minute||
+    contact.location!==q.location||!Number.isInteger(q.minute)||q.minute<last||
+    contact.day!==Math.floor(q.minute/DAY)||contact.private!==false||
+    typeof contact.description!=='string'||!['affiliative','curious','reserved','independent'].includes(q.disposition)||
+    !Number.isInteger(q.rngBefore)||q.rngBefore<1||q.rngBefore>4294967295||
+    !['hunger','fatigue','condition'].every(k=>Number.isFinite(q.welfare?.[k])&&q.welfare[k]>=0&&q.welfare[k]<=100))
+    return false;
+   const rng={rngState:q.rngBefore},offer=q.humanChoice.accepted?draw(rng):null,
+    threshold=q.disposition==='independent'?.36:q.disposition==='reserved'?.49:.72,
+    available=q.welfare.hunger<65&&q.welfare.fatigue<65&&q.welfare.condition>=65;
+   if(q.offer!==offer||q.rngAfter!==rng.rngState||
+    contact.willingness!==(q.humanChoice.accepted&&available&&offer<threshold))return false;
+   const retained=l.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===q.encounterHash);
+   if(retained&&hash(retained)!==hash(contact))return false;
+   if(!retained&&l.history[0]&&contact.day>l.history[0].day)return false;
+   seen.add(q.encounterHash);head=row.seal;last=contact.minute;continue;
+  }
+  if(!q||q.origin!=='source-resolved-sapient-contact-v1'||row.seal!==hash(q)||
+   q.previous!==head||q.personSeal!==l.sourceHash||q.beastId!==b.id||
+   e?.type!=='encounter'||d?.origin!=='engine-local-wildlife-encounter'||
+   d.beastId!==b.id||d.species!==l.source.species||d.location!==contact?.location||
+   !E.LOCATIONS[d.location]?.spawns?.includes(d.species)||
+   q.encounterHash!==hash(e)||seen.has(q.encounterHash)||
+   contact?.type!=='personally-witnessed-contact'||contact.meetingHash!==q.encounterHash||
+   !Number.isInteger(contact.minute)||contact.minute<last||
+   contact.day!==Math.floor(contact.minute/DAY)||contact.private!==false||
+   typeof contact.description!=='string'||!['affiliative','curious','reserved','independent'].includes(q.disposition)||
+   !Number.isInteger(q.rngBefore)||q.rngBefore<1||q.rngBefore>4294967295||
+   !['hunger','fatigue','condition'].every(k=>Number.isFinite(q.welfare?.[k])&&q.welfare[k]>=0&&q.welfare[k]<=100))return false;
+  const rng={rngState:q.rngBefore},offer=draw(rng),
+   threshold=q.disposition==='independent'?.36:q.disposition==='reserved'?.49:.72,
+   available=q.welfare.hunger<65&&q.welfare.fatigue<65&&q.welfare.condition>=65;
+  if(q.offer!==offer||q.rngAfter!==rng.rngState||contact.willingness!==(available&&offer<threshold))return false;
+  const retained=l.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===q.encounterHash);
+  if(retained&&hash(retained)!==hash(contact))return false;
+  if(!retained&&l.history[0]&&contact.day>l.history[0].day)return false;
+  seen.add(q.encounterHash);head=row.seal;last=contact.minute;
+ }
+ return l.contactHead===head;
+}
+function contactProof(b,contact){
+ const l=b?.sapientLife;if(!l||!contact||!verify(b))return false;
+ const archived=l.contactReceipts?.find(x=>x.source.encounterHash===contact.meetingHash);
+ if(archived)return hash(archived.source.contact)===hash(contact);
+ // Earlier saves must not get fictional source rolls. Preserve the
+ // original retained/first-sighting proof behaviour for their old contacts.
+ const retained=l.history.find(x=>x.type==='personally-witnessed-contact'&&x.meetingHash===contact.meetingHash);
+ if(retained)return hash(retained)===hash(contact);
+ return (contact.meetingHash===l.source.encounterHash||l.triedEncounters.includes(contact.meetingHash))&&
+  !!l.history[0]&&contact.day<l.history[0].day;
+}
+function verifyTerrestrialBeastReceipts(b,l){
+ const rows=l.terrestrialJourneyReceipts;if(rows===undefined)return true;
+ if(!Array.isArray(rows)||rows.length>24)return false;
+ let previous=-1;const seen=new Set();
+ for(const row of rows){
+  const q=row?.source;
+  if(!q||row.seal!==hash(q)||
+   q.origin!=='source-actual-independent-original-linked-terrestrial-leg-v1'||
+   q.beastId!==b.id||q.beastHash!==l.sourceHash||
+   !Number.isInteger(q.minute)||q.minute<=previous||
+   !Number.isInteger(q.arrivalMinute)||q.arrivalMinute<q.minute||
+   !EngineLocationLeg(q.from,q.to)||
+   q.afterBeastLocation!==(q.departed?q.to:q.from)||
+   q.noPlayerMovementOrPartnership!==true||
+   typeof q.witnessHash!=='string'||seen.has(q.witnessHash))return false;
+  seen.add(q.witnessHash);previous=q.minute;
+ }
+ return true;
+}
+function EngineLocationLeg(from,to){
+ return !!(E.LOCATIONS[from]?.exits?.includes(to)&&E.LOCATIONS[to]);
+}
 function verify(b){
  const l=b?.sapientLife;
  if(l===undefined)return true;
@@ -91,7 +186,11 @@ function verify(b){
   !Number.isInteger(l.lastTickDay)||l.lastTickDay<0||
   !Array.isArray(l.triedEncounters)||l.triedEncounters.length>24||
   l.triedEncounters.some(x=>typeof x!=='string'||!/^[a-f0-9]{64}$/.test(x))||
-  !Array.isArray(l.history)||l.history.length>HISTORY||
+  !Array.isArray(l.history)||l.history.length>HISTORY||!verifyContacts(b,l)||
+  !verifyTerrestrialBeastReceipts(b,l)||
+  !require('../rules/independent-sapient-visitor-welfare').structure(b)||
+  !require('../rules/independent-visitor-sapient-food-offer').structure(b)||
+  !require('../rules/independent-visitor-sapient-diet-plan').structure(b)||
   !Practice.verify(l.practice,'sapient:'+b.id,l.sourceHash,aptitude(b))||
   l.noImposedProfession!==true||l.noInferredSociety!==true)
   return false;
@@ -120,11 +219,13 @@ function meet(s,p={}){
  const {b,ev,location}=original(s),key=hash(ev),existing=b.sapientLife;
  if(existing){
   if(!verify(b))throw Error('Unverified existing sapient individual');
-  if(existing.triedEncounters.includes(key))
+  if(existing.triedEncounters.includes(key)||existing.contactReceipts?.some(x=>x.source.encounterHash===key))
    throw Error('The person has already responded to this encounter; do not reroll their choice');
  }
  const l=ensure(s,b,ev),profile=Agency.profile(s,b);
  const available=b.needs.hunger<65&&b.needs.fatigue<65&&b.condition>=65;
+ if((l.contactReceipts?.length||0)>=4096)throw Error('Original sapient contact archive requires a source-preserving extension');
+ const rngBefore=l.rngState,welfare={hunger:b.needs.hunger,fatigue:b.needs.fatigue,condition:b.condition};
  const offer=draw(l),willing=available&&offer<
   (profile.disposition==='independent'?.36:
    profile.disposition==='reserved'?.49:.72);
@@ -136,9 +237,14 @@ function meet(s,p={}){
  const now=s.world.minutes,minutes=willing?12:5,day=Math.floor(now/DAY);
  l.triedEncounters.push(key);
  if(l.triedEncounters.length>24)l.triedEncounters.shift();
- remember(l,{type:'personally-witnessed-contact',day,
-  minute:now,location,meetingHash:key,
-  willingness:willing,description:response,private:false});
+ const contact={type:'personally-witnessed-contact',day,
+  minute:now,location,meetingHash:key,willingness:willing,description:response,private:false};
+ remember(l,contact);
+ const source={origin:'source-resolved-sapient-contact-v1',previous:l.contactHead??l.sourceHash,
+  personSeal:l.sourceHash,beastId:b.id,encounter:structuredClone(ev),encounterHash:key,
+  disposition:profile.disposition,welfare,rngBefore,rngAfter:l.rngState,offer,contact:structuredClone(contact)};
+ const seal=hash(source);(l.contactReceipts||=[]).push({source,seal});l.contactHead=seal;
+ if(!verify(b))throw Error('Original independent contact archive cannot be verified');
  const witnessed={origin:'personally-witnessed-sapient-contact-v1',
   beastId:b.id,species:b.species,day,minute:now,location,
   meetingHash:key,description:response,freelyEngaged:willing,
@@ -238,5 +344,5 @@ function sixday(s,day){
  }
  return {acted,earned}; // GM-private, never a public XP notification.
 }
-module.exports={ORIGIN,ACTIVITY,make,verify,ensure,meet,witnessedStatus,sixday,
+module.exports={ORIGIN,FOLLOWUP,ACTIVITY,make,verify,contactProof,ensure,meet,witnessedStatus,sixday,
  _debug:{hash,original,aptitude,originProof,draw,location}};

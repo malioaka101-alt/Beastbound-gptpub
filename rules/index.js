@@ -248,6 +248,10 @@ function act(s,{system,operation,params={}}={}){
   case 'origin.researchStatus':return OriginFoundations.status(s);
   case 'origin.mapPattern':return OriginFoundations.mapPattern(s,params);
   case 'origin.screenCompatibility':return OriginFoundations.screening(s,params);
+  case 'origin.npcIntegrationStage':return require('./independent-original-origin-integration').work(s,params);
+  case 'origin.npcIntegrationCare':return require('./independent-original-origin-integration').care(s,params);
+  case 'origin.npcLineageScreen':return require('./independent-original-origin-research').screen(s,params);
+  case 'origin.npcLineageMap':return require('./independent-original-origin-research').work(s,params);
   case 'origin.lineageMap':return require('./beast-origin-lineage').map(s,params);
   case 'origin.lineageScreen':return require('./beast-origin-lineage').screen(s,params);
   case 'origin.lineageStatus':return require('./beast-origin-lineage').status(s);
@@ -273,6 +277,7 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.formulaLearn':return require('./arcane-spell-grammar').learn(s,params);
   case 'arcane.formulaCast':return require('./arcane-spell-grammar').cast(s,params);
   case 'arcane.formulaRepair':return require('./arcane-spell-grammar').repair(s,params);
+  case 'arcane.npcHigherWork':return require('./independent-original-higher-architectures').work(s,params,'arcane');
   case 'arcane.higherStatus':return require('./arcane-higher-circles').status(s);
   case 'arcane.higherMap':return require('./arcane-higher-circles').map(s,params);
   case 'arcane.higherWork':return require('./arcane-higher-circles').work(s,params);
@@ -291,6 +296,10 @@ function act(s,{system,operation,params={}}={}){
   case 'body.organStatus':return Disciplines.organStatus(s);
   case 'body.organWork':return Disciplines.organWork(s,params);
   case 'body.nerveStatus':return require('./body-nerve-sense').status(s);
+  case 'body.npcNerveWork':return require('./independent-original-body-nerve-sense-four').work(s,params);
+  case 'body.npcLivingPhysiqueWork':return require('./independent-original-body-living-physiques').work(s,params);
+  case 'body.npcAdaptiveAssume':return require('./independent-original-body-living-physiques').assume(s,params);
+  case 'body.npcAdaptiveRelease':return require('./independent-original-body-living-physiques').release(s,params);
   case 'body.nerveMap':return require('./body-nerve-sense').map(s,params);
   case 'body.nerveExtend':return require('./body-nerve-sense').extend(s,params);
   case 'body.nervePractice':return require('./body-nerve-sense').practice(s,params);
@@ -343,6 +352,16 @@ function act(s,{system,operation,params={}}={}){
   case 'combat.register':throw Error('Raw combatant registration is not a playable action; only an established assessed encounter may register participants');
   case 'health.ensurePlayer':return Unified.ensurePlayer(s);
   case 'health.witnessedNpcNightSleep':return Unified.witnessedNpcNightSleep(s,params);
+  case 'health.npcVisitorNightSleep':return require('./independent-original-visitor-night-rest').rest(s,params);
+  case 'health.npcVisitorNightStatus':return require('./independent-original-visitor-night-rest').status(s,params);
+  case 'bond.npcVisitorBeastRefuge':return require('./independent-sapient-visitor-welfare').rest(s,params);
+  case 'bond.npcVisitorBeastWelfareStatus':return require('./independent-sapient-visitor-welfare').beastStatus(s,params);
+  case 'bond.npcVisitorRationReadiness':return require('./independent-visitor-ration-trade').status(s,params);
+  case 'bond.npcVisitorRationPurchase':return require('./independent-visitor-ration-trade').buy(s,params);
+  case 'bond.npcVisitorFoodReadiness':return require('./independent-visitor-sapient-food-offer').readiness(s,params);
+  case 'bond.npcVisitorFoodOffer':return require('./independent-visitor-sapient-food-offer').offer(s,params);
+  case 'bond.npcVisitorDietReadiness':return require('./independent-visitor-sapient-diet-plan').readiness(s,params);
+  case 'bond.npcVisitorDietDiscussion':return require('./independent-visitor-sapient-diet-plan').discuss(s,params);
   case 'health.linkWitnessedHuman':return Unified.linkWitnessedHuman(s,params);
   case 'health.migrateLegacy':return LegacyInjury.migrate(s,params);
   case 'health.linkBeast':throw Error('Beast combatant measurements must come from the current saved individual combat assessment via combat.begin');
@@ -383,6 +402,7 @@ function act(s,{system,operation,params={}}={}){
   case 'craft.fieldPoultice':return FieldCrafting.craft(s,params);
   case 'craft.status':return FieldCrafting.status(s,params);
   case 'craft.productionHistory':return require('./physical-production-ledger').status(s,params);
+  case 'material.offerToPerson':return require('./independent-material-custody').offer(s,params);
   case 'gear.offers':return Equipment.offers(s,params);
   case 'gear.inquire':return Equipment.inquire(s,params);
   case 'gear.purchase':return Equipment.purchase(s,params);
@@ -409,6 +429,7 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.latticePractice':return require('./soul-resonance-lattice').practice(s,params);
   case 'soul.latticeRepair':return require('./soul-resonance-lattice').repair(s,params);
   case 'soul.latticeComplete':return require('./soul-resonance-lattice').complete(s,params);
+  case 'soul.npcHigherWork':return require('./independent-original-higher-architectures').work(s,params,'soul');
   case 'soul.higherStatus':return require('./soul-higher-architecture').status(s);
   case 'soul.higherMap':return require('./soul-higher-architecture').map(s,params);
   case 'soul.higherPractice':return require('./soul-higher-architecture').practice(s,params);
@@ -425,10 +446,19 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.anchorStatus':return RiftAnchors.status(s);
   case 'rift.anchorWork':return RiftAnchors.mark(s,params);
   case 'rift.orient':return RiftAnchors.orient(s,params);
+  case 'rift.npcFoldStep':return require('./independent-original-rift-local-spatial').fold(s,params);
+  case 'rift.npcWeaveBoundary':return require('./independent-original-rift-local-spatial').weave(s,params);
   case 'rift.foldStatus':return require('./rift-fold-step').status(s);
   case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
   case 'rift.weaveStatus':return require('./rift-boundary-weaving').status(s);
   case 'rift.weaveBoundary':return require('./rift-boundary-weaving').weave(s,params);
+  case 'rift.npcBoundaryDomain':return require('./independent-original-rift-boundary-domain').form(s,params);
+  case 'rift.npcRealmPrepare':return require('./independent-original-rift-realm-walking').prepare(s,params);
+  case 'rift.npcRealmEnter':return require('./independent-original-rift-realm-walking').enter(s,params);
+  case 'rift.npcRealmReturn':return require('./independent-original-rift-realm-walking').returnToAnchor(s,params);
+  case 'rift.npcPocketTransfer':return require('./independent-original-rift-local-spatial').transfer(s,params);
+  case 'rift.npcPocketBuild':return require('./independent-original-rift-local-spatial').pocket(s,params);
+  case 'rift.npcAdaptExposure':return require('./independent-original-rift-local-spatial').adaptation(s,params);
   case 'rift.pocketStatus':return require('./rift-pocket-architecture').status(s);
   case 'rift.pocketBuild':return require('./rift-pocket-architecture').build(s,params);
   case 'rift.pocketTransfer':return require('./rift-pocket-architecture').transfer(s,params);
@@ -659,6 +689,8 @@ function act(s,{system,operation,params={}}={}){
   case 'research.proof':return ResearchGuard.proof(s,params);
   case 'research.replication':return ResearchGuard.replication(s,params);
   case 'research.status':return {project:R.publicCard(R.get(s,params.id))};
+  case 'evolution.npcNativeRite':return require('./independent-original-native-evolution').attempt(s,params);
+  case 'evolution.npcMaturityEnroll':return require('./independent-original-beast-maturity').enroll(s,params);
   case 'evolution.authorBranch':return require('./evolution-branch-web').branch(s,params);
   case 'evolution.branchWebStatus':return require('./evolution-branch-web').status(s,params);
   case 'evolution.register':return EvolutionGuard.record(s,params);
@@ -673,6 +705,28 @@ function act(s,{system,operation,params={}}={}){
   case 'evolution.eligibility':return EvolutionDisclosure.view(s,params);
   case 'bond.socialDraft':return require('./beast-social-arrangements').draft(s,params);
   case 'bond.socialNegotiate':return require('./beast-social-arrangements').negotiate(s,params);
+  case 'bond.npcTerrestrialJourney':return require('./independent-sapient-terrestrial-journey').depart(s,params);
+  case 'bond.npcTerrestrialProposal':return require('./independent-sapient-terrestrial-proposal').propose(s,params);
+  case 'bond.npcVisitorTerrestrialProposal':return require('./independent-sapient-terrestrial-visitor-proposal').propose(s,params);
+  case 'bond.npcVisitorTerrestrialJourney':return require('./independent-sapient-terrestrial-journey').depart(s,params);
+  case 'bond.npcSapientFollowupContact':return require('./independent-sapient-followup').contact(s,params);
+  case 'bond.npcSapientProposalDiscussion':return require('./independent-sapient-proposal-discussions').discuss(s,params);
+  case 'bond.npcSyncPractice':return require('./independent-original-bond-interactions').sync(s,params);
+  case 'bond.npcVisitorMerchantReadiness':return require('../world/merchant-voluntary-work-terms').visitorWorkStatus(s,params);
+  case 'bond.npcVisitorMerchantWork':return require('../world/merchant-voluntary-work-terms').performVisitorService(s,params);
+  case 'bond.npcVisitorMerchantSettle':return require('../world/merchant-voluntary-work-terms').settleVisitorService(s,params);
+  case 'bond.npcGradeReadiness':return require('./independent-original-beast-grade-preflight').status(s,params);
+  case 'bond.npcGradeFunding':return require('./independent-original-beast-grade-preflight').fundingStatus(s,params);
+  case 'bond.npcGradeCalibrationReadiness':return require('./independent-original-beast-grade-preflight').calibrationSiteReadiness(s,params);
+  case 'bond.npcGradeSpecimenEvidence':return require('./independent-original-beast-grade-preflight').specimenEvidence(s,params);
+  case 'bond.npcGradeDiagnosticDiscussion':return require('./independent-original-grade-diagnostic-discussion').discuss(s,params);
+  case 'bond.npcGradeExamine':return require('./independent-original-beast-grade-exam').examine(s,params);
+  case 'bond.npcPairSeal':return require('./independent-original-bond-interactions').seal(s,params);
+  case 'bond.npcPairReview':return require('./independent-original-bond-interactions').review(s,params);
+  case 'bond.npcPairInteract':return require('./independent-original-bond-interactions').interact(s,params);
+  case 'bond.npcPairRecord':return require('./independent-original-bond-pair').record(s,params);
+  case 'bond.npcSapientArrangementAccept':return require('./independent-sapient-arrangements').accept(s,params);
+  case 'bond.npcSapientArrangementReview':return require('./independent-sapient-arrangements').review(s,params);
   case 'bond.socialEnd':return require('./beast-social-arrangements').conclude(s,params);
   case 'bond.socialDispute':return require('./beast-social-arrangements').dispute(s,params);
   case 'bond.socialStatus':return require('./beast-social-arrangements').status(s,params);
@@ -743,6 +797,8 @@ function act(s,{system,operation,params={}}={}){
    return BD.willingness(s,BD.fromSave(s,params.beastId),{...params,handlerRank:rank});
   }
   case 'bond.seal':{
+   if(require('./independent-original-bond-interactions').activeForBeast(s,params.beastId))
+    throw Error('This independent individual already has an original magical contract; no second player contract');
    // Capacity is a property of the saved handler and *all* active contracts,
    // not numbers a caller may provide to make a seal appear eligible.
    const records=s.table?.bondRecords||{},existingPartners=s.player.partnerIds||[];

@@ -105,24 +105,32 @@ function bondCapacity(will,soulPhase=0){
 }
 const depthBase={light:50,standard:60,deep:70,covenant:80};
 const linkRange={light:'100 m',standard:'1 km',deep:'10 km',covenant:'100 km'};
+function contractSpec({grade,sapience,depth='standard',will,contractLore=0,soulDB=0,soulPhase=0,usedCapacity=0,bonuses=0}={}){
+ C.int(will,'Will',-10,20);C.int(contractLore,'Contract Lore',-20,30);C.int(soulDB,'Soul discipline bonus',0,20);
+ C.int(usedCapacity,'used bond capacity',0,100);C.int(bonuses,'contract stability bonus',-50,50);
+ const load=contractLoad(grade,sapience,depth),capacity=bondCapacity(will,soulPhase);
+ return {depth,load,capacity,usedCapacity,overCapacity:usedCapacity+load>capacity,
+  dc:12+2*load,modifier:will+contractLore+soulDB,stability:clamp(depthBase[depth]+bonuses+(soulPhase>=3?10:0)),
+  base:depthBase[depth],link:linkRange[depth]};
+}
+function applyContractCheck(b,sp,ch){
+ if(!ch.success){if(ch.degree==='severe failure')b.trust=clamp(b.trust-5);return {sealed:false,load:sp.load,check:ch};}
+ b.contract={depth:sp.depth,load:sp.load,link:sp.link,base:sp.base};
+ b.contractStability=sp.stability;
+ if(sp.depth!=='light')b.commCap=Math.min(100,b.commCap+20);
+ return {sealed:true,load:sp.load,stability:sp.stability,link:sp.link,overCapacity:false,capacity:sp.capacity,check:ch};
+}
 function seal(s,b,{grade,depth='standard',will,contractLore=0,soulDB=0,soulPhase=0,usedCapacity=0,bonuses=0,beastWilling=false,guardianConsent=false,informedConsent=false}={}){
  if(b.contract)return {sealed:false,reason:'An existing contract must be lawfully ended before a new one can be sealed'};
  const consent=consentGuard(b,{beastWilling,guardianConsent,informedConsent});
  if(!consent.eligible||b.willingness<50)return {sealed:false,reason:consent.eligible?'Bond willingness below 50':consent.reason};
- C.int(will,'Will',-10,20);C.int(contractLore,'Contract Lore',-20,30);C.int(soulDB,'Soul discipline bonus',0,20);
- C.int(usedCapacity,'used bond capacity',0,100);C.int(bonuses,'contract stability bonus',-50,50);
- const load=contractLoad(grade,b.sapience,depth),dc=12+2*load;
- const capacity=bondCapacity(will,soulPhase);
+ const sp=contractSpec({grade,sapience:b.sapience,depth,will,contractLore,soulDB,soulPhase,usedCapacity,bonuses});
+ const {load,capacity,dc}=sp;
  // Over-capacity agreements must never roll or create a contract, even
  // when the handler and beast otherwise consent.
  if(usedCapacity+load>capacity)return {sealed:false,reason:'Insufficient bond capacity',load,usedCapacity,capacity,overCapacity:true};
- const ch=C.check(s,{modifier:will+contractLore+soulDB,dc,label:`Contract sealing (${depth})`});
- if(!ch.success){if(ch.degree==='severe failure')b.trust=clamp(b.trust-5);return {sealed:false,load,check:ch};}
- const stability=clamp(depthBase[depth]+bonuses+(soulPhase>=3?10:0));
- b.contract={depth,load,link:linkRange[depth],base:depthBase[depth]};
- b.contractStability=stability;
- if(depth!=='light')b.commCap=Math.min(100,b.commCap+20);
- return {sealed:true,load,stability,link:linkRange[depth],overCapacity:false,capacity,check:ch};
+ const ch=C.check(s,{modifier:sp.modifier,dc,label:`Contract sealing (${depth})`});
+ return applyContractCheck(b,sp,ch);
 }
 const stabilityChange={honoured_month:1,minor_breach:-5,major_breach:-15,fracture_week:-10,over_capacity_week:-5,month_apart:-2};
 function adjustStability(b,reason){
@@ -163,4 +171,4 @@ function register(s,{beastId,start='won_by_trust',years=0,personality=[]}={}){
 }
 function fromSave(s,id){const b=s.table?.bondRecords?.[id];if(!b)throw Error('Bond record not found');return b;}
 module.exports={consentGuard,communicationCap,create,applyEvent,weeklyCare,simpleCommandReady,willingness,
-  contractLoad,bondCapacity,seal,adjustStability,syncReadiness,publicBond,register,fromSave};
+  contractLoad,bondCapacity,contractSpec,applyContractCheck,seal,adjustStability,syncReadiness,publicBond,register,fromSave};

@@ -25,6 +25,7 @@ const SPEC=Object.freeze({
   sources:['sustainedFeedback','maintenanceFailure'],
   basis:'An individually observed connected living soul structure with real maintenance and failure thresholds, not resurrection'}
 });
+const Law=require('./higher-architecture-shared-original-law');
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const integer=(x,lo=0,hi=1000000000)=>Number.isInteger(x)&&x>=lo&&x<=hi;
 const phrase=(x,lo=12,hi=900)=>typeof x==='string'&&x.trim().length>=lo&&x.trim().length<=hi;
@@ -228,17 +229,14 @@ function practice(s,p={}){
   throw Error('A separately observed self-response and independent identity boundary are required');
  if(r.attempts.some(x=>x.source.witnessHash===digest(wit)))
   throw Error('The same individual spiritual exercise cannot be rerolled');
- const minutes=p.minutes??60,reserveSpent=current.cost,
-  staminaSpent=Math.ceil(minutes/120)+1;
+ const minutes=p.minutes??60,mode=Law.soulHigher(current,'practice',minutes,s.player.attributes.wis??10,s.player.skills?.cultivation?.rank||0,soul.stability),reserveSpent=mode.energy,staminaSpent=mode.stamina;
  if(!integer(soul.reserve,reserveSpent,100000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('Existing Soul Reserve and Stamina cannot support this session');
  const before=s.world.minutes;
  soul.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0)+Math.floor(soul.stability/30)-1,
-  dc:current.dc,label:'Original Soul '+current.name+' structure practice'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Original Soul '+current.name+' structure practice'});
  const checkEvent=structuredClone(s.log.at(-1));
  const earned=check.success?check.progress:0,
   strainAdded=check.degree==='severe failure'?3:0;
@@ -275,16 +273,14 @@ function repair(s,p={}){
   throw Error('A real independent diagnosis and recovery plan must be observed');
  if(r.repairs.some(x=>x.source.witnessHash===digest(wit)))
   throw Error('This original spiritual repair was already attempted');
- const minutes=p.minutes??60,reserveSpent=2,staminaSpent=Math.ceil(minutes/120)+1;
+ const minutes=p.minutes??60,mode=Law.soulHigher(SPEC[p.phase],'repair',minutes,s.player.attributes.wis??10,s.player.skills?.cultivation?.rank||0,soul.stability),reserveSpent=mode.energy,staminaSpent=mode.stamina;
  if(!integer(soul.reserve,reserveSpent,100000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('Actual Soul Reserve and Stamina are needed for recovery');
  const before=s.world.minutes,old=r.strain;
  soul.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0),
-  dc:14,label:'Source-observed original higher Soul structural repair'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Source-observed original higher Soul structural repair'});
  const checkEvent=structuredClone(s.log.at(-1));
  r.strain=check.success?Math.max(0,old-2):old;
  if(check.success)soul.stability=Math.min(100,soul.stability+2);
@@ -313,17 +309,14 @@ function complete(s,p={}){
   throw Error('Distinct original functioning Soul structure, actual counterexample and retained identity must be witnessed');
  if(r.tests.some(x=>x.source.witnessHash===digest(wit)))
   throw Error('One original Soul formation source cannot be rolled twice');
- const minutes=p.minutes??90,reserveSpent=current.cost+3,
-  staminaSpent=2+Math.ceil(minutes/90);
+ const minutes=p.minutes??90,mode=Law.soulHigher(current,'form',minutes,s.player.attributes.wis??10,s.player.skills?.cultivation?.rank||0,soul.stability),reserveSpent=mode.energy,staminaSpent=mode.stamina;
  if(!integer(soul.reserve,reserveSpent,100000)||
   !integer(s.player.stamina,staminaSpent,100000))
   throw Error('The original body lacks actual Soul Reserve or Stamina for final structure formation');
  const before=s.world.minutes,oldReserve=soul.reserve,oldMaxReserve=soul.maxReserve;
  soul.reserve-=reserveSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.wis??10)-10)/2)+
-  2*(s.player.skills?.cultivation?.rank||0)+Math.floor(soul.stability/25)-2,
-  dc:current.dc+3,label:'Phase '+p.phase+' '+current.name+' independent identity and structural proof'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Phase '+p.phase+' '+current.name+' independent identity and structural proof'});
  const checkEvent=structuredClone(s.log.at(-1));
  const willAtFormation=currentWill(s);let capacity=null;
  if(check.success){

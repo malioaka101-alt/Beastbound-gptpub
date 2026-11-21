@@ -5,9 +5,10 @@
 // Neither a caller nor a clinic roll can rewrite Critical wounds or save the
 // dying by fiat.
 const Crypto=require('node:crypto');
-const E=require('../engine.js'),C=require('./core'),W=require('./world'),Health=require('./unified');
-const CLINIC='academy',PHYSICIAN='vale',COST_SC=3000;
-const CONSULT_MINUTES=15,STAY_DAYS=6,DAY=1440;
+const E=require('../engine.js'),C=require('./core'),W=require('./world'),Health=require('./unified'),
+ OriginalClinic=require('./shared-original-clinic-recovery');
+const CLINIC='academy',PHYSICIAN='vale',COST_SC=OriginalClinic.COST_SCALES;
+const CONSULT_MINUTES=15,STAY_DAYS=OriginalClinic.DAYS,DAY=1440;
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 // A completed Serious-wound course belongs to the original clinical and
 // wound ledgers. Retain its actual consultation and completion witnesses in
@@ -181,9 +182,15 @@ function recover(s,p={}){
  visit.used=true;visit.recoveredAtMinute=before;
  E.advance(s,STAY_DAYS*DAY);
  W.finalizeTime(s,before);
- c.wounds[1]--;
- c.wounds[0]=0; // six ordinary nights of Light-wound recovery
- c.stamina=c.maxStamina;c.recoverUses=0;c.firstAided=false;
+ // The exact same original physical recovery law can now be projected
+ // for other actors. Only this ALREADY paid, actually elapsed sixday clinic
+ // action is authorised to commit its effect to the patient.
+ const recovery=OriginalClinic.project(c);
+ c.wounds[1]=recovery.woundsAfter[1];
+ c.wounds[0]=recovery.woundsAfter[0];
+ c.stamina=recovery.staminaAfter;
+ c.recoverUses=recovery.recoverUsesAfter;
+ c.firstAided=recovery.firstAidedAfter;
  Health.sync(s,{source:'wounds'});
  C.event(s,'injury',doctor.name+' completes sixdays of genuine supervised recovery; one Serious wound heals.',{
   caseId,source:visit.source,elapsedDays:STAY_DAYS,

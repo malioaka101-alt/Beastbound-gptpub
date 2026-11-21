@@ -33,7 +33,10 @@ function opportunity(s,w,life,activity,day){
  const id='npc_'+p.id,condition=require('../rules/unified').
   currentNpcWoundCondition(s,p.actorId),body=condition&&Combat.get(s,id);
  if(!body||!body.npcOrigin||body.status!=='ok')return null;
- const workDay=day-1,originalShift=People.shift(p,workDay,w),
+ const workDay=day-1;
+ if(require('../rules/independent-sapient-terrestrial-journey').awayDuring(p,workDay*1440,day*1440))return null;
+ if(p.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(p,workDay*1440,day*1440))return null;
+ const originalShift=People.shift(p,workDay,w),
   site=originalShift?.location;
  if(!site)return null;
  const loc=Lived.location(s,site);
@@ -64,7 +67,7 @@ function evidence(ctx,kind){
 // A sealed original personal-day event may age out of its 80-entry ordinary
 // history. Check it against that actual record whenever retained, and retain
 // its original signed source inside the cultivation receipt for older saves.
-function verifyEvidence(s,p,q){
+function verifyEvidenceInternal(s,p,q,verifiedLife=null){
  const x=q?.offscreenOpportunity;
  if(!x)return q?.offscreenOpportunity===undefined;
  if(x.origin!==ORIGIN||x.actorId!==p.actorId||
@@ -85,7 +88,8 @@ function verifyEvidence(s,p,q){
   x.noPlayerPresenceOrPlayerControlAssumed!==true)
   return false;
  const w=s.table?.realm,life=w?.independentPersonLives?.people?.[p.id];
- if(!life||!require('./independent-person-lives').verifyEntry(w,life))
+ if(!life||(verifiedLife!==life&&
+  !require('./independent-person-lives').verifyEntry(w,life)))
   return false;
  const row=life.history.find(y=>y.source.day===x.independentLifeDay);
  if(row){
@@ -97,11 +101,22 @@ function verifyEvidence(s,p,q){
   return false;
  return true;
 }
+// One SOURCE-VERIFIED life for ONE immediate 108-Gate history replay.
+// Never cache this across world ticks, replay calls, imports or mutations.
+// Each practice witness / shift / day hash is STILL checked individually.
+function verifyEvidence(s,p,q){return verifyEvidenceInternal(s,p,q);}
+function verifyEvidenceBatch(s,p,receipts){
+ if(!Array.isArray(receipts)||!receipts.length)return false;
+ const w=s.table?.realm,life=w?.independentPersonLives?.people?.[p?.id];
+ if(!life||!require('./independent-person-lives').verifyEntry(w,life))
+  return false;
+ return receipts.every(q=>verifyEvidenceInternal(s,p,q,life));
+}
 function sourceBase(ctx,system,start,minutes,before,choice,accepted,points,methods,
  cooldown,training,extra={}){
  const e=evidence(ctx,system);
  return {origin:extra.origin||Early.ORIGIN,actorId:ctx.actor.actorId,
-  system,target:Early.TARGETS[system],
+  system,target:extra.target||Early.TARGETS[system],
   individualOriginHash:ctx.actor.originHash,
   originalFoundationSeal:ctx.actor.mechanicalFoundation.seal,
   originalCombatEntrySeal:ctx.body.npcOrigin.seal,
@@ -129,14 +144,16 @@ function safeCheck(s,params){
  }
 }
 function dailyPractice(s,ctx,system){
- const {actor:p,body}=ctx,sp=Disc.KEYS[system],spec=Early.TARGETS[system],
+ const {actor:p,body}=ctx,sp=Disc.KEYS[system],
+  spec=system==='arcane'&&p.originalArcaneCore?.coreIgnited?'circle1':Early.TARGETS[system],
   original=sp.tracks[spec],journal=p.originalEarlyDisciplinePreparation||{},
   old=journal[system],all=Object.values(journal);
- if(p.originalArcaneCore?.coreIgnited&&system==='arcane'||
+ if(p.originalArcaneCore?.circles>=1&&system==='arcane'||
   p.originalFirstPowerMilestones?.[system]||
   all.some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay||
-  old?.points>=original[0]||ctx.workDay<(old?.cooldownUntil||0)||
+  old?.points>=original[0]||old?.target&&old.target!==spec||
+  ctx.workDay<(old?.cooldownUntil||0)||
   body.stamina<1||body.wounds.some(x=>x>0)||
   old?.sessions?.length>=480)return null;
  if(!Early.verify(s,p))throw Error('Original off-screen training source is altered');
@@ -154,7 +171,7 @@ function dailyPractice(s,ctx,system){
   methodNumber=Core.die(p,Early.METHODS[system].length);
   method=Early.METHODS[system][methodNumber-1];
   const prior=record.sessions.filter(x=>x.source.origin===Early.ORIGIN&&
-   x.source.accepted).map(x=>({system,target:spec,method:x.source.method,
+   x.source.accepted&&x.source.target===spec).map(x=>({system,target:spec,method:x.source.method,
     minutes:120,startMinute:x.source.startMinute,eventHash:x.seal})),
    dc=Difficulty.disciplinePractice(s,{system,method,record,
     baseDC:original[1],independent:true,short:true,
@@ -180,7 +197,7 @@ function dailyPractice(s,ctx,system){
  }
  const source=sourceBase(ctx,system,minutes,actualMinutes,before,choice,
   accepted,oldPoints,oldMethods,cooldown,null,{
-   method,methodNumber,check,complicationRoll,
+   target:spec,method,methodNumber,check,complicationRoll,
    originalPhysicalInjury:injury,staminaCost:spent,
    staminaBefore:accepted?startingStamina:null,
    maxStaminaAtAttempt:accepted?body.maxStamina:null,
@@ -197,16 +214,17 @@ function dailyPractice(s,ctx,system){
 }
 function milestone(s,ctx,system){
  const {actor:p,body}=ctx,journal=p.originalEarlyDisciplinePreparation||{},
-  record=journal[system],target=Early.TARGETS[system],
+  record=journal[system],
+  target=system==='arcane'&&p.originalArcaneCore?.coreIgnited?'circle1':Early.TARGETS[system],
   [required,baseDC]=Disc.KEYS[system].tracks[target],
-  isArcane=system==='arcane';
+  isArcane=system==='arcane',isCircleOne=isArcane&&target==='circle1';
  if(!record||record.points!==required||record.target!==target||
   Object.keys(record.methods).filter(k=>record.methods[k]>0).length<2||
   ctx.workDay<record.cooldownUntil||
   Object.values(journal).some(x=>x.lastAttemptDay>=ctx.workDay)||
   p.meridianTraining?.lastAttemptDay>=ctx.workDay||
   p.originalFirstPowerMilestones?.[system]||
-  p.originalArcaneCore?.coreIgnited||
+  p.originalArcaneCore?.circles>=1||
   body.status!=='ok'||body.stamina<1||
   body.wounds.some(x=>x!==0)||record.sessions.length>=480)
   return null;
@@ -215,7 +233,9 @@ function milestone(s,ctx,system){
   accepted=choice<=chance,starting=ctx.workDay*1440+600,
   base=sourceBase(ctx,system,starting,accepted?180:5,before,choice,
    accepted,record.points,record.methods,record.cooldownUntil,null,{
-    origin:isArcane?require('../rules/independent-original-arcane-core').ORIGIN:
+    target,origin:isCircleOne?
+     require('../rules/independent-original-arcane-core').CIRCLE:
+     isArcane?require('../rules/independent-original-arcane-core').ORIGIN:
      First.ORIGIN,
     originalRiteDC:baseDC+5,
     originalPotentialDimension:Potential.PRIMARY[system][target],
@@ -223,14 +243,17 @@ function milestone(s,ctx,system){
      p.mechanicalFoundation.unassessedPotential[
       Potential.PRIMARY[system][target]]),
     insightSpent:0,feeTalons:0,
-    ...(isArcane?{noCircleSpellOrTechniqueGranted:true}:{
+    ...(isCircleOne?{
+     noLearnedSpellOrTechniqueGranted:true,
+     originalPriorCoreSourceHash:p.originalArcaneCore.originalSourceHash
+    }:isArcane?{noCircleSpellOrTechniqueGranted:true}:{
      sourceOwner:'rules/disciplines.js',noOtherSystemOrTechniqueGranted:true})
    }),
   previous={...record.methods},previousPoints=record.points,
   initialWounds=[...body.wounds];
  let check=null,outcome='declined',endCooldown=record.cooldownUntil,
   nextPoints=record.points,nextMethods=record.methods,
-  injury=false,effect=null,mana=null,geometry=null;
+  injury=false,effect=null,mana=null,geometry=null,channels=null,maxComplexity=null;
  if(accepted){
   const training=Disc.originalActorTrainingProfile(s,{
    actorId:p.actorId,system,target});
@@ -240,10 +263,15 @@ function milestone(s,ctx,system){
   check={roll:actual.roll,modifier:actual.modifier,dc:actual.dc,
    degree:actual.degree,success:actual.success};
   if(actual.success){
-   outcome=isArcane?'ignited':'breakthrough';
+   outcome=isCircleOne?'circle-formed':isArcane?'ignited':'breakthrough';
    nextPoints=0;nextMethods={};
    if(isArcane){
-    mana=Build.arcaneProfile(0).mana;geometry='seeded core';
+    const profile=Build.arcaneProfile(isCircleOne?1:0);
+    mana=profile.mana;
+    geometry=isCircleOne?
+     require('../rules/independent-original-arcane-core').circleGeometry(p):
+     'seeded core';
+    if(isCircleOne){channels=profile.channels;maxComplexity=profile.maxComplexity;}
    }else{
     effect=First.effect(system,p,body);
     if(system==='body'){
@@ -269,13 +297,21 @@ function milestone(s,ctx,system){
   woundsBefore:accepted?initialWounds:null,
   woundsAfter:accepted?[...body.wounds]:null,
   ...(isArcane?{
-   structuredManaAfter:mana,geometryAfter:geometry
+   structuredManaAfter:mana,geometryAfter:geometry,
+   ...(isCircleOne?{channelsAfter:channels,maxComplexityAfter:maxComplexity}:{})
   }:{effect})};
  const seal=Early.hash(source);
  record.sessions.push({source,seal});
  record.points=nextPoints;record.methods=nextMethods;
  record.cooldownUntil=endCooldown;record.lastAttemptDay=ctx.workDay;
- if(outcome==='ignited'){
+ if(outcome==='circle-formed'){
+  record.target='circle-one-earned';
+  p.originalArcaneCore={coreIgnited:true,circles:1,
+   geometry,structuredMana:mana,
+   originalSourceHash:p.originalArcaneCore.originalSourceHash,
+   noLearnedSpells:true,
+   originalCircleOneSourceHash:seal,channels,maxComplexity};
+ }else if(outcome==='ignited'){
   record.target='circle1';
   p.originalArcaneCore={coreIgnited:true,circles:0,geometry:'seeded core',
    structuredMana:mana,originalSourceHash:hash(source),noLearnedSpells:true};
@@ -291,20 +327,33 @@ function milestone(s,ctx,system){
 }
 function night(s,ctx){
  const {actor:p,body,loc}=ctx;
- if(loc.biome!=='settlement'||ctx.workDay<1||
-  body.status!=='ok'||!ctx.dailyActivity||
+ // A real observed sleep already occupies these physical hours. Never
+ // duplicate it with an unwitnessed 16:00–00:00 NPC rest on the same day.
+ const overlapping=s.table?.originalNpcNightInProgress;
+ if(overlapping?.actorId===p.actorId&&
+  overlapping.day===ctx.workDay&&overlapping.accepted===true)
+  return null;
+ if(ctx.workDay<1||body.status!=='ok'||!ctx.dailyActivity||
   ctx.dailyActivity.action!=='rest')return null;
- // A town is NOT proof of a safe bed. Require an actual earlier
- // independently accepted, personally witnessed safe shelter at this exact
- // site, with the ORIGINAL Night source fully reconciled. An already
- // witnessed night on the same date must never be processed a second time.
- const Health=require('../rules/unified');
- if(!Health.verifyNpcNightHistory(s,p.actorId))
-  throw Error('Prior original safe-shelter history is invalid');
- const witnessed=(p.originalOvernightRestDecisions||[]).filter(x=>
-  x?.source?.accepted===true&&x.result?.accepted===true&&
-  x.source.location===ctx.site&&x.source.day<ctx.workDay).at(-1);
- if(!witnessed)return null;
+ // Settlement nights retain their OWN prior witnessed, independently
+ // accepted original shelter. A Riftglass RUINS night instead requires
+ // original survival surveying (45 minutes, 3 real Stamina, weather/risk),
+ // an actual successful temporary site and a distinct independent human
+ // choice to sleep there. Mere wardstones or a rift survey facility are
+ // never automatic shelter; no other wilderness site becomes free lodging.
+ let witnessed=null,field=null;
+ if(loc.biome==='settlement'){
+  const Health=require('../rules/unified');
+  if(!Health.verifyNpcNightHistory(s,p.actorId))
+   throw Error('Prior original safe-shelter history is invalid');
+  witnessed=(p.originalOvernightRestDecisions||[]).filter(x=>
+   x?.source?.accepted===true&&x.result?.accepted===true&&
+   x.source.location===ctx.site&&x.source.day<ctx.workDay).at(-1);
+  if(!witnessed)return null;
+ }else if(ctx.site==='ruins'&&p.regionId==='riftglass'){
+  field=require('../rules/independent-riftglass-field-refuge').propose(s,ctx);
+  if(!field?.accepted)return null;
+ }else return null;
  // The completed real night is 16:00–00:00 before this day boundary,
  // never another E.advance(s,480). Same Combat owner, one night.
  const start=ctx.workDay*1440+960,before={wounds:[...body.wounds],
@@ -312,7 +361,9 @@ function night(s,ctx){
   recovery=Combat.completedNight(s,'npc_'+p.id),
   proof={origin:REST,actorId:p.actorId,personOriginHash:p.originHash,
    physicalEntrySeal:body.npcOrigin.seal,
-   originalWitnessedShelterHash:witnessed.sourceHash,
+   ...(witnessed?{originalWitnessedShelterHash:witnessed.sourceHash}:{}),
+   ...(field?{originalFieldSurveyHash:field.originalSurveySourceHash,
+    originalFieldNightChoiceHash:field.originalNightChoiceSourceHash}:{}),
    independentDailySourceHash:ctx.dailySourceHash,
    originalShiftHash:ctx.originalShiftHash,
    site:ctx.site,startMinute:start,endMinute:start+480,
@@ -325,11 +376,40 @@ function night(s,ctx){
   p.originalOffscreenCombatNights.shift();
  p.originalOffscreenCombatNights.push({source:proof,seal:hash(proof)});
  if(!verifyNights(s,p))throw Error('Actual original offscreen sleep source failed replay');
+ const originalNight=p.originalOffscreenCombatNights.at(-1);
+ const qi=require('./independent-meridian-night-qi').afterNight(s,p,
+  originalNight);
+ const soulReserve=p.originalSoulHigherArchitecture!==undefined?
+  require('../rules/independent-original-higher-architectures').afterNight(s,p,originalNight,'soul'):
+  p.originalSoulLatticeThree!==undefined?
+  require('../rules/independent-original-soul-lattice-three')
+   .afterNight(s,p,originalNight):
+  require('../rules/independent-original-soul-thread-two')
+   .afterNight(s,p,originalNight);
+ const arcaneMana=p.originalArcaneHigherArchitecture!==undefined?
+  require('../rules/independent-original-higher-architectures').afterNight(s,p,originalNight,'arcane'):
+  p.originalArcaneMatrix!==undefined?
+  require('../rules/independent-original-arcane-matrix-three')
+   .afterNight(s,p,originalNight):
+  require('../rules/independent-original-arcane-circle-two')
+   .afterNight(s,p,originalNight);
+ // Original Combat.rest({weeks:1}) Serious recovery requires six
+ // consecutive PERSONALLY chosen, fully witnessed safe rest days.
+ // Already elapsed independent days never advance again.
+ const convalesced=require('./independent-serious-convalescence').
+  afterNight(s,ctx);
  return {kind:'sleep',actualOriginalCombatRecovery:recovery.completedNights,
+  originalRestoredQi:qi?.restoredQi||0,
+  ...(soulReserve?{originalRestoredSoulReserve:soulReserve.originalSoulReserveRestored}:{}),
+  ...(arcaneMana?{originalRestoredArcaneMana:arcaneMana.actualOriginalManaRestored}:{}),
+  ...(convalesced?{originalSeriousSixdayRecovery:1}:{}),
   noPlayerKnowledge:true};
 }
-function verifyNights(s,p){
- const rows=p?.originalOffscreenCombatNights||[],
+// An archived original-night receipt can be checked after the current
+// 480-night rolling body ledger has aged it out. All ordinary source checks,
+// prior witnessed shelter, physical costs and daily provenance still apply.
+function verifyNights(s,p,archivedRows=null){
+ const rows=archivedRows===null?(p?.originalOffscreenCombatNights||[]):archivedRows,
   life=s.table?.realm?.independentPersonLives?.people?.[p?.id];
  if(!Array.isArray(rows)||rows.length>480)return false;
  if(rows.length&&(!life||!require('./independent-person-lives').
@@ -348,7 +428,13 @@ function verifyNights(s,p){
    typeof q.site!=='string'||q.site.length<2||
    !/^[a-f0-9]{64}$/.test(q.originalShiftHash||'')||
    !/^[a-f0-9]{64}$/.test(q.independentDailySourceHash||'')||
-   !/^[a-f0-9]{64}$/.test(q.originalWitnessedShelterHash||'')||
+   !(q.site==='ruins'?
+    /^[a-f0-9]{64}$/.test(q.originalFieldSurveyHash||'')&&
+    /^[a-f0-9]{64}$/.test(q.originalFieldNightChoiceHash||'')&&
+    q.originalWitnessedShelterHash===undefined:
+    /^[a-f0-9]{64}$/.test(q.originalWitnessedShelterHash||'')&&
+    q.originalFieldSurveyHash===undefined&&
+    q.originalFieldNightChoiceHash===undefined)||
    !Array.isArray(q.before?.wounds)||q.before.wounds.length!==3||
    !Array.isArray(q.after?.wounds)||q.after.wounds.length!==3||
    q.before.wounds.some((v,i)=>!Number.isInteger(v)||v<0||
@@ -366,11 +452,14 @@ function verifyNights(s,p){
     ['incapacitated','knocked_out'].includes(q.before.status)&&
      q.before.wounds[2]===0?'ok':q.before.status))
    return false;
-  // No ordinary settlement alone can establish safe sleeping. A real
-  // prior, independently accepted original night proves this individual had
-  // access to shelter at this exact location. The current night's choice
-  // is still the separately committed genuine daily rest.
-  if(!require('../rules/unified').verifyNpcNightHistory(s,p.actorId)||
+  // Keep independent physical shelter owner source-specific.
+  // A source-proven exterior Riftglass wardstone refuge is NOT a
+  // settlement room, must expire after 18h and requires BOTH a completed
+  // Survival survey AND an independently accepted personal sleep choice.
+  if(q.site==='ruins'){
+   if(!require('../rules/independent-riftglass-field-refuge').
+    verifiedNight(s,p,q))return false;
+  }else if(!require('../rules/unified').verifyNpcNightHistory(s,p.actorId)||
    !(p.originalOvernightRestDecisions||[]).some(x=>
     x.sourceHash===q.originalWitnessedShelterHash&&
     x.source.accepted===true&&x.result.accepted===true&&
@@ -397,21 +486,86 @@ function afterDaily(s,w,life,activity,day){
  if(!['practice','rest'].includes(activity?.source?.action))return null;
  const ctx=opportunity(s,w,life,activity,day);
  if(!ctx)return null;
- if(activity.source.action==='rest')
+ // A witnessed Domain already consumed this actor's original physical
+ // discipline opportunity. No retroactive second practice or field night.
+ if(ctx.actor.originalRiftBoundaryDomains?.rows?.some(x=>x.source.day===ctx.workDay)||
+  ctx.actor.originalBondInteractions?.some(x=>['drill','sync'].includes(x.source.approach)&&x.source.day===ctx.workDay))return null;
+ if(activity.source.action==='rest'){
+  // An exterior Riftglass rest is NOT a settlement safe night. After
+  // independently witnessed sensing, the person can still choose ONE
+  // original Combat Recover action without inventing shelter or an
+  // overnight recharge. It does not create a second independent life day.
+  if(ctx.site==='ruins'&&ctx.actor.regionId==='riftglass'){
+   const safeNight=night(s,ctx);
+   return safeNight||require('../rules/independent-original-riftglass-one-recover')
+    .afterRestDay(s,ctx);
+  }
   return night(s,ctx);
+ }
  const system=activity.source.focus;
+ // Witnessed original Nerve–Sense work already owns this person's
+ // daylight discipline decision; no duplicate autonomous power practice.
+ if(ctx.actor.originalBodyNerveSenseFour?.lastAttemptDay===ctx.workDay||
+  ctx.actor.originalBodyLivingPhysiques?.lastAttemptDay===ctx.workDay||
+  ctx.actor.originalOriginPatternResearch?.lastAttemptDay===ctx.workDay||
+  ctx.actor.originalOriginIntegrations?.lastAttemptDay===ctx.workDay||
+  ['originalSoulHigherArchitecture','originalArcaneHigherArchitecture'].some(k=>ctx.actor[k]?.sessions.some(x=>x.source.day===ctx.workDay)))return null;
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
   system==='rift'&&ctx.site!=='ruins')return null;
  // Meridian uses its OWN Foundation / Stage I source owner. Never route
  // its Qi quality, integrity or stamina through a generic first-milestone.
- if(system==='meridian')
-  return require('./independent-offscreen-meridian').practice(s,ctx);
+ if(system==='meridian'){
+  const result=require('./independent-offscreen-meridian').practice(s,ctx);
+  // Real verified Meridian breakthroughs have real physical Combat effects.
+  // Apply the EXISTING Build.meridianProfile anatomy to this same Combat
+  // body only after its actual original source receipt has passed replay.
+  // Not every practice or refusal updates stats; no second check or tick.
+  if(result&&(result.outcome==='breakthrough'||
+   result.gateOpened&&[1,36,72,108].includes(result.gateNumber)||
+   result.formed===true))
+   require('../rules/meridian-npc-physical').synchronize(s,ctx.actor);
+  return result;
+ }
+ // Only after a genuinely verified First Circle may this exact existing
+ // independent practice day advance the original Second Circle architecture.
+ // No extra life choice, time, player RNG, training rank or spell is created.
+ if(system==='arcane'&&ctx.actor.originalArcaneCore?.circles===1)
+  return ctx.actor.originalArcaneCircleTwo?.completed?
+   require('../rules/independent-original-arcane-matrix-three').afterDaily(s,ctx):
+   require('../rules/independent-original-arcane-circle-two').afterDaily(s,ctx);
+ // Independently earned Soul Phase I begins only original Phase II inner
+ // mind/body/resonance Threading. A title never unlocks an art.
+ if(system==='soul'&&ctx.actor.originalFirstPowerMilestones?.soul?.phase===1)
+  return ctx.actor.originalSoulThreadTwo?.completed?
+   require('../rules/independent-original-soul-lattice-three')
+    .afterDaily(s,ctx):
+   require('../rules/independent-original-soul-thread-two')
+    .afterDaily(s,ctx);
+ // Only genuine source-earned Rift Sense I at the original Riftglass
+ // exterior may independently MEASURE the real spatial boundary. A signed
+ // successful reading is NOT an anchor, Fold Step or vault permission.
+ if(system==='rift'&&ctx.actor.originalFirstPowerMilestones?.rift?.step===1)
+  return ctx.actor.originalRiftMeasuredSense?.successfulReading?
+   require('../rules/independent-original-rift-exterior-anchor-two')
+    .afterDaily(s,ctx):
+   require('../rules/independent-original-rift-sense-observation')
+    .afterDaily(s,ctx);
+ // Stage I Body tissue proof unlocks only the original Bone-Marrow work,
+ // not a free cycle, technique or invented combat statistics.
+ if(system==='body'&&ctx.actor.originalFirstPowerMilestones?.body?.
+  completedCycle==='Muscle-Tendon Cycle')
+  return ctx.actor.originalBodyCycleTwo?.completed?
+   require('../rules/independent-original-body-organ-cycle-three')
+    .afterDaily(s,ctx):
+   require('../rules/independent-original-body-cycle-two').afterDaily(s,ctx);
  // Existing ordinary day decisions have already picked today's activity.
  // No extra independent action is granted, no duplicated time advancement.
  const original=ctx.actor.originalEarlyDisciplinePreparation?.[system];
- return original?.points===Disc.KEYS[system].tracks[Early.TARGETS[system]][0]?
+ const target=system==='arcane'&&ctx.actor.originalArcaneCore?.coreIgnited?
+  'circle1':Early.TARGETS[system];
+ return original?.points===Disc.KEYS[system].tracks[target][0]?
   milestone(s,ctx,system):dailyPractice(s,ctx,system);
 }
-module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyNights,
+module.exports={ORIGIN,REST,afterDaily,verifyEvidence,verifyEvidenceBatch,verifyNights,
  opportunityEvidence:evidence};

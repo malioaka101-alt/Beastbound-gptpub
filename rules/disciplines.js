@@ -177,6 +177,7 @@ function firstArcaneArchitecture(s){
  return {core,first,profile};
 }
 function arcaneCircleWork(s,params={}){
+ const circleLaw=require('./arcane-shared-original-circle-two');
  if(!params||typeof params!=='object'||Array.isArray(params)||
   Object.keys(params).some(k=>!['design','minutes','route','guidanceId'].includes(k)))
   throw Error('Circle construction accepts only a genuine freeform design, session time and practice route, not chosen checks, ranks or effects');
@@ -190,7 +191,7 @@ function arcaneCircleWork(s,params={}){
  const {first}=firstArcaneArchitecture(s);
  const a=s.player.arcane;
  if(a.coreStability<40)throw Error('The Mana Core is too unstable for a structural redesign without real treatment');
- if(!Number.isInteger(s.player.mana)||s.player.mana<2)
+ if(!Number.isInteger(s.player.mana)||s.player.mana<circleLaw.MANA_COST)
   throw Error('Two units of actual available Mana are required to attempt a dual-channel working');
  const old=s.table?.arcaneCircleRevision;
  if(old&&(old.target!==2||old.originalGeometry!==a.geometry||
@@ -201,31 +202,30 @@ function arcaneCircleWork(s,params={}){
  const work=old||{target:2,originalGeometry:from,progress:0,attempts:[]};
  const designNote=design.trim();
  const result=C.check(s,{modifier:modifier(s,'arcane')+
-  (a.coreStability>=85?1:a.coreStability<60?-2:0)+(theory?.bonus||0),
-  dc:17,label:'Second Arcane Circle — dual-channel integration'});
- const effort=result.success?(result.degree==='exceptional'?4:
-  result.degree==='strong'?3:2):0;
+  circleLaw.stabilityBonus(a.coreStability)+(theory?.bonus||0),
+  dc:circleLaw.DC,label:'Second Arcane Circle — dual-channel integration'});
+ const effort=circleLaw.earned(result);
  // Consume actual mana only after all material/anatomical prerequisites were
  // met. The check remains the sole source of success and complications.
- s.player.mana-=2;
+ s.player.mana-=circleLaw.MANA_COST;
  work.progress+=effort;
  let backlash=false;
  if(result.degree==='severe failure'){
-  backlash=true;a.coreStability=Math.max(0,a.coreStability-7);
+  backlash=true;a.coreStability=circleLaw.stabilityAfter(a.coreStability,result);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
- }else if(result.success)a.coreStability=Math.min(100,a.coreStability+1);
+ }else if(result.success)a.coreStability=circleLaw.stabilityAfter(a.coreStability,result);
  const priorIndex=s.log.length-1,
   check=result,
   attempt={startedMinute:startMinute,location:self.site,design:designNote,
    firstGeometry:from,sourceDay:first.day,checkIndex:priorIndex,
    theoreticalGuidance:theory,result:check.degree,
-   earnedIntegrity:effort,manaSpent:2,
+   earnedIntegrity:effort,manaSpent:circleLaw.MANA_COST,
    stabilityAfter:a.coreStability};
  work.attempts.push(attempt);
  s.table||={};s.table.arcaneCircleRevision=work;
  let constructed=false;
- if(work.progress>=4){
+ if(work.progress>=circleLaw.REQUIRED){
   const next=Build.arcaneProfile(2);
   // Capacity/profile upgrades do not teach new spells, copy beast traits,
   // reset spent mana or change independent Qi, Soul, Body or Rift stages.
@@ -249,7 +249,7 @@ function arcaneCircleWork(s,params={}){
    day:E.day(s),target:'circle2',quality:check.degree,
    change:'Second Circle constructed; dual channels integrated from the original First Circle',
    witnessSource:witness.originalSource});
-  work.progress=4;work.completed=true;constructed=true;
+  work.progress=circleLaw.REQUIRED;work.completed=true;constructed=true;
  }
  E.advance(s,minutes);W.finalizeTime(s,startMinute);
  U.sync(s,{source:'legacy'});
@@ -262,11 +262,11 @@ function arcaneCircleWork(s,params={}){
    design:designNote,elapsedMinutes:minutes,roll:check.roll,
    theoreticalGuidance:theory,
    earnedIntegrity:effort,integrityProgress:work.progress,
-   constructed,backlash,manaSpent:2,
+   constructed,backlash,manaSpent:circleLaw.MANA_COST,
    newSpells:0,noCompulsoryTeacher:true});
  return {system:'arcane',target:'circle2',route,
-  constructed,progress:work.progress,required:4,
-  check,manaSpent:2,minutes,backlash,coreStability:a.coreStability,
+  constructed,progress:work.progress,required:circleLaw.REQUIRED,
+  check,manaSpent:circleLaw.MANA_COST,minutes,backlash,coreStability:a.coreStability,
   newChannels:constructed?2:0,newSpellGranted:false,
   noAutomaticTechnique:true,noCompulsoryTeacher:true,tuitionTalons:0,
   theoreticalGuidance:theory};
@@ -690,7 +690,9 @@ function breakthrough(s,{system,source,insightSpent=0,geometry=null,route=source
       throw Error('Bone-Marrow refining requires an authentically completed Muscle-Tendon Cycle');
      s.player.body.cycles.push('Bone-Marrow Cycle');
      const c=s.table.combatants.player;
-     c.toughness+=1;c.boxes[1]+=1;
+     const cycleTwoLaw=require('./body-shared-original-cycle-two');
+     c.toughness+=cycleTwoLaw.toughGain;
+     c.boxes[1]+=cycleTwoLaw.seriousBoxGain;
      change='Completed Cycle II Bone-Marrow refinement; +1 Toughness, +1 Serious wound box';
     }
    }
@@ -761,9 +763,9 @@ function gatePractice(s,params={}){
   throw Error('A verified sequence of prior Gate openings is required before a transition rite; no claimed Gate count can replace individual evidence');
  const next=gates.length+1;
  if(next>108)throw Error('All 108 Gates are already open');
- const transition=[36,72,108].includes(next);
- const [band,pts,dc]=next<=36?['Lower',3,13]:next<=72?['Middle',5,16]:['High',8,19];
- const gradeBonus=({Perfect:2,Firm:1,Sound:0,Thin:-1,Cracked:-2})[phys.foundationQuality];
+ const originalLaw=require('./meridian-shared-original-gates'),
+  {transition,band,points:pts,baseDC:dc,actualDC}=originalLaw.gateSpec(next),
+  gradeBonus=originalLaw.foundationBonus(phys.foundationQuality);
  const theory=witnessedTheory(s,'meridian',guidanceId);
  const stage=s.table.meridianGateTraining ||= {gate:next,progress:0,forced:false};
  if(stage.gate!==next||!Number.isInteger(stage.progress)||stage.progress<0||
@@ -773,7 +775,6 @@ function gatePractice(s,params={}){
  // The structural boundary is real: its check is harder, but does NOT
  // require a pre-selected true flag, universal price or specific teacher.
  const aptitude=Potential.read(s,'gateStability');
- const actualDC=dc+(transition?3:0);
  const roll=C.check(s,{modifier:modifier(s,'meridian')+gradeBonus+aptitude.modifier+(theory?.bonus||0),
   dc:actualDC,label:'Gate '+next+' ('+band+(transition?', structural transition':'')+')'});
  let gain=roll.progress+(roll.success?Math.max(0,aptitude.modifier):0),severe=roll.degree==='severe failure'||(force&&roll.margin<=-5);
@@ -797,9 +798,7 @@ function gatePractice(s,params={}){
  }
  let opened=null;
  if(stage.progress>=pts){
-  const quality=stage.forced?'Flawed':
-   roll.degree==='exceptional'||(roll.degree==='strong'&&
-   phys.foundationQuality==='Perfect')?'Perfect':'Sound';
+  const quality=originalLaw.gateQuality(roll.degree,phys.foundationQuality,stage.forced);
   opened={number:next,band,quality};
   p.gates ||= [];p.gates.push(opened);
   phys.gateRecords.push({...opened,day:E.day(s)});
@@ -880,7 +879,7 @@ function seaPrerequisites(s){
   throw Error('No high-pressure Dantian formation during combat, immediate danger or incapacity');
  return {perfect,flawed,foundationQuality:phys.foundationQuality};
 }
-const SEA_METHODS=Object.freeze(['compression','circulation','stabilisation','integrated']);
+const SEA_METHODS=require('./meridian-shared-original-sea').METHODS;
 function seaStatus(s){
  const m=s.player.meridian,sea=m.dantianSea;
  if(m.stage>=4)return {stage:m.stage,formed:!!sea,
@@ -911,7 +910,11 @@ function seaWork(s,params={}){
  const quality=seaPrerequisites(s);
  const self=independentSite(s,'meridian',{shortSession:true});
  const theory=witnessedTheory(s,'meridian',guidanceId);
- const energySpent=8,staminaSpent=Math.ceil(minutes/120);
+ const seaLaw=require('./meridian-shared-original-sea'),
+  plan=seaLaw.working({perfect:quality.perfect,flawed:quality.flawed,
+   foundationQuality:quality.foundationQuality,
+   stability:s.player.meridian.stability,minutes}),
+  energySpent=plan.qiSpent,staminaSpent=plan.staminaSpent;
  if(s.player.qi<energySpent||s.player.stamina<staminaSpent)
   throw Error('Dantian Sea formation requires eight available Qi and real Stamina');
  const record=s.table.meridianSeaFormation ||= {
@@ -923,12 +926,9 @@ function seaWork(s,params={}){
     !Array.isArray(record.attempts)||record.attempts.length>500)
   throw Error('Invalid Stage IV work ledger; no roll may be made');
  const now=s.world.minutes,oldCurrentQi=s.player.qi,
-  baseMod=modifier(s,'meridian'),flaws=quality.flawed,
-  foundationBonus=quality.foundationQuality==='Perfect'?2:
-    quality.foundationQuality==='Firm'?1:0,
-  gateBonus=Math.min(2,Math.floor(quality.perfect/36)),
-  dc=21+Math.floor(flaws/18)+
-    (s.player.meridian.stability<70?2:0);
+  baseMod=modifier(s,'meridian'),
+  foundationBonus=plan.foundationBonus,
+  gateBonus=plan.gateBonus,dc=plan.actualDC;
  // The user's wording names how they attempt the work but cannot set DC,
  // talent, output, difficulty, quality or another character's permission.
  s.player.qi-=energySpent;
@@ -937,7 +937,7 @@ function seaWork(s,params={}){
   s.table.combatants.player.stamina=s.player.stamina;
  const check=C.check(s,{modifier:baseMod+foundationBonus+gateBonus+
    (theory?.bonus||0),dc,label:'Stage IV Dantian Sea '+method});
- const earned=check.degree==='exceptional'?5:check.progress;
+ const earned=seaLaw.progress(check.degree,check.progress);
  record.points=Math.min(5,record.points+earned);
  let backlash=null;
  if(check.degree==='severe failure'){
@@ -949,10 +949,8 @@ function seaWork(s,params={}){
  }
  let formed=false,profile=null;
  if(record.points>=5){
-  const purity=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/36)-
-    Math.floor(flaws/27)));
-  const density=Math.max(1,Math.min(9,3+Math.floor(quality.perfect/27)-
-    Math.floor(flaws/36)));
+  const {purity,density}=seaLaw.formation({perfect:quality.perfect,
+   flawed:quality.flawed,stability:s.player.meridian.stability});
   s.player.meridian.stage=4;
   s.player.meridian.dantianSea={
    rings:1,density,purity,stability:s.player.meridian.stability,
@@ -1123,6 +1121,7 @@ function matrixStatus(s){
   note:'Earn a stable third resonance layer; no compound spell or formula is granted by rank alone'};
 }
 function matrixWork(s,params={}){
+ const matrixLaw=require('./arcane-shared-original-matrix');
  if(!params||typeof params!=='object'||Array.isArray(params)||
     Object.keys(params).some(k=>!['design','focus','minutes','guidanceId','route'].includes(k)))
   throw Error('Matrix work accepts only genuine geometry design, focus, duration, optional witnessed theory and route; not chosen checks, ranks or spells');
@@ -1137,7 +1136,7 @@ function matrixWork(s,params={}){
  const self=independentSite(s,'arcane',{shortSession:true});
  const chain=thirdPrerequisites(s);
  const theory=witnessedTheory(s,'arcane',guidanceId);
- const a=chain.a,manaSpent=4,staminaSpent=Math.ceil(minutes/120);
+ const a=chain.a,manaSpent=matrixLaw.MANA_COST,staminaSpent=matrixLaw.staminaCost(minutes);
  if(!Number.isInteger(s.player.mana)||s.player.mana<manaSpent||
     !Number.isInteger(s.player.stamina)||s.player.stamina<staminaSpent)
   throw Error('Matrix work requires four real Mana and physical Stamina');
@@ -1151,30 +1150,27 @@ function matrixWork(s,params={}){
  const record=previous||{target:3,secondCircleHash,progress:0,
   attempts:[],completed:false};
  const start=s.world.minutes,designNote=design.trim();
- const coreMod=a.coreStability>=85?1:a.coreStability<60?-2:0;
+ const coreMod=matrixLaw.stabilityBonus(a.coreStability);
  const check=C.check(s,{modifier:modifier(s,'arcane')+coreMod+(theory?.bonus||0),
-  dc:20,label:'Third Circle — resonant matrix '+focus});
- const earned=check.degree==='exceptional'?6:check.degree==='strong'?3:
-  check.degree==='success'?2:0;
+  dc:matrixLaw.DC,label:'Third Circle — resonant matrix '+focus});
+ const earned=matrixLaw.earned(check);
  s.player.mana-=manaSpent;s.player.stamina-=staminaSpent;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
  let backlash=false;
  if(check.degree==='severe failure'){
-  backlash=true;a.coreStability=Math.max(0,a.coreStability-9);
+  backlash=true;a.coreStability=matrixLaw.stabilityAfter(a.coreStability,check);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
- }else if(check.success)a.coreStability=Math.min(100,a.coreStability+1);
- record.progress=Math.min(6,record.progress+earned);
+ }else if(check.success)a.coreStability=matrixLaw.stabilityAfter(a.coreStability,check);
+ record.progress=Math.min(matrixLaw.REQUIRED,record.progress+earned);
  const entry={startedMinute:start,location:self.site,focus,design:designNote,
   degree:check.degree,roll:check.roll,earned,manaSpent,staminaSpent};
  record.attempts.push(entry);
  s.table.arcaneMatrixRevision=record;
  let formed=false;
- if(record.progress>=6){
+ if(record.progress>=matrixLaw.REQUIRED){
   const next=Build.arcaneProfile(3);
-  const integrity=Math.min(100,Math.max(40,
-   58+Math.max(0,check.margin)*2+Math.min(12,record.attempts.length*2)-
-   Math.max(0,80-a.coreStability)));
+  const integrity=matrixLaw.integrity(check.margin,record.attempts.length,a.coreStability);
   a.circles=3;a.channels=next.channels;a.structuredMana=next.mana;
   a.maxComplexity=next.maxComplexity;a.intake=next.intake;
   a.loadTolerance=next.loadTolerance;a.preparedCapacity=next.prepared;
@@ -1191,7 +1187,7 @@ function matrixWork(s,params={}){
    day:E.day(s),target:'circle3',quality:check.degree,
    change:'Third Circle constructed; the three-Circle resonance matrix is stable',
    witnessSource:MATRIX_SOURCE});
-  record.progress=6;record.completed=true;formed=true;
+  record.progress=matrixLaw.REQUIRED;record.completed=true;formed=true;
  }
  E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
  C.event(s,'progress',formed?
@@ -1204,7 +1200,7 @@ function matrixWork(s,params={}){
    ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}: {})
  });
  return {system:'arcane',target:'circle3',formed,progress:record.progress,
-  required:6,focus,check,backlash,minutes,manaSpent,staminaSpent,
+  required:matrixLaw.REQUIRED,focus,check,backlash,minutes,manaSpent,staminaSpent,
   route,feeTalons:0,coreStability:a.coreStability,
   ...(formed?{matrixIntegrity:a.matrixIntegrity,channels:a.channels}:{}),
   noAutomaticSpell:true,independent:true};
@@ -1216,12 +1212,12 @@ function matrixWork(s,params={}){
 // systems represented here are heart, lungs, liver and kidneys; integrated
 // work includes their coordination with other organs. Exceptional integrated
 // practice can advance several tissues in the SAME genuine check.
-const ORGAN_NAMES=Object.freeze(['heart','lungs','liver','kidneys']);
-const ORGAN_FOCI=Object.freeze([...ORGAN_NAMES,'integrated']);
+const OrganLaw=require('./body-shared-original-organ-cycle-three');
+const ORGAN_NAMES=OrganLaw.ORGANS,ORGAN_FOCI=OrganLaw.FOCI;
 const ORGAN_ORIGIN='earned-body-organ-cycle-iii-v1';
 const organDigest=x=>Crypto.createHash('sha256')
  .update(JSON.stringify(x)).digest('hex');
-const organPoints=()=>({heart:0,lungs:0,liver:0,kidneys:0});
+const organPoints=OrganLaw.empty;
 function organPrerequisites(s){
  const p=s.player,body=p?.body,h=s.table?.disciplineTraining?.body?.history||[];
  if(!body||!Array.isArray(body.cycles)||body.cycles.length!==2||
@@ -1315,7 +1311,7 @@ function organWork(s,params={}){
  organPrerequisites(s);
  const self=independentSite(s,'body',{shortSession:true});
  const theory=witnessedTheory(s,'body',guidanceId);
- const fatigue=Math.ceil(minutes/120),p=s.player;
+ const fatigue=OrganLaw.staminaCost(minutes),p=s.player;
  if(!Number.isInteger(p.stamina)||p.stamina<fatigue)
   throw Error('Organ adaptation requires available Stamina for real exertion');
  const old=s.table?.organCycleWork;
@@ -1329,17 +1325,11 @@ function organWork(s,params={}){
  p.stamina-=fatigue;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=p.stamina;
  const check=C.check(s,{modifier:modifier(s,'body')+
-  (theory?.bonus||0),dc:17,
+  (theory?.bonus||0),dc:OrganLaw.DC,
   label:'Organ Cycle III — '+focus+' adaptation'});
- const earned=check.progress;
- if(earned){
-  if(focus==='integrated'){
-   work.integrated=true;
-   for(const organ of ORGAN_NAMES)
-    work.systems[organ]=Math.min(2,work.systems[organ]+
-     (check.degree==='exceptional'?2:1));
-  }else work.systems[focus]=Math.min(2,work.systems[focus]+earned);
- }
+ const grown=OrganLaw.grow(work.systems,work.integrated,focus,check.degree);
+ const earned=grown.earned;
+ work.systems=grown.organs;work.integrated=grown.integrated;
  let setback=null;
  if(check.degree==='severe failure'){
   setback='organ strain';
@@ -1355,11 +1345,11 @@ function organWork(s,params={}){
  work.attempts.push(record);
  s.table.organCycleWork=work;
  let completedCycle=false;
- if(work.integrated&&ORGAN_NAMES.every(k=>work.systems[k]>=2)){
+ if(OrganLaw.formed(work.systems,work.integrated)){
   const c=s.table.combatants.player;
   p.body.cycles.push('Organ Cycle');
-  staminaGain(s,2);
-  c.toughness+=1;c.boxes[2]+=1;
+  staminaGain(s,OrganLaw.STAMINA_GAIN);
+  c.toughness+=OrganLaw.TOUGHNESS_GAIN;c.boxes[2]+=OrganLaw.CRITICAL_BOX_GAIN;
   p.body.organAdaptation={
    systems:structuredClone(work.systems),originalSource:ORGAN_ORIGIN,
    completedMinute:start+minutes,attemptsHash:organDigest(work.attempts)};
@@ -1431,10 +1421,65 @@ function verifyNpcMeridian(s,person){
   combatant.npcOrigin.actorId!==person.actorId)return false;
  let points=0,lastDay=-1,lastMinute=-1,lastPracticeDay=-1,
   lastRiteDay=-1,earntStage=0,quality=null,cooldown=0,previousEnd=-1;
- const methods={},priorAcceptedWitnesses=[],
-  firstMaximum=combatant.maxStamina-(rec.earnedStage===1?
-   Build.meridianProfile(1).bonuses.stamina:0);
- if(firstMaximum<1)return false;
+ // The Stage I entry maximum is immutable ORIGINAL human anatomy. Reading
+ // it back from a *current* combat body would invalidate every honest later
+ // Stage II–IX Stamina bonus and strand a trained independent NPC forever.
+ const a=person.mechanicalFoundation.baselineAttributes,
+  abilities={vigor:Math.floor((a.con-10)/2),
+   agility:Math.floor((a.dex-10)/2),
+   wits:Math.floor((a.wis-10)/2),
+   will:Math.floor((a.wis-10)/2),
+   might:Math.floor((a.str-10)/2)},
+  originalHuman=Build.humanStats(abilities,{skills:{Melee:0},
+   size:'Medium'}),
+  methods={},priorAcceptedWitnesses=[],
+  firstMaximum=originalHuman.stamina;
+ // The independent ORIGINAL Body Muscle–Tendon cycle can be earned before
+ // or after Meridian preparation. Its separate already-verified +2 Stamina
+ // must be honoured at the historical minute of EACH Meridian receipt.
+ // Never treat another distinct power as invalid anatomy or invent a bonus.
+ const bodyMilestone=person.originalFirstPowerMilestones?.body,
+  bodyProof=bodyMilestone?person.originalEarlyDisciplinePreparation?.body?.
+   sessions?.find(x=>x.seal===bodyMilestone.originalSourceHash):null;
+ if(bodyMilestone&&(!bodyProof||
+  !require('./independent-original-discipline-preparation').verify(s,person)||
+  bodyMilestone.kind!=='body-muscle-tendon-cycle-one'||
+  bodyMilestone.maxStaminaAfter!==bodyMilestone.maxStaminaBefore+2))
+  return false;
+ // Higher Body cycles also change the SAME physical reserve. Reconstruct
+ // their gains at the historical completion time, never from today's body.
+ // Every referenced receipt must first pass its own original source owner.
+ const gains=[];
+ if(bodyProof)gains.push({minute:bodyProof.source.startMinute,amount:2});
+ const organ=person.originalBodyOrganCycleThree,nerve=person.originalBodyNerveSenseFour,
+  living=person.originalBodyLivingPhysiques;
+ if(organ&&!require('./independent-original-body-organ-cycle-three').verify(s,person))return false;
+ if(nerve&&!require('./independent-original-body-nerve-sense-four').verify(s,person))return false;
+ if(living&&!require('./independent-original-body-living-physiques').verify(s,person))return false;
+ if(organ?.completed){
+  const q=organ.sessions.find(x=>x.seal===organ.originalCycleThreeSourceHash)?.source;
+  if(!q||!q.completedAfter)return false;
+  gains.push({minute:q.startMinute+q.actualMinutes,
+   amount:require('./body-shared-original-organ-cycle-three').STAMINA_GAIN});
+ }
+ if(nerve?.completed){
+  const q=nerve.sessions.find(x=>x.seal===nerve.completionSourceHash)?.source;
+  if(!q||!q.accepted||q.kind!=='form'||!q.check?.success)return false;
+  gains.push({minute:q.minute+q.actualMinutes,amount:require('./body-shared-original-nerve-sense').STAMINA_GAIN});
+ }
+ for(const [cycle,r] of Object.entries(living?.cycles||{})){
+  if(!r.completed)continue;
+  const q=living.sessions.find(x=>x.seal===r.formationSourceHash)?.source,
+   amount=require('./body-shared-original-living-physique').SPEC[cycle]?.bonus;
+  if(!q||q.cycle!==Number(cycle)||q.kind!=='form'||!q.accepted||!q.check?.success||!Number.isInteger(amount))return false;
+  gains.push({minute:q.minute+q.actualMinutes,amount});
+ }
+ const bodyEarnedBefore=time=>gains.reduce((n,g)=>n+(g.minute<time?g.amount:0),0);
+ if(!combatant.npcOrigin.originalUnarmouredHumanBaseline||
+  firstMaximum<1||
+  combatant.maxStamina<firstMaximum+bodyEarnedBefore(s.world.minutes+1)+
+   (rec.earnedStage===1?Build.meridianProfile(1).bonuses.stamina:0))
+  return false;
  for(const row of rec.sessions){
   const q=row?.source;
   if(q?.offscreenOpportunity!==undefined&&
@@ -1489,7 +1534,7 @@ function verifyNpcMeridian(s,person){
      q.check.modifier!==originalWis+apt||
      q.check.dc!==q.originalRiteDC||
      !Number.isInteger(q.maxStaminaBefore)||
-     q.maxStaminaBefore!==firstMaximum||
+     q.maxStaminaBefore!==firstMaximum+bodyEarnedBefore(q.startMinute)||
      !Number.isInteger(q.staminaBefore)||q.staminaBefore<1||
      q.staminaBefore>q.maxStaminaBefore||
      !Array.isArray(q.woundsBefore)||
@@ -1591,7 +1636,7 @@ function verifyNpcMeridian(s,person){
    if(!Number.isInteger(q.maxStaminaAtAttempt)||
     q.maxStaminaAtAttempt<1||
     q.staminaBefore>q.maxStaminaAtAttempt||
-    q.maxStaminaAtAttempt!==firstMaximum)
+    q.maxStaminaAtAttempt!==firstMaximum+bodyEarnedBefore(q.startMinute))
     return false;
    const expectedDC=Difficulty.disciplinePractice(s,{
     system:'meridian',method:q.method,
@@ -1646,7 +1691,20 @@ function verifyNpcMeridian(s,person){
    rec.foundationQuality===quality)&&
   (rec.foundationIntegrity===undefined?earntStage===0:
    rec.foundationIntegrity===(earntStage===1?20:0))&&
-  JSON.stringify(rec.methods)===JSON.stringify(methods);
+  JSON.stringify(rec.methods)===JSON.stringify(methods)&&
+  // Each later ORIGINAL source verifier already recursively confirms every
+  // physically prerequisite earlier actor record. Verify only the deepest
+  // actually earned owner, instead of replaying 108 Gates five separate
+  // times per ordinary world tick. No absent stage can be assumed.
+  (person.originalMeridianAdvanced?
+   require('../world/independent-meridian-advanced').verify(s,person):
+   person.originalMeridianWeb?
+    require('../world/independent-meridian-web').verify(s,person):
+   person.originalMeridianSea?
+    require('../world/independent-meridian-sea').verify(s,person):
+   person.originalMeridianGates?
+    require('../world/independent-meridian-gates').verify(s,person):
+   require('../world/independent-meridian-ladder').verify(s,person));
 }
 function npcMeridianPrivateStatus(s,actorId){
  const w=require('../world/simulation').peek(s),
@@ -1656,9 +1714,56 @@ function npcMeridianPrivateStatus(s,actorId){
   throw Error('Original independent human identity not verified');
  if(!verifyNpcMeridian(s,p))
   throw Error('Original individual Meridian training proof was altered');
- const rec=p.meridianTraining;
+ // A saved *claim* of Meridian advancement cannot be a source of truth.
+ // Verify the deepest actually present original NPC owner's entire
+ // chronological source (and its earlier prerequisites) ONCE here. This
+ // private reader feeds both the GM actor dossier and real Combat anatomy.
+ // Partly mapped stages still have to verify before the preceding completed
+ // stage may be presented, and no client can bypass source verification by
+ // reading stage numbers alone.
+ const presentOwner=p.originalMeridianAdvanced?
+  '../world/independent-meridian-advanced':
+  p.originalMeridianWeb?'../world/independent-meridian-web':
+  p.originalMeridianSea?'../world/independent-meridian-sea':
+  p.originalMeridianGates?'../world/independent-meridian-gates':
+  p.originalMeridianLadder?'../world/independent-meridian-ladder':null;
+ if(presentOwner&&!require(presentOwner).verify(s,p))
+  throw Error('Original individual Meridian stage source failed full owner replay');
+ const rec=p.meridianTraining,
+  ladder=p.originalMeridianLadder,
+  gateWork=p.originalMeridianGates,
+  sea=p.originalMeridianSea,
+  web=p.originalMeridianWeb,
+  advanced=p.originalMeridianAdvanced,
+  stage=advanced?.stage>=6?advanced.stage:
+   web?.stage===5?5:sea?.stage===4?4:gateWork?.stage===3?3:
+   ladder?.stage===2?2:rec?.earnedStage===1?1:null;
  return {actorId,originalOwner:'rules/disciplines.js',
-  originalMeridianStageEarned:rec?.earnedStage===1?1:null,
+  originalMeridianStageEarned:stage,
+  originalStageTwoPrimaryMeridians:
+   stage>=2?ladder.primaryMapped:null,
+  originalStageThreeOpenedGates:stage>=3?gateWork.gates.length:null,
+  originalStageFourSea:stage>=4?
+   structuredClone(sea.sea):null,
+  originalStageFiveWebRoutes:stage>=5?
+   structuredClone(web.routes):null,
+  originalAdvancedStages:stage>=6?
+   structuredClone(advanced.achieved):null,
+  originalAdvancedCurrentTrack:stage>=6?
+   structuredClone(advanced.track):null,
+  originalStageFiveSourceHash:stage>=5?
+   web.originalStageFiveSourceHash:null,
+  originalStageFourSourceHash:stage>=4?
+   sea.attempts.at(-1).seal:null,
+  originalStageThreeIndividualGates:stage>=3?
+   structuredClone(gateWork.gates):null,
+  originalStageTwoQiProfile:stage>=2?
+   structuredClone(stage>=6?advanced.energy:
+    stage===5?web.energy:stage===4?sea.energy:
+     stage===3?gateWork.energy:ladder.energy):null,
+  originalAwakeningTrainingPoints:ladder?.awakening?.points??null,
+  originalAwakeningRiteSourceHash:stage>=2?
+   ladder.originalStageTwoSourceHash:null,
   originalStageOneFoundationQuality:rec?.foundationQuality??null,
   originalFoundationIntegrity:rec?.foundationIntegrity??null,
   originalMeridianTrainingTarget:rec?.target??'foundation',

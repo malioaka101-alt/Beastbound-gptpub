@@ -29,7 +29,20 @@ const prose=(s,n=25)=>typeof s==='string'&&s.trim().length>=n&&s.length<=900;
 const validId=s=>typeof s==='string'&&/^[a-z][a-z0-9_-]{3,65}$/.test(s);
 const own=(p,k)=>p&&typeof p==='object'&&!Array.isArray(p)&&
  Object.keys(p).every(x=>k.includes(x));
-function authorisation(s,id,seal,q){
+// Original actor-specific check, load and rejection rules. The consuming
+// biological owner must still establish an authentic candidate and rights.
+function stageSpec(step,load,attribute,rank,aptitude){
+ const rule=RULES[step];if(!rule)throw Error('Original Origin stage required');
+ C.int(attribute,'earned attribute',1,30);C.int(rank,'earned skill rank',0,5);
+ return {dc:rule.dc+Math.min(4,load),modifier:Math.floor((attribute-10)/2)+2*rank+aptitude,
+  cost:rule.cost,minimum:rule.minimum};
+}
+function stageConsequence(step,load,check){
+ const rejection=step===4&&!check.success,severe=check.degree==='severe failure';
+ return {strainAdded:rejection||severe?3:0,riskAdded:rejection?10:severe?5:0,
+  loadAdded:step===3&&check.success?load:0};
+}
+function authorisation(s,id,seal,q,actorId='player'){
  const rec=s.table?.originLineageAuthorisations?.[id],a=rec?.source,
   w=a?.witness,d=w?.details;
  if(!rec||rec.origin!==AUTH||rec.seal!==hash(a)||
@@ -60,6 +73,9 @@ function authorisation(s,id,seal,q){
   (a.mode==='verified-self-synthesis'&&q.route!=='synthetic-trait'&&
    q.route!=='origin-cultivation'))
   throw Error('An independent ethically authenticated, identity-matched source, human ownership or informed donor right is required');
+ const observed=q.observation?.details?.actorId,recipient=d?.actorId;
+ if(actorId==='player'?((observed!==undefined&&observed!=='player')||(recipient!==undefined&&recipient!=='player')):
+  (observed!==actorId||recipient!==actorId))throw Error('Original material authorisation belongs to a different individual');
  return rec;
 }
 function context(s,id,{allowCompleted=false}={}){
@@ -314,19 +330,17 @@ function stage(s,p={}){
  const loadBefore=o.load,rejectionBefore=o.rejectionRisk||0,strainBefore=t?.strain||0;
  Lineage.archive(s,auth.source.witness);
  Lineage.archive(s,observed);
- const check=C.check(s,{modifier:mod+2*rank+aptitude.modifier,
-  dc:rule.dc+Math.min(4,q.integrationLoad),
+ const spec=stageSpec(step,q.integrationLoad,attr,rank,aptitude.modifier);
+ const check=C.check(s,{modifier:spec.modifier,
+  dc:spec.dc,
   label:'Human Origin '+STEPS[step]+' — '+q.traitName.slice(0,24)});
  const rollEvent=structuredClone(s.log.at(-1));
  if(plan)U.applyItems(s,plan);
- const strainAdded=step===4&&!check.success?3:
-  check.degree==='severe failure'?3:0;
- const riskAdded=step===4&&!check.success?10:
-  check.degree==='severe failure'?5:0;
+ const {strainAdded,riskAdded,loadAdded}=stageConsequence(step,q.integrationLoad,check);
  if(strainAdded){
   Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});
  }
- const success=check.success,loadAdded=step===3&&success?q.integrationLoad:0;
+ const success=check.success;
  if(loadAdded){
   o.load+=loadAdded;o.phase=3;o.candidate=p.sourceId;
  }
@@ -485,6 +499,6 @@ function recordUse(s,checkId,check,baseModifier){
  return {sourceId:a.source.sourceId,staminaSpent:1,
   physicalModifier:1,fromOriginalEarnedHumanLineage:true};
 }
-module.exports={ORIGIN,AUTH,STAGE,CARE,USE,STEPS,RULES,
+module.exports={ORIGIN,AUTH,STAGE,CARE,USE,STEPS,RULES,stageSpec,stageConsequence,stageWitness,
  authorisation,context,verifyRecord,status,stage,care,
  prepareFooting,sceneSupport,recordUse};

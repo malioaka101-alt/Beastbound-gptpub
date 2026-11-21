@@ -25,6 +25,53 @@ const priority=[
  'original-diplomatic-courier-public-provenance.test.js',
  'trade-original-interstate-corridor-history.test.js'
 ];
+// Previously the final gate re-executed these already-tested contracts.
+// Require their presence instead; full batches still EXECUTE every test once.
+const requiredCrossSystem=[
+ 'economy-existing-owned-material-assets.test.js',
+ 'economy-real-physical-production-source.test.js',
+ 'field-crafting.test.js','rank-depth-prototypes.test.js',
+ 'voluntary-person-material-handoffs.test.js',
+ 'live-provisioner-trade.test.js',
+ 'economy-original-scarcity-market-quotations.test.js',
+ 'economy-voluntary-original-merchant-worker-terms.test.js',
+ 'economy-original-wholesale-transport-disruptions.test.js',
+ 'economy-independent-regional-market-demand.test.js',
+ 'economy-independent-funded-real-local-purchase.test.js',
+ 'economy-independent-person-owned-material-sales.test.js',
+ 'civic-original-records-remedy.test.js',
+ 'civic-local-rights-and-sapient-standing.test.js',
+ 'civic-independent-local-law-enactment.test.js',
+ 'economy-original-paid-demand-price-pressure.test.js',
+ 'living-career-real-merchant-payments.test.js',
+ 'trade-original-interstate-corridor-history.test.js',
+ 'source-parity.test.js','source-coverage.test.js'
+];
+// Actual prior Actions wall-clock costs (seconds), rounded up as mere
+// scheduling hints. Every test always executes; NO result is cached/faked.
+const measuredSeconds=Object.freeze({
+ 'living-world.test.js':472,
+ 'agent-initiatives.test.js':364,
+ 'knowledge-diffusion.test.js':352,
+ 'meridian-npc-actual-unbroken-source-progression.test.js':112,
+ 'professional-peers-longrun.test.js':63,
+ 'emergent-groups.test.js':58,
+ 'family-members-longrun.test.js':56,
+ 'adaptive-ambitions.test.js':42,
+ 'government-offices.test.js':32,
+ 'open-learning-routes.test.js':26,
+ 'group-membership-runner.test.js':20,
+ 'beast-individuality.test.js':14,
+ 'emergent-careers.test.js':10,
+ 'beast-ecological-learning.test.js':9,
+ 'generated-family-kinship.test.js':3,
+ 'earned-senses.test.js':5,
+ 'ordinary-life-npc-journey.test.js':5,
+ 'emergent-people.test.js':5,
+ 'fantasy-canon.test.js':4
+});
+const estimatedCost=name=>measuredSeconds[name]||2;
+
 function integer(arg,flag){
  const raw=arg.split('=')[1],n=Number(raw);
  if(!Number.isInteger(n)||String(n)!==raw)
@@ -50,15 +97,25 @@ function inventory(){
   .filter(x=>x.isFile()&&x.name.endsWith('.test.js'))
   .map(x=>x.name).sort();
  if(!all.length)throw Error('Missing regression test inventory');
- const missing=priority.filter(x=>!all.includes(x));
+ const missing=[...new Set([...priority,...requiredCrossSystem])].filter(x=>!all.includes(x));
  if(missing.length)throw Error('Focused original integration tests missing: '+missing.join(', '));
  assert.equal(new Set(all).size,all.length,'Ambiguous test inventory');
  const p=new Set(priority);
  return [...priority,...all.filter(x=>!p.has(x))];
 }
 function plan(tests,shards){
- const batches=Array.from({length:shards},()=>[]);
- tests.forEach((name,i)=>batches[i%shards].push(name));
+ const batches=Array.from({length:shards},()=>[]),
+  loads=Array.from({length:shards},()=>0);
+ // Deterministic longest-first allocation balances WALL TIME, not file count.
+ const ranked=tests.map(name=>({name,seconds:estimatedCost(name)}))
+  .sort((a,b)=>b.seconds-a.seconds||a.name.localeCompare(b.name));
+ for(const item of ranked){
+  let i=0;
+  for(let n=1;n<shards;n++)
+   if(loads[n]<loads[i]||
+     loads[n]===loads[i]&&batches[n].length<batches[i].length)i=n;
+  batches[i].push(item.name);loads[i]+=item.seconds;
+ }
  const joined=batches.flat();
  assert.equal(joined.length,tests.length,'Incomplete regression coverage');
  assert.equal(new Set(joined).size,tests.length,'Duplicate regression assignments');
@@ -75,7 +132,8 @@ function main(){
   ' total independent test files across '+opts.shards+' batches.\n');
  batches.forEach((files,i)=>process.stdout.write(
   'Batch '+(i+1)+'/'+batches.length+': '+files.length+' tests'+
-  (opts.shard===i?' [selected]':'')+'\n'));
+  (opts.shard===i?' [selected]':'')+
+  '; estimated historic runtime '+files.reduce((n,x)=>n+estimatedCost(x),0)+'s\n'));
  if(opts.validate)return;
  const files=batches[opts.shard];
  for(let i=0;i<files.length;i++){

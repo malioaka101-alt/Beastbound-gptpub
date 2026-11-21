@@ -7,8 +7,8 @@ const Crypto=require('node:crypto');
 const E=require('../engine'),C=require('./core'),W=require('./world'),
  U=require('./unified'),Combat=require('./combat'),Build=require('./build');
 const ORIGIN='earned-soul-threading-phase-ii-v1';
-const LINKS=Object.freeze(['mind','body','resonance']);
-const FOCI=Object.freeze([...LINKS,'integrated']);
+const LAW=require('./soul-shared-original-threading');
+const LINKS=LAW.LINKS,FOCI=LAW.FOCI;
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const empty=()=>({mind:0,body:0,resonance:0});
 const ability=p=>Math.floor(((p.attributes?.wis??10)-10)/2)+2*(p.skills?.cultivation?.rank||0);
@@ -123,47 +123,42 @@ function work(s,params={}){
   throw Error('Describe genuine inner thread work, not an awarded Soul power');
  originalPerception(s);safety(s);
  const so=s.player.soul,prior=s.table?.soulThreadWork,
-  fatigue=Math.ceil(minutes/120);
+  fatigue=LAW.staminaCost(minutes);
  if(prior&&(prior.completed||!prior.links||!Array.isArray(prior.attempts)||
     prior.attempts.length>500||typeof prior.integrated!=='boolean'||
     LINKS.some(k=>!Number.isInteger(prior.links[k])||
       prior.links[k]<0||prior.links[k]>2)))
   throw Error('A saved earlier soul-thread attempt must be reconciled before further work');
- if(so.reserve<2||s.player.stamina<fatigue)
+ if(so.reserve<LAW.RESERVE_COST||s.player.stamina<fatigue)
   throw Error('Soul Threading needs two actual Soul reserve and available Stamina');
  const ledger=prior||{links:empty(),integrated:false,attempts:[],completed:false};
  const start=s.world.minutes;
- so.reserve-=2;s.player.stamina-=fatigue;
+ so.reserve-=LAW.RESERVE_COST;s.player.stamina-=fatigue;
  if(s.table?.combatants?.player)s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:ability(s.player),dc:16,
+ const check=C.check(s,{modifier:ability(s.player),dc:LAW.DC,
   label:'Soul Phase II — '+focus+' threading'});
- const gain=check.progress;
- if(gain){
-  if(focus==='integrated'){
-   ledger.integrated=true;
-   for(const k of LINKS)ledger.links[k]=Math.min(2,
-    ledger.links[k]+(check.degree==='exceptional'?2:1));
-  }else ledger.links[focus]=Math.min(2,ledger.links[focus]+gain);
- }
+ const grown=LAW.grow(ledger.links,ledger.integrated,focus,check.degree);
+ const gain=grown.earned;
+ ledger.links=grown.links;ledger.integrated=grown.integrated;
  let backlash=null;
  if(check.degree==='severe failure'){
   backlash='identity resonance backlash';
-  so.stability=Math.max(1,so.stability-6);
+  so.stability=LAW.stabilityAfter(so.stability,check);
   U.ensurePlayer(s);Combat.harm(s,Combat.get(s,'player'),2);
   U.sync(s,{source:'wounds'});
  }
  const attempt={minute:start,minutes,focus,
   degree:check.degree,roll:check.roll,earned:gain,
-  reserveSpent:2,staminaSpent:fatigue,location:s.world.location,
+  reserveSpent:LAW.RESERVE_COST,staminaSpent:fatigue,location:s.world.location,
   ...(approach?{approach:approach.trim()}:{}),
   source:'Personal Soul Threading, existing earned Phase I perception at '+E.LOCATIONS[s.world.location].name};
  ledger.attempts.push(attempt);
  s.table||={};s.table.soulThreadWork=ledger;
  let formed=false;
- if(ledger.integrated&&LINKS.every(k=>ledger.links[k]>=2)){
+ if(LAW.formed(ledger.links,ledger.integrated)){
   const next=Build.soulProfile(2,{
    will:Math.floor(((s.player.attributes?.wis??10)-10)/2)});
-  const integrity=Math.max(40,Math.min(100,65+Math.max(0,check.margin)*2));
+  const integrity=LAW.integrity(check.margin);
   so.phase=2;so.maxReserve=next.soulReserve;
   so.reserve=Math.min(so.reserve,so.maxReserve);
   so.perceptionRange=next.perceptionRangeMetres;
@@ -187,13 +182,13 @@ function work(s,params={}){
   'Soul Threading practice develops controlled inner links.',{
    origin:ORIGIN,originalCheck:check,attempt,
    links:{...ledger.links},integrated:ledger.integrated,formed,
-   reserveSpent:2,staminaSpent:fatigue,backlash,
+   reserveSpent:LAW.RESERVE_COST,staminaSpent:fatigue,backlash,
    ...(formed?{phase:2,integrity:so.threadIntegrity,
     noOtherPersonsRead:true,noAutomaticSoulArts:true}: {})
   });
  return {system:'soul',target:'phase2',focus,check,
   earned:gain,links:{...ledger.links},formed,
-  reserveSpent:2,staminaSpent:fatigue,minutes,backlash,
+  reserveSpent:LAW.RESERVE_COST,staminaSpent:fatigue,minutes,backlash,
   independent:true,feeTalons:0,noNewMindreading:true,
   ...(formed?{threadIntegrity:so.threadIntegrity,
    perceptionRangeMetres:so.perceptionRange}: {})};

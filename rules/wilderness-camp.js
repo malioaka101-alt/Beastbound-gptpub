@@ -9,9 +9,15 @@ const ORIGIN='actually-scouted-wilderness-rest-site-v1',MINUTES=45,STAMINA=3;
 const SITES=Object.freeze({
  forest:Object.freeze({description:'a raised root hollow sheltered under the woodland canopy',dc:11}),
  fen:Object.freeze({description:'an elevated, sheltered reedbank beyond the wet waterline',dc:14}),
- hills:Object.freeze({description:'a dry wind-shadow ledge away from loose scree',dc:15})
+ hills:Object.freeze({description:'a dry wind-shadow ledge away from loose scree',dc:15}),
+ // A REAL successful Survival survey, never the mere existence of wards,
+ // establishes a temporary exterior camp OUTSIDE the sealed Riftglass vault.
+ ruins:Object.freeze({description:'a dry exterior wardstone windbreak beyond the sealed Riftglass breach and active boundary',dc:20})
 });
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const weatherPenalty=weather=>
+ /storm|gale|flood|downpour|blizzard|whiteout/i.test(weather)?3:
+ /rain|mist|fog|sleet/i.test(weather)?1:0;
 function preflight(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
   throw Error('Scout a genuine local campsite; callers cannot choose its safety, DC, shelter ID, result or resources');
@@ -19,7 +25,7 @@ function preflight(s,p={}){
   throw Error('A present encounter or battle must be resolved before scouting a rest site');
  const loc=E.LOCATIONS[s.world?.location],cfg=SITES[loc?.biome];
  if(!loc||!cfg||!Array.isArray(loc.spawns)||!loc.spawns.length)
-  throw Error('This procedure requires actual nearby open woodland, wetland or upland terrain; other places need their own witnessed local shelter');
+  throw Error('This procedure requires actual nearby open woodland, wetland or upland terrain (or a genuinely surveyed Riftglass exterior wardline); other places need their own witnessed local shelter');
  const status=s.table?.combatants?.player?.status;
  if(['incapacitated','knocked_out','rehabilitating','dying','dead'].includes(status))
   throw Error('An incapacitated character cannot independently scout a campsite');
@@ -38,8 +44,7 @@ function preflight(s,p={}){
   throw Error('The character stamina must match the actual wound model before scouting');
  const elemental=require('./specialist-elemental-wetland').support(s);
  const weather=String(s.world.weather||'Fair').slice(0,120);
- const hard=/storm|gale|flood|downpour|blizzard|whiteout/i.test(weather);
- const penalty=hard?3:/rain|mist|fog|sleet/i.test(weather)?1:0;
+ const penalty=weatherPenalty(weather);
  return {loc,cfg,weather,stamina,elemental,
   modifier:Math.floor((score-10)/2)+2*rank,
   dc:cfg.dc+penalty-elemental.mitigation};
@@ -97,7 +102,7 @@ function find(s,p={}){
    'You have not confirmed a safe sleeping place here; another plausible approach remains possible, but this attempt cost time and effort.'};
 }
 function valid(s,site){
- if(!site||site.origin!==ORIGIN||!/^fieldcamp_(forest|fen|hills)_[0-9]+$/.test(site.id)||
+ if(!site||site.origin!==ORIGIN||!/^fieldcamp_(forest|fen|hills|ruins)_[0-9]+$/.test(site.id)||
     site.location!==s.world.location||site.biome!==E.LOCATIONS[site.location]?.biome||
     site.terrain!==SITES[site.biome]?.description||
     site.knownToPlayer!==true||site.safe!==true||
@@ -143,4 +148,4 @@ function valid(s,site){
   throw Error('A newly documented severe weather event calls for renewed shelter verification');
  return site;
 }
-module.exports={ORIGIN,SITES,MINUTES,STAMINA,find,valid};
+module.exports={ORIGIN,SITES,MINUTES,STAMINA,weatherPenalty,find,valid};

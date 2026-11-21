@@ -206,8 +206,10 @@ function practice(s,p={}){
  const witnessHash=H(witness);
  if(record.attempts.some(x=>x.source.witnessHash===witnessHash))
   throw Error('The original constitutional adaptation was already resolved');
- const minutes=p.minutes??45,qiSpent=4+Math.ceil(minutes/90),
-  staminaSpent=3+Math.ceil(minutes/90);
+ const minutes=p.minutes??45,
+  law=require('./meridian-shared-original-advanced').law(9,{kind:'practice',
+   stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('Actual human Qi and Stamina are insufficient for constitutional adaptation');
  const before=s.world.minutes;
@@ -247,7 +249,10 @@ function form(s,p={}){
  const proof=H(witness);
  if(net.constitutionTests.some(x=>x.source.witnessHash===proof))
   throw Error('The original bodily transition trial was already rolled');
- const minutes=p.minutes??90,qiSpent=10,staminaSpent=Math.ceil(minutes/90)+4;
+ const minutes=p.minutes??90,
+  law=require('./meridian-shared-original-advanced').law(9,{kind:'form',
+   stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('Real original bodily Qi and energy are insufficient for constitutional conversion');
  const before=s.world.minutes,oldQi=s.player.qi,oldMax=s.player.maxQi;
@@ -296,14 +301,16 @@ function care(s,p={}){
  const w=H(witness);
  if(net.constitutionCare.some(x=>x.source.witnessHash===w))
   throw Error('The individual maintenance work already received one original check');
- const minutes=p.minutes??45,qiSpent=3,staminaSpent=2+Math.ceil(minutes/120);
+ const minutes=p.minutes??45,
+  sourceLaw=require('./meridian-shared-original-advanced').maintenance({minutes}),
+  qiSpent=sourceLaw.qiSpent,staminaSpent=sourceLaw.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('The changed body has real continuing metabolic Qi and Stamina costs');
  const before=s.world.minutes,burdenBefore=m.constitutionBurden;
  s.player.qi-=qiSpent;s.player.stamina-=staminaSpent;
  const check=C.check(s,{modifier:Math.floor((s.player.attributes.con-10)/2)+
   2*(s.player.skills?.cultivation?.rank||0),
-  dc:19,label:'Real Stage IX physical metabolic maintenance'});
+  dc:sourceLaw.dc,label:'Real Stage IX physical metabolic maintenance'});
  const rollEvent=structuredClone(s.log.at(-1));
  const burdenAfter=check.success?Math.max(0,burdenBefore-1):Math.min(10,burdenBefore+2),
   stabilityLoss=check.degree==='severe failure'?2:0;

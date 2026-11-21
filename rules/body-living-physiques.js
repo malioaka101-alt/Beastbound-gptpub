@@ -20,17 +20,7 @@ const ORIGIN='source-earned-individual-living-physique-v1',
  REPEAT='witnessed-original-whole-body-refinement-repetition-v1',
  ADAPTIVE_COOLDOWN=8,
  ADAPTIVE_MENTAL='identity and agency unchanged';
-const SPEC=Object.freeze({
- 5:{name:'Blood-Essence Cycle',kind:'blood',dc:19,energy:3,bonus:2,
-  sources:['circulationMeasurement','metabolicLimit'],
-  nature:'Existing blood, tissue oxygenation, nutrition and compatible energy'},
- 6:{name:'Adaptive Physique Cycle',kind:'adaptive',dc:20,energy:3,bonus:1,
-  sources:['environmentalCondition','reversibleResponse'],
-  nature:'Actually observed bounded and reversible biological response'},
- 7:{name:'Evolved Physique Cycle',kind:'evolved',dc:22,energy:5,bonus:2,
-  sources:['individualConstitution','lifespanBoundary'],
-  nature:'Unique coordinated human physique, vulnerable and metabolic'}
-});
+const Law=require('./body-shared-original-living-physique'),SPEC=Law.SPEC;
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const I=(x,a=0,b=100000000)=>Number.isInteger(x)&&x>=a&&x<=b;
 const S=(x,a=12,b=900)=>typeof x==='string'&&x.trim().length>=a&&x.trim().length<=b;
@@ -473,22 +463,21 @@ function attempt(s,p={},kind='work'){
   throw Error('Observed actual tissue adaptation, independent body limit and repair evidence are required');
  if([...r.attempts,...r.repairs].some(x=>x.source.witnessHash===digest(witness)))
   throw Error('The original bodily experiment cannot be rerolled');
- const minutes=p.minutes??60,spent=kind==='care'?2:sp.energy;
+ const minutes=p.minutes??60,procedure=Law.checkSpec(p.cycle,kind,s.player.attributes.con??10,s.player.skills?.survival?.rank||0,r.strain),spent=procedure.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('Existing physical Stamina cannot sustain this body treatment');
  const start=s.world.minutes,old=r.strain;
  s.player.stamina-=spent;
  s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:(kind==='care'?15:sp.dc),label:'Personally observed '+sp.name+' '+(kind==='care'?'clinical physical correction':'tissue training')});
+ const check=C.check(s,{modifier:procedure.modifier,
+  dc:procedure.dc,label:'Personally observed '+sp.name+' '+(kind==='care'?'clinical physical correction':'tissue training')});
  const e=structuredClone(s.log.at(-1)),earned=check.success?check.progress:0,
   damage=check.degree==='severe failure'?3:0;
  if(kind==='work'){
-  r.points=Math.min(6,r.points+earned);
-  r.strain=Math.min(100,r.strain+damage);
+  const next=Law.workState(r.points,r.strain,check);
+  r.points=next.points;r.strain=next.strain;
   if(damage){Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});}
- }else if(check.success)r.strain=Math.max(0,r.strain-2);
+ }else r.strain=Law.repaired(r.strain,check);
  const src={origin:ORIGIN,kind,cycle:p.cycle,minute:start,minutes,
   staminaSpent:spent,witness,witnessHash:digest(witness),
   check:structuredClone(check),checkEvent:e,checkEventHash:digest(e),
@@ -509,7 +498,7 @@ function complete(s,p={}){
   throw Error('Actual source-earned whole-body integration requires real time and an independent test');
  const {sp}=prerequisite(s,p.cycle);
  const r=s.table?.bodyRefinement?.living?.cycles?.[p.cycle];
- if(!r||!verify(s)||r.points<6||r.strain>2)
+ if(!r||!verify(s)||!Law.ready(r.points,r.strain))
   throw Error('Source-earned tissue refinement and proper physical pressure recovery must precede completion');
  const witness=scene(s,p.witnessIndex,FORM,p.cycle);
  if(!S(witness.details?.integratedFunction,25,900)||
@@ -522,9 +511,9 @@ function complete(s,p={}){
  if(!I(s.player.stamina,spent,100000))throw Error('Real body Stamina insufficient for whole-body integration');
  const before=s.world.minutes,old=s.player.stamina,oldMax=s.player.maxStamina;
  s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:sp.dc+3,label:sp.name+' independent biological integration'});
+ const procedure=Law.checkSpec(p.cycle,'form',s.player.attributes.con??10,s.player.skills?.survival?.rank||0,r.strain);
+ const check=C.check(s,{modifier:procedure.modifier,
+  dc:procedure.dc,label:sp.name+' independent biological integration'});
  const e=structuredClone(s.log.at(-1));let cap=null;
  if(check.success){
   s.player.body.cycles.push(sp.name);
@@ -642,14 +631,12 @@ function assume(s,p={}){
  const wHash=digest(witness);
  if(r.expressions.some(x=>x.source.witnessHash===wHash))
   throw Error('The same original adaptive experiment may not be repeated as a new attempt');
- const spent=Math.ceil(p.minutes/60)+1;
+ const mode=Law.adaptiveSpec(p.minutes,s.player.attributes.con??10,s.player.skills?.survival?.rank||0,r.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original stamina pool cannot support that measured adaptive duration');
  const start=s.world.minutes;s.player.stamina-=spent;
  s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:18,label:'Original verified living adaptive physiology under present conditions'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Original verified living adaptive physiology under present conditions'});
  const event=structuredClone(s.log.at(-1));
  const woundRiskRecorded=check.degree==='severe failure';
  if(woundRiskRecorded){
@@ -659,10 +646,8 @@ function assume(s,p={}){
   duration:p.minutes,staminaSpent:spent,
   witness,witnessHash:wHash,check:structuredClone(check),
   checkEvent:event,checkEventHash:digest(event),roll:check.roll,
-  formed:check.success,activeFrom:start+1,
-  activeUntil:check.success?start+1+p.minutes:null,
+  formed:check.success,...Law.adaptiveWindow(start,p.minutes,check.success),
   cooldownMinutes:ADAPTIVE_COOLDOWN,
-  cooldownUntil:start+1+(check.success?p.minutes:0)+ADAPTIVE_COOLDOWN,
   mentalEffects:ADAPTIVE_MENTAL,woundRiskRecorded};
  const receipt={origin:ORIGIN,source:src,seal:digest(src)};
  r.expressions.push(receipt);
@@ -690,7 +675,7 @@ function release(s,p={}){
  const start=s.world.minutes;
  const src={origin:ORIGIN,kind:'release',minute:start,
   activationSeal:last.seal,witness,witnessHash:wHash,
-  cooldownUntil:start+1+ADAPTIVE_COOLDOWN,
+  cooldownUntil:Law.releaseCooldown(start),
   mentalEffects:ADAPTIVE_MENTAL};
  r.expressions.push({origin:ORIGIN,source:src,seal:digest(src)});
  E.advance(s,1);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
@@ -856,14 +841,13 @@ function tissuePractice(s,p={},kind='tissue-work'){
   throw Error('Independent witnessed original tissue function and physical limit must match this individual anatomy');
  const hash=digest(witness);
  if(tissueKnownWitness(s,hash))throw Error('An individual tissue experiment cannot be rolled twice');
- const spent=kind==='tissue-care'?2:SPEC[p.cycle].energy;
+ const mode=Law.checkSpec(p.cycle,kind==='tissue-care'?'care':'work',
+  s.player.attributes?.con??10,s.player.skills?.survival?.rank||0,t.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original body has insufficient real Stamina for this work');
  const start=s.world.minutes,minutes=p.minutes??60,before=t.strain;
  s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(t.strain/3),
-  dc:kind==='tissue-care'?15:SPEC[p.cycle].dc,
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,
   label:'Personally witnessed '+SPEC[p.cycle].name+' individual '+p.id+' '+kind});
  const event=structuredClone(s.log.at(-1)),earned=
   kind==='tissue-work'&&check.success?check.progress:0;
@@ -924,7 +908,7 @@ function sustain(s,p={}){
  const wHash=digest(witness);
  if((r.upkeep||[]).some(x=>x.source.witnessHash===wHash))
   throw Error('A prior genuine constitutional care episode cannot be rerolled');
- const minutes=p.minutes??60,spent=2;
+ const minutes=p.minutes??60,mode=Law.sustainSpec(s.player.attributes?.con??10,s.player.skills?.survival?.rank||0,r.strain),spent=mode.cost;
  if(!I(s.player.stamina,spent,100000))
   throw Error('The original body lacks stamina for this actual self-care');
  // Physical stock is conserved through the SAME executor as gathering,
@@ -934,9 +918,7 @@ function sustain(s,p={}){
  const start=s.world.minutes;
  U.applyItems(s,foodPlan);
  s.player.stamina-=spent;s.table.combatants.player.stamina=s.player.stamina;
- const check=C.check(s,{modifier:Math.floor(((s.player.attributes?.con??10)-10)/2)+
-  2*(s.player.skills?.survival?.rank||0)-Math.floor(r.strain/3),
-  dc:18,label:'Individually observed Evolved Physique metabolic maintenance'});
+ const check=C.check(s,{modifier:mode.modifier,dc:mode.dc,label:'Individually observed Evolved Physique metabolic maintenance'});
  const rollEvent=structuredClone(s.log.at(-1));
  const supportedMinutes=witness.details.supportedMinutes;
  const src={origin:ORIGIN,kind:'sustain',cycle:7,minute:start,minutes,
@@ -945,7 +927,7 @@ function sustain(s,p={}){
   witness,witnessHash:wHash,check:structuredClone(check),
   checkEvent:rollEvent,checkEventHash:digest(rollEvent),roll:check.roll,
   supportedMinutes,factuallySupported:check.success,
-  maintainedUntil:check.success?start+minutes+supportedMinutes:null};
+  maintainedUntil:Law.sustainedUntil(start,minutes,supportedMinutes,check.success)};
  r.upkeep||=[];r.upkeep.push({origin:ORIGIN,source:src,seal:digest(src)});
  E.advance(s,minutes);W.finalizeTime(s,start);U.sync(s,{source:'legacy'});
  if(!verify(s))throw Error('Saved metabolic care or original body resources cannot be reconciled');

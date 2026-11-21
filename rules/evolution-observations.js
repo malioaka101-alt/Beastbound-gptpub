@@ -38,6 +38,7 @@ function crucible(s,p={}){
     Object.keys(p).some(k=>!['key','eventIndex'].includes(k)))
   throw Error('Crucible years, story source and success cannot be supplied by the caller');
  const {r,b}=current(s,p.key);
+ require('./independent-original-beast-maturity').requireOrdinary(r);
  const record=b.crucibleAssessments?.[r.branchId]?.[String(p.eventIndex)];
  const seen=witnessed(s,record,b,p.eventIndex);
  if(record.branchId!==r.branchId||!['combat','story','progress','world'].includes(seen.event.type))

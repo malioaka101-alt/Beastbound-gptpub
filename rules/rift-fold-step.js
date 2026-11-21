@@ -9,6 +9,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Realm=require('../world/simulation');
 const SOURCE='earned-rift-fold-step-local-geometry-v1',
  WITNESS='gm-witnessed-present-local-fold-geometry-v1';
+const Local=require('./rift-shared-original-local-spatial-law'),Exterior=require('./rift-shared-original-exterior-sense');
 const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const integer=(x,min=0,max=1000000)=>Number.isInteger(x)&&x>=min&&x<=max;
 const phrase=(x,min=25)=>typeof x==='string'&&x.trim().length>=min&&x.trim().length<=900;
@@ -25,12 +26,8 @@ function worldRisk(s){
   !integer(site.seal,0,100)||!integer(eco.pressure,0,100)||
   !['quiet','fading','surging','unstable'].includes(site.phase))
   throw Error('The original measured Riftglass environment is unavailable');
- const severe=site.phase==='unstable'||site.seal<35;
- return {dcRisk:severe?6:
-  site.phase==='surging'||site.charge>72||eco.pressure>73?3:0,
-  identity:digest({phase:site.phase,charge:site.charge,seal:site.seal,
-   pressure:eco.pressure,worldSeed:w.worldSeed,
-   day:Math.floor(s.world.minutes/1440)})};
+ const snapshot=Exterior.snapshot(w,Math.floor(s.world.minutes/1440));
+ return {dcRisk:Local.pressureAdjust(snapshot),identity:Local.pressureIdentity(snapshot)};
 }
 function evidence(s,index){
  if(!integer(index,0,s.log?.length-1))
@@ -240,13 +237,12 @@ function fold(s,p={}){
   require('./rift-boundary-domain').support(s,segmentId):
   {mitigation:0,sourceSeal:null};
  // Domain and local weave share the SAME physical frame; never add both.
- const dc=16+Math.ceil(d.measuredDistanceMetres/4)+risk.dcRisk+
-   Math.floor(strain/12)-Math.max(weave.mitigation,domain.mitigation);
+ const dc=Local.foldSpec(d.measuredDistanceMetres,strain,risk.dcRisk,sourceInt,sourceArcana,weave.mitigation,domain.mitigation).dc;
  const start=s.world.minutes;
  const check=C.check(s,{modifier,dc,
   label:'Original measured short Rift Fold Step'});
  const rollEvent=structuredClone(s.log.at(-1)),
-  added=check.degree==='severe failure'?6:0;
+  added=Local.strainAdded(check);
  if(added){Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});}
  s.player.stamina-=cost;s.table.combatants.player.stamina=s.player.stamina;
  const prev=s.player.rift.step;
@@ -292,4 +288,4 @@ function fold(s,p={}){
   actuallyEarnedDomainSupport:domain.mitigation,
   noVaultAccess:true,noRealmTransit:true,noInventedDestination:true};
 }
-module.exports={SOURCE,WITNESS,status,fold,verify};
+module.exports={SOURCE,WITNESS,status,fold,verify,evidence};

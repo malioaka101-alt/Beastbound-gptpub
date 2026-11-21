@@ -1,0 +1,26 @@
+name: Beastbound Independent Pair Positive Longitudinal
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/living-pair-positive-chain.yml'
+      - 'tests/living-npc-sapient-positive-continuity-assessment.test.js'
+      - 'tests/living-npc-sapient-bilateral-proposal-discussion.test.js'
+      - 'rules/independent-sapient-followup.js'
+      - 'rules/independent-original-bond-interactions.js'
+      - 'rules/independent-original-bond-pair.js'
+      - 'world/sapient-beast-persons.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  distinct-independent-worlds:
+    name: Original real-world consent and later earned pair interaction
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sample 24 genuine independently resolved living worlds
+        run: node tests/living-npc-sapient-positive-continuity-assessment.test.js

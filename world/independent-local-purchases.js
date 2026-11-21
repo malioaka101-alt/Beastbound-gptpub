@@ -106,6 +106,38 @@ function verifyPersonal(p){
    return {valid:false,spentScales:spent,receivedScales:0};
   seenSales.add(row.sourceHash);
  }
+ // Actual original non-consumable examination service is a paid use of
+ // the SAME physical Scales; it does not issue goods, a licence or a Grade
+ // merely because it was purchased. The assessment owner separately replays
+ // its own private choices, biological calibration and actual d20 result.
+ const examOrigin='source-paid-independent-original-numeric-beast-grade-exam-v1',
+  originalExamFee=100,examRows=p?.originalIndependentGradeExams||[];
+ if(!Array.isArray(examRows)||examRows.length>480)
+  return {valid:false,spentScales:spent,receivedScales:received};
+ const usedGradeWitnesses=new Set();
+ for(const row of examRows){
+  const q=row?.source;
+  if(!q||row.seal!==hash(q)||q.origin!==examOrigin||
+   q.actorId!==p.actorId||q.humanHash!==p.originHash||
+   !Number.isInteger(q.minute)||q.minute<0||
+   q.endMinute!==q.minute+q.actualMinutes||
+   q.accepted!==Boolean(q.humanChoice?.accepted&&q.beastChoice?.outcome==='accepted')||
+   !Number.isInteger(q.cashBefore)||q.cashBefore<0||
+   q.cashAfter!==q.cashBefore-(q.accepted?originalExamFee:0)||
+   q.feeScales!==(q.accepted?originalExamFee:0)||
+   (q.accepted&&q.cashBefore<originalExamFee)||
+   q.actualMinutes!==(q.accepted?120:5)||
+   !['academy','crossing'].includes(q.site)||
+   typeof q.witnessHash!=='string'||q.witnessHash.length!==64||
+   usedGradeWitnesses.has(q.witnessHash))
+    return {valid:false,spentScales:spent,receivedScales:received};
+  if(q.accepted){
+   if(!Number.isSafeInteger(spent+originalExamFee))
+    return {valid:false,spentScales:spent,receivedScales:received};
+   spent+=originalExamFee;
+  }
+  usedGradeWitnesses.add(q.witnessHash);
+ }
  return {valid:true,spentScales:spent,receivedScales:received};
 }
 function nextOwnerRng(n){
@@ -142,6 +174,55 @@ function actualInterest(w,p,day){
   !p.independentMarketPurchases?.some(x=>x.source.interestId===row.id))
   .at(-1)||null;
 }
+// An independently travelled human can consider the SAME already owned
+// ration and source-local original price. No invented demand posting or
+// home-region rewrite: signed live visitor arrival is their actual shift.
+function visitorPurchaseSource(w,p,q,sourceHash){
+ const v=q?.visitorSource;
+ if(!v)return false;
+ const Visit=require('../rules/independent-sapient-terrestrial-journey'),
+  Arr=require('../rules/independent-sapient-arrangements'),
+  Food=require('../rules/independent-visitor-ration-trade'),
+  pos=Visit.position(p,v.minute),
+  shift=Visit.visitorPresence(p,v.minute,'crossing'),
+  old=(p.originalSapientTerrestrialJourneys||[]).find(x=>x.seal===v.arrivalSeal);
+ const check=hash({origin:Food.ORIGIN,intentId:v.intentId,
+  actorId:p.actorId,beastId:v.beastId,minute:v.minute,
+  arrivalSeal:v.arrivalSeal,witnessHash:v.witnessHash,
+  choice:v.humanChoice});
+ return v.origin===Food.ORIGIN&&v.actorId===p.actorId&&
+  v.humanHash===p.originHash&&typeof v.beastId==='string'&&
+  typeof v.beastHash==='string'&&v.beastHash.length===64&&
+  v.site==='crossing'&&Number.isInteger(v.minute)&&v.minute>=1440&&
+  v.day===Math.floor(v.minute/1440)&&q.day===v.day&&
+  q.interestId===v.intentId&&v.intentId===Food.id(v)&&
+  v.originalVisitorShiftHash===shift?.hash&&
+  pos?.arrived&&pos.location==='crossing'&&
+  pos.sourceHash===v.arrivalSeal&&
+  old?.source?.beastId===v.beastId&&
+  old.source.beastHash===v.beastHash&&
+  old.source.departed===true&&old.source.to==='crossing'&&
+  old.source.arrivalMinute<=v.minute&&
+  q.independentOriginalPresence?.hash===shift?.hash&&
+  v.purchaseContextHash===check&&
+  // Original market source must match the independently recorded witness,
+  // prior body and species/individual provenance. The seller may not
+  // exchange goods using only a plausible 64-byte invented hash.
+  old.source.beastHash===v.beastHash&&
+  Arr.verifyHuman(v.humanChoice,v.witnessHash)&&
+  v.humanChoice.personality===p.personality&&
+  v.humanChoice.accepted===true&&
+  v.noAssumedAnimalFeeding===true&&
+  v.noOtherSellerOrChosenPurchase===true&&
+  q.originalBuyerChoice===v.humanChoice.rngAfter&&
+  q.individualWillingness===v.humanChoice.chance&&
+  q.individualAccepted===true&&
+  (p.originalVisitorRationRequests||[]).some(r=>
+   r.source?.intentId===v.intentId&&
+   r.source?.purchaseContextHash===v.purchaseContextHash&&
+   r.source?.purchaseSourceHash===sourceHash&&
+   r.source?.accepted===true);
+}
 function verifyOne(w,row){
  const q=row?.source,p=w.emergentPeople?.people?.[q?.personId],
   merchant=w.localProvisioner,acct=w.materialCustody?.accounts?.[q?.actorId],
@@ -168,7 +249,10 @@ function verifyOne(w,row){
   q.independentOriginalPresence?.location!=='crossing'||
   q.independentOriginalPresence?.fromDay>q.day||
   q.independentOriginalPresence?.throughDay<q.day||
-  q.originalDemandHash!==hash(q.originalDemandSource)||
+  (q.visitorSource?(!visitorPurchaseSource(w,p,q,row.sourceHash)||
+   q.originalDemandHash!==undefined||
+   q.originalDemandSource!==undefined):
+   (q.originalDemandHash!==hash(q.originalDemandSource)||
   !['grain','feed'].includes(q.originalDemandSource?.good)||
   q.originalDemandSource?.regionId!=='morrowfen_basin'||
   q.originalDemandSource?.day>=q.day||
@@ -176,17 +260,18 @@ function verifyOne(w,row){
   q.interestId!==q.originalDemandSource?.id||
   !Demand.verifyOne(w,{id:q.interestId,day:q.originalDemandSource.day,
    origin:Demand.ORIGIN,accepted:true,
-   source:q.originalDemandSource,sourceHash:q.originalDemandHash})||
+   source:q.originalDemandSource,sourceHash:q.originalDemandHash})))||
   !Scarcity.verify(q.priceSource,q.priceSourceHash,
    q.paidPriceScales,q.sellerStockBefore)||
   (q.priceSource?.originalPaidDemand!==undefined&&
    !require('../rules/original-paid-demand-price').backedByActualSeller(
     w,q.priceSource.originalPaidDemand))||
-  q.originalBuyerChoice!==Math.floor(independentChoice(p,{
-   sourceHash:q.originalDemandHash})*4294967296)||
-  q.individualWillingness!==chance(q)||
-  q.individualAccepted!==true||
-  q.originalBuyerChoice/4294967296>=q.individualWillingness||
+  (!q.visitorSource&&(
+   q.originalBuyerChoice!==Math.floor(independentChoice(p,{
+    sourceHash:q.originalDemandHash})*4294967296)||
+   q.individualWillingness!==chance(q)||
+   q.individualAccepted!==true||
+   q.originalBuyerChoice/4294967296>=q.individualWillingness))||
   q.noCreditOrGoodsCreated!==true||
   q.noCompulsoryPurchase!==true||
   q.notUniversalPriceOrDemand!==true||
@@ -201,7 +286,7 @@ function verifyOne(w,row){
   return false;
  // Earlier source posts can roll out of the bounded market-interest board;
  // original complete proof stays copied in this real purchase.
- if(interests.some(x=>x.id===q.interestId&&
+ if(!q.visitorSource&&interests.some(x=>x.id===q.interestId&&
   x.sourceHash!==q.originalDemandHash))return false;
  return true;
 }
@@ -324,4 +409,81 @@ function sixday(w,day){
  return {genuineFundedPurchases:bought,
   note:'Only original independently chosen paid purchases alter real stock/currency'};
 }
-module.exports={ORIGIN,verifyPersonal,verifyOne,verify,buy,sixday};
+// Source-bounded physically visiting citizen, not an alternative shop.
+// Called only after fresh original independent buyer acceptance. Conserves
+// the SAME original merchant finite stock, actual Scales and owner holdings.
+function buyVerifiedVisitor(s,p,b,{visitorIntent:it,quoted}={}){
+ const Realm=require('./simulation'),Visit=require('../rules/independent-sapient-terrestrial-journey'),
+  w=Realm.peek(s),vendor=w.localProvisioner,day=Math.floor(s.world.minutes/1440),
+  shift=Visit.visitorPresence(p,s.world.minutes,'crossing');
+ if(!it||!quoted?.canOffer||it.origin!=='real-independent-visitor-funded-original-ration-purchase-v1'||
+  it.actorId!==p.actorId||it.beastId!==b?.id||!it.humanChoice?.accepted||
+  day!==it.day||it.minute!==s.world.minutes||it.site!=='crossing'||
+  shift?.hash!==it.shiftHash||!People.verify(w,p)||!verify(w)||
+  !vendor||vendor.origin!=='established-reedmarch-provisions-v1'||
+  vendor.sellerNpcId!=='otto'||vendor.location!=='crossing'||
+  vendor.item!=='clean_rations'||vendor.stock<1||
+  !Number.isInteger(p.cashScales)||p.cashScales<quoted.priceScales||
+  vendor.fundsScales+quoted.priceScales>100000000)
+  throw Error('Actual self-funded visitor, original saved physical seller and unspent ration stock required');
+ const price=Scarcity.observe(w,vendor),amount=price.source.actualQuotedPriceScales;
+ if(amount!==quoted.priceScales||price.sourceHash!==quoted.originalPriceSourceHash||
+  vendor.stock!==quoted.originalMerchantStock||
+  it.actualPriceScales!==amount||it.originalPriceSourceHash!==price.sourceHash)
+  throw Error('Actual seller inventory and original quoted ration price changed');
+ const v={origin:it.origin,actorId:p.actorId,humanHash:p.originHash,
+  beastId:b.id,beastHash:b.sapientLife.sourceHash,
+  site:'crossing',day,minute:it.minute,arrivalSeal:it.arrivalSeal,
+  originalVisitorShiftHash:it.shiftHash,intentId:it.intentId,
+  witnessHash:it.witnessHash,
+  purchaseContextHash:it.purchaseContextHash,
+  humanChoice:structuredClone(it.humanChoice),
+  noAssumedAnimalFeeding:true,noOtherSellerOrChosenPurchase:true};
+ const q={origin:ORIGIN,id:receiptId(p.id,it.intentId),
+  personId:p.id,actorId:p.actorId,personOriginHash:p.originHash,
+  personName:p.name,sellerId:'otto',sellerName:vendor.seller,
+  sellerLocation:'crossing',sellerRegionId:'morrowfen_basin',
+  item:'clean_rations',quantity:1,day,
+  originalSixdayNumber:w.ticks.sixdays,
+  interestId:it.intentId,
+  independentOriginalPresence:structuredClone(shift),
+  priceSource:price.source,priceSourceHash:price.sourceHash,
+  paidPriceScales:amount,
+  personCashBefore:p.cashScales,
+  personCashAfter:p.cashScales-amount,
+  sellerScalesBefore:vendor.fundsScales,
+  sellerScalesAfter:vendor.fundsScales+amount,
+  sellerStockBefore:vendor.stock,sellerStockAfter:vendor.stock-1,
+  originalBuyerChoice:it.humanChoice.rngAfter,
+  individualWillingness:it.humanChoice.chance,
+  individualAccepted:true,visitorSource:v,
+  noCreditOrGoodsCreated:true,noCompulsoryPurchase:true,
+  notUniversalPriceOrDemand:true};
+ const row={id:q.id,origin:ORIGIN,source:q,sourceHash:hash(q)};
+ if(!verifyPersonal(p).valid||
+  (p.independentMarketPurchases||[]).some(x=>x.id===row.id))
+  throw Error('Prior visitor purchase or person money source is invalid');
+ Handoffs.preflightPurchasedRation(w,p.actorId,row);
+ const before=w.materialCustody?.accounts?.[p.actorId]?.held?.clean_rations??0;
+ if(!Core.conservedItems({sourceBefore:q.sellerStockBefore,
+  sourceAfter:q.sellerStockAfter,targetBefore:before,
+  targetAfter:before+1,amount:1})||
+  !Core.conservedScales({sourceBefore:q.personCashBefore,
+   sourceAfter:q.personCashAfter,targetBefore:q.sellerScalesBefore,
+   targetAfter:q.sellerScalesAfter,amount}))
+  throw Error('Genuine original visitor ration sale must conserve goods and Scales');
+ p.cashScales=q.personCashAfter;
+ p.independentMarketPurchases||=[];p.independentMarketPurchases.push(row);
+ vendor.stock=q.sellerStockAfter;vendor.fundsScales=q.sellerScalesAfter;
+ vendor.independentCustomerPurchases||=[];
+ vendor.independentCustomerPurchases.push(structuredClone(row));
+ vendor.history.push({day,kind:'real-independent-funded-local-sale',
+  buyerId:p.id,item:'clean_rations',quantity:1,
+  paidScales:amount,remainingStock:vendor.stock,
+  remainingScales:vendor.fundsScales,sourceHash:row.sourceHash});
+ if(vendor.history.length>80)vendor.history.shift();
+ Handoffs.creditPurchasedRation(w,p.actorId,row);
+ return {sourceHash:row.sourceHash,amountScales:amount,
+  item:'clean_rations',humanOwnedQuantity:1};
+}
+module.exports={ORIGIN,verifyPersonal,verifyOne,verify,buy,sixday,buyVerifiedVisitor};

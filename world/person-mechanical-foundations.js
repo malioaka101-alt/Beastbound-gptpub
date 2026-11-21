@@ -154,6 +154,19 @@ function earnedEvidence(w,actorId,s=null){
    individualOriginHash:life.sourceHash,
    witnessedEncounterHash:life.source.encounterHash,
    originalSpecies:life.source.species,
+   individuallySourceVerifiedVisitorWelfare:
+    require('../rules/independent-sapient-visitor-welfare').beastStatus(s,{beastId}),
+   independentlyWillingIndividualDietPlans:(life.originalIndividualDietPlans||[]).map(x=>({
+    privateToGM:true,sourceHash:x.seal,individuallyAgreed:x.source.accepted,
+    species:x.source.beastSpecies,originalForm:x.source.beastForm,
+    originalDietaryConsultationMinutes:x.source.elapsedMinutes,
+    noBoughtFoodOrContractOrGrade:true})),
+   individuallySourcedVoluntaryFoodOffers:(life.originalVisitorRationOffers||[]).map(x=>({
+    privateToGM:true,originalSourceHash:x.seal,
+    independentlyAte:x.source.accepted,
+    genuinelyOwnedOneRationConsumed:x.source.foodConsumed,
+    originalHungerImprovement:x.source.hungerBefore-x.source.hungerAfter,
+    noForcedRelationshipOrCare:true})),
    autonomousEarnedWork:{
     sourceHash:practice.sourceHash,
     completedAttempts:practice.attempts,
@@ -219,6 +232,30 @@ function earnedEvidence(w,actorId,s=null){
    privateToGM:true
   }:null;
   const career=actor.career||null;
+  // This private GM view must read the SAME source-owned human Combat body
+  // and individually consented weapon as an actual encounter. The dossier
+  // does not invent either from a profession, age label, or baseline.
+  const inMatchingGame=!!s&&s.table?.realm===w,
+   Health=inMatchingGame?require('../rules/unified'):null,
+   condition=Health?Health.currentNpcWoundCondition(s,actorId):null,
+   combatant=condition?s.table.combatants[condition.combatantId]:null,
+   Combat=combatant?require('../rules/combat'):null,
+   verifiedWeapon=inMatchingGame?
+    require('../rules/equipment').verifiedIndependentWeapon(s,actorId):null,
+   currentCombat=combatant?{
+    originalOwner:'rules/combat.js',combatantId:condition.combatantId,
+    sourceEntrySeal:condition.originalEntrySeal,
+    stamina:combatant.stamina,maxStamina:combatant.maxStamina,
+    defense:combatant.defense,toughness:combatant.toughness,
+    woundBoxes:[...combatant.boxes],wounds:[...combatant.wounds],
+    status:combatant.status,offenseMagnitude:combatant.offM,
+    durabilityMagnitude:combatant.durM,
+    woundPenaltyReduction:combatant.wpr,
+    currentWoundPenalty:Combat.penalty(combatant),
+    workOrPracticeBlocked:condition.workAndOrdinaryPracticeBlocked,
+    equipmentAndPowersDoNotFollowFromStats:true,
+    privateToGM:true
+   }:null;
   // The ORIGINAL discipline owner alone knows whether a personal practice
   // history culminated in a genuinely earned Stage I rite. Ordinary study,
   // career prestige or a raw legacy array remain incapable of awarding it.
@@ -231,38 +268,156 @@ function earnedEvidence(w,actorId,s=null){
    actor.originalEarlyDisciplinePreparation?
    require('../rules/independent-original-discipline-preparation')
     .privateStatus(s,actorId):null;
+  const verifiedArcaneSecond=s?.table?.realm===w&&actor.originalArcaneCircleTwo?
+   require('../rules/independent-original-arcane-circle-two')
+    .privateStatus(s,actor):null;
+  const verifiedArcaneThird=s?.table?.realm===w&&actor.originalArcaneMatrix?
+   require('../rules/independent-original-arcane-matrix-three')
+    .privateStatus(s,actor):null;
+  const verifiedArcaneHigher=s?.table?.realm===w&&actor.originalArcaneHigherArchitecture?
+   require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'arcane'):null;
+  const verifiedSoulHigher=s?.table?.realm===w&&actor.originalSoulHigherArchitecture?
+   require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'soul'):null;
+  const verifiedMaterialCustody=s?.table?.realm===w&&actor.originalMaterialCustody?
+   require('../rules/independent-material-custody').held(s,actor):null;
+  const verifiedOriginIntegration=s?.table?.realm===w&&actor.originalOriginIntegrations?
+   require('../rules/independent-original-origin-integration').privateStatus(s,actor):null;
+  const verifiedOriginResearch=s?.table?.realm===w&&actor.originalOriginPatternResearch?
+   require('../rules/independent-original-origin-research').privateStatus(s,actor):null;
+  const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
+   require('../rules/independent-original-body-cycle-two')
+    .privateStatus(s,actor):null;
+  const verifiedBodyThree=s?.table?.realm===w&&actor.originalBodyOrganCycleThree?
+   require('../rules/independent-original-body-organ-cycle-three')
+    .privateStatus(s,actor):null;
+  const verifiedLivingPhysiques=s?.table?.realm===w&&actor.originalBodyLivingPhysiques?
+   require('../rules/independent-original-body-living-physiques').privateStatus(s,actor):null;
+  const verifiedBodyFour=s?.table?.realm===w&&actor.originalBodyNerveSenseFour?
+   require('../rules/independent-original-body-nerve-sense-four')
+    .privateStatus(s,actor):null;
+  const verifiedSoulTwo=s?.table?.realm===w&&actor.originalSoulThreadTwo?
+   require('../rules/independent-original-soul-thread-two')
+    .privateStatus(s,actor):null;
+  const verifiedSoulThree=s?.table?.realm===w&&actor.originalSoulLatticeThree?
+   require('../rules/independent-original-soul-lattice-three')
+    .privateStatus(s,actor):null;
+  const verifiedRiftExterior=s?.table?.realm===w&&actor.originalRiftMeasuredSense?
+   require('../rules/independent-original-rift-sense-observation')
+    .privateStatus(s,actor):null;
+  const verifiedRiftDomain=s?.table?.realm===w&&actor.originalRiftBoundaryDomains?
+   require('../rules/independent-original-rift-boundary-domain').privateStatus(s,actor):null;
+  const verifiedRiftJourney=s?.table?.realm===w&&actor.originalRiftRealmJourney?
+   require('../rules/independent-original-rift-realm-walking').privateStatus(s,actor):null;
+  const verifiedRiftLocal=s?.table?.realm===w&&actor.originalRiftLocalSpatial?
+   require('../rules/independent-original-rift-local-spatial').privateStatus(s,actor):null;
+  const verifiedRiftAnchorTwo=s?.table?.realm===w&&actor.originalRiftExteriorAnchor?
+   require('../rules/independent-original-rift-exterior-anchor-two')
+    .privateStatus(s,actor):null;
+  const verifiedRiftFieldRest=s?.table?.realm===w&&actor.originalRiftglassFieldRest?
+   require('../rules/independent-riftglass-field-refuge')
+    .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
+  if(verifiedOriginIntegration)originalMilestones.beastOrigin={integrations:verifiedOriginIntegration.stableTraits.length,actualOccupiedLoad:verifiedOriginIntegration.load,sourceVerifiedCandidate:verifiedOriginIntegration.candidate};
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
   if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
    originalMilestones.arcane.coreIgnited=true;
-   originalMilestones.arcane.circles=0;
+   originalMilestones.arcane.circles=verifiedArcaneHigher?verifiedArcaneHigher.earnedStage:verifiedArcaneThird?.sourceVerifiedThirdCircle?
+    3:verifiedArcaneSecond?.sourceVerifiedSecondCircle?
+    2:actor.originalArcaneCore.circles;
   }
   // Only independently earned, fully replayed ORIGINAL individual milestones
   // can establish Phase I, Cycle I or Rift Sense. The same calculation does
   // NOT claim later phases, cycles, spatial steps or learned techniques.
   const earnedOther=verifiedOtherPreparation?.originalSourceEarnedFirstMilestones||{};
   if(earnedOther.soul?.phase===1){
-   originalMilestones.soul.phase=1;
+   originalMilestones.soul.phase=verifiedSoulHigher?verifiedSoulHigher.earnedStage:verifiedSoulThree?.verifiedSoulPhase===3?3:
+    verifiedSoulTwo?.verifiedSoulPhase===2?2:1;
    originalMilestones.soul.soulReserve=earnedOther.soul.soulReserve;
    originalMilestones.soul.perceptionRangeMetres=earnedOther.soul.perceptionRangeMetres;
+   if(verifiedSoulTwo?.verifiedSoulPhase===2){
+    originalMilestones.soul.earnedThreadLinks={...verifiedSoulTwo.mindBodyResonanceLinks};
+    originalMilestones.soul.originalThreadIntegrity=verifiedSoulTwo.earnedThreadIntegrity;
+    originalMilestones.soul.soulReserve=verifiedSoulTwo.maxSoulReserve;
+   }
+   if(verifiedSoulThree?.verifiedSoulPhase===3){
+    originalMilestones.soul.soulReserve=verifiedSoulThree.maxSoulReserve;
+    originalMilestones.soul.perceptionRangeMetres=
+     verifiedSoulThree.actuallyFormedLattice.perceptionRangeMetres;
+    originalMilestones.soul.originalResonanceLattice=
+     structuredClone(verifiedSoulThree.actuallyFormedLattice);
+   }
+   if(verifiedSoulHigher){
+    originalMilestones.soul.soulReserve=verifiedSoulHigher.capacity;
+    originalMilestones.soul.perceptionRangeMetres=require('../rules/build').soulProfile(verifiedSoulHigher.earnedStage,{will:Math.floor((actor.mechanicalFoundation.baselineAttributes.wis-10)/2)}).perceptionRangeMetres;
+   }
   }
   if(earnedOther.body?.completedCycle==='Muscle-Tendon Cycle'){
    originalMilestones.body.completedCycles=['Muscle-Tendon Cycle'];
    originalMilestones.body.originalCurrentStrengthBonus=1;
    originalMilestones.body.realCombatBodyStaminaBonus=2;
   }
+  if(verifiedBodyTwo?.earnedBoneMarrowRefinement===true){
+   originalMilestones.body.completedCycles=['Muscle-Tendon Cycle','Bone-Marrow Cycle'];
+   originalMilestones.body.originalToughnessGain=1;
+   originalMilestones.body.originalSeriousWoundBoxGain=1;
+  }
+  if(verifiedBodyThree?.earnedOrganCycle===true){
+   originalMilestones.body.completedCycles.push('Organ Cycle');
+   originalMilestones.body.originalOrganIntegration={...verifiedBodyThree.organIntegration};
+   originalMilestones.body.originalToughnessGain=2;
+   originalMilestones.body.originalCriticalWoundBoxGain=1;
+   originalMilestones.body.realCombatBodyStaminaBonus=4;
+  }
+  if(verifiedBodyFour?.earnedNerveSenseCycle===true&&
+   originalMilestones.body.completedCycles?.length===3){
+   originalMilestones.body.completedCycles.push('Nerve-Sense Cycle');
+   originalMilestones.body.realCombatBodyStaminaBonus+=verifiedBodyFour.sourceVerifiedStaminaCapacityGain;
+  }
+  if(verifiedLivingPhysiques&&originalMilestones.body.completedCycles?.includes('Organ Cycle')){
+   for(const v of verifiedLivingPhysiques.cycles.filter(x=>x.completed)){
+    originalMilestones.body.completedCycles.push(v.name);
+    originalMilestones.body.realCombatBodyStaminaBonus+=v.sourceVerifiedCapacityGain;
+   }
+  }
   if(earnedOther.rift?.step===1){
-   originalMilestones.rift.step=1;
+   originalMilestones.rift.step=verifiedRiftDomain?.earnedStep??verifiedRiftJourney?.earnedStep??verifiedRiftLocal?.earnedStep??(verifiedRiftAnchorTwo?.verifiedRiftStep===2?2:1);
+   if(verifiedRiftAnchorTwo?.verifiedRiftStep===2)
+    originalMilestones.rift.originalExteriorAnchor=
+     structuredClone(verifiedRiftAnchorTwo.provenRiftglassAnchor);
    originalMilestones.rift.originalLimitedSense=structuredClone(earnedOther.rift.sense);
   }
-  if(verifiedMeridian?.originalMeridianStageEarned===1){
-   originalMilestones.meridian.stage=1;
+  if([1,2,3,4,5,6,7,8,9].includes(verifiedMeridian?.originalMeridianStageEarned)){
+   originalMilestones.meridian.stage=verifiedMeridian.originalMeridianStageEarned;
    originalMilestones.meridian.openedGates=0;
    originalMilestones.meridian.foundationQuality=
     verifiedMeridian.originalStageOneFoundationQuality;
    originalMilestones.meridian.foundationIntegrity=
     verifiedMeridian.originalFoundationIntegrity;
+   if(verifiedMeridian.originalMeridianStageEarned>=2){
+    originalMilestones.meridian.primaryMeridiansMapped=
+     verifiedMeridian.originalStageTwoPrimaryMeridians;
+    originalMilestones.meridian.originalQiCapacityProfile=
+     structuredClone(verifiedMeridian.originalStageTwoQiProfile);
+    if(verifiedMeridian.originalMeridianStageEarned>=3){
+     originalMilestones.meridian.openedGates=
+      verifiedMeridian.originalStageThreeOpenedGates;
+     originalMilestones.meridian.originalVerifiedGateRecords=
+      structuredClone(verifiedMeridian.originalStageThreeIndividualGates);
+     if(verifiedMeridian.originalMeridianStageEarned>=4)
+      originalMilestones.meridian.originalDantianSea=
+       structuredClone(verifiedMeridian.originalStageFourSea);
+     if(verifiedMeridian.originalMeridianStageEarned>=5)
+      originalMilestones.meridian.originalLivingWebRoutes=
+       structuredClone(verifiedMeridian.originalStageFiveWebRoutes);
+     if(verifiedMeridian.originalMeridianStageEarned>=6){
+      originalMilestones.meridian.originalIndividuallyEarnedAdvancedStages=
+       structuredClone(verifiedMeridian.originalAdvancedStages);
+      originalMilestones.meridian.originalCurrentMeridianWork=
+       structuredClone(verifiedMeridian.originalAdvancedCurrentTrack);
+     }
+    }
+   }
   }
   return {known:true,actorId,privateToGM:true,
    evidenceOwners:['world/emergent-people.js','world/person-careers.js',
@@ -271,13 +426,31 @@ function earnedEvidence(w,actorId,s=null){
    // original workplace incidents are real, but no clinical diagnosis,
    // combat wound boxes or age-adjusted abilities can be deduced from them.
    physicalCondition:{ageBand:actor.ageBand,status:actor.status,
-    fatigue:actor.fatigue,currentAttributes:null,wounds:null,
+    fatigue:actor.fatigue,currentAttributes:null,
+    wounds:currentCombat?[...currentCombat.wounds]:null,
     workplaceIncidentEvidence:Careers.workplaceSafetyStatus(actor)
      .map((incident,i)=>({...incident,
       originalSourceHash:actor.career.safetyIncidents[i].sourceHash})),
     originalCareerWorkBlockedByRecoveryStatus:actor.status==='recovering',
     recoveryStatusNotClinicalWoundDiagnosis:true,
-    woundDetailsNotEstablished:true},
+    woundDetailsNotEstablished:!currentCombat,
+    liveCombatSource:currentCombat,
+    liveWoundsFromOriginalCombatOnly:!!currentCombat,
+    independentlyWitnessedVisitorSapientWelfare:
+     inMatchingGame&&actor.originalSapientVisitorRefugeChoices!==undefined?
+      require('../rules/independent-sapient-visitor-welfare').privateStatus(s,actor):null,
+    sourceVerifiedSapientIndividualDietDiscussions:
+     inMatchingGame&&actor.originalSapientVisitorDietDiscussions!==undefined?
+      require('../rules/independent-visitor-sapient-diet-plan').privateStatus(s,actor):null,
+    originalIndependentlyChosenVisitorBeastFood:
+     inMatchingGame&&actor.originalVisitorSapientFoodOffers!==undefined?
+      require('../rules/independent-visitor-sapient-food-offer').privateStatus(s,actor):null,
+    sourceVerifiedIndividualRationPurchases:
+     inMatchingGame&&actor.originalVisitorRationRequests!==undefined?
+      require('../rules/independent-visitor-ration-trade').privateStatus(s,actor):null,
+    independentlyWitnessedVisitorHumanNights:
+     inMatchingGame&&actor.originalVisitorNightRestReceipts!==undefined?
+      require('../rules/independent-original-visitor-night-rest').privateStatus(s,actor):null},
    profession:career?{
     competenceRank:career.competenceRank,skillPoints:career.skillPoints,
     completedWorkChecks:career.workCount,successfulWorkChecks:career.successes,
@@ -315,6 +488,25 @@ function earnedEvidence(w,actorId,s=null){
    // Actual original practice receipts, but NO core ignition, Soul phase,
    // Body cycle, Rift step, free mana or learned technique.
    originalOtherDisciplinePreparation:verifiedOtherPreparation,
+   originalArcaneStructuralArchitecture:verifiedArcaneSecond,
+   originalArcaneResonantMatrix:verifiedArcaneThird,
+   originalArcaneHigherArchitecture:verifiedArcaneHigher,
+   originalOriginPatternResearch:verifiedOriginResearch,
+   originalOriginIntegration:verifiedOriginIntegration,
+   originalOwnedMaterials:verifiedMaterialCustody,
+   originalSoulHigherArchitecture:verifiedSoulHigher,
+   originalBodyBoneMarrowCycle:verifiedBodyTwo,
+   originalBodyOrganCycleThree:verifiedBodyThree,
+   originalBodyNerveSenseFour:verifiedBodyFour,
+   originalBodyLivingPhysiques:verifiedLivingPhysiques,
+   originalSoulMindBodyThreading:verifiedSoulTwo,
+   originalSoulResonanceLatticeThree:verifiedSoulThree,
+   originalRiftExteriorBoundaryReading:verifiedRiftExterior,
+   originalRiftExteriorAnchorMarking:verifiedRiftAnchorTwo,
+   originalRiftLocalSpatial:verifiedRiftLocal,
+   originalRiftRealmJourney:verifiedRiftJourney,
+   originalRiftBoundaryDomains:verifiedRiftDomain,
+   originalRiftglassFieldRefuge:verifiedRiftFieldRest,
    verifiedLearnedTechniques:[],
    unverifiedLegacyClaims:{
     disciplineEntries:Array.isArray(actor.practicedDisciplines)?
@@ -326,11 +518,111 @@ function earnedEvidence(w,actorId,s=null){
    // source. Clothing, tools, weapons and actual worn gear remain unresolved.
    physicalMaterialCustody:Custody.privateHoldingEvidence(w,actorId),
    equipment:{verifiedItems:null,
-    reason:'Verified materials are not proof of equipped tools, weapons or armor'},
-   beastRelationships:{verifiedPartners:null,reason:'Original consent and bond bridge not yet established'},
-   sourceStatus:verifiedMeridian?.originalMeridianStageEarned===1?
-    'Real original Stage I Meridian Foundation and individual daily/work evidence verified; other power systems unresolved':
-    'Earned ordinary work and daily familiarity verified; unearned supernatural stages remain unresolved',
+    // The gift is a physically accepted *owned* weapon, not proof it is
+    // equipped, readied today, or that the adult consents to a fight.
+    acceptedOwnedWeapon:verifiedWeapon?{
+     item:verifiedWeapon.item,
+     originalTransferSourceHash:verifiedWeapon.originalSourceHash,
+     originalPaidAssetRoot:verifiedWeapon.originalPurchasedAssetRoot,
+     originalAction:structuredClone(verifiedWeapon.actualMundaneAction),
+     noInferredCombatRank:true,
+     noAutomaticEquippingOrCombatConsent:true
+    }:null,
+    ownershipCheckedAgainstOriginalEquipmentOwner:inMatchingGame,
+    reason:verifiedWeapon?
+     'Accepted and source-owned weapon; present readiness still requires live encounter evidence':
+     'Verified materials are not proof of equipped tools, weapons or armor'},
+   beastRelationships:{verifiedPartners:inMatchingGame&&actor.originalBondInteractions!==undefined?
+     require('../rules/independent-original-bond-interactions').privateStatus(s,actor).filter(x=>x.bond.contract).map(x=>({beastId:x.beastId,contract:x.bond.contract,sourceHash:x.contractReceipt})):null,
+    reason:'Only actual original source-verified magical contracts are listed',
+    ...(inMatchingGame&&actor.originalIndependentGradeExams!==undefined?
+     {sourceVerifiedPrivateIndividualGradeExams:require('../rules/independent-original-beast-grade-exam')
+      .privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
+     {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientTerrestrialJourneys!==undefined?
+     {sourceVerifiedActualTerrestrialJourneys:require('../rules/independent-sapient-terrestrial-journey').privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientTerrestrialProposals!==undefined?
+     {sourceVerifiedTerrestrialProposals:require('../rules/independent-sapient-terrestrial-proposal').privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientRenewedContacts!==undefined?
+     {sourceVerifiedRenewedSapientContacts:require('../rules/independent-sapient-followup')
+      .privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
+     {sourceVerifiedProposalDiscussions:require('../rules/independent-sapient-proposal-discussions')
+      .privateStatus(s,actor)}:{}),
+    ...(inMatchingGame&&actor.originalSapientArrangements!==undefined?
+     {sourceVerifiedSocialArrangements:require('../rules/independent-sapient-arrangements')
+      .privateStatus(s,actor)}:{})},
+   sourceStatus:[
+    verifiedMeridian?.originalMeridianStageEarned>=1?
+     'Meridian Stage '+verifiedMeridian.originalMeridianStageEarned:null,
+    originalMilestones.arcane.circles===3?'Arcane Third Circle':
+    originalMilestones.arcane.circles===2?'Arcane Second Circle':
+    originalMilestones.arcane.circles===1?'Arcane First Circle':
+     originalMilestones.arcane.coreIgnited?'Arcane Mana Core':null,
+    originalMilestones.soul.phase===3?'Soul Phase III Resonance Lattice':
+    originalMilestones.soul.phase===2?'Soul Phase II Threading':
+    originalMilestones.soul.phase===1?'Soul Phase I':null,
+    originalMilestones.body.completedCycles?.includes('Evolved Physique Cycle')?'Body Evolved Physique Cycle VII':
+    originalMilestones.body.completedCycles?.includes('Adaptive Physique Cycle')?'Body Adaptive Physique Cycle VI':
+    originalMilestones.body.completedCycles?.includes('Blood-Essence Cycle')?'Body Blood-Essence Cycle V':
+    originalMilestones.body.completedCycles?.includes('Nerve-Sense Cycle')?
+     'Body Nerve–Sense Cycle IV':
+    originalMilestones.body.completedCycles?.length===3?
+     'Body Integrated Organ Cycle III':
+    originalMilestones.body.completedCycles?.length===2?
+     'Body Bone–Marrow Cycle II':
+    originalMilestones.body.completedCycles?.length===1?
+     'Body Muscle–Tendon Cycle I':null,
+    originalMilestones.rift.step===8?'Boundary Domain VIII':
+    originalMilestones.rift.step===7?'Realm Walking VII':
+    originalMilestones.rift.step===6?'Rift Adaptation VI':
+    originalMilestones.rift.step===5?'Pocket Architecture V':
+    originalMilestones.rift.step===4?'Boundary Weaving IV':
+    originalMilestones.rift.step===3?'Fold Step III':
+    originalMilestones.rift.step===2?'Rift Anchor II':
+    originalMilestones.rift.step===1?'Rift Sense I':null
+   ].filter(Boolean).join(', ')||
+    'Ordinary career and independent life only; no source-earned supernatural milestone',
+   originalPowerReadiness:{
+    // Source-earned Core/Phase/Sense/Body are not the same as a learned
+    // spell, soul art, physical combat technique or arbitrary Rift travel.
+    meridianQi:verifiedMeridian?.originalMeridianStageEarned>=2?
+     structuredClone(verifiedMeridian.originalStageTwoQiProfile):null,
+    arcaneManaCore:originalMilestones.arcane.coreIgnited===true?
+     (originalMilestones.arcane.circles>=2?
+      require('../rules/build').arcaneProfile(originalMilestones.arcane.circles).mana:
+      actor.originalArcaneCore.structuredMana):null,
+    arcaneAvailableMana:verifiedArcaneHigher?.currentEnergy??verifiedArcaneThird?.currentMana??
+     verifiedArcaneSecond?.currentMana??null,
+    originalArcaneCircles:originalMilestones.arcane.circles,
+    arcaneSpellStillUnproven:
+     originalMilestones.arcane.coreIgnited===true,
+    originalSoulReserveCapacity:originalMilestones.soul.phase>=1?
+     originalMilestones.soul.soulReserve:null,
+    actualSoulReserveAvailable:verifiedSoulHigher?.currentEnergy??verifiedSoulThree?.currentSoulReserve??
+     verifiedSoulTwo?.currentSoulReserve??null,
+    originalSoulResonanceLattice:verifiedSoulThree?.actuallyFormedLattice||null,
+    soulArtsStillUnproven:true,
+    originalBodyCycleWeaponForce:
+     originalMilestones.body.completedCycles?.length>=1?1:null,
+    originalBodyBoneMarrowAnatomy:verifiedBodyTwo?.earnedBoneMarrowRefinement?
+     {toughnessGain:1,seriousWoundBoxGain:1,
+      originalCombatSourceRequired:true}:null,
+    originalBodyOrganPhysiology:verifiedBodyThree?.earnedOrganCycle?
+     {organs:{...verifiedBodyThree.organIntegration},
+      staminaCapacityGain:2,toughnessGain:1,criticalWoundBoxGain:1,
+      originalCombatSourceRequired:true,noAutomaticTechnique:true}:null,
+    originalBodyNeuralPhysiology:verifiedBodyFour?.earnedNerveSenseCycle?
+     {staminaCapacityGain:verifiedBodyFour.sourceVerifiedStaminaCapacityGain,
+      originalCombatSourceRequired:true,noAutomaticTechniqueOrBeastSense:true}:null,
+    originalRiftSense:originalMilestones.rift.step>=1?
+     structuredClone(originalMilestones.rift.originalLimitedSense):null,
+    actualExteriorRiftglassReading:verifiedRiftExterior?.originalReading||null,
+    earnedExteriorRiftglassAnchor:verifiedRiftAnchorTwo?.provenRiftglassAnchor||null,
+    riftFoldStepNotLearned:true,
+    actionNeedsOriginalSourceAndLiveResources:true,privateToGM:true
+   },
    noAbilityByTitle:true,noRetrospectivePower:true};
  }
  if(actorId.startsWith('notable:')){

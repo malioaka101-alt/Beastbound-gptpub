@@ -49,7 +49,7 @@ function safe(s){
     !c||c.status!=='ok')
   throw Error('Lineage research requires a present physical scene and a stable conscious human, not an unresolved encounter');
 }
-function gmSource(s,sourceId){
+function gmSource(s,sourceId,actorId='player'){
  if(!id(sourceId))throw Error('An actual GM-registered individual source ID is required');
  const z=s.table?.originTraitSources?.[sourceId],q=z?.source;
  if(!z||z.origin!==SOURCE||z.seal!==hash(q)||!q||
@@ -72,6 +72,9 @@ function gmSource(s,sourceId){
   q.observation.details?.location!==q.location||
   q.location!==q.observation.details.location)
   throw Error('A genuine separately witnessed individual Origin Pattern and its acquisition rights must be registered by the GM');
+ const observedActor=q.observation.details.actorId;
+ if(actorId==='player'?(observedActor!==undefined&&observedActor!=='player'):observedActor!==actorId)
+  throw Error('This registered Origin source belongs to a different individual');
  // Even an authentic study source with unresolved rights grants no right to
  // acquire or seed its tissue. The executable integration stages are separate.
  return {z,q};
@@ -92,6 +95,11 @@ function modifier(s,attribute,skill){
  const a=C.int(s.player.attributes?.[attribute],'earned '+attribute,1,30),
  rank=C.int(s.player.skills?.[skill]?.rank??0,'earned '+skill,0,5);
  return Math.floor((a-10)/2)+2*rank;
+}
+// Original map calculation, shared with independently witnessed research.
+function mappingSpec(load,minutes,intelligence,researchRank,aptitudeModifier){
+ return {dc:15+Math.min(4,load),stamina:Math.ceil(minutes/120),
+  modifier:Math.floor((intelligence-10)/2)+2*researchRank+aptitudeModifier};
 }
 function records(s){return s.table?.originLineageStudies||{}}
 function checkIntegrity(c){
@@ -191,8 +199,9 @@ function map(s,p={}){
   throw Error('Actual physical stamina is needed to study this lineage');
  archive(s,q.observation);archive(s,seen);
  const start=s.world.minutes,aptitude=Potential.read(s,'bloodlineExpression');
- const check=C.check(s,{modifier:modifier(s,'int','research')+aptitude.modifier,
-  dc:15+Math.min(4,q.integrationLoad),
+ const mode=mappingSpec(q.integrationLoad,minutes,s.player.attributes.int,s.player.skills?.research?.rank??0,aptitude.modifier);
+ const check=C.check(s,{modifier:mode.modifier,
+  dc:mode.dc,
   label:'Individual Origin Pattern mapping: '+q.traitName.slice(0,40)});
  const event=structuredClone(s.log.at(-1)),earned=check.success?check.progress:0;
  const r=old||{origin:ORIGIN,sourceId:p.sourceId,sourceSeal:z.seal,
@@ -215,6 +224,27 @@ function map(s,p={}){
 const METHODS=Object.freeze({physical:['wis','medicine'],
  energetic:['int','arcana'],spiritual:['wis','cultivation'],
  'trait-conflict':['int','research']});
+// Original clinical caution law, reused with a verified individual body
+// snapshot. Missing anatomy is NOT an ordinary healthy baseline.
+function screeningRisks(axis,q,body,details){
+ const {origin:o,evolutionStability,soulStability,externalThroughput}=body,risk=[];
+ if(!AXES.includes(axis)||!o||!integer(o.capacity,0,100)||!integer(o.load,0,100)||
+  !Array.isArray(o.stableTraits)||o.load>o.capacity)throw Error('Existing human Origin load or inherited anatomy is inconsistent');
+ if(o.load+q.integrationLoad>o.capacity)risk.push('Original human biological Origin capacity is already insufficient');
+ if(axis==='physical'&&evolutionStability<60)risk.push('Actually recorded human evolutionary stability requires recovery');
+ if(axis==='spiritual'&&soulStability<65)risk.push('Original individual soul integrity needs observed care');
+ if(axis==='trait-conflict'&&o.stableTraits.length&&!details?.measuredExistingTraitInteractions)
+  risk.push('Existing integrated trait interactions have not been independently examined');
+ if(axis==='energetic'&&q.energyMode!=='metabolic'&&!externalThroughput)
+  risk.push('No established external magical or meridian energy throughput');
+ return risk;
+}
+function screeningSpec(load,minutes,attribute,rank,aptitudeModifier,risks){
+ C.int(attribute,'earned attribute',1,30);C.int(rank,'earned skill rank',0,5);
+ return {dc:15+Math.min(4,load)+Math.min(3,risks.length),stamina:Math.ceil(minutes/120),
+  modifier:Math.floor((attribute-10)/2)+2*rank+aptitudeModifier};
+}
+const screenResult=(check,risks)=>check.success?(risks.length?'caution':'promising'):'inconclusive';
 function screen(s,p={}){
  if(!only(p,['sourceId','axis','witnessIndex','minutes'])||
   !id(p.sourceId)||!AXES.includes(p.axis)||
@@ -228,35 +258,21 @@ function screen(s,p={}){
  const seen=witness(s,p.witnessIndex,SCREEN,p.sourceId,p.axis),wHash=hash(seen);
  if(Object.values(r.screens).flat().some(a=>a.source.witnessHash===wHash))
   throw Error('An original clinical compatibility observation cannot be rolled twice');
- const risk=[],pchar=s.player,o=pchar.origin;
- if(!o||!integer(o.capacity,0,100)||!integer(o.load,0,100)||
-  !Array.isArray(o.stableTraits)||o.load>o.capacity)
-  throw Error('Existing human Origin load or inherited anatomy is inconsistent');
- if(o.load+q.integrationLoad>o.capacity)
-  risk.push('Original human biological Origin capacity is already insufficient');
- if(p.axis==='physical'&&(pchar.humanEvolution?.stability??0)<60)
-  risk.push('Actually recorded human evolutionary stability requires recovery');
- if(p.axis==='spiritual'&&(pchar.soul?.stability??0)<65)
-  risk.push('Original individual soul integrity needs observed care');
- if(p.axis==='trait-conflict'&&o.stableTraits.length&&
-    !seen.details?.measuredExistingTraitInteractions)
-  risk.push('Existing integrated trait interactions have not been independently examined');
- if(p.axis==='energetic'&&q.energyMode!=='metabolic'&&
-   !pchar.arcane?.coreIgnited&&!pchar.meridian?.stage)
-  risk.push('No established external magical or meridian energy throughput');
- // That last finding is a contextual caution, never a blanket requirement
- // that ordinary inherited biological traits have a Mana Core or a teacher.
+ const pchar=s.player,risk=screeningRisks(p.axis,q,{origin:pchar.origin,
+  evolutionStability:pchar.humanEvolution?.stability??0,soulStability:pchar.soul?.stability??0,
+  externalThroughput:!!(pchar.arcane?.coreIgnited||pchar.meridian?.stage)},seen.details);
  const minutes=p.minutes??90,staminaSpent=Math.ceil(minutes/120);
  if(!integer(pchar.stamina,staminaSpent,100000))
   throw Error('Actual stamina is needed for lineage compatibility measurement');
  archive(s,q.observation);archive(s,seen);
  const method=METHODS[p.axis],start=s.world.minutes,
   aptitude=Potential.originAxis(s,p.axis);
- const check=C.check(s,{modifier:modifier(s,method[0],method[1])+aptitude.modifier,
-  dc:15+Math.min(4,q.integrationLoad)+Math.min(3,risk.length),
+ const mode=screeningSpec(q.integrationLoad,minutes,pchar.attributes[method[0]],pchar.skills?.[method[1]]?.rank??0,aptitude.modifier,risk);
+ const check=C.check(s,{modifier:mode.modifier,
+  dc:mode.dc,
   label:'Original individual Origin '+p.axis+' compatibility'});
  const rollEvent=structuredClone(s.log.at(-1));
- const result=check.success?(risk.length?'caution':'promising'):'inconclusive';
+ const result=screenResult(check,risk);
  const src={origin:ORIGIN,kind:'screen',axis:p.axis,
   sourceId:p.sourceId,minute:start,minutes,staminaSpent,witness:seen,
   witnessHash:wHash,potentialAptitude:aptitude,
@@ -288,5 +304,5 @@ function status(s){
   noAutomaticOriginTraitOrHumanEvolution:true};
 }
 module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,
- hash,gmSource,witness,records,checkIntegrity,witnessed,archive,
+ hash,gmSource,witness,records,checkIntegrity,witnessed,archive,mappingSpec,METHODS,screeningRisks,screeningSpec,screenResult,
  map,screen,status,verify};

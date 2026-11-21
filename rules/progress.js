@@ -145,7 +145,30 @@ function applyForm(s,r,b){
  r.evolved=true;r.needsVerifiedFormProfile=false;r.years=Math.min(r.years,r.requiredYears);
  return {old,newForm:f.formName,newSpecies:f.species,abilities:f.abilities.map(a=>a.name),needs:f.needs};
 }
-function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsent=false,informedConsent=false,care={}}={}){
+// Shared original trial law. A source-owner establishes actual consent,
+// measured anatomy and access before entering this resolver.
+function evolutionTrialSpec(r,careBonus=0){
+ const gate=status(r),verified=r.eventStats,
+ kindBonus=r.kind==='hidden'&&r.documented?2:r.kind==='rare'?2:['hidden','legendary'].includes(r.kind)?4:0;
+ return {dc:10+2*r.grade+kindBonus+2*gate.knownUnmet+gate.potentialStrain,
+  trials:r.grade<=3?1:r.grade<=6?3:5,needed:r.grade<=3?1:r.grade<=6?2:3,
+  modifier:verified.vigor+verified.will+(r.potential-3)+careBonus};
+}
+function evolutionEvent(s,r,params={}){
+ return resolveEvolution(s,r,params,null);
+}
+// Internal-only adapter; never exposed as an arbitrary public roll owner.
+// The native rite owner supplies exact source-specific observed assent and
+// validates that no handler-facility/catalyst benefit has been assumed.
+function nativeEvolutionEvent(s,r,source,life){
+ const b=s.beasts?.[r.beastId];
+ if(!b||life!==b.individualLife||b.owner!==null||b.relationship!=='wild'||
+  s.player.partnerIds?.includes(b.id)||!r.independentMaturity||
+  !require('./independent-original-native-evolution').acceptedContext(s,r,b,source))
+  throw Error('A genuine independently chosen native self-rite is required');
+ return resolveEvolution(s,r,{source,beastWilling:true},life);
+}
+function resolveEvolution(s,r,{vigor,will,source,beastWilling=false,guardianConsent=false,informedConsent=false,care={}}={},life=null){
  const b=s.beasts?.[r.beastId];if(!b)throw Error('Evolution beast missing');
  if(typeof source!=='string'||source.trim().length<12)throw Error('Evolution Event requires an established scene, catalysts and source');
  if(r.blocked||r.evolved)throw Error('This branch has already closed or evolved');
@@ -157,7 +180,7 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
   throw Error('A known non-time evolution prerequisite is unmet; no rite can bypass it by rolling high');
  const B=require('./bonds');
  const consent=B.consentGuard(b,{beastWilling,guardianConsent,informedConsent});
- if(!consent.eligible||b.consent!==true)throw Error('Evolution requires actual voluntary willingness and appropriate protected-mind/informed consent');
+ if(!consent.eligible||(!life&&b.consent!==true))throw Error('Evolution requires actual voluntary willingness and appropriate protected-mind/informed consent');
  if(vigor!==undefined||will!==undefined)throw Error('Evolution Vigor/Will may not be supplied at attempt time; use a previously recorded, sourced beast profile');
  const verified=r.eventStats;
  if(!verified||typeof verified.basis!=='string')throw Error('Evolution requires a precommitted, sourced Vigor/Will record');
@@ -169,14 +192,10 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
   const c=s.table?.combatants?.['beast:'+b.id];
   if(c&&(c.wounds?.some(v=>v>0)||c.status!=='ok'))throw Error('Wounded beast requires a pre-established form and wound transfer plan');
  }
- const careBonus=evolutionCare(s,b,care);
- const kindBonus=r.kind==='hidden'&&r.documented?2:r.kind==='rare'?2:['hidden','legendary'].includes(r.kind)?4:0;
- const dc=10+2*r.grade+kindBonus+2*gate.knownUnmet+gate.potentialStrain;
- const trials=r.grade<=3?1:r.grade<=6?3:5;
- const needed=r.grade<=3?1:r.grade<=6?2:3;
- const bonus=verified.vigor+verified.will+(r.potential-3)+careBonus;
+ const careBonus=life?0:evolutionCare(s,b,care);
+ const {dc,trials,needed,modifier:bonus}=evolutionTrialSpec(r,careBonus);
  const results=[];
- for(let i=0;i<trials;i++)results.push(C.check(s,{modifier:bonus,dc,label:`${b.name} Evolution ${i+1}/${trials}`}));
+ for(let i=0;i<trials;i++)results.push(C.check(s,{modifier:bonus,dc,label:`${b.name} Evolution ${i+1}/${trials}`,...(life?{independentRngOwner:life,privateDisplay:true}:{})}));
  const successes=results.filter(x=>x.success).length, severe=results.some(x=>x.degree==='severe failure');
  let outcome,complication=null;
  if(gate.unknownUnmet){outcome=severe?'twisted transformation; nature uncertain':'stalled';
@@ -187,7 +206,7 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
   r.appliedFormSummary=applied;
  }else if(!severe){outcome='stalled until next season';r.stalledUntilDay=E.day(s)+90;}
  else{
-  const roll=C.die(s);
+  const roll=C.die(life||s);
   const condition=roll<=6?'illness':roll<=10?'lost technique':roll<=13?'malformation':roll<=16?'permanent branch closure':roll<=19?'twisted branch':'critical collapse';
   complication={roll,condition,requiresAdjudication:condition!=='permanent branch closure'};
   outcome='failed evolution: '+condition;
@@ -197,7 +216,7 @@ function evolutionEvent(s,r,{vigor,will,source,beastWilling=false,guardianConsen
  }
  r.lastEvent={outcome,day:E.day(s),dc,trials,needed,successes,
   potentialStrain:gate.potentialStrain,source:source.trim().slice(0,180),complication};
- C.event(s,'progress',`${b.name}: evolutionary transformation ${outcome}.`,{beastId:b.id,branchId:r.branchId,dc,successes,needed,outcome,complication});
+ if(!life)C.event(s,'progress',`${b.name}: evolutionary transformation ${outcome}.`,{beastId:b.id,branchId:r.branchId,dc,successes,needed,outcome,complication});
  return {outcome,dc,successes,needed,rolls:results.map(x=>({roll:x.roll,total:x.total,degree:x.degree})),
   complication,confirmedForm:r.evolved?b.evolutionStage:null,formChange:r.evolved?r.appliedFormSummary:null,requiresFormProfile:false,
   noUnverifiedAbilitiesGranted:true};
@@ -276,5 +295,5 @@ function xpToNext(level,rate='Average'){
  const floor=Math.floor(x);
  return x-floor===.5?(floor%2===0?floor:floor+1):Math.round(x); // Python's ties-to-even
 }
-module.exports={multiplier,maturityAdvance,register,get,status,publicStatus,ripening,patternEcho,eventGate,crucible,recogniseSigns,evolutionCare,evolutionEvent,validateFormProfile,
+module.exports={multiplier,maturityAdvance,register,get,status,publicStatus,ripening,patternEcho,eventGate,crucible,recogniseSigns,evolutionCare,evolutionEvent,evolutionTrialSpec,nativeEvolutionEvent,validateFormProfile,
  expectedRate,trainingWeek,breakthrough,trainingPP,addPracticePoints,xpToNext};

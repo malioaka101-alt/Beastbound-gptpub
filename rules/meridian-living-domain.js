@@ -213,8 +213,10 @@ function practice(s,p={}){
  const proof=H(witness);
  if(plan.attempts.some(x=>x.source.witnessHash===proof))
   throw Error('One domain scene may not be rolled twice');
- const minutes=p.minutes??45,qiSpent=2+Math.ceil(plan.source.radius/4),
-  staminaSpent=Math.ceil(minutes/90)+2;
+ const minutes=p.minutes??45,
+  law=require('./meridian-shared-original-advanced').law(8,{kind:'practice',
+   radius:plan.source.radius,stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||
   !I(s.player.stamina,staminaSpent,100000))
   throw Error('The observed domain exercise requires actual Qi and Stamina');
@@ -254,8 +256,10 @@ function form(s,p={}){
   throw Error('A local measured domain with an actual environmental countertest is required');
  if(net.domainTests.some(x=>x.source.witnessHash===H(witness)))
   throw Error('A prior real domain formation check cannot be rerolled');
- const minutes=p.minutes??90,qiSpent=6+Math.ceil(plan.source.radius/3),
-  staminaSpent=Math.ceil(minutes/90)+3;
+ const minutes=p.minutes??90,
+  law=require('./meridian-shared-original-advanced').law(8,{kind:'form',
+   radius:plan.source.radius,stability:m.stability,minutes}),
+  qiSpent=law.qiSpent,staminaSpent=law.staminaSpent;
  if(!I(s.player.qi,qiSpent,100000)||!I(s.player.stamina,staminaSpent,100000))
   throw Error('Real energy and tissue recovery are insufficient for domain formation');
  const before=s.world.minutes,oldQi=s.player.qi,oldMax=s.player.maxQi;

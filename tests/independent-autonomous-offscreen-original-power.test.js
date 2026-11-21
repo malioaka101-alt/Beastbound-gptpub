@@ -167,6 +167,17 @@ for(const system of ['arcane','soul','body','rift']){
  A.equal(p.originalOffscreenCombatNights[0].source.originalWitnessedShelterHash,
   p.originalOvernightRestDecisions[0].sourceHash);
  A.equal(Offscreen.verifyNights(s,p),true);
+ // Original bodily evidence has to remain checkable after the bounded
+ // physical-night journal stops retaining a particular past night.
+ const retainedOriginalNight=structuredClone(p.originalOffscreenCombatNights[0]);
+ A.equal(Offscreen.verifyNights(s,p,[retainedOriginalNight]),true,
+  'Exactly the real archived original Combat night remains independently replayable');
+ const falseArchived=structuredClone(retainedOriginalNight);
+ falseArchived.source.after.stamina-=1;
+ falseArchived.seal=require('node:crypto').createHash('sha256').
+  update(JSON.stringify(falseArchived.source)).digest('hex');
+ A.equal(Offscreen.verifyNights(s,p,[falseArchived]),false,
+  'A separately resealed archived night still cannot fake original Combat recovery');
  A.equal(Early.verify(s,p),true);
  const after=E.exportGame(s),reloaded=E.importGame(after),
   rp=Realm.peek(reloaded).emergentPeople.people[p.id];
