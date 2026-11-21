@@ -158,6 +158,7 @@ function replay(s,p,base){
    !eq(q.woundsAfter,injury?[1,0,0]:[0,0,0])||!eq(q.after,snapshot(state))||
    q.actualMinutes!==(q.accepted?q.plannedMinutes:5)||
    q.minute+q.actualMinutes>s.world.minutes)return null;
+  if(p.originalRiftRealmJourney&&require('./independent-original-rift-realm-walking').awayDuring(p,q.minute,q.minute+q.actualMinutes))return null;
   state.end=q.minute+q.actualMinutes;used.add(q.witnessHash);
  }
  if(!verifyTransfers(s,p,l,state,body))return null;
@@ -198,6 +199,7 @@ function verifyTransfers(s,p,l,state,body){
    if(movements.has(q.custodySeal)||!Custody.pocketTransferProof(s,p,q.custodySeal,q.pocketSeal,q.witnessHash,q.minute))return false;
    movements.add(q.custodySeal);
   }else if(q.custodySeal!==null)return false;
+  if(p.originalRiftRealmJourney&&require('./independent-original-rift-realm-walking').awayDuring(p,q.minute,q.minute+5))return false;
   used.add(q.witnessHash);last=q.minute+5;
  }
  if((p.originalMaterialCustody?.rows||[]).some(x=>x.source.kind==='pocket-transfer'&&!movements.has(x.seal)))return false;
