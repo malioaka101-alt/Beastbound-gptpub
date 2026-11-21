@@ -500,6 +500,13 @@ for(let n=0;n<80;n++){
       A.throws(()=>R.act(fs,{system:'bond',operation:'npcPairInteract',
        params:{...requestEvent,affection:100}}),/no outcome or affinity/);
       A.equal(E.exportGame(fs),beforeEvent);
+      if(fs.world.minutes%1440+15>1440){
+       A.throws(()=>R.act(fs,{system:'bond',operation:'npcPairInteract',params:requestEvent}),
+        /Complete original interaction within the witnessed day/);
+       A.equal(E.exportGame(fs),beforeEvent);
+       console.log('INDEPENDENT ORIGINAL FRIENDLY INTERACTION DEFERRED BY REAL DAYLIGHT');
+       continue;
+      }
       const exchange=R.act(fs,{system:'bond',operation:'npcPairInteract',params:requestEvent}),
        actualReceipt=witnessedPerson.originalBondInteractions.at(-1).source;
       A.equal(Interact.verify(fs,witnessedPerson),true);
