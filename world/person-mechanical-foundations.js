@@ -265,6 +265,8 @@ function earnedEvidence(w,actorId,s=null){
    require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'arcane'):null;
   const verifiedSoulHigher=s?.table?.realm===w&&actor.originalSoulHigherArchitecture?
    require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'soul'):null;
+  const verifiedOriginResearch=s?.table?.realm===w&&actor.originalOriginPatternResearch?
+   require('../rules/independent-original-origin-research').privateStatus(s,actor):null;
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
    require('../rules/independent-original-body-cycle-two')
     .privateStatus(s,actor):null;
