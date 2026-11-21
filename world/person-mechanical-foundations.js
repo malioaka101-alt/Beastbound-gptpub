@@ -507,6 +507,9 @@ function earnedEvidence(w,actorId,s=null){
    beastRelationships:{verifiedPartners:inMatchingGame&&actor.originalBondInteractions!==undefined?
      require('../rules/independent-original-bond-interactions').privateStatus(s,actor).filter(x=>x.bond.contract).map(x=>({beastId:x.beastId,contract:x.bond.contract,sourceHash:x.contractReceipt})):null,
     reason:'Only actual original source-verified magical contracts are listed',
+    ...(inMatchingGame&&actor.originalIndependentGradeExams!==undefined?
+     {sourceVerifiedPrivateIndividualGradeExams:require('../rules/independent-original-beast-grade-exam')
+      .privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalBondPairRecognitions!==undefined?
      {sourceVerifiedUncommittedPairs:require('../rules/independent-original-bond-interactions').privateStatus(s,actor)}:{}),
     ...(inMatchingGame&&actor.originalSapientProposalDiscussions!==undefined?
