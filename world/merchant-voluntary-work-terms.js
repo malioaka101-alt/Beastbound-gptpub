@@ -386,6 +386,18 @@ function settle(w,p,{agreementId,workHash,day}={},sourceWorld=null){
  return {...paid,agreementId:q.id,independentMutualConsent:true,
   originalWageTermsSettled:true,noExtraPaymentOrWork:true};
 }
+function settleVisitorService(s,{actorId,agreementId,workHash,...extra}={}){
+ if(Object.keys(extra).length||typeof actorId!=='string'||
+  !/^emergent:person_[0-9]+$/.test(actorId)||
+  typeof agreementId!=='string'||typeof workHash!=='string')
+  throw Error('Original independent market payment accepts only the actual worker and individually completed work receipt, not a chosen amount or success');
+ const w=require('./simulation').peek(s),
+  p=w?.emergentPeople?.people?.[actorId.slice(9)];
+ if(!p||w.emergentPeople?.people?.[p.id]!==p)
+  throw Error('Unknown independently lived visitor cannot be paid');
+ return settle(w,p,{agreementId,workHash,
+  day:Math.floor(s.world.minutes/1440)},s);
+}
 function workerTerms(w,p){
  if(!originalWorker(w,p)||!verify(w))
   throw Error('Only the real individual may inspect their original local work terms');
@@ -398,4 +410,4 @@ function workerTerms(w,p){
    notCompulsoryWork:true,noPayUntilActualSuccessfulWork:true}));
 }
 module.exports={ORIGIN,SETTLEMENT,VISITOR_WORK,negotiate,
- performVisitorService,settle,verify,workerTerms};
+ performVisitorService,settleVisitorService,settle,verify,workerTerms};
