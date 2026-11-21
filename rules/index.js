@@ -696,6 +696,8 @@ function act(s,{system,operation,params={}}={}){
   case 'bond.socialDraft':return require('./beast-social-arrangements').draft(s,params);
   case 'bond.socialNegotiate':return require('./beast-social-arrangements').negotiate(s,params);
   case 'bond.npcSapientProposalDiscussion':return require('./independent-sapient-proposal-discussions').discuss(s,params);
+  case 'bond.npcPairSeal':return require('./independent-original-bond-interactions').seal(s,params);
+  case 'bond.npcPairReview':return require('./independent-original-bond-interactions').review(s,params);
   case 'bond.npcPairInteract':return require('./independent-original-bond-interactions').interact(s,params);
   case 'bond.npcPairRecord':return require('./independent-original-bond-pair').record(s,params);
   case 'bond.npcSapientArrangementAccept':return require('./independent-sapient-arrangements').accept(s,params);
@@ -770,6 +772,8 @@ function act(s,{system,operation,params={}}={}){
    return BD.willingness(s,BD.fromSave(s,params.beastId),{...params,handlerRank:rank});
   }
   case 'bond.seal':{
+   if(require('./independent-original-bond-interactions').activeForBeast(s,params.beastId))
+    throw Error('This independent individual already has an original magical contract; no second player contract');
    // Capacity is a property of the saved handler and *all* active contracts,
    // not numbers a caller may provide to make a seal appear eligible.
    const records=s.table?.bondRecords||{},existingPartners=s.player.partnerIds||[];
