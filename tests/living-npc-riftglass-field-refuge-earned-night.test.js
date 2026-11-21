@@ -85,8 +85,12 @@ for(const refused of independentlyRefusedOrFailed){
 A.equal((p.originalOvernightRestDecisions||[]).length,0,
  'Non-settlement verified field night is not a made-up city room');
 const trulyRenewed=p.originalRiftglassRecover?.renewals||[];
-A.ok(trulyRenewed.length>=1,
- 'This personally source-earned full Riftglass Combat night should permit a later genuinely CHOSEN second Recover, never a free once-per-day recharge');
+// The Night resets the source-owned Recover limit, but it cannot
+// compel a later REST decision or create another independent life day.
+// Some genuine unchosen histories therefore have ZERO renewed uses.
+A.ok(trulyRenewed.length<=
+ (p.originalOffscreenCombatNights||[]).length,
+ 'There can never be more subsequent independent Recover renewals than genuinely completed original nights');
 for(const row of trulyRenewed){
  const reset=row.source.originalCombatNight;
  A.equal(reset.seal,row.source.originalCombatNightSourceHash);
@@ -130,6 +134,19 @@ editedNight.source.originalFieldSurveyHash='f'.repeat(64);
 editedNight.seal=hash(editedNight.source);
 A.equal(Offscreen.verifyNights(fakeNight,np),false,
  'Forging a valid-looking fake wilderness campsite source cannot create night-scale healing');
+const fakeRenewal=E.importGame(saved),
+ fr=Realm.peek(fakeRenewal).emergentPeople.people[p.id],
+ prior=fr.originalRiftglassRecover,
+ counterfeit={...structuredClone(prior.source),
+  origin:Recover.RENEW,
+  previousRecoverSourceHash:prior.seal,
+  originalCombatNight:structuredClone(night),
+  originalCombatNightSourceHash:night.seal,
+  originalRecoverResetOnlyByActualNight:true};
+prior.renewals||=[];
+prior.renewals.push({source:counterfeit,seal:hash(counterfeit)});
+A.equal(Recover.verify(fakeRenewal,fr),false,
+ 'Resealing an invented second Recover is not evidence of a later independently chosen REST day');
 const fakeChoice=E.importGame(saved),pc=Realm.peek(fakeChoice).emergentPeople.people[p.id],
  nightChoice=pc.originalRiftglassFieldRest.attempts.find(x=>x.seal===camp.seal);
 nightChoice.source.nightChoice.accepted=false;
