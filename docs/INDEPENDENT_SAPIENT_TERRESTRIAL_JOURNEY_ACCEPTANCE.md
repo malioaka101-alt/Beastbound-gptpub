@@ -1,6 +1,6 @@
 # Independent human–sapient beast terrestrial journey — source-owner acceptance plan
 
-**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** source-verified original linked-leg preflight and freely decided travel proposals passed. A first restricted same-day physical departure/arrival and visitor-position source owner is now **implemented, with genuine positive departure verification still pending**. No guaranteed return, independent multi-leg trip or Grade examination is claimed.
+**Scope:** Unified Living Character #177, draft PR #188; unrelated to deferred mechanical redesign #189. **Status:** source-verified original linked-leg preflight and freely decided travel proposals passed. A first restricted same-day physical departure/arrival and visitor-position source owner is now **implemented and positively verified across three genuine independent completed journeys**. No guaranteed return, independent multi-leg trip or Grade examination is claimed.
 
 ## Exact original source gap
 
@@ -16,7 +16,7 @@ The new `rules/independent-sapient-terrestrial-journey.js` gives a separate, fre
 
 An actual completed leg replaces the human's home-local appearance with a single source-authenticated visitor presence at the true destination. The old shift and original Combat entry remain historically intact; visitor source is based on the **actual arrival day**. `world/emergent-people.js`, `world/independent-person-lives.js` and `world/independent-original-power-days.js` block simultaneous hometown labour, independent practice or remote cultivation while the person is physically travelling. The sapient individual's own source ledger also records the same leg and destination. `rules/independent-original-beast-grade-exam.js` now requires a verified original arrival source before treating the individual as present at crossing/academy.
 
-Current bounded restrictions are intentional: a linked leg must finish within its original calendar day; arrival does not automatically register return or a safe next leg. A separate 96-world `Beastbound Independent Actual Terrestrial Arrival` regression seeks an **actual independently accepted, successfully paid arrival**, and cannot be accepted merely because a proposal is mutually considered. This physical positive proof and the uninterrupted world-tick return and full six-shard tests remain unresolved.
+Current bounded restrictions are intentional: a linked leg must finish within its original calendar day; arrival does not automatically register return or a safe next leg. [Independent Actual Terrestrial Arrival run 44893914280](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44893914280) **PASSED**: three genuine 75-minute/4-Stamina linked-leg arrivals out of 96 distinct simulated worlds, 15 separate departure refusals and three deferred late-day routes; 76 worlds had source-qualifying histories. No consent was supplied to the independent RNG. Long post-arrival world ticks, independent return and full six-shard tests remain unresolved.
 
 ## Verified original partial source owners — 21 November 2026
 
@@ -24,7 +24,7 @@ The original forest-to-crossing exit genuinely crosses an Atlas regional boundar
 
 The `independent-sapient-terrestrial-proposal.js` owner now records a fresh original linked destination, current individual shift, original Combat source, cost, purpose, risks and withdrawal rights, then independently resolves new human and sapient beast personal choices. Proposal replay is source sealed and no destination location, journey cost, future consent, magical partnership or Grade is granted. [Real 24-world run 44892367392](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44892367392) **PASSED**: 17 independently witnessed proposals, four mutually willing to consider the route, ten human refusals and three beast refusals. [Focused engine run 44892367368](https://github.com/malioaka101-alt/Beastbound-gptpub/actions/runs/44892367368) **PASSED** 35 short original source tests, not the entire six-shard suite.
 
-**Physical linked-leg departure, arrival, temporally exclusive visitor presence and independent return remain unfinished.** Proposals do not establish that anyone has travelled, much less that a Grade examiner has met a sapient beast at crossing or academy.
+**Original first-leg departure, arrival and temporally exclusive visitor presence have source-verified positive examples.** Voluntary return, multi-leg journeys, long-world life and the later Grade examination remain unfinished; a successful trip does not itself prove an accredited examiner has witnessed an individually calibrated Grade.
 
 ## Required original mechanical ownership
 
