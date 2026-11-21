@@ -35,7 +35,7 @@ function witnessValid(p,b,q){
   text(d.examinationSafetyAndLimits)&&d.noInferredGradeOrForcedExamination===true;
 }
 function physical(s,p,b,q,minute){
- const pair=Interaction.current(s,p,q.pairSeal),arr=p.originalSapientArrangements?.find(x=>x.seal===q.arrangementHash);
+ const pair=Interaction.currentAt(s,p,q.pairSeal,minute),arr=p.originalSapientArrangements?.find(x=>x.seal===q.arrangementHash);
  if(!pair||pair.base.source.beastId!==b.id||pair.bond.fractured||
   pair.bond.willingness<30||arr?.source.beastId!==b.id||
   !Pair.revision(arr,minute,q.arrangementRevision)||b.sapience<3||
