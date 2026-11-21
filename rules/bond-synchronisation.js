@@ -232,6 +232,14 @@ function breakthrough(s,b,r,target){
   return {ready:false,reason:'An exceptional bond needs a genuinely designed unique shared method'};
  return {ready:true,proof:event};
 }
+// Original bounded pair training law; actor-specific aptitude, available
+// energy, current relationship and freely accepted exercise are separate.
+function practiceSpec(target,dex,rank,coordination,aptitudeModifier){
+ C.int(target,'target synchronisation stage',1,10);C.int(dex,'Dexterity',1,30);C.int(rank,'Beastcraft',0,5);
+ return {humanCost:2+target,fatigueCost:2+Math.ceil(target/2),energyCost:target>=3?Math.ceil(target/2):0,
+  minutes:25+5*target,dc:11+2*target,modifier:Math.floor((dex-10)/2)+2*rank+
+  Math.floor((coordination||0)/35)+aptitudeModifier};
+}
 function train(s,p={}){
  if(!fields(p,['beastId','witnessIndex','focus'])||typeof p.beastId!=='string')
   throw Error('Pair practice accepts only an existing partner and witnessed scene, never selected rolls or consent');
@@ -246,8 +254,7 @@ function train(s,p={}){
   throw Error('Previously earned pair evidence was altered');
  if(life?.history.some(x=>x.source.kind==='exercise'&&x.source.witnessHash===proof.digest))
   throw Error('One witnessed attempt cannot be rolled again');
- const humanCost=2+target,fatigueCost=2+Math.ceil(target/2),
-  energyCost=target>=3?Math.ceil(target/2):0;
+ const {humanCost,fatigueCost,energyCost,minutes}=practiceSpec(target,10,0,0,0);
  if(!integer(s.player.stamina,humanCost,100000)||
   b.needs.fatigue+fatigueCost>95||
   (energyCost&&(!integer(b.energy,energyCost,100000))))
@@ -262,7 +269,6 @@ function train(s,p={}){
   b.needs.fatigue+=fatigueCost;
   if(energyCost)b.energy-=energyCost;
  }
- const minutes=25+5*target;
  E.advance(s,minutes);require('./world').finalizeTime(s,started);
  if(!decision.yes){
   append(s,b,r,'exercise',{target,witness:structuredClone(proof.event),
@@ -276,9 +282,8 @@ function train(s,p={}){
  const dex=C.int(s.player.attributes.dex,'Dexterity',1,30),
   rank=C.int(s.player.skills?.beastcraft?.rank??0,'Beastcraft',0,5);
  const aptitude=Potential.read(s,'synchronisation');
- const modifier=Math.floor((dex-10)/2)+2*rank+
-  Math.floor((r.coordination||0)/35)+aptitude.modifier;
- const check=C.check(s,{modifier,dc:11+2*target,
+ const sp=practiceSpec(target,dex,rank,r.coordination,aptitude.modifier);
+ const check=C.check(s,{modifier:sp.modifier,dc:sp.dc,
   label:'Independent pairwork '+NAMES[target-1]});
  const checkEvent=structuredClone(s.log.at(-1));
  const checkHash=hash(checkEvent);
@@ -461,4 +466,4 @@ function status(s,p={}){
    witnessedSuccesses:m.successes})),
   note:'Original pair stage only; not human Level, beast Level, magical ownership or guaranteed shared powers'};
 }
-module.exports={SOURCE,SCENE,PROOF,METHOD,train,design,demonstration,status,verify};
+module.exports={practiceSpec,SOURCE,SCENE,PROOF,METHOD,train,design,demonstration,status,verify};
