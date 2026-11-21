@@ -34,6 +34,7 @@ const EXPENSIVE=new Set([
  'knowledge-diffusion.test.js',
  'meridian-npc-actual-unbroken-source-progression.test.js',
  'living-npc-source-born-original-soul-first-stage.test.js',
+ 'living-npc-soul-lattice-three-formation-assessment.test.js',
  'living-npc-original-body-through-organ-three-live.test.js',
  'living-npc-rift-anchor-two-unbroken-source-life.test.js',
  'living-npc-rift-anchor-two-long-form-assessment.test.js',
