@@ -1,0 +1,18 @@
+'use strict';
+// Original spatial physics, shared without inventing a realm passage.
+const Exterior=require('./rift-shared-original-exterior-sense');
+const pressureAdjust=snapshot=>({unstable:6,elevated:3,contained:0})[Exterior.risk(snapshot)];
+function pressureIdentity(v){
+ return Exterior.digest({phase:v.phase,charge:v.charge,seal:v.seal,
+  pressure:v.ecosystemPressure,worldSeed:v.worldSeed,day:v.day});
+}
+function foldSpec(distance,strain,pressure,attribute,rank,weave=0,domain=0){
+ return {dc:16+Math.ceil(distance/4)+pressure+Math.floor(strain/12)-Math.max(weave,domain),
+  modifier:Math.floor((attribute-10)/2)+2*rank,stamina:2,minutes:5};
+}
+function weaveSpec(area,minutes,strain,pressure,attribute,rank){
+ return {dc:18+Math.ceil(area/4)+pressure+Math.floor(strain/12),
+  modifier:Math.floor((attribute-10)/2)+2*rank,stamina:3+Math.ceil(minutes/120),minutes};
+}
+const strainAdded=check=>check.degree==='severe failure'?6:0;
+module.exports=Object.freeze({pressureAdjust,pressureIdentity,foldSpec,weaveSpec,strainAdded});
