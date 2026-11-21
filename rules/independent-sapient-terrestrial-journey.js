@@ -97,9 +97,27 @@ function position(p,minute){
   sourceHash:latest?.seal,arrivalMinute:latest?.source.arrivalMinute};
 }
 function awayDuring(p,start,end){
+ // Date intervals are half-open. A completed original return removes the
+ // away-from-home condition for LATER complete days, never retroactively
+ // awards work, rest or power on the actual travelling day. Use the signed
+ // traveller history; do not infer home from the player's current location.
  if(!integer(start)||!integer(end,start)||!structure(p))return true;
- return (p.originalSapientTerrestrialJourneys||[]).some(x=>
-  x.source.departed&&x.source.minute<end);
+ if(end===start)return false;
+ const trips=(p.originalSapientTerrestrialJourneys||[]).filter(x=>x.source.departed);
+ if(!trips.length)return false;
+ const home=trips[0].source.from,boundaries=[start,end];
+ for(const row of trips){
+  for(const t of [row.source.minute,row.source.arrivalMinute])
+   if(t>start&&t<end)boundaries.push(t);
+ }
+ boundaries.sort((a,b)=>a-b);
+ for(let i=0;i<boundaries.length-1;i++){
+  if(boundaries[i]===boundaries[i+1])continue;
+  const there=position(p,boundaries[i]);
+  if(there?.invalid||there?.inTransit||
+   there?.arrived&&there.location!==home)return true;
+ }
+ return false;
 }
 function visitorPresence(p,minute,location){
  const pos=position(p,minute);
