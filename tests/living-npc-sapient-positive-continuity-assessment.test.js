@@ -30,7 +30,7 @@ for(let i=0;i<24;i++){
   continue;
  }
  summary.genuineWorlds++;
- const proposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL (\\{[^\\n]+\\})/g)]
+ const proposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
  summary.witnessedTerrestrialProposals+=proposals.length;
  summary.mutuallyConsideredOriginalLegs+=proposals.filter(x=>x.result==='both-consider-leg').length;
