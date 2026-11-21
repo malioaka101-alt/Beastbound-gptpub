@@ -16,6 +16,13 @@ const digest=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('he
 const SOUL_COST=2,RIFT_STAMINA=RiftLaw.STAMINA_COST,
  SOUL_MINUTES=6,RIFT_MINUTES=RiftLaw.READ_MINUTES;
 const SOUL='phase1',RIFT='sense';
+// The existing bounded own-Soul Perception check, shared with independent
+// Phase III own-pattern diagnosis. It cannot itself diagnose someone else,
+// repair strain, read a mind or confer a Soul art.
+function ownSoulPerceptionSpec(wis,rank,verifiedThread){
+ return {dc:12,modifier:Math.floor((wis-10)/2)+2*rank+
+  (verifiedThread?2:0),reserveCost:SOUL_COST,minutes:SOUL_MINUTES};
+}
 function noParams(p){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length)
   throw Error('Earned perception abilities accept no chosen target, sensed answer, DC, range, cost, hidden truth or free roll');
@@ -161,7 +168,8 @@ function perceive(s,p={},personalId){
  })();
  const threadBonus=verifiedThreads?2:0;
  const start=s.world.minutes,location=s.world.location,
-  dc=beast||person?14:12,modifier=Math.floor((attr-10)/2)+2*rank+threadBonus+(personal?1:0);
+  own=ownSoulPerceptionSpec(attr,rank,verifiedThreads),
+  dc=beast||person?14:own.dc,modifier=own.modifier+(personal?1:0);
  Core.event(s,'world','The practitioner concentrates on their own established spiritual pattern'+
   (beast?' while a genuinely encountered animal is nearby.':
    person?' while a recently spoken-to person remains present.':'.'),{
@@ -320,4 +328,5 @@ function senseRift(s,p={}){
   noVaultEntry:true,noTeleportation:true,noHiddenRouteRevealed:true};
 }
 module.exports={SOUL_COST,RIFT_STAMINA,SOUL_MINUTES,RIFT_MINUTES,
+ ownSoulPerceptionSpec,
  soulStatus,perceive,focusBonus,useFocus,riftStatus,senseRift};
