@@ -27,6 +27,7 @@ for(let i=0;i<14;i++){
  // Explicit disposable PC-side material fixture, NOT NPC property, a gift,
  // successful construction or historical acquisition claim. The same
  // NPC must voluntarily receive actual stock and perform all original work.
+ require('../rules/unified').ensurePlayer(s);
  s.player.inventory.moss_crystal=2;
  const first=Rules.act(s,{system:'discipline',operation:'npcOriginalFirstMilestone',
   params:{actorId:p.actorId,system:'rift'}});
@@ -85,7 +86,7 @@ for(let i=0;i<14;i++){
   prime={score,seed,s,p,completed};
  // Only the original completed II actor receives this disposable observed
  // local geometry opportunity. Never award II or an extra rest for the test.
- let localSpatial=null;
+ let localSpatial=null,realmJourney=null;
  if(completed&&body.status==='ok'&&body.wounds.every(x=>x===0)&&body.stamina>=2){
   const Local=require('../rules/independent-original-rift-local-spatial'),
    Fold=require('../rules/rift-fold-step'),Weave=require('../rules/rift-boundary-weaving'),
@@ -179,6 +180,7 @@ for(let i=0;i<14;i++){
       const expired=Local.privateStatus(copy,cp).constructedPockets.find(x=>x.pocketId===pocketId);
       A.equal(expired.active,false);A.equal(expired.expiredContentsInaccessible,true);
       A.deepEqual(expired.contents,opened.contents);
+      if(state.earnedStep===6)realmJourney=require('./independent-realm-walking-assessment-helper').assess(s,p);
      }
     }
 
@@ -191,7 +193,7 @@ for(let i=0;i<14;i++){
    localSpatial=Local.privateStatus(s,p);
   }
  }
- reports.push({seed,localSpatial,originalRiftReading:!!p.originalRiftMeasuredSense?.successfulReading,
+ reports.push({seed,localSpatial,realmJourney,originalRiftReading:!!p.originalRiftMeasuredSense?.successfulReading,
   firstSenseAttempts:p.originalRiftMeasuredSense?.attempts?.length||0,
   measuredAnchorChecks:accepted.length,axisGrowth:gained.length,
   axes:p.originalRiftExteriorAnchor?.axes||null,
