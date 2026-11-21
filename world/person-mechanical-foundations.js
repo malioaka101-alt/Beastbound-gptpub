@@ -267,6 +267,8 @@ function earnedEvidence(w,actorId,s=null){
    require('../rules/independent-original-higher-architectures').privateStatus(s,actor,'soul'):null;
   const verifiedMaterialCustody=s?.table?.realm===w&&actor.originalMaterialCustody?
    require('../rules/independent-material-custody').held(s,actor):null;
+  const verifiedOriginIntegration=s?.table?.realm===w&&actor.originalOriginIntegrations?
+   require('../rules/independent-original-origin-integration').privateStatus(s,actor):null;
   const verifiedOriginResearch=s?.table?.realm===w&&actor.originalOriginPatternResearch?
    require('../rules/independent-original-origin-research').privateStatus(s,actor):null;
   const verifiedBodyTwo=s?.table?.realm===w&&actor.originalBodyCycleTwo?
@@ -302,6 +304,7 @@ function earnedEvidence(w,actorId,s=null){
    require('../rules/independent-riftglass-field-refuge')
     .privateStatus(s,actor):null;
   const originalMilestones=emptyMilestones();
+  if(verifiedOriginIntegration)originalMilestones.beastOrigin={integrations:verifiedOriginIntegration.stableTraits.length,actualOccupiedLoad:verifiedOriginIntegration.load,sourceVerifiedCandidate:verifiedOriginIntegration.candidate};
   // The actual original Arcane Core (no Circle, spell or casting formula)
   // is only known after its source-replayed individual ignition rite.
   if(verifiedOtherPreparation?.verifiedArcaneCoreIgnition===true){
@@ -461,6 +464,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalArcaneHigherArchitecture:verifiedArcaneHigher,
    originalOriginPatternResearch:verifiedOriginResearch,
+   originalOriginIntegration:verifiedOriginIntegration,
    originalOwnedMaterials:verifiedMaterialCustody,
    originalSoulHigherArchitecture:verifiedSoulHigher,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
