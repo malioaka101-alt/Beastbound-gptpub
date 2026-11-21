@@ -93,7 +93,20 @@ for(const {s,p,today,seed,intelligence} of sample.slice(0,3)){
   tampered.source.originalSecondCircleSourceHash='0'.repeat(64);tampered.seal=hash(tampered.source);
   A.equal(Third.verify(bad,bp),false);
  }
+ const prep=p.originalEarlyDisciplinePreparation.arcane,
+  firstWork=prep.sessions.filter(x=>x.source.target==='circle1'),
+  firstPaid=firstWork.filter(x=>x.source.origin===Early.ORIGIN&&x.source.accepted),
+  combat=s.table.combatants['npc_'+p.id];
  reports.push({seed,intelligence,days,firstCircle:p.originalArcaneCore.circles,
+  firstCirclePreparation:prep.target==='circle1'?prep.points:null,
+  firstCircleAcceptedPractice:firstPaid.length,
+  firstCircleSuccessfulPractice:firstPaid.filter(x=>x.source.check?.success).length,
+  firstCircleRiteAttempts:firstWork.filter(x=>x.source.origin!==Early.ORIGIN&&x.source.accepted).length,
+  originalEarlySourceRows:prep.sessions.length,
+  earlyLedgerAtCapacity:prep.sessions.length>=480,
+  physicalStamina:combat.stamina,physicalWounds:combat.wounds,
+  verifiedOriginalCombatNights:(p.originalOffscreenCombatNights||[]).length,
+  remainingOriginalCooldownDays:Math.max(0,prep.cooldownUntil-Math.floor(s.world.minutes/1440)),
   second:!!two?.completed,secondIntegrity:two?.integrity??null,
   secondChecks:checks2.length,third:!!three?.completed,thirdProgress:three?.progress??null,
   thirdChecks:checks3.length,actualManaNights:nightHashes.size});
