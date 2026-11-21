@@ -273,6 +273,7 @@ function act(s,{system,operation,params={}}={}){
   case 'arcane.formulaLearn':return require('./arcane-spell-grammar').learn(s,params);
   case 'arcane.formulaCast':return require('./arcane-spell-grammar').cast(s,params);
   case 'arcane.formulaRepair':return require('./arcane-spell-grammar').repair(s,params);
+  case 'arcane.npcHigherWork':return require('./independent-original-higher-architectures').work(s,params,'arcane');
   case 'arcane.higherStatus':return require('./arcane-higher-circles').status(s);
   case 'arcane.higherMap':return require('./arcane-higher-circles').map(s,params);
   case 'arcane.higherWork':return require('./arcane-higher-circles').work(s,params);
@@ -413,6 +414,7 @@ function act(s,{system,operation,params={}}={}){
   case 'soul.latticePractice':return require('./soul-resonance-lattice').practice(s,params);
   case 'soul.latticeRepair':return require('./soul-resonance-lattice').repair(s,params);
   case 'soul.latticeComplete':return require('./soul-resonance-lattice').complete(s,params);
+  case 'soul.npcHigherWork':return require('./independent-original-higher-architectures').work(s,params,'soul');
   case 'soul.higherStatus':return require('./soul-higher-architecture').status(s);
   case 'soul.higherMap':return require('./soul-higher-architecture').map(s,params);
   case 'soul.higherPractice':return require('./soul-higher-architecture').practice(s,params);
