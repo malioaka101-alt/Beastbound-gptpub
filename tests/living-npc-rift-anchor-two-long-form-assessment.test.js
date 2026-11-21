@@ -20,6 +20,7 @@ const A=require('node:assert/strict'),E=require('../engine'),
 const {fixture}=require('./living-npc-original-soul-body-rift-first-milestones.test.js');
 const reports=[];let actualAnchors=0,originalSuccessfulAxes=0,
  acceptedNightCount=0,acceptedAnchorChecks=0,originalSurveyChecks=0,
+ sourceNightResetRecoverRenewals=0,
  trulyCompleted=0,prime=null;
 for(let i=0;i<14;i++){
  const seed=973800+i*17,{s,p,day}=fixture('rift','breakthrough',seed);
@@ -43,12 +44,23 @@ for(let i=0;i<14;i++){
   accepted=anchors.filter(x=>x.source.accepted),
   gained=accepted.filter(x=>x.source.progressEarned>0),
   completed=p.originalRiftExteriorAnchor?.completed===true,
+  earnedRecoverRenewals=p.originalRiftglassRecover?.renewals||[],
   body=s.table.combatants['npc_'+p.id];
  actualAnchors+=anchors.length;
  acceptedAnchorChecks+=accepted.length;
  originalSuccessfulAxes+=gained.length;
  originalSurveyChecks+=camps.length;
  acceptedNightCount+=nights.length;
+ sourceNightResetRecoverRenewals+=earnedRecoverRenewals.length;
+ A.ok(earnedRecoverRenewals.length<=nights.length,
+  'A fully witnessed Combat night can reset the original Recover allowance ONCE, but an ordinary rest day cannot');
+ for(const row of earnedRecoverRenewals){
+  const proof=row.source.originalCombatNight;
+  A.equal(Offscreen.verifyNights(s,p,[proof]),true,
+   'Every renewed Recover requires an already completed, authentic original wilderness night');
+  A.equal(row.source.recoverUsesBefore,0);
+  A.equal(row.source.recoverUsesAfter,1);
+ }
  if(completed)trulyCompleted++;
  for(const night of nights)
   A.equal(Field.verifiedNight(s,p,night.source),true,
@@ -74,6 +86,7 @@ for(let i=0;i<14;i++){
   integrated:p.originalRiftExteriorAnchor?.integrated||false,
   actualFieldSurveys:camps.length,actualFullFieldNights:nights.length,
   physicalStaminaRemaining:body.stamina,
+  originalNightResetCombatRecovers:earnedRecoverRenewals.length,
   originalAnchorCompleted:completed});
 }
 A.ok(originalSurveyChecks>=1,
@@ -90,8 +103,9 @@ A.equal(Offscreen.verifyNights(copy,restored),true);
 A.deepEqual(restored.originalRiftExteriorAnchor,prime.p.originalRiftExteriorAnchor);
 console.log('ORIGINAL RIFT II LONG AUTONOMOUS SOURCE ASSESSMENT PASS: '+
  JSON.stringify({daysPerIndividual:720,individuals:reports.length,
-  originalSurveyChecks,acceptedNightCount,acceptedAnchorChecks,
-  originalSuccessfulAxes,trulyCompleted,reports}));
+  originalSurveyChecks,acceptedNightCount,
+  sourceNightResetRecoverRenewals,
+  acceptedAnchorChecks,originalSuccessfulAxes,trulyCompleted,reports}));
 console.log(trulyCompleted?
  'AUTHENTIC ORIGINAL RIFT II formation exists: three axes and integrated field geometry, no vault Fold or teleport.':
  'Full Rift II formation NOT YET EARNED in this exact 14-life sample; the source-owning RNG, outdoor refuge, real rest and wound rules were never overridden.');
