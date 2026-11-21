@@ -93,6 +93,11 @@ function modifier(s,attribute,skill){
  rank=C.int(s.player.skills?.[skill]?.rank??0,'earned '+skill,0,5);
  return Math.floor((a-10)/2)+2*rank;
 }
+// Original map calculation, shared with independently witnessed research.
+function mappingSpec(load,minutes,intelligence,researchRank,aptitudeModifier){
+ return {dc:15+Math.min(4,load),stamina:Math.ceil(minutes/120),
+  modifier:Math.floor((intelligence-10)/2)+2*researchRank+aptitudeModifier};
+}
 function records(s){return s.table?.originLineageStudies||{}}
 function checkIntegrity(c){
  if(!c||c.rollEvent?.type!=='roll'||c.rollEventHash!==hash(c.rollEvent)||
@@ -191,8 +196,9 @@ function map(s,p={}){
   throw Error('Actual physical stamina is needed to study this lineage');
  archive(s,q.observation);archive(s,seen);
  const start=s.world.minutes,aptitude=Potential.read(s,'bloodlineExpression');
- const check=C.check(s,{modifier:modifier(s,'int','research')+aptitude.modifier,
-  dc:15+Math.min(4,q.integrationLoad),
+ const mode=mappingSpec(q.integrationLoad,minutes,s.player.attributes.int,s.player.skills?.research?.rank??0,aptitude.modifier);
+ const check=C.check(s,{modifier:mode.modifier,
+  dc:mode.dc,
   label:'Individual Origin Pattern mapping: '+q.traitName.slice(0,40)});
  const event=structuredClone(s.log.at(-1)),earned=check.success?check.progress:0;
  const r=old||{origin:ORIGIN,sourceId:p.sourceId,sourceSeal:z.seal,
@@ -288,5 +294,5 @@ function status(s){
   noAutomaticOriginTraitOrHumanEvolution:true};
 }
 module.exports={ORIGIN,SOURCE,MAP,SCREEN,ROUTES,AXES,
- hash,gmSource,witness,records,checkIntegrity,witnessed,archive,
+ hash,gmSource,witness,records,checkIntegrity,witnessed,archive,mappingSpec,
  map,screen,status,verify};
