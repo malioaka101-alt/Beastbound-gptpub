@@ -19,6 +19,7 @@ const GradePreflight=require('../rules/independent-original-beast-grade-prefligh
 const VisitorNight=require('../rules/independent-original-visitor-night-rest');
 const VisitorBeastWelfare=require('../rules/independent-sapient-visitor-welfare');
 const VisitorFoodTrade=require('../rules/independent-visitor-ration-trade');
+const VisitorDiet=require('../rules/independent-visitor-sapient-diet-plan');
 const LocalPurchases=require('../world/independent-local-purchases');
 const GradeDiscussion=require('../rules/independent-original-grade-diagnostic-discussion');
 const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
@@ -613,6 +614,96 @@ for(let n=0;n<80;n++){
         trueArrival:welfareArrival.location,individualChoice:beastRespite.observedChoice,
         sourceFatigueReduction:beastRespite.sourceOwnedFatigueReduction,
         noAddedHumanBeastSocialContractOrFood:true}));
+       // The ORIGINAL native Nightcorvid is canonically an omnivore,
+       // but only the personally witnessed existing provisioner may give
+       // THIS individual a one-serving plan, freely considered by both
+       // independent people. A plan is not a free ration or feeding assent.
+       const dietWorld=E.importGame(E.exportGame(js)),
+        dietPerson=Realm.peek(dietWorld).emergentPeople.people[jp.id],
+        dietBeast=dietWorld.beasts[jb.id],
+        dietMinute=dietWorld.world.minutes,
+        dietDay=Math.floor(dietMinute/1440);
+       let dietServiceDay=dietDay*1440+12*60;
+       if(dietServiceDay<dietMinute)dietServiceDay+=1440;
+       E.advance(dietWorld,dietServiceDay-dietMinute);
+       Time.finalizeTime(dietWorld,dietMinute);
+       const dietAt=Journey.position(dietPerson,dietWorld.world.minutes),
+        dietShift=Journey.visitorPresence(dietPerson,dietWorld.world.minutes,'crossing'),
+        dietScene=dietPerson.name+' and '+dietBeast.name+
+         ' are actually present with Orrin Vale at the existing crossing beast provisioner; he personally observes this actual sapient omnivore and explains a single documented one-ration serving as an optional future feeding plan, without selling or offering it now.';
+       dietWorld.chatRuntime.scene=dietScene;
+       C.event(dietWorld,'story',dietScene,{
+        origin:VisitorDiet.WITNESS,actorId:dietPerson.actorId,
+        beastId:dietBeast.id,
+        humanOriginHash:dietPerson.originHash,
+        beastPersonHash:dietBeast.sapientLife.sourceHash,
+        site:'crossing',minute:dietWorld.world.minutes,
+        originalJourneyArrivalSeal:dietAt.sourceHash,
+        originalVisitorPresenceHash:dietShift.hash,
+        originalSellerId:'otto',sellerName:'Orrin Vale',
+        observedOriginalSpecies:dietBeast.species,
+        originalSpeciesDiet:E.SPECIES[dietBeast.species].diet,
+        originalCurrentForm:dietBeast.evolutionStage,
+        exactObservedServingQuantity:1,
+        originalCompatibleFood:'clean_rations',
+        currentIndividualObservedServingAndSeparateRights:
+         'The genuine original person and source-present beast provisioner observe this exact individual's form, omnivore biology and suitable single clean-ration serving, with no compulsory health or feeding intervention.',
+        notAnExamOrPresumedMedicalTreatment:
+         'This ordinary species-serving consultation is not a diagnostic medical examination, historical accredited Grade reading or forced bodily procedure.',
+        followUpEatingRequiresNewConsentAndRealStock:
+         'The human and sapient individual each retain a fresh independent right to refuse every later real owned ration, and no provisions are supplied today.',
+        noAssumedGuaranteedFoodForAnySpecies:true,
+        noNumericalGradeOrMedicalResult:true,
+        privateToGM:true});
+       const dietArgs={actorId:dietPerson.actorId,beastId:dietBeast.id,
+        witnessIndex:dietWorld.log.length-1},
+        dietBefore=E.exportGame(dietWorld),
+        dietHumanRng=dietPerson.rngState,
+        dietBeastRng=dietBeast.sapientLife.rngState,
+        dietInitialHunger=dietBeast.needs.hunger;
+       const dietPossible=R.act(dietWorld,{system:'bond',
+        operation:'npcVisitorDietReadiness',params:{
+         actorId:dietPerson.actorId,beastId:dietBeast.id}});
+       A.equal(dietPossible.privateToGM,true);
+       A.equal(dietPossible.actualCanonicalDiet,'omnivore');
+       A.equal(dietPossible.actualSourceVisitorAndNamedProvisionerPresent,true);
+       A.equal(E.exportGame(dietWorld),dietBefore);
+       A.throws(()=>R.act(dietWorld,{system:'bond',
+        operation:'npcVisitorDietDiscussion',
+        params:{...dietArgs,quantity:9}}),
+        /no caller diet, portion, plan or consent/);
+       A.equal(E.exportGame(dietWorld),dietBefore);
+       const chosenDiet=R.act(dietWorld,{system:'bond',
+        operation:'npcVisitorDietDiscussion',params:dietArgs});
+       A.equal(chosenDiet.privateToGM,true);
+       A.equal(chosenDiet.noRationBoughtOrFedAndNoGradeOrContract,true);
+       A.equal(dietWorld.world.minutes,dietServiceDay+VisitorDiet.MINUTES);
+       A.equal(dietPerson.rngState!==dietHumanRng,true);
+       A.equal(dietBeast.sapientLife.rngState!==dietBeastRng,
+        dietPerson.originalSapientVisitorDietDiscussions[0].source.humanChoice.accepted);
+       A.equal(dietBeast.needs.hunger,dietInitialHunger);
+       A.equal(VisitorDiet.verify(dietWorld,dietPerson),true);
+       A.equal(Person.verify(dietBeast),true);
+       A.equal(Journey.verify(dietWorld,dietPerson),true);
+       A.equal(chosenDiet.freelyBothAgreedToPlan,!!dietBeast.welfareCarePlan);
+       if(chosenDiet.freelyBothAgreedToPlan){
+        A.equal(VisitorDiet.planVerified(dietWorld,dietBeast,dietBeast.welfareCarePlan),true);
+        const afterDiet=R.act(dietWorld,{system:'bond',
+         operation:'npcVisitorFoodReadiness',params:{
+          actorId:dietPerson.actorId,beastId:dietBeast.id}});
+        A.equal(afterDiet.canOffer,false,
+         'A documented diet plan never creates a real personally owned food portion');
+        A.equal(afterDiet.reason,'no-personally-owned-genuine-original-ration');
+       }
+       const dietSave=E.exportGame(dietWorld),
+        restoredDiet=E.importGame(dietSave),
+        restoredDietPerson=Realm.peek(restoredDiet).emergentPeople.people[jp.id];
+       A.equal(VisitorDiet.verify(restoredDiet,restoredDietPerson),true);
+       A.equal(E.exportGame(restoredDiet),dietSave);
+       console.log('INDEPENDENT ORIGINAL INDIVIDUAL SAPIENT NUTRITION PLAN '+JSON.stringify({
+        authenticSeller:'otto',actualNativeDiet:E.SPECIES[dietBeast.species].diet,
+        independentlyAgreed:chosenDiet.freelyBothAgreedToPlan,
+        noFreeRationOrEatingConsent:true}));
        // An original crossing arrival does not create food or
        // imply that the native sapient individual eats human rations.
        const noFoodBefore=E.exportGame(js),

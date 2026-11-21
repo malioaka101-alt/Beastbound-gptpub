@@ -38,7 +38,8 @@ function setting(s,p,b,minute=s.world.minutes){
  try{diet=BondCare.feedingProfile(s,b);}catch{return null;}
  if(!diet.locations.includes('crossing')||diet.item!=='clean_rations'||
   diet.quantity!==1||!E.SPECIES[b.species]||
-  E.SPECIES[b.species].diet!=='omnivore')return null;
+  E.SPECIES[b.species].diet!=='omnivore'||
+  !require('./independent-visitor-sapient-diet-plan').planVerified(s,b,diet))return null;
  return {pos,shift,diet};
 }
 function witnessValid(p,b,q){

@@ -80,7 +80,8 @@ function actualPair(s,p,b,minute){
  try{feeding=BondCare.feedingProfile(s,b);}catch{return null;}
  if(feeding.item!=='clean_rations'||feeding.quantity!==1||
   !feeding.locations.includes('crossing')||
-  E.SPECIES[b.species]?.diet!=='omnivore')
+  E.SPECIES[b.species]?.diet!=='omnivore'||
+  !require('./independent-visitor-sapient-diet-plan').planVerified(s,b,feeding))
   return null;
  return {pos,shift,feeding};
 }

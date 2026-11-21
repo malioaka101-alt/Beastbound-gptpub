@@ -360,6 +360,8 @@ function act(s,{system,operation,params={}}={}){
   case 'bond.npcVisitorRationPurchase':return require('./independent-visitor-ration-trade').buy(s,params);
   case 'bond.npcVisitorFoodReadiness':return require('./independent-visitor-sapient-food-offer').readiness(s,params);
   case 'bond.npcVisitorFoodOffer':return require('./independent-visitor-sapient-food-offer').offer(s,params);
+  case 'bond.npcVisitorDietReadiness':return require('./independent-visitor-sapient-diet-plan').readiness(s,params);
+  case 'bond.npcVisitorDietDiscussion':return require('./independent-visitor-sapient-diet-plan').discuss(s,params);
   case 'health.linkWitnessedHuman':return Unified.linkWitnessedHuman(s,params);
   case 'health.migrateLegacy':return LegacyInjury.migrate(s,params);
   case 'health.linkBeast':throw Error('Beast combatant measurements must come from the current saved individual combat assessment via combat.begin');

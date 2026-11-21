@@ -190,6 +190,7 @@ function verify(b){
   !verifyTerrestrialBeastReceipts(b,l)||
   !require('../rules/independent-sapient-visitor-welfare').structure(b)||
   !require('../rules/independent-visitor-sapient-food-offer').structure(b)||
+  !require('../rules/independent-visitor-sapient-diet-plan').structure(b)||
   !Practice.verify(l.practice,'sapient:'+b.id,l.sourceHash,aptitude(b))||
   l.noImposedProfession!==true||l.noInferredSociety!==true)
   return false;
