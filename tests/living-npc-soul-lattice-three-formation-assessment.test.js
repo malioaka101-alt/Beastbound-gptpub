@@ -41,7 +41,7 @@ for(const {s,p,day,seed,wis} of candidates.slice(0,4)){
  }
  surveyed++;
  A.equal(Health.verifyNpcNightHistory(s,p.actorId),true);
- for(let interval=0;interval<24;interval++){
+ for(let interval=0;interval<48;interval++){
   const t=s.world.minutes;
   E.advance(s,30*1440);World.finalizeTime(s,t);
   if(p.originalSoulLatticeThree?.formed)break;
@@ -110,7 +110,8 @@ for(const {s,p,day,seed,wis} of candidates.slice(0,4)){
   edited.source.originalFormationCountertestHash='0'.repeat(64);edited.seal=hash(edited.source);
   A.equal(Lattice.verify(bad,bp),false,'A resealed formation without its original countertest is invalid');
  }
- reports.push({seed,wis,threadFormed:!!p.originalSoulThreadTwo?.completed,
+ const higher=r?.formed?require('./independent-higher-architecture-assessment-helper').assess(s,p,'soul',180):null;
+ reports.push({seed,wis,higher,threadFormed:!!p.originalSoulThreadTwo?.completed,
   points:r?.points??0,strain:r?.strain??null,stability:r?.soulStability??null,
   sessions:rows.length,countertests:counters.length,formationAttempts:attempts.length,formed:!!r?.formed});
 }
