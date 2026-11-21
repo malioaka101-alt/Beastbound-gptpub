@@ -709,6 +709,7 @@ function act(s,{system,operation,params={}}={}){
   case 'bond.npcGradeFunding':return require('./independent-original-beast-grade-preflight').fundingStatus(s,params);
   case 'bond.npcGradeCalibrationReadiness':return require('./independent-original-beast-grade-preflight').calibrationSiteReadiness(s,params);
   case 'bond.npcGradeSpecimenEvidence':return require('./independent-original-beast-grade-preflight').specimenEvidence(s,params);
+  case 'bond.npcGradeDiagnosticDiscussion':return require('./independent-original-grade-diagnostic-discussion').discuss(s,params);
   case 'bond.npcGradeExamine':return require('./independent-original-beast-grade-exam').examine(s,params);
   case 'bond.npcPairSeal':return require('./independent-original-bond-interactions').seal(s,params);
   case 'bond.npcPairReview':return require('./independent-original-bond-interactions').review(s,params);

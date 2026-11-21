@@ -16,6 +16,7 @@ const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
 const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
+const GradeDiscussion=require('../rules/independent-original-grade-diagnostic-discussion');
 const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
@@ -351,6 +352,71 @@ for(let n=0;n<80;n++){
         realFacility:'crossing',playerRemains:js.world.location,
         eligible:gradeReady.assessmentEligible,reason:gradeReady.reason,
         noAutomaticGradeOrFee:true}));
+       // Actual first crossing arrival can support a fresh OPTIONAL
+       // discussion, not an accredited assay or a future consent waiver.
+       const diagScene=jp.name+' and '+jb.name+
+        ' are separately deciding whether to ask about a possible future Grade diagnostic at the crossing; no actual examiner or measured method has yet been established.';
+       C.event(js,'story',diagScene,{
+        origin:GradeDiscussion.WITNESS,actorId:jp.actorId,beastId:jb.id,
+        location:'crossing',minute:js.world.minutes,
+        pairSeal:jp.originalBondPairRecognitions.find(x=>
+         x.source.accepted&&x.source.beastId===jb.id)?.seal,
+        arrangementHash:entry.seal,
+        originalSignedVisitorHash:Journey.position(jp,js.world.minutes).sourceHash,
+        originalSapientLifeHash:jb.sapientLife.sourceHash,
+        explainedFutureMethodAndExamAreNotYetEstablished:
+         'There is presently no verified individual measurement rubric, method or accredited specialist on offer.',
+        separateUnconditionalRightToDecline:
+         'Both participants can refuse discussing any future measurement without penalty or loss of their voluntary arrangement.',
+        futureDiagnosticRequiresEntirelyFreshPermission:
+         'A later specified assay or examination needs completely fresh informed consent by both people and its original costs and risks.',
+        noGradeRubricOrMeasurementNow:true,noOwnerContractOrSync:true,privateToGM:true});
+       const diaArgs={actorId:jp.actorId,beastId:jb.id,witnessIndex:js.log.length-1},
+        diaBefore=E.exportGame(js),diaMinute=js.world.minutes,
+        diaCoins=js.player.coins,diaWorldRng=js.rngState,
+        diaHumanRng=jp.rngState,diaBeastRng=jb.sapientLife.rngState;
+       A.throws(()=>R.act(js,{system:'bond',
+        operation:'npcGradeDiagnosticDiscussion',
+        params:{...diaArgs,grade:9}}),/no selected grade, interest, roll or assay/);
+       A.equal(E.exportGame(js),diaBefore);
+       const conversation=R.act(js,{system:'bond',
+        operation:'npcGradeDiagnosticDiscussion',params:diaArgs});
+       A.equal(conversation.privateToGM,true);
+       A.equal(conversation.actualDiagnostic,null);
+       A.equal(conversation.noCurrentOrFutureAssayConsent,true);
+       A.equal(conversation.noGradeFeeOrTimeOrPartnership,true);
+       A.equal(js.world.minutes,diaMinute);
+       A.equal(js.player.coins,diaCoins);
+       A.equal(js.rngState,diaWorldRng);
+       A.notEqual(jp.rngState,diaHumanRng,
+        'The independent human owns a fresh original choice draw');
+       A.equal(jb.sapientLife.rngState!==diaBeastRng,
+        jp.originalIndependentGradeDiagnosticDiscussions[0].source.humanChoice.accepted,
+        'The beast personal stream is used only when the human wishes to discuss');
+       A.equal(GradeDiscussion.verify(js,jp),true);
+       A.equal(jp.originalIndependentGradeDiagnosticDiscussions.length,1);
+       A.equal(jb.sapientLife.originalGradeDiagnosticDiscussions.length,1);
+       A.equal(jb.gradeCalibration,undefined);
+       A.equal(jb.contractGradeAssessment,undefined);
+       const diaSave=E.exportGame(js),diaCopy=E.importGame(diaSave),
+        diaPerson=Realm.peek(diaCopy).emergentPeople.people[jp.id];
+       A.equal(GradeDiscussion.verify(diaCopy,diaPerson),true);
+       A.equal(E.exportGame(diaCopy),diaSave);
+       const forgedDia=E.importGame(diaSave),
+        fDiaP=Realm.peek(forgedDia).emergentPeople.people[jp.id],
+        fDiaRow=fDiaP.originalIndependentGradeDiagnosticDiscussions[0];
+       fDiaRow.source.mutualInterest=!fDiaRow.source.mutualInterest;
+       fDiaRow.seal=hash(fDiaRow.source);
+       A.equal(GradeDiscussion.verify(forgedDia,fDiaP),false,
+        'Rehashed fake interest fails the original participant choices and reciprocal beast archive');
+       A.throws(()=>R.act(js,{system:'bond',
+        operation:'npcGradeDiagnosticDiscussion',params:diaArgs}),
+        /Fresh truthful individual discussion witness and unused pair day/);
+       A.equal(E.exportGame(js),diaSave);
+       console.log('INDEPENDENT ORIGINAL OPTIONAL GRADE DIAGNOSTIC DISCUSSION '+JSON.stringify({
+        location:'crossing',outcome:conversation.outcome,
+        mutuallyInterested:conversation.mutualInterest,
+        bothIndividualRecords:true,noAssayNoGradeOrExamConsent:true}));
        // A distinct real-world disposable visitor can DISCUSS a genuinely
        // funded market service with the original independent merchant.
        // Signed crossing arrival proves the worker is present without
