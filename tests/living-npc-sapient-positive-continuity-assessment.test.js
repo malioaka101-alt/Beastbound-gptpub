@@ -15,6 +15,10 @@ const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  legallyEligibleTerrestrialPreflights:0,refusedByActualStamina:0,refusedByIllegalPhysicalBaseline:0,
  witnessedTerrestrialProposals:0,mutuallyConsideredOriginalLegs:0,humanTravelRefusals:0,beastTravelRefusals:0,
  originalPhysicalDepartures:0,originalPhysicalDepartureRefusals:0,originalOvernightDeferrals:0,
+ actualVisitorNextLegProposals:0,mutuallyConsideredVisitorNextLegs:0,
+ visitorNextLegHumanRefusals:0,visitorNextLegBeastRefusals:0,
+ actualSecondLegDepartures:0,actualSecondLegRefusals:0,
+ realReturnHomeContinuity:0,
  unforcedRefusals:0,worldSamples:[]};
 for(let i=0;i<worldCount;i++){
  const seed=927801+i*47;
@@ -38,6 +42,20 @@ for(let i=0;i<worldCount;i++){
  summary.originalPhysicalDepartures+=journeys.filter(x=>x.departed).length;
  summary.originalPhysicalDepartureRefusals+=journeys.filter(x=>!x.departed).length;
  summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
+ const visitorProposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL (\\{[^\\n]+\\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const nextLegs=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL ACTUAL SECOND PHYSICAL TERRESTRIAL LEG (\\{[^\\n]+\\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.actualVisitorNextLegProposals+=visitorProposals.length;
+ summary.mutuallyConsideredVisitorNextLegs+=visitorProposals.filter(x=>
+  x.result==='both-consider-visitor-leg').length;
+ summary.visitorNextLegHumanRefusals+=visitorProposals.filter(x=>
+  x.result==='visitor-human-refused').length;
+ summary.visitorNextLegBeastRefusals+=visitorProposals.filter(x=>
+  x.result==='visitor-beast-refused').length;
+ summary.actualSecondLegDepartures+=nextLegs.filter(x=>x.departed).length;
+ summary.actualSecondLegRefusals+=nextLegs.filter(x=>!x.departed).length;
+ summary.realReturnHomeContinuity+=(child.stdout.match(/INDEPENDENT ORIGINAL RETURN HOME TWO-DAY CONTINUITY/g)||[]).length;
  const proposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
  summary.witnessedTerrestrialProposals+=proposals.length;
@@ -73,5 +91,9 @@ if(worldCount>=96){
  A.ok(summary.originalPhysicalDepartures>0,'Across many genuine worlds at least one mutually consenting original physically paid linked-leg arrival must be verified; no assigned travel');
  A.ok(summary.originalPhysicalDepartureRefusals>0,'Fresh actual departure refusal remains meaningful despite earlier mutually considered route');
 }
+A.ok(summary.actualSecondLegDepartures<=summary.mutuallyConsideredVisitorNextLegs,
+ 'A second actual journey cannot exceed the number of genuinely independently mutually considered visitor-site routes');
+A.equal(summary.realReturnHomeContinuity,summary.actualSecondLegDepartures,
+ 'Only an actually completed separately accepted original second physical leg may restore home-world duties in the assessment');
 A.ok(summary.actualPairInteractions>0,'A genuinely new mutually accepted contact must reach an actual original interaction check opportunity');
 console.log('INDEPENDENT LONGITUDINAL REAL PAIR POSITIVE SOURCE ASSESSMENT '+JSON.stringify(summary));
