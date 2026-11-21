@@ -352,6 +352,7 @@ function act(s,{system,operation,params={}}={}){
   case 'combat.register':throw Error('Raw combatant registration is not a playable action; only an established assessed encounter may register participants');
   case 'health.ensurePlayer':return Unified.ensurePlayer(s);
   case 'health.witnessedNpcNightSleep':return Unified.witnessedNpcNightSleep(s,params);
+  case 'health.npcVisitorNightSleep':return require('./independent-original-visitor-night-rest').rest(s,params);
   case 'health.linkWitnessedHuman':return Unified.linkWitnessedHuman(s,params);
   case 'health.migrateLegacy':return LegacyInjury.migrate(s,params);
   case 'health.linkBeast':throw Error('Beast combatant measurements must come from the current saved individual combat assessment via combat.begin');

@@ -16,6 +16,7 @@ const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
 const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
+const VisitorNight=require('../rules/independent-original-visitor-night-rest');
 const GradeDiscussion=require('../rules/independent-original-grade-diagnostic-discussion');
 const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
@@ -420,6 +421,83 @@ for(let n=0;n<80;n++){
         location:'crossing',outcome:conversation.outcome,
         mutuallyInterested:conversation.mutualInterest,
         bothIndividualRecords:true,noAssayNoGradeOrExamConsent:true}));
+       // A distinctly witnessed real visiting adult may CHOOSE the
+       // SAME original eight-hour human Combat night as an ordinary
+       // local, without the player leaving the forest. The existing
+       // travel/merchant sample is kept on its original independent fork.
+       const nightWorld=E.importGame(E.exportGame(js)),
+        nightPerson=Realm.peek(nightWorld).emergentPeople.people[jp.id],
+        nightCombat=nightWorld.table.combatants['npc_'+jp.id],
+        nightSite='crossing',nightStart=nightWorld.world.minutes;
+       let evening=Math.floor(nightStart/1440)*1440+16*60+30;
+       if(evening<nightStart)evening+=1440;
+       E.advance(nightWorld,evening-nightStart);
+       Time.finalizeTime(nightWorld,nightStart);
+       const sleepVisit=Journey.position(nightPerson,nightWorld.world.minutes),
+        sleepShift=Journey.visitorPresence(nightPerson,nightWorld.world.minutes,nightSite),
+        roomScene=nightPerson.name+
+         ' is directly seen entering an existing safe room at the original Morrowfen Crossing settlement for an optional eight-hour sleep, with no claimed payment or bed for the sapient companion.';
+       nightWorld.chatRuntime||={};
+       nightWorld.chatRuntime.scene=roomScene;
+       C.event(nightWorld,'story',roomScene,{
+        origin:VisitorNight.WITNESS,
+        actorId:nightPerson.actorId,personOriginHash:nightPerson.originHash,
+        site:nightSite,minute:nightWorld.world.minutes,
+        originalArrivalSeal:sleepVisit.sourceHash,
+        originalVisitorPresenceHash:sleepShift.hash,
+        directlyWitnessedRoomAndSafeAccess:
+         'The individual living human has just been physically observed using an actually accessible, secure ordinary room in this original settlement.',
+        noAssumedPaymentOrPermission:
+         'An independently witnessed actual room does not imply another person paid lodging, supplied medical treatment or consented to companionship.',
+        notAGuaranteedInnOrFreeSupplies:true,noForcedHumanRestOrBeastRest:true});
+       const nightArgs={actorId:nightPerson.actorId,
+        witnessIndex:nightWorld.log.length-1},
+        beforeNight=E.exportGame(nightWorld),
+        humanBefore=nightPerson.rngState,
+        staminaBeforeNight=nightCombat.stamina,
+        woundsBeforeNight=[...nightCombat.wounds],
+        playerBeforeNight=structuredClone(nightWorld.player),
+        playerPositionBeforeNight=nightWorld.world.location;
+       A.throws(()=>R.act(nightWorld,{system:'health',
+        operation:'npcVisitorNightSleep',params:{...nightArgs,accepted:true}}),
+        /no chosen rest, healing or venue/);
+       A.equal(E.exportGame(nightWorld),beforeNight);
+       const nightResult=R.act(nightWorld,{system:'health',
+        operation:'npcVisitorNightSleep',params:nightArgs});
+       A.equal(nightResult.privateToGM,true);
+       A.equal(nightResult.actualVisitorSite,nightSite);
+       A.equal(nightResult.noAssumedShelterContractBeastRestOrHealing,true);
+       A.equal(nightResult.noSecondNightOrAutomaticHumanOrBeastPower,true);
+       A.equal(nightPerson.rngState!==humanBefore,true);
+       A.equal(nightResult.elapsedMinutes,nightResult.freelyAccepted?480:5);
+       A.equal(nightWorld.world.minutes,evening+nightResult.elapsedMinutes);
+       A.equal(nightWorld.world.location,playerPositionBeforeNight);
+       A.deepEqual(nightWorld.player,playerBeforeNight);
+       A.equal(VisitorNight.verify(nightWorld,nightPerson),true);
+       A.equal(Journey.verify(nightWorld,nightPerson),true);
+       A.equal(nightPerson.originalVisitorNightRestReceipts.length,1);
+       A.equal(nightPerson.originalOvernightRestDecisions.length,1);
+       A.equal(nightCombat.stamina,
+        nightResult.freelyAccepted?nightCombat.maxStamina:staminaBeforeNight);
+       A.equal(nightCombat.wounds[0],nightResult.freelyAccepted?
+        Math.max(0,woundsBeforeNight[0]-1):woundsBeforeNight[0]);
+       const nightSaved=E.exportGame(nightWorld),
+        nightRestored=E.importGame(nightSaved),
+        nightReloaded=Realm.peek(nightRestored).emergentPeople.people[jp.id];
+       A.equal(VisitorNight.verify(nightRestored,nightReloaded),true);
+       A.equal(Journey.verify(nightRestored,nightReloaded),true);
+       A.equal(E.exportGame(nightRestored),nightSaved);
+       const forgery=E.importGame(nightSaved),
+        forgeryPerson=Realm.peek(forgery).emergentPeople.people[jp.id],
+        forgedReceipt=forgeryPerson.originalVisitorNightRestReceipts[0];
+       forgedReceipt.source.site='academy';forgedReceipt.seal=hash(forgedReceipt.source);
+       A.equal(VisitorNight.verify(forgery,forgeryPerson),false,
+        'A resealed false visitor room cannot count as the original physical night');
+       console.log('INDEPENDENT ORIGINAL VISITOR ACTUAL SAFE ROOM AND COMBAT NIGHT '+JSON.stringify({
+        realOriginArrival:true,freelyAccepted:nightResult.freelyAccepted,
+        originalMinutes:nightResult.elapsedMinutes,
+        preservedOriginalJourney:true,restoredHumanStamina:nightCombat.stamina,
+        noUnverifiedInnCostBeastRestOrMagicalPower:true}));
        // A distinct real-world disposable visitor can DISCUSS a genuinely
        // funded market service with the original independent merchant.
        // Signed crossing arrival proves the worker is present without

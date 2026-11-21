@@ -325,7 +325,7 @@ function verifyNpcNightHistory(s,actorId){
  }
  return true;
 }
-function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
+function witnessedNpcNightSleep(s,{actorId,witness,...extras}={},originalVisitor=null){
  if(Object.keys(extras).length||
   typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
   typeof witness!=='string'||witness.length<35||witness.length>700)
@@ -345,14 +345,28 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
   throw Error('A genuine active adult with legal original wound condition must rest');
  if(!verifyNpcNightHistory(s,actorId))
   throw Error('Original person rest receipts are altered');
- const place=LivedPlaces.location(s),start=s.world.minutes,
-  minute=start%1440,day=Math.floor(start/1440);
- if(place?.biome!=='settlement'||place.regionId!==p.regionId)
+ const start=s.world.minutes,minute=start%1440,day=Math.floor(start/1440),
+  site=originalVisitor?.site??s.world.location,
+  place=LivedPlaces.location(s,site),
+  actualVisitor=originalVisitor?require('./independent-original-visitor-night-rest').
+   context(s,actorId,start):null;
+ // Home and physically visited settlement rest share the SAME Combat
+ // night, original personal RNG, elapsed time and source ledger. A remote
+ // visitor must have a separate already witnessed safe room and signed
+ // original visit. A location string is not a new place or free lodging.
+ if(place?.biome!=='settlement'||(!originalVisitor&&place.regionId!==p.regionId)||
+  originalVisitor&&(!actualVisitor||actualVisitor.site!==site||
+   actualVisitor.pos.sourceHash!==originalVisitor.arrivalSeal||
+   actualVisitor.presence.hash!==originalVisitor.presenceHash||
+   !Number.isInteger(originalVisitor.witnessIndex)))
   throw Error('An unknown or remote sleeping place does not establish safe shelter');
  if(minute<16*60||minute>17*60+30)
   throw Error('A current witnessed evening start and full overnight interval are required');
- const presence=Presence.resolve(w,actorId,s.world.location,day,minute);
- if(!presence?.presence||presence.presence.hash!==p.shift?.hash||
+ const presence=Presence.resolve(w,actorId,site,day,minute);
+ if(!presence?.presence||
+  (originalVisitor?presence.presence.hash!==actualVisitor.presence.hash||
+   presence.presence.source!==require('./independent-sapient-terrestrial-journey').VISITOR:
+   presence.presence.hash!==p.shift?.hash)||
   presence.presence.originHash!==p.originHash)
   throw Error('The actual person must be physically witnessed before resting');
  if(!s.chatRuntime?.scene?.includes(witness)||!witness.includes(p.name)||
@@ -364,7 +378,7 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
  if((p.originalOvernightRestDecisions||[]).length>=90)
   throw Error('Old overnight decisions need source reconciliation');
  const response=People.considerOriginalOvernightSleep(w,p,{
-  startMinute:start,location:s.world.location,
+  startMinute:start,location:site,
   sourceShiftHash:presence.presence.hash,
   sceneWitnessHash:npcNightHash(witness),
   originalCombatEntrySeal:c.npcOrigin.seal});
@@ -396,6 +410,10 @@ function witnessedNpcNightSleep(s,{actorId,witness,...extras}={}){
  p.originalOvernightRestDecisions||=[];
  p.originalOvernightRestDecisions.push({
   source:response.source,sourceHash:response.sourceHash,result});
+ if(originalVisitor){
+  require('./independent-original-visitor-night-rest').record(s,p,
+   p.originalOvernightRestDecisions.at(-1),originalVisitor);
+ }
  // The same verified original eight-hour physical sleep may also replenish
  // genuinely earned, previously spent individual Qi. No new sleep interval,
  // source claim, Mana, technique, species organ or supernatural rank.

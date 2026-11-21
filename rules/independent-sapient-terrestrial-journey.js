@@ -177,7 +177,15 @@ function verify(s,p){
  if(last){
   const b=s.beasts?.[last.source.beastId],
    body=s.table?.combatants?.['npc_'+p.id];
-  if(b?.location!==last.source.to||body?.stamina!==last.source.staminaAfter)return false;
+  if(b?.location!==last.source.to||!body)return false;
+  // The historic arrival charge remains immutable. Only the SAME
+  // independently chosen, witnessed original Combat night can make current
+  // Stamina differ later; no free return recharge or retroactive travel.
+  if(body.stamina!==last.source.staminaAfter){
+   const earnedNight=require('./independent-original-visitor-night-rest').
+    latestAcceptedAfter(s,p,last);
+   if(!earnedNight||body.stamina!==earnedNight.result.staminaAfter)return false;
+  }
  }
  return true;
 }
