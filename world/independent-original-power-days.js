@@ -506,6 +506,7 @@ function afterDaily(s,w,life,activity,day){
  if(ctx.actor.originalBodyNerveSenseFour?.lastAttemptDay===ctx.workDay||
   ctx.actor.originalBodyLivingPhysiques?.lastAttemptDay===ctx.workDay||
   ctx.actor.originalOriginPatternResearch?.lastAttemptDay===ctx.workDay||
+  ctx.actor.originalOriginIntegrations?.lastAttemptDay===ctx.workDay||
   ['originalSoulHigherArchitecture','originalArcaneHigherArchitecture'].some(k=>ctx.actor[k]?.sessions.some(x=>x.source.day===ctx.workDay)))return null;
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
