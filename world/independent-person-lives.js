@@ -118,6 +118,10 @@ function enroll(s,p={}){
 function daily(w,q,day,s){
  if(!verifyEntry(w,q)||day<=q.lastDay)return null;
  const actualPerson=w.emergentPeople.people[q.id];
+ if(require('../rules/independent-sapient-terrestrial-journey').awayDuring(actualPerson,(day-1)*1440,day*1440)){
+  // One source-owned body cannot simultaneously train or work at home.
+  q.lastDay=day;return null;
+ }
  if(actualPerson.originalRiftRealmJourney&&require('../rules/independent-original-rift-realm-walking').awayDuring(actualPerson,(day-1)*1440,day*1440)){
   // The foreign interval is real. This local-life owner has no source for
   // foreign sleep, training, employment or social activity. No RNG spent.
