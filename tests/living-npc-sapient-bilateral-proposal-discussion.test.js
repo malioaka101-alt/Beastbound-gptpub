@@ -387,14 +387,14 @@ for(let n=0;n<80;n++){
         goal:'Witness real finite provisioner stock and identify storage handling risks',
         domain:'trade',day:marketDay,witness:dutyWitness,
         visitorSite:'crossing',
-        visitorMinute:jp.originalSapientTerrestrialJourneys[0].source.arrivalMinute-1}),
+        visitorMinute:jp.originalSapientTerrestrialJourneys[0].source.arrivalMinute-1},marketplace),
         /Only a truly signed and presently situated individual visitor/);
        A.equal(E.exportGame(marketplace),beforeBadVisitor);
        const addedDuty=Career.authorDuty(mw,mp,{
         id:dutyId,role:dutyRole,method:'shop-stock-service',
         goal:'Witness real finite provisioner stock and identify storage handling risks',
         domain:'trade',day:marketDay,witness:dutyWitness,
-        visitorSite:'crossing',visitorMinute:marketMinute});
+        visitorSite:'crossing',visitorMinute:marketMinute},marketplace);
        A.equal(addedDuty.available,true);
        A.equal(Career.verify(mp),true);
        A.equal(mp.regionId,jp.regionId,
