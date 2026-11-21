@@ -22,6 +22,7 @@ function routeStatus(s,p,b,destination){
  const w=Realm.peek(s),minute=s.world.minutes,day=Math.floor(minute/1440),
   pos=Journey.position(p,minute);
  if(!pos?.arrived)return deny('no-verified-original-visitor-arrival');
+ if(s.battle||s.encounter)return deny('original-encounter-or-combat-unresolved');
  if(!Journey.verify(s,p)||!People.verify(w,p)||p.status!=='active'||
   p.ageBand!=='adult, exact birthday not established')
   return deny('original-visitor-history-or-adult-source-unverified');
