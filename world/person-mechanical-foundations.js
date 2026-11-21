@@ -452,6 +452,7 @@ function earnedEvidence(w,actorId,s=null){
    originalArcaneStructuralArchitecture:verifiedArcaneSecond,
    originalArcaneResonantMatrix:verifiedArcaneThird,
    originalArcaneHigherArchitecture:verifiedArcaneHigher,
+   originalOriginPatternResearch:verifiedOriginResearch,
    originalSoulHigherArchitecture:verifiedSoulHigher,
    originalBodyBoneMarrowCycle:verifiedBodyTwo,
    originalBodyOrganCycleThree:verifiedBodyThree,
