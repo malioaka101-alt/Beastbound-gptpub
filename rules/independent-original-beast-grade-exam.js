@@ -39,7 +39,7 @@ function physical(s,p,b,q,minute){
  if(!pair||pair.base.source.beastId!==b.id||pair.bond.fractured||
   pair.bond.willingness<30||arr?.source.beastId!==b.id||
   !Pair.revision(arr,minute,q.arrangementRevision)||b.sapience<3||
-  !Person.verify(b)||!Arr.safe(b))return false;
+  !Person.verify(b)||!q.welfare||!Arr.safe({...b,...q.welfare}))return false;
  return true;
 }
 function replay(s,p){
@@ -129,7 +129,9 @@ function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
  const q={origin:ORIGIN,actorId,humanHash:p.originHash,beastId,beastHash:b.sapientLife.sourceHash,
   pairSeal:pair.sourceHash,arrangementHash:arr.seal,arrangementRevision:revision,minute,day,site,
   species:b.species,form:b.evolutionStage,individualGrade:b.individualGrade,
-  calibration:structuredClone(calibration),witness,witnessHash:hash(witness),
+  calibration:structuredClone(calibration),welfare:{condition:b.condition,mood:b.mood,
+   relationship:b.relationship,needs:structuredClone(b.needs),injuries:structuredClone(b.injuries||[]),
+   conditions:structuredClone(b.conditions||[])},witness,witnessHash:hash(witness),
   shift:structuredClone(present.presence),spec:Original.examSpec(calibration.grade,p.mechanicalFoundation.baselineAttributes.wis,0),
   noRarityGradeOrPlayerPaymentOrPartnership:true};
  if(!physical(s,p,b,q,minute)||!witnessValid(p,b,q)||!int(p.cashScales,100)||s.world.minutes%1440+120>1440||
