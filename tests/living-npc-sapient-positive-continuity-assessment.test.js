@@ -19,6 +19,10 @@ const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  visitorNextLegHumanRefusals:0,visitorNextLegBeastRefusals:0,
  actualSecondLegDepartures:0,actualSecondLegRefusals:0,
  realReturnHomeContinuity:0,
+ laterDayOffers:0,laterDayMutualOffers:0,laterDayHumanRefusals:0,
+ laterDayBeastRefusals:0,laterDaySecondDepartures:0,
+ laterDaySecondDepartureRefusals:0,laterDayVerifiedHomecomings:0,
+ laterDayIneligibleDeferrals:0,laterDayDaylightDeferrals:0,
  unforcedRefusals:0,worldSamples:[]};
 for(let i=0;i<worldCount;i++){
  const seed=927801+i*47;
@@ -56,6 +60,22 @@ for(let i=0;i<worldCount;i++){
  summary.actualSecondLegDepartures+=nextLegs.filter(x=>x.departed).length;
  summary.actualSecondLegRefusals+=nextLegs.filter(x=>!x.departed).length;
  summary.realReturnHomeContinuity+=(child.stdout.match(/INDEPENDENT ORIGINAL RETURN HOME TWO-DAY CONTINUITY/g)||[]).length;
+ const laterOffers=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL LATER-DAY VISITOR PROPOSAL (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const laterJourneys=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL LATER-DAY SECOND JOURNEY (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ const homecomings=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL LATER-DAY VERIFIED HOMECOMING (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.laterDayOffers+=laterOffers.length;
+ summary.laterDayMutualOffers+=laterOffers.filter(x=>x.result==='both-consider-visitor-leg').length;
+ summary.laterDayHumanRefusals+=laterOffers.filter(x=>x.result==='visitor-human-refused').length;
+ summary.laterDayBeastRefusals+=laterOffers.filter(x=>x.result==='visitor-beast-refused').length;
+ summary.laterDaySecondDepartures+=laterJourneys.filter(x=>x.departed).length;
+ summary.laterDaySecondDepartureRefusals+=laterJourneys.filter(x=>!x.departed).length;
+ summary.laterDayVerifiedHomecomings+=homecomings.length;
+ summary.laterDayIneligibleDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL VISITOR LATER-DAY DEFERRED/g)||[]).length;
+ summary.laterDayDaylightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL LATER-DAY DEPARTURE DEFERRED/g)||[]).length;
+
  const proposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
  summary.witnessedTerrestrialProposals+=proposals.length;
@@ -95,5 +115,12 @@ A.ok(summary.actualSecondLegDepartures<=summary.mutuallyConsideredVisitorNextLeg
  'A second actual journey cannot exceed the number of genuinely independently mutually considered visitor-site routes');
 A.equal(summary.realReturnHomeContinuity,summary.actualSecondLegDepartures,
  'Only an actually completed separately accepted original second physical leg may restore home-world duties in the assessment');
+A.equal(summary.laterDayVerifiedHomecomings,summary.laterDaySecondDepartures,
+ 'Only a real source-paid second journey can earn a witnessed later-day homecoming');
+A.ok(summary.laterDaySecondDepartures<=summary.laterDayMutualOffers,
+ 'A late actual return can never exceed freely mutually considered visitor proposals');
+A.equal(summary.laterDayOffers,summary.laterDayMutualOffers+
+ summary.laterDayHumanRefusals+summary.laterDayBeastRefusals,
+ 'Every new later-day choice must have a mutually considered or explicitly refused original outcome');
 A.ok(summary.actualPairInteractions>0,'A genuinely new mutually accepted contact must reach an actual original interaction check opportunity');
 console.log('INDEPENDENT LONGITUDINAL REAL PAIR POSITIVE SOURCE ASSESSMENT '+JSON.stringify(summary));
