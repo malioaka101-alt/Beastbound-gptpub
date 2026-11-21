@@ -15,6 +15,7 @@ const Route=require('../rules/independent-sapient-terrestrial-preflight'),Travel
 const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
+const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('ruins'),{minutes:145,stamina:4});
@@ -342,6 +343,113 @@ for(let n=0;n<80;n++){
         A.equal(homeward.stamina,4);
         A.equal(homeward.sourceArrivalHash,jp.originalSapientTerrestrialJourneys[0].seal);
         A.equal(homeward.requiresNewSeparateWitnessAndIndependentDecisions,true);
+        // Genuine independently arrived visitor, original physically open
+        // crossing→forest edge, existing social terms. A NEW source-witnessed
+        // route proposal draws TWO new individual choices; older forest
+        // choices and first departure never carry over. Neither party is
+        // told by the test what to decide.
+        const visitorScene=jp.name+' and '+jb.name+
+         ' separately consider whether to travel from their real crossing visit to the original linked forest and may each refuse.';
+        js.chatRuntime.scene=visitorScene;
+        C.event(js,'story',visitorScene,{
+         origin:VisitorProposal.WITNESS,actorId:jp.actorId,beastId:jb.id,
+         arrivalSeal:homeward.sourceArrivalHash,from:'crossing',to:'forest',
+         arrangementSeal:entry.seal,pairSeal:row.seal,
+         combatSeal:humanBody.npcOrigin.seal,
+         originalLinkedMinutes:75,originalHumanStamina:4,
+         separateNewHumanAndSapientChoices:true,
+         noInheritedReturnConsentOrGuaranteedJourney:true,
+         actualVisitorSitePurposeAndDestination:'Both actually consider the source-linked forest from their verified canal crossing visit, with no commitment to return.',
+         currentRouteRisksAndWeather:'The original connected forest path is physical and may have weather, fatigue, encounters or delayed passage.',
+         freshRightOfEachPersonToRefuse:'Either independent person may refuse the trip now or decline any separate eventual departure.',
+         originalTerrestrialMeansNotTeleportOrMount:'Only the existing walkable crossing-to-forest exit is proposed, without transport invention or ownership.'});
+        const nextParams={actorId:jp.actorId,beastId:jb.id,
+         destination:'forest',witnessIndex:js.log.length-1},
+         beforeProposal=E.exportGame(js),beforeHuman=jp.rngState,
+         beforeBeast=jb.sapientLife.rngState,beforeWorld=js.rngState,
+         originalStamina=humanBody.stamina,originalMinute=js.world.minutes;
+        A.throws(()=>R.act(js,{system:'bond',operation:'npcVisitorTerrestrialProposal',
+         params:{...nextParams,accepted:true}}),/no caller chosen consent or movement/);
+        A.equal(E.exportGame(js),beforeProposal);
+        const considered=R.act(js,{system:'bond',operation:'npcVisitorTerrestrialProposal',
+         params:nextParams}),nextSource=jp.originalSapientVisitorLegProposals.at(-1).source,
+         nextSeal=jp.originalSapientVisitorLegProposals.at(-1).seal;
+        A.equal(VisitorProposal.verify(js,jp),true);
+        A.equal(Journey.verify(js,jp),true);
+        A.equal(nextSource.humanChoice.rngBefore,beforeHuman);
+        A.equal(nextSource.beastChoice?.rngBefore??beforeBeast,beforeBeast);
+        A.equal(js.rngState,beforeWorld);
+        A.equal(js.world.minutes,originalMinute);
+        A.equal(humanBody.stamina,originalStamina);
+        A.equal(jb.location,'crossing');
+        A.equal(considered.mutuallyInterested,nextSource.mutuallyInterested);
+        A.equal(considered.noArrivalOrAdditionalConsent,true);
+        A.equal(E.exportGame(E.importGame(E.exportGame(js))),E.exportGame(js));
+        const afterPropose=E.exportGame(js);
+        A.throws(()=>R.act(js,{system:'bond',operation:'npcVisitorTerrestrialProposal',
+         params:nextParams}),/distinct originally witnessed informed visitor-leg discussion/i);
+        A.equal(E.exportGame(js),afterPropose);
+        console.log('INDEPENDENT ORIGINAL VISITOR SECOND PROPOSAL '+JSON.stringify({
+         result:considered.outcome,newChoices:true,noMovement:true}));
+        if(considered.mutuallyInterested&&originalMinute%1440+76<=1440){
+         // Actual one minute elapses before the separate *departure*
+         // decision: an instantly copied proposal witness cannot serve as
+         // the independent second-person departure witness.
+         E.advance(js,1);Time.finalizeTime(js,originalMinute);
+         const departScene=jp.name+' and '+jb.name+
+          ' independently reconsider the real crossing to forest departure with full freedom to remain at the crossing.';
+         js.chatRuntime.scene=departScene;
+         C.event(js,'story',departScene,{
+          origin:Journey.WITNESS,actorId:jp.actorId,beastId:jb.id,
+          proposalSeal:nextSeal,from:'crossing',to:'forest',
+          actualFreshDepartureDecision:true,noAssumedFutureConsentOrOwnedBeast:true,
+          originalRouteMinutes:75,originalHumanStaminaCost:4,
+          currentInformedDepartureAndReturnFreedom:'The two individual travellers may independently refuse this second physical departure despite having agreed to consider it.',
+          originalRouteConditionsAndKnownHazards:'The actual original 75-minute physical connected forest exit remains subject to weather, ordinary hazards, fatigue and no guaranteed arrival.',
+          actualIndividualBeastMovementAbility:'The original source-present sapient being can physically traverse the real footpath without an assigned mount, portal or coerced service.',
+          noCompelledUnsafeWeatherOrHazardBypass:true});
+         const more={actorId:jp.actorId,beastId:jb.id,
+          proposalSeal:nextSeal,witnessIndex:js.log.length-1},
+          beforeNewDeparture=E.exportGame(js),atMinute=js.world.minutes,
+          atStamina=humanBody.stamina;
+         A.throws(()=>R.act(js,{system:'bond',operation:'npcVisitorTerrestrialJourney',
+          params:{...more,departed:true}}),/no chosen assent, arrival, stamina or location/);
+         A.equal(E.exportGame(js),beforeNewDeparture);
+         const second=R.act(js,{system:'bond',operation:'npcVisitorTerrestrialJourney',params:more}),
+          q2=jp.originalSapientTerrestrialJourneys.at(-1).source;
+         A.equal(second.departureConsent,q2.departed);
+         A.equal(Journey.verify(js,jp),true);
+         A.equal(VisitorProposal.verify(js,jp),true);
+         A.equal(Person.verify(jb),true);
+         A.equal(js.world.location,playerSite);
+         A.equal(js.player.partnerIds.includes(jb.id),false);
+         A.equal(humanBody.stamina,atStamina-(q2.departed?4:0));
+         A.equal(js.world.minutes,atMinute+(q2.departed?75:0));
+         A.equal(jb.location,q2.departed?'forest':'crossing');
+         A.equal(Journey.position(jp,js.world.minutes).location,q2.departed?'forest':'crossing');
+         if(q2.departed){
+          A.equal(Presence.resolve(Realm.peek(js),jp.actorId,'crossing',
+           Math.floor(js.world.minutes/1440),js.world.minutes%1440),null);
+          A.ok(Presence.resolve(Realm.peek(js),jp.actorId,'forest',
+           Math.floor(js.world.minutes/1440),js.world.minutes%1440)?.presence,
+           'Return means actual original hometown location, NOT automatic resumed paid work');
+          A.equal(jp.cashScales,p.cashScales,
+           'The journey itself does not invent a salary, Grade or exam');
+         }
+         const secondCopy=E.importGame(E.exportGame(js)),
+          scp=Realm.peek(secondCopy).emergentPeople.people[jp.id];
+         A.equal(Journey.verify(secondCopy,scp),true);
+         scp.originalSapientTerrestrialJourneys[1].source.arrivalMinute+=1;
+         scp.originalSapientTerrestrialJourneys[1].seal=
+          hash(scp.originalSapientTerrestrialJourneys[1].source);
+         A.equal(Journey.verify(secondCopy,scp),false,
+          'Resealing a falsely altered second actual arrival is rejected');
+         console.log('INDEPENDENT ORIGINAL ACTUAL SECOND PHYSICAL TERRESTRIAL LEG '+JSON.stringify({
+          departed:q2.departed,from:'crossing',to:q2.departed?'forest':null,
+          staminaPaid:second.actualHumanStaminaPaid,minutes:second.actualMinutes,
+          noInferredHomeWageOrContract:true}));
+        }
+
        }else{
         A.ok(['insufficient-original-human-stamina',
          'no-current-revocable-mutual-travel-arrangement',
