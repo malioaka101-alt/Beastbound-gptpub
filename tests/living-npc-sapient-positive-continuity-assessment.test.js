@@ -8,12 +8,15 @@ const A=require('node:assert/strict');
 const {spawnSync}=require('node:child_process');
 const path=require('node:path');
 const source=path.join(__dirname,'living-npc-sapient-bilateral-proposal-discussion.test.js');
+const worldCount=process.env.BEASTBOUND_SAPIENT_SAMPLE_WORLD_COUNT===undefined?24:Number(process.env.BEASTBOUND_SAPIENT_SAMPLE_WORLD_COUNT);
+A.ok(Number.isInteger(worldCount)&&worldCount>=24&&worldCount<=192,'Bounded, independent original world count required');
 const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  actualPairInteractions:0,pairsWithRepeatedInteractions:0,successfulPairChecks:0,earnedOriginalEvents:0,
  legallyEligibleTerrestrialPreflights:0,refusedByActualStamina:0,refusedByIllegalPhysicalBaseline:0,
  witnessedTerrestrialProposals:0,mutuallyConsideredOriginalLegs:0,humanTravelRefusals:0,beastTravelRefusals:0,
+ originalPhysicalDepartures:0,originalPhysicalDepartureRefusals:0,originalOvernightDeferrals:0,
  unforcedRefusals:0,worldSamples:[]};
-for(let i=0;i<24;i++){
+for(let i=0;i<worldCount;i++){
  const seed=927801+i*47;
  const child=spawnSync(process.execPath,[source],{cwd:path.resolve(__dirname,'..'),
   env:{...process.env,BEASTBOUND_SAPIENT_SAMPLE_SEED:String(seed)},
@@ -30,6 +33,11 @@ for(let i=0;i<24;i++){
   continue;
  }
  summary.genuineWorlds++;
+ const journeys=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL ACTUAL TERRESTRIAL JOURNEY (\{[^\n]+\})/g)]
+  .map(x=>JSON.parse(x[1]));
+ summary.originalPhysicalDepartures+=journeys.filter(x=>x.departed).length;
+ summary.originalPhysicalDepartureRefusals+=journeys.filter(x=>!x.departed).length;
+ summary.originalOvernightDeferrals+=(child.stdout.match(/INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT/g)||[]).length;
  const proposals=[...child.stdout.matchAll(/INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL (\{[^\n]+\})/g)]
   .map(x=>JSON.parse(x[1]));
  summary.witnessedTerrestrialProposals+=proposals.length;
@@ -61,5 +69,9 @@ A.ok(summary.mutuallyConsideredOriginalLegs>0,'At least one original pair must g
 A.ok(summary.humanTravelRefusals>0&&summary.beastTravelRefusals>0,'Both separate travellers must be capable of independently refusing the actual one-leg proposal');
 A.ok(summary.legallyEligibleTerrestrialPreflights>0,'At least one genuinely source-sufficient original independent human and existing local pair must pass the purely read-only route preflight');
 A.ok(summary.genuinelyAcceptedRenewals>0,'At least one separate natural later-day renewed meeting must actually be accepted');
+if(worldCount>=96){
+ A.ok(summary.originalPhysicalDepartures>0,'Across many genuine worlds at least one mutually consenting original physically paid linked-leg arrival must be verified; no assigned travel');
+ A.ok(summary.originalPhysicalDepartureRefusals>0,'Fresh actual departure refusal remains meaningful despite earlier mutually considered route');
+}
 A.ok(summary.actualPairInteractions>0,'A genuinely new mutually accepted contact must reach an actual original interaction check opportunity');
 console.log('INDEPENDENT LONGITUDINAL REAL PAIR POSITIVE SOURCE ASSESSMENT '+JSON.stringify(summary));
