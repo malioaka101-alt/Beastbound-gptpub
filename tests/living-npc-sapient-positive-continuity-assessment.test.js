@@ -10,6 +10,7 @@ const path=require('node:path');
 const source=path.join(__dirname,'living-npc-sapient-bilateral-proposal-discussion.test.js');
 const summary={genuineWorlds:0,sourceUnavailable:0,genuinelyAcceptedRenewals:0,
  actualPairInteractions:0,pairsWithRepeatedInteractions:0,successfulPairChecks:0,earnedOriginalEvents:0,
+ legallyEligibleTerrestrialPreflights:0,refusedByActualStamina:0,refusedByIllegalPhysicalBaseline:0,
  unforcedRefusals:0,worldSamples:[]};
 for(let i=0;i<24;i++){
  const seed=927801+i*47;
@@ -28,6 +29,9 @@ for(let i=0;i<24;i++){
   continue;
  }
  summary.genuineWorlds++;
+ summary.legallyEligibleTerrestrialPreflights+=(child.stdout.match(/INDEPENDENT ORIGINAL LINKED CROSS-REGION TRAVEL PREFLIGHT PASS/g)||[]).length;
+ summary.refusedByActualStamina+=(child.stdout.match(/INDEPENDENT ORIGINAL LINKED TRAVEL REFUSED BY ACTUAL STAMINA/g)||[]).length;
+ summary.refusedByIllegalPhysicalBaseline+=(child.stdout.match(/INDEPENDENT ORIGINAL LINKED TRAVEL REFUSED BY REAL PHYSICAL BASELINE/g)||[]).length;
  const pair=[...child.stdout.matchAll(/INDEPENDENT EXTENDED REAL PAIR PROGRESSION (\{[^\n]+\})/g)];
  if(!pair.length)throw Error('Missing genuine independent chronological pair assessment '+seed);
  const result=JSON.parse(pair[pair.length-1][1]);
@@ -45,6 +49,7 @@ for(let i=0;i<24;i++){
 }
 A.ok(summary.genuineWorlds>=4,'Multiple genuinely independent source-backed human–beast pairs must exist in distinct worlds; no automatic pair is authored');
 A.ok(summary.unforcedRefusals>0,'The native sapient person must be able to refuse new interaction');
+A.ok(summary.legallyEligibleTerrestrialPreflights>0,'At least one genuinely source-sufficient original independent human and existing local pair must pass the purely read-only route preflight');
 A.ok(summary.genuinelyAcceptedRenewals>0,'At least one separate natural later-day renewed meeting must actually be accepted');
 A.ok(summary.actualPairInteractions>0,'A genuinely new mutually accepted contact must reach an actual original interaction check opportunity');
 console.log('INDEPENDENT LONGITUDINAL REAL PAIR POSITIVE SOURCE ASSESSMENT '+JSON.stringify(summary));
