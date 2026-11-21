@@ -259,4 +259,4 @@ function status(s,p={}){
  return {known,notAnEvolutionGrant:true,
   note:'Only personally discovered possibilities are shown, not secret branches, private readiness, unvisited biology or guaranteed transformation'};
 }
-module.exports={ORIGIN,ECO,branch,preRegister,postRegister,beforeEvent,afterEvent,sixday,ecoVerify,observed,status};
+module.exports={ORIGIN,ECO,branch,validated,preRegister,postRegister,beforeEvent,afterEvent,sixday,ecoVerify,observed,status};
