@@ -7,6 +7,12 @@ const INTERACTIONS={
  gentle:{event:'gentle_treatment',minutes:15,baseDC:12,description:'approach without pressure'},
  play:{event:'play',minutes:20,baseDC:14,description:'accept an invitation to play'}
 };
+function interactionSpec(approach,cha,rank,cautious,willingness,sapience){
+ const method=INTERACTIONS[approach];if(!method)throw Error('Original witnessed approach required');
+ C.int(cha,'earned Charisma',1,30);C.int(rank,'earned Beastcraft',0,5);
+ return {event:method.event,minutes:method.minutes,dc:method.baseDC+(cautious?4:0)+(willingness<20?3:0)+(sapience>=3?2:0),
+  modifier:Math.floor((cha-10)/2)+2*rank};
+}
 function interact(s,p={}){
  if(!p||typeof p!=='object'||Array.isArray(p)||
     Object.keys(p).some(k=>!['beastId','approach'].includes(k)))
@@ -45,8 +51,7 @@ function interact(s,p={}){
  const rank=C.int(s.player.skills.beastcraft?.rank??0,'Beastcraft rank',0,5);
  const mood=String(beast.mood||'');
  const cautious=/wary|uneasy|agitated|fear|hostile|territorial/i.test(mood);
- const dc=method.baseDC+(cautious?4:0)+(record.willingness<20?3:0)+(beast.sapience>=3?2:0);
- const modifier=Math.floor((cha-10)/2)+2*rank;
+ const {dc,modifier}=interactionSpec(p.approach,cha,rank,cautious,record.willingness,beast.sapience);
  const result=C.check(s,{modifier,dc,label:'Voluntary beast interaction: '+p.approach});
  Agency.remember(s,beast);
  s.table.bondWitnessActivity[id]=currentDay;
@@ -73,4 +78,4 @@ function interact(s,p={}){
  return {approach:p.approach,accepted:true,check:result,
    elapsedMinutes:method.minutes,evidenceId,event:method.event,message:msg};
 }
-module.exports={interact};
+module.exports={interact,interactionSpec};
