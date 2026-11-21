@@ -12,6 +12,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Cosmos=require('../world/cosmology-ledger');
 const SOURCE='earned-rift-spatial-pressure-adaptation-vi-v1',
  WITNESS='gm-measured-human-rift-pressure-adaptation-v1';
+const Local=require('./rift-shared-original-local-spatial-law');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const int=(x,min=0,max=1000000000)=>Number.isInteger(x)&&x>=min&&x<=max;
 const prose=(x,min=25)=>typeof x==='string'&&x.trim().length>=min&&x.length<=900;
@@ -186,11 +187,11 @@ function expose(s,p={}){
   'original spatial energy regulation skill',0,5),
   modifier=Math.floor((attributeScore-10)/2)+2*skillRank,
   tolerance=progress===2?1:0,
-  dc=18+environment.severity+Math.floor(strain/12)-tolerance;
+  dc=Local.adaptationSpec(progress,minutes,strain,environment.severity,attributeScore,skillRank).dc;
  const check=C.check(s,{modifier,dc,
   label:'Original individual human Rift pressure adaptation'});
  const rollEvent=structuredClone(s.log.at(-1));
- const added=check.degree==='severe failure'?6:0;
+ const added=Local.strainAdded(check);
  if(added){Combat.harm(s,Combat.get(s,'player'),2);U.sync(s,{source:'wounds'});}
  s.player.stamina-=cost;s.table.combatants.player.stamina=s.player.stamina;
  const beforeStep=s.player.rift.step,
@@ -229,4 +230,4 @@ function expose(s,p={}){
   noOtherRealmImmunity:true,noAutomaticOriginTrait:true,
   noPortalTravel:true};
 }
-module.exports={SOURCE,WITNESS,verify,status,expose,pressureTolerance};
+module.exports={SOURCE,WITNESS,verify,status,expose,pressureTolerance,witness};
