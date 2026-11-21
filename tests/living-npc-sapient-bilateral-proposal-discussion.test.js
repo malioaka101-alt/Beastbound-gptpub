@@ -436,6 +436,44 @@ for(let n=0;n<80;n++){
            'Return means actual original hometown location, NOT automatic resumed paid work');
           A.equal(jp.cashScales,p.cashScales,
            'The journey itself does not invent a salary, Grade or exam');
+          const sameReturnDay=Math.floor(js.world.minutes/1440),
+           noReturnWork=E.importGame(E.exportGame(js)),
+           returnedPerson=Realm.peek(noReturnWork).emergentPeople.people[jp.id],
+           returnedBeast=noReturnWork.beasts[jb.id],
+           noWorkCash=returnedPerson.cashScales,
+           trueReturnMinute=noReturnWork.world.minutes,
+           homeShift=returnedPerson.shift;
+          A.equal(Journey.awayDuring(returnedPerson,trueReturnMinute-75,
+           trueReturnMinute),true,
+           'The real return transit is still part of time away from home');
+          A.equal(Journey.awayDuring(returnedPerson,(sameReturnDay+1)*1440,
+           (sameReturnDay+2)*1440),false,
+           'Later whole days are no longer a second overseas absence after real return');
+          A.equal(Presence.resolve(Realm.peek(noReturnWork),returnedPerson.actorId,
+           'forest',sameReturnDay,trueReturnMinute%1440)?.presence?.source,
+           Journey.VISITOR,'Actual homecoming day is a visitor, not a free completed work shift');
+          Time.advance(noReturnWork,2);
+          const laterReturnDay=Math.floor(noReturnWork.world.minutes/1440),
+           laterReturnMinute=noReturnWork.world.minutes%1440,
+           homePresent=Presence.resolve(Realm.peek(noReturnWork),
+            returnedPerson.actorId,'forest',laterReturnDay,laterReturnMinute);
+          A.equal(Journey.verify(noReturnWork,returnedPerson),true);
+          A.equal(Person.verify(returnedBeast),true);
+          A.equal(Journey.position(returnedPerson,noReturnWork.world.minutes).location,
+           'forest');
+          A.equal(homePresent?.presence?.source,People.SHIFT,
+           'Only later originally scheduled human home attendance resumes');
+          A.equal(Presence.resolve(Realm.peek(noReturnWork),returnedPerson.actorId,
+           'crossing',laterReturnDay,laterReturnMinute),null);
+          A.ok(returnedPerson.cashScales>=noWorkCash,
+           'Later original wages may be earned, but not a retroactive journey reward');
+          A.equal(noReturnWork.world.location,playerSite);
+          A.equal(E.exportGame(E.importGame(E.exportGame(noReturnWork))),
+           E.exportGame(noReturnWork));
+          console.log('INDEPENDENT ORIGINAL RETURN HOME TWO-DAY CONTINUITY '+JSON.stringify({
+           homeShiftRestoredOnLaterDay:true,noReturnDaySalary:true,
+           actualTransitStaminaPaid:4,noSecondBody:true}));
+
          }
          const secondCopy=E.importGame(E.exportGame(js)),
           scp=Realm.peek(secondCopy).emergentPeople.people[jp.id];
