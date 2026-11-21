@@ -219,5 +219,5 @@ function privateStatus(s,p){
   status:statusAt(row,s.world.minutes),endMinute:row.endMinute,
   noMagicalBondOrExecutedPayment:true}));
 }
-module.exports={ORIGIN,WITNESS,REVIEW,verify,accept:(s,p)=>decide(s,p),
+module.exports={ORIGIN,WITNESS,REVIEW,verify,humanChoice,verifyHuman,statusAt,safe,accept:(s,p)=>decide(s,p),
  review:(s,p)=>decide(s,p,true),sixday,privateStatus};
