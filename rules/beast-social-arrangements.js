@@ -130,14 +130,29 @@ function present(s,b){
   b.condition<55||b.needs?.hunger>=75||b.needs?.fatigue>=75)
   throw Error('A social promise cannot be demanded from a distressed, captive or unwilling individual');
 }
-function draft(s,p={}){
+function termsValid(p){
  const fields=['beastId','id','kind','purpose','humanDuty','beastDuty',
   'protections','termination','communication','durationDays'];
- if(!keys(p,fields)||!id(p.id)||!text(p.kind,3,150)||
-   !text(p.purpose,12,700)||!text(p.humanDuty)||
-   !text(p.beastDuty)||!text(p.protections)||
-   !text(p.termination)||!text(p.communication,5,260)||
-   !int(p.durationDays,0,36500))
+ return !!(keys(p,fields)&&id(p.id)&&text(p.kind,3,150)&&
+  text(p.purpose,12,700)&&text(p.humanDuty)&&text(p.beastDuty)&&
+  text(p.protections)&&text(p.termination)&&text(p.communication,5,260)&&
+  int(p.durationDays,0,36500));
+}
+// Same individual disposition-based choice for player or another human.
+// The actual sapient personal-life stream remains the sole decision owner.
+function sapientChoice(life,disposition){
+ if(!['independent','reserved','curious','affiliative'].includes(disposition)||
+  !Number.isInteger(life?.rngState)||life.rngState<1)
+  throw Error('Original sapient disposition and personal decision stream required');
+ const willingness=disposition==='independent'?.30:
+  disposition==='reserved'?.43:disposition==='curious'?.60:.66;
+ const rngBefore=life.rngState,decision=Person._debug.draw(life);
+ return {disposition,willingness,rngBefore,rngAfter:life.rngState,
+  outcome:decision<willingness?'accepted':
+   decision<willingness+.18?'countered':'declined'};
+}
+function draft(s,p={}){
+ if(!termsValid(p))
   throw Error('A voluntary arrangement needs original purpose, two-sided duties, safeguards, communication and an exit path');
  const b=s.beasts?.[p.beastId],kind=personKind(s,b);
  present(s,b);
@@ -199,11 +214,7 @@ const encounter=witnessed(s,b,row,p.witnessIndex);
   // This is the autonomous individual's own persisted decision stream,
   // never a human-supplied yes/no or a reusable social check.
   const disposition=Agency.profile(s,b).disposition;
-  const willingness=disposition==='independent'?.30:
-   disposition==='reserved'?.43:disposition==='curious'?.60:.66;
-  const decision=Person._debug.draw(life);
-  outcome=decision<willingness?'accepted':
-   decision<willingness+.18?'countered':'declined';
+  outcome=sapientChoice(life,disposition).outcome;
   detail.proof='Independent choice from source-verified sapient personal life after witnessed comprehension';
  }
  append(s,b,row,outcome,detail);
@@ -306,4 +317,4 @@ function status(s,p={}){
  return {known:true,beastId:b.id,arrangements:entries,
   noPartnerOrContractSealGranted:true};
 }
-module.exports={ORIGIN,DISCUSSION,DISPUTE,draft,negotiate,conclude,dispute,status,sixday,verify};
+module.exports={ORIGIN,DISCUSSION,DISPUTE,draft,negotiate,conclude,dispute,status,sixday,verify,termsValid,sapientChoice};
