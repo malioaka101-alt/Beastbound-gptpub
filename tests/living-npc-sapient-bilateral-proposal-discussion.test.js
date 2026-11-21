@@ -694,12 +694,22 @@ for(let n=0;n<80;n++){
         A.equal(afterDiet.canOffer,false,
          'A documented diet plan never creates a real personally owned food portion');
         A.equal(afterDiet.reason,'no-personally-owned-genuine-original-ration');
+        A.equal(VisitorDiet.planVerified(dietWorld,dietBeast,
+         {...dietBeast.welfareCarePlan,quantity:9}),false,
+         'A caller-increased ration amount is not the actual witnessed individual plan');
        }
        const dietSave=E.exportGame(dietWorld),
         restoredDiet=E.importGame(dietSave),
         restoredDietPerson=Realm.peek(restoredDiet).emergentPeople.people[jp.id];
        A.equal(VisitorDiet.verify(restoredDiet,restoredDietPerson),true);
        A.equal(E.exportGame(restoredDiet),dietSave);
+       const falselyCertified=E.importGame(dietSave),
+        falsifiedPerson=Realm.peek(falselyCertified).emergentPeople.people[jp.id],
+        falsifiedPlan=falsifiedPerson.originalSapientVisitorDietDiscussions[0];
+       falsifiedPlan.source.accepted=!falsifiedPlan.source.accepted;
+       falsifiedPlan.seal=hash(falsifiedPlan.source);
+       A.equal(VisitorDiet.verify(falselyCertified,falsifiedPerson),false,
+        'A resealed forged individual nutrition consent fails source-person replay and reciprocal sapient records');
        console.log('INDEPENDENT ORIGINAL INDIVIDUAL SAPIENT NUTRITION PLAN '+JSON.stringify({
         authenticSeller:'otto',actualNativeDiet:E.SPECIES[dietBeast.species].diet,
         independentlyAgreed:chosenDiet.freelyBothAgreedToPlan,
