@@ -1350,7 +1350,7 @@ function assistanceStatus(s,params={}){
   note:'Only work personally attempted is shown; signed employment, private aptitude, wages and hidden competence cannot be invented.'};
 }
 
-module.exports={ORIGIN,GM_ORIGIN,SHIFT,considerOriginalOvernightSleep,verifyOriginalNightChoice,chooseOriginalArmedBeastStrike,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
+module.exports={ORIGIN,GM_ORIGIN,SHIFT,originalItemGiftChance:giftChance,considerOriginalOvernightSleep,verifyOriginalNightChoice,chooseOriginalArmedBeastStrike,chooseEmergencyInterposition,considerOriginalWeaponGift,verifyOriginalWeaponGiftChoice,registerGM,authorWitnessedDuty,retireWitnessedDuty,witnessedDutyStatus,gmStatus,considerPublicInvitation,verifyPublicInvitationChoice,considerPublicEventEntry,verifyPublicEventEntryChoice,considerPublicWorkReview,verifyPublicWorkReviewChoice,seed,ensure,sourceDemand,verify,siteFor,shift,
  presence,sixday,heardStatus,meet,observeLocalWork,witnessedWorkStatus,
  proposeLocalWork,withdrawLocalWork,localWorkOffersStatus,
  assistLocalWork,assistanceStatus,_debug:{draw,role,make,live,name,hash}};
