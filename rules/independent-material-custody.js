@@ -12,7 +12,7 @@ const ORIGIN='source-owned-independent-human-material-custody-v1',
  eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b),
  int=(v,a=0,b=1000000000)=>Number.isInteger(v)&&v>=a&&v<=b;
 const stockCount=(bag,item)=>bag[item]||0;
-const purposes=Object.freeze({'body-upkeep':'body-sustain','rift-pocket-build':'rift-pocket','origin-seeding':'origin-stage'});
+const purposes=Object.freeze({'body-upkeep':'witnessed-unique-physique-metabolic-maintenance-v1','rift-pocket-build':'gm-observed-anchored-rift-pocket-v-v1'});
 function entries(value){
  if(!value||Object.getPrototypeOf(value)!==Object.prototype)return null;
  const e=Object.entries(value);
@@ -62,7 +62,9 @@ function replay(s,p){
    }
    offerDays.add(offerKey);last=q.minute+5;
   }else if(q.kind==='consume'){
-   if(!Object.hasOwn(purposes,q.purpose)||q.noItemCreation!==true)return null;
+   if(!Object.hasOwn(purposes,q.purpose)||q.witness.details.origin!==purposes[q.purpose]||
+    (q.purpose==='body-upkeep'&&(q.witness.details.cycle!==7||!eq(q.items,{clean_rations:1})))||
+    (q.purpose==='rift-pocket-build'&&!eq(q.items,q.witness.details.materials))||q.noItemCreation!==true)return null;
    for(const [item,qty] of Object.entries(q.items)){
     const left=stockCount(bag,item)-qty;if(left<0)return null;
     if(left)bag[item]=left;else delete bag[item];
@@ -123,7 +125,9 @@ function consume(s,p,items,purpose,witness){
   witnessHash=hash(witness),before=held(s,p),after=structuredClone(before);
  if(r.rows.length>=960||r.rows.some(x=>x.source.witnessHash===witnessHash)||
   !s.log.some(x=>hash(x)===witnessHash)||
-  !witnessValid({witness,witnessHash,day,minute,site},p))throw Error('Fresh original witnessed material consumption required');
+  !witnessValid({witness,witnessHash,day,minute,site},p)||witness.details.origin!==purposes[purpose]||
+  (purpose==='body-upkeep'&&(witness.details.cycle!==7||!eq(items,{clean_rations:1})))||
+  (purpose==='rift-pocket-build'&&!eq(items,witness.details.materials)))throw Error('Fresh original witnessed material consumption required');
  for(const [item,qty] of Object.entries(items)){
   after[item]-=qty;if(!after[item])delete after[item];
  }
