@@ -40,7 +40,7 @@ for(const {s,p,today,seed,intelligence} of sample.slice(0,3)){
  acceptedNights++;
  A.equal(Health.verifyNpcNightHistory(s,p.actorId),true);
  let days=0;
- for(let i=0;i<120;i++){
+ for(let i=0;i<180;i++){
   const t=s.world.minutes;E.advance(s,30*1440);World.finalizeTime(s,t);days+=30;
   if(p.originalArcaneMatrix?.completed)break;
  }
@@ -98,7 +98,8 @@ for(const {s,p,today,seed,intelligence} of sample.slice(0,3)){
   firstWork=prep.sessions.filter(x=>x.source.target==='circle1'),
   firstPaid=firstWork.filter(x=>x.source.origin===Early.ORIGIN&&x.source.accepted),
   combat=s.table.combatants['npc_'+p.id];
- reports.push({seed,intelligence,days,firstCircle:p.originalArcaneCore.circles,
+ const higher=three?.completed?require('./independent-higher-architecture-assessment-helper').assess(s,p,'arcane',180):null;
+ reports.push({seed,intelligence,days,higher,firstCircle:p.originalArcaneCore.circles,
   firstCirclePreparation:prep.target==='circle1'?prep.points:null,
   firstCircleAcceptedPractice:firstPaid.length,
   firstCircleSuccessfulPractice:firstPaid.filter(x=>x.source.check?.success).length,
