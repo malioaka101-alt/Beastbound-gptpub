@@ -1,10 +1,13 @@
 'use strict';
 // #177: A genuinely independently CHOSEN rest day at the dangerous
-// Riftglass exterior may use the EXISTING Combat.recover action ONCE.
-// It is not Combat.completedNight; no safe ruins shelter, eight-hour sleep,
-// second Recover use, Qi/Mana/Soul recharge, wound healing, Fold or free
-// spatial progress is manufactured. A real preceding source-measured
-// Rift exterior effort, physical person, day and place are mandatory.
+// Riftglass exterior may use the EXISTING Combat.recover action once
+// within the ORIGINAL current completed-night budget. Any later renewal
+// requires a separately source-verified Combat.completedNight that occurred
+// AFTER the previous Recover; no new daily charge is manufactured.
+// Recover is NOT Combat.completedNight: it grants no safe shelter, eight-
+// hour sleep, Qi/Mana/Soul recharge, wound healing, Fold or free spatial
+// progress. A prior source-measured Rift exterior effort, physical person,
+// independently chosen REST day and real place remain mandatory.
 const Crypto=require('node:crypto'),Combat=require('./combat'),
  Early=require('./independent-original-discipline-preparation'),
  Sense=require('./independent-original-rift-sense-observation'),
