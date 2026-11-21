@@ -226,3 +226,93 @@ A.equal(Nerve.verify(IVfake,IVbad),false,'Resealed fake neural check cannot crea
 console.log('ORIGINAL WITNESSED NPC NERVE-SENSE IV ASSESSMENT PASS '+JSON.stringify({
  actualMap,practiceCount,repairCount,formChecks,refusals,extended,formed:IV.completed,
  progress:IV.progress,strain:IV.strain}));
+
+
+// Continue the same actual Organ III / witnessed IV practitioner into
+// the original independent Blood/Adaptive plans (V and VI are not serial
+// prerequisites). All new tissue witness text is an explicitly authored
+// disposable test scene; all choices, checks, elapsed days and costs real.
+const Physique=require('../rules/independent-original-body-living-physiques'),
+ PCPhysique=require('../rules/body-living-physiques'),
+ PLaw=require('../rules/body-shared-original-living-physique');
+const advancedMax=originalCombat.maxStamina,counts={map:0,work:0,care:0,form:0,repeat:0,declined:0};
+for(let i=0;i<300;i++){
+ const old=s.world.minutes,target=(Math.floor(old/1440)+1)*1440+600;
+ E.advance(s,target-old);World.finalizeTime(s,old);
+ const dayNow=Math.floor(s.world.minutes/1440);
+ if(!Presence.resolve(Realm.peek(s),p.actorId,IVsite,dayNow,600)||
+  originalCombat.status!=='ok'||originalCombat.wounds.some(x=>x!==0)||
+  originalCombat.stamina<5)continue;
+ const ledger=p.originalBodyLivingPhysiques,cycles=ledger?.cycles||{};
+ const unfinished=[5,6].filter(c=>!cycles[c]?.completed);
+ const cycle=unfinished.length?unfinished[i%unfinished.length]:
+  IV.completed&&!cycles[7]?.completed?7:null;
+ if(!cycle)break;
+ const rec=cycles[cycle],sp=PLaw.SPEC[cycle];let origin,details,minutes;
+ if(!rec){
+  origin=PCPhysique.MAP;
+  details={designId:'witnessed_personal_physique_'+cycle,
+   method:'A separately observed bounded refinement procedure for this individual’s existing biological tissues.',
+   actualTissues:'Existing individual tissue, circulation and metabolic responses are physically observed and measured without copied species power.',
+   metabolicSupport:'Observed ordinary oxygen, water, nutrition and metabolic demand limit the procedure.',
+   failureLimit:'An independently observed physical counterstimulus identifies impairment and a genuine failure boundary.',
+   reversion:'The examined practitioner can stop the workload and requires ordinary supported physical recovery.',
+   independentCountertest:'Actual controlled finite anatomical response and failure boundary are examined in this local test scene.',
+   ...Object.fromEntries(sp.sources.map(k=>[k,'Distinct actual tissue function and metabolic limitations are witnessed for '+sp.name+' in this disposable anatomical test scene.']))};
+ }else if(rec.strain>=5||rec.points===6&&rec.strain>2){
+  origin=PCPhysique.CARE;minutes=60;
+  details={observedBodyResponse:'Previously recorded strain is now observed in bounded individual physical response and targeted clinical correction.',
+   physicalLimit:'Measured fatigue and damage constrain this restorative treatment; no automatic healing.'};
+ }else if(PLaw.ready(rec.points,rec.strain)){
+  origin=PCPhysique.FORM;minutes=90;
+  details={integratedFunction:'All actually mapped individual original tissues are observed in a controlled integrated whole body response.',
+   failureCounter:'An independently applied bounded counterstimulus measures the failure threshold and safe stopping response.',
+   metabolicTradeoff:'Actual physiological demand and ordinary nutrition and fatigue limit the integrated function.'};
+ }else{
+  origin=PCPhysique.WORK;minutes=60;
+  details={observedBodyResponse:'The separately examined individual tissue design displays measurable but bounded response to the original exertion procedure.',
+   physicalLimit:'Finite observed metabolic load, fatigue and physical damage constrain this personal training.'};
+ }
+ const kind=origin===PCPhysique.MAP?'map':origin===PCPhysique.CARE?'care':origin===PCPhysique.FORM?'form':'work';
+ if(kind!=='map'&&originalCombat.stamina<PLaw.checkSpec(cycle,kind,
+   p.mechanicalFoundation.baselineAttributes.con,0,rec.strain).cost)continue;
+ s.chatRuntime.scene=p.name+' is present for a witnessed original individual '+sp.name+' procedure.';
+ Core.event(s,'story',s.chatRuntime.scene,{origin,location:IVsite,actorId:p.actorId,cycle,...details});
+ const req={actorId:p.actorId,witnessIndex:s.log.length-1,...(minutes===undefined?{}:{minutes})};
+ const before=E.exportGame(s);
+ if(!ledger){
+  A.throws(()=>Rules.act(s,{system:'body',operation:'npcLivingPhysiqueWork',params:{...req,formed:true}}),/accepts actorId/);
+  A.equal(E.exportGame(s),before);
+ }
+ const result=Rules.act(s,{system:'body',operation:'npcLivingPhysiqueWork',params:req}),
+  receipt=p.originalBodyLivingPhysiques.sessions.at(-1),q=receipt.source;
+ A.equal(Physique.verify(s,p),true);
+ A.equal(q.accepted,result.independentlyAccepted);
+ if(!q.accepted){counts.declined++;A.equal(q.staminaSpent,0);}
+ else{
+  counts[kind]++;
+  if(kind!=='map'){
+   const expected=PLaw.checkSpec(cycle,kind,p.mechanicalFoundation.baselineAttributes.con,0,q.before.strain);
+   A.equal(q.staminaSpent,expected.cost);A.equal(q.check.dc,expected.dc);
+   A.equal(q.check.modifier,expected.modifier);
+  }
+  if(cycle===7)A.ok(q.supportingProof.nerve&&q.supportingProof.blood&&q.supportingProof.adaptive);
+ }
+}
+const advanced=p.originalBodyLivingPhysiques;
+A.ok(advanced&&counts.map>=1&&counts.work>=1,'Actual NPC advanced tissue map and paid original practice required');
+A.equal(Physique.verify(s,p),true);
+const earnedAdvanced=Object.entries(advanced.cycles).filter(([,r])=>r.completed),
+ bonus=earnedAdvanced.reduce((sum,[k])=>sum+PLaw.SPEC[k].bonus,0);
+A.equal(originalCombat.maxStamina,advancedMax+bonus);
+const ad=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
+A.equal(ad.originalBodyLivingPhysiques.cycles.filter(x=>x.completed).length,earnedAdvanced.length);
+A.deepEqual(p.knownTechniques,[]);
+const adsave=E.exportGame(s),adcopy=E.importGame(adsave),adp=Realm.peek(adcopy).emergentPeople.people[p.id];
+A.equal(Physique.verify(adcopy,adp),true);
+const adfake=E.importGame(adsave),adbad=Realm.peek(adfake).emergentPeople.people[p.id],
+ adrow=adbad.originalBodyLivingPhysiques.sessions.find(x=>x.source.kind==='work'&&x.source.accepted);
+adrow.source.check.dc=1;adrow.seal=hash(adrow.source);
+A.equal(Physique.verify(adfake,adbad),false,'Rehashed cheap fake advanced physiology cannot grant actual advancement');
+console.log('ORIGINAL WITNESSED NPC BODY V–VII ASSESSMENT PASS '+JSON.stringify({
+ counts,cycles:advanced.cycles,actualCapacityGain:bonus}));
