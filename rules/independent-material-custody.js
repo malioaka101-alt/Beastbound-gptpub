@@ -13,7 +13,7 @@ const ORIGIN='source-owned-independent-human-material-custody-v1',
  eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b),
  int=(v,a=0,b=1000000000)=>Number.isInteger(v)&&v>=a&&v<=b;
 const stockCount=(bag,item)=>bag[item]||0;
-const purposes=Object.freeze({'body-upkeep':'witnessed-unique-physique-metabolic-maintenance-v1','rift-pocket-build':'gm-observed-anchored-rift-pocket-v-v1'});
+const purposes=Object.freeze({'body-upkeep':'witnessed-unique-physique-metabolic-maintenance-v1','rift-pocket-build':'gm-observed-anchored-rift-pocket-v-v1','rift-boundary-domain':'gm-observed-original-spatial-domain-v1'});
 function entries(value){
  if(!value||Object.getPrototypeOf(value)!==Object.prototype)return null;
  const e=Object.entries(value);
@@ -96,10 +96,11 @@ function replay(s,p){
   }else if(q.kind==='consume'){
    if(!Object.hasOwn(purposes,q.purpose)||q.witness.details.origin!==purposes[q.purpose]||
     (q.purpose==='body-upkeep'&&(q.witness.details.cycle!==7||!eq(q.items,{clean_rations:1})))||
-    (q.purpose==='rift-pocket-build'&&!eq(q.items,q.witness.details.materials))||q.noItemCreation!==true)return null;
-   const consumer=(q.purpose==='body-upkeep'?p.originalBodyLivingPhysiques?.sessions:p.originalRiftLocalSpatial?.sessions)?.find(x=>x?.source?.witnessHash===q.witnessHash);
+    (q.purpose==='rift-pocket-build'&&!eq(q.items,q.witness.details.materials))||
+    (q.purpose==='rift-boundary-domain'&&!eq(q.items,require('./rift-boundary-domain').MATERIALS))||q.noItemCreation!==true)return null;
+   const consumer=(q.purpose==='body-upkeep'?p.originalBodyLivingPhysiques?.sessions:q.purpose==='rift-boundary-domain'?p.originalRiftBoundaryDomains?.rows:p.originalRiftLocalSpatial?.sessions)?.find(x=>x?.source?.witnessHash===q.witnessHash);
    if(!consumer||consumer.seal!==hash(consumer.source)||consumer.source.actorId!==p.actorId||consumer.source.minute!==q.minute||consumer.source.accepted!==true||
-    (q.purpose==='body-upkeep'?(consumer.source.kind!=='sustain'||consumer.source.foodDebitSeal!==row.seal):(consumer.source.kind!=='pocket'||consumer.source.materialDebitSeal!==row.seal)))return null;
+    (q.purpose==='body-upkeep'?(consumer.source.kind!=='sustain'||consumer.source.foodDebitSeal!==row.seal):(consumer.source.kind!==(q.purpose==='rift-boundary-domain'?'domain':'pocket')||consumer.source.materialDebitSeal!==row.seal)))return null;
    for(const [item,qty] of Object.entries(q.items)){
     const left=stockCount(bag,item)-qty;if(left<0)return null;
     if(left)bag[item]=left;else delete bag[item];
@@ -178,7 +179,8 @@ function consume(s,p,items,purpose,witness){
   !s.log.some(x=>hash(x)===witnessHash)||
   !witnessValid({witness,witnessHash,day,minute,site},p)||witness.details.origin!==purposes[purpose]||
   (purpose==='body-upkeep'&&(witness.details.cycle!==7||!eq(items,{clean_rations:1})))||
-  (purpose==='rift-pocket-build'&&!eq(items,witness.details.materials)))throw Error('Fresh original witnessed material consumption required');
+  (purpose==='rift-pocket-build'&&!eq(items,witness.details.materials))||
+  (purpose==='rift-boundary-domain'&&!eq(items,require('./rift-boundary-domain').MATERIALS)))throw Error('Fresh original witnessed material consumption required');
  for(const [item,qty] of Object.entries(items)){
   after[item]-=qty;if(!after[item])delete after[item];
  }
