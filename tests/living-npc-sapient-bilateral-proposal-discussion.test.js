@@ -298,6 +298,13 @@ for(let n=0;n<80;n++){
       A.throws(()=>R.act(js,{system:'bond',operation:'npcTerrestrialJourney',
        params:{...actual,arrival:'academy'}}),/no chosen assent, arrival, stamina or location/);
       A.equal(E.exportGame(js),beforeDeparture);
+      if(initialHour%1440+75>1440){
+       A.throws(()=>R.act(js,{system:'bond',operation:'npcTerrestrialJourney',
+        params:actual}),/finish within its own original calendar day/);
+       A.equal(E.exportGame(js),beforeDeparture);
+       console.log('INDEPENDENT ORIGINAL TERRESTRIAL TRAVEL DEFERRED BY REAL DAYLIGHT '+JSON.stringify({
+        originalMinute:initialHour,requiredMinutes:75,noInventedOvernightPassage:true}));
+      }else{
       const journey=R.act(js,{system:'bond',operation:'npcTerrestrialJourney',
        params:actual}),e=jp.originalSapientTerrestrialJourneys[0].source;
       A.equal(journey.departureConsent,e.departed);
@@ -333,6 +340,7 @@ for(let n=0;n<80;n++){
        departed:e.departed,arrival:e.departed?'crossing':null,
        actualMinutes:journey.actualMinutes,staminaPaid:journey.actualHumanStaminaPaid,
        playerLocationUnchanged:true,noAutomaticBondOrGrade:true}));
+      }
      }
      console.log('INDEPENDENT ORIGINAL TERRESTRIAL PROPOSAL '+JSON.stringify({
       result:chosen.outcome,originalMinutes:75,humanStaminaCostIfTraveled:4,
