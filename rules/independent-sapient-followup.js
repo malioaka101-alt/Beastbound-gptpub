@@ -45,7 +45,7 @@ function verify(s,p){
    sh.scheduledAtDay!==sh.fromDay||sh.throughDay-sh.fromDay!==5||
    sh.fromDay>r.day||sh.throughDay<r.day||
    !p.originalBondPairRecognitions?.some(x=>x.seal===r.pairSeal&&
-    x.source.beastId===b.id&&x.source.accepted&&x.source.minute<r.minute))
+    x.source.beastId===b.id&&x.source.accepted&&x.source.day<r.day))
    return false;
   seen.add(r.witnessHash);last=r.minute;
  }
@@ -65,7 +65,7 @@ function contact(s,{actorId,beastId,witnessIndex,...extra}={}){
   b.away===true||b.location!==site||!E.LOCATIONS[site]?.spawns?.includes(b.species)||
   s.battle||s.encounter?.threat||(s.encounter&&s.encounter.beastId!==beastId)||
   s.player.partnerIds?.includes(beastId)||!pair?.source.accepted||
-  pair.source.beastId!==beastId||pair.source.minute>=minute||
+  pair.source.beastId!==beastId||pair.source.day>=day||
   !Pair.verify(s,p)||!Arr.verify(s,p)||!verify(s,p)||
   arr?.source.beastId!==beastId||Arr.statusAt(arr,minute)!=='accepted'||
   p.originalSapientRenewedContacts?.some(x=>x.source.beastId===beastId&&x.source.day===day)||
