@@ -58,6 +58,22 @@ A.deepEqual(q.woundsAfter,q.woundsBefore);
 A.equal(q.noUnverifiedShelterNightOrWoundHealing,true);
 A.equal(q.noAdditionalWorldTimeOrAnotherAction,true);
 A.equal(q.noQiManaSoulOrFreeSpatialPower,true);
+for(const row of record.renewals||[]){
+ const renewed=row.source,
+  provenNight=renewed.originalCombatNight;
+ A.equal(renewed.origin,Recovery.RENEW);
+ A.equal(renewed.originalRecoverResetOnlyByActualNight,true);
+ A.equal(provenNight.seal,renewed.originalCombatNightSourceHash);
+ A.equal(Offscreen.verifyNights(s,p,[provenNight]),true);
+ A.equal(provenNight.source.site,'ruins');
+ A.equal(renewed.recoverUsesBefore,0);
+ A.equal(renewed.recoverUsesAfter,1);
+ A.equal(renewed.actualOriginalRecoverGain,
+  Math.min(renewed.maximumStamina,
+   renewed.staminaBefore+Math.max(0,2+renewed.vigorAtAttempt))-
+   renewed.staminaBefore);
+}
+
 A.ok((p.originalOffscreenCombatNights||[]).every(row=>
  Field.verifiedNight(s,p,row.source)),
  'No ordinary unsafe ruins night is legal; every full sleep needs a real original refuge and personal acceptance');
@@ -76,6 +92,15 @@ fp.originalRiftglassRecover.seal=
  hash(fp.originalRiftglassRecover.source);
 A.equal(Recovery.verify(falsified,fp),false,
  'Resealed invented Stamina recovery must not alter original Combat Recover');
+if(record.renewals?.length){
+ const falseNight=E.importGame(saved),
+  forgedNight=Realm.peek(falseNight).emergentPeople.people[p.id],
+  renewal=forgedNight.originalRiftglassRecover.renewals[0];
+ renewal.source.originalCombatNightSourceHash='0'.repeat(64);
+ renewal.seal=hash(renewal.source);
+ A.equal(Recovery.verify(falseNight,forgedNight),false,
+  'Rehashed forged renewed Combat Recover must be rejected without a true earlier full night');
+}
 const falsePlace=E.importGame(saved),
  forgedPlace=Realm.peek(falsePlace).emergentPeople.people[p.id];
 forgedPlace.originalRiftglassRecover.source.originalShiftProof.location='fen';
