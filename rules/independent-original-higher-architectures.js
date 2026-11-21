@@ -264,7 +264,10 @@ function afterNight(s,p,night,system){
   energyAfter:Math.min(state.capacity,state.energy+(system==='arcane'?12:3))};
  r.sessions.push({source,seal:hash(source)});
  if(!verify(s,p,system))throw Error('Original higher architecture recovery failed replay');
- return {actualOriginalEnergyRestored:source.energyAfter-source.energyBefore,system,noFreeReplenishment:true};
+ const restored=source.energyAfter-source.energyBefore;
+ return {actualOriginalEnergyRestored:restored,system,
+  ...(system==='arcane'?{actualOriginalManaRestored:restored}:{originalSoulReserveRestored:restored}),
+  noFreeReplenishment:true};
 }
 function privateStatus(s,p,system){
  if(!p?.[keys[system]])return null;
