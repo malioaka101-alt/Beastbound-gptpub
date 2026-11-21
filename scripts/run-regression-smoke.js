@@ -29,6 +29,7 @@ const QUICK=[
  'soul-shared-own-perception-and-lattice-repair-parity.test.js',
  'living-npc-original-soul-lattice-three-live.test.js',
  'body-shared-original-nerve-sense-four-npc.test.js',
+ 'body-shared-original-living-physique-npc.test.js',
  'arcane-shared-original-second-circle-npc.test.js',
  'arcane-shared-original-third-circle-npc.test.js',
  'living-npc-sapient-bilateral-proposal-discussion.test.js',
