@@ -240,8 +240,9 @@ function afterNight(s,p,nightRow){
   r.sessions.length>=480||r.sessions.some(x=>x.source?.origin===RECOVERY&&
    x.source.originalNightSourceHash===nightRow.seal))return null;
  const capacity=Build.arcaneProfile(r.completed?3:2).mana,
-  before=r.manaRemaining,after=Math.min(capacity,before+RESTORED_MANA_PER_ORIGINAL_NIGHT),
-  source={origin:RECOVERY,system:'arcane',actorId:p.actorId,
+  before=r.manaRemaining,after=Math.min(capacity,before+RESTORED_MANA_PER_ORIGINAL_NIGHT);
+ if(after===before)return null;
+ const source={origin:RECOVERY,system:'arcane',actorId:p.actorId,
    originalSecondCircleSourceHash:r.originalSecondCircleSourceHash,
    originalNight:structuredClone(nightRow),originalNightSourceHash:nightRow.seal,
    endMinute:nightRow.source.endMinute,manaBefore:before,
