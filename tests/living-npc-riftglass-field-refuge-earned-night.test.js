@@ -84,6 +84,23 @@ for(const refused of independentlyRefusedOrFailed){
 }
 A.equal((p.originalOvernightRestDecisions||[]).length,0,
  'Non-settlement verified field night is not a made-up city room');
+const trulyRenewed=p.originalRiftglassRecover?.renewals||[];
+A.ok(trulyRenewed.length>=1,
+ 'This personally source-earned full Riftglass Combat night should permit a later genuinely CHOSEN second Recover, never a free once-per-day recharge');
+for(const row of trulyRenewed){
+ const reset=row.source.originalCombatNight;
+ A.equal(reset.seal,row.source.originalCombatNightSourceHash);
+ A.equal(Offscreen.verifyNights(s,p,[reset]),true);
+ A.equal(row.source.originalRecoverResetOnlyByActualNight,true);
+ A.equal(row.source.recoverUsesBefore,0);
+ A.equal(row.source.recoverUsesAfter,1);
+ A.ok(reset.source.endMinute<=row.source.startMinute,
+  'Original eight-hour Combat sleep must precede each later source-owned Recover use');
+ A.equal(row.source.actualOriginalRecoverGain,
+  Math.min(row.source.maximumStamina,
+   row.source.staminaBefore+Math.max(0,2+row.source.vigorAtAttempt))-
+   row.source.staminaBefore);
+}
 A.deepEqual(p.knownTechniques,[]);
 const d=Foundation.gmDossier(Realm.peek(s),p.actorId,s).earnedEvidence;
 A.ok(d.originalRiftglassFieldRefuge?.personallyAcceptedOriginalFieldNights>=1,
@@ -98,6 +115,7 @@ if(d.originalRiftExteriorAnchorMarking)
 const saved=E.exportGame(s),imported=E.importGame(saved),
  cp=Realm.peek(imported).emergentPeople.people[p.id];
 A.equal(Field.verify(imported,cp),true);
+A.equal(Recover.verify(imported,cp),true);
 A.equal(Offscreen.verifyNights(imported,cp),true);
 A.deepEqual(cp.originalRiftglassFieldRest,p.originalRiftglassFieldRest);
 const fake=E.importGame(saved),fp=Realm.peek(fake).emergentPeople.people[p.id],
