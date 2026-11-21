@@ -432,6 +432,8 @@ function act(s,{system,operation,params={}}={}){
   case 'rift.anchorStatus':return RiftAnchors.status(s);
   case 'rift.anchorWork':return RiftAnchors.mark(s,params);
   case 'rift.orient':return RiftAnchors.orient(s,params);
+  case 'rift.npcFoldStep':return require('./independent-original-rift-local-spatial').fold(s,params);
+  case 'rift.npcWeaveBoundary':return require('./independent-original-rift-local-spatial').weave(s,params);
   case 'rift.foldStatus':return require('./rift-fold-step').status(s);
   case 'rift.foldStep':return require('./rift-fold-step').fold(s,params);
   case 'rift.weaveStatus':return require('./rift-boundary-weaving').status(s);
