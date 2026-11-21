@@ -61,7 +61,6 @@ function structure(p){
    q.staminaAfter!==q.staminaBefore-(q.departed?q.law.stamina:0)||
    q.arrivalMinute!==q.minute+(q.departed?q.law.minutes:0)||
    q.arrivalMinute>q.minute+1440||
-   q.noPlayerMovementOrPartnership===true&&false||
    q.noPlayerMovementOrPartnership!==true||
    !integer(q.beastFatigueBefore,0,100)||
    q.beastFatigueAfter!==q.beastFatigueBefore||
@@ -92,8 +91,10 @@ function position(p,minute){
   if(minute<q.arrivalMinute)return {inTransit:true,from:q.from,to:q.to,sourceHash:row.seal};
   location=q.to;
  }
- return location===null?null:{arrived:true,location,sourceHash:
-  (p.originalSapientTerrestrialJourneys||[]).filter(x=>x.source.departed&&x.source.arrivalMinute<=minute).at(-1)?.seal};
+ const latest=(p.originalSapientTerrestrialJourneys||[]).filter(x=>
+  x.source.departed&&x.source.arrivalMinute<=minute).at(-1);
+ return location===null?null:{arrived:true,location,
+  sourceHash:latest?.seal,arrivalMinute:latest?.source.arrivalMinute};
 }
 function awayDuring(p,start,end){
  if(!integer(start)||!integer(end,start)||!structure(p))return true;
@@ -103,7 +104,9 @@ function awayDuring(p,start,end){
 function visitorPresence(p,minute,location){
  const pos=position(p,minute);
  if(!pos?.arrived||pos.location!==location)return null;
- const day=Math.floor(minute/1440),fromDay=Math.floor(day/6)*6,
+ const day=Math.floor(minute/1440),
+  arrivalDay=Math.floor(pos.arrivalMinute/1440),
+  fromDay=arrivalDay+6*Math.floor((day-arrivalDay)/6),
   body={source:VISITOR,actorId:p.actorId,npcId:p.actorId,
    personId:p.id,name:p.name,profession:p.profession,polity:p.polity,
    originHash:p.originHash,location,
