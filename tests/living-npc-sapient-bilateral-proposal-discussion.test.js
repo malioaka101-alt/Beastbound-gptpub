@@ -179,7 +179,7 @@ for(let n=0;n<80;n++){
    const beforeRoute=E.exportGame(s),beforeHuman=p.rngState,beforeBeast=b.sapientLife.rngState;
    A.equal(Route.routeStatus(s,p,b,site).reason,'not-one-original-linked-leg');
    A.equal(Route.routeStatus(s,p,b,'academy').reason,'not-one-original-linked-leg');
-   A.equal(Route.routeStatus(s,p,b,'crossing').reason,'original-encounter-or-combat-unresolved');
+   A.equal(Route.routeStatus(s,p,b,'crossing').reason,'cross-region-route-needs-separate-original-journey-owner');
    A.equal(E.exportGame(s),beforeRoute,'A private travel proposal preflight may not manufacture movement, route choice or old combat condition');
    A.equal(p.rngState,beforeHuman);A.equal(b.sapientLife.rngState,beforeBeast);
 
