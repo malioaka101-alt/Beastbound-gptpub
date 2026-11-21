@@ -196,7 +196,7 @@ function usedDay(p,day){
   .some(r=>r?.lastAttemptDay>=day)||
   Object.values(keys).some(k=>p[k]?.sessions?.some(x=>x.source.origin===ORIGIN&&x.source.day>=day))||
   !!p.originalRiftBoundaryDomains?.rows?.some(x=>x.source.day>=day)||
-  !!p.originalBondInteractions?.some(x=>x.source.approach==='drill'&&x.source.day>=day);
+  !!p.originalBondInteractions?.some(x=>['drill','sync'].includes(x.source.approach)&&x.source.day>=day);
 }
 function work(s,{actorId,witnessIndex,minutes,...extra}={},system){
  if(Object.keys(extra).length||!keys[system]||typeof actorId!=='string'||
