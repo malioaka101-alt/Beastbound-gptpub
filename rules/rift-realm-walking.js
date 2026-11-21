@@ -12,6 +12,7 @@ const Crypto=require('node:crypto'),E=require('../engine.js'),
  Pocket=require('./rift-pocket-architecture'),Adapt=require('./rift-adaptation');
 const SOURCE='earned-selected-realm-walking-vii-v1',
  ROUTE='gm-witnessed-actual-realm-passage-and-return-v1';
+const Local=require('./rift-shared-original-local-spatial-law');
 const hash=x=>Crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const int=(x,a=0,b=1000000000)=>Number.isInteger(x)&&x>=a&&x<=b;
 const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{3,65}$/.test(x);
@@ -30,7 +31,7 @@ function pressure(s){
   seal:hash({phase:m.phase,charge:m.charge,seal:m.seal,
    pressure:e.pressure,day:Math.floor(s.world.minutes/1440),seed:w.worldSeed})};
 }
-function route(s,routeId,fresh=false){
+function route(s,routeId,fresh=false,originalArchive=null){
  if(!id(routeId))throw Error('A specific independently recorded real route is required');
  const rec=s.table?.realm?.riftRouteSources?.[routeId],q=rec?.source,
   w=q?.witness,d=w?.details,v=Cosmos.peek(s)||Cosmos.seed();
@@ -58,7 +59,7 @@ function route(s,routeId,fresh=false){
   d.protectedVaultEntry!==false||d.noUniversalPortal!==true)
   throw Error('Independent GM evidence for an actually open, rights-checked, individually measured route and return is required');
  const inLog=s.log?.some(e=>hash(e)===q.witnessHash);
- const archived=ledger(s)?.witnessArchive?.[q.witnessHash];
+ const archived=(originalArchive??ledger(s)?.witnessArchive)?.[q.witnessHash];
  if((fresh&&!inLog)||(!inLog&&
   !(archived?.origin===ROUTE&&archived.seal===q.witnessHash&&
     hash(archived.event)===q.witnessHash)))
@@ -150,7 +151,7 @@ function check(s,q,kind,minutes,baseDc,cost){
  const start=s.world.minutes,attr=C.int(s.player.attributes.int,'earned Int',1,30),
   rank=C.int(s.player.skills.arcana.rank,'earned Arcana',0,5),
   modifier=Math.floor((attr-10)/2)+2*rank,r=pressure(s),
-  dc=baseDc+r.risk;
+  dc=Local.walkSpec(kind,minutes,r.risk,attr,rank).dc;
  const outcome=C.check(s,{modifier,dc,label:'Real chosen realm passage — '+kind});
  const event=structuredClone(s.log.at(-1)),
   wounded=outcome.degree==='severe failure';
@@ -257,4 +258,4 @@ function status(s){
   requiresRealReturn:true,noUniversalPortal:true,
   note:'Only an individually witnessed specific open route allows real foreign-plane presence; no other location or portal is inferred'};
 }
-module.exports={SOURCE,ROUTE,verify,status,prepare,enter,returnToAnchor,isInside};
+module.exports={SOURCE,ROUTE,verify,status,prepare,enter,returnToAnchor,isInside,route};
