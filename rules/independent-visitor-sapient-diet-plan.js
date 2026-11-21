@@ -145,8 +145,13 @@ function verify(s,p){
 }
 function planVerified(s,b,plan){
  if(!b?.sapientLife||!Person.verify(b)||!plan||!structure(b))return false;
+ // The recorded PLAN is an original full biological observation.
+ // An action sees the original bond-care projection, not its saved
+ // provider fields. Locate by the ACTUAL saved accepted plan and then
+ // verify either exact canonical representation, never a copied caller
+ // source string that happens to look credible.
  const row=b.sapientLife.originalIndividualDietPlans?.find(x=>
-  x.source.accepted&&equal(x.source.plan,plan));
+  x.source.accepted&&equal(x.source.plan,b.welfareCarePlan));
  // The original bond-care provider returns a read-only FEEDING PROFILE
  // {item,quantity,locations,source}. The original individual witnessed
  // PLAN is stored with different but equivalent fields plus species/form
