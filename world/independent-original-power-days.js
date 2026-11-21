@@ -492,6 +492,9 @@ function afterDaily(s,w,life,activity,day){
   return night(s,ctx);
  }
  const system=activity.source.focus;
+ // Witnessed original Nerve–Sense work already owns this person's
+ // daylight discipline decision; no duplicate autonomous power practice.
+ if(ctx.actor.originalBodyNerveSenseFour?.lastAttemptDay===ctx.workDay)return null;
  if(!supported.has(system)||ctx.condition.workAndOrdinaryPracticeBlocked||
   !ctx.life.interests.includes(system)||
   system==='rift'&&ctx.site!=='ruins')return null;
