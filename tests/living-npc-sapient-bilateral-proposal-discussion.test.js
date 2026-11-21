@@ -240,7 +240,7 @@ for(let n=0;n<80;n++){
        Arrangement.privateStatus(fs,fp)[0].status==='accepted'){
      const scene=fp.name+' and '+fb.name+
        ' are both visibly present for a genuinely new, nonbinding local conversation in their established habitat.';
-     fs.chatRuntime.scene=scene;
+     fs.chatRuntime||={};fs.chatRuntime.scene=scene;
      C.event(fs,'story',scene,{origin:Follow.WITNESS,actorId:fp.actorId,beastId:fb.id,
       location:site,pairSeal:row.seal,arrangementHash:entry.seal,
       actualRenewedCoPresence:true,noAssignedBeastConsentOrOwnership:true,
