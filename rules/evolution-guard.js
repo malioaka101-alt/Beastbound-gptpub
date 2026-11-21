@@ -45,6 +45,7 @@ function advance(s,p={}){
     r.originAssessment.species!==b.species||r.originAssessment.evolutionStage!==b.evolutionStage)
   throw Error('Unreconciled evolution branch lacks an established source-bound current form');
  if(r.evolved||r.blocked)throw Error('Closed or evolved branches cannot gain Maturity');
+ require('./independent-original-beast-maturity').requireOrdinary(r);
  C.int(p.days,'actually elapsed Maturity days',1,6);
  // Only real saved synchronisation and independently precommitted documented
  // branch status may accelerate maturity. Locale, materials and special
