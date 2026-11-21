@@ -137,6 +137,49 @@ welfare.beasts[b.id].condition=34;
 Arrangement.sixday(welfare,[Math.floor(welfare.world.minutes/1440)]);
 A.equal(Arrangement.privateStatus(welfare,wp)[0].status,'paused');
 A.equal(Arrangement.verify(welfare,wp),true);
+// Disposable recovery fixture: not an in-game medical treatment or consent.
+welfare.beasts[b.id].condition=copy.beasts[b.id].condition;
+const wr=wp.originalSapientArrangements[0],wb=welfare.beasts[b.id],
+ reviewRng=wp.rngState,reviewBeastRng=wb.sapientLife.rngState,
+ reviewWorldRng=welfare.rngState,reviewMinute=welfare.world.minutes;
+C.event(welfare,'story',wp.name+' and the sapient person consider whether to continue their original voluntary arrangement after the welfare pause.',{
+ origin:Arrangement.REVIEW,actorId:wp.actorId,beastId:b.id,location:site,
+ minute:reviewMinute,contactHash:hash(contact),proposalHash:wr.source.proposalHash,
+ arrangementHash:wr.seal,terms:wr.source.terms,
+ comprehension:'Both separate people understood the unchanged terms and the option to end the arrangement.',
+ communication:'Actually witnessed shared local signs',
+ rightToRefuse:'Each individual can independently refuse further cooperation without compelled service.',
+ noAssumedSharedLanguage:true,noMagicalPromise:true});
+const reviewParams={actorId:wp.actorId,beastId:b.id,witnessIndex:welfare.log.length-1},
+ beforeReview=E.exportGame(welfare);
+A.throws(()=>R.act(welfare,{system:'bond',operation:'npcSapientArrangementReview',
+ params:{...reviewParams,accepted:true}}),/no assigned consent/);
+A.equal(E.exportGame(welfare),beforeReview);
+const reviewed=R.act(welfare,{system:'bond',operation:'npcSapientArrangementReview',params:reviewParams}),
+ rv=wr.events.at(-1).source;
+A.equal(rv.kind,'review');A.equal(rv.previous,wr.events[0].seal);
+A.equal(rv.humanChoice.rngBefore,reviewRng);
+A.equal(rv.humanChoice.rngAfter,wp.rngState);
+A.equal(rv.beastChoice?.rngBefore??reviewBeastRng,reviewBeastRng);
+A.equal(rv.beastChoice?.rngAfter??reviewBeastRng,wb.sapientLife.rngState);
+A.equal(welfare.rngState,reviewWorldRng);A.equal(welfare.world.minutes,reviewMinute);
+A.equal(reviewed.mutuallyAccepted,rv.outcome==='resumed');
+A.ok(['resumed','paused','withdrawn-by-human','withdrawn-by-beast'].includes(rv.outcome));
+A.equal(Arrangement.privateStatus(welfare,wp)[0].status,rv.outcome==='resumed'?'accepted':rv.outcome);
+A.equal(Arrangement.verify(welfare,wp),true);
+A.equal(welfare.table?.bondRecords?.[b.id],undefined);
+A.equal(welfare.player.partnerIds.includes(b.id),false);
+const reviewedSave=E.exportGame(welfare);
+A.throws(()=>R.act(welfare,{system:'bond',operation:'npcSapientArrangementReview',params:reviewParams}),
+ /open same-terms arrangement and unused review day/);
+A.equal(E.exportGame(welfare),reviewedSave);
+const reviewCopy=E.importGame(reviewedSave),
+ reviewPerson=Realm.peek(reviewCopy).emergentPeople.people[agreed.p.id];
+A.equal(Arrangement.verify(reviewCopy,reviewPerson),true);
+const re=reviewPerson.originalSapientArrangements[0].events.at(-1);
+re.source.humanChoice.accepted=!re.source.humanChoice.accepted;re.seal=hash(re.source);
+A.equal(Arrangement.verify(reviewCopy,reviewPerson),false,'Rehashed false continuation assent rejected');
+console.log('INDEPENDENT SAPIENT CONTINUATION REVIEW '+JSON.stringify({outcome:rv.outcome,mutual:reviewed.mutuallyAccepted,noBond:true}));
 console.log('INDEPENDENT SAPient FINAL TERMS PASS '+JSON.stringify({finalResults,accepted:true,expiry:true,welfarePause:true}));
 A.equal(Bridge.verify(copy,cp),true);
 const forged=cp.originalSapientProposalDiscussions[0];
