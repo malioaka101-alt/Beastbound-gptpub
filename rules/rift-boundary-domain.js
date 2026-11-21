@@ -18,6 +18,10 @@ const only=(p,k)=>p&&typeof p==='object'&&!Array.isArray(p)&&
  Object.keys(p).every(x=>k.includes(x));
 const MODES=Object.freeze(['reinforce','redirect','contour']);
 const MANA=18,STAMINA=13,MINUTES=120;
+function domainSpec(area,strain,risk,tolerance,attribute,rank){
+ return {dc:23+Math.ceil(area/4)+risk+Math.floor(strain/12)-tolerance,
+  modifier:Math.floor((attribute-10)/2)+2*rank,mana:MANA,stamina:STAMINA,minutes:MINUTES};
+}
 const MATERIALS=Object.freeze({moss_crystal:2,ironbloom:1});
 function ledger(s){return s.table?.realm?.riftDomains||null;}
 function pressure(s){
@@ -225,8 +229,7 @@ function form(s,p={}){
   tolerance=Adapt.pressureTolerance(s);
  if(tolerance!==1)
   throw Error('A genuinely observed biological pressure adaptation is necessary for this particular living domain construction');
- const dc=23+Math.ceil(d.areaSquareMetres/4)+pres.danger+
-  Math.floor((r?.strain||0)/12)-tolerance;
+ const dc=domainSpec(d.areaSquareMetres,r?.strain||0,pres.danger,tolerance,attr,rank).dc;
  const check=C.check(s,{modifier,dc,
   label:'Original limited Rift Boundary Domain VIII'});
  const rollEvent=structuredClone(s.log.at(-1)),
@@ -281,5 +284,5 @@ function form(s,p={}){
   noPortal:true,noGlobalRealmRewrite:true,
   actualLocalFoldMitigation:check.success&&d.mode==='reinforce'?2:0};
 }
-module.exports={SOURCE,WITNESS,MATERIALS,verify,earnedAt,
+module.exports={SOURCE,WITNESS,MATERIALS,domainSpec,evidence,verify,earnedAt,
  supportProof,support,status,form};
