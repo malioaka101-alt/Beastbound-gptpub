@@ -32,7 +32,12 @@ function soulAt(s,p,minute){
  }
  return {phase,sourceSeal};
 }
-function gradeAt(b,assessment,minute){
+function gradeAt(b,assessment,minute,s=null,p=null){
+ const GradeExam=require('./independent-original-beast-grade-exam'),
+  independent=assessment?.origin===GradeExam.ORIGIN;
+ const paid=independent&&p?.originalIndependentGradeExams?.find(x=>
+  x.source?.assessment&&JSON.stringify(x.source.assessment)===JSON.stringify(assessment));
+ if(independent&&(!s||!paid||!GradeExam.paidSource(s,p,b,paid)))return null;
  // An individual Grade field is NOT a measured Grade. The only current
  // original numeric exam owner is rules/bond-grade.js; require its actual
  // calibrated prior and successful, paid, 120-minute examination receipt.
@@ -40,12 +45,13 @@ function gradeAt(b,assessment,minute){
   x.worldMinute===assessment?.worldMinute&&x.outcome==='verified'&&
   x.facility===assessment?.facility&&x.check?.roll===assessment?.examCheck?.roll&&
   x.check?.dc===assessment?.examCheck?.dc);
- if(!assessment||assessment.origin!=='observed-independent-grade-exam'||
+ if(!assessment||!['observed-independent-grade-exam',GradeExam.ORIGIN].includes(assessment.origin)||
   !int(assessment.grade,1,9)||!int(assessment.worldMinute,0,minute)||
   assessment.worldMinute<120||
   !['crossing','academy'].includes(assessment.facility)||
   !exam||!int(exam.check.roll,1,20)||
   exam.check.dc!==12+2*assessment.grade||
+  (independent&&(exam.sourceSeal!==paid.seal||exam.actorId!==p.actorId||exam.origin!==GradeExam.ORIGIN))||
   !int(calibration?.worldMinute,0,assessment.worldMinute-120)||
   calibration?.grade!==assessment.grade||
   calibration.species!==assessment.species||
@@ -63,7 +69,7 @@ function gradeAt(b,assessment,minute){
  return {grade:assessment.grade,gradeSeal:hash(assessment)};
 }
 function inputs(s,p,b,minute,assessment,depth,usedCapacity){
- const soul=soulAt(s,p,minute),grade=gradeAt(b,assessment,minute);
+ const soul=soulAt(s,p,minute),grade=gradeAt(b,assessment,minute,s,p);
  if(!soul||!grade)return null;
  const will=Math.floor((p.mechanicalFoundation.baselineAttributes.wis-10)/2),
   soulDB=Build.soulProfile(soul.phase,{will}).disciplineBonus;
