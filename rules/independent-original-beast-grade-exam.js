@@ -70,7 +70,7 @@ function replay(s,p){
    !int(q.minute,minute+1,s.world.minutes)||!int(q.day,lastDay+1)||q.day!==Math.floor(q.minute/1440)||
    !['crossing','academy'].includes(q.site)||q.form!==b.evolutionStage||q.species!==b.species||
    q.individualGrade!==b.individualGrade||
-   !eq(q.calibration,b.gradeCalibration)||!int(q.calibration.worldMinute,0,q.minute)||
+   !eq(q.calibration,b.gradeCalibration)||!int(q.calibration.worldMinute,0,q.minute-1)||
    !physical(s,p,b,q,q.minute)||!witnessValid(p,b,q)||q.witnessHash!==hash(q.witness)||
    seen.has(q.witnessHash)||!int(q.cashBefore,0)||!int(q.cashAfter,0)||
    !int(q.rngBefore,1,4294967295)||
@@ -171,6 +171,7 @@ function examine(s,{actorId,beastId,witnessIndex,...extra}={}){
   throw Error('Real co-present independent sapient individual, original examination facility, funds, verified pair and safe welfare required');
  let calibration;
  try{calibration=Original.gradeReference(s,b);}catch{throw Error('Pre-existing individual numeric Grade calibration required; species rarity is not a Grade');}
+  if(calibration.worldMinute>=minute)throw Error('Individual numerical Grade calibration must predate the distinct formal examination');
  const pair=Interaction.privateStatus(s,p).find(x=>x.beastId===beastId),
   arr=p.originalSapientArrangements?.find(x=>x.seal===d?.arrangementHash),
   revision=arr?.events.at(-1)?.seal||arr?.seal;
