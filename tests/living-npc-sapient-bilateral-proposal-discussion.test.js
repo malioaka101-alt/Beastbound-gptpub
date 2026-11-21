@@ -16,6 +16,7 @@ const Terrestrial=require('../rules/independent-sapient-terrestrial-proposal');
 const Journey=require('../rules/independent-sapient-terrestrial-journey');
 const ReturnPreflight=require('../rules/independent-sapient-terrestrial-return-preflight');
 const GradePreflight=require('../rules/independent-original-beast-grade-preflight');
+const Career=require('../world/person-careers'),MerchantTerms=require('../world/merchant-voluntary-work-terms');
 const VisitorProposal=require('../rules/independent-sapient-terrestrial-visitor-proposal');
 A.deepEqual(TravelLaw.legSpec('crossing'),{minutes:75,stamina:4});
 A.deepEqual(TravelLaw.legSpec('academy'),{minutes:75,stamina:4});
@@ -350,6 +351,88 @@ for(let n=0;n<80;n++){
         realFacility:'crossing',playerRemains:js.world.location,
         eligible:gradeReady.assessmentEligible,reason:gradeReady.reason,
         noAutomaticGradeOrFee:true}));
+       // A distinct real-world disposable visitor can DISCUSS a genuinely
+       // funded market service with the original independent merchant.
+       // Signed crossing arrival proves the worker is present without
+       // rewriting their home polity, physical body or former career.
+       // An authored duty is NOT employment, a successful roll or a wage;
+       // both merchant and worker retain independent saved RNG decisions.
+       const marketplace=E.importGame(E.exportGame(js));
+       Time.advance(marketplace,1);
+       const mw=Realm.peek(marketplace),
+        mp=mw.emergentPeople.people[jp.id],
+        mb=marketplace.beasts[jb.id],
+        merchant=mw.localProvisioner,
+        marketDay=Math.floor(marketplace.world.minutes/1440),
+        marketMinute=marketplace.world.minutes,
+        marketArrival=Journey.position(mp,marketMinute),
+        dutyId='visitor-trade-service-'+mp.id,
+        merchantOfferId='visitor-merchant-service-'+mp.id,
+        dutyRole='Independently witnessed real crossing stock-care service',
+        dutyWitness=mp.name+' and '+merchant.seller+
+         ' are actually present at the original crossing market; caring for finite physical provisions is proposed, not yet hired or performed.';
+       A.equal(marketArrival.location,'crossing');
+       A.equal(mb.location,'crossing');
+       A.equal(marketplace.world.location,playerSite);
+       A.equal(mp.cashScales,0);
+       const beforeBadVisitor=E.exportGame(marketplace);
+       A.throws(()=>Career.authorDuty(mw,mp,{
+        id:dutyId,role:dutyRole,method:'shop-stock-service',
+        goal:'Witness real finite provisioner stock and identify storage handling risks',
+        domain:'trade',day:marketDay,witness:dutyWitness,
+        visitorSite:'crossing',
+        visitorMinute:jp.originalSapientTerrestrialJourneys[0].source.arrivalMinute-1}),
+        /Only a truly signed and presently situated individual visitor/);
+       A.equal(E.exportGame(marketplace),beforeBadVisitor);
+       const addedDuty=Career.authorDuty(mw,mp,{
+        id:dutyId,role:dutyRole,method:'shop-stock-service',
+        goal:'Witness real finite provisioner stock and identify storage handling risks',
+        domain:'trade',day:marketDay,witness:dutyWitness,
+        visitorSite:'crossing',visitorMinute:marketMinute});
+       A.equal(addedDuty.available,true);
+       A.equal(Career.verify(mp),true);
+       A.equal(mp.regionId,jp.regionId,
+        'Foreign merchant work cannot rewrite this individual's actual home region');
+       A.equal(mp.cashScales,0);
+       const proposal={id:merchantOfferId,day:marketDay,
+        dutyId,scope:dutyRole+
+         ' preserving the existing seller stock without implied ownership or guaranteed wages.',
+        throughDay:marketDay+2,amountScales:137,
+        witness:merchant.seller+' and '+mp.name+
+         ' are both here at the original crossing market discussing a finite genuine stock-care service that either may refuse.'};
+       const beforeTerms=E.exportGame(marketplace),
+        merchantRng=merchant.serviceTermsRngState,
+        visitorRng=mp.rngState,
+        negotiated=MerchantTerms.negotiate(mw,mp,proposal);
+       A.equal(negotiated.offered,true);
+       A.equal(negotiated.noFundsTransferred,true);
+       A.equal(negotiated.noWorkCredited,true);
+       A.equal(negotiated.noGuaranteedOutcome,true);
+       A.equal(negotiated.accepted,
+        negotiated.merchantAccepted&&negotiated.workerAccepted);
+       A.equal(mp.cashScales,0);
+       A.equal(Career.verify(mp),true);
+       A.equal(MerchantTerms.verify(mw),true);
+       A.equal(marketplace.world.minutes,marketMinute);
+       A.equal(marketplace.world.location,playerSite);
+       A.equal(mb.location,'crossing');
+       A.equal(mw.localProvisioner.fundsScales,merchant.fundsScales);
+       A.equal(GradePreflight.routeStatus(marketplace,mp,mb).assessmentEligible,false);
+       A.equal(E.exportGame(E.importGame(E.exportGame(marketplace))),
+        E.exportGame(marketplace));
+       const forged=E.importGame(E.exportGame(marketplace));
+       const fakeWorker=Realm.peek(forged).emergentPeople.people[mp.id];
+       fakeWorker.career.authoredDuties.at(-1).source.visitorArrivalSeal='f'.repeat(64);
+       fakeWorker.career.authoredDuties.at(-1).sourceHash=
+        hash(fakeWorker.career.authoredDuties.at(-1).source);
+       A.equal(Career.verify(fakeWorker),false,
+        'Re-sealing an invented visitor arrival cannot authorize foreign market employment');
+       console.log('INDEPENDENT ORIGINAL VISITOR MERCHANT WORK TERMS '+JSON.stringify({
+        reachedActualMarket:true,merchantAccepted:negotiated.merchantAccepted,
+        visitorAccepted:negotiated.workerAccepted,mutuallyAccepted:negotiated.accepted,
+        homeRegionPreserved:true,merchantFundsNotMinted:true,
+        wagePaid:0,notYetPerformedWork:true,noAutomaticGrade:true}));
+
 
        A.equal(Journey.awayDuring(jp,initialHour,js.world.minutes),true);
        A.equal(js.table.combatants['npc_'+traveler.id].npcOrigin.location,'forest',
