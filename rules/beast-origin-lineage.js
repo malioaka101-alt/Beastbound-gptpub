@@ -49,7 +49,7 @@ function safe(s){
     !c||c.status!=='ok')
   throw Error('Lineage research requires a present physical scene and a stable conscious human, not an unresolved encounter');
 }
-function gmSource(s,sourceId){
+function gmSource(s,sourceId,actorId='player'){
  if(!id(sourceId))throw Error('An actual GM-registered individual source ID is required');
  const z=s.table?.originTraitSources?.[sourceId],q=z?.source;
  if(!z||z.origin!==SOURCE||z.seal!==hash(q)||!q||
@@ -72,6 +72,9 @@ function gmSource(s,sourceId){
   q.observation.details?.location!==q.location||
   q.location!==q.observation.details.location)
   throw Error('A genuine separately witnessed individual Origin Pattern and its acquisition rights must be registered by the GM');
+ const observedActor=q.observation.details.actorId;
+ if(actorId==='player'?(observedActor!==undefined&&observedActor!=='player'):observedActor!==actorId)
+  throw Error('This registered Origin source belongs to a different individual');
  // Even an authentic study source with unresolved rights grants no right to
  // acquire or seed its tissue. The executable integration stages are separate.
  return {z,q};
