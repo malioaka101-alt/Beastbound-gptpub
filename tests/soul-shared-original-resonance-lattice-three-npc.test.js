@@ -35,10 +35,19 @@ A.equal(Build.soulProfile(3,{will:1}).perceptionRangeMetres,50);
 A.match(PC.practice.toString(),/LatticeLaw.practiceState/);
 A.match(PC.repair.toString(),/LatticeLaw.repairState/);
 A.match(PC.complete.toString(),/LatticeLaw.formationModifier/);
-A.match(NPC.afterDaily.toString(),/if\(kind==='repair'\)return null/,
- 'Independent Soul III must not fake the player owner\'s separate clinical repair witness');
-A.match(NPC.verify.toString(),/if\(q.kind==='repair'\)return false/,
- 'Source replay must reject unobserved clinician repairs even if a forged receipt is resealed');
+// Original player remains the source of repair and formation requirements.
+// An independent NPC needs an actual paid prior diagnosis for repair and
+// a fresh separately demonstrated identity-control test for formation.
+const ThreadLaw=require('../rules/soul-shared-original-threading');
+A.match(NPC.afterDaily.toString(),/diagnosisReady\(diagnosis/);
+A.match(NPC.verify.toString(),/originalDiagnosisSourceHash!==diagnosis\?\.seal/);
+A.match(NPC.afterDaily.toString(),/countertestReady\(countertest/);
+A.match(NPC.verify.toString(),/originalFormationCountertestHash!==countertest\?\.seal/);
+A.deepEqual(NPC.formationCountertestSpec(3),{
+ minutes:120,dc:ThreadLaw.DC,modifier:3,reserveCost:ThreadLaw.RESERVE_COST,
+ staminaCost:ThreadLaw.staminaCost(120)});
+A.equal(ThreadLaw.stabilityAfter(90,{degree:'severe failure'}),84);
+A.equal(ThreadLaw.stabilityAfter(90,{degree:'success'}),90);
 A.equal(NPC.verify({table:{}},{originalSoulLatticeThree:undefined}),true);
 A.equal(NPC.verify({table:{}},{
  originalSoulLatticeThree:{formed:true}
