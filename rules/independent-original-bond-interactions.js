@@ -112,7 +112,7 @@ function consequence(r,q,check,week,energy){
  if(!q.possible||q.beastChoice.outcome!=='accepted')return B.applyEvent(r,'respected_refusal',1);
  return check.success&&(q.approach!=='drill'||week.length===5)?B.applyEvent(r,q.law.event,1):null;
 }
-function replay(s,p){
+function replay(s,p,cutoff=Infinity){
  if(!Pair.verify(s,p))return null;
  const foundations=(p.originalBondPairRecognitions||[]).filter(x=>x.source.accepted),
   pairs=new Map(foundations.map(x=>[x.seal,{base:x,bond:structuredClone(x.bond),head:x.seal,last:x.source.minute,contractReceipt:null}]));
@@ -121,6 +121,7 @@ function replay(s,p){
  if(!Array.isArray(rows)||rows.length>960)return null;
  const seen=new Set(),days=new Set(),prior=[];let previousMinute=0;
  for(const row of rows){
+  if(row?.source?.minute>=cutoff)break;
   const q=row?.source,pair=pairs.get(q?.pairSeal),b=s.beasts?.[q?.beastId],
    arr=p.originalSapientArrangements?.find(x=>x.seal===q?.arrangementHash),sh=q?.shift;
   if(!q||!pair||!b?.sapientLife||!Person.verify(b)||
@@ -186,6 +187,11 @@ function replay(s,p){
  return pairs;
 }
 function verify(s,p){try{return replay(s,p)!==null;}catch{return false;}}
+function currentAt(s,p,seal,minute){
+ if(!Number.isInteger(minute)||minute<0)return null;
+ const map=replay(s,p,minute),entry=map?.get(seal);
+ return entry&&entry.base.source.minute<=minute?entry:null;
+}
 function current(s,p,seal){const map=replay(s,p);if(!map)throw Error('Original independent pair interaction history altered');return map.get(seal)||null;}
 function interact(s,{actorId,beastId,witnessIndex,...extra}={},kind='friendly'){
  if(Object.keys(extra).length||typeof actorId!=='string'||!/^emergent:person_[0-9]+$/.test(actorId)||
@@ -293,5 +299,5 @@ function activeForBeast(s,beastId){
  if(active.length>1)throw Error('Conflicting original independent magical contracts for the same individual');
  return active[0]||null;
 }
-module.exports={ORIGIN,WITNESS,SEAL,REVIEW,SYNC,ENERGY,verify,current,interact,privateStatus,completedTrainingSixday,activeForBeast,
+module.exports={ORIGIN,WITNESS,SEAL,REVIEW,SYNC,ENERGY,verify,current,currentAt,interact,privateStatus,completedTrainingSixday,activeForBeast,
  seal:(s,p)=>interact(s,p,'seal'),review:(s,p)=>interact(s,p,'review'),sync:(s,p)=>interact(s,p,'sync')};
